@@ -5,10 +5,11 @@ from pingouin.effsize import *
 
 # Generate a fake dataset: heights in countries x and y
 np.random.seed(123)
-N = 1000
-x = np.random.normal(loc=172, scale=2, size=N)
-y = np.random.normal(loc=175, scale=1.8, size=N)
-df = pd.DataFrame({'DV': np.r_[x, y], 'Group': np.repeat(['X', 'Y'], N)})
+nx, ny = 100, 120
+x = np.random.normal(loc=174, size=nx)
+y = np.random.normal(loc=175, size=ny)
+group = np.r_[np.repeat(['France'], nx), np.repeat(['UK'], ny)]
+df = pd.DataFrame({'DV': np.r_[x, y], 'Group': group })
 
 
 # EFFECT SIZE COMPUTATION
@@ -33,6 +34,10 @@ print(eftype, '(from T): %.3f' % ef)
 # EFFECT SIZE CONVERSION
 # -----------------------
 # 1 - Convert r to Cohen's d
+n = 100
+x = np.random.normal(loc=174, size=n)
+y = np.random.normal(loc=175, size=n)
+df = pd.DataFrame({'DV': np.r_[x, y], 'Group': np.repeat(['France', 'UK'], n)})
 r, _ = pearsonr(x, y)
 ef = convert_effsize(r, input_type='r', output_type='cohen')
-print('r: ', r, '-', eftype, '(from r): %.3f' % ef)
+print('r: ', r, 'to', eftype, ': %.3f' % ef)

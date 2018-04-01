@@ -3,7 +3,7 @@
 # Code borrowed from statsmodel and mne.stats
 # GNU license
 import numpy as np
-from pingouin.utils import _check_data
+from pingouin.utils import (_check_data, _extract_effects)
 
 __all__ = ["fdr", "bonf", "multicomp", "pairwise_ttests"]
 
@@ -166,8 +166,8 @@ def multicomp(pvals, alpha=0.05, method='holm'):
     return reject, pvals_corrected
 
 
-def pairwise_ttests(dv, group, data, paired=False, alpha=.05,
-                     tailed='two-sided', padjust=None):
+def pairwise_ttests(dv=None, between=None, within=None, effects='all', data=None,
+                    alpha=.05, tailed='two-sided', padjust=None):
     '''Pairwise T-tests using Pandas
     Parameters
     ----------
@@ -194,14 +194,22 @@ def pairwise_ttests(dv, group, data, paired=False, alpha=.05,
 
     if tailed not in ['one-sided', 'two-sided']:
         raise ValueError('Tailed not recognized')
-    # Extract data
 
-    x, y, _, _, _ = _check_data(dv, group, data)
+    # Extract data
+    dt_array, nobs = _extract_effects(dv=dv, between=between, within=within,
+                                     effects=effects, data=data)
 
     # Compute T-tests
-    tvals, pvals = np.zeros([]), np.zeros([])
-    t, p = ttest_rel(x, y) if paired else ttest_ind(x, y)
-    tvals, pvals = t, p
+    paired = True if effects == 'within' else False
+    # Number and labels of possible comparisons
+    ntests = nobs.size - 1
+    tvals, pvals = np.zeros(ntests), np.zeros(ntests)
+    # Start looping over columns
+    for i in np.arange(ntests):
+        x = dt_array[col1]
+        y = dt_array[col2]
+        t, p = ttest_rel(x, y) if paired else ttest_ind(x, y)
+        tvals[i], pvals[i] = t, p
 
     # Multiple comparisons
     if padjust is not None:
