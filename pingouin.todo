@@ -1,4 +1,7 @@
 - Add mean and std in pairwise_ttests
+- Add disclaimer and icon author
+- Check all effect sizes
+- Add sources for effect size formula
 - Sphinx documentation and github pages
 - Implementation of ANOVA using mne.stats
 - Add within / between effsize
