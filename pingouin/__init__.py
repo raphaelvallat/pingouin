@@ -1,4 +1,6 @@
 # Import pingouin objects
-from .pingouin import *
+from .utils import *
+from .effsize import *
+from .multicomp import *
 
 __version__ = "0.1.dev"
