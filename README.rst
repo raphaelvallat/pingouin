@@ -3,7 +3,7 @@
 Pingouin
 ########
 
-.. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/picture/pingouin.png
+.. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/pictures/pingouin.png
    :align:   center
 
 
@@ -58,7 +58,7 @@ Quick start
 
 Output:
 
-.. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/picture/pairwise_stats_all.png
+.. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/pictures/pairwise_stats_all.png
    :align:   center
 
 Contribution
