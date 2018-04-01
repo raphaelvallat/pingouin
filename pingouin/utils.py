@@ -7,13 +7,17 @@ from six import string_types
 import pandas as pd
 
 
-__all__ = ["_check_eftype", "_check_data", "_extract_effects"]
+__all__ = ["_check_eftype", "_check_data", "_check_dataframe",
+           "_extract_effects"]
 
 # SUB-FUNCTIONS
 def _check_eftype(eftype):
     """Check validity of eftype"""
-    return True if eftype in ['hedges', 'cohen', 'r', 'eta-square',
-                              'odds-ratio', 'AUC'] else False
+    if eftype.lower() in ['none', 'hedges', 'cohen', 'r', 'eta-square',
+                          'odds-ratio', 'auc']:
+        return True
+    else:
+        return False
 
 
 def _check_data(dv=None, group=None, data=None, x=None, y=None):
@@ -52,8 +56,9 @@ def _check_data(dv=None, group=None, data=None, x=None, y=None):
     return x, y, nx, ny, dof
 
 
-def _extract_effects(dv=None, between=None, within=None, effects='all', data=None):
-    """Extract data from dataframe or numpy arrays"""
+def _check_dataframe(dv=None, between=None, within=None, effects=None,
+                     data=None):
+    """Check dataframe"""
 
     # Check input arguments
     if not isinstance(data, pd.DataFrame):
@@ -72,21 +77,35 @@ def _extract_effects(dv=None, between=None, within=None, effects='all', data=Non
                 raise ValueError('within and between must be specified when \
                 effects=interaction')
 
-    # Extract number of pairwise comparisons
-    if effects == 'within':
-        col = within
-    elif effects == 'between':
-        col = between
-    # Extract data
-    labels = data[col].unique()
-    npairs = len(labels)
+def _extract_effects(dv=None, between=None, within=None, effects=None,
+                     data=None):
+    """Extract main effects"""
+    # Check the dataframe
+    _check_dataframe(dv=dv, between=between, within=within, effects=effects,
+                     data=data)
+
     datadic = {}
     nobs = np.array([], dtype=int)
 
-    print('Labels:', labels)
-    for l in labels:
-        datadic[l] = data[data[col] == l][dv]
-        nobs = np.append(nobs, len(datadic[l]))
+    # Extract number of pairwise comparisons
+    if effects.lower() in ['within', 'between']:
+        col = within if effects == 'within' else between
+        # Extract data
+        labels = list(data[col].unique())
+        npairs = len(labels)
+        for l in labels:
+            datadic[l] = data[data[col] == l][dv]
+            nobs = np.append(nobs, len(datadic[l]))
+
+    elif effects.lower() == 'interaction':
+        labels_with = list(data[within].unique())
+        labels_betw = list(data[between].unique())
+        npairs = len(labels_with)
+        for lw in labels_with:
+            for l in labels_betw:
+                tmp = data[data[within] == lw]
+                datadic[lw, l] = tmp[tmp[between] == l][dv]
+                nobs = np.append(nobs, len(datadic[lw, l]))
 
     dt_array = pd.DataFrame.from_dict(datadic)
     return dt_array, nobs

@@ -3,7 +3,10 @@
 # Code borrowed from statsmodel and mne.stats
 # GNU license
 import numpy as np
-from pingouin.utils import (_check_data, _extract_effects)
+import pandas as pd
+from pingouin.utils import (_check_data, _check_dataframe, _extract_effects)
+from pingouin.effsize import compute_effsize
+
 
 __all__ = ["fdr", "bonf", "multicomp", "pairwise_ttests"]
 
@@ -160,14 +163,16 @@ def multicomp(pvals, alpha=0.05, method='holm'):
         reject, pvals_corrected = fdr(pvals, alpha=alpha, method='indep')
     elif method.lower() in ['fdr_by']:
         reject, pvals_corrected = fdr(pvals, alpha=alpha, method='negcorr')
+    elif method.lower() == 'none':
+        return None, None
     else:
         raise ValueError('Multiple comparison method not recognized')
-
     return reject, pvals_corrected
 
 
-def pairwise_ttests(dv=None, between=None, within=None, effects='all', data=None,
-                    alpha=.05, tailed='two-sided', padjust=None):
+def pairwise_ttests(dv=None, between=None, within=None, effects='all',
+                    data=None, alpha=.05, tailed='two-sided', padjust='none',
+                    effsize='hedges'):
     '''Pairwise T-tests using Pandas
     Parameters
     ----------
@@ -183,39 +188,109 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all', data=None
         `holm` : step-down method using Bonferroni adjustments
         `fdr_bh` : Benjamini/Hochberg FDR correction
         `fdr_by` : Benjamini/Yekutieli FDR correction
+    effsize : string or None
+        Effect size type. Available methods are :
+        `none` : no correction
+        `cohen` : Unbiased Cohen's d
+        `hedges` : Hedges g
+        `eta-square` : Eta-square
+        `odds-ratio` : Odds ratio
+        `AUC` : Area Under the Curve
     Returns
     -------
     tvals : array
         Test statistics
     pvals : array
         (un)-corrected p-values
+    efvals : array
+        Effect sizes
     '''
+    from itertools import combinations
     from scipy.stats import ttest_ind, ttest_rel
 
     if tailed not in ['one-sided', 'two-sided']:
         raise ValueError('Tailed not recognized')
 
-    # Extract data
+    # Extract main effects
     dt_array, nobs = _extract_effects(dv=dv, between=between, within=within,
                                      effects=effects, data=data)
 
-    # Compute T-tests
-    paired = True if effects == 'within' else False
-    # Number and labels of possible comparisons
-    ntests = nobs.size - 1
-    tvals, pvals = np.zeros(ntests), np.zeros(ntests)
-    # Start looping over columns
-    for i in np.arange(ntests):
-        x = dt_array[col1]
-        y = dt_array[col2]
-        t, p = ttest_rel(x, y) if paired else ttest_ind(x, y)
-        tvals[i], pvals[i] = t, p
+    # Initalize output dataframe
+    stats = pd.DataFrame(columns=['A', 'B', 'Type', 'Paired', 'T-val', 'p-unc'])
+
+    # OPTION A: simple main effect
+    if effects.lower() in ['within', 'between']:
+        # Compute T-tests
+        paired = True if effects == 'within' else False
+
+        # Extract column names
+        col_names = list(dt_array.columns.values)
+
+        # Number and labels of possible comparisons
+        if len(col_names) >= 2:
+            combs = list(combinations(col_names, 2))
+            ntests = len(combs)
+        else:
+            raise ValueError('Data must have at least two columns')
+
+        # Initialize vectors
+        for comb in combs:
+            col1, col2 = comb
+            x = dt_array[col1].dropna().values
+            y = dt_array[col2].dropna().values
+            t, p = ttest_rel(x, y) if paired else ttest_ind(x, y)
+            ef = compute_effsize(x=x, y=y, eftype=effsize)
+            stats = stats.append({
+                                 'A': col1,
+                                 'B': col2,
+                                 'Type': effects,
+                                 'Paired': paired,
+                                 'T-val': t,
+                                 'p-unc': p,
+                                 'Eff_size': ef,
+                                 'Eff_type': effsize}, ignore_index=True)
+        col_order = ['A', 'B', 'Type', 'Paired', 'T-val', 'Tail',
+                     'p-unc', 'p-corr', 'p-adjust', 'Eff_size', 'Eff_type']
+
+    # OPTION B: interaction
+    if effects.lower() == 'interaction':
+        paired = False
+        for time, sub_dt in dt_array.groupby(level=0, axis=1):
+            col1, col2 = sub_dt.columns.get_level_values(1)
+            x = sub_dt[(time, col1)].dropna().values
+            y = sub_dt[(time, col2)].dropna().values
+            t, p = ttest_rel(x, y) if paired else ttest_ind(x, y)
+            ef = compute_effsize(x=x, y=y, eftype=effsize)
+            stats = stats.append({
+                                 'Time': time,
+                                 'A': col1,
+                                 'B': col2,
+                                 'Type': effects,
+                                 'Paired': paired,
+                                 'T-val': t,
+                                 'p-unc': p,
+                                 'Eff_size': ef,
+                                 'Eff_type': effsize}, ignore_index=True)
+        col_order = ['Time', 'A', 'B', 'Type', 'Paired', 'T-val', 'Tail',
+                     'p-unc', 'p-corr', 'p-adjust', 'Eff_size', 'Eff_type']
+
+
+    if tailed == 'one-sided':
+        stats['p-unc'] *= .5
+        stats['Tail'] = 'one-sided'
+    else:
+        stats['Tail'] = 'two-sided'
 
     # Multiple comparisons
-    if padjust is not None:
-        _, pvals = multicomp(pvals, alpha=alpha, method=padjust)
-
-    if tailed=='two-sided':
-        return tvals, pvals
+    if padjust is not None or padjust.lower() is not 'none':
+        _, stats['p-corr'] = multicomp(stats['p-unc'].values, alpha=alpha,
+                                       method=padjust)
+        stats['p-adjust'] = padjust
     else:
-        return tvals, 0.5 * pvals
+        stats['p-corr'] = None
+        stats['p-adjust'] = None
+
+    # Reorganize order
+    stats = stats.reindex(columns=col_order)
+
+    return stats

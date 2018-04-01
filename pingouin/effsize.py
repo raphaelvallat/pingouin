@@ -27,7 +27,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     Return
     ------
     ef: float
-        Desred converted effect size
+        Desired converted effect size
     """
     # Check input and output type
     for input in [input_type, output_type]:
@@ -36,15 +36,17 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
             raise ValueError(err)
 
     # First convert to Cohen's d
-    if input_type == 'r':
+    it = input_type.lower()
+    if it == 'r':
         d = (2 * ef) / np.sqrt(1 - ef**2)
-    elif input_type == 'cohen':
+    elif it == 'cohen':
         d = ef
 
     # Then convert to the desired output type
-    if output_type == 'cohen':
+    ot = output_type.lower()
+    if ot == 'cohen':
         return d
-    elif output_type == 'hedges':
+    elif ot == 'hedges':
         if all(v is not None for v in [nx, ny]):
             return d * (1 - (3 / (4 * (nx + ny) - 9)))
         else:
@@ -52,19 +54,21 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
             print("You need to pass nx and ny arguments to compute \
                    Hedges g. Returning Cohen's d instead")
             return d
-    elif output_type == 'r':
+    elif ot == 'r':
         if all(v is not None for v in [nx, ny]):
             a = (nx + ny)**2 / (nx * ny)
         else:
             a = 4
         return d / np.sqrt(d**2 + a)
-    elif output_type == 'eta-square':
+    elif ot == 'eta-square':
         return (d/2)**2 / (1 + (d/2)**2)
-    elif output_type == 'odds-ratio':
+    elif ot == 'odds-ratio':
         return np.exp(d * np.pi / np.sqrt(3))
-    elif output_type == 'AUC':
+    elif ot == 'auc':
         from scipy.stats import norm
         return norm.cdf(d / np.sqrt(2))
+    elif ot == 'none':
+        return None
 
 
 def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
@@ -88,6 +92,13 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
         X and Y are only taken into account if dv, group and data = None
     eftype: string
         Desired output effect size, optional
+        Available methods are :
+        `none` : no effect size
+        `cohen` : Unbiased Cohen's d
+        `hedges` : Hedges g
+        `eta-square` : Eta-square
+        `odds-ratio` : Odds ratio
+        `AUC` : Area Under the Curve
     Return
     ------
     ef: float
@@ -106,7 +117,7 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
     d = (np.mean(x) - np.mean(y)) / np.sqrt(((nx - 1) * np.std(x, ddof=1)**2 \
             + (ny - 1) * np.std(y, ddof=1)**2) / dof)
 
-    if eftype == 'cohen':
+    if eftype.lower() == 'cohen':
         return d
     else:
         return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)
