@@ -4,9 +4,8 @@
 # GNU license
 import numpy as np
 import pandas as pd
-from pingouin.utils import (_check_data, _check_dataframe, _extract_effects)
-from pingouin.effsize import compute_effsize
-
+from pingouin import (_check_data, _check_dataframe, _extract_effects,
+                     compute_effsize)
 
 __all__ = ["fdr", "bonf", "multicomp", "pairwise_ttests"]
 
@@ -171,7 +170,7 @@ def multicomp(pvals, alpha=0.05, method='holm'):
 
 
 def pairwise_ttests(dv=None, between=None, within=None, effects='all',
-                    data=None, alpha=.05, tailed='two-sided', padjust='none',
+                    data=None, alpha=.05, tail='two-sided', padjust='none',
                     effsize='hedges'):
     '''Pairwise T-tests using Pandas
     Parameters
@@ -208,17 +207,21 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
     from itertools import combinations
     from scipy.stats import ttest_ind, ttest_rel
 
-    if tailed not in ['one-sided', 'two-sided']:
-        raise ValueError('Tailed not recognized')
+    if tail not in ['one-sided', 'two-sided']:
+        raise ValueError('Tail not recognized')
+
+    if not isinstance(alpha, float):
+        raise ValueError('Alpha must be float')
 
     # Extract main effects
     dt_array, nobs = _extract_effects(dv=dv, between=between, within=within,
                                      effects=effects, data=data)
 
     # Initalize output dataframe
-    stats = pd.DataFrame(columns=['A', 'B', 'Type', 'Paired', 'T-val', 'p-unc'])
+    stats = pd.DataFrame(columns=['A', 'B', 'Type', 'Paired', 'Alpha',
+                                  'T-val', 'p-unc'])
 
-    # OPTION A: simple main effect
+    # OPTION A: simple main effects
     if effects.lower() in ['within', 'between']:
         # Compute T-tests
         paired = True if effects == 'within' else False
@@ -245,11 +248,12 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
                                  'B': col2,
                                  'Type': effects,
                                  'Paired': paired,
+                                 'Alpha': alpha,
                                  'T-val': t,
                                  'p-unc': p,
                                  'Eff_size': ef,
                                  'Eff_type': effsize}, ignore_index=True)
-        col_order = ['A', 'B', 'Type', 'Paired', 'T-val', 'Tail',
+        col_order = ['A', 'B', 'Type', 'Paired', 'Alpha', 'T-val', 'Tail',
                      'p-unc', 'p-corr', 'p-adjust', 'Eff_size', 'Eff_type']
 
     # OPTION B: interaction
@@ -267,15 +271,30 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
                                  'B': col2,
                                  'Type': effects,
                                  'Paired': paired,
+                                 'Alpha': alpha,
                                  'T-val': t,
                                  'p-unc': p,
                                  'Eff_size': ef,
                                  'Eff_type': effsize}, ignore_index=True)
-        col_order = ['Time', 'A', 'B', 'Type', 'Paired', 'T-val', 'Tail',
-                     'p-unc', 'p-corr', 'p-adjust', 'Eff_size', 'Eff_type']
 
 
-    if tailed == 'one-sided':
+    if effects.lower() == 'all':
+        stats_within = pairwise_ttests(dv=dv, within=within, effects='within',
+                            data=data, alpha=alpha, tail=tail, padjust=padjust,
+                            effsize=effsize)
+        stats_between = pairwise_ttests(dv=dv, between=between,
+                            effects='between', data=data, alpha=alpha,
+                            tail=tail, padjust=padjust, effsize=effsize)
+
+        stats_interaction = pairwise_ttests(dv=dv, within=within,
+                            between=between, effects='interaction', data=data,
+                            alpha=alpha, tail=tail, padjust=padjust,
+                            effsize=effsize)
+        stats = pd.concat([stats_within, stats_between,
+                                stats_interaction]).reset_index()
+
+    # Tail and multiple comparisons
+    if tail == 'one-sided':
         stats['p-unc'] *= .5
         stats['Tail'] = 'one-sided'
     else:
@@ -283,14 +302,24 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
     # Multiple comparisons
     if padjust is not None or padjust.lower() is not 'none':
-        _, stats['p-corr'] = multicomp(stats['p-unc'].values, alpha=alpha,
+        reject, stats['p-corr'] = multicomp(stats['p-unc'].values, alpha=alpha,
                                        method=padjust)
         stats['p-adjust'] = padjust
+        stats['reject'] = reject
     else:
         stats['p-corr'] = None
         stats['p-adjust'] = None
+        stats['reject'] = stats['p-unc'] < alpha
 
-    # Reorganize order
+    # Trick to force conversion from boolean to int
+    stats['reject'] *= 1
+
+    # Reorganize column order
+    col_order = ['Time', 'A', 'B', 'Type', 'Paired', 'Alpha', 'T-val',
+                'Tail', 'p-unc', 'p-corr', 'p-adjust', 'reject', 'Eff_size',
+                'Eff_type']
+    if effects.lower() in ['within', 'between']:
+        col_order = col_order.remove('Time')
+
     stats = stats.reindex(columns=col_order)
-
     return stats

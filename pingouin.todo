@@ -1,0 +1,3 @@
+- Fix bug in Holm correction
+- Fix bug in r to d conversion
+- Add possible input in convert_effsize

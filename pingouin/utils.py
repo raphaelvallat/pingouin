@@ -59,14 +59,13 @@ def _check_data(dv=None, group=None, data=None, x=None, y=None):
 def _check_dataframe(dv=None, between=None, within=None, effects=None,
                      data=None):
     """Check dataframe"""
-
     # Check input arguments
     if not isinstance(data, pd.DataFrame):
         raise ValueError('Data must be a pandas dataframe')
     if any(v is None for v in [dv, data]):
         raise ValueError('DV and data must be specified')
     if effects not in ['within', 'between', 'interaction', 'all']:
-        raise ValueError('Effects must be: within, between, interaction or all')
+        raise ValueError('Effects must be: within, between, interaction, all')
     if effects == 'within' and not isinstance(within, string_types):
         raise ValueError('within must be specified when effects=within')
     elif effects == 'between' and not isinstance(between, string_types):
