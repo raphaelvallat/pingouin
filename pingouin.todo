@@ -1,4 +1,5 @@
 - Add mean and std in pairwise_ttests
+- Implementation of ANOVA using mne.stats
 - Add within / between effsize
 - Fix bug in r to d conversion
 - Add possible input in convert_effsize
