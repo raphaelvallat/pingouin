@@ -1,6 +1,5 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
-# GNU license
 import numpy as np
 from scipy import stats
 from six import string_types

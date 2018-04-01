@@ -1,35 +1,23 @@
-import numpy as np
-from numpy.random import normal
 import pandas as pd
 from pingouin import pairwise_ttests
 
 # Change default display format of pandas
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
-# Generate a fake dataset
+# Load a fake dataset: the INSOMNIA study
+# Goal: evaluate the influence of a treatment on sleep duration in a control
+# and insomnia group
+#
 # Mixed repeated measures design
-# - DV = hours of sleep per night
-# - Between = Insomnia (n=10) / Control (n=12)
-# - Within = Pre-treatment / Post-treatment
-nx, ny, ngr, nrm = 10, 12, 2, 3
+#   - Dependant variable (DV) = hours of sleep per night
+#   - Between-factor = two-levels (Insomnia / Control)
+#   - Within-factor = four levels (Pre, Post1, Post2, Post3)
+df = pd.read_csv('sleep_dataset.csv')
 
-between = np.tile(np.r_[np.repeat(['Insomnia'], nx),
-                        np.repeat(['Control'], ny)], nrm)
-within = np.repeat(['Pre', 'Post-6months', 'Post-12months'], (nx+ny))
-
-# Create DV
-i_pre = normal(loc=4, size=nx)
-i_posta = normal(loc=7.5, size=nx)
-i_postb = normal(loc=7.2, size=nx)
-c_pre = normal(loc=7.8, size=ny)
-c_posta = normal(loc=7.9, size=ny)
-c_postb = normal(loc=7.85, size=ny)
-hours_sleep = np.r_[i_pre, c_pre, i_posta, c_posta, i_postb, c_postb]
-
-df = pd.DataFrame({'DV': hours_sleep,
-                   'Group': between,
-                   'Time': within})
-# print(df)
+# Print the means and standard deviations
+print(df.groupby(['Time']).agg(['mean', 'std'])) # Main effect Time
+print(df.groupby(['Group']).agg(['mean', 'std'])) # Main effect Group
+print(df.groupby(['Group', 'Time']).agg(['mean', 'std'])) # Interaction
 
 # Pairwise T tests
 # ----------------

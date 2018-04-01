@@ -3,9 +3,8 @@
 # Copyright (C) 2018 Raphael Vallat
 import os
 
-DESCRIPTION = "Pingouin: effect size in Python"
-LONG_DESCRIPTION = """\
-Pingouin is a Python package for computing effect size based on Pandas.
+DESCRIPTION = "Pingouin: statistical package for Python"
+LONG_DESCRIPTION = """Pingouin is a statistical Python package based on Pandas.
 """
 
 DISTNAME = 'pingouin'

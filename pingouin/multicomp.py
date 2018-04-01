@@ -1,7 +1,6 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 # Code borrowed from statsmodel and mne.stats
-# GNU license
 import numpy as np
 import pandas as pd
 from pingouin import (_check_data, _check_dataframe, _extract_effects,

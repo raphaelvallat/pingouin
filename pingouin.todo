@@ -1,3 +1,4 @@
-- Fix bug in Holm correction
+- Add mean and std in pairwise_ttests
+- Add within / between effsize
 - Fix bug in r to d conversion
 - Add possible input in convert_effsize
