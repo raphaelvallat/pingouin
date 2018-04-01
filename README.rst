@@ -3,7 +3,11 @@
 Pingouin
 ########
 
-**Pingouin** (French word for penguin) is an open-source statistical Python 3 package based on Pandas. It allows the computation of post-hoc pairwise T-tests from a mixed two-way repeated measures ANOVA. Pingouin also implements several tools for computing and converting effect sizes (Cohen d, Hedges g, eta-square, AUC and odds-ratio).
+.. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/picture/pingouin.png
+   :align:   center
+
+
+**Pingouin** (French word for *penguin*) is an open-source statistical Python 3 package based on Pandas. It allows the computation of post-hoc pairwise T-tests from a mixed two-way repeated measures ANOVA. Pingouin also implements several tools for computing and converting effect sizes (Cohen d, Hedges g, eta-square, AUC and odds-ratio).
 
 Installation
 ============
@@ -52,6 +56,10 @@ Quick start
                           tail='two-sided', padjust='fdr_by', effsize='hedges')
   print(stats)
 
+Output:
+
+.. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/picture/pairwise_stats_all.png
+   :align:   center
 
 Contribution
 ============
