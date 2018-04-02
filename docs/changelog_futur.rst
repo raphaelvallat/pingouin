@@ -7,7 +7,7 @@ Changelog
 ---------
 
 v0.1dev
-^^^^^^
+^^^^^^^
 
 Future directions
 -----------------
