@@ -14,6 +14,7 @@ URL = ''
 LICENSE = 'BSD (3-clause)'
 DOWNLOAD_URL = 'https://github.com/raphaelvallat/pingouin/'
 VERSION = '0.1.dev'
+PACKAGE_DATA = {'pingouin.data.icons': ['*.svg']}
 
 try:
     from setuptools import setup
@@ -56,6 +57,7 @@ if __name__ == "__main__":
         download_url=DOWNLOAD_URL,
         install_requires=install_requires,
         packages=['pingouin'],
+        package_data=PACKAGE_DATA,
         classifiers=[
                      'Intended Audience :: Science/Research',
                      'Programming Language :: Python :: 3.6',
