@@ -12,7 +12,7 @@ Installation
 Dependencies
 ------------
 
-Visbrain requires :
+Pingouin requires :
 
 * NumPy
 * SciPy
