@@ -12,7 +12,7 @@ __all__ = ["_check_eftype", "_check_data", "_check_dataframe",
 # SUB-FUNCTIONS
 def _check_eftype(eftype):
     """Check validity of eftype"""
-    if eftype.lower() in ['none', 'hedges', 'cohen', 'r', 'eta-square',
+    if eftype.lower() in ['none', 'hedges', 'cohen', 'glass', 'r', 'eta-square',
                           'odds-ratio', 'auc']:
         return True
     else:

@@ -90,7 +90,7 @@ def test_homoscedasticity(*args, alpha=.05):
     normal, _ = test_normality(*args)
 
     if np.count_nonzero(normal) != normal.size:
-        print('Data are not normally distributed. Using Levene test.')
+        # print('Data are not normally distributed. Using Levene test.')
         _, p = levene(*args)
     else:
         _, p = bartlett(*args)
