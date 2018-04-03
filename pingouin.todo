@@ -1,3 +1,4 @@
-- Add sources for effect size formula
-- ANOVA implementation?
-- Add within / between effsize
+- Support for two or more between effects and two or more within effects
+- Examples in ipynb notebook --> convert to .rst
+- ANOVA implementation
+- Add within / between in effsize
