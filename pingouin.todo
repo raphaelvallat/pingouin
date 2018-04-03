@@ -1,9 +1,9 @@
-- Add mean and std in pairwise_ttests
+- Add Glass delta for unequal variance
 - Add disclaimer and icon author
 - Check all effect sizes
 - Add sources for effect size formula
 - Sphinx documentation and github pages
-- Implementation of ANOVA using mne.stats
+- ANOVA implementation?
 - Add within / between effsize
 - Fix bug in r to d conversion
 - Add possible input in convert_effsize

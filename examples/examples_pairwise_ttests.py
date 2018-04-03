@@ -14,33 +14,29 @@ pd.set_option('display.float_format', lambda x: '%.3f' % x)
 #   - Within-factor = four levels (Pre, Post1, Post2, Post3)
 df = pd.read_csv('sleep_dataset.csv')
 
-# Print the means and standard deviations
-print(df.groupby(['Time']).agg(['mean', 'std'])) # Main effect Time
-print(df.groupby(['Group']).agg(['mean', 'std'])) # Main effect Group
-print(df.groupby(['Group', 'Time']).agg(['mean', 'std'])) # Interaction
-
 # Pairwise T tests
 # ----------------
 # 1 - Main effect of group (between)
-stats = pairwise_ttests(dv='DV', between='Group', effects='between', data=df,
-                        alpha=.05, tail='two-sided', padjust='none',
-                        effsize='none')
-print(stats)
+# stats = pairwise_ttests(dv='DV', between='Group', effects='between', data=df,
+#                         alpha=.05, tail='two-sided', padjust='none',
+#                         effsize='none')
+# print(stats)
 
 # 2 - Main effect of measurement (within)
-stats = pairwise_ttests(dv='DV', within='Time', effects='within', data=df,
-                        alpha=.05, tail='two-sided', padjust='fdr_bh',
-                        effsize='hedges')
-print(stats)
+# stats = pairwise_ttests(dv='DV', within='Time', effects='within', data=df,
+#                         alpha=.05, tail='two-sided', padjust='fdr_bh',
+#                         effsize='hedges')
+# print(stats)
 
 # 3 - Interaction within * between
-stats = pairwise_ttests(dv='DV', within='Time', between='Group',
-                        effects='interaction', data=df, alpha=.05,
-                        tail='two-sided', padjust='bonf', effsize='eta-square')
-print(stats)
+# stats = pairwise_ttests(dv='DV', within='Time', between='Group',
+#                         effects='interaction', data=df, alpha=.05,
+#                         tail='two-sided', padjust='bonf', effsize='eta-square')
+# print(stats)
 
 # 4 - all = return all three above
 stats = pairwise_ttests(dv='DV', within='Time', between='Group',
                         effects='all', data=df, alpha=.05,
-                        tail='two-sided', padjust='fdr_by', effsize='hedges')
+                        tail='two-sided', padjust='fdr_by',
+                        effsize='cohen', return_desc=True)
 print(stats)

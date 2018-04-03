@@ -26,10 +26,15 @@ print(eftype, ': %.3f' % ef)
 ef = compute_effsize(x=x, y=y, eftype=eftype)
 print(eftype, ': %.3f' % ef)
 
-# 3 - using a T-value
+# 3 - using a T-value when nx and ny are known
 T, _ = ttest_ind(x, y)
 ef = compute_effsize_from_T(T, nx=len(x), ny=len(y), eftype=eftype)
-print(eftype, '(from T): %.3f' % ef)
+print(eftype, '(from T - nx + ny): %.3f' % ef)
+
+# 3 - using a T-value when only total sample size is known
+T, _ = ttest_ind(x, y)
+ef = compute_effsize_from_T(T, N=len(x) + len(y), eftype='cohen')
+print('cohen (from T - only N): %.3f' % ef)
 
 # EFFECT SIZE CONVERSION
 # -----------------------
@@ -39,5 +44,6 @@ x = np.random.normal(loc=174, size=n)
 y = np.random.normal(loc=175, size=n)
 df = pd.DataFrame({'DV': np.r_[x, y], 'Group': np.repeat(['France', 'UK'], n)})
 r, _ = pearsonr(x, y)
-ef = convert_effsize(r, input_type='r', output_type='cohen')
-print('r: ', r, 'to', eftype, ': %.3f' % ef)
+eftype = 'cohen'
+ef = convert_effsize(r, input_type='r', output_type=eftype)
+print('r: : %.3f' % r, 'to', eftype, ': %.3f' % ef)

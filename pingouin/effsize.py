@@ -34,6 +34,9 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
             err = "Could not interpret input '{}'".format(input)
             raise ValueError(err)
 
+    if input_type == output_type:
+        return ef
+
     # First convert to Cohen's d
     it = input_type.lower()
     if it == 'r':
@@ -50,12 +53,12 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
             return d * (1 - (3 / (4 * (nx + ny) - 9)))
         else:
             # If shapes of x and y are not known, return cohen's d
-            print("You need to pass nx and ny arguments to compute \
-                   Hedges g. Returning Cohen's d instead")
+            print("You need to pass nx and ny arguments to compute Hedges g. Returning Cohen's d instead")
             return d
     elif ot == 'r':
+        # McGrath and Meyer 2006
         if all(v is not None for v in [nx, ny]):
-            a = (nx + ny)**2 / (nx * ny)
+            a = ((nx + ny)**2 - 2*(nx + ny)) / (nx*ny)
         else:
             a = 4
         return d / np.sqrt(d**2 + a)
@@ -71,7 +74,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
 
 
 def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
-                    eftype=None):
+                    eftype=None, paired=False):
     """Compute effect size from pandas dataframe or two numpy arrays
     Case A: pass a DataFrame
         >>>> compute_effsize(dv='Height', 'group='Countries', data=df)
@@ -98,6 +101,8 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
         `eta-square` : Eta-square
         `odds-ratio` : Odds ratio
         `AUC` : Area Under the Curve
+    paired : boolean
+        If True, use Cohen davg formula (see Cumming 2012)
     Return
     ------
     ef: float
@@ -112,24 +117,31 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
     x, y, nx, ny, dof = _check_data(dv, group, data, x, y)
 
     # Compute unbiased Cohen's d effect size
-    # https://en.wikipedia.org/wiki/Effect_size
-    d = (np.mean(x) - np.mean(y)) / np.sqrt(((nx - 1) * np.std(x, ddof=1)**2 \
-            + (ny - 1) * np.std(y, ddof=1)**2) / dof)
+    if not paired:
+        # https://en.wikipedia.org/wiki/Effect_size
+        d = (np.mean(x) - np.mean(y)) / np.sqrt(((nx - 1) * \
+             np.std(x, ddof=1)**2 + (ny - 1) * np.std(y, ddof=1)**2) / dof)
+    else:
+        # Report Cohen d-avg (Cumming 2012; Lakens 2013)
+        d = (np.mean(x) - np.mean(y)) / (.5 * (np.std(x) + np.std(y)))
 
     if eftype.lower() == 'cohen':
         return d
     else:
         return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)
 
-def compute_effsize_from_T(T, nx, ny, eftype):
+def compute_effsize_from_T(T, nx=None, ny=None, N=None, eftype='cohen'):
     """Compute effect size from pandas dataframe or two numpy arrays
     Parameters
     ----------
     T: float
         T-value
-    nx, ny: int
+    nx, ny: int, optional
         Length of vector x and y.
-    eftype: desired output effect size, optional
+    N: int, optional
+        Total sample size (will not be used if nx and ny are specified)
+    eftype: string, optional
+        desired output effect size
     Return
     ------
     ef: float
@@ -143,11 +155,11 @@ def compute_effsize_from_T(T, nx, ny, eftype):
         err = "T-value must be float"
         raise ValueError(err)
 
-    for input in [nx, ny]:
-        if not isinstance(input, int):
-            err = "nx and ny must be int"
-            raise ValueError(err)
-
-    # Compute Cohen d
-    d = (T * (nx + ny)) / np.sqrt((nx + ny - 2) * (nx * ny))
+    # Compute Cohen d (Lakens, 2013)
+    if nx is not None and ny is not None:
+        d = T * np.sqrt(1 / nx + 1 / ny)
+    elif N is not None:
+        d = 2 * T / np.sqrt(N)
+    else:
+        raise ValueError('You must specify either nx + ny, or just N')
     return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)
