@@ -68,3 +68,8 @@ Main developers
 ---------------
 
 * `Raphael Vallat <https://raphaelvallat.github.io>`_
+
+Further reading
+===============
+
+* Effect size: see `Lakens et al. 2013 <https://www.frontiersin.org/articles/10.3389/fpsyg.2013.00863/full>`_
