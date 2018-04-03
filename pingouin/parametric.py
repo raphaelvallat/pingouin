@@ -6,14 +6,17 @@ __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist"]
 
 def gzscore(x):
     """Compute the geometric standard score of a 1D array.
+
     Geometric Z-score are better than arithmetic z-scores when the data
     comes from a log-normal or chi-squares distribution.
+
     Parameters
     ----------
     x: array_like
         Array of raw values
-    Return
-    ------
+
+    Returns
+    -------
     gzscore: array_like
         Array of geometric z-scores (gzscore.shape == x.shape)
     """
@@ -28,12 +31,14 @@ def gzscore(x):
 # MAIN FUNCTIONS
 def test_normality(*args, alpha=.05):
     """Test normality of an array.
+
     Parameters
     ----------
     sample1, sample2,... : array_like
         Array of sample data. May be different lengths.
-    Return
-    ------
+
+    Returns
+    -------
     normal: boolean
         True if x comes from a normal distribution.
     p: float
@@ -69,8 +74,9 @@ def test_homoscedasticity(*args, alpha=.05):
     ----------
     sample1, sample2,... : array_like
         Array of sample data. May be different lengths.
-    Return
-    ------
+
+    Returns
+    -------
     equal_var: boolean
         True if data have equal variance.
     p: float
@@ -100,14 +106,15 @@ def test_homoscedasticity(*args, alpha=.05):
 
 
 def test_dist(*args, dist='norm'):
-    """Anderson-Darling test for data coming from a particular distribution
+    """Anderson-Darling test for data coming from a particular distribution.
 
     Parameters
     ----------
     sample1, sample2,... : array_like
         Array of sample data. May be different lengths.
-    Return
-    ------
+
+    Returns
+    -------
     from_dist: boolean
         True if data comes from this distribution.
     """

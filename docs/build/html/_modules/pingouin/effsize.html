@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pingouin.effsize &#8212; pingouin 0.1.dev documentation</title>
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/copybutton.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html"><span><img src="../../_static/pingouin_128x128.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1.dev</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../api.html">API</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API reference</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <h1>Source code for pingouin.effsize</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Raphael Vallat &lt;raphaelvallat9@gmail.com&gt;</span>
+<span class="c1"># Date: April 2018</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">stats</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pingouin.utils</span> <span class="k">import</span> <span class="p">(</span><span class="n">_check_data</span><span class="p">,</span> <span class="n">_check_eftype</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pingouin.parametric</span> <span class="k">import</span> <span class="p">(</span><span class="n">test_homoscedasticity</span><span class="p">)</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;convert_effsize&quot;</span><span class="p">,</span> <span class="s2">&quot;compute_effsize&quot;</span><span class="p">,</span> <span class="s2">&quot;compute_effsize_from_T&quot;</span><span class="p">]</span>
+
+
+<span class="c1"># MAIN FUNCTIONS</span>
+<div class="viewcode-block" id="convert_effsize"><a class="viewcode-back" href="../../generated/pingouin.convert_effsize.html#pingouin.convert_effsize">[docs]</a><span class="k">def</span> <span class="nf">convert_effsize</span><span class="p">(</span><span class="n">ef</span><span class="p">,</span> <span class="n">input_type</span><span class="p">,</span> <span class="n">output_type</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Conversion between effect sizes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ef: float</span>
+<span class="sd">        Original effect size</span>
+<span class="sd">    input_type: string</span>
+<span class="sd">        Effect size type of ef. Must be &#39;r&#39; or &#39;d&#39;.</span>
+<span class="sd">    output_type: string</span>
+<span class="sd">        Desired effect size type.</span>
+<span class="sd">        Available methods are :</span>
+<span class="sd">        `none` : no effect size</span>
+<span class="sd">        `cohen` : Unbiased Cohen&#39;s d</span>
+<span class="sd">        `hedges` : Hedges g</span>
+<span class="sd">        `glass`: Glass delta</span>
+<span class="sd">        `eta-square` : Eta-square</span>
+<span class="sd">        `odds-ratio` : Odds ratio</span>
+<span class="sd">        `AUC` : Area Under the Curve</span>
+<span class="sd">    nx, ny: int, int, optional</span>
+<span class="sd">        Length of vector x and y.</span>
+<span class="sd">        nx and ny are required to convert to Hedges g</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ef: float</span>
+<span class="sd">        Desired converted effect size</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">it</span> <span class="o">=</span> <span class="n">input_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">ot</span> <span class="o">=</span> <span class="n">output_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="c1"># Check input and output type</span>
+    <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="p">[</span><span class="n">it</span><span class="p">,</span> <span class="n">ot</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_check_eftype</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;Could not interpret input &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">it</span> <span class="o">==</span> <span class="n">ot</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ef</span>
+
+    <span class="k">if</span> <span class="n">it</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input type must be &#39;r&#39; or &#39;cohen&#39;&quot;</span><span class="p">)</span>
+
+    <span class="c1"># First convert to Cohen&#39;s d</span>
+    <span class="k">if</span> <span class="n">it</span> <span class="o">==</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ef</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ef</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">it</span> <span class="o">==</span> <span class="s1">&#39;cohen&#39;</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">ef</span>
+
+    <span class="c1"># Then convert to the desired output type</span>
+    <span class="k">if</span> <span class="n">ot</span> <span class="o">==</span> <span class="s1">&#39;cohen&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">d</span>
+    <span class="k">elif</span> <span class="n">ot</span> <span class="o">==</span> <span class="s1">&#39;hedges&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="n">d</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="n">nx</span> <span class="o">+</span> <span class="n">ny</span><span class="p">)</span> <span class="o">-</span> <span class="mi">9</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If shapes of x and y are not known, return cohen&#39;s d</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need to pass nx and ny arguments to compute Hedges g.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Returning Cohen&#39;s d instead&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">d</span>
+    <span class="k">elif</span> <span class="n">ot</span> <span class="o">==</span> <span class="s1">&#39;glass&#39;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Returning original effect size instead of Glass because&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;variance is not known.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ef</span>
+    <span class="k">elif</span> <span class="n">ot</span> <span class="o">==</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span>
+        <span class="c1"># McGrath and Meyer 2006</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]):</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="p">((</span><span class="n">nx</span> <span class="o">+</span> <span class="n">ny</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">nx</span> <span class="o">+</span> <span class="n">ny</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="k">return</span> <span class="n">d</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ot</span> <span class="o">==</span> <span class="s1">&#39;eta-square&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ot</span> <span class="o">==</span> <span class="s1">&#39;odds-ratio&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">d</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">ot</span> <span class="o">==</span> <span class="s1">&#39;auc&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">norm</span>
+        <span class="k">return</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">d</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">ot</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="compute_effsize"><a class="viewcode-back" href="../../generated/pingouin.compute_effsize.html#pingouin.compute_effsize">[docs]</a><span class="k">def</span> <span class="nf">compute_effsize</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">eftype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute effect size from pandas dataframe or two numpy arrays.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dv: string</span>
+<span class="sd">        Column name of dependant variable in data, optional</span>
+<span class="sd">    group: string</span>
+<span class="sd">        Column name of group factor in data, optional</span>
+<span class="sd">    data : DataFrame, optional</span>
+<span class="sd">        Pandas Dataframe containing columns dv and group</span>
+<span class="sd">    x, y: vector data, optional</span>
+<span class="sd">        X and Y are only taken into account if dv, group and data = None</span>
+<span class="sd">    eftype: string</span>
+<span class="sd">        Desired output effect size, optional</span>
+<span class="sd">        Available methods are :</span>
+<span class="sd">        `none` : no effect size</span>
+<span class="sd">        `cohen` : Unbiased Cohen&#39;s d</span>
+<span class="sd">        `hedges` : Hedges g</span>
+<span class="sd">        `glass`: Glass delta</span>
+<span class="sd">        `eta-square` : Eta-square</span>
+<span class="sd">        `odds-ratio` : Odds ratio</span>
+<span class="sd">        `AUC` : Area Under the Curve</span>
+<span class="sd">    paired : boolean</span>
+<span class="sd">        If True, uses Cohen d-avg formula to correct for repeated measurements</span>
+<span class="sd">        (Cumming 2012)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ef: float</span>
+<span class="sd">        Effect size</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check arguments</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_check_eftype</span><span class="p">(</span><span class="n">eftype</span><span class="p">):</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;Could not interpret input &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">eftype</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+
+    <span class="c1"># Extract data</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">dof</span> <span class="o">=</span> <span class="n">_check_data</span><span class="p">(</span><span class="n">dv</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">eftype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;glass&#39;</span><span class="p">:</span>
+        <span class="c1"># Find group with lowest variance</span>
+        <span class="n">sd_control</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">y</span><span class="p">)])</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">/</span> <span class="n">sd_control</span>
+        <span class="k">return</span> <span class="n">d</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Test equality of variance of data with a stringent threshold</span>
+        <span class="n">equal_var</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">test_homoscedasticity</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">001</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">equal_var</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Unequal variances. You should consider reporting&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;Glass delta instead.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Compute unbiased Cohen&#39;s d effect size</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">paired</span><span class="p">:</span>
+            <span class="c1"># https://en.wikipedia.org/wiki/Effect_size</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">nx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> \
+                 <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">ny</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">dof</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Report Cohen d-avg (Cumming 2012; Lakens 2013)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="o">.</span><span class="mi">5</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">convert_effsize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">eftype</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="compute_effsize_from_T"><a class="viewcode-back" href="../../generated/pingouin.compute_effsize_from_T.html#pingouin.compute_effsize_from_T">[docs]</a><span class="k">def</span> <span class="nf">compute_effsize_from_T</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute effect size from pandas dataframe or two numpy arrays.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    T: float</span>
+<span class="sd">        T-value</span>
+<span class="sd">    nx, ny: int, optional</span>
+<span class="sd">        Length of vector x and y.</span>
+<span class="sd">    N: int, optional</span>
+<span class="sd">        Total sample size (will not be used if nx and ny are specified)</span>
+<span class="sd">    eftype: string, optional</span>
+<span class="sd">        desired output effect size</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ef: float</span>
+<span class="sd">        Effect size</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_check_eftype</span><span class="p">(</span><span class="n">eftype</span><span class="p">):</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;Could not interpret input &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">eftype</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;T-value must be float&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+
+    <span class="c1"># Compute Cohen d (Lakens, 2013)</span>
+    <span class="k">if</span> <span class="n">nx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ny</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">T</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">nx</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">ny</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">N</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;You must specify either nx + ny, or just N&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">convert_effsize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">eftype</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">)</span></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2018, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

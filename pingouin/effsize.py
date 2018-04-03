@@ -12,7 +12,8 @@ __all__ = ["convert_effsize", "compute_effsize", "compute_effsize_from_T"]
 
 # MAIN FUNCTIONS
 def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
-    """Conversion between effect sizes
+    """Conversion between effect sizes.
+
     Parameters
     ----------
     ef: float
@@ -32,8 +33,9 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     nx, ny: int, int, optional
         Length of vector x and y.
         nx and ny are required to convert to Hedges g
-    Return
-    ------
+
+    Returns
+    -------
     ef: float
         Desired converted effect size
     """
@@ -93,13 +95,8 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
 
 def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
                     eftype=None, paired=False):
-    """Compute effect size from pandas dataframe or two numpy arrays
-    Case A: pass a DataFrame
-        >>>> compute_effsize(dv='Height', 'group='Countries', data=df)
-    Case B: pass two vectors
-        >>>> x = np.random.normal(loc=172, size=N)
-        >>>> y = np.random.normal(loc=175, size=N)
-        >>>> compute_effsize(x=x, y=y, data=df)
+    """Compute effect size from pandas dataframe or two numpy arrays.
+
     Parameters
     ----------
     dv: string
@@ -123,8 +120,9 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
     paired : boolean
         If True, uses Cohen d-avg formula to correct for repeated measurements
         (Cumming 2012)
-    Return
-    ------
+
+    Returns
+    -------
     ef: float
         Effect size
     """
@@ -159,7 +157,8 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
         return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)
 
 def compute_effsize_from_T(T, nx=None, ny=None, N=None, eftype='cohen'):
-    """Compute effect size from pandas dataframe or two numpy arrays
+    """Compute effect size from pandas dataframe or two numpy arrays.
+
     Parameters
     ----------
     T: float
@@ -170,8 +169,9 @@ def compute_effsize_from_T(T, nx=None, ny=None, N=None, eftype='cohen'):
         Total sample size (will not be used if nx and ny are specified)
     eftype: string, optional
         desired output effect size
-    Return
-    ------
+
+    Returns
+    -------
     ef: float
         Effect size
     """

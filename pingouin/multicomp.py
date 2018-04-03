@@ -6,7 +6,7 @@ import pandas as pd
 from pingouin import (_check_data, _check_dataframe, _extract_effects,
                      compute_effsize)
 
-__all__ = ["fdr", "bonf", "multicomp", "pairwise_ttests"]
+__all__ = ["fdr", "bonf", "holm", "multicomp", "pairwise_ttests"]
 
 
 def _ecdf(x):
@@ -17,9 +17,11 @@ def _ecdf(x):
 
 def fdr(pvals, alpha=0.05, method='indep'):
     """P-value correction with False Discovery Rate (FDR).
+
     Correction for multiple comparison using FDR.
     This covers Benjamini/Hochberg for independent or positively correlated and
     Benjamini/Yekutieli for general or negatively correlated tests.
+
     Parameters
     ----------
     pvals : array_like
@@ -29,18 +31,13 @@ def fdr(pvals, alpha=0.05, method='indep'):
     method : 'indep' | 'negcorr'
         If 'indep' it implements Benjamini/Hochberg for independent or if
         'negcorr' it corresponds to Benjamini/Yekutieli.
+
     Returns
     -------
     reject : array, bool
         True if a hypothesis is rejected, False if not
     pval_corrected : array
         pvalues adjusted for multiple hypothesis testing to limit FDR
-    Notes
-    -----
-    Reference:
-    Genovese CR, Lazar NA, Nichols T.
-    Thresholding of statistical maps in functional neuroimaging using the false
-    discovery rate. Neuroimage. 2002 Apr;15(4):870-8.
     """
     pvals = np.asarray(pvals)
     shape_init = pvals.shape
@@ -75,12 +72,14 @@ def fdr(pvals, alpha=0.05, method='indep'):
 
 def bonf(pvals, alpha=0.05):
     """P-value correction with Bonferroni method.
+
     Parameters
     ----------
     pvals : array_like
         set of p-values of the individual tests.
     alpha : float
         error rate
+
     Returns
     -------
     reject : array, bool
@@ -97,12 +96,15 @@ def bonf(pvals, alpha=0.05):
 
 def holm(pvals, alpha=0.05):
     """P-value correction with Holm method.
+
     Parameters
     ----------
+
     pvals : array_like
         set of p-values of the individual tests.
     alpha : float
         error rate
+
     Returns
     -------
     reject : array, bool
@@ -128,7 +130,8 @@ def holm(pvals, alpha=0.05):
     return reject, pvals_corrected
 
 def multicomp(pvals, alpha=0.05, method='holm'):
-    '''Test results and p-value correction for multiple tests
+    '''Test results and p-value correction for multiple tests.
+
     Parameters
     ----------
     pvals : array_like
@@ -142,6 +145,7 @@ def multicomp(pvals, alpha=0.05, method='holm'):
         `holm` : step-down method using Bonferroni adjustments
         `fdr_bh` : Benjamini/Hochberg FDR correction
         `fdr_by` : Benjamini/Yekutieli FDR correction
+
     Returns
     -------
     reject : array, boolean
@@ -191,7 +195,8 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, paired, alpha,
 def pairwise_ttests(dv=None, between=None, within=None, effects='all',
                     data=None, alpha=.05, tail='two-sided', padjust='none',
                     effsize='hedges', return_desc=True):
-    '''Pairwise T-tests using Pandas
+    '''Pairwise T-tests in Pandas.
+
     Parameters
     ----------
     pvals : array_like
@@ -216,6 +221,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         `AUC` : Area Under the Curve
     return_desc : boolean
         If True, add mean + std in dataframe
+
     Returns
     -------
     stats : DataFrame
