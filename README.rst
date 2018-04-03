@@ -12,7 +12,7 @@ Pingouin
 Documentation
 =============
 
-- `Link to documentation <https://raphaelvallat.github.io/pingouin/index.html>`_
+- `Link to documentation <https://raphaelvallat.github.io/pingouin/build/html/index.html>`_
 
 Installation
 ============
