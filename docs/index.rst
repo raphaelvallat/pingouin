@@ -45,7 +45,7 @@ Quick start
  # Mixed repeated measures design
  #   - Dependent variable ('DV') = hours of sleep per night
  #   - Between-factor ('Group') = two-levels (Insomnia / Control)
- #   - Within-factor ('Time') = four levels (Pre, Post1, Post2, Post3)
+ #   - Within-factor ('Time') = three levels (Pre, Post1, Post2)
  df = pd.read_csv('examples/sleep_dataset.csv')
 
  stats = pairwise_ttests(dv='DV', within='Time', between='Group',
