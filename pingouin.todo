@@ -1,4 +1,3 @@
 - Support for two or more between effects and two or more within effects
-- Examples in ipynb notebook --> convert to .rst
-- ANOVA implementation
 - Add within / between in effsize
+- ANOVA implementation
