@@ -2,7 +2,9 @@
 # Date: April 2018
 import numpy as np
 
-__all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist"]
+__all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
+           "test_sphericity", "rm_anova"]
+
 
 def gzscore(x):
     """Compute the geometric standard score of a 1D array.
@@ -24,11 +26,13 @@ def gzscore(x):
     # Geometric mean
     geo_mean = gmean(x)
     # Geometric standard deviation
-    gstd = np.exp(np.sqrt(np.sum((np.log(x/geo_mean))**2) / (len(x) - 1)))
+    gstd = np.exp(np.sqrt(np.sum((np.log(x / geo_mean))**2) / (len(x) - 1)))
     # Geometric z-score
-    return np.log(x/geo_mean) / np.log(gstd)
+    return np.log(x / geo_mean) / np.log(gstd)
 
 # MAIN FUNCTIONS
+
+
 def test_normality(*args, alpha=.05):
     """Test normality of an array.
 
@@ -94,7 +98,6 @@ def test_homoscedasticity(*args, alpha=.05):
 
     # Test normality of data
     normal, _ = test_normality(*args)
-
     if np.count_nonzero(normal) != normal.size:
         # print('Data are not normally distributed. Using Levene test.')
         _, p = levene(*args)
@@ -136,3 +139,130 @@ def test_dist(*args, dist='norm'):
         from_dist = bool(from_dist)
         sig_level = float(sig_level)
     return from_dist, sig_level
+
+
+def test_sphericity(X, alpha=.05):
+    """Mauchly's test for sphericity
+
+    Adapted from MATLAB code by Antonio Trujillo-Ortiz
+    https://www.mathworks.com/matlabcentral/fileexchange/3694-sphertest
+
+    Parameters
+    ----------
+    X : array_like
+        Multivariate data matrix
+    alpha: float, optional
+        Significance level
+
+    Returns
+    -------
+    sphericity: boolean
+        True if data have the sphericity property.
+    p: float
+        P-value.
+    """
+    from scipy.stats import chi2
+    n, p = X.shape
+    # Covariance matrix
+    W = np.cov(X, rowvar=0)
+    # Mauchly's statistic
+    L = np.linalg.det(W) / ((1 / p) * np.trace(W))**p
+    M = (n - 1) - (2 * p * p + p + 2) / 6 / p
+    # Chi-square approximation
+    LL = (-1) * M * np.log(L)
+    A = (p + 1) * (p - 1) * (p + 2) * (2 * p * p *
+                                       p + 6 * p * p + 3 * p + 2) / 288 / p / p
+    # Degrees of freedom
+    F = p * (p + 1) / 2 - 1
+    A1 = 1 - chi2.cdf(LL, F)
+    A3 = 1 - chi2.cdf(LL, F + 4)
+    # Probability that null hypothesis is true
+    P = A1 + (A / M / M) * (A3 - A1)
+    sphericity = True if P > alpha else False
+    return sphericity, P
+
+
+def rm_anova(dv=None, within=None, data=None):
+    """Compute one-way repeated measures ANOVA from a pandas DataFrame.
+
+    Tested against mne.stats.f_mway_rm and ez R package.
+
+    Parameters
+    ----------
+    dv : string
+        Name of column containing the dependant variable.
+    within: string
+        Name of column containing the within factor.
+    data: pandas DataFrame
+        DataFrame
+
+    Returns
+    -------
+    aov : DataFrame
+        ANOVA summary
+    """
+    import pandas as pd
+    from scipy.stats import f
+    rm = list(data[within].unique())
+    n_rm = len(rm)
+    n_obs = int(data.groupby(within)[dv].count().max())
+
+    # Calculating SStime
+    grp_with = data.groupby(within)[dv]
+    sstime = n_obs * np.sum((grp_with.mean() - grp_with.mean().mean())**2)
+
+    # Calculating SSw
+    ssw = np.zeros(n_rm)
+    for i, (name, group) in enumerate(grp_with):
+        ssw[i] = np.sum((group - group.mean())**2)
+    sswithin = np.sum(ssw)
+
+    # Calculating SSsubjects and SSerror
+    data['Subj'] = np.tile(np.arange(n_obs), n_rm)
+    grp_subj = data.groupby('Subj')[dv]
+    sssubj = n_rm * np.sum((grp_subj.mean() - grp_subj.mean().mean())**2)
+    sserror = sswithin - sssubj
+
+    # Calculate MStime
+    ddof1 = n_rm - 1
+    ddof2 = ddof1 * (n_obs - 1)
+    mserror = sserror / (ddof2 / ddof1)
+    fval = sstime / mserror
+    p_unc = f(ddof1, ddof2).sf(fval)
+
+    # Compute sphericity using Mauchly's test
+    # Sphericity = pairwise differences in variance between the samples are
+    # ALL equal.
+    data_pivot = data.pivot(index='Subj', columns=within, values=dv).dropna()
+    # Test using a more stringent threshold of p<.01
+    sphericity, p_mauchly = test_sphericity(data_pivot.as_matrix(), alpha=.01)
+    correction = True if not sphericity else False
+
+    # If required, apply Greenhouse-Geisser correction for sphericity
+    if correction:
+        # Compute covariance matrix
+        v = data_pivot.cov().as_matrix()
+        v = v[np.newaxis, :, :]
+
+        # Borrowed from mne.stats.f_mway_rm
+        v = (np.array([np.trace(vv) for vv in v]) ** 2 /
+             (ddof1 * np.sum(np.sum(v * v, axis=2), axis=1)))
+        eps = v
+
+        corr_ddof1, corr_ddof2 = [np.maximum(d * eps, 1.) for d in
+                                  (ddof1, ddof2)]
+        p_corr = f(corr_ddof1, corr_ddof2).sf(fval)
+
+    # Create output dataframe
+    aov = pd.DataFrame({'Effect': within,
+                        'ddof1': ddof1,
+                        'ddof2': ddof2,
+                        'F': fval,
+                        'p_unc': p_unc,
+                        'sphericity': sphericity
+                        }, index=[0])
+    if correction:
+        aov['p-GG-corr'] = p_corr
+        aov['p-Mauchly'] = p_mauchly
+
+    return aov

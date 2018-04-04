@@ -5,6 +5,17 @@
 API reference
 =============
 
+ANOVA
+-----
+
+.. _anova:
+
+.. autosummary::
+   :toctree: generated/
+
+    rm_anova
+
+
 Pairwise tests
 --------------
 
@@ -41,4 +52,5 @@ Miscellaneous
     gzscore
     test_normality
     test_homoscedasticity
+    test_sphericity
     test_dist

@@ -28,7 +28,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="pingouin.multicomp" href="pingouin.multicomp.html" />
-    <link rel="prev" title="API reference" href="../api.html" />
+    <link rel="prev" title="pingouin.rm_anova" href="pingouin.rm_anova.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -109,13 +109,29 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>pvals</strong> : array_like</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dv</strong> : string</p>
 <blockquote>
-<div><p>uncorrected p-values</p>
+<div><p>Name of column containing the dependant variable.</p>
 </div></blockquote>
-<p><strong>alpha</strong> : float</p>
+<p><strong>between: string</strong></p>
+<blockquote>
+<div><p>Name of column containing the between factor.</p>
+</div></blockquote>
+<p><strong>within: string</strong></p>
+<blockquote>
+<div><p>Name of column containing the within factor.</p>
+</div></blockquote>
+<p><strong>data: pandas DataFrame</strong></p>
+<blockquote>
+<div><p>DataFrame</p>
+</div></blockquote>
+<p><strong>alpha: float</strong></p>
 <blockquote>
 <div><p>FWER, family-wise error rate, e.g. 0.1</p>
+</div></blockquote>
+<p><strong>tail: string</strong></p>
+<blockquote>
+<div><p>Indicates whether to return the ‘two-sided’ or ‘one-sided’ p-values</p>
 </div></blockquote>
 <p><strong>p-adjust</strong> : string</p>
 <blockquote>

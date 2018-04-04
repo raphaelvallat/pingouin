@@ -299,10 +299,18 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    pvals : array_like</span>
-<span class="sd">        uncorrected p-values</span>
-<span class="sd">    alpha : float</span>
+<span class="sd">    dv : string</span>
+<span class="sd">        Name of column containing the dependant variable.</span>
+<span class="sd">    between: string</span>
+<span class="sd">        Name of column containing the between factor.</span>
+<span class="sd">    within: string</span>
+<span class="sd">        Name of column containing the within factor.</span>
+<span class="sd">    data: pandas DataFrame</span>
+<span class="sd">        DataFrame</span>
+<span class="sd">    alpha: float</span>
 <span class="sd">        FWER, family-wise error rate, e.g. 0.1</span>
+<span class="sd">    tail: string</span>
+<span class="sd">        Indicates whether to return the &#39;two-sided&#39; or &#39;one-sided&#39; p-values</span>
 <span class="sd">    p-adjust : string</span>
 <span class="sd">        Method used for testing and adjustment of pvalues. Can be either the</span>
 <span class="sd">        full name or initial letters. Available methods are :</span>
@@ -330,12 +338,28 @@
     <span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">combinations</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">ttest_ind</span><span class="p">,</span> <span class="n">ttest_rel</span>
 
+    <span class="n">effects</span> <span class="o">=</span> <span class="s1">&#39;within&#39;</span> <span class="k">if</span> <span class="n">between</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">effects</span>
+    <span class="n">effects</span> <span class="o">=</span> <span class="s1">&#39;between&#39;</span> <span class="k">if</span> <span class="n">within</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">effects</span>
+
     <span class="k">if</span> <span class="n">tail</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;one-sided&#39;</span><span class="p">,</span> <span class="s1">&#39;two-sided&#39;</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Tail not recognized&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Alpha must be float&#39;</span><span class="p">)</span>
 
+    <span class="c1"># Check NA in repeated measurements</span>
+    <span class="c1"># Works well for one-way repeated measures</span>
+    <span class="c1"># Needs adaptation for mixed model!</span>
+    <span class="k">if</span> <span class="n">within</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">effects</span> <span class="o">!=</span> <span class="s1">&#39;between&#39;</span><span class="p">:</span>
+            <span class="n">rm</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">within</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+            <span class="n">n_rm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rm</span><span class="p">)</span>
+            <span class="n">n_obs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">within</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Subj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_obs</span><span class="p">),</span> <span class="n">n_rm</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;Subj&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">dv</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">value_vars</span><span class="o">=</span><span class="n">rm</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="n">dv</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="c1"># Extract main effects</span>
     <span class="n">dt_array</span><span class="p">,</span> <span class="n">nobs</span> <span class="o">=</span> <span class="n">_extract_effects</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span>
                                      <span class="n">effects</span><span class="o">=</span><span class="n">effects</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>

@@ -27,7 +27,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="pingouin.pairwise_ttests" href="generated/pingouin.pairwise_ttests.html" />
+    <link rel="next" title="pingouin.rm_anova" href="generated/pingouin.rm_anova.html" />
     <link rel="prev" title="Changelog" href="changelog.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
@@ -101,6 +101,20 @@
       
   <div class="section" id="api-reference">
 <span id="api-ref"></span><h1>API reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="anova">
+<h2>ANOVA<a class="headerlink" href="#anova" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.rm_anova.html#pingouin.rm_anova" title="pingouin.rm_anova"><code class="xref py py-obj docutils literal"><span class="pre">rm_anova</span></code></a>([dv,&nbsp;within,&nbsp;data,&nbsp;dropna])</td>
+<td>Compute one-way repeated measures ANOVA from a pandas DataFrame.</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div class="section" id="pairwise-tests">
 <h2>Pairwise tests<a class="headerlink" href="#pairwise-tests" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="longtable docutils">
@@ -155,7 +169,10 @@
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.test_homoscedasticity.html#pingouin.test_homoscedasticity" title="pingouin.test_homoscedasticity"><code class="xref py py-obj docutils literal"><span class="pre">test_homoscedasticity</span></code></a>(*args[,&nbsp;alpha])</td>
 <td>Test equality of variance.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.test_dist.html#pingouin.test_dist" title="pingouin.test_dist"><code class="xref py py-obj docutils literal"><span class="pre">test_dist</span></code></a>(*args[,&nbsp;dist])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.test_sphericity.html#pingouin.test_sphericity" title="pingouin.test_sphericity"><code class="xref py py-obj docutils literal"><span class="pre">test_sphericity</span></code></a>(X[,&nbsp;alpha])</td>
+<td>Mauchly’s test for sphericity</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.test_dist.html#pingouin.test_dist" title="pingouin.test_dist"><code class="xref py py-obj docutils literal"><span class="pre">test_dist</span></code></a>(*args[,&nbsp;dist])</td>
 <td>Anderson-Darling test for data coming from a particular distribution.</td>
 </tr>
 </tbody>

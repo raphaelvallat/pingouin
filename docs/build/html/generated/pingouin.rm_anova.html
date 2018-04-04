@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pingouin.test_homoscedasticity &#8212; pingouin 0.1.dev documentation</title>
+    <title>pingouin.rm_anova &#8212; pingouin 0.1.dev documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -27,8 +27,8 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pingouin.test_sphericity" href="pingouin.test_sphericity.html" />
-    <link rel="prev" title="pingouin.test_normality" href="pingouin.test_normality.html" />
+    <link rel="next" title="pingouin.pairwise_ttests" href="pingouin.pairwise_ttests.html" />
+    <link rel="prev" title="API reference" href="../api.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -99,31 +99,34 @@
   <div class="row">
     <div class="col-md-12 content">
       
-  <div class="section" id="pingouin-test-homoscedasticity">
-<h1>pingouin.test_homoscedasticity<a class="headerlink" href="#pingouin-test-homoscedasticity" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="pingouin-rm-anova">
+<h1>pingouin.rm_anova<a class="headerlink" href="#pingouin-rm-anova" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="pingouin.test_homoscedasticity">
-<code class="descclassname">pingouin.</code><code class="descname">test_homoscedasticity</code><span class="sig-paren">(</span><em>*args</em>, <em>alpha=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#test_homoscedasticity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.test_homoscedasticity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test equality of variance.</p>
-<p>If data are normally distributed, uses Bartlett (1937).
-If data are not-normally distributed, uses Levene (1960).</p>
+<dt id="pingouin.rm_anova">
+<code class="descclassname">pingouin.</code><code class="descname">rm_anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#rm_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.rm_anova" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute one-way repeated measures ANOVA from a pandas DataFrame.</p>
+<p>Tested against mne.stats.f_mway_rm and ez R package.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>sample1, sample2,…</strong> : array_like</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dv</strong> : string</p>
 <blockquote>
-<div><p>Array of sample data. May be different lengths.</p>
+<div><p>Name of column containing the dependant variable.</p>
+</div></blockquote>
+<p><strong>within: string</strong></p>
+<blockquote>
+<div><p>Name of column containing the within factor.</p>
+</div></blockquote>
+<p><strong>data: pandas DataFrame</strong></p>
+<blockquote>
+<div><p>DataFrame</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">equal_var: boolean</p>
-<blockquote>
-<div><p>True if data have equal variance.</p>
-</div></blockquote>
-<p>p: float</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>aov</strong> : DataFrame</p>
 <blockquote class="last">
-<div><p>P-value.</p>
+<div><p>ANOVA summary</p>
 </div></blockquote>
 </td>
 </tr>
@@ -146,7 +149,7 @@ If data are not-normally distributed, uses Levene (1960).</p>
         <br/>
         
 <div id="sourcelink">
-  <a href="../_sources/generated/pingouin.test_homoscedasticity.rst.txt"
+  <a href="../_sources/generated/pingouin.rm_anova.rst.txt"
      rel="nofollow">Source</a>
 </div>
       

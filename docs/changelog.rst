@@ -8,6 +8,11 @@ v0.1dev (April 2018)
 
 Initial release.
 
+**ANOVA**
+
+a. One-way repeated measures
+
+
 **Pairwise comparisons**
 
 a. FDR correction (BH / BY)
@@ -26,4 +31,4 @@ f. Area Under the Curve
 **Miscellaneous statistical functions**
 
 a. Geometric Z-score
-b. Normality, homoscedasticity and distributions tests
+b. Normality, sphericity homoscedasticity and distributions tests

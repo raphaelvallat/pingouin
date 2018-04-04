@@ -199,10 +199,18 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
     Parameters
     ----------
-    pvals : array_like
-        uncorrected p-values
-    alpha : float
+    dv : string
+        Name of column containing the dependant variable.
+    between: string
+        Name of column containing the between factor.
+    within: string
+        Name of column containing the within factor.
+    data: pandas DataFrame
+        DataFrame
+    alpha: float
         FWER, family-wise error rate, e.g. 0.1
+    tail: string
+        Indicates whether to return the 'two-sided' or 'one-sided' p-values
     p-adjust : string
         Method used for testing and adjustment of pvalues. Can be either the
         full name or initial letters. Available methods are :
@@ -230,12 +238,28 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
     from itertools import combinations
     from scipy.stats import ttest_ind, ttest_rel
 
+    effects = 'within' if between is None else effects
+    effects = 'between' if within is None else effects
+
     if tail not in ['one-sided', 'two-sided']:
         raise ValueError('Tail not recognized')
 
     if not isinstance(alpha, float):
         raise ValueError('Alpha must be float')
 
+    # Check NA in repeated measurements
+    # Works well for one-way repeated measures
+    # Needs adaptation for mixed model!
+    if within is not None and data[dv].isnull().values.any():
+        if effects != 'between':
+            rm = list(data[within].unique())
+            n_rm = len(rm)
+            n_obs = int(data.groupby(within)[dv].count().max())
+            data['Subj'] = np.tile(np.arange(n_obs), n_rm)
+            data = data.pivot(index='Subj', columns=within, values=dv).dropna()
+            data = pd.melt(data, value_vars=rm, var_name=within, value_name=dv)
+
+    print(data.shape)
     # Extract main effects
     dt_array, nobs = _extract_effects(dv=dv, between=between, within=within,
                                      effects=effects, data=data)

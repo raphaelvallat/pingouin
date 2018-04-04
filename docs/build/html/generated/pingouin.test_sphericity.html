@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pingouin.test_homoscedasticity &#8212; pingouin 0.1.dev documentation</title>
+    <title>pingouin.test_sphericity &#8212; pingouin 0.1.dev documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -27,8 +27,8 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pingouin.test_sphericity" href="pingouin.test_sphericity.html" />
-    <link rel="prev" title="pingouin.test_normality" href="pingouin.test_normality.html" />
+    <link rel="next" title="pingouin.test_dist" href="pingouin.test_dist.html" />
+    <link rel="prev" title="pingouin.test_homoscedasticity" href="pingouin.test_homoscedasticity.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -99,27 +99,31 @@
   <div class="row">
     <div class="col-md-12 content">
       
-  <div class="section" id="pingouin-test-homoscedasticity">
-<h1>pingouin.test_homoscedasticity<a class="headerlink" href="#pingouin-test-homoscedasticity" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="pingouin-test-sphericity">
+<h1>pingouin.test_sphericity<a class="headerlink" href="#pingouin-test-sphericity" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="pingouin.test_homoscedasticity">
-<code class="descclassname">pingouin.</code><code class="descname">test_homoscedasticity</code><span class="sig-paren">(</span><em>*args</em>, <em>alpha=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#test_homoscedasticity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.test_homoscedasticity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test equality of variance.</p>
-<p>If data are normally distributed, uses Bartlett (1937).
-If data are not-normally distributed, uses Levene (1960).</p>
+<dt id="pingouin.test_sphericity">
+<code class="descclassname">pingouin.</code><code class="descname">test_sphericity</code><span class="sig-paren">(</span><em>X</em>, <em>alpha=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#test_sphericity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.test_sphericity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mauchly’s test for sphericity</p>
+<p>Adapted from MATLAB code by Antonio Trujillo-Ortiz
+<a class="reference external" href="https://www.mathworks.com/matlabcentral/fileexchange/3694-sphertest">https://www.mathworks.com/matlabcentral/fileexchange/3694-sphertest</a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>sample1, sample2,…</strong> : array_like</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : array_like</p>
 <blockquote>
-<div><p>Array of sample data. May be different lengths.</p>
+<div><p>Multivariate data matrix</p>
+</div></blockquote>
+<p><strong>alpha: float, optional</strong></p>
+<blockquote>
+<div><p>Significance level</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">equal_var: boolean</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">sphericity: boolean</p>
 <blockquote>
-<div><p>True if data have equal variance.</p>
+<div><p>True if data have the sphericity property.</p>
 </div></blockquote>
 <p>p: float</p>
 <blockquote class="last">
@@ -146,7 +150,7 @@ If data are not-normally distributed, uses Levene (1960).</p>
         <br/>
         
 <div id="sourcelink">
-  <a href="../_sources/generated/pingouin.test_homoscedasticity.rst.txt"
+  <a href="../_sources/generated/pingouin.test_sphericity.rst.txt"
      rel="nofollow">Source</a>
 </div>
       
