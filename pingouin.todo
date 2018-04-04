@@ -1,3 +1,5 @@
+- Back to readable theme
+- Fix font-size blockquotes and return not bold in api
 - Support for two or more between effects and two or more within effects
 - Add within / between in effsize
 - ANOVA implementation
