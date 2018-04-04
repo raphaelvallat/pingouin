@@ -100,56 +100,46 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
-
 # -- Options for HTML output ----------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
+# Read the doc theme
+# html_theme = "sphinx_rtd_theme"
+# html_theme_path = ["_themes", ]
+# html_theme_options = {
+#     'canonical_url': '',
+#     'analytics_id': '',
+#     'logo_only': False,
+#     'display_version': True,
+#     'prev_next_buttons_location': 'bottom',
+#     'collapse_navigation': False,
+#     'sticky_navigation': True,
+#     'navigation_depth': 4,
+#     'includehidden': True,
+#     'titles_only': False
+# }
+# Bootstrap theme
 html_theme = 'bootstrap'
-
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-#
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_theme_options = {
     'source_link_position': "footer",
-    'bootswatch_theme': "paper",
+    'bootswatch_theme': "readable",
     'navbar_sidebarrel': False,
+    'navbar_pagenav': False,
     'bootstrap_version': "3",
     'navbar_links': [
-                     ("API", "api"),
+                     ("Examples", "examples"),
+                     ("API", "api")
                      ],
 
     }
 
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
-
 html_logo = 'pictures/pingouin_128x128.png'
 html_favicon = 'pictures/favicon.ico'
-
-html_static_path = ['_static']
-
-# Custom sidebar templates, must be a dictionary that maps document names
-# to template names.
-#
-# This is required for the alabaster theme
-# refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
-# html_sidebars = {
-#     '**': [
-#         'about.html',
-#         'navigation.html',
-#         'relations.html',  # needs 'show_related': True theme option to display
-#         'searchbox.html',
-#         'donate.html',
-#     ]
-# }
-
 
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'pingouindoc'
-
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -200,9 +190,3 @@ texinfo_documents = [
      author, 'pingouin', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-# Add the 'copybutton' javascript, to hide/show the prompt in code
-# examples, originally taken from scikit-learn's doc/conf.py
-def setup(app):
-    app.add_javascript('copybutton.js')
-    app.add_stylesheet('style.css')

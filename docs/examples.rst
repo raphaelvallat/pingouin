@@ -3,8 +3,7 @@
 Examples
 ========
 
-Effect sizes
-------------
-
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+
+   examples/effect_size

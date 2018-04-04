@@ -6,7 +6,6 @@
     <title>API reference &#8212; pingouin 0.1.dev documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/style.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -20,7 +19,6 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/copybutton.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
@@ -30,7 +28,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="pingouin.pairwise_ttests" href="generated/pingouin.pairwise_ttests.html" />
-    <link rel="prev" title="Pingouin" href="index.html" />
+    <link rel="prev" title="Changelog" href="changelog.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -56,6 +54,7 @@
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
             
+                <li><a href="examples.html">Examples</a></li>
                 <li><a href="#">API</a></li>
             
             
@@ -68,26 +67,9 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API reference</a></li>
-</ul>
-</ul>
-</li>
-              
-                <li class="dropdown">
-  <a role="button"
-     id="dLabelLocalToc"
-     data-toggle="dropdown"
-     data-target="#"
-     href="#">Page <b class="caret"></b></a>
-  <ul class="dropdown-menu localtoc"
-      role="menu"
-      aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">API reference</a><ul>
-<li><a class="reference internal" href="#pairwise-tests">Pairwise tests</a></li>
-<li><a class="reference internal" href="#effect-sizes">Effect sizes</a></li>
-<li><a class="reference internal" href="#miscellaneous">Miscellaneous</a></li>
-</ul>
-</li>
 </ul>
 </ul>
 </li>
@@ -128,10 +110,10 @@
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests" title="pingouin.pairwise_ttests"><code class="xref py py-obj docutils literal"><span class="pre">pairwise_ttests</span></code></a>([dv,&nbsp;between,&nbsp;within,&nbsp;…])</td>
-<td>Pairwise T-tests using Pandas</td>
+<td>Pairwise T-tests in Pandas.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.multicomp.html#pingouin.multicomp" title="pingouin.multicomp"><code class="xref py py-obj docutils literal"><span class="pre">multicomp</span></code></a>(pvals[,&nbsp;alpha,&nbsp;method])</td>
-<td>Test results and p-value correction for multiple tests</td>
+<td>Test results and p-value correction for multiple tests.</td>
 </tr>
 </tbody>
 </table>
@@ -148,10 +130,10 @@
 <td>Compute effect size from pandas dataframe or two numpy arrays.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.compute_effsize_from_T.html#pingouin.compute_effsize_from_T" title="pingouin.compute_effsize_from_T"><code class="xref py py-obj docutils literal"><span class="pre">compute_effsize_from_T</span></code></a>(T[,&nbsp;nx,&nbsp;ny,&nbsp;N,&nbsp;eftype])</td>
-<td>Compute effect size from pandas dataframe or two numpy arrays</td>
+<td>Compute effect size from pandas dataframe or two numpy arrays.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.convert_effsize.html#pingouin.convert_effsize" title="pingouin.convert_effsize"><code class="xref py py-obj docutils literal"><span class="pre">convert_effsize</span></code></a>(ef,&nbsp;input_type,&nbsp;output_type)</td>
-<td>Conversion between effect sizes</td>
+<td>Conversion between effect sizes.</td>
 </tr>
 </tbody>
 </table>
@@ -165,7 +147,7 @@
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.gzscore.html#pingouin.gzscore" title="pingouin.gzscore"><code class="xref py py-obj docutils literal"><span class="pre">gzscore</span></code></a>(x)</td>
-<td>Compute the geometric standard score of a 1D array</td>
+<td>Compute the geometric standard score of a 1D array.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.test_normality.html#pingouin.test_normality" title="pingouin.test_normality"><code class="xref py py-obj docutils literal"><span class="pre">test_normality</span></code></a>(*args[,&nbsp;alpha])</td>
 <td>Test normality of an array.</td>
@@ -174,7 +156,7 @@
 <td>Test equality of variance.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.test_dist.html#pingouin.test_dist" title="pingouin.test_dist"><code class="xref py py-obj docutils literal"><span class="pre">test_dist</span></code></a>(*args[,&nbsp;dist])</td>
-<td>Anderson-Darling test for data coming from a particular distribution</td>
+<td>Anderson-Darling test for data coming from a particular distribution.</td>
 </tr>
 </tbody>
 </table>
