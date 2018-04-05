@@ -1,11 +1,9 @@
 Doc
 ---
-- Fix font-size blockquotes and return not bold in api
-- Support for two or more between effects and two or more within effects
+- ANOVA examples
 
 Code
 ----
 - Add within / between in effsize
 - Global function to correct NAN in mixed model
-- Check Mauchly's test of sphericity
 - Mixed ANOVA implementation
