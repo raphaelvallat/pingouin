@@ -149,6 +149,8 @@ def test_sphericity(X, alpha=.05):
     Warning: there are some differences with the output of ez.
     This function needs to be further tested against SPSS and R.
 
+    Use with EXTREME caution.
+
     Parameters
     ----------
     X : array_like
@@ -183,7 +185,7 @@ def test_sphericity(X, alpha=.05):
     return sphericity, W, p
 
 
-def rm_anova(dv=None, within=None, data=None):
+def rm_anova(dv=None, within=None, data=None, correction=False):
     """Compute one-way repeated measures ANOVA from a pandas DataFrame.
 
     Tested against mne.stats.f_mway_rm and ez R package.
@@ -196,6 +198,10 @@ def rm_anova(dv=None, within=None, data=None):
         Name of column containing the within factor.
     data : pandas DataFrame
         DataFrame
+    correction : string or boolean
+        If True, return Greenhouse-Geisser corrected p-value.
+        If 'auto', compute Mauchly's test of sphericity to determine whether the
+        p-values needs to be corrected.
 
     Returns
     -------
@@ -231,14 +237,17 @@ def rm_anova(dv=None, within=None, data=None):
     fval = sstime / mserror
     p_unc = f(ddof1, ddof2).sf(fval)
 
-    # Compute sphericity using Mauchly's test
-    # Sphericity = pairwise differences in variance between the samples are
-    # ALL equal.
     data_pivot = data.pivot(index='Subj', columns=within, values=dv).dropna()
-    # Test using a more stringent threshold of p<.01
-    sphericity, W_mauchly, p_mauchly = test_sphericity(
-        data_pivot.as_matrix(), alpha=.01)
-    correction = True if not sphericity else False
+    if correction == 'auto' or correction == True:
+        # Compute sphericity using Mauchly's test
+        # Sphericity = pairwise differences in variance between the samples are
+        # ALL equal.
+        # Test using a more stringent threshold of p<.01
+        sphericity, W_mauchly, p_mauchly = test_sphericity(
+            data_pivot.as_matrix(), alpha=.01)
+
+        if correction == 'auto':
+            correction = True if not sphericity else False
 
     # If required, apply Greenhouse-Geisser correction for sphericity
     if correction:
@@ -254,12 +263,12 @@ def rm_anova(dv=None, within=None, data=None):
                         'ddof1': ddof1,
                         'ddof2': ddof2,
                         'F': fval,
-                        'p_unc': p_unc,
-                        'sphericity': sphericity
+                        'p_unc': p_unc
                         }, index=[0])
     if correction:
         aov['p-GG-corr'] = p_corr
         aov['W-Mauchly'] = W_mauchly
         aov['p-Mauchly'] = p_mauchly
+        aov['sphericity'] = sphericity
 
     return aov

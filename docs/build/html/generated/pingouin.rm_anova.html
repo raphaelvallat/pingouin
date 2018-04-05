@@ -103,7 +103,7 @@
 <h1>pingouin.rm_anova<a class="headerlink" href="#pingouin-rm-anova" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pingouin.rm_anova">
-<code class="descclassname">pingouin.</code><code class="descname">rm_anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#rm_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.rm_anova" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pingouin.</code><code class="descname">rm_anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>data=None</em>, <em>correction=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#rm_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.rm_anova" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute one-way repeated measures ANOVA from a pandas DataFrame.</p>
 <p>Tested against mne.stats.f_mway_rm and ez R package.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -121,6 +121,12 @@
 <p><strong>data</strong> : pandas DataFrame</p>
 <blockquote>
 <div><p>DataFrame</p>
+</div></blockquote>
+<p><strong>correction</strong> : string or boolean</p>
+<blockquote>
+<div><p>If True, return Greenhouse-Geisser corrected p-value.
+If ‘auto’, compute Mauchly’s test of sphericity to determine whether the
+p-values needs to be corrected.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -156,7 +162,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
     </p>
   </div>
 </footer>

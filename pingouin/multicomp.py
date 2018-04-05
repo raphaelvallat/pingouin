@@ -263,7 +263,6 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
             data = data.pivot(index='Subj', columns=within, values=dv).dropna()
             data = pd.melt(data, value_vars=rm, var_name=within, value_name=dv)
 
-    print(data.shape)
     # Extract main effects
     dt_array, nobs = _extract_effects(dv=dv, between=between, within=within,
                                      effects=effects, data=data)

@@ -249,6 +249,8 @@
 <span class="sd">    Warning: there are some differences with the output of ez.</span>
 <span class="sd">    This function needs to be further tested against SPSS and R.</span>
 
+<span class="sd">    Use with EXTREME caution.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    X : array_like</span>
@@ -283,7 +285,7 @@
     <span class="k">return</span> <span class="n">sphericity</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">p</span></div>
 
 
-<div class="viewcode-block" id="rm_anova"><a class="viewcode-back" href="../../generated/pingouin.rm_anova.html#pingouin.rm_anova">[docs]</a><span class="k">def</span> <span class="nf">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="rm_anova"><a class="viewcode-back" href="../../generated/pingouin.rm_anova.html#pingouin.rm_anova">[docs]</a><span class="k">def</span> <span class="nf">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Compute one-way repeated measures ANOVA from a pandas DataFrame.</span>
 
 <span class="sd">    Tested against mne.stats.f_mway_rm and ez R package.</span>
@@ -296,6 +298,10 @@
 <span class="sd">        Name of column containing the within factor.</span>
 <span class="sd">    data : pandas DataFrame</span>
 <span class="sd">        DataFrame</span>
+<span class="sd">    correction : string or boolean</span>
+<span class="sd">        If True, return Greenhouse-Geisser corrected p-value.</span>
+<span class="sd">        If &#39;auto&#39;, compute Mauchly&#39;s test of sphericity to determine whether the</span>
+<span class="sd">        p-values needs to be corrected.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -331,14 +337,17 @@
     <span class="n">fval</span> <span class="o">=</span> <span class="n">sstime</span> <span class="o">/</span> <span class="n">mserror</span>
     <span class="n">p_unc</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">ddof1</span><span class="p">,</span> <span class="n">ddof2</span><span class="p">)</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">fval</span><span class="p">)</span>
 
-    <span class="c1"># Compute sphericity using Mauchly&#39;s test</span>
-    <span class="c1"># Sphericity = pairwise differences in variance between the samples are</span>
-    <span class="c1"># ALL equal.</span>
     <span class="n">data_pivot</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;Subj&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">dv</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
-    <span class="c1"># Test using a more stringent threshold of p&lt;.01</span>
-    <span class="n">sphericity</span><span class="p">,</span> <span class="n">W_mauchly</span><span class="p">,</span> <span class="n">p_mauchly</span> <span class="o">=</span> <span class="n">test_sphericity</span><span class="p">(</span>
-        <span class="n">data_pivot</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">(),</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">01</span><span class="p">)</span>
-    <span class="n">correction</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">sphericity</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">correction</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span> <span class="ow">or</span> <span class="n">correction</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="c1"># Compute sphericity using Mauchly&#39;s test</span>
+        <span class="c1"># Sphericity = pairwise differences in variance between the samples are</span>
+        <span class="c1"># ALL equal.</span>
+        <span class="c1"># Test using a more stringent threshold of p&lt;.01</span>
+        <span class="n">sphericity</span><span class="p">,</span> <span class="n">W_mauchly</span><span class="p">,</span> <span class="n">p_mauchly</span> <span class="o">=</span> <span class="n">test_sphericity</span><span class="p">(</span>
+            <span class="n">data_pivot</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">(),</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">01</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">correction</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+            <span class="n">correction</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">sphericity</span> <span class="k">else</span> <span class="kc">False</span>
 
     <span class="c1"># If required, apply Greenhouse-Geisser correction for sphericity</span>
     <span class="k">if</span> <span class="n">correction</span><span class="p">:</span>
@@ -354,13 +363,13 @@
                         <span class="s1">&#39;ddof1&#39;</span><span class="p">:</span> <span class="n">ddof1</span><span class="p">,</span>
                         <span class="s1">&#39;ddof2&#39;</span><span class="p">:</span> <span class="n">ddof2</span><span class="p">,</span>
                         <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="n">fval</span><span class="p">,</span>
-                        <span class="s1">&#39;p_unc&#39;</span><span class="p">:</span> <span class="n">p_unc</span><span class="p">,</span>
-                        <span class="s1">&#39;sphericity&#39;</span><span class="p">:</span> <span class="n">sphericity</span>
+                        <span class="s1">&#39;p_unc&#39;</span><span class="p">:</span> <span class="n">p_unc</span>
                         <span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">correction</span><span class="p">:</span>
         <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-GG-corr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_corr</span>
         <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;W-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">W_mauchly</span>
         <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_mauchly</span>
+        <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;sphericity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sphericity</span>
 
     <span class="k">return</span> <span class="n">aov</span></div>
 </pre></div>
@@ -380,7 +389,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
     </p>
   </div>
 </footer>
