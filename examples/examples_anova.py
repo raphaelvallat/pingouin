@@ -15,7 +15,7 @@ df = df[df['Group'] == 'Insomnia']
 df.iloc[[4,33], 0] = nan
 
 # Compute one-way repeated measures ANOVA
-aov = rm_anova(dv='DV', within='Time', data=df)
+aov = rm_anova(dv='DV', within='Time', data=df, correction='auto')
 print(aov)
 
 # Compute pairwise post-hocs with effect size

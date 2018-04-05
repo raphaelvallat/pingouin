@@ -146,10 +146,10 @@ def test_dist(*args, dist='norm'):
 def test_sphericity(X, alpha=.05):
     """Mauchly's test for sphericity
 
-    Warning: there are some differences with the output of ez.
-    This function needs to be further tested against SPSS and R.
+    https://www.mathworks.com/help/stats/mauchlys-test-of-sphericity.html
 
-    Use with EXTREME caution.
+    Warning: results can slightly differ than R or Matlab. If you can,
+    always double-check your results.
 
     Parameters
     ----------
@@ -168,24 +168,35 @@ def test_sphericity(X, alpha=.05):
         P-value.
     """
     from scipy.stats import chi2
-    n, k = X.shape
-    d = k - 1
-    # Covariance matrix
-    C = np.cov(X, rowvar=0, ddof=k) * k
+    n = X.shape[0]
+
+    # Compute the covariance matrix
+    S = np.cov(X, rowvar=0)
+    p = S.shape[1]
+    d = p - 1
+
+    # Orthonormal contrast matrix
+    C = np.array(np.triu(np.ones((p, d))), order='F')
+    C.reshape(-1, order='F')[1::p + 1] = -np.arange(d)
+    C, _ = np.linalg.qr(C)
+    d = C.shape[1]
+    T = C.T.dot(S).dot(C)
+
     # Mauchly's statistic
-    W = np.linalg.det(C) / (np.trace(C) / d)**d
+    W = np.linalg.det(T) / (np.trace(T) / (p - 1))**d
+
     # Chi-square statistic
-    chi_sq = np.log(W) * ((2 * d**2 + d + 2) / 6 *
-                          d - n - np.linalg.matrix_rank(X))
-    # Degree of freedom
-    ddof = d * (d + 1) / 2
-    # P-value
-    p = chi2.sf(chi_sq, ddof)
-    sphericity = True if p > alpha else False
-    return sphericity, W, p
+    nr = n - np.linalg.matrix_rank(X)
+    dd = 1 - (2 * d**2 + d + 2) / (6 * d * nr)
+    chi_sq = -np.log(W) * dd * nr
+    ddof = d * (d + 1) / 2 - 1
+    pval = chi2.sf(chi_sq, ddof)
+    sphericity = True if pval > alpha else False
+
+    return sphericity, W, pval
 
 
-def rm_anova(dv=None, within=None, data=None, correction=False):
+def rm_anova(dv=None, within=None, data=None, correction='auto'):
     """Compute one-way repeated measures ANOVA from a pandas DataFrame.
 
     Tested against mne.stats.f_mway_rm and ez R package.
@@ -200,7 +211,7 @@ def rm_anova(dv=None, within=None, data=None, correction=False):
         DataFrame
     correction : string or boolean
         If True, return Greenhouse-Geisser corrected p-value.
-        If 'auto', compute Mauchly's test of sphericity to determine whether the
+        If 'auto' (default), compute Mauchly's test of sphericity to determine whether the
         p-values needs to be corrected.
 
     Returns
@@ -242,9 +253,8 @@ def rm_anova(dv=None, within=None, data=None, correction=False):
         # Compute sphericity using Mauchly's test
         # Sphericity = pairwise differences in variance between the samples are
         # ALL equal.
-        # Test using a more stringent threshold of p<.01
         sphericity, W_mauchly, p_mauchly = test_sphericity(
-            data_pivot.as_matrix(), alpha=.01)
+            data_pivot.as_matrix(), alpha=.05)
 
         if correction == 'auto':
             correction = True if not sphericity else False
@@ -253,9 +263,9 @@ def rm_anova(dv=None, within=None, data=None, correction=False):
     if correction:
         # Compute covariance matrix
         v = data_pivot.cov().as_matrix()
-        eps = np.trace(v)** 2 / ddof1 * np.sum(np.sum(v * v, axis=1))
-        corr_ddof1, corr_ddof2 = [np.maximum(d * eps, 1.) for d in \
-                                                            (ddof1, ddof2)]
+        eps = np.trace(v) ** 2 / ddof1 * np.sum(np.sum(v * v, axis=1))
+        corr_ddof1, corr_ddof2 = [np.maximum(d * eps, 1.) for d in
+                                  (ddof1, ddof2)]
         p_corr = f(corr_ddof1, corr_ddof2).sf(fval)
 
     # Create output dataframe
