@@ -154,7 +154,7 @@ def test_sphericity(X, alpha=.05):
     Parameters
     ----------
     X : array_like
-        Multivariate data matrix
+        Data array of shape (n_observations, n_repetitions)
     alpha : float, optional
         Significance level
 
