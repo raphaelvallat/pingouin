@@ -105,8 +105,8 @@
 <dt id="pingouin.test_sphericity">
 <code class="descclassname">pingouin.</code><code class="descname">test_sphericity</code><span class="sig-paren">(</span><em>X</em>, <em>alpha=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#test_sphericity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.test_sphericity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mauchly’s test for sphericity</p>
-<p>Adapted from MATLAB code by Antonio Trujillo-Ortiz
-<a class="reference external" href="https://www.mathworks.com/matlabcentral/fileexchange/3694-sphertest">https://www.mathworks.com/matlabcentral/fileexchange/3694-sphertest</a></p>
+<p>Warning: there are some differences with the output of ez.
+This function needs to be further tested against SPSS and R.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -115,17 +115,21 @@
 <blockquote>
 <div><p>Multivariate data matrix</p>
 </div></blockquote>
-<p><strong>alpha: float, optional</strong></p>
+<p><strong>alpha</strong> : float, optional</p>
 <blockquote>
 <div><p>Significance level</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">sphericity: boolean</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>sphericity</strong> : boolean</p>
 <blockquote>
 <div><p>True if data have the sphericity property.</p>
 </div></blockquote>
-<p>p: float</p>
+<p><strong>W</strong> : float</p>
+<blockquote>
+<div><p>Mauchly’s W statistic</p>
+</div></blockquote>
+<p><strong>p</strong> : float</p>
 <blockquote class="last">
 <div><p>P-value.</p>
 </div></blockquote>
@@ -157,7 +161,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
     </p>
   </div>
 </footer>

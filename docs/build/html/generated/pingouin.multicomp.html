@@ -27,7 +27,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pingouin.compute_effsize" href="pingouin.compute_effsize.html" />
+    <link rel="next" title="pingouin.bonf" href="pingouin.bonf.html" />
     <link rel="prev" title="pingouin.pairwise_ttests" href="pingouin.pairwise_ttests.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
@@ -104,7 +104,7 @@
 <dl class="function">
 <dt id="pingouin.multicomp">
 <code class="descclassname">pingouin.</code><code class="descname">multicomp</code><span class="sig-paren">(</span><em>pvals</em>, <em>alpha=0.05</em>, <em>method='holm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/multicomp.html#multicomp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.multicomp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test results and p-value correction for multiple tests.</p>
+<dd><p>P-values correction for multiple tests.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -120,11 +120,13 @@
 <p><strong>method</strong> : string</p>
 <blockquote>
 <div><p>Method used for testing and adjustment of pvalues. Can be either the
-full name or initial letters. Available methods are ::
-<cite>bonferroni</cite> : one-step correction
-<cite>holm</cite> : step-down method using Bonferroni adjustments
-<cite>fdr_bh</cite> : Benjamini/Hochberg FDR correction
-<cite>fdr_by</cite> : Benjamini/Yekutieli FDR correction</p>
+full name or initial letters. Available methods are</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;bonferroni&#39;</span> <span class="p">:</span> <span class="n">one</span><span class="o">-</span><span class="n">step</span> <span class="n">correction</span>
+<span class="s1">&#39;holm&#39;</span> <span class="p">:</span> <span class="n">step</span><span class="o">-</span><span class="n">down</span> <span class="n">method</span> <span class="n">using</span> <span class="n">Bonferroni</span> <span class="n">adjustments</span>
+<span class="s1">&#39;fdr_bh&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Hochberg</span> <span class="n">FDR</span> <span class="n">correction</span>
+<span class="s1">&#39;fdr_by&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Yekutieli</span> <span class="n">FDR</span> <span class="n">correction</span>
+</pre></div>
+</div>
 </div></blockquote>
 </td>
 </tr>
@@ -164,7 +166,7 @@ full name or initial letters. Available methods are ::
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
     </p>
   </div>
 </footer>

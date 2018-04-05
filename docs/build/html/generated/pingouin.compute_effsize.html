@@ -28,7 +28,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="pingouin.compute_effsize_from_T" href="pingouin.compute_effsize_from_T.html" />
-    <link rel="prev" title="pingouin.multicomp" href="pingouin.multicomp.html" />
+    <link rel="prev" title="pingouin.fdr" href="pingouin.fdr.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -109,11 +109,11 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dv: string</strong></p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dv</strong> : string</p>
 <blockquote>
 <div><p>Column name of dependant variable in data, optional</p>
 </div></blockquote>
-<p><strong>group: string</strong></p>
+<p><strong>group</strong> : string</p>
 <blockquote>
 <div><p>Column name of group factor in data, optional</p>
 </div></blockquote>
@@ -121,21 +121,23 @@
 <blockquote>
 <div><p>Pandas Dataframe containing columns dv and group</p>
 </div></blockquote>
-<p><strong>x, y: vector data, optional</strong></p>
+<p><strong>x, y</strong> : vector data, optional</p>
 <blockquote>
 <div><p>X and Y are only taken into account if dv, group and data = None</p>
 </div></blockquote>
-<p><strong>eftype: string</strong></p>
+<p><strong>eftype</strong> : string</p>
 <blockquote>
 <div><p>Desired output effect size, optional
-Available methods are :
-<cite>none</cite> : no effect size
-<cite>cohen</cite> : Unbiased Cohen’s d
-<cite>hedges</cite> : Hedges g
-<cite>glass</cite>: Glass delta
-<cite>eta-square</cite> : Eta-square
-<cite>odds-ratio</cite> : Odds ratio
-<cite>AUC</cite> : Area Under the Curve</p>
+Available methods are</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;none&#39;</span> <span class="p">:</span> <span class="n">no</span> <span class="n">effect</span> <span class="n">size</span>
+<span class="s1">&#39;cohen&#39;</span> <span class="p">:</span> <span class="n">Unbiased</span> <span class="n">Cohen</span> <span class="n">d</span>
+<span class="s1">&#39;hedges&#39;</span> <span class="p">:</span> <span class="n">Hedges</span> <span class="n">g</span>
+<span class="s1">&#39;glass&#39;</span><span class="p">:</span> <span class="n">Glass</span> <span class="n">delta</span>
+<span class="s1">&#39;eta-square&#39;</span> <span class="p">:</span> <span class="n">Eta</span><span class="o">-</span><span class="n">square</span>
+<span class="s1">&#39;odds-ratio&#39;</span> <span class="p">:</span> <span class="n">Odds</span> <span class="n">ratio</span>
+<span class="s1">&#39;AUC&#39;</span> <span class="p">:</span> <span class="n">Area</span> <span class="n">Under</span> <span class="n">the</span> <span class="n">Curve</span>
+</pre></div>
+</div>
 </div></blockquote>
 <p><strong>paired</strong> : boolean</p>
 <blockquote>
@@ -144,7 +146,7 @@ Available methods are :
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">ef: float</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ef</strong> : float</p>
 <blockquote class="last">
 <div><p>Effect size</p>
 </div></blockquote>
@@ -176,7 +178,7 @@ Available methods are :
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
     </p>
   </div>
 </footer>

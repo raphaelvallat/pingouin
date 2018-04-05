@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pingouin.compute_effsize_from_T &#8212; pingouin 0.1.dev documentation</title>
+    <title>pingouin.holm &#8212; pingouin 0.1.dev documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -27,8 +27,8 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pingouin.convert_effsize" href="pingouin.convert_effsize.html" />
-    <link rel="prev" title="pingouin.compute_effsize" href="pingouin.compute_effsize.html" />
+    <link rel="next" title="pingouin.fdr" href="pingouin.fdr.html" />
+    <link rel="prev" title="pingouin.bonf" href="pingouin.bonf.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -99,37 +99,33 @@
   <div class="row">
     <div class="col-md-12 content">
       
-  <div class="section" id="pingouin-compute-effsize-from-t">
-<h1>pingouin.compute_effsize_from_T<a class="headerlink" href="#pingouin-compute-effsize-from-t" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="pingouin-holm">
+<h1>pingouin.holm<a class="headerlink" href="#pingouin-holm" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="pingouin.compute_effsize_from_T">
-<code class="descclassname">pingouin.</code><code class="descname">compute_effsize_from_T</code><span class="sig-paren">(</span><em>T</em>, <em>nx=None</em>, <em>ny=None</em>, <em>N=None</em>, <em>eftype='cohen'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/effsize.html#compute_effsize_from_T"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.compute_effsize_from_T" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute effect size from a T-value.</p>
+<dt id="pingouin.holm">
+<code class="descclassname">pingouin.</code><code class="descname">holm</code><span class="sig-paren">(</span><em>pvals</em>, <em>alpha=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/multicomp.html#holm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.holm" title="Permalink to this definition">¶</a></dt>
+<dd><p>P-value correction with Holm method.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>T</strong> : float</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>pvals</strong> : array_like</p>
 <blockquote>
-<div><p>T-value</p>
+<div><p>set of p-values of the individual tests.</p>
 </div></blockquote>
-<p><strong>nx, ny</strong> : int, optional</p>
+<p><strong>alpha</strong> : float</p>
 <blockquote>
-<div><p>Length of vector x and y.</p>
-</div></blockquote>
-<p><strong>N</strong> : int, optional</p>
-<blockquote>
-<div><p>Total sample size (will not be used if nx and ny are specified)</p>
-</div></blockquote>
-<p><strong>eftype</strong> : string, optional</p>
-<blockquote>
-<div><p>desired output effect size</p>
+<div><p>error rate</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ef</strong> : float</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>reject</strong> : array, bool</p>
+<blockquote>
+<div><p>True if a hypothesis is rejected, False if not</p>
+</div></blockquote>
+<p><strong>pval_corrected</strong> : array</p>
 <blockquote class="last">
-<div><p>Effect size</p>
+<div><p>pvalues adjusted for multiple hypothesis testing</p>
 </div></blockquote>
 </td>
 </tr>
@@ -152,7 +148,7 @@
         <br/>
         
 <div id="sourcelink">
-  <a href="../_sources/generated/pingouin.compute_effsize_from_T.rst.txt"
+  <a href="../_sources/generated/pingouin.holm.rst.txt"
      rel="nofollow">Source</a>
 </div>
       

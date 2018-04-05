@@ -7,20 +7,20 @@ __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
 
 
 def gzscore(x):
-    """Compute the geometric standard score of a 1D array.
+    """Geometric standard (Z) score.
 
     Geometric Z-score are better than arithmetic z-scores when the data
     comes from a log-normal or chi-squares distribution.
 
     Parameters
     ----------
-    x: array_like
+    x : array_like
         Array of raw values
 
     Returns
     -------
-    gzscore: array_like
-        Array of geometric z-scores (gzscore.shape == x.shape)
+    gzscore : array_like
+        Array of geometric z-scores (same shape as x)
     """
     from scipy.stats import gmean
     # Geometric mean
@@ -34,7 +34,7 @@ def gzscore(x):
 
 
 def test_normality(*args, alpha=.05):
-    """Test normality of an array.
+    """Test the normality of one or more array.
 
     Parameters
     ----------
@@ -43,9 +43,9 @@ def test_normality(*args, alpha=.05):
 
     Returns
     -------
-    normal: boolean
+    normal : boolean
         True if x comes from a normal distribution.
-    p: float
+    p : float
         P-value.
     """
     from scipy.stats import shapiro
@@ -81,9 +81,9 @@ def test_homoscedasticity(*args, alpha=.05):
 
     Returns
     -------
-    equal_var: boolean
+    equal_var : boolean
         True if data have equal variance.
-    p: float
+    p : float
         P-value.
     """
     from scipy.stats import levene, bartlett
@@ -109,16 +109,18 @@ def test_homoscedasticity(*args, alpha=.05):
 
 
 def test_dist(*args, dist='norm'):
-    """Anderson-Darling test for data coming from a particular distribution.
+    """Anderson-Darling test of distribution.
 
     Parameters
     ----------
     sample1, sample2,... : array_like
         Array of sample data. May be different lengths.
+    dist : string
+        Distribution ('norm', 'expon', 'logistic', 'gumbel')
 
     Returns
     -------
-    from_dist: boolean
+    from_dist : boolean
         True if data comes from this distribution.
     """
     from scipy.stats import anderson
@@ -151,14 +153,16 @@ def test_sphericity(X, alpha=.05):
     ----------
     X : array_like
         Multivariate data matrix
-    alpha: float, optional
+    alpha : float, optional
         Significance level
 
     Returns
     -------
-    sphericity: boolean
+    sphericity : boolean
         True if data have the sphericity property.
-    p: float
+    W : float
+        Mauchly's W statistic
+    p : float
         P-value.
     """
     from scipy.stats import chi2
@@ -188,9 +192,9 @@ def rm_anova(dv=None, within=None, data=None):
     ----------
     dv : string
         Name of column containing the dependant variable.
-    within: string
+    within : string
         Name of column containing the within factor.
-    data: pandas DataFrame
+    data : pandas DataFrame
         DataFrame
 
     Returns

@@ -103,7 +103,7 @@
 <dl class="function">
 <dt id="pingouin.test_dist">
 <code class="descclassname">pingouin.</code><code class="descname">test_dist</code><span class="sig-paren">(</span><em>*args</em>, <em>dist='norm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#test_dist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.test_dist" title="Permalink to this definition">¶</a></dt>
-<dd><p>Anderson-Darling test for data coming from a particular distribution.</p>
+<dd><p>Anderson-Darling test of distribution.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -112,9 +112,13 @@
 <blockquote>
 <div><p>Array of sample data. May be different lengths.</p>
 </div></blockquote>
+<p><strong>dist</strong> : string</p>
+<blockquote>
+<div><p>Distribution (‘norm’, ‘expon’, ‘logistic’, ‘gumbel’)</p>
+</div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">from_dist: boolean</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>from_dist</strong> : boolean</p>
 <blockquote class="last">
 <div><p>True if data comes from this distribution.</p>
 </div></blockquote>
@@ -146,7 +150,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
     </p>
   </div>
 </footer>

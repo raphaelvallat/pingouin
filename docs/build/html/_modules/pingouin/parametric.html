@@ -107,20 +107,20 @@
 
 
 <div class="viewcode-block" id="gzscore"><a class="viewcode-back" href="../../generated/pingouin.gzscore.html#pingouin.gzscore">[docs]</a><span class="k">def</span> <span class="nf">gzscore</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute the geometric standard score of a 1D array.</span>
+    <span class="sd">&quot;&quot;&quot;Geometric standard (Z) score.</span>
 
 <span class="sd">    Geometric Z-score are better than arithmetic z-scores when the data</span>
 <span class="sd">    comes from a log-normal or chi-squares distribution.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    x: array_like</span>
+<span class="sd">    x : array_like</span>
 <span class="sd">        Array of raw values</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    gzscore: array_like</span>
-<span class="sd">        Array of geometric z-scores (gzscore.shape == x.shape)</span>
+<span class="sd">    gzscore : array_like</span>
+<span class="sd">        Array of geometric z-scores (same shape as x)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">gmean</span>
     <span class="c1"># Geometric mean</span>
@@ -134,7 +134,7 @@
 
 
 <div class="viewcode-block" id="test_normality"><a class="viewcode-back" href="../../generated/pingouin.test_normality.html#pingouin.test_normality">[docs]</a><span class="k">def</span> <span class="nf">test_normality</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Test normality of an array.</span>
+    <span class="sd">&quot;&quot;&quot;Test the normality of one or more array.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -143,9 +143,9 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    normal: boolean</span>
+<span class="sd">    normal : boolean</span>
 <span class="sd">        True if x comes from a normal distribution.</span>
-<span class="sd">    p: float</span>
+<span class="sd">    p : float</span>
 <span class="sd">        P-value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">shapiro</span>
@@ -181,9 +181,9 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    equal_var: boolean</span>
+<span class="sd">    equal_var : boolean</span>
 <span class="sd">        True if data have equal variance.</span>
-<span class="sd">    p: float</span>
+<span class="sd">    p : float</span>
 <span class="sd">        P-value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">levene</span><span class="p">,</span> <span class="n">bartlett</span>
@@ -209,16 +209,18 @@
 
 
 <div class="viewcode-block" id="test_dist"><a class="viewcode-back" href="../../generated/pingouin.test_dist.html#pingouin.test_dist">[docs]</a><span class="k">def</span> <span class="nf">test_dist</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="s1">&#39;norm&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Anderson-Darling test for data coming from a particular distribution.</span>
+    <span class="sd">&quot;&quot;&quot;Anderson-Darling test of distribution.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    sample1, sample2,... : array_like</span>
 <span class="sd">        Array of sample data. May be different lengths.</span>
+<span class="sd">    dist : string</span>
+<span class="sd">        Distribution (&#39;norm&#39;, &#39;expon&#39;, &#39;logistic&#39;, &#39;gumbel&#39;)</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    from_dist: boolean</span>
+<span class="sd">    from_dist : boolean</span>
 <span class="sd">        True if data comes from this distribution.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">anderson</span>
@@ -244,42 +246,41 @@
 <div class="viewcode-block" id="test_sphericity"><a class="viewcode-back" href="../../generated/pingouin.test_sphericity.html#pingouin.test_sphericity">[docs]</a><span class="k">def</span> <span class="nf">test_sphericity</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Mauchly&#39;s test for sphericity</span>
 
-<span class="sd">    Adapted from MATLAB code by Antonio Trujillo-Ortiz</span>
-<span class="sd">    https://www.mathworks.com/matlabcentral/fileexchange/3694-sphertest</span>
+<span class="sd">    Warning: there are some differences with the output of ez.</span>
+<span class="sd">    This function needs to be further tested against SPSS and R.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    X : array_like</span>
 <span class="sd">        Multivariate data matrix</span>
-<span class="sd">    alpha: float, optional</span>
+<span class="sd">    alpha : float, optional</span>
 <span class="sd">        Significance level</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    sphericity: boolean</span>
+<span class="sd">    sphericity : boolean</span>
 <span class="sd">        True if data have the sphericity property.</span>
-<span class="sd">    p: float</span>
+<span class="sd">    W : float</span>
+<span class="sd">        Mauchly&#39;s W statistic</span>
+<span class="sd">    p : float</span>
 <span class="sd">        P-value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">chi2</span>
-    <span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">n</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="c1"># Covariance matrix</span>
-    <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">rowvar</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">rowvar</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="n">k</span>
     <span class="c1"># Mauchly&#39;s statistic</span>
-    <span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">W</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">W</span><span class="p">))</span><span class="o">**</span><span class="n">p</span>
-    <span class="n">M</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">p</span> <span class="o">*</span> <span class="n">p</span> <span class="o">+</span> <span class="n">p</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">6</span> <span class="o">/</span> <span class="n">p</span>
-    <span class="c1"># Chi-square approximation</span>
-    <span class="n">LL</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">M</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
-    <span class="n">A</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">p</span> <span class="o">*</span> <span class="n">p</span> <span class="o">*</span>
-                                       <span class="n">p</span> <span class="o">+</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">p</span> <span class="o">*</span> <span class="n">p</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">p</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">288</span> <span class="o">/</span> <span class="n">p</span> <span class="o">/</span> <span class="n">p</span>
-    <span class="c1"># Degrees of freedom</span>
-    <span class="n">F</span> <span class="o">=</span> <span class="n">p</span> <span class="o">*</span> <span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="n">A1</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">chi2</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">LL</span><span class="p">,</span> <span class="n">F</span><span class="p">)</span>
-    <span class="n">A3</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">chi2</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">LL</span><span class="p">,</span> <span class="n">F</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
-    <span class="c1"># Probability that null hypothesis is true</span>
-    <span class="n">P</span> <span class="o">=</span> <span class="n">A1</span> <span class="o">+</span> <span class="p">(</span><span class="n">A</span> <span class="o">/</span> <span class="n">M</span> <span class="o">/</span> <span class="n">M</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">A3</span> <span class="o">-</span> <span class="n">A1</span><span class="p">)</span>
-    <span class="n">sphericity</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">P</span> <span class="o">&gt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="kc">False</span>
-    <span class="k">return</span> <span class="n">sphericity</span><span class="p">,</span> <span class="n">P</span></div>
+    <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span><span class="o">**</span><span class="n">d</span>
+    <span class="c1"># Chi-square statistic</span>
+    <span class="n">chi_sq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">W</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="n">d</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">6</span> <span class="o">*</span>
+                          <span class="n">d</span> <span class="o">-</span> <span class="n">n</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_rank</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+    <span class="c1"># Degree of freedom</span>
+    <span class="n">ddof</span> <span class="o">=</span> <span class="n">d</span> <span class="o">*</span> <span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="c1"># P-value</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">chi_sq</span><span class="p">,</span> <span class="n">ddof</span><span class="p">)</span>
+    <span class="n">sphericity</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">p</span> <span class="o">&gt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">sphericity</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">p</span></div>
 
 
 <div class="viewcode-block" id="rm_anova"><a class="viewcode-back" href="../../generated/pingouin.rm_anova.html#pingouin.rm_anova">[docs]</a><span class="k">def</span> <span class="nf">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -291,9 +292,9 @@
 <span class="sd">    ----------</span>
 <span class="sd">    dv : string</span>
 <span class="sd">        Name of column containing the dependant variable.</span>
-<span class="sd">    within: string</span>
+<span class="sd">    within : string</span>
 <span class="sd">        Name of column containing the within factor.</span>
-<span class="sd">    data: pandas DataFrame</span>
+<span class="sd">    data : pandas DataFrame</span>
 <span class="sd">        DataFrame</span>
 
 <span class="sd">    Returns</span>
@@ -335,22 +336,17 @@
     <span class="c1"># ALL equal.</span>
     <span class="n">data_pivot</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;Subj&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">dv</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
     <span class="c1"># Test using a more stringent threshold of p&lt;.01</span>
-    <span class="n">sphericity</span><span class="p">,</span> <span class="n">p_mauchly</span> <span class="o">=</span> <span class="n">test_sphericity</span><span class="p">(</span><span class="n">data_pivot</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">(),</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">01</span><span class="p">)</span>
+    <span class="n">sphericity</span><span class="p">,</span> <span class="n">W_mauchly</span><span class="p">,</span> <span class="n">p_mauchly</span> <span class="o">=</span> <span class="n">test_sphericity</span><span class="p">(</span>
+        <span class="n">data_pivot</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">(),</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">01</span><span class="p">)</span>
     <span class="n">correction</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">sphericity</span> <span class="k">else</span> <span class="kc">False</span>
 
     <span class="c1"># If required, apply Greenhouse-Geisser correction for sphericity</span>
     <span class="k">if</span> <span class="n">correction</span><span class="p">:</span>
         <span class="c1"># Compute covariance matrix</span>
         <span class="n">v</span> <span class="o">=</span> <span class="n">data_pivot</span><span class="o">.</span><span class="n">cov</span><span class="p">()</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">()</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
-
-        <span class="c1"># Borrowed from mne.stats.f_mway_rm</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">vv</span><span class="p">)</span> <span class="k">for</span> <span class="n">vv</span> <span class="ow">in</span> <span class="n">v</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span>
-             <span class="p">(</span><span class="n">ddof1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">v</span> <span class="o">*</span> <span class="n">v</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
-        <span class="n">eps</span> <span class="o">=</span> <span class="n">v</span>
-
-        <span class="n">corr_ddof1</span><span class="p">,</span> <span class="n">corr_ddof2</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">d</span> <span class="o">*</span> <span class="n">eps</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span>
-                                  <span class="p">(</span><span class="n">ddof1</span><span class="p">,</span> <span class="n">ddof2</span><span class="p">)]</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">ddof1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">v</span> <span class="o">*</span> <span class="n">v</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">corr_ddof1</span><span class="p">,</span> <span class="n">corr_ddof2</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">d</span> <span class="o">*</span> <span class="n">eps</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> \
+                                                            <span class="p">(</span><span class="n">ddof1</span><span class="p">,</span> <span class="n">ddof2</span><span class="p">)]</span>
         <span class="n">p_corr</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">corr_ddof1</span><span class="p">,</span> <span class="n">corr_ddof2</span><span class="p">)</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">fval</span><span class="p">)</span>
 
     <span class="c1"># Create output dataframe</span>
@@ -363,6 +359,7 @@
                         <span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">correction</span><span class="p">:</span>
         <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-GG-corr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_corr</span>
+        <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;W-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">W_mauchly</span>
         <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_mauchly</span>
 
     <span class="k">return</span> <span class="n">aov</span></div>
@@ -383,7 +380,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
     </p>
   </div>
 </footer>

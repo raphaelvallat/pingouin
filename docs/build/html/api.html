@@ -109,7 +109,7 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.rm_anova.html#pingouin.rm_anova" title="pingouin.rm_anova"><code class="xref py py-obj docutils literal"><span class="pre">rm_anova</span></code></a>([dv,&nbsp;within,&nbsp;data,&nbsp;dropna])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.rm_anova.html#pingouin.rm_anova" title="pingouin.rm_anova"><code class="xref py py-obj docutils literal"><span class="pre">rm_anova</span></code></a>([dv,&nbsp;within,&nbsp;data])</td>
 <td>Compute one-way repeated measures ANOVA from a pandas DataFrame.</td>
 </tr>
 </tbody>
@@ -128,6 +128,15 @@
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.multicomp.html#pingouin.multicomp" title="pingouin.multicomp"><code class="xref py py-obj docutils literal"><span class="pre">multicomp</span></code></a>(pvals[,&nbsp;alpha,&nbsp;method])</td>
 <td>Test results and p-value correction for multiple tests.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.bonf.html#pingouin.bonf" title="pingouin.bonf"><code class="xref py py-obj docutils literal"><span class="pre">bonf</span></code></a>(pvals[,&nbsp;alpha])</td>
+<td>P-value correction with Bonferroni method.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.holm.html#pingouin.holm" title="pingouin.holm"><code class="xref py py-obj docutils literal"><span class="pre">holm</span></code></a>(pvals[,&nbsp;alpha])</td>
+<td>P-value correction with Holm method.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.fdr.html#pingouin.fdr" title="pingouin.fdr"><code class="xref py py-obj docutils literal"><span class="pre">fdr</span></code></a>(pvals[,&nbsp;alpha,&nbsp;method])</td>
+<td>P-value correction with False Discovery Rate (FDR).</td>
 </tr>
 </tbody>
 </table>
@@ -173,7 +182,7 @@
 <td>Mauchly’s test for sphericity</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.test_dist.html#pingouin.test_dist" title="pingouin.test_dist"><code class="xref py py-obj docutils literal"><span class="pre">test_dist</span></code></a>(*args[,&nbsp;dist])</td>
-<td>Anderson-Darling test for data coming from a particular distribution.</td>
+<td>Anderson-Darling test of distribution.</td>
 </tr>
 </tbody>
 </table>
@@ -200,7 +209,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
     </p>
   </div>
 </footer>

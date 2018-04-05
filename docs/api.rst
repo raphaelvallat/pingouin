@@ -26,6 +26,9 @@ Pairwise tests
 
     pairwise_ttests
     multicomp
+    bonf
+    holm
+    fdr
 
 
 Effect sizes

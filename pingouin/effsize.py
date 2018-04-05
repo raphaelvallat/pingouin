@@ -16,27 +16,28 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
 
     Parameters
     ----------
-    ef: float
+    ef : float
         Original effect size
-    input_type: string
+    input_type : string
         Effect size type of ef. Must be 'r' or 'd'.
-    output_type: string
+    output_type : string
         Desired effect size type.
-        Available methods are :
-        `none` : no effect size
-        `cohen` : Unbiased Cohen's d
-        `hedges` : Hedges g
-        `glass`: Glass delta
-        `eta-square` : Eta-square
-        `odds-ratio` : Odds ratio
-        `AUC` : Area Under the Curve
-    nx, ny: int, int, optional
+        Available methods are ::
+
+        'none' : no effect size
+        'cohen' : Unbiased Cohen d
+        'hedges' : Hedges g
+        'glass': Glass delta
+        'eta-square' : Eta-square
+        'odds-ratio' : Odds ratio
+        'AUC' : Area Under the Curve
+    nx, ny : int, optional
         Length of vector x and y.
         nx and ny are required to convert to Hedges g
 
     Returns
     -------
-    ef: float
+    ef : float
         Desired converted effect size
     """
     it = input_type.lower()
@@ -99,31 +100,32 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
 
     Parameters
     ----------
-    dv: string
+    dv : string
         Column name of dependant variable in data, optional
-    group: string
+    group : string
         Column name of group factor in data, optional
     data : DataFrame, optional
         Pandas Dataframe containing columns dv and group
-    x, y: vector data, optional
+    x, y : vector data, optional
         X and Y are only taken into account if dv, group and data = None
-    eftype: string
+    eftype : string
         Desired output effect size, optional
-        Available methods are :
-        `none` : no effect size
-        `cohen` : Unbiased Cohen's d
-        `hedges` : Hedges g
-        `glass`: Glass delta
-        `eta-square` : Eta-square
-        `odds-ratio` : Odds ratio
-        `AUC` : Area Under the Curve
+        Available methods are ::
+
+        'none' : no effect size
+        'cohen' : Unbiased Cohen d
+        'hedges' : Hedges g
+        'glass': Glass delta
+        'eta-square' : Eta-square
+        'odds-ratio' : Odds ratio
+        'AUC' : Area Under the Curve
     paired : boolean
         If True, uses Cohen d-avg formula to correct for repeated measurements
         (Cumming 2012)
 
     Returns
     -------
-    ef: float
+    ef : float
         Effect size
     """
     # Check arguments
@@ -157,22 +159,22 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
         return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)
 
 def compute_effsize_from_T(T, nx=None, ny=None, N=None, eftype='cohen'):
-    """Compute effect size from pandas dataframe or two numpy arrays.
+    """Compute effect size from a T-value.
 
     Parameters
     ----------
-    T: float
+    T : float
         T-value
-    nx, ny: int, optional
+    nx, ny : int, optional
         Length of vector x and y.
-    N: int, optional
+    N : int, optional
         Total sample size (will not be used if nx and ny are specified)
-    eftype: string, optional
+    eftype : string, optional
         desired output effect size
 
     Returns
     -------
-    ef: float
+    ef : float
         Effect size
     """
     if not _check_eftype(eftype):

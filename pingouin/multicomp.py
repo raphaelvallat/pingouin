@@ -19,6 +19,7 @@ def fdr(pvals, alpha=0.05, method='indep'):
     """P-value correction with False Discovery Rate (FDR).
 
     Correction for multiple comparison using FDR.
+
     This covers Benjamini/Hochberg for independent or positively correlated and
     Benjamini/Yekutieli for general or negatively correlated tests.
 
@@ -99,7 +100,6 @@ def holm(pvals, alpha=0.05):
 
     Parameters
     ----------
-
     pvals : array_like
         set of p-values of the individual tests.
     alpha : float
@@ -130,7 +130,7 @@ def holm(pvals, alpha=0.05):
     return reject, pvals_corrected
 
 def multicomp(pvals, alpha=0.05, method='holm'):
-    '''Test results and p-value correction for multiple tests.
+    '''P-values correction for multiple tests.
 
     Parameters
     ----------
@@ -141,10 +141,12 @@ def multicomp(pvals, alpha=0.05, method='holm'):
     method : string
         Method used for testing and adjustment of pvalues. Can be either the
         full name or initial letters. Available methods are ::
-        `bonferroni` : one-step correction
-        `holm` : step-down method using Bonferroni adjustments
-        `fdr_bh` : Benjamini/Hochberg FDR correction
-        `fdr_by` : Benjamini/Yekutieli FDR correction
+
+        'bonferroni' : one-step correction
+        'holm' : step-down method using Bonferroni adjustments
+        'fdr_bh' : Benjamini/Hochberg FDR correction
+        'fdr_by' : Benjamini/Yekutieli FDR correction
+
 
     Returns
     -------
@@ -203,32 +205,34 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         Name of column containing the dependant variable.
     between: string
         Name of column containing the between factor.
-    within: string
+    within : string
         Name of column containing the within factor.
-    data: pandas DataFrame
+    data : pandas DataFrame
         DataFrame
-    alpha: float
-        FWER, family-wise error rate, e.g. 0.1
-    tail: string
+    alpha : float
+        Significance level
+    tail : string
         Indicates whether to return the 'two-sided' or 'one-sided' p-values
     p-adjust : string
-        Method used for testing and adjustment of pvalues. Can be either the
-        full name or initial letters. Available methods are :
-        `none` : no correction
-        `bonferroni` : one-step correction
-        `holm` : step-down method using Bonferroni adjustments
-        `fdr_bh` : Benjamini/Hochberg FDR correction
-        `fdr_by` : Benjamini/Yekutieli FDR correction
+        Method used for testing and adjustment of pvalues. Available methods are ::
+
+        'none' : no correction
+        'bonferroni' : one-step correction
+        'holm' : step-down method using Bonferroni adjustments
+        'fdr_bh' : Benjamini/Hochberg FDR correction
+        'fdr_by' : Benjamini/Yekutieli FDR correction
     effsize : string or None
-        Effect size type. Available methods are :
-        `none` : no correction
-        `cohen` : Unbiased Cohen's d
-        `hedges` : Hedges g
-        `eta-square` : Eta-square
-        `odds-ratio` : Odds ratio
-        `AUC` : Area Under the Curve
+        Effect size type. Available methods are ::
+
+        'none' : no effect size
+        'cohen' : Unbiased Cohen d
+        'hedges' : Hedges g
+        'glass': Glass delta
+        'eta-square' : Eta-square
+        'odds-ratio' : Odds ratio
+        'AUC' : Area Under the Curve
     return_desc : boolean
-        If True, add mean + std in dataframe
+        If True, return group means and std
 
     Returns
     -------

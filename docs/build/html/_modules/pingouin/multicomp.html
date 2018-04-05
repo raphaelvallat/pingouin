@@ -115,10 +115,11 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nobs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">nobs</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">fdr</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;indep&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="fdr"><a class="viewcode-back" href="../../generated/pingouin.fdr.html#pingouin.fdr">[docs]</a><span class="k">def</span> <span class="nf">fdr</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;indep&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;P-value correction with False Discovery Rate (FDR).</span>
 
 <span class="sd">    Correction for multiple comparison using FDR.</span>
+
 <span class="sd">    This covers Benjamini/Hochberg for independent or positively correlated and</span>
 <span class="sd">    Benjamini/Yekutieli for general or negatively correlated tests.</span>
 
@@ -167,10 +168,10 @@
     <span class="n">pvals_corrected</span><span class="p">[</span><span class="n">pvals_corrected</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="n">pvals_corrected</span> <span class="o">=</span> <span class="n">pvals_corrected</span><span class="p">[</span><span class="n">sortrevind</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape_init</span><span class="p">)</span>
     <span class="n">reject</span> <span class="o">=</span> <span class="n">reject</span><span class="p">[</span><span class="n">sortrevind</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape_init</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corrected</span>
+    <span class="k">return</span> <span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corrected</span></div>
 
 
-<span class="k">def</span> <span class="nf">bonf</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+<div class="viewcode-block" id="bonf"><a class="viewcode-back" href="../../generated/pingouin.bonf.html#pingouin.bonf">[docs]</a><span class="k">def</span> <span class="nf">bonf</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;P-value correction with Bonferroni method.</span>
 
 <span class="sd">    Parameters</span>
@@ -191,15 +192,14 @@
     <span class="n">pvals_corrected</span> <span class="o">=</span> <span class="n">pvals</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">pvals</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
     <span class="n">pvals_corrected</span><span class="p">[</span><span class="n">pvals_corrected</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="n">reject</span> <span class="o">=</span> <span class="n">pvals_corrected</span> <span class="o">&lt;</span> <span class="n">alpha</span>
-    <span class="k">return</span> <span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corrected</span>
+    <span class="k">return</span> <span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corrected</span></div>
 
 
-<span class="k">def</span> <span class="nf">holm</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+<div class="viewcode-block" id="holm"><a class="viewcode-back" href="../../generated/pingouin.holm.html#pingouin.holm">[docs]</a><span class="k">def</span> <span class="nf">holm</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;P-value correction with Holm method.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-
 <span class="sd">    pvals : array_like</span>
 <span class="sd">        set of p-values of the individual tests.</span>
 <span class="sd">    alpha : float</span>
@@ -227,10 +227,10 @@
     <span class="n">pvals_corrected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="n">pvals_corrected_raw</span><span class="p">)</span>
     <span class="n">pvals_corrected</span><span class="p">[</span><span class="n">pvals_corrected</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="n">reject</span> <span class="o">=</span> <span class="n">pvals_corrected</span> <span class="o">&lt;</span> <span class="n">alpha</span>
-    <span class="k">return</span> <span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corrected</span>
+    <span class="k">return</span> <span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corrected</span></div>
 
 <div class="viewcode-block" id="multicomp"><a class="viewcode-back" href="../../generated/pingouin.multicomp.html#pingouin.multicomp">[docs]</a><span class="k">def</span> <span class="nf">multicomp</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;holm&#39;</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Test results and p-value correction for multiple tests.</span>
+    <span class="sd">&#39;&#39;&#39;P-values correction for multiple tests.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -241,10 +241,12 @@
 <span class="sd">    method : string</span>
 <span class="sd">        Method used for testing and adjustment of pvalues. Can be either the</span>
 <span class="sd">        full name or initial letters. Available methods are ::</span>
-<span class="sd">        `bonferroni` : one-step correction</span>
-<span class="sd">        `holm` : step-down method using Bonferroni adjustments</span>
-<span class="sd">        `fdr_bh` : Benjamini/Hochberg FDR correction</span>
-<span class="sd">        `fdr_by` : Benjamini/Yekutieli FDR correction</span>
+
+<span class="sd">        &#39;bonferroni&#39; : one-step correction</span>
+<span class="sd">        &#39;holm&#39; : step-down method using Bonferroni adjustments</span>
+<span class="sd">        &#39;fdr_bh&#39; : Benjamini/Hochberg FDR correction</span>
+<span class="sd">        &#39;fdr_by&#39; : Benjamini/Yekutieli FDR correction</span>
+
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -303,32 +305,34 @@
 <span class="sd">        Name of column containing the dependant variable.</span>
 <span class="sd">    between: string</span>
 <span class="sd">        Name of column containing the between factor.</span>
-<span class="sd">    within: string</span>
+<span class="sd">    within : string</span>
 <span class="sd">        Name of column containing the within factor.</span>
-<span class="sd">    data: pandas DataFrame</span>
+<span class="sd">    data : pandas DataFrame</span>
 <span class="sd">        DataFrame</span>
-<span class="sd">    alpha: float</span>
-<span class="sd">        FWER, family-wise error rate, e.g. 0.1</span>
-<span class="sd">    tail: string</span>
+<span class="sd">    alpha : float</span>
+<span class="sd">        Significance level</span>
+<span class="sd">    tail : string</span>
 <span class="sd">        Indicates whether to return the &#39;two-sided&#39; or &#39;one-sided&#39; p-values</span>
 <span class="sd">    p-adjust : string</span>
-<span class="sd">        Method used for testing and adjustment of pvalues. Can be either the</span>
-<span class="sd">        full name or initial letters. Available methods are :</span>
-<span class="sd">        `none` : no correction</span>
-<span class="sd">        `bonferroni` : one-step correction</span>
-<span class="sd">        `holm` : step-down method using Bonferroni adjustments</span>
-<span class="sd">        `fdr_bh` : Benjamini/Hochberg FDR correction</span>
-<span class="sd">        `fdr_by` : Benjamini/Yekutieli FDR correction</span>
+<span class="sd">        Method used for testing and adjustment of pvalues. Available methods are ::</span>
+
+<span class="sd">        &#39;none&#39; : no correction</span>
+<span class="sd">        &#39;bonferroni&#39; : one-step correction</span>
+<span class="sd">        &#39;holm&#39; : step-down method using Bonferroni adjustments</span>
+<span class="sd">        &#39;fdr_bh&#39; : Benjamini/Hochberg FDR correction</span>
+<span class="sd">        &#39;fdr_by&#39; : Benjamini/Yekutieli FDR correction</span>
 <span class="sd">    effsize : string or None</span>
-<span class="sd">        Effect size type. Available methods are :</span>
-<span class="sd">        `none` : no correction</span>
-<span class="sd">        `cohen` : Unbiased Cohen&#39;s d</span>
-<span class="sd">        `hedges` : Hedges g</span>
-<span class="sd">        `eta-square` : Eta-square</span>
-<span class="sd">        `odds-ratio` : Odds ratio</span>
-<span class="sd">        `AUC` : Area Under the Curve</span>
+<span class="sd">        Effect size type. Available methods are ::</span>
+
+<span class="sd">        &#39;none&#39; : no effect size</span>
+<span class="sd">        &#39;cohen&#39; : Unbiased Cohen d</span>
+<span class="sd">        &#39;hedges&#39; : Hedges g</span>
+<span class="sd">        &#39;glass&#39;: Glass delta</span>
+<span class="sd">        &#39;eta-square&#39; : Eta-square</span>
+<span class="sd">        &#39;odds-ratio&#39; : Odds ratio</span>
+<span class="sd">        &#39;AUC&#39; : Area Under the Curve</span>
 <span class="sd">    return_desc : boolean</span>
-<span class="sd">        If True, add mean + std in dataframe</span>
+<span class="sd">        If True, return group means and std</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -468,7 +472,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
     </p>
   </div>
 </footer>

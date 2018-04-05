@@ -116,27 +116,28 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    ef: float</span>
+<span class="sd">    ef : float</span>
 <span class="sd">        Original effect size</span>
-<span class="sd">    input_type: string</span>
+<span class="sd">    input_type : string</span>
 <span class="sd">        Effect size type of ef. Must be &#39;r&#39; or &#39;d&#39;.</span>
-<span class="sd">    output_type: string</span>
+<span class="sd">    output_type : string</span>
 <span class="sd">        Desired effect size type.</span>
-<span class="sd">        Available methods are :</span>
-<span class="sd">        `none` : no effect size</span>
-<span class="sd">        `cohen` : Unbiased Cohen&#39;s d</span>
-<span class="sd">        `hedges` : Hedges g</span>
-<span class="sd">        `glass`: Glass delta</span>
-<span class="sd">        `eta-square` : Eta-square</span>
-<span class="sd">        `odds-ratio` : Odds ratio</span>
-<span class="sd">        `AUC` : Area Under the Curve</span>
-<span class="sd">    nx, ny: int, int, optional</span>
+<span class="sd">        Available methods are ::</span>
+
+<span class="sd">        &#39;none&#39; : no effect size</span>
+<span class="sd">        &#39;cohen&#39; : Unbiased Cohen d</span>
+<span class="sd">        &#39;hedges&#39; : Hedges g</span>
+<span class="sd">        &#39;glass&#39;: Glass delta</span>
+<span class="sd">        &#39;eta-square&#39; : Eta-square</span>
+<span class="sd">        &#39;odds-ratio&#39; : Odds ratio</span>
+<span class="sd">        &#39;AUC&#39; : Area Under the Curve</span>
+<span class="sd">    nx, ny : int, optional</span>
 <span class="sd">        Length of vector x and y.</span>
 <span class="sd">        nx and ny are required to convert to Hedges g</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    ef: float</span>
+<span class="sd">    ef : float</span>
 <span class="sd">        Desired converted effect size</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">it</span> <span class="o">=</span> <span class="n">input_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -199,31 +200,32 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    dv: string</span>
+<span class="sd">    dv : string</span>
 <span class="sd">        Column name of dependant variable in data, optional</span>
-<span class="sd">    group: string</span>
+<span class="sd">    group : string</span>
 <span class="sd">        Column name of group factor in data, optional</span>
 <span class="sd">    data : DataFrame, optional</span>
 <span class="sd">        Pandas Dataframe containing columns dv and group</span>
-<span class="sd">    x, y: vector data, optional</span>
+<span class="sd">    x, y : vector data, optional</span>
 <span class="sd">        X and Y are only taken into account if dv, group and data = None</span>
-<span class="sd">    eftype: string</span>
+<span class="sd">    eftype : string</span>
 <span class="sd">        Desired output effect size, optional</span>
-<span class="sd">        Available methods are :</span>
-<span class="sd">        `none` : no effect size</span>
-<span class="sd">        `cohen` : Unbiased Cohen&#39;s d</span>
-<span class="sd">        `hedges` : Hedges g</span>
-<span class="sd">        `glass`: Glass delta</span>
-<span class="sd">        `eta-square` : Eta-square</span>
-<span class="sd">        `odds-ratio` : Odds ratio</span>
-<span class="sd">        `AUC` : Area Under the Curve</span>
+<span class="sd">        Available methods are ::</span>
+
+<span class="sd">        &#39;none&#39; : no effect size</span>
+<span class="sd">        &#39;cohen&#39; : Unbiased Cohen d</span>
+<span class="sd">        &#39;hedges&#39; : Hedges g</span>
+<span class="sd">        &#39;glass&#39;: Glass delta</span>
+<span class="sd">        &#39;eta-square&#39; : Eta-square</span>
+<span class="sd">        &#39;odds-ratio&#39; : Odds ratio</span>
+<span class="sd">        &#39;AUC&#39; : Area Under the Curve</span>
 <span class="sd">    paired : boolean</span>
 <span class="sd">        If True, uses Cohen d-avg formula to correct for repeated measurements</span>
 <span class="sd">        (Cumming 2012)</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    ef: float</span>
+<span class="sd">    ef : float</span>
 <span class="sd">        Effect size</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check arguments</span>
@@ -257,22 +259,22 @@
         <span class="k">return</span> <span class="n">convert_effsize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">eftype</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="compute_effsize_from_T"><a class="viewcode-back" href="../../generated/pingouin.compute_effsize_from_T.html#pingouin.compute_effsize_from_T">[docs]</a><span class="k">def</span> <span class="nf">compute_effsize_from_T</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute effect size from pandas dataframe or two numpy arrays.</span>
+    <span class="sd">&quot;&quot;&quot;Compute effect size from a T-value.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    T: float</span>
+<span class="sd">    T : float</span>
 <span class="sd">        T-value</span>
-<span class="sd">    nx, ny: int, optional</span>
+<span class="sd">    nx, ny : int, optional</span>
 <span class="sd">        Length of vector x and y.</span>
-<span class="sd">    N: int, optional</span>
+<span class="sd">    N : int, optional</span>
 <span class="sd">        Total sample size (will not be used if nx and ny are specified)</span>
-<span class="sd">    eftype: string, optional</span>
+<span class="sd">    eftype : string, optional</span>
 <span class="sd">        desired output effect size</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    ef: float</span>
+<span class="sd">    ef : float</span>
 <span class="sd">        Effect size</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_check_eftype</span><span class="p">(</span><span class="n">eftype</span><span class="p">):</span>
@@ -308,7 +310,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
     </p>
   </div>
 </footer>
