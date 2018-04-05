@@ -241,7 +241,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto'):
     sssubj = n_rm * np.sum((grp_subj.mean() - grp_subj.mean().mean())**2)
     sserror = sswithin - sssubj
 
-    # Calculate MStime
+    # Calculate degrees of freedom, F- and p-values
     ddof1 = n_rm - 1
     ddof2 = ddof1 * (n_obs - 1)
     mserror = sserror / (ddof2 / ddof1)

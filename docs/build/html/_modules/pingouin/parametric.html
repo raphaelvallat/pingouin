@@ -254,7 +254,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    X : array_like</span>
-<span class="sd">        Multivariate data matrix</span>
+<span class="sd">        Data array of shape (n_observations, n_repetitions)</span>
 <span class="sd">    alpha : float, optional</span>
 <span class="sd">        Significance level</span>
 
@@ -341,7 +341,7 @@
     <span class="n">sssubj</span> <span class="o">=</span> <span class="n">n_rm</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">grp_subj</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">grp_subj</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">sserror</span> <span class="o">=</span> <span class="n">sswithin</span> <span class="o">-</span> <span class="n">sssubj</span>
 
-    <span class="c1"># Calculate MStime</span>
+    <span class="c1"># Calculate degrees of freedom, F- and p-values</span>
     <span class="n">ddof1</span> <span class="o">=</span> <span class="n">n_rm</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="n">ddof2</span> <span class="o">=</span> <span class="n">ddof1</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_obs</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">mserror</span> <span class="o">=</span> <span class="n">sserror</span> <span class="o">/</span> <span class="p">(</span><span class="n">ddof2</span> <span class="o">/</span> <span class="n">ddof1</span><span class="p">)</span>
