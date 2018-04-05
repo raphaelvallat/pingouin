@@ -137,7 +137,7 @@ def multicomp(pvals, alpha=0.05, method='holm'):
     pvals : array_like
         uncorrected p-values
     alpha : float
-        FWER, family-wise error rate, e.g. 0.1
+        Significance level
     method : string
         Method used for testing and adjustment of pvalues. Can be either the
         full name or initial letters. Available methods are ::

@@ -126,16 +126,27 @@
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests" title="pingouin.pairwise_ttests"><code class="xref py py-obj docutils literal"><span class="pre">pairwise_ttests</span></code></a>([dv,&nbsp;between,&nbsp;within,&nbsp;…])</td>
 <td>Pairwise T-tests in Pandas.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.multicomp.html#pingouin.multicomp" title="pingouin.multicomp"><code class="xref py py-obj docutils literal"><span class="pre">multicomp</span></code></a>(pvals[,&nbsp;alpha,&nbsp;method])</td>
-<td>Test results and p-value correction for multiple tests.</td>
+</tbody>
+</table>
+</div>
+<div class="section" id="multiple-comparisons">
+<h2>Multiple comparisons<a class="headerlink" href="#multiple-comparisons" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.multicomp.html#pingouin.multicomp" title="pingouin.multicomp"><code class="xref py py-obj docutils literal"><span class="pre">multicomp</span></code></a>(pvals[,&nbsp;alpha,&nbsp;method])</td>
+<td>P-values correction for multiple tests.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.bonf.html#pingouin.bonf" title="pingouin.bonf"><code class="xref py py-obj docutils literal"><span class="pre">bonf</span></code></a>(pvals[,&nbsp;alpha])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.bonf.html#pingouin.bonf" title="pingouin.bonf"><code class="xref py py-obj docutils literal"><span class="pre">bonf</span></code></a>(pvals[,&nbsp;alpha])</td>
 <td>P-value correction with Bonferroni method.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.holm.html#pingouin.holm" title="pingouin.holm"><code class="xref py py-obj docutils literal"><span class="pre">holm</span></code></a>(pvals[,&nbsp;alpha])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.holm.html#pingouin.holm" title="pingouin.holm"><code class="xref py py-obj docutils literal"><span class="pre">holm</span></code></a>(pvals[,&nbsp;alpha])</td>
 <td>P-value correction with Holm method.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.fdr.html#pingouin.fdr" title="pingouin.fdr"><code class="xref py py-obj docutils literal"><span class="pre">fdr</span></code></a>(pvals[,&nbsp;alpha,&nbsp;method])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.fdr.html#pingouin.fdr" title="pingouin.fdr"><code class="xref py py-obj docutils literal"><span class="pre">fdr</span></code></a>(pvals[,&nbsp;alpha,&nbsp;method])</td>
 <td>P-value correction with False Discovery Rate (FDR).</td>
 </tr>
 </tbody>
@@ -153,7 +164,7 @@
 <td>Compute effect size from pandas dataframe or two numpy arrays.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.compute_effsize_from_T.html#pingouin.compute_effsize_from_T" title="pingouin.compute_effsize_from_T"><code class="xref py py-obj docutils literal"><span class="pre">compute_effsize_from_T</span></code></a>(T[,&nbsp;nx,&nbsp;ny,&nbsp;N,&nbsp;eftype])</td>
-<td>Compute effect size from pandas dataframe or two numpy arrays.</td>
+<td>Compute effect size from a T-value.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.convert_effsize.html#pingouin.convert_effsize" title="pingouin.convert_effsize"><code class="xref py py-obj docutils literal"><span class="pre">convert_effsize</span></code></a>(ef,&nbsp;input_type,&nbsp;output_type)</td>
 <td>Conversion between effect sizes.</td>
@@ -170,10 +181,10 @@
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.gzscore.html#pingouin.gzscore" title="pingouin.gzscore"><code class="xref py py-obj docutils literal"><span class="pre">gzscore</span></code></a>(x)</td>
-<td>Compute the geometric standard score of a 1D array.</td>
+<td>Geometric standard (Z) score.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.test_normality.html#pingouin.test_normality" title="pingouin.test_normality"><code class="xref py py-obj docutils literal"><span class="pre">test_normality</span></code></a>(*args[,&nbsp;alpha])</td>
-<td>Test normality of an array.</td>
+<td>Test the normality of one or more array.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.test_homoscedasticity.html#pingouin.test_homoscedasticity" title="pingouin.test_homoscedasticity"><code class="xref py py-obj docutils literal"><span class="pre">test_homoscedasticity</span></code></a>(*args[,&nbsp;alpha])</td>
 <td>Test equality of variance.</td>

@@ -25,6 +25,16 @@ Pairwise tests
    :toctree: generated/
 
     pairwise_ttests
+
+
+Multiple comparisons
+--------------------
+
+.. _multicomp:
+
+.. autosummary::
+   :toctree: generated/
+
     multicomp
     bonf
     holm
