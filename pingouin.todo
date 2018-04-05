@@ -7,4 +7,5 @@ Code
 ----
 - Add within / between in effsize
 - Global function to correct NAN in mixed model
+- Check Mauchly's test of sphericity
 - Mixed ANOVA implementation
