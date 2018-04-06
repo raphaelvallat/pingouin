@@ -37,6 +37,11 @@ def check_dependencies():
         import pandas
     except ImportError:
         install_requires.append('pandas')
+    try:
+        import tabulate
+    except ImportError:
+        install_requires.append('tabulate')
+
 
     return install_requires
 
