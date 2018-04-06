@@ -17,7 +17,7 @@ def _check_eftype(eftype):
     else:
         return False
 
-def print_table(df, floatfmt=".5f"):
+def print_table(df, floatfmt=".4f"):
     """Nice display of table"""
     if 'F' in df.keys():
         print('=============\nANOVA SUMMARY\n=============\n')
