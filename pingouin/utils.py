@@ -4,12 +4,11 @@ import numpy as np
 from scipy import stats
 from six import string_types
 import pandas as pd
+from tabulate import tabulate
 
+__all__ = ["print_table", "_check_eftype", "_remove_rm_na", "_check_data",
+           "_check_dataframe", "_extract_effects", "print_table"]
 
-__all__ = ["_remove_rm_na", "_check_eftype", "_check_data", "_check_dataframe",
-           "_extract_effects"]
-
-# SUB-FUNCTIONS
 def _check_eftype(eftype):
     """Check validity of eftype"""
     if eftype.lower() in ['none', 'hedges', 'cohen', 'glass', 'r', 'eta-square',
@@ -18,28 +17,36 @@ def _check_eftype(eftype):
     else:
         return False
 
+def print_table(df, floatfmt=".5f"):
+    """Nice display of table"""
+    if 'F' in df.keys():
+        print('=============\nANOVA SUMMARY\n=============\n')
 
-def _remove_rm_na(dv=None, between=None, within=None, data=None):
-    """Remove subject with one or more NAN in repeated measurements."""
-    rm = list(data[within].unique())
+    try:
+        from tabulate import tabulate
+        print(tabulate(df, headers="keys", showindex=False, floatfmt=floatfmt))
+    except:
+        print(df)
+
+
+def _remove_rm_na(dv=None, within=None, between=None, data=None):
+    """Remove subject(s) with one or more missing values in repeated
+    measurements.
+    """
+    rm = list(data[within].dropna().unique())
     n_rm = len(rm)
     n_obs = int(data.groupby(within)[dv].count().max())
-    data['Subj'] = np.tile(np.arange(n_obs), n_rm)
-    if between is not None:
-        idx_pivot = ['Subj', between]
-    else:
-        idx_pivot = 'Subj'
-    pivoted = pd.pivot_table(data, values=dv, index=idx_pivot,
-                                    columns=within).reset_index()
-    # Remove rows with NaN
-    pivoted.dropna(axis=0, how='any', inplace=True)
-    # Reshape to original format
-    # sub = pd.melt(pivoted, value_vars='Subj', value_name='Subj')
-    # betw = pd.melt(pivoted, value_vars=between, value_name=between)
-    # within = pd.melt(pivoted, value_vars=rm, value_name=dv)
-    # test = pd.concat([sub, betw], axis=1)
-    # data_corr = pd.melt(data, value_vars=rm, var_name=within, value_name=dv)
-    return data
+    data['ID_Subj'] = np.tile(np.arange(n_obs), n_rm)
+
+    # Efficiently remove subjects with one or more missing values
+    data.set_index('ID_Subj', inplace=True)
+
+    # Find index with nan
+    iloc_nan = pd.isnull(data).any(1).nonzero()[0]
+    idx_nan = data.index[iloc_nan].values
+    print('\nNote: %i subject(s) removed because of missing value(s).\n'
+                                                            % len(idx_nan))
+    return data.drop(idx_nan).reset_index(drop=True)
 
 
 def _check_data(dv=None, group=None, data=None, x=None, y=None):

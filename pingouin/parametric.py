@@ -196,7 +196,8 @@ def test_sphericity(X, alpha=.05):
     return sphericity, W, pval
 
 
-def rm_anova(dv=None, within=None, data=None, correction='auto'):
+def rm_anova(dv=None, within=None, data=None, correction='auto',
+             remove_na=False):
     """Compute one-way repeated measures ANOVA from a pandas DataFrame.
 
     Tested against mne.stats.f_mway_rm and ez R package.
@@ -211,8 +212,19 @@ def rm_anova(dv=None, within=None, data=None, correction='auto'):
         DataFrame
     correction : string or boolean
         If True, return Greenhouse-Geisser corrected p-value.
-        If 'auto' (default), compute Mauchly's test of sphericity to determine whether the
-        p-values needs to be corrected.
+        If 'auto' (default), compute Mauchly's test of sphericity to determine
+        whether the p-values needs to be corrected.
+    remove_na : boolean
+        If True, automatically remove from the analysis subjects with one or
+        more missing values:
+
+        Ss    x1       x2       x3
+        --    ---      ----     ---
+        1     5.0      4.2      nan
+
+        If true, Ss 1 will be removed from the ANOVA because of the x3 missing
+        values. If False, the two non-missing values will be included in the
+        analysis.
 
     Returns
     -------

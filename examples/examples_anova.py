@@ -1,9 +1,9 @@
 import pandas as pd
 from numpy import nan
-from pingouin import rm_anova, pairwise_ttests
-
-# Change default display format of pandas
-# pd.set_option('display.float_format', lambda x: '%.3f' % x)
+from pingouin import rm_anova, pairwise_ttests, print_table
+# Trick to increase windows default size
+import os
+os.system('mode con: cols=200 lines=40')
 
 # Load dataset
 df = pd.read_csv('sleep_dataset.csv')
@@ -11,14 +11,16 @@ df = pd.read_csv('sleep_dataset.csv')
 # Keep only insomnia group
 df = df[df['Group'] == 'Insomnia']
 
-# to make it trickier, let's assume that some random observations are missing
-df.iloc[[4,33], 0] = nan
+# to make it trickier, let's assume that one subject has a missing value.
+df.iloc[20, 0] = nan
 
 # Compute one-way repeated measures ANOVA
 aov = rm_anova(dv='DV', within='Time', data=df, correction='auto')
-print(aov)
+print_table(aov)
 
 # Compute pairwise post-hocs with effect size
 post_hocs = pairwise_ttests(dv='DV', within='Time', data=df, effects='within',
                             padjust='bonf', effsize='hedges')
-print(post_hocs)
+                            
+# Print the table with 3 decimals
+print_table(post_hocs, floatfmt=".3f")
