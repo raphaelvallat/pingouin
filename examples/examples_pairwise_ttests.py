@@ -1,8 +1,7 @@
 import pandas as pd
-from pingouin import pairwise_ttests
-
-# Change default display format of pandas
-pd.set_option('display.float_format', lambda x: '%.3f' % x)
+from pingouin import pairwise_ttests, print_table
+import os
+os.system('mode con: cols=200 lines=40')
 
 # Load a fake dataset: the INSOMNIA study
 # Goal: evaluate the influence of a treatment on sleep duration in a control
@@ -38,5 +37,5 @@ df = pd.read_csv('sleep_dataset.csv')
 stats = pairwise_ttests(dv='DV', within='Time', between='Group',
                         effects='all', data=df, alpha=.05,
                         tail='two-sided', padjust='fdr_by',
-                        effsize='cohen', return_desc=True)
-print(stats)
+                        effsize='cohen', return_desc=False)
+print_table(stats)
