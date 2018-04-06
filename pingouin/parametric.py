@@ -164,6 +164,10 @@ def test_sphericity(X, alpha=.05):
         True if data have the sphericity property.
     W : float
         Mauchly's W statistic
+    chi_sq : float
+        Chi-square statistic
+    ddof : int
+        Degrees of freedom
     p : float
         P-value.
     """
@@ -193,11 +197,11 @@ def test_sphericity(X, alpha=.05):
     pval = chi2.sf(chi_sq, ddof)
     sphericity = True if pval > alpha else False
 
-    return sphericity, W, pval
+    return sphericity, W, chi_sq, ddof, pval
 
 
 def rm_anova(dv=None, within=None, data=None, correction='auto',
-             remove_na=False):
+             remove_na=False, full_table=True):
     """Compute one-way repeated measures ANOVA from a pandas DataFrame.
 
     Tested against mne.stats.f_mway_rm and ez R package.
@@ -225,6 +229,8 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         If true, Ss 1 will be removed from the ANOVA because of the x3 missing
         values. If False, the two non-missing values will be included in the
         analysis.
+    full_table : boolean
+        If True, return a full ANOVA table
 
     Returns
     -------
@@ -260,16 +266,23 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     fval = sstime / mserror
     p_unc = f(ddof1, ddof2).sf(fval)
 
+    # Calculating partial eta-square
+    # Similar to (fval * ddof1) / (fval * ddof1 + ddof2)
+    np2 = sstime / (sstime + sserror)
+
+    # Reshape and remove NAN for sphericity estimation and correction
     data_pivot = data.pivot(index='Subj', columns=within, values=dv).dropna()
-    if correction == 'auto' or correction == True:
-        # Compute sphericity using Mauchly's test
-        # Sphericity = pairwise differences in variance between the samples are
-        # ALL equal.
-        sphericity, W_mauchly, p_mauchly = test_sphericity(
-            data_pivot.as_matrix(), alpha=.05)
+
+    # Compute sphericity using Mauchly's test
+    # Sphericity assumption only applies if there are more than 2 levels
+    if correction == 'auto' or correction == True and n_rm >= 3:
+        sphericity, W_mauchly, chi_sq_mauchly, ddof_mauchly, \
+        p_mauchly = test_sphericity(data_pivot.as_matrix(), alpha=.05)
 
         if correction == 'auto':
             correction = True if not sphericity else False
+    else:
+        correction = False
 
     # If required, apply Greenhouse-Geisser correction for sphericity
     if correction:
@@ -281,16 +294,46 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         p_corr = f(corr_ddof1, corr_ddof2).sf(fval)
 
     # Create output dataframe
-    aov = pd.DataFrame({'Effect': within,
-                        'ddof1': ddof1,
-                        'ddof2': ddof2,
-                        'F': fval,
-                        'p_unc': p_unc
-                        }, index=[0])
-    if correction:
-        aov['p-GG-corr'] = p_corr
-        aov['W-Mauchly'] = W_mauchly
-        aov['p-Mauchly'] = p_mauchly
-        aov['sphericity'] = sphericity
+    if not full_table:
+        aov = pd.DataFrame({'Source': within,
+                            'ddof1': ddof1,
+                            'ddof2': ddof2,
+                            'F': fval,
+                            'p-unc': p_unc,
+                            'np2': np2
+                            }, index=[0])
+        if correction:
+            aov['p-GG-corr'] = p_corr
+            aov['W-Mauchly'] = W_mauchly
+            aov['X2-Mauchly'] = chi_sq_mauchly
+            aov['DF-Mauchly'] = ddof_mauchly
+            aov['p-Mauchly'] = p_mauchly
+            aov['sphericity'] = sphericity
 
+        col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc',
+                    'p-GG-corr', 'np2', 'sphericity','W-Mauchly', 'X2-Mauchly',
+                    'DF-Mauchly', 'p-Mauchly']
+    else:
+        aov = pd.DataFrame({'Source': ['Time', 'Error'],
+                            'SS': [sstime, sserror],
+                            'DF': [ddof1, ddof2],
+                            'MS': [sstime / ddof1, sserror / ddof2],
+                            'F': [fval, np.nan],
+                            'p-unc': [p_unc, np.nan],
+                            'np2': [np2, np.nan]
+                            })
+        if correction:
+            aov['p-GG-corr'] = [p_corr, np.nan]
+            aov['W-Mauchly'] = [W_mauchly, np.nan]
+            aov['X2-Mauchly'] = [chi_sq_mauchly, np.nan]
+            aov['DF-Mauchly'] = np.array([ddof_mauchly, 0], 'int')
+            aov['p-Mauchly'] = [p_mauchly, np.nan]
+            aov['sphericity'] = [sphericity, np.nan]
+
+        col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'p-GG-corr',
+                     'np2', 'sphericity','W-Mauchly', 'X2-Mauchly',
+                     'DF-Mauchly', 'p-Mauchly']
+
+    aov = aov.reindex(columns=col_order)
+    aov.dropna(how='all', axis=1, inplace=True)
     return aov
