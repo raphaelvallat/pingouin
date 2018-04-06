@@ -4,7 +4,7 @@
 import numpy as np
 import pandas as pd
 from pingouin import (_check_data, _check_dataframe, _extract_effects,
-                     compute_effsize)
+                     compute_effsize, remove_rm_na)
 
 __all__ = ["fdr", "bonf", "holm", "multicomp", "pairwise_ttests"]
 
@@ -252,17 +252,9 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         raise ValueError('Alpha must be float')
 
     # Check NA in repeated measurements
-    # Works well for one-way repeated measures
-    # Needs adaptation for mixed model!
     if within is not None and data[dv].isnull().values.any():
-        if effects != 'between':
-            rm = list(data[within].unique())
-            n_rm = len(rm)
-            n_obs = int(data.groupby(within)[dv].count().max())
-            data['Subj'] = np.tile(np.arange(n_obs), n_rm)
-            data = data.pivot(index='Subj', columns=within, values=dv).dropna()
-            data = pd.melt(data, value_vars=rm, var_name=within, value_name=dv)
-
+        data = _remove_rm_na(dv=dv, between=between, within=within, data=data)
+    
     # Extract main effects
     dt_array, nobs = _extract_effects(dv=dv, between=between, within=within,
                                      effects=effects, data=data)

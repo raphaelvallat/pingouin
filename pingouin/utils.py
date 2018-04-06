@@ -6,7 +6,7 @@ from six import string_types
 import pandas as pd
 
 
-__all__ = ["_check_eftype", "_check_data", "_check_dataframe",
+__all__ = ["_remove_rm_na", "_check_eftype", "_check_data", "_check_dataframe",
            "_extract_effects"]
 
 # SUB-FUNCTIONS
@@ -17,6 +17,29 @@ def _check_eftype(eftype):
         return True
     else:
         return False
+
+
+def _remove_rm_na(dv=None, between=None, within=None, data=None):
+    """Remove subject with one or more NAN in repeated measurements."""
+    rm = list(data[within].unique())
+    n_rm = len(rm)
+    n_obs = int(data.groupby(within)[dv].count().max())
+    data['Subj'] = np.tile(np.arange(n_obs), n_rm)
+    if between is not None:
+        idx_pivot = ['Subj', between]
+    else:
+        idx_pivot = 'Subj'
+    pivoted = pd.pivot_table(data, values=dv, index=idx_pivot,
+                                    columns=within).reset_index()
+    # Remove rows with NaN
+    pivoted.dropna(axis=0, how='any', inplace=True)
+    # Reshape to original format
+    # sub = pd.melt(pivoted, value_vars='Subj', value_name='Subj')
+    # betw = pd.melt(pivoted, value_vars=between, value_name=between)
+    # within = pd.melt(pivoted, value_vars=rm, value_name=dv)
+    # test = pd.concat([sub, betw], axis=1)
+    # data_corr = pd.melt(data, value_vars=rm, var_name=within, value_name=dv)
+    return data
 
 
 def _check_data(dv=None, group=None, data=None, x=None, y=None):
