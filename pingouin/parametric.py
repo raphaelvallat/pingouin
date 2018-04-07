@@ -31,8 +31,6 @@ def gzscore(x):
     # Geometric z-score
     return np.log(x / geo_mean) / np.log(gstd)
 
-# MAIN FUNCTIONS
-
 
 def test_normality(*args, alpha=.05):
     """Test the normality of one or more array.
@@ -197,7 +195,6 @@ def test_sphericity(X, alpha=.05):
     ddof = d * (d + 1) / 2 - 1
     pval = chi2.sf(chi_sq, ddof)
     sphericity = True if pval > alpha else False
-
     return sphericity, W, chi_sq, ddof, pval
 
 

@@ -31,7 +31,7 @@ def print_table(df, floatfmt=".4f"):
         print(df)
 
 
-def _remove_rm_na(dv=None, within=None, between=None, data=None):
+def _remove_rm_na(dv=None, within=None, data=None):
     """Remove subject(s) with one or more missing values in repeated
     measurements.
     """
