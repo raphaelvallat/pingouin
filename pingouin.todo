@@ -4,5 +4,6 @@ Doc
 
 Code
 ----
+- Check DF in rm_anova
 - Add within / between in effsize
 - Mixed ANOVA implementation

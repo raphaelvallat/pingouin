@@ -1,9 +1,10 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 import numpy as np
+import pandas as pd
 
 __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
-           "test_sphericity", "rm_anova", "anova"]
+           "test_sphericity", "rm_anova", "anova", "mixed_anova"]
 
 
 def gzscore(x):
@@ -201,7 +202,7 @@ def test_sphericity(X, alpha=.05):
 
 
 def rm_anova(dv=None, within=None, data=None, correction='auto',
-             remove_na=False, full_table=True):
+             remove_na=False, full_table=False):
     """Compute one-way repeated measures ANOVA from a pandas DataFrame.
 
     Tested against mne.stats.f_mway_rm and ez R package.
@@ -237,7 +238,6 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     aov : DataFrame
         ANOVA summary
     """
-    import pandas as pd
     from scipy.stats import f
     rm = list(data[within].unique())
     n_rm = len(rm)
@@ -314,7 +314,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
                     'p-GG-corr', 'np2', 'sphericity','W-Mauchly', 'X2-Mauchly',
                     'DF-Mauchly', 'p-Mauchly']
     else:
-        aov = pd.DataFrame({'Source': ['Time', 'Error'],
+        aov = pd.DataFrame({'Source': [within, 'Error'],
                             'SS': [sstime, sserror],
                             'DF': [ddof1, ddof2],
                             'MS': [sstime / ddof1, sserror / ddof2],
@@ -339,7 +339,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     return aov
 
 
-def anova(dv=None, between=None, data=None, full_table=True):
+def anova(dv=None, between=None, data=None, full_table=False):
     """Compute one-way ANOVA from a pandas DataFrame.
 
     Tested against ez R package.
@@ -360,7 +360,6 @@ def anova(dv=None, between=None, data=None, full_table=True):
     aov : DataFrame
         ANOVA summary
     """
-    import pandas as pd
     from scipy.stats import f
     groups = list(data[between].unique())
     n_groups = len(groups)
@@ -402,7 +401,7 @@ def anova(dv=None, between=None, data=None, full_table=True):
 
         col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc', 'np2']
     else:
-        aov = pd.DataFrame({'Source': ['Time', 'Error'],
+        aov = pd.DataFrame({'Source': [between, 'Within'],
                             'SS': [ssbetween, sswithin],
                             'DF': [ddof1, ddof2],
                             'MS': [msbetween, mswithin],
@@ -415,3 +414,81 @@ def anova(dv=None, between=None, data=None, full_table=True):
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
     return aov
+
+
+def mixed_anova(dv=None, within=None, between=None, data=None,
+                correction='auto', remove_na=False):
+    """Compute one-way ANOVA from a pandas DataFrame.
+
+    Tested against ez R package.
+
+    Parameters
+    ----------
+    dv : string
+        Name of column containing the dependant variable.
+    between : string
+        Name of column containing the between factor.
+    data : pandas DataFrame
+        DataFrame
+    correction : string or boolean
+        If True, return Greenhouse-Geisser corrected p-value.
+        If 'auto' (default), compute Mauchly's test of sphericity to determine
+        whether the p-values needs to be corrected.
+    remove_na : boolean
+        If True, automatically remove from the analysis subjects with one or
+        more missing values:
+
+        Ss    x1       x2       x3
+        --    ---      ----     ---
+        1     5.0      4.2      nan
+
+        If true, Ss 1 will be removed from the ANOVA because of the x3 missing
+        values. If False, the two non-missing values will be included in the
+        analysis.
+
+    Returns
+    -------
+    aov : DataFrame
+        ANOVA summary
+    """
+    from scipy.stats import f
+
+    # Compute within and between one-way ANOVA
+    stats_between = anova(dv=dv, between=between, data=data, full_table=True)
+    stats_within = rm_anova(dv=dv, within=within, data=data,
+                            remove_na=remove_na, correction=correction,
+                            full_table=True)
+
+    # Compute interactions
+    ddof1, ddof2 = stats_between.loc[0, 'DF'], stats_within.loc[0, 'DF']
+    grp = data.groupby([between, within])[dv]
+    grandmean = grp.mean().mean()
+    ssta, sstb = np.zeros((ddof1 + 1)*(ddof2 + 1)), \
+                            np.zeros((ddof1 + 1)*(ddof2 + 1))
+
+    for i, (name, group) in enumerate(grp):
+        ssta[i] = np.sum(group.mean()**2)
+        sstb[i] = np.sum(group.mean())
+    ssta, sstb = np.sum(ssta), np.sum(sstb)**2
+    sstotal = ssta - sstb / data[dv].size
+
+    ss_inter = sstotal - (stats_between.loc[0, 'SS'] + \
+                        stats_within.loc[0, 'SS'] +  \
+                        stats_within.loc[1, 'SS'])
+
+    ddof_inter = stats_between.loc[0, 'DF'] * stats_within.loc[0, 'DF']
+    ms_inter = ss_inter / ddof_inter
+    f_inter = ms_inter / stats_within.loc[1, 'MS']
+    p_inter = f(ddof_inter, ddof2).sf(f_inter)
+    np2 = np.nan
+
+    stats = pd.concat([stats_between, stats_within])
+    stats = stats.append({'Source': 'Interaction',
+                          'SS': ss_inter,
+                          'DF': ddof_inter,
+                          'MS': ms_inter,
+                          'F': f_inter,
+                          'p-unc': p_inter
+                          }, ignore_index=True)
+
+    return stats.drop(index=[1,3])
