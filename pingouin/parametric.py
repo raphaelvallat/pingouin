@@ -2,6 +2,7 @@
 # Date: April 2018
 import numpy as np
 import pandas as pd
+from pingouin import _check_dataframe, _remove_rm_na
 
 __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
            "test_sphericity", "rm_anova", "anova", "mixed_anova"]
@@ -241,6 +242,13 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         ANOVA summary
     """
     from scipy.stats import f
+    # Check data
+    _check_dataframe(dv=dv, within=within, data=data, effects='within')
+
+    # Remove NaN
+    if remove_na:
+        data = _remove_rm_na(dv=dv, within=within, data=data)
+
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
 
@@ -364,6 +372,14 @@ def anova(dv=None, between=None, data=None, detailed=False):
         ANOVA summary
     """
     from scipy.stats import f
+
+    # Check data
+    _check_dataframe(dv=dv, between=between, data=data,
+                        effects='between')
+
+    # Reset index (avoid duplicate axis error)
+    data = data.reset_index(drop=True)
+
     groups = list(data[between].unique())
     n_groups = len(groups)
     N = data[dv].size
@@ -450,9 +466,17 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
         ANOVA summary
     """
     from scipy.stats import f
-    N = data[dv].size
+    # Check data
+    _check_dataframe(dv=dv, within=within, between=between, data=data,
+                        effects='interaction')
+    # Remove NaN
+    if remove_na:
+        data = _remove_rm_na(dv=dv, within=within, data=data)
+    # Reset index (avoid duplicate axis error)
+    data = data.reset_index(drop=True)
 
     # SUMS OF SQUARES
+    N = data[dv].size
     # Time effect
     grp_with = data.groupby(within)[dv]
     n_obs = grp_with.count().max()
@@ -476,10 +500,10 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     ssinter = sstotal - (sswg + sstime + ssbetween)
 
     # DEGREES OF FREEDOM
-    dftime = grp_with.count().count() - 1
+    dftime = n_rm - 1
     dfbetween = grp_betw.count().count() - 1
-    dfeb = grp_with.count().max() - grp_betw.count().count()
-    dfwg = dftime * (grp_with.count().max() - grp.count().count())
+    dfeb = n_obs - grp_betw.count().count()
+    dfwg = dftime * (n_obs - grp.count().count())
     dftotal = N - 1
     dfinter = dftime * dfbetween
 

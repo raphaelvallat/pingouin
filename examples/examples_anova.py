@@ -38,14 +38,14 @@ print_table(post_hocs, floatfmt=".2f")
 df = pd.read_csv('sleep_dataset.csv')
 
 # Keep only insomnia group
-df = df[df['Group'] == 'Insomnia']
+#df = df[df['Group'] == 'Insomnia']
 
 # to make it trickier, let's assume that one subject has a missing value.
-df.iloc[20, 0] = nan
+#df.iloc[20, 0] = nan
 
 # Compute one-way repeated measures ANOVA
-aov = rm_anova(dv='DV', within='Time', data=df, correction='auto',
-                detailed=True)
+aov = rm_anova(dv='DV', within='Time', data=df, correction='auto', 
+               remove_na=True, detailed=True)
 print_table(aov)
 
 # Compute pairwise post-hocs with effect size
@@ -65,13 +65,13 @@ print_table(post_hocs, floatfmt=".3f")
 df = pd.read_csv('sleep_dataset.csv')
 
 # 2 - http://www.miracosta.edu/Home/rmorrissette/Chapter14.htm
-x = pd.DataFrame({'Group': repeat('X', 5*3),
-                   'Time': repeat([1, 2, 3], 5),
-                   'DV': [8, 10, 8, 6, 13, 4, 6, 3, 5, 7, 2, 2, 3, 4, 6]})
-
-y = pd.DataFrame({'Group': repeat('Y', 5*3),
-                   'Time': repeat([1, 2, 3], 5),
-                   'DV': [5, 4, 1, 2, 3, 4, 1, 2, 3, 2, 3, 0, 3, 2, 2]})
+# x = pd.DataFrame({'Group': repeat('X', 5*3),
+#                   'Time': repeat([1, 2, 3], 5),
+#                   'DV': [8, 10, 8, 6, 13, 4, 6, 3, 5, 7, 2, 2, 3, 4, 6]})
+#
+# y = pd.DataFrame({'Group': repeat('Y', 5*3),
+#                   'Time': repeat([1, 2, 3], 5),
+#                   'DV': [5, 4, 1, 2, 3, 4, 1, 2, 3, 2, 3, 0, 3, 2, 2]})
 # df = pd.concat([x, y])
 
 aov = mixed_anova(dv='DV', within='Time', between='Group', data=df)

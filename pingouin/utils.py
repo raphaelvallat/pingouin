@@ -6,7 +6,7 @@ from six import string_types
 import pandas as pd
 
 __all__ = ["print_table", "_check_eftype", "_remove_rm_na", "_check_data",
-           "_check_dataframe", "_extract_effects", "print_table"]
+           "_check_dataframe",  "_extract_effects", "print_table"]
 
 def _check_eftype(eftype):
     """Check validity of eftype"""
