@@ -3,7 +3,7 @@
 import numpy as np
 
 __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
-           "test_sphericity", "rm_anova"]
+           "test_sphericity", "rm_anova", "anova"]
 
 
 def gzscore(x):
@@ -333,6 +333,84 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'p-GG-corr',
                      'np2', 'sphericity','W-Mauchly', 'X2-Mauchly',
                      'DF-Mauchly', 'p-Mauchly']
+
+    aov = aov.reindex(columns=col_order)
+    aov.dropna(how='all', axis=1, inplace=True)
+    return aov
+
+
+def anova(dv=None, between=None, data=None, full_table=True):
+    """Compute one-way ANOVA from a pandas DataFrame.
+
+    Tested against ez R package.
+
+    Parameters
+    ----------
+    dv : string
+        Name of column containing the dependant variable.
+    between : string
+        Name of column containing the between factor.
+    data : pandas DataFrame
+        DataFrame
+    full_table : boolean
+        If True, return a full ANOVA table
+
+    Returns
+    -------
+    aov : DataFrame
+        ANOVA summary
+    """
+    import pandas as pd
+    from scipy.stats import f
+    groups = list(data[between].unique())
+    n_groups = len(groups)
+    n_obs = data.groupby(between)[dv].count().as_matrix()
+    N = data[dv].size
+
+    # Calculating SSbetween and SSwithin
+    grp_betw = data.groupby(between)[dv]
+    grandmean = grp_betw.mean().mean()
+    ssb, ssw = np.zeros(n_groups), np.zeros(n_groups)
+    for i, (name, group) in enumerate(grp_betw):
+        ssb[i] = group.count() * np.sum((group.mean() - grandmean)**2)
+        ssw[i] = np.sum((group - group.mean())**2)
+
+    ssbetween = np.sum(ssb)
+    sswithin = np.sum(ssw)
+
+    # Calculate degrees of freedom, F- and p-values
+    ddof1 = n_groups - 1
+    msbetween = ssbetween / ddof1
+    ddof2 = N - n_groups
+    mswithin = sswithin / ddof2
+    fval = msbetween / mswithin
+    p_unc = f(ddof1, ddof2).sf(fval)
+
+    # Calculating partial eta-square
+    # Similar to (fval * ddof1) / (fval * ddof1 + ddof2)
+    np2 = ssbetween / (ssbetween + sswithin)
+
+    # Create output dataframe
+    if not full_table:
+        aov = pd.DataFrame({'Source': between,
+                            'ddof1': ddof1,
+                            'ddof2': ddof2,
+                            'F': fval,
+                            'p-unc': p_unc,
+                            'np2': np2
+                            }, index=[0])
+
+        col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc', 'np2']
+    else:
+        aov = pd.DataFrame({'Source': ['Time', 'Error'],
+                            'SS': [ssbetween, sswithin],
+                            'DF': [ddof1, ddof2],
+                            'MS': [msbetween, mswithin],
+                            'F': [fval, np.nan],
+                            'p-unc': [p_unc, np.nan],
+                            'np2': [np2, np.nan]
+                            })
+        col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'np2']
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)

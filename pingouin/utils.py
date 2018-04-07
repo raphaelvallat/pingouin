@@ -20,10 +20,11 @@ def _check_eftype(eftype):
 def print_table(df, floatfmt=".4f"):
     """Nice display of table"""
     if 'F' in df.keys():
-        print('=============\nANOVA SUMMARY\n=============\n')
+        print('=============\nANOVA SUMMARY\n=============')
 
     try:
         from tabulate import tabulate
+        print('')
         print(tabulate(df, headers="keys", showindex=False, floatfmt=floatfmt))
     except:
         print(df)

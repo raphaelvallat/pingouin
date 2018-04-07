@@ -156,11 +156,13 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         stats['Tail'] = 'two-sided'
 
     # Multiple comparisons
-    if padjust is not None or padjust.lower() is not 'none':
-        reject, stats['p-corr'] = multicomp(stats['p-unc'].values, alpha=alpha,
-                                       method=padjust)
-        stats['p-adjust'] = padjust
-        stats['reject'] = reject
+    padjust = None if stats['p-unc'].size <= 1 else padjust
+    if padjust is not None:
+        if padjust.lower() is not 'none':
+            reject, stats['p-corr'] = multicomp(stats['p-unc'].values,
+                                                alpha=alpha, method=padjust)
+            stats['p-adjust'] = padjust
+            stats['reject'] = reject
     else:
         stats['p-corr'] = None
         stats['p-adjust'] = None
