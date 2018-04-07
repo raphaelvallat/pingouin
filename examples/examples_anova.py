@@ -19,7 +19,7 @@ df = pd.DataFrame({'Group': repeat(['A', 'B', 'C'], 6),
                    })
 
 # Compute one-way ANOVA
-aov = anova(dv='DV', between='Group', data=df, full_table=True)
+aov = anova(dv='DV', between='Group', data=df, detailed=True)
 print_table(aov, floatfmt=".3f")
 
 # Compute pairwise post-hocs with effect size
@@ -45,7 +45,7 @@ df.iloc[20, 0] = nan
 
 # Compute one-way repeated measures ANOVA
 aov = rm_anova(dv='DV', within='Time', data=df, correction='auto',
-                full_table=True)
+                detailed=True)
 print_table(aov)
 
 # Compute pairwise post-hocs with effect size
@@ -60,9 +60,19 @@ print_table(post_hocs, floatfmt=".3f")
 # TWO-WAY MIXED MODEL ANOVA (Within + Between factors)
 ###############################################################################
 
-# WORK IN PROGRESS
-
 # Load dataset
-# df = pd.read_csv('sleep_dataset.csv')
-# aov = mixed_anova(dv='DV', within='Time', between='Group', data=df)
-# print_table(aov)
+# 1 - Sleep dataset
+df = pd.read_csv('sleep_dataset.csv')
+
+# 2 - http://www.miracosta.edu/Home/rmorrissette/Chapter14.htm
+x = pd.DataFrame({'Group': repeat('X', 5*3),
+                   'Time': repeat([1, 2, 3], 5),
+                   'DV': [8, 10, 8, 6, 13, 4, 6, 3, 5, 7, 2, 2, 3, 4, 6]})
+
+y = pd.DataFrame({'Group': repeat('Y', 5*3),
+                   'Time': repeat([1, 2, 3], 5),
+                   'DV': [5, 4, 1, 2, 3, 4, 1, 2, 3, 2, 3, 0, 3, 2, 2]})
+# df = pd.concat([x, y])
+
+aov = mixed_anova(dv='DV', within='Time', between='Group', data=df)
+print_table(aov)

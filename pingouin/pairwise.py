@@ -19,7 +19,7 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, paired, alpha,
                         'std(B)': np.std(y, ddof=1),
                         'Type': effects,
                         'Paired': paired,
-                        'Alpha': alpha,
+                        # 'Alpha': alpha,
                         'T-val': t,
                         'p-unc': p,
                         'Eff_size': ef,
@@ -162,13 +162,13 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
             reject, stats['p-corr'] = multicomp(stats['p-unc'].values,
                                                 alpha=alpha, method=padjust)
             stats['p-adjust'] = padjust
-            stats['reject'] = reject
+            # stats['reject'] = reject
     else:
         stats['p-corr'] = None
         stats['p-adjust'] = None
-        stats['reject'] = stats['p-unc'] < alpha
+        # stats['reject'] = stats['p-unc'] < alpha
 
-    stats['reject'] = stats['reject'].astype(bool)
+    # stats['reject'] = stats['reject'].astype(bool)
     stats['Paired'] = stats['Paired'].astype(bool)
 
     if not return_desc:

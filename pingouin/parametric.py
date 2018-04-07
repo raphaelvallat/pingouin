@@ -207,7 +207,7 @@ def ss(grp, type='a'):
 
 
 def rm_anova(dv=None, within=None, data=None, correction='auto',
-             remove_na=False, full_table=False):
+             remove_na=False, detailed=False):
     """Compute one-way repeated measures ANOVA from a pandas DataFrame.
 
     Tested against mne.stats.f_mway_rm and ez R package.
@@ -235,7 +235,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         If true, Ss 1 will be removed from the ANOVA because of the x3 missing
         values. If False, the two non-missing values will be included in the
         analysis.
-    full_table : boolean
+    detailed : boolean
         If True, return a full ANOVA table
 
     Returns
@@ -300,7 +300,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         p_corr = f(corr_ddof1, corr_ddof2).sf(fval)
 
     # Create output dataframe
-    if not full_table:
+    if not detailed:
         aov = pd.DataFrame({'Source': within,
                             'ddof1': ddof1,
                             'ddof2': ddof2,
@@ -345,7 +345,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     return aov
 
 
-def anova(dv=None, between=None, data=None, full_table=False):
+def anova(dv=None, between=None, data=None, detailed=False):
     """Compute one-way ANOVA from a pandas DataFrame.
 
     Tested against ez R package.
@@ -358,8 +358,8 @@ def anova(dv=None, between=None, data=None, full_table=False):
         Name of column containing the between factor.
     data : pandas DataFrame
         DataFrame
-    full_table : boolean
-        If True, return a full ANOVA table
+    detailed : boolean
+        If True, return a detailed ANOVA table
 
     Returns
     -------
@@ -371,16 +371,14 @@ def anova(dv=None, between=None, data=None, full_table=False):
     n_groups = len(groups)
     N = data[dv].size
 
+    # Sums of squares
     grp_betw = data.groupby(between)[dv]
     n_obs = grp_betw.count().as_matrix()
-
-    # Sums of squares
     grandmean = grp_betw.mean().mean()
     ssb, ssw = np.zeros(n_groups), np.zeros(n_groups)
     for i, (name, group) in enumerate(grp_betw):
         ssb[i] = group.count() * np.sum((group.mean() - grandmean)**2)
         ssw[i] = np.sum((group - group.mean())**2)
-
     ssbetween = np.sum(ssb)
     sswithin = np.sum(ssw)
 
@@ -397,7 +395,7 @@ def anova(dv=None, between=None, data=None, full_table=False):
     np2 = ssbetween / (ssbetween + sswithin)
 
     # Create output dataframe
-    if not full_table:
+    if not detailed:
         aov = pd.DataFrame({'Source': between,
                             'ddof1': ddof1,
                             'ddof2': ddof2,
@@ -470,15 +468,17 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
 
     # Between effect
     grp_betw = data.groupby(between)[dv]
-    ssbetween = ss(grp_betw) / grp_betw.count().max() - ss(grp_betw, 'b') / N
+    n_obs = grp_betw.count().as_matrix()
+    grandmean = grp_betw.mean().mean()
+    ssb = np.zeros(len(n_obs))
+    for i, (name, group) in enumerate(grp_betw):
+        ssb[i] = group.count() * np.sum((group.mean() - grandmean)**2)
+    ssbetween = np.sum(ssb)
 
     # Within-group effect
     grp = data.groupby([between, within])[dv]
-    n_group = grp.count().count()
-    n_obs = grp.count().max()
-    ssa = grp.apply(lambda x: x**2).sum()
-    sswg = ssa - ss(grp) / n_obs
-    sstotal = ssa - ss(grp, 'b') / N
+    sstotal = grp.apply(lambda x: x**2).sum() - ss(grp, 'b') / N
+    sswg = grp.apply(lambda x: x**2).sum() - (grp.sum()**2 / grp.count()).sum()
 
     # Interaction
     ssinter = sstotal - (sswg + sstime + ssbetween)
@@ -514,13 +514,14 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     # Stats table
     aov = pd.DataFrame({'Source': [between, within, 'Interaction'],
                         'SS': [ssbetween, sstime, ssinter],
-                        'DF': [dfbetween, dftime, dfinter],
+                        'DF1': [dfbetween, dftime, dfinter],
+                        'DF2': [dfwg, dfwg, dfwg],
                         'MS': [msbetween, mstime, msinter],
                         'F': [fbetween, ftime, finter],
                         'p-unc': [pbetween, ptime, pinter],
                         'np2': [npsq_between, npsq_time, npsq_inter]
                         })
-    col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'np2']
+    col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc', 'np2']
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
