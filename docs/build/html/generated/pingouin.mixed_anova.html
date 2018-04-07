@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pingouin.compute_effsize_from_T &#8212; pingouin 0.1.dev documentation</title>
+    <title>pingouin.mixed_anova &#8212; pingouin 0.1.dev documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -27,8 +27,8 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pingouin.convert_effsize" href="pingouin.convert_effsize.html" />
-    <link rel="prev" title="pingouin.compute_effsize" href="pingouin.compute_effsize.html" />
+    <link rel="next" title="pingouin.pairwise_ttests" href="pingouin.pairwise_ttests.html" />
+    <link rel="prev" title="pingouin.rm_anova" href="pingouin.rm_anova.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -99,37 +99,52 @@
   <div class="row">
     <div class="col-md-12 content">
       
-  <div class="section" id="pingouin-compute-effsize-from-t">
-<h1>pingouin.compute_effsize_from_T<a class="headerlink" href="#pingouin-compute-effsize-from-t" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="pingouin-mixed-anova">
+<h1>pingouin.mixed_anova<a class="headerlink" href="#pingouin-mixed-anova" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="pingouin.compute_effsize_from_T">
-<code class="descclassname">pingouin.</code><code class="descname">compute_effsize_from_T</code><span class="sig-paren">(</span><em>T</em>, <em>nx=None</em>, <em>ny=None</em>, <em>N=None</em>, <em>eftype='cohen'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/effsize.html#compute_effsize_from_T"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.compute_effsize_from_T" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute effect size from a T-value.</p>
+<dt id="pingouin.mixed_anova">
+<code class="descclassname">pingouin.</code><code class="descname">mixed_anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>between=None</em>, <em>data=None</em>, <em>correction='auto'</em>, <em>remove_na=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#mixed_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.mixed_anova" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mixed-design (split-plot) ANOVA .</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>T</strong> : float</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dv</strong> : string</p>
 <blockquote>
-<div><p>T-value</p>
+<div><p>Name of column containing the dependant variable.</p>
 </div></blockquote>
-<p><strong>nx, ny</strong> : int, optional</p>
+<p><strong>between</strong> : string</p>
 <blockquote>
-<div><p>Length of vector x and y.</p>
+<div><p>Name of column containing the between factor.</p>
 </div></blockquote>
-<p><strong>N</strong> : int, optional</p>
+<p><strong>data</strong> : pandas DataFrame</p>
 <blockquote>
-<div><p>Total sample size (will not be used if nx and ny are specified)</p>
+<div><p>DataFrame</p>
 </div></blockquote>
-<p><strong>eftype</strong> : string, optional</p>
+<p><strong>correction</strong> : string or boolean</p>
 <blockquote>
-<div><p>desired output effect size</p>
+<div><p>If True, return Greenhouse-Geisser corrected p-value.
+If ‘auto’ (default), compute Mauchly’s test of sphericity to determine
+whether the p-values needs to be corrected.</p>
+</div></blockquote>
+<p><strong>remove_na</strong> : boolean</p>
+<blockquote>
+<div><p>If True, automatically remove from the analysis subjects with one or
+more missing values:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Ss</span>    <span class="n">x1</span>       <span class="n">x2</span>       <span class="n">x3</span>
+<span class="mi">1</span>     <span class="mf">5.0</span>      <span class="mf">4.2</span>      <span class="n">nan</span>
+<span class="mi">2</span>     <span class="mf">4.6</span>      <span class="mf">3.6</span>      <span class="mf">3.9</span>
+</pre></div>
+</div>
+<p>In this example, if remove_na == True, Ss 1 will be removed from the
+ANOVA because of the x3 missing value. If False, the two non-missing
+values will be included in the analysis.</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ef</strong> : float</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>aov</strong> : DataFrame</p>
 <blockquote class="last">
-<div><p>Effect size</p>
+<div><p>ANOVA summary</p>
 </div></blockquote>
 </td>
 </tr>
@@ -152,7 +167,7 @@
         <br/>
         
 <div id="sourcelink">
-  <a href="../_sources/generated/pingouin.compute_effsize_from_T.rst.txt"
+  <a href="../_sources/generated/pingouin.mixed_anova.rst.txt"
      rel="nofollow">Source</a>
 </div>
       

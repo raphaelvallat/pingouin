@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pingouin.compute_effsize_from_T &#8212; pingouin 0.1.dev documentation</title>
+    <title>pingouin.anova &#8212; pingouin 0.1.dev documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -27,8 +27,8 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pingouin.convert_effsize" href="pingouin.convert_effsize.html" />
-    <link rel="prev" title="pingouin.compute_effsize" href="pingouin.compute_effsize.html" />
+    <link rel="next" title="pingouin.rm_anova" href="pingouin.rm_anova.html" />
+    <link rel="prev" title="API reference" href="../api.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -99,37 +99,38 @@
   <div class="row">
     <div class="col-md-12 content">
       
-  <div class="section" id="pingouin-compute-effsize-from-t">
-<h1>pingouin.compute_effsize_from_T<a class="headerlink" href="#pingouin-compute-effsize-from-t" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="pingouin-anova">
+<h1>pingouin.anova<a class="headerlink" href="#pingouin-anova" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="pingouin.compute_effsize_from_T">
-<code class="descclassname">pingouin.</code><code class="descname">compute_effsize_from_T</code><span class="sig-paren">(</span><em>T</em>, <em>nx=None</em>, <em>ny=None</em>, <em>N=None</em>, <em>eftype='cohen'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/effsize.html#compute_effsize_from_T"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.compute_effsize_from_T" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute effect size from a T-value.</p>
+<dt id="pingouin.anova">
+<code class="descclassname">pingouin.</code><code class="descname">anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>between=None</em>, <em>data=None</em>, <em>detailed=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.anova" title="Permalink to this definition">¶</a></dt>
+<dd><p>One-way ANOVA.</p>
+<p>Tested against ez R package.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>T</strong> : float</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dv</strong> : string</p>
 <blockquote>
-<div><p>T-value</p>
+<div><p>Name of column containing the dependant variable.</p>
 </div></blockquote>
-<p><strong>nx, ny</strong> : int, optional</p>
+<p><strong>between</strong> : string</p>
 <blockquote>
-<div><p>Length of vector x and y.</p>
+<div><p>Name of column containing the between factor.</p>
 </div></blockquote>
-<p><strong>N</strong> : int, optional</p>
+<p><strong>data</strong> : pandas DataFrame</p>
 <blockquote>
-<div><p>Total sample size (will not be used if nx and ny are specified)</p>
+<div><p>DataFrame</p>
 </div></blockquote>
-<p><strong>eftype</strong> : string, optional</p>
+<p><strong>detailed</strong> : boolean</p>
 <blockquote>
-<div><p>desired output effect size</p>
+<div><p>If True, return a detailed ANOVA table</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ef</strong> : float</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>aov</strong> : DataFrame</p>
 <blockquote class="last">
-<div><p>Effect size</p>
+<div><p>ANOVA summary</p>
 </div></blockquote>
 </td>
 </tr>
@@ -152,7 +153,7 @@
         <br/>
         
 <div id="sourcelink">
-  <a href="../_sources/generated/pingouin.compute_effsize_from_T.rst.txt"
+  <a href="../_sources/generated/pingouin.anova.rst.txt"
      rel="nofollow">Source</a>
 </div>
       

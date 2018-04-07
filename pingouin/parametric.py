@@ -1,9 +1,10 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 import numpy as np
+import pandas as pd
 
 __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
-           "test_sphericity", "rm_anova"]
+           "test_sphericity", "rm_anova", "anova", "mixed_anova"]
 
 
 def gzscore(x):
@@ -164,6 +165,10 @@ def test_sphericity(X, alpha=.05):
         True if data have the sphericity property.
     W : float
         Mauchly's W statistic
+    chi_sq : float
+        Chi-square statistic
+    ddof : int
+        Degrees of freedom
     p : float
         P-value.
     """
@@ -193,12 +198,17 @@ def test_sphericity(X, alpha=.05):
     pval = chi2.sf(chi_sq, ddof)
     sphericity = True if pval > alpha else False
 
-    return sphericity, W, pval
+    return sphericity, W, chi_sq, ddof, pval
+
+
+def ss(grp, type='a'):
+    """Sums of squares"""
+    return np.sum(grp.sum()**2) if type == 'a' else grp.sum().sum()**2
 
 
 def rm_anova(dv=None, within=None, data=None, correction='auto',
-             remove_na=False):
-    """Compute one-way repeated measures ANOVA from a pandas DataFrame.
+             remove_na=False, detailed=False):
+    """One-way repeated measures ANOVA.
 
     Tested against mne.stats.f_mway_rm and ez R package.
 
@@ -216,32 +226,34 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         whether the p-values needs to be corrected.
     remove_na : boolean
         If True, automatically remove from the analysis subjects with one or
-        more missing values:
+        more missing values::
 
-        Ss    x1       x2       x3
-        --    ---      ----     ---
-        1     5.0      4.2      nan
+            Ss    x1       x2       x3
+            1     5.0      4.2      nan
+            2     4.6      3.6      3.9
 
-        If true, Ss 1 will be removed from the ANOVA because of the x3 missing
-        values. If False, the two non-missing values will be included in the
-        analysis.
+        In this example, if remove_na == True, Ss 1 will be removed from the
+        ANOVA because of the x3 missing value. If False, the two non-missing
+        values will be included in the analysis.
+    detailed : boolean
+        If True, return a full ANOVA table
 
     Returns
     -------
     aov : DataFrame
         ANOVA summary
     """
-    import pandas as pd
     from scipy.stats import f
     rm = list(data[within].unique())
     n_rm = len(rm)
+    N = data[dv].size
+
+    # Groupby
+    grp_with = data.groupby(within)[dv]
     n_obs = int(data.groupby(within)[dv].count().max())
 
-    # Calculating SStime
-    grp_with = data.groupby(within)[dv]
-    sstime = n_obs * np.sum((grp_with.mean() - grp_with.mean().mean())**2)
-
-    # Calculating SSw
+    # Sums of squares
+    sstime = ss(grp_with) / n_obs - ss(grp_with, 'b') / N
     ssw = np.zeros(n_rm)
     for i, (name, group) in enumerate(grp_with):
         ssw[i] = np.sum((group - group.mean())**2)
@@ -260,16 +272,23 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     fval = sstime / mserror
     p_unc = f(ddof1, ddof2).sf(fval)
 
+    # Calculating partial eta-square
+    # Similar to (fval * ddof1) / (fval * ddof1 + ddof2)
+    np2 = sstime / (sstime + sserror)
+
+    # Reshape and remove NAN for sphericity estimation and correction
     data_pivot = data.pivot(index='Subj', columns=within, values=dv).dropna()
-    if correction == 'auto' or correction == True:
-        # Compute sphericity using Mauchly's test
-        # Sphericity = pairwise differences in variance between the samples are
-        # ALL equal.
-        sphericity, W_mauchly, p_mauchly = test_sphericity(
-            data_pivot.as_matrix(), alpha=.05)
+
+    # Compute sphericity using Mauchly's test
+    # Sphericity assumption only applies if there are more than 2 levels
+    if correction == 'auto' or correction == True and n_rm >= 3:
+        sphericity, W_mauchly, chi_sq_mauchly, ddof_mauchly, \
+        p_mauchly = test_sphericity(data_pivot.as_matrix(), alpha=.05)
 
         if correction == 'auto':
             correction = True if not sphericity else False
+    else:
+        correction = False
 
     # If required, apply Greenhouse-Geisser correction for sphericity
     if correction:
@@ -281,16 +300,227 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         p_corr = f(corr_ddof1, corr_ddof2).sf(fval)
 
     # Create output dataframe
-    aov = pd.DataFrame({'Effect': within,
-                        'ddof1': ddof1,
-                        'ddof2': ddof2,
-                        'F': fval,
-                        'p_unc': p_unc
-                        }, index=[0])
-    if correction:
-        aov['p-GG-corr'] = p_corr
-        aov['W-Mauchly'] = W_mauchly
-        aov['p-Mauchly'] = p_mauchly
-        aov['sphericity'] = sphericity
+    if not detailed:
+        aov = pd.DataFrame({'Source': within,
+                            'ddof1': ddof1,
+                            'ddof2': ddof2,
+                            'F': fval,
+                            'p-unc': p_unc,
+                            'np2': np2
+                            }, index=[0])
+        if correction:
+            aov['p-GG-corr'] = p_corr
+            aov['W-Mauchly'] = W_mauchly
+            aov['X2-Mauchly'] = chi_sq_mauchly
+            aov['DF-Mauchly'] = ddof_mauchly
+            aov['p-Mauchly'] = p_mauchly
+            aov['sphericity'] = sphericity
 
+        col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc',
+                    'p-GG-corr', 'np2', 'sphericity','W-Mauchly', 'X2-Mauchly',
+                    'DF-Mauchly', 'p-Mauchly']
+    else:
+        aov = pd.DataFrame({'Source': [within, 'Error'],
+                            'SS': [sstime, sserror],
+                            'DF': [ddof1, ddof2],
+                            'MS': [sstime / ddof1, sserror / ddof2],
+                            'F': [fval, np.nan],
+                            'p-unc': [p_unc, np.nan],
+                            'np2': [np2, np.nan]
+                            })
+        if correction:
+            aov['p-GG-corr'] = [p_corr, np.nan]
+            aov['W-Mauchly'] = [W_mauchly, np.nan]
+            aov['X2-Mauchly'] = [chi_sq_mauchly, np.nan]
+            aov['DF-Mauchly'] = np.array([ddof_mauchly, 0], 'int')
+            aov['p-Mauchly'] = [p_mauchly, np.nan]
+            aov['sphericity'] = [sphericity, np.nan]
+
+        col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'p-GG-corr',
+                     'np2', 'sphericity','W-Mauchly', 'X2-Mauchly',
+                     'DF-Mauchly', 'p-Mauchly']
+
+    aov = aov.reindex(columns=col_order)
+    aov.dropna(how='all', axis=1, inplace=True)
+    return aov
+
+
+def anova(dv=None, between=None, data=None, detailed=False):
+    """One-way ANOVA.
+
+    Tested against ez R package.
+
+    Parameters
+    ----------
+    dv : string
+        Name of column containing the dependant variable.
+    between : string
+        Name of column containing the between factor.
+    data : pandas DataFrame
+        DataFrame
+    detailed : boolean
+        If True, return a detailed ANOVA table
+
+    Returns
+    -------
+    aov : DataFrame
+        ANOVA summary
+    """
+    from scipy.stats import f
+    groups = list(data[between].unique())
+    n_groups = len(groups)
+    N = data[dv].size
+
+    # Sums of squares
+    grp_betw = data.groupby(between)[dv]
+    n_obs = grp_betw.count().as_matrix()
+    grandmean = grp_betw.mean().mean()
+    ssb, ssw = np.zeros(n_groups), np.zeros(n_groups)
+    for i, (name, group) in enumerate(grp_betw):
+        ssb[i] = group.count() * np.sum((group.mean() - grandmean)**2)
+        ssw[i] = np.sum((group - group.mean())**2)
+    ssbetween = np.sum(ssb)
+    sswithin = np.sum(ssw)
+
+    # Calculate degrees of freedom, F- and p-values
+    ddof1 = n_groups - 1
+    msbetween = ssbetween / ddof1
+    ddof2 = N - n_groups
+    mswithin = sswithin / ddof2
+    fval = msbetween / mswithin
+    p_unc = f(ddof1, ddof2).sf(fval)
+
+    # Calculating partial eta-square
+    # Similar to (fval * ddof1) / (fval * ddof1 + ddof2)
+    np2 = ssbetween / (ssbetween + sswithin)
+
+    # Create output dataframe
+    if not detailed:
+        aov = pd.DataFrame({'Source': between,
+                            'ddof1': ddof1,
+                            'ddof2': ddof2,
+                            'F': fval,
+                            'p-unc': p_unc,
+                            'np2': np2
+                            }, index=[0])
+
+        col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc', 'np2']
+    else:
+        aov = pd.DataFrame({'Source': [between, 'Within'],
+                            'SS': [ssbetween, sswithin],
+                            'DF': [ddof1, ddof2],
+                            'MS': [msbetween, mswithin],
+                            'F': [fval, np.nan],
+                            'p-unc': [p_unc, np.nan],
+                            'np2': [np2, np.nan]
+                            })
+        col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'np2']
+
+    aov = aov.reindex(columns=col_order)
+    aov.dropna(how='all', axis=1, inplace=True)
+    return aov
+
+
+def mixed_anova(dv=None, within=None, between=None, data=None,
+                correction='auto', remove_na=False):
+    """Mixed-design (split-plot) ANOVA .
+
+    Parameters
+    ----------
+    dv : string
+        Name of column containing the dependant variable.
+    between : string
+        Name of column containing the between factor.
+    data : pandas DataFrame
+        DataFrame
+    correction : string or boolean
+        If True, return Greenhouse-Geisser corrected p-value.
+        If 'auto' (default), compute Mauchly's test of sphericity to determine
+        whether the p-values needs to be corrected.
+    remove_na : boolean
+        If True, automatically remove from the analysis subjects with one or
+        more missing values::
+
+            Ss    x1       x2       x3
+            1     5.0      4.2      nan
+            2     4.6      3.6      3.9
+
+        In this example, if remove_na == True, Ss 1 will be removed from the
+        ANOVA because of the x3 missing value. If False, the two non-missing
+        values will be included in the analysis.
+
+    Returns
+    -------
+    aov : DataFrame
+        ANOVA summary
+    """
+    from scipy.stats import f
+    N = data[dv].size
+
+    # SUMS OF SQUARES
+    # Time effect
+    grp_with = data.groupby(within)[dv]
+    n_obs = grp_with.count().max()
+    n_rm = grp_with.count().count()
+    sstime = ss(grp_with) / n_obs - ss(grp_with, 'b') / N
+
+    # Between effect
+    grp_betw = data.groupby(between)[dv]
+    n_obs = grp_betw.count().as_matrix()
+    grandmean = grp_betw.mean().mean()
+    ssb = np.zeros(len(n_obs))
+    for i, (name, group) in enumerate(grp_betw):
+        ssb[i] = group.count() * np.sum((group.mean() - grandmean)**2)
+    ssbetween = np.sum(ssb)
+
+    # Within-group effect
+    grp = data.groupby([between, within])[dv]
+    sstotal = grp.apply(lambda x: x**2).sum() - ss(grp, 'b') / N
+    sswg = grp.apply(lambda x: x**2).sum() - (grp.sum()**2 / grp.count()).sum()
+
+    # Interaction
+    ssinter = sstotal - (sswg + sstime + ssbetween)
+
+    # DEGREES OF FREEDOM
+    dftime = grp_with.count().count() - 1
+    dfbetween = grp_betw.count().count() - 1
+    dfwg = N - grp.count().count()
+    dftotal = N - 1
+    dfinter = dftime * dfbetween
+
+    # MEAN SQUARES
+    mstime = sstime / dftime
+    msbetween = ssbetween / dfbetween
+    mswg = sswg / dfwg
+    msinter = ssinter / dfinter
+
+    # F VALUES
+    ftime = mstime / mswg
+    fbetween = msbetween / mswg
+    finter = msinter / mswg
+
+    # P-values
+    ptime = f(dftime, dfwg).sf(ftime)
+    pbetween = f(dfbetween, dfwg).sf(fbetween)
+    pinter = f(dfinter, dfwg).sf(finter)
+
+    # Effects sizes
+    npsq_between = fbetween * dfbetween / (fbetween * dfbetween + dfwg)
+    npsq_time = ftime * dftime / (ftime * dftime + dfwg)
+    npsq_inter = ssinter / (ssinter + sswg)
+
+    # Stats table
+    aov = pd.DataFrame({'Source': [between, within, 'Interaction'],
+                        'SS': [ssbetween, sstime, ssinter],
+                        'DF1': [dfbetween, dftime, dfinter],
+                        'DF2': [dfwg, dfwg, dfwg],
+                        'MS': [msbetween, mstime, msinter],
+                        'F': [fbetween, ftime, finter],
+                        'p-unc': [pbetween, ptime, pinter],
+                        'np2': [npsq_between, npsq_time, npsq_inter]
+                        })
+    col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc', 'np2']
+
+    aov = aov.reindex(columns=col_order)
+    aov.dropna(how='all', axis=1, inplace=True)
     return aov

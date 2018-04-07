@@ -10,7 +10,9 @@ Initial release.
 
 **ANOVA**
 
+a. One-way
 a. One-way repeated measures
+a. Two-way split-plot (one between factor and one within factor)
 
 
 **Pairwise comparisons**

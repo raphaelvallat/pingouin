@@ -19,7 +19,7 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, paired, alpha,
                         'std(B)': np.std(y, ddof=1),
                         'Type': effects,
                         'Paired': paired,
-                        'Alpha': alpha,
+                        # 'Alpha': alpha,
                         'T-val': t,
                         'p-unc': p,
                         'Eff_size': ef,
@@ -31,7 +31,7 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, paired, alpha,
 def pairwise_ttests(dv=None, between=None, within=None, effects='all',
                     data=None, alpha=.05, tail='two-sided', padjust='none',
                     effsize='hedges', return_desc=True, remove_nan=True):
-    '''Pairwise T-tests in Pandas.
+    '''Pairwise T-tests.
 
     Parameters
     ----------
@@ -156,17 +156,19 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         stats['Tail'] = 'two-sided'
 
     # Multiple comparisons
-    if padjust is not None or padjust.lower() is not 'none':
-        reject, stats['p-corr'] = multicomp(stats['p-unc'].values, alpha=alpha,
-                                       method=padjust)
-        stats['p-adjust'] = padjust
-        stats['reject'] = reject
+    padjust = None if stats['p-unc'].size <= 1 else padjust
+    if padjust is not None:
+        if padjust.lower() is not 'none':
+            reject, stats['p-corr'] = multicomp(stats['p-unc'].values,
+                                                alpha=alpha, method=padjust)
+            stats['p-adjust'] = padjust
+            # stats['reject'] = reject
     else:
         stats['p-corr'] = None
         stats['p-adjust'] = None
-        stats['reject'] = stats['p-unc'] < alpha
+        # stats['reject'] = stats['p-unc'] < alpha
 
-    stats['reject'] = stats['reject'].astype(bool)
+    # stats['reject'] = stats['reject'].astype(bool)
     stats['Paired'] = stats['Paired'].astype(bool)
 
     if not return_desc:

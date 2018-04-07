@@ -4,7 +4,6 @@ import numpy as np
 from scipy import stats
 from six import string_types
 import pandas as pd
-from tabulate import tabulate
 
 __all__ = ["print_table", "_check_eftype", "_remove_rm_na", "_check_data",
            "_check_dataframe", "_extract_effects", "print_table"]
@@ -17,14 +16,17 @@ def _check_eftype(eftype):
     else:
         return False
 
-def print_table(df, floatfmt=".5f"):
+def print_table(df, floatfmt=".4f"):
     """Nice display of table"""
     if 'F' in df.keys():
-        print('=============\nANOVA SUMMARY\n=============\n')
+        print('\n=============\nANOVA SUMMARY\n=============\n')
+    elif 'A' in df.keys():
+        print('\n==============\nPOST HOC TESTS\n==============\n')
 
     try:
         from tabulate import tabulate
         print(tabulate(df, headers="keys", showindex=False, floatfmt=floatfmt))
+        print('')
     except:
         print(df)
 
