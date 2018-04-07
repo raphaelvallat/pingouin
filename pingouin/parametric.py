@@ -483,7 +483,7 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     # DEGREES OF FREEDOM
     dftime = grp_with.count().count() - 1
     dfbetween = grp_betw.count().count() - 1
-    dfeb = grp_betw.count().sum() - grp_betw.count().count()
+    dfeb = grp_with.count().max() - grp_betw.count().count()
     dfwg = dftime * (grp_with.count().max() - grp.count().count())
     dftotal = N - 1
     dfinter = dftime * dfbetween
