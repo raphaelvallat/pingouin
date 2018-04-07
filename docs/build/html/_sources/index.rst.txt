@@ -8,9 +8,9 @@ Pingouin
 
 Its main features are:
 
-1. One-way repeated measures ANOVA
+1. ANOVA: one-way, repeated measures, and mixed (split-plot)
 
-2. Post-hocs pairwise T-tests from a mixed model ANOVA
+2. Post-hocs pairwise T-tests
 
 3. Tests for sphericity, normality and homoscedasticity
 
@@ -56,18 +56,25 @@ Quick start
  # Mixed repeated measures design
  #   - Dependent variable ('DV') = hours of sleep per night
  #   - Between-factor ('Group') = two-levels (Insomnia / Control)
- #   - Within-factor ('Time') = three levels (Pre, Post1, Post2)
+ #   - Within-factor ('Time') = three levels (Pre, Post-6months, Post-12months)
  df = pd.read_csv('examples/sleep_dataset.csv')
+ print(df.head())
 
- stats = pairwise_ttests(dv='DV', within='Time', between='Group',
-                         effects='all', data=df, alpha=.05,
-                         tail='two-sided', padjust='fdr_by', effsize='hedges')
- print(stats)
+ # Compute mixed-design ANOVA
+ aov = mixed_anova(dv='DV', within='Time', between='Group', data=df)
+ print_table(aov)
+
+ # Compute FDR-corrected post-hocs with effect sizes
+ posthocs = pairwise_ttests(dv='DV', within='Time', between='Group', data=df,
+                            tail='two-sided', padjust='fdr_bh', effsize='cohen')
+ print_table(posthocs)
+
 
 Output:
 
-.. figure::  /pictures/pairwise_stats_all.png
+.. figure::  /pictures/readme_anova.png
   :align:   center
+
 
 Contents:
 =========

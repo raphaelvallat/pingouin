@@ -208,7 +208,7 @@ def ss(grp, type='a'):
 
 def rm_anova(dv=None, within=None, data=None, correction='auto',
              remove_na=False, detailed=False):
-    """Compute one-way repeated measures ANOVA from a pandas DataFrame.
+    """One-way repeated measures ANOVA.
 
     Tested against mne.stats.f_mway_rm and ez R package.
 
@@ -226,15 +226,15 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         whether the p-values needs to be corrected.
     remove_na : boolean
         If True, automatically remove from the analysis subjects with one or
-        more missing values:
+        more missing values::
 
-        Ss    x1       x2       x3
-        --    ---      ----     ---
-        1     5.0      4.2      nan
+            Ss    x1       x2       x3
+            1     5.0      4.2      nan
+            2     4.6      3.6      3.9
 
-        If true, Ss 1 will be removed from the ANOVA because of the x3 missing
-        values. If False, the two non-missing values will be included in the
-        analysis.
+        In this example, if remove_na == True, Ss 1 will be removed from the
+        ANOVA because of the x3 missing value. If False, the two non-missing
+        values will be included in the analysis.
     detailed : boolean
         If True, return a full ANOVA table
 
@@ -346,7 +346,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
 
 
 def anova(dv=None, between=None, data=None, detailed=False):
-    """Compute one-way ANOVA from a pandas DataFrame.
+    """One-way ANOVA.
 
     Tested against ez R package.
 
@@ -423,9 +423,7 @@ def anova(dv=None, between=None, data=None, detailed=False):
 
 def mixed_anova(dv=None, within=None, between=None, data=None,
                 correction='auto', remove_na=False):
-    """Compute one-way ANOVA from a pandas DataFrame.
-
-    Tested against ez R package.
+    """Mixed-design (split-plot) ANOVA .
 
     Parameters
     ----------
@@ -441,15 +439,15 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
         whether the p-values needs to be corrected.
     remove_na : boolean
         If True, automatically remove from the analysis subjects with one or
-        more missing values:
+        more missing values::
 
-        Ss    x1       x2       x3
-        --    ---      ----     ---
-        1     5.0      4.2      nan
+            Ss    x1       x2       x3
+            1     5.0      4.2      nan
+            2     4.6      3.6      3.9
 
-        If true, Ss 1 will be removed from the ANOVA because of the x3 missing
-        values. If False, the two non-missing values will be included in the
-        analysis.
+        In this example, if remove_na == True, Ss 1 will be removed from the
+        ANOVA because of the x3 missing value. If False, the two non-missing
+        values will be included in the analysis.
 
     Returns
     -------

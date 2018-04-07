@@ -101,9 +101,10 @@
 <span></span><span class="c1"># Author: Raphael Vallat &lt;raphaelvallat9@gmail.com&gt;</span>
 <span class="c1"># Date: April 2018</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;gzscore&quot;</span><span class="p">,</span> <span class="s2">&quot;test_normality&quot;</span><span class="p">,</span> <span class="s2">&quot;test_homoscedasticity&quot;</span><span class="p">,</span> <span class="s2">&quot;test_dist&quot;</span><span class="p">,</span>
-           <span class="s2">&quot;test_sphericity&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_anova&quot;</span><span class="p">]</span>
+           <span class="s2">&quot;test_sphericity&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_anova&quot;</span><span class="p">,</span> <span class="s2">&quot;anova&quot;</span><span class="p">,</span> <span class="s2">&quot;mixed_anova&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="gzscore"><a class="viewcode-back" href="../../generated/pingouin.gzscore.html#pingouin.gzscore">[docs]</a><span class="k">def</span> <span class="nf">gzscore</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
@@ -264,6 +265,10 @@
 <span class="sd">        True if data have the sphericity property.</span>
 <span class="sd">    W : float</span>
 <span class="sd">        Mauchly&#39;s W statistic</span>
+<span class="sd">    chi_sq : float</span>
+<span class="sd">        Chi-square statistic</span>
+<span class="sd">    ddof : int</span>
+<span class="sd">        Degrees of freedom</span>
 <span class="sd">    p : float</span>
 <span class="sd">        P-value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -293,11 +298,17 @@
     <span class="n">pval</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">chi_sq</span><span class="p">,</span> <span class="n">ddof</span><span class="p">)</span>
     <span class="n">sphericity</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">pval</span> <span class="o">&gt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="kc">False</span>
 
-    <span class="k">return</span> <span class="n">sphericity</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">pval</span></div>
+    <span class="k">return</span> <span class="n">sphericity</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">chi_sq</span><span class="p">,</span> <span class="n">ddof</span><span class="p">,</span> <span class="n">pval</span></div>
 
 
-<div class="viewcode-block" id="rm_anova"><a class="viewcode-back" href="../../generated/pingouin.rm_anova.html#pingouin.rm_anova">[docs]</a><span class="k">def</span> <span class="nf">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute one-way repeated measures ANOVA from a pandas DataFrame.</span>
+<span class="k">def</span> <span class="nf">ss</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sums of squares&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grp</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;a&#39;</span> <span class="k">else</span> <span class="n">grp</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span>
+
+
+<div class="viewcode-block" id="rm_anova"><a class="viewcode-back" href="../../generated/pingouin.rm_anova.html#pingouin.rm_anova">[docs]</a><span class="k">def</span> <span class="nf">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>
+             <span class="n">remove_na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;One-way repeated measures ANOVA.</span>
 
 <span class="sd">    Tested against mne.stats.f_mway_rm and ez R package.</span>
 
@@ -311,25 +322,38 @@
 <span class="sd">        DataFrame</span>
 <span class="sd">    correction : string or boolean</span>
 <span class="sd">        If True, return Greenhouse-Geisser corrected p-value.</span>
-<span class="sd">        If &#39;auto&#39; (default), compute Mauchly&#39;s test of sphericity to determine whether the</span>
-<span class="sd">        p-values needs to be corrected.</span>
+<span class="sd">        If &#39;auto&#39; (default), compute Mauchly&#39;s test of sphericity to determine</span>
+<span class="sd">        whether the p-values needs to be corrected.</span>
+<span class="sd">    remove_na : boolean</span>
+<span class="sd">        If True, automatically remove from the analysis subjects with one or</span>
+<span class="sd">        more missing values::</span>
+
+<span class="sd">            Ss    x1       x2       x3</span>
+<span class="sd">            1     5.0      4.2      nan</span>
+<span class="sd">            2     4.6      3.6      3.9</span>
+
+<span class="sd">        In this example, if remove_na == True, Ss 1 will be removed from the</span>
+<span class="sd">        ANOVA because of the x3 missing value. If False, the two non-missing</span>
+<span class="sd">        values will be included in the analysis.</span>
+<span class="sd">    detailed : boolean</span>
+<span class="sd">        If True, return a full ANOVA table</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    aov : DataFrame</span>
 <span class="sd">        ANOVA summary</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">f</span>
     <span class="n">rm</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">within</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
     <span class="n">n_rm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rm</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="c1"># Groupby</span>
+    <span class="n">grp_with</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">within</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
     <span class="n">n_obs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">within</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
 
-    <span class="c1"># Calculating SStime</span>
-    <span class="n">grp_with</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">within</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
-    <span class="n">sstime</span> <span class="o">=</span> <span class="n">n_obs</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">grp_with</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">grp_with</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-
-    <span class="c1"># Calculating SSw</span>
+    <span class="c1"># Sums of squares</span>
+    <span class="n">sstime</span> <span class="o">=</span> <span class="n">ss</span><span class="p">(</span><span class="n">grp_with</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_obs</span> <span class="o">-</span> <span class="n">ss</span><span class="p">(</span><span class="n">grp_with</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
     <span class="n">ssw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_rm</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grp_with</span><span class="p">):</span>
         <span class="n">ssw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">group</span> <span class="o">-</span> <span class="n">group</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
@@ -348,16 +372,23 @@
     <span class="n">fval</span> <span class="o">=</span> <span class="n">sstime</span> <span class="o">/</span> <span class="n">mserror</span>
     <span class="n">p_unc</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">ddof1</span><span class="p">,</span> <span class="n">ddof2</span><span class="p">)</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">fval</span><span class="p">)</span>
 
+    <span class="c1"># Calculating partial eta-square</span>
+    <span class="c1"># Similar to (fval * ddof1) / (fval * ddof1 + ddof2)</span>
+    <span class="n">np2</span> <span class="o">=</span> <span class="n">sstime</span> <span class="o">/</span> <span class="p">(</span><span class="n">sstime</span> <span class="o">+</span> <span class="n">sserror</span><span class="p">)</span>
+
+    <span class="c1"># Reshape and remove NAN for sphericity estimation and correction</span>
     <span class="n">data_pivot</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;Subj&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">dv</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">correction</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span> <span class="ow">or</span> <span class="n">correction</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="c1"># Compute sphericity using Mauchly&#39;s test</span>
-        <span class="c1"># Sphericity = pairwise differences in variance between the samples are</span>
-        <span class="c1"># ALL equal.</span>
-        <span class="n">sphericity</span><span class="p">,</span> <span class="n">W_mauchly</span><span class="p">,</span> <span class="n">p_mauchly</span> <span class="o">=</span> <span class="n">test_sphericity</span><span class="p">(</span>
-            <span class="n">data_pivot</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">(),</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">)</span>
+
+    <span class="c1"># Compute sphericity using Mauchly&#39;s test</span>
+    <span class="c1"># Sphericity assumption only applies if there are more than 2 levels</span>
+    <span class="k">if</span> <span class="n">correction</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span> <span class="ow">or</span> <span class="n">correction</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">n_rm</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">sphericity</span><span class="p">,</span> <span class="n">W_mauchly</span><span class="p">,</span> <span class="n">chi_sq_mauchly</span><span class="p">,</span> <span class="n">ddof_mauchly</span><span class="p">,</span> \
+        <span class="n">p_mauchly</span> <span class="o">=</span> <span class="n">test_sphericity</span><span class="p">(</span><span class="n">data_pivot</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">(),</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">correction</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
             <span class="n">correction</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">sphericity</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">correction</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># If required, apply Greenhouse-Geisser correction for sphericity</span>
     <span class="k">if</span> <span class="n">correction</span><span class="p">:</span>
@@ -369,18 +400,229 @@
         <span class="n">p_corr</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">corr_ddof1</span><span class="p">,</span> <span class="n">corr_ddof2</span><span class="p">)</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">fval</span><span class="p">)</span>
 
     <span class="c1"># Create output dataframe</span>
-    <span class="n">aov</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Effect&#39;</span><span class="p">:</span> <span class="n">within</span><span class="p">,</span>
-                        <span class="s1">&#39;ddof1&#39;</span><span class="p">:</span> <span class="n">ddof1</span><span class="p">,</span>
-                        <span class="s1">&#39;ddof2&#39;</span><span class="p">:</span> <span class="n">ddof2</span><span class="p">,</span>
-                        <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="n">fval</span><span class="p">,</span>
-                        <span class="s1">&#39;p_unc&#39;</span><span class="p">:</span> <span class="n">p_unc</span>
-                        <span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="k">if</span> <span class="n">correction</span><span class="p">:</span>
-        <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-GG-corr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_corr</span>
-        <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;W-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">W_mauchly</span>
-        <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_mauchly</span>
-        <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;sphericity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sphericity</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">detailed</span><span class="p">:</span>
+        <span class="n">aov</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Source&#39;</span><span class="p">:</span> <span class="n">within</span><span class="p">,</span>
+                            <span class="s1">&#39;ddof1&#39;</span><span class="p">:</span> <span class="n">ddof1</span><span class="p">,</span>
+                            <span class="s1">&#39;ddof2&#39;</span><span class="p">:</span> <span class="n">ddof2</span><span class="p">,</span>
+                            <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="n">fval</span><span class="p">,</span>
+                            <span class="s1">&#39;p-unc&#39;</span><span class="p">:</span> <span class="n">p_unc</span><span class="p">,</span>
+                            <span class="s1">&#39;np2&#39;</span><span class="p">:</span> <span class="n">np2</span>
+                            <span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">correction</span><span class="p">:</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-GG-corr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_corr</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;W-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">W_mauchly</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;X2-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chi_sq_mauchly</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;DF-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ddof_mauchly</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_mauchly</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;sphericity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sphericity</span>
 
+        <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Source&#39;</span><span class="p">,</span> <span class="s1">&#39;ddof1&#39;</span><span class="p">,</span> <span class="s1">&#39;ddof2&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;p-GG-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">,</span> <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span><span class="s1">&#39;W-Mauchly&#39;</span><span class="p">,</span> <span class="s1">&#39;X2-Mauchly&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;DF-Mauchly&#39;</span><span class="p">,</span> <span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">aov</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Source&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">within</span><span class="p">,</span> <span class="s1">&#39;Error&#39;</span><span class="p">],</span>
+                            <span class="s1">&#39;SS&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">sstime</span><span class="p">,</span> <span class="n">sserror</span><span class="p">],</span>
+                            <span class="s1">&#39;DF&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">ddof1</span><span class="p">,</span> <span class="n">ddof2</span><span class="p">],</span>
+                            <span class="s1">&#39;MS&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">sstime</span> <span class="o">/</span> <span class="n">ddof1</span><span class="p">,</span> <span class="n">sserror</span> <span class="o">/</span> <span class="n">ddof2</span><span class="p">],</span>
+                            <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">fval</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+                            <span class="s1">&#39;p-unc&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">p_unc</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+                            <span class="s1">&#39;np2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+                            <span class="p">})</span>
+        <span class="k">if</span> <span class="n">correction</span><span class="p">:</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-GG-corr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">p_corr</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;W-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">W_mauchly</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;X2-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">chi_sq_mauchly</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;DF-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ddof_mauchly</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">p_mauchly</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;sphericity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">sphericity</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+
+        <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Source&#39;</span><span class="p">,</span> <span class="s1">&#39;SS&#39;</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span> <span class="s1">&#39;p-GG-corr&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;np2&#39;</span><span class="p">,</span> <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span><span class="s1">&#39;W-Mauchly&#39;</span><span class="p">,</span> <span class="s1">&#39;X2-Mauchly&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;DF-Mauchly&#39;</span><span class="p">,</span> <span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span>
+
+    <span class="n">aov</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
+    <span class="n">aov</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">aov</span></div>
+
+
+<div class="viewcode-block" id="anova"><a class="viewcode-back" href="../../generated/pingouin.anova.html#pingouin.anova">[docs]</a><span class="k">def</span> <span class="nf">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;One-way ANOVA.</span>
+
+<span class="sd">    Tested against ez R package.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dv : string</span>
+<span class="sd">        Name of column containing the dependant variable.</span>
+<span class="sd">    between : string</span>
+<span class="sd">        Name of column containing the between factor.</span>
+<span class="sd">    data : pandas DataFrame</span>
+<span class="sd">        DataFrame</span>
+<span class="sd">    detailed : boolean</span>
+<span class="sd">        If True, return a detailed ANOVA table</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    aov : DataFrame</span>
+<span class="sd">        ANOVA summary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">f</span>
+    <span class="n">groups</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">between</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+    <span class="n">n_groups</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="c1"># Sums of squares</span>
+    <span class="n">grp_betw</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">between</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
+    <span class="n">n_obs</span> <span class="o">=</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">()</span>
+    <span class="n">grandmean</span> <span class="o">=</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">ssb</span><span class="p">,</span> <span class="n">ssw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_groups</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_groups</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grp_betw</span><span class="p">):</span>
+        <span class="n">ssb</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">group</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">grandmean</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">ssw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">group</span> <span class="o">-</span> <span class="n">group</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">ssbetween</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ssb</span><span class="p">)</span>
+    <span class="n">sswithin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ssw</span><span class="p">)</span>
+
+    <span class="c1"># Calculate degrees of freedom, F- and p-values</span>
+    <span class="n">ddof1</span> <span class="o">=</span> <span class="n">n_groups</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">msbetween</span> <span class="o">=</span> <span class="n">ssbetween</span> <span class="o">/</span> <span class="n">ddof1</span>
+    <span class="n">ddof2</span> <span class="o">=</span> <span class="n">N</span> <span class="o">-</span> <span class="n">n_groups</span>
+    <span class="n">mswithin</span> <span class="o">=</span> <span class="n">sswithin</span> <span class="o">/</span> <span class="n">ddof2</span>
+    <span class="n">fval</span> <span class="o">=</span> <span class="n">msbetween</span> <span class="o">/</span> <span class="n">mswithin</span>
+    <span class="n">p_unc</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">ddof1</span><span class="p">,</span> <span class="n">ddof2</span><span class="p">)</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">fval</span><span class="p">)</span>
+
+    <span class="c1"># Calculating partial eta-square</span>
+    <span class="c1"># Similar to (fval * ddof1) / (fval * ddof1 + ddof2)</span>
+    <span class="n">np2</span> <span class="o">=</span> <span class="n">ssbetween</span> <span class="o">/</span> <span class="p">(</span><span class="n">ssbetween</span> <span class="o">+</span> <span class="n">sswithin</span><span class="p">)</span>
+
+    <span class="c1"># Create output dataframe</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">detailed</span><span class="p">:</span>
+        <span class="n">aov</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Source&#39;</span><span class="p">:</span> <span class="n">between</span><span class="p">,</span>
+                            <span class="s1">&#39;ddof1&#39;</span><span class="p">:</span> <span class="n">ddof1</span><span class="p">,</span>
+                            <span class="s1">&#39;ddof2&#39;</span><span class="p">:</span> <span class="n">ddof2</span><span class="p">,</span>
+                            <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="n">fval</span><span class="p">,</span>
+                            <span class="s1">&#39;p-unc&#39;</span><span class="p">:</span> <span class="n">p_unc</span><span class="p">,</span>
+                            <span class="s1">&#39;np2&#39;</span><span class="p">:</span> <span class="n">np2</span>
+                            <span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Source&#39;</span><span class="p">,</span> <span class="s1">&#39;ddof1&#39;</span><span class="p">,</span> <span class="s1">&#39;ddof2&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">aov</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Source&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">between</span><span class="p">,</span> <span class="s1">&#39;Within&#39;</span><span class="p">],</span>
+                            <span class="s1">&#39;SS&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">ssbetween</span><span class="p">,</span> <span class="n">sswithin</span><span class="p">],</span>
+                            <span class="s1">&#39;DF&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">ddof1</span><span class="p">,</span> <span class="n">ddof2</span><span class="p">],</span>
+                            <span class="s1">&#39;MS&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">msbetween</span><span class="p">,</span> <span class="n">mswithin</span><span class="p">],</span>
+                            <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">fval</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+                            <span class="s1">&#39;p-unc&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">p_unc</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+                            <span class="s1">&#39;np2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+                            <span class="p">})</span>
+        <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Source&#39;</span><span class="p">,</span> <span class="s1">&#39;SS&#39;</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">]</span>
+
+    <span class="n">aov</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
+    <span class="n">aov</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">aov</span></div>
+
+
+<div class="viewcode-block" id="mixed_anova"><a class="viewcode-back" href="../../generated/pingouin.mixed_anova.html#pingouin.mixed_anova">[docs]</a><span class="k">def</span> <span class="nf">mixed_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">remove_na</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mixed-design (split-plot) ANOVA .</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dv : string</span>
+<span class="sd">        Name of column containing the dependant variable.</span>
+<span class="sd">    between : string</span>
+<span class="sd">        Name of column containing the between factor.</span>
+<span class="sd">    data : pandas DataFrame</span>
+<span class="sd">        DataFrame</span>
+<span class="sd">    correction : string or boolean</span>
+<span class="sd">        If True, return Greenhouse-Geisser corrected p-value.</span>
+<span class="sd">        If &#39;auto&#39; (default), compute Mauchly&#39;s test of sphericity to determine</span>
+<span class="sd">        whether the p-values needs to be corrected.</span>
+<span class="sd">    remove_na : boolean</span>
+<span class="sd">        If True, automatically remove from the analysis subjects with one or</span>
+<span class="sd">        more missing values::</span>
+
+<span class="sd">            Ss    x1       x2       x3</span>
+<span class="sd">            1     5.0      4.2      nan</span>
+<span class="sd">            2     4.6      3.6      3.9</span>
+
+<span class="sd">        In this example, if remove_na == True, Ss 1 will be removed from the</span>
+<span class="sd">        ANOVA because of the x3 missing value. If False, the two non-missing</span>
+<span class="sd">        values will be included in the analysis.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    aov : DataFrame</span>
+<span class="sd">        ANOVA summary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">f</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="c1"># SUMS OF SQUARES</span>
+    <span class="c1"># Time effect</span>
+    <span class="n">grp_with</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">within</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
+    <span class="n">n_obs</span> <span class="o">=</span> <span class="n">grp_with</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">n_rm</span> <span class="o">=</span> <span class="n">grp_with</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">sstime</span> <span class="o">=</span> <span class="n">ss</span><span class="p">(</span><span class="n">grp_with</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_obs</span> <span class="o">-</span> <span class="n">ss</span><span class="p">(</span><span class="n">grp_with</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
+
+    <span class="c1"># Between effect</span>
+    <span class="n">grp_betw</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">between</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
+    <span class="n">n_obs</span> <span class="o">=</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">()</span>
+    <span class="n">grandmean</span> <span class="o">=</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">ssb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">n_obs</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grp_betw</span><span class="p">):</span>
+        <span class="n">ssb</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">group</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">grandmean</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">ssbetween</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ssb</span><span class="p">)</span>
+
+    <span class="c1"># Within-group effect</span>
+    <span class="n">grp</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">between</span><span class="p">,</span> <span class="n">within</span><span class="p">])[</span><span class="n">dv</span><span class="p">]</span>
+    <span class="n">sstotal</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="n">ss</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
+    <span class="n">sswg</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="p">(</span><span class="n">grp</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">grp</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="c1"># Interaction</span>
+    <span class="n">ssinter</span> <span class="o">=</span> <span class="n">sstotal</span> <span class="o">-</span> <span class="p">(</span><span class="n">sswg</span> <span class="o">+</span> <span class="n">sstime</span> <span class="o">+</span> <span class="n">ssbetween</span><span class="p">)</span>
+
+    <span class="c1"># DEGREES OF FREEDOM</span>
+    <span class="n">dftime</span> <span class="o">=</span> <span class="n">grp_with</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">dfbetween</span> <span class="o">=</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">dfwg</span> <span class="o">=</span> <span class="n">N</span> <span class="o">-</span> <span class="n">grp</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">dftotal</span> <span class="o">=</span> <span class="n">N</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">dfinter</span> <span class="o">=</span> <span class="n">dftime</span> <span class="o">*</span> <span class="n">dfbetween</span>
+
+    <span class="c1"># MEAN SQUARES</span>
+    <span class="n">mstime</span> <span class="o">=</span> <span class="n">sstime</span> <span class="o">/</span> <span class="n">dftime</span>
+    <span class="n">msbetween</span> <span class="o">=</span> <span class="n">ssbetween</span> <span class="o">/</span> <span class="n">dfbetween</span>
+    <span class="n">mswg</span> <span class="o">=</span> <span class="n">sswg</span> <span class="o">/</span> <span class="n">dfwg</span>
+    <span class="n">msinter</span> <span class="o">=</span> <span class="n">ssinter</span> <span class="o">/</span> <span class="n">dfinter</span>
+
+    <span class="c1"># F VALUES</span>
+    <span class="n">ftime</span> <span class="o">=</span> <span class="n">mstime</span> <span class="o">/</span> <span class="n">mswg</span>
+    <span class="n">fbetween</span> <span class="o">=</span> <span class="n">msbetween</span> <span class="o">/</span> <span class="n">mswg</span>
+    <span class="n">finter</span> <span class="o">=</span> <span class="n">msinter</span> <span class="o">/</span> <span class="n">mswg</span>
+
+    <span class="c1"># P-values</span>
+    <span class="n">ptime</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">dftime</span><span class="p">,</span> <span class="n">dfwg</span><span class="p">)</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">ftime</span><span class="p">)</span>
+    <span class="n">pbetween</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">dfbetween</span><span class="p">,</span> <span class="n">dfwg</span><span class="p">)</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">fbetween</span><span class="p">)</span>
+    <span class="n">pinter</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">dfinter</span><span class="p">,</span> <span class="n">dfwg</span><span class="p">)</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">finter</span><span class="p">)</span>
+
+    <span class="c1"># Effects sizes</span>
+    <span class="n">npsq_between</span> <span class="o">=</span> <span class="n">fbetween</span> <span class="o">*</span> <span class="n">dfbetween</span> <span class="o">/</span> <span class="p">(</span><span class="n">fbetween</span> <span class="o">*</span> <span class="n">dfbetween</span> <span class="o">+</span> <span class="n">dfwg</span><span class="p">)</span>
+    <span class="n">npsq_time</span> <span class="o">=</span> <span class="n">ftime</span> <span class="o">*</span> <span class="n">dftime</span> <span class="o">/</span> <span class="p">(</span><span class="n">ftime</span> <span class="o">*</span> <span class="n">dftime</span> <span class="o">+</span> <span class="n">dfwg</span><span class="p">)</span>
+    <span class="n">npsq_inter</span> <span class="o">=</span> <span class="n">ssinter</span> <span class="o">/</span> <span class="p">(</span><span class="n">ssinter</span> <span class="o">+</span> <span class="n">sswg</span><span class="p">)</span>
+
+    <span class="c1"># Stats table</span>
+    <span class="n">aov</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Source&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">between</span><span class="p">,</span> <span class="n">within</span><span class="p">,</span> <span class="s1">&#39;Interaction&#39;</span><span class="p">],</span>
+                        <span class="s1">&#39;SS&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">ssbetween</span><span class="p">,</span> <span class="n">sstime</span><span class="p">,</span> <span class="n">ssinter</span><span class="p">],</span>
+                        <span class="s1">&#39;DF1&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">dfbetween</span><span class="p">,</span> <span class="n">dftime</span><span class="p">,</span> <span class="n">dfinter</span><span class="p">],</span>
+                        <span class="s1">&#39;DF2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">dfwg</span><span class="p">,</span> <span class="n">dfwg</span><span class="p">,</span> <span class="n">dfwg</span><span class="p">],</span>
+                        <span class="s1">&#39;MS&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">msbetween</span><span class="p">,</span> <span class="n">mstime</span><span class="p">,</span> <span class="n">msinter</span><span class="p">],</span>
+                        <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">fbetween</span><span class="p">,</span> <span class="n">ftime</span><span class="p">,</span> <span class="n">finter</span><span class="p">],</span>
+                        <span class="s1">&#39;p-unc&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">pbetween</span><span class="p">,</span> <span class="n">ptime</span><span class="p">,</span> <span class="n">pinter</span><span class="p">],</span>
+                        <span class="s1">&#39;np2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">npsq_between</span><span class="p">,</span> <span class="n">npsq_time</span><span class="p">,</span> <span class="n">npsq_inter</span><span class="p">]</span>
+                        <span class="p">})</span>
+    <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Source&#39;</span><span class="p">,</span> <span class="s1">&#39;SS&#39;</span><span class="p">,</span> <span class="s1">&#39;DF1&#39;</span><span class="p">,</span> <span class="s1">&#39;DF2&#39;</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">]</span>
+
+    <span class="n">aov</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
+    <span class="n">aov</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">aov</span></div>
 </pre></div>
 
@@ -399,7 +641,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
     </p>
   </div>
 </footer>

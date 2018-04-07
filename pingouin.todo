@@ -4,6 +4,6 @@ Doc
 
 Code
 ----
-- Check DF in rm_anova
+- Parent function anova
+- Correction for sphericity and GG in mixed model ANOVA
 - Add within / between in effsize
-- Mixed ANOVA implementation

@@ -102,11 +102,8 @@
 <span class="c1"># Date: April 2018</span>
 <span class="c1"># Code borrowed from statsmodel and mne.stats</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="p">(</span><span class="n">_check_data</span><span class="p">,</span> <span class="n">_check_dataframe</span><span class="p">,</span> <span class="n">_extract_effects</span><span class="p">,</span>
-                     <span class="n">compute_effsize</span><span class="p">)</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;fdr&quot;</span><span class="p">,</span> <span class="s2">&quot;bonf&quot;</span><span class="p">,</span> <span class="s2">&quot;holm&quot;</span><span class="p">,</span> <span class="s2">&quot;multicomp&quot;</span><span class="p">,</span> <span class="s2">&quot;pairwise_ttests&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;fdr&quot;</span><span class="p">,</span> <span class="s2">&quot;bonf&quot;</span><span class="p">,</span> <span class="s2">&quot;holm&quot;</span><span class="p">,</span> <span class="s2">&quot;multicomp&quot;</span><span class="p">]</span>
 
 
 <span class="k">def</span> <span class="nf">_ecdf</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
@@ -272,188 +269,6 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Multiple comparison method not recognized&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corrected</span></div>
-
-<span class="k">def</span> <span class="nf">_append_stats_dataframe</span><span class="p">(</span><span class="n">stats</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xlabel</span><span class="p">,</span> <span class="n">ylabel</span><span class="p">,</span> <span class="n">effects</span><span class="p">,</span> <span class="n">paired</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span>
-                            <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">ef</span><span class="p">,</span> <span class="n">eftype</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">):</span>
-    <span class="n">stats</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-                        <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="n">xlabel</span><span class="p">,</span>
-                        <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="n">ylabel</span><span class="p">,</span>
-                        <span class="s1">&#39;mean(A)&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
-                        <span class="s1">&#39;mean(B)&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
-                        <span class="c1"># Use ddof=1 for unibiased estimator (pandas default)</span>
-                        <span class="s1">&#39;std(A)&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-                        <span class="s1">&#39;std(B)&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-                        <span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="n">effects</span><span class="p">,</span>
-                        <span class="s1">&#39;Paired&#39;</span><span class="p">:</span> <span class="n">paired</span><span class="p">,</span>
-                        <span class="s1">&#39;Alpha&#39;</span><span class="p">:</span> <span class="n">alpha</span><span class="p">,</span>
-                        <span class="s1">&#39;T-val&#39;</span><span class="p">:</span> <span class="n">t</span><span class="p">,</span>
-                        <span class="s1">&#39;p-unc&#39;</span><span class="p">:</span> <span class="n">p</span><span class="p">,</span>
-                        <span class="s1">&#39;Eff_size&#39;</span><span class="p">:</span> <span class="n">ef</span><span class="p">,</span>
-                        <span class="s1">&#39;Eff_type&#39;</span><span class="p">:</span> <span class="n">eftype</span><span class="p">,</span>
-                        <span class="s1">&#39;Time&#39;</span><span class="p">:</span> <span class="n">time</span><span class="p">},</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">stats</span>
-
-
-<div class="viewcode-block" id="pairwise_ttests"><a class="viewcode-back" href="../../generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests">[docs]</a><span class="k">def</span> <span class="nf">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>
-                    <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span>
-                    <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">,</span> <span class="n">return_desc</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Pairwise T-tests in Pandas.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    dv : string</span>
-<span class="sd">        Name of column containing the dependant variable.</span>
-<span class="sd">    between: string</span>
-<span class="sd">        Name of column containing the between factor.</span>
-<span class="sd">    within : string</span>
-<span class="sd">        Name of column containing the within factor.</span>
-<span class="sd">    data : pandas DataFrame</span>
-<span class="sd">        DataFrame</span>
-<span class="sd">    alpha : float</span>
-<span class="sd">        Significance level</span>
-<span class="sd">    tail : string</span>
-<span class="sd">        Indicates whether to return the &#39;two-sided&#39; or &#39;one-sided&#39; p-values</span>
-<span class="sd">    p-adjust : string</span>
-<span class="sd">        Method used for testing and adjustment of pvalues. Available methods are ::</span>
-
-<span class="sd">        &#39;none&#39; : no correction</span>
-<span class="sd">        &#39;bonferroni&#39; : one-step correction</span>
-<span class="sd">        &#39;holm&#39; : step-down method using Bonferroni adjustments</span>
-<span class="sd">        &#39;fdr_bh&#39; : Benjamini/Hochberg FDR correction</span>
-<span class="sd">        &#39;fdr_by&#39; : Benjamini/Yekutieli FDR correction</span>
-<span class="sd">    effsize : string or None</span>
-<span class="sd">        Effect size type. Available methods are ::</span>
-
-<span class="sd">        &#39;none&#39; : no effect size</span>
-<span class="sd">        &#39;cohen&#39; : Unbiased Cohen d</span>
-<span class="sd">        &#39;hedges&#39; : Hedges g</span>
-<span class="sd">        &#39;glass&#39;: Glass delta</span>
-<span class="sd">        &#39;eta-square&#39; : Eta-square</span>
-<span class="sd">        &#39;odds-ratio&#39; : Odds ratio</span>
-<span class="sd">        &#39;AUC&#39; : Area Under the Curve</span>
-<span class="sd">    return_desc : boolean</span>
-<span class="sd">        If True, return group means and std</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    stats : DataFrame</span>
-<span class="sd">        Stats summary</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">combinations</span>
-    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">ttest_ind</span><span class="p">,</span> <span class="n">ttest_rel</span>
-
-    <span class="n">effects</span> <span class="o">=</span> <span class="s1">&#39;within&#39;</span> <span class="k">if</span> <span class="n">between</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">effects</span>
-    <span class="n">effects</span> <span class="o">=</span> <span class="s1">&#39;between&#39;</span> <span class="k">if</span> <span class="n">within</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">effects</span>
-
-    <span class="k">if</span> <span class="n">tail</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;one-sided&#39;</span><span class="p">,</span> <span class="s1">&#39;two-sided&#39;</span><span class="p">]:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Tail not recognized&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Alpha must be float&#39;</span><span class="p">)</span>
-
-    <span class="c1"># Check NA in repeated measurements</span>
-    <span class="c1"># Works well for one-way repeated measures</span>
-    <span class="c1"># Needs adaptation for mixed model!</span>
-    <span class="k">if</span> <span class="n">within</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">effects</span> <span class="o">!=</span> <span class="s1">&#39;between&#39;</span><span class="p">:</span>
-            <span class="n">rm</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">within</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
-            <span class="n">n_rm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rm</span><span class="p">)</span>
-            <span class="n">n_obs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">within</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Subj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_obs</span><span class="p">),</span> <span class="n">n_rm</span><span class="p">)</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;Subj&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">dv</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">value_vars</span><span class="o">=</span><span class="n">rm</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="n">dv</span><span class="p">)</span>
-
-    <span class="c1"># Extract main effects</span>
-    <span class="n">dt_array</span><span class="p">,</span> <span class="n">nobs</span> <span class="o">=</span> <span class="n">_extract_effects</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span>
-                                     <span class="n">effects</span><span class="o">=</span><span class="n">effects</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
-
-    <span class="n">stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([])</span>
-
-    <span class="c1"># OPTION A: simple main effects</span>
-    <span class="k">if</span> <span class="n">effects</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;within&#39;</span><span class="p">,</span> <span class="s1">&#39;between&#39;</span><span class="p">]:</span>
-        <span class="c1"># Compute T-tests</span>
-        <span class="n">paired</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;within&#39;</span> <span class="k">else</span> <span class="kc">False</span>
-
-        <span class="c1"># Extract column names</span>
-        <span class="n">col_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dt_array</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-
-        <span class="c1"># Number and labels of possible comparisons</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">col_names</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">combs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="n">col_names</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-            <span class="n">ntests</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">combs</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Data must have at least two columns&#39;</span><span class="p">)</span>
-
-        <span class="c1"># Initialize vectors</span>
-        <span class="k">for</span> <span class="n">comb</span> <span class="ow">in</span> <span class="n">combs</span><span class="p">:</span>
-            <span class="n">col1</span><span class="p">,</span> <span class="n">col2</span> <span class="o">=</span> <span class="n">comb</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">dt_array</span><span class="p">[</span><span class="n">col1</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">dt_array</span><span class="p">[</span><span class="n">col2</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
-            <span class="n">t</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">ttest_rel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">if</span> <span class="n">paired</span> <span class="k">else</span> <span class="n">ttest_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-            <span class="n">ef</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="n">effsize</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="n">paired</span><span class="p">)</span>
-            <span class="n">stats</span> <span class="o">=</span> <span class="n">_append_stats_dataframe</span><span class="p">(</span><span class="n">stats</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">col1</span><span class="p">,</span> <span class="n">col2</span><span class="p">,</span> <span class="n">effects</span><span class="p">,</span>
-                                            <span class="n">paired</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">ef</span><span class="p">,</span> <span class="n">effsize</span><span class="p">)</span>
-
-    <span class="c1"># OPTION B: interaction</span>
-    <span class="k">if</span> <span class="n">effects</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;interaction&#39;</span><span class="p">:</span>
-        <span class="n">paired</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">for</span> <span class="n">time</span><span class="p">,</span> <span class="n">sub_dt</span> <span class="ow">in</span> <span class="n">dt_array</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-            <span class="n">col1</span><span class="p">,</span> <span class="n">col2</span> <span class="o">=</span> <span class="n">sub_dt</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">sub_dt</span><span class="p">[(</span><span class="n">time</span><span class="p">,</span> <span class="n">col1</span><span class="p">)]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">sub_dt</span><span class="p">[(</span><span class="n">time</span><span class="p">,</span> <span class="n">col2</span><span class="p">)]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
-            <span class="n">t</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">ttest_rel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">if</span> <span class="n">paired</span> <span class="k">else</span> <span class="n">ttest_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-            <span class="n">ef</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="n">effsize</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="n">paired</span><span class="p">)</span>
-            <span class="n">stats</span> <span class="o">=</span> <span class="n">_append_stats_dataframe</span><span class="p">(</span><span class="n">stats</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">col1</span><span class="p">,</span> <span class="n">col2</span><span class="p">,</span> <span class="n">effects</span><span class="p">,</span>
-                                            <span class="n">paired</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">ef</span><span class="p">,</span> <span class="n">effsize</span><span class="p">,</span>
-                                            <span class="n">time</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">effects</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
-        <span class="n">stats_within</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;within&#39;</span><span class="p">,</span>
-                            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="n">tail</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="n">padjust</span><span class="p">,</span>
-                            <span class="n">effsize</span><span class="o">=</span><span class="n">effsize</span><span class="p">)</span>
-        <span class="n">stats_between</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span>
-                            <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;between&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
-                            <span class="n">tail</span><span class="o">=</span><span class="n">tail</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="n">padjust</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="n">effsize</span><span class="p">)</span>
-
-        <span class="n">stats_interaction</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span>
-                            <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;interaction&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-                            <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="n">tail</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="n">padjust</span><span class="p">,</span>
-                            <span class="n">effsize</span><span class="o">=</span><span class="n">effsize</span><span class="p">)</span>
-        <span class="n">stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">stats_within</span><span class="p">,</span> <span class="n">stats_between</span><span class="p">,</span>
-                                <span class="n">stats_interaction</span><span class="p">])</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
-
-    <span class="c1"># Tail and multiple comparisons</span>
-    <span class="k">if</span> <span class="n">tail</span> <span class="o">==</span> <span class="s1">&#39;one-sided&#39;</span><span class="p">:</span>
-        <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-unc&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="o">.</span><span class="mi">5</span>
-        <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;Tail&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;one-sided&#39;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;Tail&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;two-sided&#39;</span>
-
-    <span class="c1"># Multiple comparisons</span>
-    <span class="k">if</span> <span class="n">padjust</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">padjust</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
-        <span class="n">reject</span><span class="p">,</span> <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-corr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">multicomp</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-unc&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
-                                       <span class="n">method</span><span class="o">=</span><span class="n">padjust</span><span class="p">)</span>
-        <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-adjust&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">padjust</span>
-        <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;reject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reject</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-corr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-adjust&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;reject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-unc&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">alpha</span>
-
-    <span class="c1"># Trick to force conversion from boolean to int</span>
-    <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;reject&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="mi">1</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">return_desc</span><span class="p">:</span>
-        <span class="n">stats</span><span class="p">[[</span><span class="s1">&#39;mean(A)&#39;</span><span class="p">,</span> <span class="s1">&#39;mean(B)&#39;</span><span class="p">,</span> <span class="s1">&#39;std(A)&#39;</span><span class="p">,</span> <span class="s1">&#39;std(B)&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-
-    <span class="c1"># Reorganize column order</span>
-    <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;mean(A)&#39;</span><span class="p">,</span> <span class="s1">&#39;std(A)&#39;</span><span class="p">,</span> <span class="s1">&#39;mean(B)&#39;</span><span class="p">,</span> <span class="s1">&#39;std(B)&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="s1">&#39;Paired&#39;</span><span class="p">,</span> <span class="s1">&#39;Alpha&#39;</span><span class="p">,</span> <span class="s1">&#39;T-val&#39;</span><span class="p">,</span> <span class="s1">&#39;Tail&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span> <span class="s1">&#39;p-corr&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;p-adjust&#39;</span><span class="p">,</span> <span class="s1">&#39;reject&#39;</span><span class="p">,</span> <span class="s1">&#39;Eff_size&#39;</span><span class="p">,</span> <span class="s1">&#39;Eff_type&#39;</span><span class="p">]</span>
-
-    <span class="n">stats</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
-    <span class="n">stats</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">stats</span></div>
 </pre></div>
 
     </div>
@@ -471,7 +286,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
     </p>
   </div>
 </footer>

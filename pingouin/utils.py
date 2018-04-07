@@ -19,9 +19,9 @@ def _check_eftype(eftype):
 def print_table(df, floatfmt=".4f"):
     """Nice display of table"""
     if 'F' in df.keys():
-        print('=============\nANOVA SUMMARY\n=============\n')
+        print('\n=============\nANOVA SUMMARY\n=============\n')
     elif 'A' in df.keys():
-        print('==============\nPOST HOC TESTS\n==============\n')
+        print('\n==============\nPOST HOC TESTS\n==============\n')
 
     try:
         from tabulate import tabulate

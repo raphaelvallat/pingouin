@@ -106,8 +106,8 @@
 <p><strong>Pingouin</strong> (French word for <em>penguin</em>) is an open-source statistical Python 3 package based on Pandas.</p>
 <p>Its main features are:</p>
 <ol class="arabic simple">
-<li>One-way repeated measures ANOVA</li>
-<li>Post-hocs pairwise T-tests from a mixed model ANOVA</li>
+<li>ANOVA: one-way, repeated measures, and mixed (split-plot)</li>
+<li>Post-hocs pairwise T-tests</li>
 <li>Tests for sphericity, normality and homoscedasticity</li>
 <li>Computation and conversion of effect sizes</li>
 </ol>
@@ -144,18 +144,23 @@ python setup.py develop
 <span class="c1"># Mixed repeated measures design</span>
 <span class="c1">#   - Dependent variable (&#39;DV&#39;) = hours of sleep per night</span>
 <span class="c1">#   - Between-factor (&#39;Group&#39;) = two-levels (Insomnia / Control)</span>
-<span class="c1">#   - Within-factor (&#39;Time&#39;) = three levels (Pre, Post1, Post2)</span>
+<span class="c1">#   - Within-factor (&#39;Time&#39;) = three levels (Pre, Post-6months, Post-12months)</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;examples/sleep_dataset.csv&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 
-<span class="n">stats</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span>
-                        <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mo">05</span><span class="p">,</span>
-                        <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;fdr_by&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+<span class="c1"># Compute mixed-design ANOVA</span>
+<span class="n">aov</span> <span class="o">=</span> <span class="n">mixed_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="n">print_table</span><span class="p">(</span><span class="n">aov</span><span class="p">)</span>
+
+<span class="c1"># Compute FDR-corrected post-hocs with effect sizes</span>
+<span class="n">posthocs</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+                           <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">)</span>
+<span class="n">print_table</span><span class="p">(</span><span class="n">posthocs</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Output:</p>
 <div class="figure align-center">
-<img alt="_images/pairwise_stats_all.png" src="_images/pairwise_stats_all.png" />
+<img alt="_images/readme_anova.png" src="_images/readme_anova.png" />
 </div>
 </div>
 <div class="section" id="contents">
@@ -194,7 +199,7 @@ python setup.py develop
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
     </p>
   </div>
 </footer>

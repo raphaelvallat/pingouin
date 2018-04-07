@@ -11,9 +11,9 @@ Pingouin
 
 Its main features are:
 
-1. One-way repeated measures ANOVA
+1. ANOVA: one-way, repeated measures, and mixed (split-plot)
 
-2. Post-hocs pairwise T-tests from a mixed model ANOVA
+2. Post-hocs pairwise T-tests
 
 3. Tests for sphericity, normality and homoscedasticity
 
@@ -55,26 +55,25 @@ Quick start
 
 .. code-block:: python
 
-  import pandas as pd
-  from pingouin import pairwise_ttests
+    import pandas as pd
+    from pingouin import mixed_anova, pairwise_ttests, print_table
 
-  # Load a fake dataset: the INSOMNIA study
-  # Goal: evaluate the influence of a treatment on sleep duration in a control
-  # and insomnia group
-  # Mixed repeated measures design
-  #   - Dependent variable ('DV') = hours of sleep per night
-  #   - Between-factor ('Group') = two-levels (Insomnia / Control)
-  #   - Within-factor ('Time') = three levels (Pre, Post1, Post2)
-  df = pd.read_csv('examples/sleep_dataset.csv')
+    # Load dataset
+    df = pd.read_csv('sleep_dataset.csv')
+    print(df.head())
 
-  stats = pairwise_ttests(dv='DV', within='Time', between='Group',
-                          effects='all', data=df, alpha=.05,
-                          tail='two-sided', padjust='fdr_by', effsize='hedges')
-  print(stats)
+    # Compute two-way split-plot ANOVA
+    aov = mixed_anova(dv='DV', within='Time', between='Group', data=df)
+    print_table(aov)
+
+    # Compute FDR-corrected post-hocs with effect sizes
+    posthocs = pairwise_ttests(dv='DV', within='Time', between='Group', data=df,
+                               tail='two-sided', padjust='fdr_bh', effsize='cohen')
+    print_table(posthocs)
 
 Output:
 
-.. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/pictures/pairwise_stats_all.png
+.. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/pictures/readme_anova.png
    :align:   center
 
 
@@ -82,9 +81,3 @@ Author
 ======
 
 * `Raphael Vallat <https://raphaelvallat.github.io>`_
-
-
-Further reading
-===============
-
-* Effect size: see `Lakens et al. 2013 <https://www.frontiersin.org/articles/10.3389/fpsyg.2013.00863/full>`_

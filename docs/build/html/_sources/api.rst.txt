@@ -13,7 +13,9 @@ ANOVA
 .. autosummary::
    :toctree: generated/
 
+    anova
     rm_anova
+    mixed_anova
 
 
 Pairwise tests
