@@ -241,20 +241,20 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         ANOVA summary
     """
     from scipy.stats import f
-    rm = list(data[within].unique())
-    n_rm = len(rm)
-    N = data[dv].size
+    # Reset index (avoid duplicate axis error)
+    data = data.reset_index(drop=True)
 
     # Groupby
     grp_with = data.groupby(within)[dv]
+    N = data[dv].size
+    rm = list(data[within].unique())
+    n_rm = len(rm)
     n_obs = int(data.groupby(within)[dv].count().max())
 
     # Sums of squares
     sstime = ss(grp_with) / n_obs - ss(grp_with, 'b') / N
-    ssw = np.zeros(n_rm)
-    for i, (name, group) in enumerate(grp_with):
-        ssw[i] = np.sum((group - group.mean())**2)
-    sswithin = np.sum(ssw)
+    sswithin = grp_with.apply(lambda x: x**2).sum() - \
+                                (grp_with.sum()**2 / grp_with.count()).sum()
 
     # Calculating SSsubjects and SSerror
     data['Subj'] = np.tile(np.arange(n_obs), n_rm)
@@ -370,26 +370,24 @@ def anova(dv=None, between=None, data=None, detailed=False):
 
     # Sums of squares
     grp_betw = data.groupby(between)[dv]
-    n_obs = grp_betw.count().as_matrix()
-    grandmean = grp_betw.mean().mean()
-    ssb, ssw = np.zeros(n_groups), np.zeros(n_groups)
-    for i, (name, group) in enumerate(grp_betw):
-        ssb[i] = group.count() * np.sum((group.mean() - grandmean)**2)
-        ssw[i] = np.sum((group - group.mean())**2)
-    ssbetween = np.sum(ssb)
-    sswithin = np.sum(ssw)
+    # Between effect
+    ssbetween = (grp_betw.sum()**2 / grp_betw.count()).sum() - \
+                                                        ss(grp_betw, 'b') / N
+    # Error (between)
+    sserror = grp_betw.apply(lambda x: x**2).sum() - \
+                                (grp_betw.sum()**2 / grp_betw.count()).sum()
 
     # Calculate degrees of freedom, F- and p-values
     ddof1 = n_groups - 1
     msbetween = ssbetween / ddof1
     ddof2 = N - n_groups
-    mswithin = sswithin / ddof2
-    fval = msbetween / mswithin
+    mserror = sserror / ddof2
+    fval = msbetween / mserror
     p_unc = f(ddof1, ddof2).sf(fval)
 
     # Calculating partial eta-square
     # Similar to (fval * ddof1) / (fval * ddof1 + ddof2)
-    np2 = ssbetween / (ssbetween + sswithin)
+    np2 = ssbetween / (ssbetween + sserror)
 
     # Create output dataframe
     if not detailed:
@@ -404,9 +402,9 @@ def anova(dv=None, between=None, data=None, detailed=False):
         col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc', 'np2']
     else:
         aov = pd.DataFrame({'Source': [between, 'Within'],
-                            'SS': [ssbetween, sswithin],
+                            'SS': [ssbetween, sserror],
                             'DF': [ddof1, ddof2],
-                            'MS': [msbetween, mswithin],
+                            'MS': [msbetween, mserror],
                             'F': [fval, np.nan],
                             'p-unc': [p_unc, np.nan],
                             'np2': [np2, np.nan]
@@ -463,14 +461,11 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
 
     # Between effect
     grp_betw = data.groupby(between)[dv]
-    n_obs = grp_betw.count().as_matrix()
-    grandmean = grp_betw.mean().mean()
-    ssb, sseb = np.zeros(len(n_obs)), np.zeros(len(n_obs))
-    for i, (name, group) in enumerate(grp_betw):
-        ssb[i] = group.count() * np.sum((group.mean() - grandmean)**2)
-        sseb[i] = np.sum((group - group.mean())**2)
-    ssbetween = np.sum(ssb)
-    sseb = np.sum(sseb)
+    ssbetween = (grp_betw.sum()**2 / grp_betw.count()).sum() - \
+                                                        ss(grp_betw, 'b') / N
+    # Error (between)
+    sseb = grp_betw.apply(lambda x: x**2).sum() - \
+                                (grp_betw.sum()**2 / grp_betw.count()).sum()
 
     # Within-group effect
     grp = data.groupby([between, within])[dv]
