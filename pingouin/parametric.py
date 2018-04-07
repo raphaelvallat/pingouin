@@ -465,10 +465,12 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     grp_betw = data.groupby(between)[dv]
     n_obs = grp_betw.count().as_matrix()
     grandmean = grp_betw.mean().mean()
-    ssb = np.zeros(len(n_obs))
+    ssb, sseb = np.zeros(len(n_obs)), np.zeros(len(n_obs))
     for i, (name, group) in enumerate(grp_betw):
         ssb[i] = group.count() * np.sum((group.mean() - grandmean)**2)
+        sseb[i] = np.sum((group - group.mean())**2)
     ssbetween = np.sum(ssb)
+    sseb = np.sum(sseb)
 
     # Within-group effect
     grp = data.groupby([between, within])[dv]
@@ -481,28 +483,30 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     # DEGREES OF FREEDOM
     dftime = grp_with.count().count() - 1
     dfbetween = grp_betw.count().count() - 1
-    dfwg = N - grp.count().count()
+    dfeb = grp_betw.count().sum() - grp_betw.count().count()
+    dfwg = dftime * (grp_with.count().max() - grp.count().count())
     dftotal = N - 1
     dfinter = dftime * dfbetween
 
     # MEAN SQUARES
     mstime = sstime / dftime
     msbetween = ssbetween / dfbetween
+    mseb = sseb / dfeb
     mswg = sswg / dfwg
     msinter = ssinter / dfinter
 
     # F VALUES
     ftime = mstime / mswg
-    fbetween = msbetween / mswg
+    fbetween = msbetween / mseb
     finter = msinter / mswg
 
     # P-values
     ptime = f(dftime, dfwg).sf(ftime)
-    pbetween = f(dfbetween, dfwg).sf(fbetween)
+    pbetween = f(dfbetween, dfeb).sf(fbetween)
     pinter = f(dfinter, dfwg).sf(finter)
 
     # Effects sizes
-    npsq_between = fbetween * dfbetween / (fbetween * dfbetween + dfwg)
+    npsq_between = fbetween * dfbetween / (fbetween * dfbetween + dfeb)
     npsq_time = ftime * dftime / (ftime * dftime + dfwg)
     npsq_inter = ssinter / (ssinter + sswg)
 
@@ -510,7 +514,7 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     aov = pd.DataFrame({'Source': [between, within, 'Interaction'],
                         'SS': [ssbetween, sstime, ssinter],
                         'DF1': [dfbetween, dftime, dfinter],
-                        'DF2': [dfwg, dfwg, dfwg],
+                        'DF2': [dfeb, dfwg, dfwg],
                         'MS': [msbetween, mstime, msinter],
                         'F': [fbetween, ftime, finter],
                         'p-unc': [pbetween, ptime, pinter],

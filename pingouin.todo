@@ -4,6 +4,6 @@ Doc
 
 Code
 ----
-- Parent function anova
+- Ceheck degrees of freedom with R
 - Correction for sphericity and GG in mixed model ANOVA
 - Add within / between in effsize

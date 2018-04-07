@@ -72,7 +72,7 @@ x = pd.DataFrame({'Group': repeat('X', 5*3),
 y = pd.DataFrame({'Group': repeat('Y', 5*3),
                    'Time': repeat([1, 2, 3], 5),
                    'DV': [5, 4, 1, 2, 3, 4, 1, 2, 3, 2, 3, 0, 3, 2, 2]})
-# df = pd.concat([x, y])
+df = pd.concat([x, y])
 
 aov = mixed_anova(dv='DV', within='Time', between='Group', data=df)
 print_table(aov)

@@ -87,7 +87,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
     # Check NA in repeated measurements
     if within is not None and data[dv].isnull().values.any():
-        data = _remove_rm_na(dv=dv, between=between, within=within, data=data)
+        data = _remove_rm_na(dv=dv, within=within, data=data)
 
     # Extract main effects
     dt_array, nobs = _extract_effects(dv=dv, between=between, within=within,
