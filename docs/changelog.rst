@@ -1,7 +1,7 @@
 .. _Changelog:
 
-Changelog
-#########
+What's new
+##########
 
 v0.1dev (April 2018)
 --------------------
@@ -11,8 +11,8 @@ Initial release.
 **ANOVA**
 
 a. One-way
-a. One-way repeated measures
-a. Two-way split-plot (one between factor and one within factor)
+b. One-way repeated measures
+c. Two-way split-plot (one between factor and one within factor)
 
 
 **Pairwise comparisons**
