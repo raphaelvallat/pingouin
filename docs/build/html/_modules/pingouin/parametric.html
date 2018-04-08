@@ -104,7 +104,7 @@
 <span class="c1"># Date: April 2018</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">_check_dataframe</span><span class="p">,</span> <span class="n">_remove_rm_na</span>
+<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">_check_dataframe</span><span class="p">,</span> <span class="n">_remove_rm_na</span><span class="p">,</span> <span class="n">_export_table</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;gzscore&quot;</span><span class="p">,</span> <span class="s2">&quot;test_normality&quot;</span><span class="p">,</span> <span class="s2">&quot;test_homoscedasticity&quot;</span><span class="p">,</span> <span class="s2">&quot;test_dist&quot;</span><span class="p">,</span>
            <span class="s2">&quot;test_sphericity&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_anova&quot;</span><span class="p">,</span> <span class="s2">&quot;anova&quot;</span><span class="p">,</span> <span class="s2">&quot;mixed_anova&quot;</span><span class="p">]</span>
@@ -302,12 +302,12 @@
 
 
 <span class="k">def</span> <span class="nf">ss</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Sums of squares&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Helper function for sums of squares computation&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grp</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;a&#39;</span> <span class="k">else</span> <span class="n">grp</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span>
 
 
 <div class="viewcode-block" id="rm_anova"><a class="viewcode-back" href="../../generated/pingouin.rm_anova.html#pingouin.rm_anova">[docs]</a><span class="k">def</span> <span class="nf">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>
-             <span class="n">remove_na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+             <span class="n">remove_na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;One-way repeated measures ANOVA.</span>
 
 <span class="sd">    Tested against mne.stats.f_mway_rm and ez R package.</span>
@@ -337,6 +337,11 @@
 <span class="sd">        values will be included in the analysis.</span>
 <span class="sd">    detailed : boolean</span>
 <span class="sd">        If True, return a full ANOVA table</span>
+<span class="sd">    export_filename : string</span>
+<span class="sd">        Filename (without extension) for the output file.</span>
+<span class="sd">        If None, do not export the table.</span>
+<span class="sd">        By default, the file will be created in the current python console</span>
+<span class="sd">        directory. To change that, specify the filename with full path.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -364,7 +369,7 @@
     <span class="c1"># Sums of squares</span>
     <span class="n">sstime</span> <span class="o">=</span> <span class="n">ss</span><span class="p">(</span><span class="n">grp_with</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_obs</span> <span class="o">-</span> <span class="n">ss</span><span class="p">(</span><span class="n">grp_with</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
     <span class="n">sswithin</span> <span class="o">=</span> <span class="n">grp_with</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> \
-                                <span class="p">(</span><span class="n">grp_with</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">grp_with</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">grp_with</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">grp_with</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
     <span class="c1"># Calculating SSsubjects and SSerror</span>
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Subj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_obs</span><span class="p">),</span> <span class="n">n_rm</span><span class="p">)</span>
@@ -388,9 +393,9 @@
 
     <span class="c1"># Compute sphericity using Mauchly&#39;s test</span>
     <span class="c1"># Sphericity assumption only applies if there are more than 2 levels</span>
-    <span class="k">if</span> <span class="n">correction</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span> <span class="ow">or</span> <span class="n">correction</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">n_rm</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">correction</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span> <span class="ow">or</span> <span class="n">correction</span> <span class="ow">and</span> <span class="n">n_rm</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
         <span class="n">sphericity</span><span class="p">,</span> <span class="n">W_mauchly</span><span class="p">,</span> <span class="n">chi_sq_mauchly</span><span class="p">,</span> <span class="n">ddof_mauchly</span><span class="p">,</span> \
-        <span class="n">p_mauchly</span> <span class="o">=</span> <span class="n">test_sphericity</span><span class="p">(</span><span class="n">data_pivot</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">(),</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">)</span>
+            <span class="n">p_mauchly</span> <span class="o">=</span> <span class="n">test_sphericity</span><span class="p">(</span><span class="n">data_pivot</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">(),</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">correction</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
             <span class="n">correction</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">sphericity</span> <span class="k">else</span> <span class="kc">False</span>
@@ -424,8 +429,8 @@
             <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;sphericity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sphericity</span>
 
         <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Source&#39;</span><span class="p">,</span> <span class="s1">&#39;ddof1&#39;</span><span class="p">,</span> <span class="s1">&#39;ddof2&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;p-GG-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">,</span> <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span><span class="s1">&#39;W-Mauchly&#39;</span><span class="p">,</span> <span class="s1">&#39;X2-Mauchly&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;DF-Mauchly&#39;</span><span class="p">,</span> <span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span>
+                     <span class="s1">&#39;p-GG-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">,</span> <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span> <span class="s1">&#39;W-Mauchly&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;X2-Mauchly&#39;</span><span class="p">,</span> <span class="s1">&#39;DF-Mauchly&#39;</span><span class="p">,</span> <span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">aov</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Source&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">within</span><span class="p">,</span> <span class="s1">&#39;Error&#39;</span><span class="p">],</span>
                             <span class="s1">&#39;SS&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">sstime</span><span class="p">,</span> <span class="n">sserror</span><span class="p">],</span>
@@ -444,15 +449,19 @@
             <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;sphericity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">sphericity</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
 
         <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Source&#39;</span><span class="p">,</span> <span class="s1">&#39;SS&#39;</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span> <span class="s1">&#39;p-GG-corr&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;np2&#39;</span><span class="p">,</span> <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span><span class="s1">&#39;W-Mauchly&#39;</span><span class="p">,</span> <span class="s1">&#39;X2-Mauchly&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;np2&#39;</span><span class="p">,</span> <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span> <span class="s1">&#39;W-Mauchly&#39;</span><span class="p">,</span> <span class="s1">&#39;X2-Mauchly&#39;</span><span class="p">,</span>
                      <span class="s1">&#39;DF-Mauchly&#39;</span><span class="p">,</span> <span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span>
 
     <span class="n">aov</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
     <span class="n">aov</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Export to .csv</span>
+    <span class="k">if</span> <span class="n">export_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_export_table</span><span class="p">(</span><span class="n">aov</span><span class="p">,</span> <span class="n">export_filename</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">aov</span></div>
 
 
-<div class="viewcode-block" id="anova"><a class="viewcode-back" href="../../generated/pingouin.anova.html#pingouin.anova">[docs]</a><span class="k">def</span> <span class="nf">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="anova"><a class="viewcode-back" href="../../generated/pingouin.anova.html#pingouin.anova">[docs]</a><span class="k">def</span> <span class="nf">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+          <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;One-way ANOVA.</span>
 
 <span class="sd">    Tested against ez R package.</span>
@@ -467,6 +476,12 @@
 <span class="sd">        DataFrame</span>
 <span class="sd">    detailed : boolean</span>
 <span class="sd">        If True, return a detailed ANOVA table</span>
+<span class="sd">    export_filename : string</span>
+<span class="sd">        Filename (without extension) for the output file.</span>
+<span class="sd">        If None, do not export the table.</span>
+<span class="sd">        By default, the file will be created in the current python console</span>
+<span class="sd">        directory. To change that, specify the filename with full path.</span>
+
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -477,7 +492,7 @@
 
     <span class="c1"># Check data</span>
     <span class="n">_check_dataframe</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-                        <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;between&#39;</span><span class="p">)</span>
+                     <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;between&#39;</span><span class="p">)</span>
 
     <span class="c1"># Reset index (avoid duplicate axis error)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -490,10 +505,10 @@
     <span class="n">grp_betw</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">between</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
     <span class="c1"># Between effect</span>
     <span class="n">ssbetween</span> <span class="o">=</span> <span class="p">(</span><span class="n">grp_betw</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> \
-                                                        <span class="n">ss</span><span class="p">(</span><span class="n">grp_betw</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
+        <span class="n">ss</span><span class="p">(</span><span class="n">grp_betw</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
     <span class="c1"># Error (between)</span>
     <span class="n">sserror</span> <span class="o">=</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> \
-                                <span class="p">(</span><span class="n">grp_betw</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">grp_betw</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
     <span class="c1"># Calculate degrees of freedom, F- and p-values</span>
     <span class="n">ddof1</span> <span class="o">=</span> <span class="n">n_groups</span> <span class="o">-</span> <span class="mi">1</span>
@@ -531,11 +546,14 @@
 
     <span class="n">aov</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
     <span class="n">aov</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Export to .csv</span>
+    <span class="k">if</span> <span class="n">export_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_export_table</span><span class="p">(</span><span class="n">aov</span><span class="p">,</span> <span class="n">export_filename</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">aov</span></div>
 
 
 <div class="viewcode-block" id="mixed_anova"><a class="viewcode-back" href="../../generated/pingouin.mixed_anova.html#pingouin.mixed_anova">[docs]</a><span class="k">def</span> <span class="nf">mixed_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">remove_na</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">remove_na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Mixed-design (split-plot) ANOVA .</span>
 
 <span class="sd">    Parameters</span>
@@ -561,6 +579,11 @@
 <span class="sd">        In this example, if remove_na == True, Ss 1 will be removed from the</span>
 <span class="sd">        ANOVA because of the x3 missing value. If False, the two non-missing</span>
 <span class="sd">        values will be included in the analysis.</span>
+<span class="sd">    export_filename : string</span>
+<span class="sd">        Filename (without extension) for the output file.</span>
+<span class="sd">        If None, do not export the table.</span>
+<span class="sd">        By default, the file will be created in the current python console</span>
+<span class="sd">        directory. To change that, specify the filename with full path.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -586,7 +609,7 @@
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">f</span>
     <span class="c1"># Check data</span>
     <span class="n">_check_dataframe</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-                        <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;interaction&#39;</span><span class="p">)</span>
+                     <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;interaction&#39;</span><span class="p">)</span>
     <span class="c1"># Remove NaN</span>
     <span class="k">if</span> <span class="n">remove_na</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">_remove_rm_na</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
@@ -604,7 +627,7 @@
     <span class="c1"># Error (between)</span>
     <span class="n">grp_betw</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">between</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
     <span class="n">sseb</span> <span class="o">=</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> \
-                                <span class="p">(</span><span class="n">grp_betw</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">grp_betw</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="c1"># Within-group effect</span>
     <span class="n">grp</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">between</span><span class="p">,</span> <span class="n">within</span><span class="p">])[</span><span class="n">dv</span><span class="p">]</span>
     <span class="n">sstotal</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="n">ss</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
@@ -618,7 +641,7 @@
     <span class="n">dfbetween</span> <span class="o">=</span> <span class="n">st_between</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">]</span>
     <span class="n">dfeb</span> <span class="o">=</span> <span class="n">n_obs</span> <span class="o">-</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
     <span class="n">dfwg</span> <span class="o">=</span> <span class="n">dftime</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_obs</span> <span class="o">-</span> <span class="n">grp</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
-    <span class="n">dftotal</span> <span class="o">=</span> <span class="n">N</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="c1"># dftotal = N - 1</span>
     <span class="n">dfinter</span> <span class="o">=</span> <span class="n">st_time</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">st_between</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">]</span>
 
     <span class="c1"># MEAN SQUARES</span>
@@ -649,21 +672,25 @@
     <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">],</span> <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pbetween</span><span class="p">,</span> <span class="n">ptime</span>
     <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">],</span> <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">npsq_between</span><span class="p">,</span> <span class="n">npsq_time</span>
     <span class="n">aov</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;Source&#39;</span><span class="p">:</span> <span class="s1">&#39;Interaction&#39;</span><span class="p">,</span>
-                        <span class="s1">&#39;SS&#39;</span><span class="p">:</span> <span class="n">ssinter</span><span class="p">,</span>
-                        <span class="s1">&#39;DF1&#39;</span><span class="p">:</span> <span class="n">dfinter</span><span class="p">,</span>
-                        <span class="s1">&#39;MS&#39;</span><span class="p">:</span>  <span class="n">msinter</span><span class="p">,</span>
-                        <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="n">finter</span><span class="p">,</span>
-                        <span class="s1">&#39;p-unc&#39;</span><span class="p">:</span> <span class="n">pinter</span><span class="p">,</span>
-                        <span class="s1">&#39;np2&#39;</span><span class="p">:</span> <span class="n">npsq_inter</span>
-                        <span class="p">},</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                      <span class="s1">&#39;SS&#39;</span><span class="p">:</span> <span class="n">ssinter</span><span class="p">,</span>
+                      <span class="s1">&#39;DF1&#39;</span><span class="p">:</span> <span class="n">dfinter</span><span class="p">,</span>
+                      <span class="s1">&#39;MS&#39;</span><span class="p">:</span> <span class="n">msinter</span><span class="p">,</span>
+                      <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="n">finter</span><span class="p">,</span>
+                      <span class="s1">&#39;p-unc&#39;</span><span class="p">:</span> <span class="n">pinter</span><span class="p">,</span>
+                      <span class="s1">&#39;np2&#39;</span><span class="p">:</span> <span class="n">npsq_inter</span>
+                      <span class="p">},</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;DF2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">dfeb</span><span class="p">,</span> <span class="n">dfwg</span><span class="p">,</span> <span class="n">dfwg</span><span class="p">]</span>
     <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Source&#39;</span><span class="p">,</span> <span class="s1">&#39;SS&#39;</span><span class="p">,</span> <span class="s1">&#39;DF1&#39;</span><span class="p">,</span> <span class="s1">&#39;DF2&#39;</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;p-GG-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span><span class="s1">&#39;W-Mauchly&#39;</span><span class="p">,</span> <span class="s1">&#39;X2-Mauchly&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;p-GG-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span> <span class="s1">&#39;W-Mauchly&#39;</span><span class="p">,</span> <span class="s1">&#39;X2-Mauchly&#39;</span><span class="p">,</span>
                  <span class="s1">&#39;DF-Mauchly&#39;</span><span class="p">,</span> <span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span>
 
     <span class="n">aov</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
     <span class="n">aov</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Export to .csv</span>
+    <span class="k">if</span> <span class="n">export_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_export_table</span><span class="p">(</span><span class="n">aov</span><span class="p">,</span> <span class="n">export_filename</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">aov</span></div>
 </pre></div>
 

@@ -105,7 +105,7 @@
 <h1>pingouin.rm_anova<a class="headerlink" href="#pingouin-rm-anova" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pingouin.rm_anova">
-<code class="descclassname">pingouin.</code><code class="descname">rm_anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>data=None</em>, <em>correction='auto'</em>, <em>remove_na=False</em>, <em>detailed=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#rm_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.rm_anova" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pingouin.</code><code class="descname">rm_anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>data=None</em>, <em>correction='auto'</em>, <em>remove_na=False</em>, <em>detailed=False</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#rm_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.rm_anova" title="Permalink to this definition">¶</a></dt>
 <dd><p>One-way repeated measures ANOVA.</p>
 <p>Tested against mne.stats.f_mway_rm and ez R package.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -146,6 +146,13 @@ values will be included in the analysis.</p>
 <p><strong>detailed</strong> : boolean</p>
 <blockquote>
 <div><p>If True, return a full ANOVA table</p>
+</div></blockquote>
+<p><strong>export_filename</strong> : string</p>
+<blockquote>
+<div><p>Filename (without extension) for the output file.
+If None, do not export the table.
+By default, the file will be created in the current python console
+directory. To change that, specify the filename with full path.</p>
 </div></blockquote>
 </td>
 </tr>

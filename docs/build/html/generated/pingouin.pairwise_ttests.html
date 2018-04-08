@@ -105,7 +105,7 @@
 <h1>pingouin.pairwise_ttests<a class="headerlink" href="#pingouin-pairwise-ttests" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pingouin.pairwise_ttests">
-<code class="descclassname">pingouin.</code><code class="descname">pairwise_ttests</code><span class="sig-paren">(</span><em>dv=None</em>, <em>between=None</em>, <em>within=None</em>, <em>effects='all'</em>, <em>data=None</em>, <em>alpha=0.05</em>, <em>tail='two-sided'</em>, <em>padjust='none'</em>, <em>effsize='hedges'</em>, <em>return_desc=True</em>, <em>remove_nan=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/pairwise.html#pairwise_ttests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.pairwise_ttests" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pingouin.</code><code class="descname">pairwise_ttests</code><span class="sig-paren">(</span><em>dv=None</em>, <em>between=None</em>, <em>within=None</em>, <em>effects='all'</em>, <em>data=None</em>, <em>alpha=0.05</em>, <em>tail='two-sided'</em>, <em>padjust='none'</em>, <em>effsize='hedges'</em>, <em>return_desc=True</em>, <em>remove_nan=True</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/pairwise.html#pairwise_ttests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.pairwise_ttests" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pairwise T-tests.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -137,7 +137,8 @@
 </div></blockquote>
 <p><strong>padjust</strong> : string</p>
 <blockquote>
-<div><p>Method used for testing and adjustment of pvalues. Available methods are</p>
+<div><p>Method used for testing and adjustment of pvalues.
+Available methods are</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;none&#39;</span> <span class="p">:</span> <span class="n">no</span> <span class="n">correction</span>
 <span class="s1">&#39;bonferroni&#39;</span> <span class="p">:</span> <span class="n">one</span><span class="o">-</span><span class="n">step</span> <span class="n">correction</span>
 <span class="s1">&#39;holm&#39;</span> <span class="p">:</span> <span class="n">step</span><span class="o">-</span><span class="n">down</span> <span class="n">method</span> <span class="n">using</span> <span class="n">Bonferroni</span> <span class="n">adjustments</span>
@@ -162,6 +163,13 @@
 <p><strong>return_desc</strong> : boolean</p>
 <blockquote>
 <div><p>If True, return group means and std</p>
+</div></blockquote>
+<p><strong>export_filename</strong> : string</p>
+<blockquote>
+<div><p>Filename (without extension) for the output file.
+If None, do not export the table.
+By default, the file will be created in the current python console
+directory. To change that, specify the filename with full path.</p>
 </div></blockquote>
 </td>
 </tr>

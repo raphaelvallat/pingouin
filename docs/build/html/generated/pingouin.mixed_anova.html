@@ -105,7 +105,7 @@
 <h1>pingouin.mixed_anova<a class="headerlink" href="#pingouin-mixed-anova" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pingouin.mixed_anova">
-<code class="descclassname">pingouin.</code><code class="descname">mixed_anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>between=None</em>, <em>data=None</em>, <em>correction='auto'</em>, <em>remove_na=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#mixed_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.mixed_anova" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pingouin.</code><code class="descname">mixed_anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>between=None</em>, <em>data=None</em>, <em>correction='auto'</em>, <em>remove_na=False</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#mixed_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.mixed_anova" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mixed-design (split-plot) ANOVA .</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -141,6 +141,13 @@ more missing values:</p>
 <p>In this example, if remove_na == True, Ss 1 will be removed from the
 ANOVA because of the x3 missing value. If False, the two non-missing
 values will be included in the analysis.</p>
+</div></blockquote>
+<p><strong>export_filename</strong> : string</p>
+<blockquote>
+<div><p>Filename (without extension) for the output file.
+If None, do not export the table.
+By default, the file will be created in the current python console
+directory. To change that, specify the filename with full path.</p>
 </div></blockquote>
 </td>
 </tr>
