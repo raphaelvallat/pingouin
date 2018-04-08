@@ -1,8 +1,6 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 import numpy as np
-from scipy import stats
-import pandas as pd
 from pingouin.utils import (_check_data, _check_eftype)
 from pingouin.parametric import (test_homoscedasticity)
 
@@ -152,7 +150,9 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
         if not paired:
             # https://en.wikipedia.org/wiki/Effect_size
             d = (np.mean(x) - np.mean(y)) / np.sqrt(((nx - 1) *
-                                                     np.std(x, ddof=1)**2 + (ny - 1) * np.std(y, ddof=1)**2) / dof)
+                                                     np.std(x, ddof=1)**2 +
+                                                     (ny - 1) * np.std(y,
+                                                     ddof=1)**2) / dof)
         else:
             # Report Cohen d-avg (Cumming 2012; Lakens 2013)
             d = (np.mean(x) - np.mean(y)) / (.5 * (np.std(x) + np.std(y)))

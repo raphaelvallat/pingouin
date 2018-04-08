@@ -291,7 +291,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
 
     # Compute sphericity using Mauchly's test
     # Sphericity assumption only applies if there are more than 2 levels
-    if correction == 'auto' or correction == True and n_rm >= 3:
+    if correction == 'auto' or correction and n_rm >= 3:
         sphericity, W_mauchly, chi_sq_mauchly, ddof_mauchly, \
             p_mauchly = test_sphericity(data_pivot.as_matrix(), alpha=.05)
 
@@ -327,8 +327,8 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
             aov['sphericity'] = sphericity
 
         col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc',
-                     'p-GG-corr', 'np2', 'sphericity', 'W-Mauchly', 'X2-Mauchly',
-                     'DF-Mauchly', 'p-Mauchly']
+                     'p-GG-corr', 'np2', 'sphericity', 'W-Mauchly',
+                     'X2-Mauchly', 'DF-Mauchly', 'p-Mauchly']
     else:
         aov = pd.DataFrame({'Source': [within, 'Error'],
                             'SS': [sstime, sserror],
@@ -539,7 +539,7 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     dfbetween = st_between.loc[0, 'DF']
     dfeb = n_obs - grp_betw.count().count()
     dfwg = dftime * (n_obs - grp.count().count())
-    dftotal = N - 1
+    # dftotal = N - 1
     dfinter = st_time.loc[0, 'DF'] * st_between.loc[0, 'DF']
 
     # MEAN SQUARES

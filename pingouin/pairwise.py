@@ -8,8 +8,8 @@ from pingouin import (compute_effsize, _remove_rm_na, _extract_effects,
 __all__ = ["pairwise_ttests"]
 
 
-def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, paired, alpha,
-                            t, p, ef, eftype, time=np.nan):
+def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, paired,
+                            alpha, t, p, ef, eftype, time=np.nan):
     stats = stats.append({
         'A': xlabel,
         'B': ylabel,
@@ -50,7 +50,8 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
     tail : string
         Indicates whether to return the 'two-sided' or 'one-sided' p-values
     padjust : string
-        Method used for testing and adjustment of pvalues. Available methods are ::
+        Method used for testing and adjustment of pvalues.
+        Available methods are ::
 
         'none' : no correction
         'bonferroni' : one-step correction
@@ -113,7 +114,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         # Number and labels of possible comparisons
         if len(col_names) >= 2:
             combs = list(combinations(col_names, 2))
-            ntests = len(combs)
+            # ntests = len(combs)
         else:
             raise ValueError('Data must have at least two columns')
 
@@ -142,16 +143,18 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
     if effects.lower() == 'all':
         stats_within = pairwise_ttests(dv=dv, within=within, effects='within',
-                                       data=data, alpha=alpha, tail=tail, padjust=padjust,
-                                       effsize=effsize)
+                                       data=data, alpha=alpha, tail=tail,
+                                       padjust=padjust, effsize=effsize)
         stats_between = pairwise_ttests(dv=dv, between=between,
-                                        effects='between', data=data, alpha=alpha,
-                                        tail=tail, padjust=padjust, effsize=effsize)
+                                        effects='between', data=data,
+                                        alpha=alpha, tail=tail,
+                                        padjust=padjust, effsize=effsize)
 
         stats_interaction = pairwise_ttests(dv=dv, within=within,
-                                            between=between, effects='interaction', data=data,
-                                            alpha=alpha, tail=tail, padjust=padjust,
-                                            effsize=effsize)
+                                            between=between,
+                                            effects='interaction',
+                                            data=data, alpha=alpha, tail=tail,
+                                            padjust=padjust, effsize=effsize)
         stats = pd.concat([stats_within, stats_between,
                            stats_interaction]).reset_index()
 
@@ -183,8 +186,8 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
     # Reorganize column order
     col_order = ['Type', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
-                 'std(B)', 'Paired', 'Alpha', 'T-val', 'Tail', 'p-unc', 'p-corr',
-                 'p-adjust', 'reject', 'Eff_size', 'Eff_type']
+                 'std(B)', 'Paired', 'Alpha', 'T-val', 'Tail', 'p-unc',
+                 'p-corr', 'p-adjust', 'reject', 'Eff_size', 'Eff_type']
 
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
