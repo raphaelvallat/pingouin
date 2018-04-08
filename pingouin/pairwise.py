@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 from pingouin import (compute_effsize, _remove_rm_na, _extract_effects,
-                      multicomp)
+                      multicomp, _export_table)
 
 __all__ = ["pairwise_ttests"]
 
@@ -30,7 +30,8 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, paired, alpha,
 
 def pairwise_ttests(dv=None, between=None, within=None, effects='all',
                     data=None, alpha=.05, tail='two-sided', padjust='none',
-                    effsize='hedges', return_desc=True, remove_nan=True):
+                    effsize='hedges', return_desc=True, remove_nan=True,
+                    export_filename=None):
     '''Pairwise T-tests.
 
     Parameters
@@ -67,6 +68,11 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         'AUC' : Area Under the Curve
     return_desc : boolean
         If True, return group means and std
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -181,4 +187,6 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
+    if export_filename is not None:
+        _export_table(stats, export_filename)
     return stats

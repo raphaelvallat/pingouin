@@ -72,5 +72,5 @@ df = pd.read_csv('sleep_dataset.csv')
 # df = pd.concat([x, y])
 
 aov = mixed_anova(dv='DV', within='Time', between='Group', data=df,
-                  correction='auto')
+                  correction='auto', export_filename='mixed_anova.csv')
 print_table(aov)

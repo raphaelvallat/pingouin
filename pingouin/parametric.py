@@ -2,7 +2,7 @@
 # Date: April 2018
 import numpy as np
 import pandas as pd
-from pingouin import _check_dataframe, _remove_rm_na
+from pingouin import _check_dataframe, _remove_rm_na, _export_table
 
 __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
            "test_sphericity", "rm_anova", "anova", "mixed_anova"]
@@ -200,12 +200,12 @@ def test_sphericity(X, alpha=.05):
 
 
 def ss(grp, type='a'):
-    """Sums of squares"""
+    """Helper function for sums of squares computation"""
     return np.sum(grp.sum()**2) if type == 'a' else grp.sum().sum()**2
 
 
 def rm_anova(dv=None, within=None, data=None, correction='auto',
-             remove_na=False, detailed=False):
+             remove_na=False, detailed=False, export_filename=None):
     """One-way repeated measures ANOVA.
 
     Tested against mne.stats.f_mway_rm and ez R package.
@@ -235,6 +235,11 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         values will be included in the analysis.
     detailed : boolean
         If True, return a full ANOVA table
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -347,10 +352,14 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
+    # Export to .csv
+    if export_filename is not None:
+        _export_table(aov, export_filename)
     return aov
 
 
-def anova(dv=None, between=None, data=None, detailed=False):
+def anova(dv=None, between=None, data=None, detailed=False,
+          export_filename=None):
     """One-way ANOVA.
 
     Tested against ez R package.
@@ -365,6 +374,12 @@ def anova(dv=None, between=None, data=None, detailed=False):
         DataFrame
     detailed : boolean
         If True, return a detailed ANOVA table
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
+
 
     Returns
     -------
@@ -429,11 +444,14 @@ def anova(dv=None, between=None, data=None, detailed=False):
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
+    # Export to .csv
+    if export_filename is not None:
+        _export_table(aov, export_filename)
     return aov
 
 
 def mixed_anova(dv=None, within=None, between=None, data=None,
-                correction='auto', remove_na=False):
+                correction='auto', remove_na=False, export_filename=None):
     """Mixed-design (split-plot) ANOVA .
 
     Parameters
@@ -459,6 +477,11 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
         In this example, if remove_na == True, Ss 1 will be removed from the
         ANOVA because of the x3 missing value. If False, the two non-missing
         values will be included in the analysis.
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -562,4 +585,8 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
+
+    # Export to .csv
+    if export_filename is not None:
+        _export_table(aov, export_filename)
     return aov

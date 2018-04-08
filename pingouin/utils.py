@@ -5,8 +5,9 @@ from scipy import stats
 from six import string_types
 import pandas as pd
 
-__all__ = ["print_table", "_check_eftype", "_remove_rm_na", "_check_data",
-           "_check_dataframe",  "_extract_effects", "print_table"]
+__all__ = ["print_table", "_export_table", "_check_eftype", "_remove_rm_na",
+           "_check_data", "_check_dataframe",  "_extract_effects",
+           "print_table"]
 
 def _check_eftype(eftype):
     """Check validity of eftype"""
@@ -29,6 +30,16 @@ def print_table(df, floatfmt=".4f"):
         print('')
     except:
         print(df)
+
+def _export_table(table, fname=None):
+    """Export DataFrame to .csv"""
+    import os.path as op
+    extension = op.splitext(fname.lower())[1]
+    if extension == '':
+        fname = fname + '.csv'
+
+    table.to_csv(fname, index=None, sep=',', encoding='utf-8',
+                 float_format='%.4f', decimal='.')
 
 
 def _remove_rm_na(dv=None, within=None, data=None):
