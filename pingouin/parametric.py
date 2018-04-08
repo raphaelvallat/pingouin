@@ -2,7 +2,7 @@
 # Date: April 2018
 import numpy as np
 import pandas as pd
-from pingouin import _check_dataframe, _remove_rm_na
+from pingouin import _check_dataframe, _remove_rm_na, _export_table
 
 __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
            "test_sphericity", "rm_anova", "anova", "mixed_anova"]
@@ -200,12 +200,12 @@ def test_sphericity(X, alpha=.05):
 
 
 def ss(grp, type='a'):
-    """Sums of squares"""
+    """Helper function for sums of squares computation"""
     return np.sum(grp.sum()**2) if type == 'a' else grp.sum().sum()**2
 
 
 def rm_anova(dv=None, within=None, data=None, correction='auto',
-             remove_na=False, detailed=False):
+             remove_na=False, detailed=False, export_filename=None):
     """One-way repeated measures ANOVA.
 
     Tested against mne.stats.f_mway_rm and ez R package.
@@ -235,6 +235,11 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         values will be included in the analysis.
     detailed : boolean
         If True, return a full ANOVA table
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -246,7 +251,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     _check_dataframe(dv=dv, within=within, data=data, effects='within')
 
     # Remove NaN
-    if remove_na:
+    if remove_na and data[dv].isnull().values.any():
         data = _remove_rm_na(dv=dv, within=within, data=data)
 
     # Reset index (avoid duplicate axis error)
@@ -262,7 +267,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     # Sums of squares
     sstime = ss(grp_with) / n_obs - ss(grp_with, 'b') / N
     sswithin = grp_with.apply(lambda x: x**2).sum() - \
-                                (grp_with.sum()**2 / grp_with.count()).sum()
+        (grp_with.sum()**2 / grp_with.count()).sum()
 
     # Calculating SSsubjects and SSerror
     data['Subj'] = np.tile(np.arange(n_obs), n_rm)
@@ -286,9 +291,9 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
 
     # Compute sphericity using Mauchly's test
     # Sphericity assumption only applies if there are more than 2 levels
-    if correction == 'auto' or correction == True and n_rm >= 3:
+    if correction == 'auto' or correction and n_rm >= 3:
         sphericity, W_mauchly, chi_sq_mauchly, ddof_mauchly, \
-        p_mauchly = test_sphericity(data_pivot.as_matrix(), alpha=.05)
+            p_mauchly = test_sphericity(data_pivot.as_matrix(), alpha=.05)
 
         if correction == 'auto':
             correction = True if not sphericity else False
@@ -322,8 +327,8 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
             aov['sphericity'] = sphericity
 
         col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc',
-                    'p-GG-corr', 'np2', 'sphericity','W-Mauchly', 'X2-Mauchly',
-                    'DF-Mauchly', 'p-Mauchly']
+                     'p-GG-corr', 'np2', 'sphericity', 'W-Mauchly',
+                     'X2-Mauchly', 'DF-Mauchly', 'p-Mauchly']
     else:
         aov = pd.DataFrame({'Source': [within, 'Error'],
                             'SS': [sstime, sserror],
@@ -342,15 +347,19 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
             aov['sphericity'] = [sphericity, np.nan]
 
         col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'p-GG-corr',
-                     'np2', 'sphericity','W-Mauchly', 'X2-Mauchly',
+                     'np2', 'sphericity', 'W-Mauchly', 'X2-Mauchly',
                      'DF-Mauchly', 'p-Mauchly']
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
+    # Export to .csv
+    if export_filename is not None:
+        _export_table(aov, export_filename)
     return aov
 
 
-def anova(dv=None, between=None, data=None, detailed=False):
+def anova(dv=None, between=None, data=None, detailed=False,
+          export_filename=None):
     """One-way ANOVA.
 
     Tested against ez R package.
@@ -365,6 +374,12 @@ def anova(dv=None, between=None, data=None, detailed=False):
         DataFrame
     detailed : boolean
         If True, return a detailed ANOVA table
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
+
 
     Returns
     -------
@@ -375,7 +390,7 @@ def anova(dv=None, between=None, data=None, detailed=False):
 
     # Check data
     _check_dataframe(dv=dv, between=between, data=data,
-                        effects='between')
+                     effects='between')
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
@@ -388,10 +403,10 @@ def anova(dv=None, between=None, data=None, detailed=False):
     grp_betw = data.groupby(between)[dv]
     # Between effect
     ssbetween = (grp_betw.sum()**2 / grp_betw.count()).sum() - \
-                                                        ss(grp_betw, 'b') / N
+        ss(grp_betw, 'b') / N
     # Error (between)
     sserror = grp_betw.apply(lambda x: x**2).sum() - \
-                                (grp_betw.sum()**2 / grp_betw.count()).sum()
+        (grp_betw.sum()**2 / grp_betw.count()).sum()
 
     # Calculate degrees of freedom, F- and p-values
     ddof1 = n_groups - 1
@@ -429,11 +444,14 @@ def anova(dv=None, between=None, data=None, detailed=False):
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
+    # Export to .csv
+    if export_filename is not None:
+        _export_table(aov, export_filename)
     return aov
 
 
 def mixed_anova(dv=None, within=None, between=None, data=None,
-                correction='auto', remove_na=False):
+                correction='auto', remove_na=False, export_filename=None):
     """Mixed-design (split-plot) ANOVA .
 
     Parameters
@@ -459,18 +477,39 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
         In this example, if remove_na == True, Ss 1 will be removed from the
         ANOVA because of the x3 missing value. If False, the two non-missing
         values will be included in the analysis.
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
 
     Returns
     -------
     aov : DataFrame
         ANOVA summary
+
+    See Also
+    --------
+    anova : One-way ANOVA
+    rm_anova : One-way repeated measures ANOVA
+
+    Examples
+    --------
+    Compute a two-way mixed model ANOVA.
+
+        >>> import pandas as pd
+        >>> from pingouin import mixed_anova, print_table
+        >>> df = pd.read_dataset('dataset.csv')
+        >>> aov = mixed_anova(dv='DV', within='Time', between='Group', data=df,
+                             correction='auto', remove_na=False)
+        >>> print_table(aov)
     """
     from scipy.stats import f
     # Check data
     _check_dataframe(dv=dv, within=within, between=between, data=data,
-                        effects='interaction')
+                     effects='interaction')
     # Remove NaN
-    if remove_na:
+    if remove_na and data[dv].isnull().values.any():
         data = _remove_rm_na(dv=dv, within=within, data=data)
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
@@ -486,7 +525,7 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     # Error (between)
     grp_betw = data.groupby(between)[dv]
     sseb = grp_betw.apply(lambda x: x**2).sum() - \
-                                (grp_betw.sum()**2 / grp_betw.count()).sum()
+        (grp_betw.sum()**2 / grp_betw.count()).sum()
     # Within-group effect
     grp = data.groupby([between, within])[dv]
     sstotal = grp.apply(lambda x: x**2).sum() - ss(grp, 'b') / N
@@ -500,7 +539,7 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     dfbetween = st_between.loc[0, 'DF']
     dfeb = n_obs - grp_betw.count().count()
     dfwg = dftime * (n_obs - grp.count().count())
-    dftotal = N - 1
+    # dftotal = N - 1
     dfinter = st_time.loc[0, 'DF'] * st_between.loc[0, 'DF']
 
     # MEAN SQUARES
@@ -509,13 +548,13 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     msinter = ssinter / dfinter
 
     # F VALUES
-    ftime = st_time.loc[0, 'MS'] / mswg
     fbetween = st_between.loc[0, 'MS'] / mseb
+    ftime = st_time.loc[0, 'MS'] / mswg
     finter = msinter / mswg
 
     # P-values
-    ptime = f(dftime, dfwg).sf(ftime)
     pbetween = f(dfbetween, dfeb).sf(fbetween)
+    ptime = f(dftime, dfwg).sf(ftime)
     pinter = f(dfinter, dfwg).sf(finter)
 
     # Effects sizes
@@ -531,19 +570,23 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     aov.loc[0, 'p-unc'], aov.loc[1, 'p-unc'] = pbetween, ptime
     aov.loc[0, 'np2'], aov.loc[1, 'np2'] = npsq_between, npsq_time
     aov = aov.append({'Source': 'Interaction',
-                        'SS': ssinter,
-                        'DF1': dfinter,
-                        'MS':  msinter,
-                        'F': finter,
-                        'p-unc': pinter,
-                        'np2': npsq_inter
-                        }, ignore_index=True)
+                      'SS': ssinter,
+                      'DF1': dfinter,
+                      'MS': msinter,
+                      'F': finter,
+                      'p-unc': pinter,
+                      'np2': npsq_inter
+                      }, ignore_index=True)
 
     aov['DF2'] = [dfeb, dfwg, dfwg]
     col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc', 'np2',
-                 'p-GG-corr', 'sphericity','W-Mauchly', 'X2-Mauchly',
+                 'p-GG-corr', 'sphericity', 'W-Mauchly', 'X2-Mauchly',
                  'DF-Mauchly', 'p-Mauchly']
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
+
+    # Export to .csv
+    if export_filename is not None:
+        _export_table(aov, export_filename)
     return aov

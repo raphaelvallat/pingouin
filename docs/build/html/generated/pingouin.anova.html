@@ -6,6 +6,7 @@
     <title>pingouin.anova &#8212; pingouin 0.1.dev documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/style.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -19,6 +20,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
@@ -103,7 +105,7 @@
 <h1>pingouin.anova<a class="headerlink" href="#pingouin-anova" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pingouin.anova">
-<code class="descclassname">pingouin.</code><code class="descname">anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>between=None</em>, <em>data=None</em>, <em>detailed=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.anova" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pingouin.</code><code class="descname">anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>between=None</em>, <em>data=None</em>, <em>detailed=False</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.anova" title="Permalink to this definition">¶</a></dt>
 <dd><p>One-way ANOVA.</p>
 <p>Tested against ez R package.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -125,6 +127,13 @@
 <p><strong>detailed</strong> : boolean</p>
 <blockquote>
 <div><p>If True, return a detailed ANOVA table</p>
+</div></blockquote>
+<p><strong>export_filename</strong> : string</p>
+<blockquote>
+<div><p>Filename (without extension) for the output file.
+If None, do not export the table.
+By default, the file will be created in the current python console
+directory. To change that, specify the filename with full path.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -152,10 +161,6 @@
       
         <br/>
         
-<div id="sourcelink">
-  <a href="../_sources/generated/pingouin.anova.rst.txt"
-     rel="nofollow">Source</a>
-</div>
       
     </p>
     <p>

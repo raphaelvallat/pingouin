@@ -6,6 +6,7 @@
     <title>pingouin.mixed_anova &#8212; pingouin 0.1.dev documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/style.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -19,6 +20,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
@@ -103,7 +105,7 @@
 <h1>pingouin.mixed_anova<a class="headerlink" href="#pingouin-mixed-anova" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pingouin.mixed_anova">
-<code class="descclassname">pingouin.</code><code class="descname">mixed_anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>between=None</em>, <em>data=None</em>, <em>correction='auto'</em>, <em>remove_na=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#mixed_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.mixed_anova" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pingouin.</code><code class="descname">mixed_anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>between=None</em>, <em>data=None</em>, <em>correction='auto'</em>, <em>remove_na=False</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#mixed_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.mixed_anova" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mixed-design (split-plot) ANOVA .</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -140,6 +142,13 @@ more missing values:</p>
 ANOVA because of the x3 missing value. If False, the two non-missing
 values will be included in the analysis.</p>
 </div></blockquote>
+<p><strong>export_filename</strong> : string</p>
+<blockquote>
+<div><p>Filename (without extension) for the output file.
+If None, do not export the table.
+By default, the file will be created in the current python console
+directory. To change that, specify the filename with full path.</p>
+</div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>aov</strong> : DataFrame</p>
@@ -150,6 +159,25 @@ values will be included in the analysis.</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="pingouin.anova.html#pingouin.anova" title="pingouin.anova"><code class="xref py py-obj docutils literal"><span class="pre">anova</span></code></a></dt>
+<dd>One-way ANOVA</dd>
+<dt><a class="reference internal" href="pingouin.rm_anova.html#pingouin.rm_anova" title="pingouin.rm_anova"><code class="xref py py-obj docutils literal"><span class="pre">rm_anova</span></code></a></dt>
+<dd>One-way repeated measures ANOVA</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>Compute a two-way mixed model ANOVA.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">mixed_anova</span><span class="p">,</span> <span class="n">print_table</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;dataset.csv&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aov</span> <span class="o">=</span> <span class="n">mixed_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+<span class="go">                     correction=&#39;auto&#39;, remove_na=False)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">print_table</span><span class="p">(</span><span class="n">aov</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>
@@ -166,10 +194,6 @@ values will be included in the analysis.</p>
       
         <br/>
         
-<div id="sourcelink">
-  <a href="../_sources/generated/pingouin.mixed_anova.rst.txt"
-     rel="nofollow">Source</a>
-</div>
       
     </p>
     <p>

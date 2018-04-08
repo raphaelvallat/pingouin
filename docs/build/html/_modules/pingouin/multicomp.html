@@ -6,6 +6,7 @@
     <title>pingouin.multicomp &#8212; pingouin 0.1.dev documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
@@ -19,6 +20,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/copybutton.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
@@ -225,6 +227,7 @@
     <span class="n">pvals_corrected</span><span class="p">[</span><span class="n">pvals_corrected</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="n">reject</span> <span class="o">=</span> <span class="n">pvals_corrected</span> <span class="o">&lt;</span> <span class="n">alpha</span>
     <span class="k">return</span> <span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corrected</span></div>
+
 
 <div class="viewcode-block" id="multicomp"><a class="viewcode-back" href="../../generated/pingouin.multicomp.html#pingouin.multicomp">[docs]</a><span class="k">def</span> <span class="nf">multicomp</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;holm&#39;</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;P-values correction for multiple tests.</span>

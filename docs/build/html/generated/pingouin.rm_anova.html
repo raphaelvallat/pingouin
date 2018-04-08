@@ -6,6 +6,7 @@
     <title>pingouin.rm_anova &#8212; pingouin 0.1.dev documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/style.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -19,6 +20,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
@@ -103,7 +105,7 @@
 <h1>pingouin.rm_anova<a class="headerlink" href="#pingouin-rm-anova" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pingouin.rm_anova">
-<code class="descclassname">pingouin.</code><code class="descname">rm_anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>data=None</em>, <em>correction='auto'</em>, <em>remove_na=False</em>, <em>detailed=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#rm_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.rm_anova" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pingouin.</code><code class="descname">rm_anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>data=None</em>, <em>correction='auto'</em>, <em>remove_na=False</em>, <em>detailed=False</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#rm_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.rm_anova" title="Permalink to this definition">¶</a></dt>
 <dd><p>One-way repeated measures ANOVA.</p>
 <p>Tested against mne.stats.f_mway_rm and ez R package.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -145,6 +147,13 @@ values will be included in the analysis.</p>
 <blockquote>
 <div><p>If True, return a full ANOVA table</p>
 </div></blockquote>
+<p><strong>export_filename</strong> : string</p>
+<blockquote>
+<div><p>Filename (without extension) for the output file.
+If None, do not export the table.
+By default, the file will be created in the current python console
+directory. To change that, specify the filename with full path.</p>
+</div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>aov</strong> : DataFrame</p>
@@ -171,10 +180,6 @@ values will be included in the analysis.</p>
       
         <br/>
         
-<div id="sourcelink">
-  <a href="../_sources/generated/pingouin.rm_anova.rst.txt"
-     rel="nofollow">Source</a>
-</div>
       
     </p>
     <p>

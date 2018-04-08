@@ -15,7 +15,7 @@ timepoints = ['Pre', 'Post-6months', 'Post-12months']
 nrm = len(timepoints)
 between = np.tile(np.r_[np.repeat(['Insomnia'], nx),
                         np.repeat(['Control'], ny)], nrm)
-within = np.repeat(timepoints, (nx+ny))
+within = np.repeat(timepoints, (nx + ny))
 
 # Create DV
 i_pre = normal(loc=5, size=nx)

@@ -3,34 +3,36 @@
 import numpy as np
 import pandas as pd
 from pingouin import (compute_effsize, _remove_rm_na, _extract_effects,
-                      multicomp)
+                      multicomp, _export_table)
 
 __all__ = ["pairwise_ttests"]
 
-def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, paired, alpha,
-                            t, p, ef, eftype, time=np.nan):
+
+def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, paired,
+                            alpha, t, p, ef, eftype, time=np.nan):
     stats = stats.append({
-                        'A': xlabel,
-                        'B': ylabel,
-                        'mean(A)': np.mean(x),
-                        'mean(B)': np.mean(y),
-                        # Use ddof=1 for unibiased estimator (pandas default)
-                        'std(A)': np.std(x, ddof=1),
-                        'std(B)': np.std(y, ddof=1),
-                        'Type': effects,
-                        'Paired': paired,
-                        # 'Alpha': alpha,
-                        'T-val': t,
-                        'p-unc': p,
-                        'Eff_size': ef,
-                        'Eff_type': eftype,
-                        'Time': time}, ignore_index=True)
+        'A': xlabel,
+        'B': ylabel,
+        'mean(A)': np.mean(x),
+        'mean(B)': np.mean(y),
+        # Use ddof=1 for unibiased estimator (pandas default)
+        'std(A)': np.std(x, ddof=1),
+        'std(B)': np.std(y, ddof=1),
+        'Type': effects,
+        'Paired': paired,
+        # 'Alpha': alpha,
+        'T-val': t,
+        'p-unc': p,
+        'Eff_size': ef,
+        'Eff_type': eftype,
+        'Time': time}, ignore_index=True)
     return stats
 
 
 def pairwise_ttests(dv=None, between=None, within=None, effects='all',
                     data=None, alpha=.05, tail='two-sided', padjust='none',
-                    effsize='hedges', return_desc=True, remove_nan=True):
+                    effsize='hedges', return_desc=True, remove_nan=True,
+                    export_filename=None):
     '''Pairwise T-tests.
 
     Parameters
@@ -48,7 +50,8 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
     tail : string
         Indicates whether to return the 'two-sided' or 'one-sided' p-values
     padjust : string
-        Method used for testing and adjustment of pvalues. Available methods are ::
+        Method used for testing and adjustment of pvalues.
+        Available methods are ::
 
         'none' : no correction
         'bonferroni' : one-step correction
@@ -67,6 +70,11 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         'AUC' : Area Under the Curve
     return_desc : boolean
         If True, return group means and std
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -91,7 +99,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
     # Extract main effects
     dt_array, nobs = _extract_effects(dv=dv, between=between, within=within,
-                                     effects=effects, data=data)
+                                      effects=effects, data=data)
 
     stats = pd.DataFrame([])
 
@@ -106,7 +114,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         # Number and labels of possible comparisons
         if len(col_names) >= 2:
             combs = list(combinations(col_names, 2))
-            ntests = len(combs)
+            # ntests = len(combs)
         else:
             raise ValueError('Data must have at least two columns')
 
@@ -135,18 +143,20 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
     if effects.lower() == 'all':
         stats_within = pairwise_ttests(dv=dv, within=within, effects='within',
-                            data=data, alpha=alpha, tail=tail, padjust=padjust,
-                            effsize=effsize)
+                                       data=data, alpha=alpha, tail=tail,
+                                       padjust=padjust, effsize=effsize)
         stats_between = pairwise_ttests(dv=dv, between=between,
-                            effects='between', data=data, alpha=alpha,
-                            tail=tail, padjust=padjust, effsize=effsize)
+                                        effects='between', data=data,
+                                        alpha=alpha, tail=tail,
+                                        padjust=padjust, effsize=effsize)
 
         stats_interaction = pairwise_ttests(dv=dv, within=within,
-                            between=between, effects='interaction', data=data,
-                            alpha=alpha, tail=tail, padjust=padjust,
-                            effsize=effsize)
+                                            between=between,
+                                            effects='interaction',
+                                            data=data, alpha=alpha, tail=tail,
+                                            padjust=padjust, effsize=effsize)
         stats = pd.concat([stats_within, stats_between,
-                                stats_interaction]).reset_index()
+                           stats_interaction]).reset_index()
 
     # Tail and multiple comparisons
     if tail == 'one-sided':
@@ -176,9 +186,11 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
     # Reorganize column order
     col_order = ['Type', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
-                 'std(B)', 'Paired', 'Alpha', 'T-val', 'Tail', 'p-unc', 'p-corr',
-                 'p-adjust', 'reject', 'Eff_size', 'Eff_type']
+                 'std(B)', 'Paired', 'Alpha', 'T-val', 'Tail', 'p-unc',
+                 'p-corr', 'p-adjust', 'reject', 'Eff_size', 'Eff_type']
 
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
+    if export_filename is not None:
+        _export_table(stats, export_filename)
     return stats

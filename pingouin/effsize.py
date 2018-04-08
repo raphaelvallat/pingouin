@@ -1,8 +1,6 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 import numpy as np
-from scipy import stats
-import pandas as pd
 from pingouin.utils import (_check_data, _check_eftype)
 from pingouin.parametric import (test_homoscedasticity)
 
@@ -70,7 +68,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
         else:
             # If shapes of x and y are not known, return cohen's d
             print("You need to pass nx and ny arguments to compute Hedges g.",
-            "Returning Cohen's d instead")
+                  "Returning Cohen's d instead")
             return d
     elif ot == 'glass':
         print("Returning original effect size instead of Glass because",
@@ -79,12 +77,12 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     elif ot == 'r':
         # McGrath and Meyer 2006
         if all(v is not None for v in [nx, ny]):
-            a = ((nx + ny)**2 - 2*(nx + ny)) / (nx*ny)
+            a = ((nx + ny)**2 - 2 * (nx + ny)) / (nx * ny)
         else:
             a = 4
         return d / np.sqrt(d**2 + a)
     elif ot == 'eta-square':
-        return (d/2)**2 / (1 + (d/2)**2)
+        return (d / 2)**2 / (1 + (d / 2)**2)
     elif ot == 'odds-ratio':
         return np.exp(d * np.pi / np.sqrt(3))
     elif ot == 'auc':
@@ -151,12 +149,15 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
         # Compute unbiased Cohen's d effect size
         if not paired:
             # https://en.wikipedia.org/wiki/Effect_size
-            d = (np.mean(x) - np.mean(y)) / np.sqrt(((nx - 1) * \
-                 np.std(x, ddof=1)**2 + (ny - 1) * np.std(y, ddof=1)**2) / dof)
+            d = (np.mean(x) - np.mean(y)) / np.sqrt(((nx - 1) *
+                                                     np.std(x, ddof=1)**2 +
+                                                     (ny - 1) * np.std(y,
+                                                     ddof=1)**2) / dof)
         else:
             # Report Cohen d-avg (Cumming 2012; Lakens 2013)
             d = (np.mean(x) - np.mean(y)) / (.5 * (np.std(x) + np.std(y)))
         return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)
+
 
 def compute_effsize_from_T(T, nx=None, ny=None, N=None, eftype='cohen'):
     """Compute effect size from a T-value.
