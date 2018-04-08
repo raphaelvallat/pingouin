@@ -4,6 +4,3 @@ Doc
 
 Code
 ----
-- Parent function anova
-- Correction for sphericity and GG in mixed model ANOVA
-- Add within / between in effsize

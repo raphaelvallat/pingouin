@@ -2,6 +2,7 @@
 # Date: April 2018
 import numpy as np
 import pandas as pd
+from pingouin import _check_dataframe, _remove_rm_na
 
 __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
            "test_sphericity", "rm_anova", "anova", "mixed_anova"]
@@ -30,8 +31,6 @@ def gzscore(x):
     gstd = np.exp(np.sqrt(np.sum((np.log(x / geo_mean))**2) / (len(x) - 1)))
     # Geometric z-score
     return np.log(x / geo_mean) / np.log(gstd)
-
-# MAIN FUNCTIONS
 
 
 def test_normality(*args, alpha=.05):
@@ -197,7 +196,6 @@ def test_sphericity(X, alpha=.05):
     ddof = d * (d + 1) / 2 - 1
     pval = chi2.sf(chi_sq, ddof)
     sphericity = True if pval > alpha else False
-
     return sphericity, W, chi_sq, ddof, pval
 
 
@@ -244,20 +242,27 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         ANOVA summary
     """
     from scipy.stats import f
-    rm = list(data[within].unique())
-    n_rm = len(rm)
-    N = data[dv].size
+    # Check data
+    _check_dataframe(dv=dv, within=within, data=data, effects='within')
+
+    # Remove NaN
+    if remove_na:
+        data = _remove_rm_na(dv=dv, within=within, data=data)
+
+    # Reset index (avoid duplicate axis error)
+    data = data.reset_index(drop=True)
 
     # Groupby
     grp_with = data.groupby(within)[dv]
+    N = data[dv].size
+    rm = list(data[within].unique())
+    n_rm = len(rm)
     n_obs = int(data.groupby(within)[dv].count().max())
 
     # Sums of squares
     sstime = ss(grp_with) / n_obs - ss(grp_with, 'b') / N
-    ssw = np.zeros(n_rm)
-    for i, (name, group) in enumerate(grp_with):
-        ssw[i] = np.sum((group - group.mean())**2)
-    sswithin = np.sum(ssw)
+    sswithin = grp_with.apply(lambda x: x**2).sum() - \
+                                (grp_with.sum()**2 / grp_with.count()).sum()
 
     # Calculating SSsubjects and SSerror
     data['Subj'] = np.tile(np.arange(n_obs), n_rm)
@@ -367,32 +372,38 @@ def anova(dv=None, between=None, data=None, detailed=False):
         ANOVA summary
     """
     from scipy.stats import f
+
+    # Check data
+    _check_dataframe(dv=dv, between=between, data=data,
+                        effects='between')
+
+    # Reset index (avoid duplicate axis error)
+    data = data.reset_index(drop=True)
+
     groups = list(data[between].unique())
     n_groups = len(groups)
     N = data[dv].size
 
     # Sums of squares
     grp_betw = data.groupby(between)[dv]
-    n_obs = grp_betw.count().as_matrix()
-    grandmean = grp_betw.mean().mean()
-    ssb, ssw = np.zeros(n_groups), np.zeros(n_groups)
-    for i, (name, group) in enumerate(grp_betw):
-        ssb[i] = group.count() * np.sum((group.mean() - grandmean)**2)
-        ssw[i] = np.sum((group - group.mean())**2)
-    ssbetween = np.sum(ssb)
-    sswithin = np.sum(ssw)
+    # Between effect
+    ssbetween = (grp_betw.sum()**2 / grp_betw.count()).sum() - \
+                                                        ss(grp_betw, 'b') / N
+    # Error (between)
+    sserror = grp_betw.apply(lambda x: x**2).sum() - \
+                                (grp_betw.sum()**2 / grp_betw.count()).sum()
 
     # Calculate degrees of freedom, F- and p-values
     ddof1 = n_groups - 1
     msbetween = ssbetween / ddof1
     ddof2 = N - n_groups
-    mswithin = sswithin / ddof2
-    fval = msbetween / mswithin
+    mserror = sserror / ddof2
+    fval = msbetween / mserror
     p_unc = f(ddof1, ddof2).sf(fval)
 
     # Calculating partial eta-square
     # Similar to (fval * ddof1) / (fval * ddof1 + ddof2)
-    np2 = ssbetween / (ssbetween + sswithin)
+    np2 = ssbetween / (ssbetween + sserror)
 
     # Create output dataframe
     if not detailed:
@@ -407,9 +418,9 @@ def anova(dv=None, between=None, data=None, detailed=False):
         col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc', 'np2']
     else:
         aov = pd.DataFrame({'Source': [between, 'Within'],
-                            'SS': [ssbetween, sswithin],
+                            'SS': [ssbetween, sserror],
                             'DF': [ddof1, ddof2],
-                            'MS': [msbetween, mswithin],
+                            'MS': [msbetween, mserror],
                             'F': [fval, np.nan],
                             'p-unc': [p_unc, np.nan],
                             'np2': [np2, np.nan]
@@ -455,71 +466,83 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
         ANOVA summary
     """
     from scipy.stats import f
-    N = data[dv].size
+    # Check data
+    _check_dataframe(dv=dv, within=within, between=between, data=data,
+                        effects='interaction')
+    # Remove NaN
+    if remove_na:
+        data = _remove_rm_na(dv=dv, within=within, data=data)
+    # Reset index (avoid duplicate axis error)
+    data = data.reset_index(drop=True)
 
     # SUMS OF SQUARES
-    # Time effect
-    grp_with = data.groupby(within)[dv]
-    n_obs = grp_with.count().max()
-    n_rm = grp_with.count().count()
-    sstime = ss(grp_with) / n_obs - ss(grp_with, 'b') / N
+    N = data[dv].size
+    # Extract main effects
+    st_time = rm_anova(dv=dv, within=within, data=data, correction=correction,
+                       remove_na=False, detailed=True)
+    st_between = anova(dv=dv, between=between, data=data, detailed=True)
 
-    # Between effect
+    # Extract error and interactions
+    # Error (between)
     grp_betw = data.groupby(between)[dv]
-    n_obs = grp_betw.count().as_matrix()
-    grandmean = grp_betw.mean().mean()
-    ssb = np.zeros(len(n_obs))
-    for i, (name, group) in enumerate(grp_betw):
-        ssb[i] = group.count() * np.sum((group.mean() - grandmean)**2)
-    ssbetween = np.sum(ssb)
-
+    sseb = grp_betw.apply(lambda x: x**2).sum() - \
+                                (grp_betw.sum()**2 / grp_betw.count()).sum()
     # Within-group effect
     grp = data.groupby([between, within])[dv]
     sstotal = grp.apply(lambda x: x**2).sum() - ss(grp, 'b') / N
     sswg = grp.apply(lambda x: x**2).sum() - (grp.sum()**2 / grp.count()).sum()
-
     # Interaction
-    ssinter = sstotal - (sswg + sstime + ssbetween)
+    ssinter = sstotal - (sswg + st_time.loc[0, 'SS'] + st_between.loc[0, 'SS'])
 
     # DEGREES OF FREEDOM
-    dftime = grp_with.count().count() - 1
-    dfbetween = grp_betw.count().count() - 1
-    dfwg = N - grp.count().count()
+    n_obs = data.groupby(within)[dv].count().max()
+    dftime = st_time.loc[0, 'DF']
+    dfbetween = st_between.loc[0, 'DF']
+    dfeb = n_obs - grp_betw.count().count()
+    dfwg = dftime * (n_obs - grp.count().count())
     dftotal = N - 1
-    dfinter = dftime * dfbetween
+    dfinter = st_time.loc[0, 'DF'] * st_between.loc[0, 'DF']
 
     # MEAN SQUARES
-    mstime = sstime / dftime
-    msbetween = ssbetween / dfbetween
+    mseb = sseb / dfeb
     mswg = sswg / dfwg
     msinter = ssinter / dfinter
 
     # F VALUES
-    ftime = mstime / mswg
-    fbetween = msbetween / mswg
+    ftime = st_time.loc[0, 'MS'] / mswg
+    fbetween = st_between.loc[0, 'MS'] / mseb
     finter = msinter / mswg
 
     # P-values
     ptime = f(dftime, dfwg).sf(ftime)
-    pbetween = f(dfbetween, dfwg).sf(fbetween)
+    pbetween = f(dfbetween, dfeb).sf(fbetween)
     pinter = f(dfinter, dfwg).sf(finter)
 
     # Effects sizes
-    npsq_between = fbetween * dfbetween / (fbetween * dfbetween + dfwg)
+    npsq_between = fbetween * dfbetween / (fbetween * dfbetween + dfeb)
     npsq_time = ftime * dftime / (ftime * dftime + dfwg)
     npsq_inter = ssinter / (ssinter + sswg)
 
     # Stats table
-    aov = pd.DataFrame({'Source': [between, within, 'Interaction'],
-                        'SS': [ssbetween, sstime, ssinter],
-                        'DF1': [dfbetween, dftime, dfinter],
-                        'DF2': [dfwg, dfwg, dfwg],
-                        'MS': [msbetween, mstime, msinter],
-                        'F': [fbetween, ftime, finter],
-                        'p-unc': [pbetween, ptime, pinter],
-                        'np2': [npsq_between, npsq_time, npsq_inter]
-                        })
-    col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc', 'np2']
+    aov = pd.concat([st_between.drop(1), st_time.drop(1)], ignore_index=True)
+    # Update values
+    aov.rename(columns={'DF': 'DF1'}, inplace=True)
+    aov.loc[0, 'F'], aov.loc[1, 'F'] = fbetween, ftime
+    aov.loc[0, 'p-unc'], aov.loc[1, 'p-unc'] = pbetween, ptime
+    aov.loc[0, 'np2'], aov.loc[1, 'np2'] = npsq_between, npsq_time
+    aov = aov.append({'Source': 'Interaction',
+                        'SS': ssinter,
+                        'DF1': dfinter,
+                        'MS':  msinter,
+                        'F': finter,
+                        'p-unc': pinter,
+                        'np2': npsq_inter
+                        }, ignore_index=True)
+
+    aov['DF2'] = [dfeb, dfwg, dfwg]
+    col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc', 'np2',
+                 'p-GG-corr', 'sphericity','W-Mauchly', 'X2-Mauchly',
+                 'DF-Mauchly', 'p-Mauchly']
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)

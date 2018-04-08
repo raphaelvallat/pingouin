@@ -6,7 +6,7 @@ from six import string_types
 import pandas as pd
 
 __all__ = ["print_table", "_check_eftype", "_remove_rm_na", "_check_data",
-           "_check_dataframe", "_extract_effects", "print_table"]
+           "_check_dataframe",  "_extract_effects", "print_table"]
 
 def _check_eftype(eftype):
     """Check validity of eftype"""
@@ -31,7 +31,7 @@ def print_table(df, floatfmt=".4f"):
         print(df)
 
 
-def _remove_rm_na(dv=None, within=None, between=None, data=None):
+def _remove_rm_na(dv=None, within=None, data=None):
     """Remove subject(s) with one or more missing values in repeated
     measurements.
     """
