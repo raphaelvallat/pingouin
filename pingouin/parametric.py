@@ -267,7 +267,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     # Sums of squares
     sstime = ss(grp_with) / n_obs - ss(grp_with, 'b') / N
     sswithin = grp_with.apply(lambda x: x**2).sum() - \
-                                (grp_with.sum()**2 / grp_with.count()).sum()
+        (grp_with.sum()**2 / grp_with.count()).sum()
 
     # Calculating SSsubjects and SSerror
     data['Subj'] = np.tile(np.arange(n_obs), n_rm)
@@ -293,7 +293,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     # Sphericity assumption only applies if there are more than 2 levels
     if correction == 'auto' or correction == True and n_rm >= 3:
         sphericity, W_mauchly, chi_sq_mauchly, ddof_mauchly, \
-        p_mauchly = test_sphericity(data_pivot.as_matrix(), alpha=.05)
+            p_mauchly = test_sphericity(data_pivot.as_matrix(), alpha=.05)
 
         if correction == 'auto':
             correction = True if not sphericity else False
@@ -327,8 +327,8 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
             aov['sphericity'] = sphericity
 
         col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc',
-                    'p-GG-corr', 'np2', 'sphericity','W-Mauchly', 'X2-Mauchly',
-                    'DF-Mauchly', 'p-Mauchly']
+                     'p-GG-corr', 'np2', 'sphericity', 'W-Mauchly', 'X2-Mauchly',
+                     'DF-Mauchly', 'p-Mauchly']
     else:
         aov = pd.DataFrame({'Source': [within, 'Error'],
                             'SS': [sstime, sserror],
@@ -347,7 +347,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
             aov['sphericity'] = [sphericity, np.nan]
 
         col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'p-GG-corr',
-                     'np2', 'sphericity','W-Mauchly', 'X2-Mauchly',
+                     'np2', 'sphericity', 'W-Mauchly', 'X2-Mauchly',
                      'DF-Mauchly', 'p-Mauchly']
 
     aov = aov.reindex(columns=col_order)
@@ -390,7 +390,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
     # Check data
     _check_dataframe(dv=dv, between=between, data=data,
-                        effects='between')
+                     effects='between')
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
@@ -403,10 +403,10 @@ def anova(dv=None, between=None, data=None, detailed=False,
     grp_betw = data.groupby(between)[dv]
     # Between effect
     ssbetween = (grp_betw.sum()**2 / grp_betw.count()).sum() - \
-                                                        ss(grp_betw, 'b') / N
+        ss(grp_betw, 'b') / N
     # Error (between)
     sserror = grp_betw.apply(lambda x: x**2).sum() - \
-                                (grp_betw.sum()**2 / grp_betw.count()).sum()
+        (grp_betw.sum()**2 / grp_betw.count()).sum()
 
     # Calculate degrees of freedom, F- and p-values
     ddof1 = n_groups - 1
@@ -507,7 +507,7 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     from scipy.stats import f
     # Check data
     _check_dataframe(dv=dv, within=within, between=between, data=data,
-                        effects='interaction')
+                     effects='interaction')
     # Remove NaN
     if remove_na and data[dv].isnull().values.any():
         data = _remove_rm_na(dv=dv, within=within, data=data)
@@ -525,7 +525,7 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     # Error (between)
     grp_betw = data.groupby(between)[dv]
     sseb = grp_betw.apply(lambda x: x**2).sum() - \
-                                (grp_betw.sum()**2 / grp_betw.count()).sum()
+        (grp_betw.sum()**2 / grp_betw.count()).sum()
     # Within-group effect
     grp = data.groupby([between, within])[dv]
     sstotal = grp.apply(lambda x: x**2).sum() - ss(grp, 'b') / N
@@ -570,17 +570,17 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     aov.loc[0, 'p-unc'], aov.loc[1, 'p-unc'] = pbetween, ptime
     aov.loc[0, 'np2'], aov.loc[1, 'np2'] = npsq_between, npsq_time
     aov = aov.append({'Source': 'Interaction',
-                        'SS': ssinter,
-                        'DF1': dfinter,
-                        'MS':  msinter,
-                        'F': finter,
-                        'p-unc': pinter,
-                        'np2': npsq_inter
-                        }, ignore_index=True)
+                      'SS': ssinter,
+                      'DF1': dfinter,
+                      'MS': msinter,
+                      'F': finter,
+                      'p-unc': pinter,
+                      'np2': npsq_inter
+                      }, ignore_index=True)
 
     aov['DF2'] = [dfeb, dfwg, dfwg]
     col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc', 'np2',
-                 'p-GG-corr', 'sphericity','W-Mauchly', 'X2-Mauchly',
+                 'p-GG-corr', 'sphericity', 'W-Mauchly', 'X2-Mauchly',
                  'DF-Mauchly', 'p-Mauchly']
 
     aov = aov.reindex(columns=col_order)

@@ -6,8 +6,9 @@ from six import string_types
 import pandas as pd
 
 __all__ = ["print_table", "_export_table", "_check_eftype", "_remove_rm_na",
-           "_check_data", "_check_dataframe",  "_extract_effects",
+           "_check_data", "_check_dataframe", "_extract_effects",
            "print_table"]
+
 
 def _check_eftype(eftype):
     """Check validity of eftype"""
@@ -16,6 +17,7 @@ def _check_eftype(eftype):
         return True
     else:
         return False
+
 
 def print_table(df, floatfmt=".4f"):
     """Nice display of table"""
@@ -28,8 +30,9 @@ def print_table(df, floatfmt=".4f"):
         from tabulate import tabulate
         print(tabulate(df, headers="keys", showindex=False, floatfmt=floatfmt))
         print('')
-    except:
+    except BaseException:
         print(df)
+
 
 def _export_table(table, fname=None):
     """Export DataFrame to .csv"""
@@ -58,7 +61,7 @@ def _remove_rm_na(dv=None, within=None, data=None):
     iloc_nan = pd.isnull(data).any(1).nonzero()[0]
     idx_nan = data.index[iloc_nan].values
     print('\nNote: %i subject(s) removed because of missing value(s).\n'
-                                                            % len(idx_nan))
+          % len(idx_nan))
     return data.drop(idx_nan).reset_index(drop=True)
 
 
@@ -117,6 +120,7 @@ def _check_dataframe(dv=None, between=None, within=None, effects=None,
             if not isinstance(input, string_types):
                 raise ValueError('within and between must be specified when \
                 effects=interaction')
+
 
 def _extract_effects(dv=None, between=None, within=None, effects=None,
                      data=None):

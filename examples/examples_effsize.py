@@ -7,9 +7,9 @@ from pingouin.effsize import *
 np.random.seed(123)
 nx, ny = 100, 100
 x = np.random.normal(loc=174, scale=1., size=nx)
-y = np.random.normal(loc=175, scale=.9,  size=ny)
+y = np.random.normal(loc=175, scale=.9, size=ny)
 group = np.r_[np.repeat(['France'], nx), np.repeat(['UK'], ny)]
-df = pd.DataFrame({'DV': np.r_[x, y], 'Group': group })
+df = pd.DataFrame({'DV': np.r_[x, y], 'Group': group})
 
 
 # EFFECT SIZE COMPUTATION

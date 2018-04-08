@@ -126,6 +126,7 @@ def holm(pvals, alpha=0.05):
     reject = pvals_corrected < alpha
     return reject, pvals_corrected
 
+
 def multicomp(pvals, alpha=0.05, method='holm'):
     '''P-values correction for multiple tests.
 

@@ -7,24 +7,25 @@ from pingouin import (compute_effsize, _remove_rm_na, _extract_effects,
 
 __all__ = ["pairwise_ttests"]
 
+
 def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, paired, alpha,
                             t, p, ef, eftype, time=np.nan):
     stats = stats.append({
-                        'A': xlabel,
-                        'B': ylabel,
-                        'mean(A)': np.mean(x),
-                        'mean(B)': np.mean(y),
-                        # Use ddof=1 for unibiased estimator (pandas default)
-                        'std(A)': np.std(x, ddof=1),
-                        'std(B)': np.std(y, ddof=1),
-                        'Type': effects,
-                        'Paired': paired,
-                        # 'Alpha': alpha,
-                        'T-val': t,
-                        'p-unc': p,
-                        'Eff_size': ef,
-                        'Eff_type': eftype,
-                        'Time': time}, ignore_index=True)
+        'A': xlabel,
+        'B': ylabel,
+        'mean(A)': np.mean(x),
+        'mean(B)': np.mean(y),
+        # Use ddof=1 for unibiased estimator (pandas default)
+        'std(A)': np.std(x, ddof=1),
+        'std(B)': np.std(y, ddof=1),
+        'Type': effects,
+        'Paired': paired,
+        # 'Alpha': alpha,
+        'T-val': t,
+        'p-unc': p,
+        'Eff_size': ef,
+        'Eff_type': eftype,
+        'Time': time}, ignore_index=True)
     return stats
 
 
@@ -97,7 +98,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
     # Extract main effects
     dt_array, nobs = _extract_effects(dv=dv, between=between, within=within,
-                                     effects=effects, data=data)
+                                      effects=effects, data=data)
 
     stats = pd.DataFrame([])
 
@@ -141,18 +142,18 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
     if effects.lower() == 'all':
         stats_within = pairwise_ttests(dv=dv, within=within, effects='within',
-                            data=data, alpha=alpha, tail=tail, padjust=padjust,
-                            effsize=effsize)
+                                       data=data, alpha=alpha, tail=tail, padjust=padjust,
+                                       effsize=effsize)
         stats_between = pairwise_ttests(dv=dv, between=between,
-                            effects='between', data=data, alpha=alpha,
-                            tail=tail, padjust=padjust, effsize=effsize)
+                                        effects='between', data=data, alpha=alpha,
+                                        tail=tail, padjust=padjust, effsize=effsize)
 
         stats_interaction = pairwise_ttests(dv=dv, within=within,
-                            between=between, effects='interaction', data=data,
-                            alpha=alpha, tail=tail, padjust=padjust,
-                            effsize=effsize)
+                                            between=between, effects='interaction', data=data,
+                                            alpha=alpha, tail=tail, padjust=padjust,
+                                            effsize=effsize)
         stats = pd.concat([stats_within, stats_between,
-                                stats_interaction]).reset_index()
+                           stats_interaction]).reset_index()
 
     # Tail and multiple comparisons
     if tail == 'one-sided':
