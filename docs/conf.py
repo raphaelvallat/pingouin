@@ -28,17 +28,22 @@
 #
 # needs_sphinx = '1.0'
 
+import os
+import sys
 import sphinx_bootstrap_theme
 
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+sys.path.insert(0, os.path.abspath('sphinxext'))
 extensions = ['sphinx.ext.mathjax',
               'sphinx.ext.viewcode',
               'sphinx.ext.githubpages',
               'sphinx.ext.autosummary',
               'sphinx.ext.autodoc',
+              # 'plot_generator',
+              # 'plot_directive',
               'numpydoc']
 
 # Generate the API documentation when building
@@ -75,8 +80,6 @@ copyright = u'2018-{}, Raphael Vallat'.format(time.strftime("%Y"))
 #
 # The short X.Y version.
 # The full version, including alpha/beta/rc tags.
-import sys
-import os
 sys.path.insert(0, os.path.abspath(os.path.pardir))
 import pingouin
 version = pingouin.__version__
@@ -140,6 +143,8 @@ html_favicon = 'pictures/favicon.ico'
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'pingouindoc'
+html_static_path = ['_static']
+html_show_sourcelink = False
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -190,3 +195,9 @@ texinfo_documents = [
      author, 'pingouin', 'One line description of project.',
      'Miscellaneous'),
 ]
+
+# Add the 'copybutton' javascript, to hide/show the prompt in code
+# examples, originally taken from scikit-learn's doc/conf.py
+def setup(app):
+    app.add_javascript('copybutton.js')
+    app.add_stylesheet('style.css')

@@ -464,6 +464,22 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     -------
     aov : DataFrame
         ANOVA summary
+
+    See Also
+    --------
+    anova : One-way ANOVA
+    rm_anova : One-way repeated measures ANOVA
+
+    Examples
+    --------
+    Compute a two-way mixed model ANOVA.
+
+        >>> import pandas as pd
+        >>> from pingouin import mixed_anova, print_table
+        >>> df = pd.read_dataset('dataset.csv')
+        >>> aov = mixed_anova(dv='DV', within='Time', between='Group', data=df,
+                             correction='auto', remove_na=False)
+        >>> print_table(aov)
     """
     from scipy.stats import f
     # Check data
