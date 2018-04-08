@@ -63,12 +63,14 @@ Quick start
     print(df.head())
 
     # Compute two-way split-plot ANOVA
-    aov = mixed_anova(dv='DV', within='Time', between='Group', data=df)
+    aov = mixed_anova(dv='DV', within='Time', between='Group', data=df,
+                     correction='auto', remove_na=False)
     print_table(aov)
 
     # Compute FDR-corrected post-hocs with effect sizes
     posthocs = pairwise_ttests(dv='DV', within='Time', between='Group', data=df,
-                               tail='two-sided', padjust='fdr_bh', effsize='cohen')
+                               tail='two-sided', padjust='fdr_bh', effsize='cohen',
+                               return_desc=False)
     print_table(posthocs)
 
 Output:

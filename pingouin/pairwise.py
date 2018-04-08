@@ -47,7 +47,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         Significance level
     tail : string
         Indicates whether to return the 'two-sided' or 'one-sided' p-values
-    p-adjust : string
+    padjust : string
         Method used for testing and adjustment of pvalues. Available methods are ::
 
         'none' : no correction
@@ -175,8 +175,8 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         stats[['mean(A)', 'mean(B)', 'std(A)', 'std(B)']] = np.nan
 
     # Reorganize column order
-    col_order = ['Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)', 'std(B)',
-                 'Type', 'Paired', 'Alpha', 'T-val', 'Tail', 'p-unc', 'p-corr',
+    col_order = ['Type', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
+                 'std(B)', 'Paired', 'Alpha', 'T-val', 'Tail', 'p-unc', 'p-corr',
                  'p-adjust', 'reject', 'Eff_size', 'Eff_type']
 
     stats = stats.reindex(columns=col_order)

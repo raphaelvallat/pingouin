@@ -28,7 +28,7 @@ post_hocs = pairwise_ttests(dv='DV', between='Group', data=df,
                             effsize='hedges')
 
 # Print the table with 3 decimals
-print_table(post_hocs, floatfmt=".2f")
+# print_table(post_hocs, floatfmt=".2f")
 
 ###############################################################################
 # ONE-WAY REPEATED MEASURES ANOVA
@@ -37,14 +37,11 @@ print_table(post_hocs, floatfmt=".2f")
 # Load dataset
 df = pd.read_csv('sleep_dataset.csv')
 
-# Keep only insomnia group
-#df = df[df['Group'] == 'Insomnia']
-
 # to make it trickier, let's assume that one subject has a missing value.
-#df.iloc[20, 0] = nan
+df.iloc[20, 0] = nan
 
 # Compute one-way repeated measures ANOVA
-aov = rm_anova(dv='DV', within='Time', data=df, correction='auto', 
+aov = rm_anova(dv='DV', within='Time', data=df, correction='auto',
                remove_na=True, detailed=True)
 print_table(aov)
 
@@ -53,7 +50,7 @@ post_hocs = pairwise_ttests(dv='DV', within='Time', data=df, effects='within',
                             padjust='bonf', effsize='hedges')
 
 # Print the table with 3 decimals
-print_table(post_hocs, floatfmt=".3f")
+# print_table(post_hocs, floatfmt=".3f")
 
 
 ###############################################################################
@@ -74,5 +71,6 @@ df = pd.read_csv('sleep_dataset.csv')
 #                   'DV': [5, 4, 1, 2, 3, 4, 1, 2, 3, 2, 3, 0, 3, 2, 2]})
 # df = pd.concat([x, y])
 
-aov = mixed_anova(dv='DV', within='Time', between='Group', data=df)
+aov = mixed_anova(dv='DV', within='Time', between='Group', data=df,
+                  correction='auto')
 print_table(aov)

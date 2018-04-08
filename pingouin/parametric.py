@@ -477,46 +477,40 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
 
     # SUMS OF SQUARES
     N = data[dv].size
-    # Time effect
-    grp_with = data.groupby(within)[dv]
-    n_obs = grp_with.count().max()
-    n_rm = grp_with.count().count()
-    sstime = ss(grp_with) / n_obs - ss(grp_with, 'b') / N
+    # Extract main effects
+    st_time = rm_anova(dv=dv, within=within, data=data, correction=correction,
+                       remove_na=False, detailed=True)
+    st_between = anova(dv=dv, between=between, data=data, detailed=True)
 
-    # Between effect
-    grp_betw = data.groupby(between)[dv]
-    ssbetween = (grp_betw.sum()**2 / grp_betw.count()).sum() - \
-                                                        ss(grp_betw, 'b') / N
+    # Extract error and interactions
     # Error (between)
+    grp_betw = data.groupby(between)[dv]
     sseb = grp_betw.apply(lambda x: x**2).sum() - \
                                 (grp_betw.sum()**2 / grp_betw.count()).sum()
-
     # Within-group effect
     grp = data.groupby([between, within])[dv]
     sstotal = grp.apply(lambda x: x**2).sum() - ss(grp, 'b') / N
     sswg = grp.apply(lambda x: x**2).sum() - (grp.sum()**2 / grp.count()).sum()
-
     # Interaction
-    ssinter = sstotal - (sswg + sstime + ssbetween)
+    ssinter = sstotal - (sswg + st_time.loc[0, 'SS'] + st_between.loc[0, 'SS'])
 
     # DEGREES OF FREEDOM
-    dftime = n_rm - 1
-    dfbetween = grp_betw.count().count() - 1
+    n_obs = data.groupby(within)[dv].count().max()
+    dftime = st_time.loc[0, 'DF']
+    dfbetween = st_between.loc[0, 'DF']
     dfeb = n_obs - grp_betw.count().count()
     dfwg = dftime * (n_obs - grp.count().count())
     dftotal = N - 1
-    dfinter = dftime * dfbetween
+    dfinter = st_time.loc[0, 'DF'] * st_between.loc[0, 'DF']
 
     # MEAN SQUARES
-    mstime = sstime / dftime
-    msbetween = ssbetween / dfbetween
     mseb = sseb / dfeb
     mswg = sswg / dfwg
     msinter = ssinter / dfinter
 
     # F VALUES
-    ftime = mstime / mswg
-    fbetween = msbetween / mseb
+    ftime = st_time.loc[0, 'MS'] / mswg
+    fbetween = st_between.loc[0, 'MS'] / mseb
     finter = msinter / mswg
 
     # P-values
@@ -530,16 +524,25 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     npsq_inter = ssinter / (ssinter + sswg)
 
     # Stats table
-    aov = pd.DataFrame({'Source': [between, within, 'Interaction'],
-                        'SS': [ssbetween, sstime, ssinter],
-                        'DF1': [dfbetween, dftime, dfinter],
-                        'DF2': [dfeb, dfwg, dfwg],
-                        'MS': [msbetween, mstime, msinter],
-                        'F': [fbetween, ftime, finter],
-                        'p-unc': [pbetween, ptime, pinter],
-                        'np2': [npsq_between, npsq_time, npsq_inter]
-                        })
-    col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc', 'np2']
+    aov = pd.concat([st_between.drop(1), st_time.drop(1)], ignore_index=True)
+    # Update values
+    aov.rename(columns={'DF': 'DF1'}, inplace=True)
+    aov.loc[0, 'F'], aov.loc[1, 'F'] = fbetween, ftime
+    aov.loc[0, 'p-unc'], aov.loc[1, 'p-unc'] = pbetween, ptime
+    aov.loc[0, 'np2'], aov.loc[1, 'np2'] = npsq_between, npsq_time
+    aov = aov.append({'Source': 'Interaction',
+                        'SS': ssinter,
+                        'DF1': dfinter,
+                        'MS':  msinter,
+                        'F': finter,
+                        'p-unc': pinter,
+                        'np2': npsq_inter
+                        }, ignore_index=True)
+
+    aov['DF2'] = [dfeb, dfwg, dfwg]
+    col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc', 'np2',
+                 'p-GG-corr', 'sphericity','W-Mauchly', 'X2-Mauchly',
+                 'DF-Mauchly', 'p-Mauchly']
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)

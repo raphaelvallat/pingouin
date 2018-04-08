@@ -47,27 +47,29 @@ Quick start
 
 .. code-block:: python
 
- import pandas as pd
- from pingouin import pairwise_ttests
+     import pandas as pd
+     from pingouin import pairwise_ttests
 
- # Load a fake dataset: the INSOMNIA study
- # Goal: evaluate the influence of a treatment on sleep duration in a control
- # and insomnia group
- # Mixed repeated measures design
- #   - Dependent variable ('DV') = hours of sleep per night
- #   - Between-factor ('Group') = two-levels (Insomnia / Control)
- #   - Within-factor ('Time') = three levels (Pre, Post-6months, Post-12months)
- df = pd.read_csv('examples/sleep_dataset.csv')
- print(df.head())
+     # Load a fake dataset: the INSOMNIA study
+     # Goal: evaluate the influence of a treatment on sleep duration in a control
+     # and insomnia group
+     # Mixed repeated measures design
+     #   - Dependent variable ('DV') = hours of sleep per night
+     #   - Between-factor ('Group') = two-levels (Insomnia / Control)
+     #   - Within-factor ('Time') = three levels (Pre, Post-6months, Post-12months)
+     df = pd.read_csv('examples/sleep_dataset.csv')
+     print(df.head())
 
- # Compute mixed-design ANOVA
- aov = mixed_anova(dv='DV', within='Time', between='Group', data=df)
- print_table(aov)
+     # Compute two-way split-plot ANOVA
+     aov = mixed_anova(dv='DV', within='Time', between='Group', data=df,
+                      correction='auto', remove_na=False)
+     print_table(aov)
 
- # Compute FDR-corrected post-hocs with effect sizes
- posthocs = pairwise_ttests(dv='DV', within='Time', between='Group', data=df,
-                            tail='two-sided', padjust='fdr_bh', effsize='cohen')
- print_table(posthocs)
+     # Compute FDR-corrected post-hocs with effect sizes
+     posthocs = pairwise_ttests(dv='DV', within='Time', between='Group', data=df,
+                                tail='two-sided', padjust='fdr_bh', effsize='cohen',
+                                return_desc=False)
+     print_table(posthocs)
 
 
 Output:
