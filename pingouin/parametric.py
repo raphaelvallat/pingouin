@@ -246,7 +246,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     _check_dataframe(dv=dv, within=within, data=data, effects='within')
 
     # Remove NaN
-    if remove_na:
+    if remove_na and data[dv].isnull().values.any():
         data = _remove_rm_na(dv=dv, within=within, data=data)
 
     # Reset index (avoid duplicate axis error)
@@ -470,7 +470,7 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     _check_dataframe(dv=dv, within=within, between=between, data=data,
                         effects='interaction')
     # Remove NaN
-    if remove_na:
+    if remove_na and data[dv].isnull().values.any():
         data = _remove_rm_na(dv=dv, within=within, data=data)
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
@@ -509,13 +509,13 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     msinter = ssinter / dfinter
 
     # F VALUES
-    ftime = st_time.loc[0, 'MS'] / mswg
     fbetween = st_between.loc[0, 'MS'] / mseb
+    ftime = st_time.loc[0, 'MS'] / mswg
     finter = msinter / mswg
 
     # P-values
-    ptime = f(dftime, dfwg).sf(ftime)
     pbetween = f(dfbetween, dfeb).sf(fbetween)
+    ptime = f(dftime, dfwg).sf(ftime)
     pinter = f(dfinter, dfwg).sf(finter)
 
     # Effects sizes
