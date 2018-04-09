@@ -102,10 +102,10 @@
     <div class="col-md-12 content">
       
   <div class="section" id="pingouin-compute-effsize-from-t">
-<h1>pingouin.compute_effsize_from_T<a class="headerlink" href="#pingouin-compute-effsize-from-t" title="Permalink to this headline">¶</a></h1>
+<h1>pingouin.compute_effsize_from_T</h1>
 <dl class="function">
 <dt id="pingouin.compute_effsize_from_T">
-<code class="descclassname">pingouin.</code><code class="descname">compute_effsize_from_T</code><span class="sig-paren">(</span><em>T</em>, <em>nx=None</em>, <em>ny=None</em>, <em>N=None</em>, <em>eftype='cohen'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/effsize.html#compute_effsize_from_T"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.compute_effsize_from_T" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pingouin.</code><code class="descname">compute_effsize_from_T</code><span class="sig-paren">(</span><em>T</em>, <em>nx=None</em>, <em>ny=None</em>, <em>N=None</em>, <em>eftype='cohen'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/effsize.html#compute_effsize_from_T"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Compute effect size from a T-value.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -117,7 +117,7 @@
 </div></blockquote>
 <p><strong>nx, ny</strong> : int, optional</p>
 <blockquote>
-<div><p>Length of vector x and y.</p>
+<div><p>Group sample sizes.</p>
 </div></blockquote>
 <p><strong>N</strong> : int, optional</p>
 <blockquote>
@@ -137,6 +137,35 @@
 </tr>
 </tbody>
 </table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="pingouin.compute_effsize.html#pingouin.compute_effsize" title="pingouin.compute_effsize"><code class="xref py py-obj docutils literal"><span class="pre">compute_effsize</span></code></a></dt>
+<dd>Compute effect size from pandas dataframe or numpy arrays</dd>
+<dt><a class="reference internal" href="pingouin.convert_effsize.html#pingouin.convert_effsize" title="pingouin.convert_effsize"><code class="xref py py-obj docutils literal"><span class="pre">convert_effsize</span></code></a></dt>
+<dd>Conversion between effect sizes</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<ol class="arabic">
+<li><p class="first">Compute effect size from T when both sample sizes are known.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">compute_effsize_from_T</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="mf">2.90</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">25</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">compute_effsize_from_T</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="go">    0.76</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Compute effect size from T when only total sample size is known (nx+ny)</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mf">2.90</span><span class="p">,</span> <span class="mi">60</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">compute_effsize_from_T</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="go">    0.75</span>
+</pre></div>
+</div>
+</li>
+</ol>
 </dd></dl>
 
 </div>
@@ -157,7 +186,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
     </p>
   </div>
 </footer>

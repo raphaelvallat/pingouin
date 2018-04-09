@@ -13,7 +13,7 @@ def _ecdf(x):
 
 
 def fdr(pvals, alpha=0.05, method='indep'):
-    """P-value correction with False Discovery Rate (FDR).
+    """P-values correction with False Discovery Rate (FDR).
 
     Correction for multiple comparison using FDR.
 
@@ -82,7 +82,7 @@ def fdr(pvals, alpha=0.05, method='indep'):
 
 
 def bonf(pvals, alpha=0.05):
-    """P-value correction with Bonferroni method.
+    """P-values correction with Bonferroni method.
 
     Parameters
     ----------
@@ -119,7 +119,7 @@ def bonf(pvals, alpha=0.05):
 
 
 def holm(pvals, alpha=.05):
-    """P-value correction with Holm method.
+    """P-values correction with Holm method.
 
     Parameters
     ----------

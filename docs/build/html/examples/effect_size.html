@@ -102,16 +102,16 @@
     <div class="col-md-12 content">
       
   <div class="section" id="computing-effect-sizes">
-<h1>Computing effect sizes<a class="headerlink" href="#computing-effect-sizes" title="Permalink to this headline">¶</a></h1>
+<h1>Computing effect sizes</h1>
 <div class="section" id="introduction">
-<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<h2>Introduction</h2>
 <blockquote>
 <div>Effect sizes are the most important outcome of empirical studies.</div></blockquote>
 <p>—<a class="reference external" href="https://www.frontiersin.org/articles/10.3389/fpsyg.2013.00863/full">Lakens et al. 2013</a></p>
 <p>Effect sizes are a way of quantifying the magnitude of the difference between two groups. They are useful to determine the sample size for follow-up studies, or examining effects across studies. In this tutorial, we will see how to compute effect sizes from a pandas DataFrame or two numpy arrays using pingouin.</p>
 </div>
 <div class="section" id="dataset">
-<h2>Dataset<a class="headerlink" href="#dataset" title="Permalink to this headline">¶</a></h2>
+<h2>Dataset</h2>
 <p>We’ll start by generating a fake demographic dataset representing the
 heights of 1000 individuals in two countries.</p>
 <div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -139,7 +139,7 @@ heights of 1000 individuals in two countries.</p>
 </div>
 <img alt="../_images/effect_size_seaborn.png" src="../_images/effect_size_seaborn.png" />
 <div class="section" id="the-effect-sizes-currently-supported-are">
-<h3>The effect sizes currently supported are:<a class="headerlink" href="#the-effect-sizes-currently-supported-are" title="Permalink to this headline">¶</a></h3>
+<h3>The effect sizes currently supported are:</h3>
 <ul class="simple">
 <li>Cohen’s <em>d</em> for independant measures</li>
 <li>Cohen’s <em>d-average</em> for repeated measures</li>
@@ -168,7 +168,7 @@ variance, e.g. Control vs Patient group)</li>
 </pre></div>
 </div>
 <div class="section" id="using-a-t-value">
-<h4>Using a T-value<a class="headerlink" href="#using-a-t-value" title="Permalink to this headline">¶</a></h4>
+<h4>Using a T-value</h4>
 <p>Alternatively, if you don’t have the data, effect size can be computed
 from a T-value and sample size.</p>
 <div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="c1"># 3 - using a T-value when nx and ny are known</span>
@@ -207,7 +207,7 @@ from a T-value and sample size.</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
     </p>
   </div>
 </footer>

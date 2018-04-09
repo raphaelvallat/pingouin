@@ -102,9 +102,9 @@
     <div class="col-md-12 content">
       
   <div class="section" id="post-hoc-comparisons">
-<h1>Post-hoc comparisons<a class="headerlink" href="#post-hoc-comparisons" title="Permalink to this headline">¶</a></h1>
+<h1>Post-hoc comparisons</h1>
 <div class="section" id="load-a-fake-dataset-the-insomnia-study">
-<h2>Load a fake dataset: the INSOMNIA study<a class="headerlink" href="#load-a-fake-dataset-the-insomnia-study" title="Permalink to this headline">¶</a></h2>
+<h2>Load a fake dataset: the INSOMNIA study</h2>
 <p>Goal: evaluate the influence of a treatment on sleep duration in a
 control and insomnia group</p>
 <p><strong>Mixed repeated measures design:</strong></p>
@@ -137,14 +137,14 @@ control and insomnia group</p>
 </div>
 <img alt="../_images/pairwise_ttests_seaborn.png" src="../_images/pairwise_ttests_seaborn.png" />
 <div class="section" id="pairwise-comparisons">
-<h3>Pairwise comparisons<a class="headerlink" href="#pairwise-comparisons" title="Permalink to this headline">¶</a></h3>
+<h3>Pairwise comparisons</h3>
 <ul class="simple">
 <li>Effect size type = cohen’s d</li>
 <li>Correction for multiple comparisons = False Discovery Rate
 (Benjamini–Hochberg procedure)</li>
 </ul>
 <div class="section" id="within-factor">
-<h4>Within-factor<a class="headerlink" href="#within-factor" title="Permalink to this headline">¶</a></h4>
+<h4>Within-factor</h4>
 <div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_ttests</span>
 
 <span class="n">stats</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span>
@@ -156,7 +156,7 @@ control and insomnia group</p>
 </div>
 </div>
 <div class="section" id="between-factor">
-<h4>Between-factor<a class="headerlink" href="#between-factor" title="Permalink to this headline">¶</a></h4>
+<h4>Between-factor</h4>
 <div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">stats</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span>
                         <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;between&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">,</span>
                         <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">,</span>
@@ -166,7 +166,7 @@ control and insomnia group</p>
 </div>
 </div>
 <div class="section" id="interaction">
-<h4>Interaction<a class="headerlink" href="#interaction" title="Permalink to this headline">¶</a></h4>
+<h4>Interaction</h4>
 <div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">stats</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span>
                         <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;interaction&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">,</span>
                         <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">,</span>
@@ -176,7 +176,7 @@ control and insomnia group</p>
 </div>
 </div>
 <div class="section" id="all-of-the-above">
-<h4>All of the above<a class="headerlink" href="#all-of-the-above" title="Permalink to this headline">¶</a></h4>
+<h4>All of the above</h4>
 <p>We also set <strong>return_desc=True</strong> in order to get the mean and
 standard deviations in each comparisons</p>
 <div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">stats</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span>
@@ -207,7 +207,7 @@ standard deviations in each comparisons</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
     </p>
   </div>
 </footer>

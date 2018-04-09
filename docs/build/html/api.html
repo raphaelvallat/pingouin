@@ -102,16 +102,16 @@
     <div class="col-md-12 content">
       
   <div class="section" id="api-reference">
-<span id="api-ref"></span><h1>API reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
+<span id="api-ref"></span><h1>API reference</h1>
 <div class="section" id="anova">
-<h2>ANOVA<a class="headerlink" href="#anova" title="Permalink to this headline">¶</a></h2>
+<h2>ANOVA</h2>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.anova.html#pingouin.anova" title="pingouin.anova"><code class="xref py py-obj docutils literal"><span class="pre">anova</span></code></a>([dv,&nbsp;between,&nbsp;data,&nbsp;detailed])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.anova.html#pingouin.anova" title="pingouin.anova"><code class="xref py py-obj docutils literal"><span class="pre">anova</span></code></a>([dv,&nbsp;between,&nbsp;data,&nbsp;detailed,&nbsp;…])</td>
 <td>One-way ANOVA.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.rm_anova.html#pingouin.rm_anova" title="pingouin.rm_anova"><code class="xref py py-obj docutils literal"><span class="pre">rm_anova</span></code></a>([dv,&nbsp;within,&nbsp;data,&nbsp;correction,&nbsp;…])</td>
@@ -120,25 +120,14 @@
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.mixed_anova.html#pingouin.mixed_anova" title="pingouin.mixed_anova"><code class="xref py py-obj docutils literal"><span class="pre">mixed_anova</span></code></a>([dv,&nbsp;within,&nbsp;between,&nbsp;data,&nbsp;…])</td>
 <td>Mixed-design (split-plot) ANOVA .</td>
 </tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="pairwise-tests">
-<h2>Pairwise tests<a class="headerlink" href="#pairwise-tests" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests" title="pingouin.pairwise_ttests"><code class="xref py py-obj docutils literal"><span class="pre">pairwise_ttests</span></code></a>([dv,&nbsp;between,&nbsp;within,&nbsp;…])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests" title="pingouin.pairwise_ttests"><code class="xref py py-obj docutils literal"><span class="pre">pairwise_ttests</span></code></a>([dv,&nbsp;between,&nbsp;within,&nbsp;…])</td>
 <td>Pairwise T-tests.</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="multiple-comparisons">
-<h2>Multiple comparisons<a class="headerlink" href="#multiple-comparisons" title="Permalink to this headline">¶</a></h2>
+<h2>Multiple comparisons</h2>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
@@ -149,19 +138,19 @@
 <td>P-values correction for multiple tests.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.bonf.html#pingouin.bonf" title="pingouin.bonf"><code class="xref py py-obj docutils literal"><span class="pre">bonf</span></code></a>(pvals[,&nbsp;alpha])</td>
-<td>P-value correction with Bonferroni method.</td>
+<td>P-values correction with Bonferroni method.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.holm.html#pingouin.holm" title="pingouin.holm"><code class="xref py py-obj docutils literal"><span class="pre">holm</span></code></a>(pvals[,&nbsp;alpha])</td>
-<td>P-value correction with Holm method.</td>
+<td>P-values correction with Holm method.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.fdr.html#pingouin.fdr" title="pingouin.fdr"><code class="xref py py-obj docutils literal"><span class="pre">fdr</span></code></a>(pvals[,&nbsp;alpha,&nbsp;method])</td>
-<td>P-value correction with False Discovery Rate (FDR).</td>
+<td>P-values correction with False Discovery Rate (FDR).</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="effect-sizes">
-<h2>Effect sizes<a class="headerlink" href="#effect-sizes" title="Permalink to this headline">¶</a></h2>
+<h2>Effect sizes</h2>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
@@ -180,8 +169,8 @@
 </tbody>
 </table>
 </div>
-<div class="section" id="miscellaneous">
-<h2>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="distribution">
+<h2>Distribution</h2>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
@@ -206,6 +195,20 @@
 </tbody>
 </table>
 </div>
+<div class="section" id="miscellaneous">
+<h2>Miscellaneous</h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.reshape_data.html#pingouin.reshape_data" title="pingouin.reshape_data"><code class="xref py py-obj docutils literal"><span class="pre">reshape_data</span></code></a>(df,&nbsp;id[,&nbsp;dv,&nbsp;rm])</td>
+<td>Reshape data from Excel –&gt; Analysis (pingouin) type</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 
 
@@ -224,7 +227,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
     </p>
   </div>
 </footer>

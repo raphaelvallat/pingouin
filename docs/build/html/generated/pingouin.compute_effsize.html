@@ -102,10 +102,10 @@
     <div class="col-md-12 content">
       
   <div class="section" id="pingouin-compute-effsize">
-<h1>pingouin.compute_effsize<a class="headerlink" href="#pingouin-compute-effsize" title="Permalink to this headline">¶</a></h1>
+<h1>pingouin.compute_effsize</h1>
 <dl class="function">
 <dt id="pingouin.compute_effsize">
-<code class="descclassname">pingouin.</code><code class="descname">compute_effsize</code><span class="sig-paren">(</span><em>dv=None</em>, <em>group=None</em>, <em>data=None</em>, <em>x=None</em>, <em>y=None</em>, <em>eftype=None</em>, <em>paired=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/effsize.html#compute_effsize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pingouin.compute_effsize" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pingouin.</code><code class="descname">compute_effsize</code><span class="sig-paren">(</span><em>dv=None</em>, <em>group=None</em>, <em>data=None</em>, <em>x=None</em>, <em>y=None</em>, <em>eftype=None</em>, <em>paired=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/effsize.html#compute_effsize"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Compute effect size from pandas dataframe or two numpy arrays.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -156,6 +156,46 @@ Available methods are</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="pingouin.convert_effsize.html#pingouin.convert_effsize" title="pingouin.convert_effsize"><code class="xref py py-obj docutils literal"><span class="pre">convert_effsize</span></code></a></dt>
+<dd>Conversion between effect sizes.</dd>
+<dt><a class="reference internal" href="pingouin.compute_effsize_from_T.html#pingouin.compute_effsize_from_T" title="pingouin.compute_effsize_from_T"><code class="xref py py-obj docutils literal"><span class="pre">compute_effsize_from_T</span></code></a></dt>
+<dd>Convert a T-statistic to an effect size.</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<ol class="arabic">
+<li><p class="first">Compute Cohen d from two independent NumPy arrays</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">compute_effsize</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">2.3</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="go">    -0.28</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Compute Hedges g from two paired samples in a pandas DataFrame</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">compute_effsize</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;dv&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span>                  <span class="s1">&#39;Group&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="s1">&#39;Pre&#39;</span><span class="p">,</span> <span class="s1">&#39;Post&#39;</span><span class="p">],</span> <span class="mi">10</span><span class="p">)})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;dv&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                    <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+<span class="go">    -1.46</span>
+</pre></div>
+</div>
+</li>
+</ol>
 </dd></dl>
 
 </div>
@@ -176,7 +216,7 @@ Available methods are</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
     </p>
   </div>
 </footer>

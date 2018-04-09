@@ -37,6 +37,46 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     -------
     ef : float
         Desired converted effect size
+
+    See Also
+    --------
+    compute_effsize : Compute effect size from pandas dataframe or numpy arrays
+    compute_effsize_from_T : Convert a T-statistic to an effect size.
+
+    Examples
+    --------
+    1. Convert from Cohen d to eta-square
+
+        >>> from pingouin import convert_effsize
+        >>> d = .45
+        >>> eta = convert_effsize(d, 'cohen', 'eta-square')
+        >>> print(eta)
+            0.05
+
+
+    2. Convert from Cohen d to Hegdes g (requires the sample sizes of each
+    group)
+
+        >>> d = .45
+        >>> g = convert_effsize(d, 'cohen', 'hedges', nx=10, ny=10)
+        >>> print(eta)
+            0.43
+
+
+    3. Convert Pearson r to Cohen d
+
+        >>> r = 0.40
+        >>> d = convert_effsize(r, 'r', 'cohen')
+        >>> print(d)
+            0.87
+
+
+    4. Reverse operation: convert Cohen d to Pearson r
+
+        >>> d = 0.873
+        >>> r = convert_effsize(d, 'cohen', 'r')
+        >>> print(r)
+            0.40
     """
     it = input_type.lower()
     ot = output_type.lower()
@@ -125,6 +165,40 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
     -------
     ef : float
         Effect size
+
+    See Also
+    --------
+    convert_effsize : Conversion between effect sizes.
+    compute_effsize_from_T : Convert a T-statistic to an effect size.
+
+    Examples
+    --------
+    1. Compute Cohen d from two independent NumPy arrays
+
+        >>> import numpy as np
+        >>> from pingouin import compute_effsize
+        >>> np.random.seed(123)
+        >>> x = np.random.normal(2, size=100)
+        >>> y = np.random.normal(2.3, size=95)
+        >>> d = compute_effsize(x=x, y=y, eftype='cohen', paired=False)
+        >>> print(d)
+            -0.28
+
+    2. Compute Hedges g from two paired samples in a pandas DataFrame
+
+        >>> import numpy as np
+        >>> import pandas as pd
+        >>> from pingouin import compute_effsize
+        >>> np.random.seed(123)
+        >>> x = np.random.normal(4, size=10)
+        >>> y = np.random.normal(5, size=10)
+        >>> df = pd.DataFrame({'dv': np.r_[x, y],
+        >>>                   'Group': np.repeat(['Pre', 'Post'], 10)})
+        >>> g = compute_effsize(dv='dv', group='Group', data=df,
+        >>>                     paired=True, eftype='hedges')
+        >>> print(g)
+            -1.46
+
     """
     # Check arguments
     if not _check_eftype(eftype):
@@ -167,7 +241,7 @@ def compute_effsize_from_T(T, nx=None, ny=None, N=None, eftype='cohen'):
     T : float
         T-value
     nx, ny : int, optional
-        Length of vector x and y.
+        Group sample sizes.
     N : int, optional
         Total sample size (will not be used if nx and ny are specified)
     eftype : string, optional
@@ -177,6 +251,28 @@ def compute_effsize_from_T(T, nx=None, ny=None, N=None, eftype='cohen'):
     -------
     ef : float
         Effect size
+
+    See Also
+    --------
+    compute_effsize : Compute effect size from pandas dataframe or numpy arrays
+    convert_effsize : Conversion between effect sizes
+
+    Examples
+    --------
+    1. Compute effect size from T when both sample sizes are known.
+
+        >>> from pingouin import compute_effsize_from_T
+        >>> T, nx, ny = 2.90, 35, 25
+        >>> d = compute_effsize_from_T(T, nx=nx, ny=ny, eftype='cohen')
+        >>> print(d)
+            0.76
+
+    2. Compute effect size from T when only total sample size is known (nx+ny)
+
+        >>> T, N = 2.90, 60
+        >>> d = compute_effsize_from_T(T, N=N, eftype='cohen')
+        >>> print(d)
+            0.75
     """
     if not _check_eftype(eftype):
         err = "Could not interpret input '{}'".format(eftype)

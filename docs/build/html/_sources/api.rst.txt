@@ -16,16 +16,6 @@ ANOVA
     anova
     rm_anova
     mixed_anova
-
-
-Pairwise tests
---------------
-
-.. _pairwise_tests:
-
-.. autosummary::
-   :toctree: generated/
-
     pairwise_ttests
 
 
@@ -56,10 +46,10 @@ Effect sizes
     convert_effsize
 
 
-Miscellaneous
--------------
+Distribution
+------------
 
-.. _misc:
+.. _parametric:
 
 .. autosummary::
    :toctree: generated/
@@ -69,3 +59,14 @@ Miscellaneous
     test_homoscedasticity
     test_sphericity
     test_dist
+
+
+Miscellaneous
+-------------
+
+.. _utils:
+
+.. autosummary::
+     :toctree: generated/
+
+      reshape_data
