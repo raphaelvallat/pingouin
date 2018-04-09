@@ -1,7 +1,6 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 import numpy as np
-from scipy import stats
 from six import string_types
 import pandas as pd
 
@@ -12,8 +11,8 @@ __all__ = ["print_table", "_export_table", "_check_eftype", "_remove_rm_na",
 
 def _check_eftype(eftype):
     """Check validity of eftype"""
-    if eftype.lower() in ['none', 'hedges', 'cohen', 'glass', 'r', 'eta-square',
-                          'odds-ratio', 'auc']:
+    if eftype.lower() in ['none', 'hedges', 'cohen', 'glass', 'r',
+                          'eta-square', 'odds-ratio', 'auc']:
         return True
     else:
         return False
@@ -137,7 +136,6 @@ def _extract_effects(dv=None, between=None, within=None, effects=None,
         col = within if effects == 'within' else between
         # Extract data
         labels = list(data[col].unique())
-        npairs = len(labels)
         for l in labels:
             datadic[l] = data[data[col] == l][dv]
             nobs = np.append(nobs, len(datadic[l]))
@@ -145,7 +143,6 @@ def _extract_effects(dv=None, between=None, within=None, effects=None,
     elif effects.lower() == 'interaction':
         labels_with = list(data[within].unique())
         labels_betw = list(data[between].unique())
-        npairs = len(labels_with)
         for lw in labels_with:
             for l in labels_betw:
                 tmp = data[data[within] == lw]
