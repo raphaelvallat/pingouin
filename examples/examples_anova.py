@@ -28,7 +28,7 @@ post_hocs = pairwise_ttests(dv='DV', between='Group', data=df,
                             effsize='hedges')
 
 # Print the table with 3 decimals
-# print_table(post_hocs, floatfmt=".2f")
+print_table(post_hocs, floatfmt=".3f")
 
 ###############################################################################
 # ONE-WAY REPEATED MEASURES ANOVA
@@ -50,7 +50,7 @@ post_hocs = pairwise_ttests(dv='DV', within='Time', data=df, effects='within',
                             padjust='bonf', effsize='hedges')
 
 # Print the table with 3 decimals
-# print_table(post_hocs, floatfmt=".3f")
+print_table(post_hocs, floatfmt=".3f")
 
 
 ###############################################################################

@@ -36,6 +36,19 @@ def fdr(pvals, alpha=0.05, method='indep'):
         True if a hypothesis is rejected, False if not
     pval_corrected : array
         pvalues adjusted for multiple hypothesis testing to limit FDR
+
+    Examples
+    --------
+    FDR correction of an array of p-values
+
+        >>> from pingouin import fdr
+        >>> pvals = [.50, .003, .32, .054, .0003]
+        >>> reject, pvals_corr = bonf(pvals, alpha=.05)
+        >>> print(reject, pvals_corr)
+
+    **Output:**
+
+    [False True False False  True] [0.5  0.0075  0.4  0.09  0.0015]
     """
     pvals = np.asarray(pvals)
     shape_init = pvals.shape
@@ -84,6 +97,19 @@ def bonf(pvals, alpha=0.05):
         True if a hypothesis is rejected, False if not
     pval_corrected : array
         pvalues adjusted for multiple hypothesis testing
+
+    Examples
+    --------
+    Bonferroni correction of an array of p-values
+
+        >>> from pingouin import bonf
+        >>> pvals = [.50, .003, .32, .054, .0003]
+        >>> reject, pvals_corr = bonf(pvals, alpha=.05)
+        >>> print(reject, pvals_corr)
+
+    **Output:**
+
+    [False True False False  True] [1.  0.015   1.  0.27  0.0015]
     """
     pvals = np.asarray(pvals)
     pvals_corrected = pvals * float(pvals.size)
@@ -92,7 +118,7 @@ def bonf(pvals, alpha=0.05):
     return reject, pvals_corrected
 
 
-def holm(pvals, alpha=0.05):
+def holm(pvals, alpha=.05):
     """P-value correction with Holm method.
 
     Parameters
@@ -108,10 +134,30 @@ def holm(pvals, alpha=0.05):
         True if a hypothesis is rejected, False if not
     pval_corrected : array
         pvalues adjusted for multiple hypothesis testing
+
+    Examples
+    --------
+    Holm correction of an array of p-values
+
+        >>> from pingouin import holm
+        >>> pvals = [.50, .003, .32, .054, .0003]
+        >>> reject, pvals_corr = holm(pvals, alpha=.05)
+        >>> print(reject, pvals_corr)
+
+    **Output:**
+
+    [False True False False True] [0.64  0.012  0.64  0.162  0.0015]
     """
     pvals = np.asarray(pvals)
+    shape_init = pvals.shape
+    pvals = pvals.ravel()
+
+    pvals_sortind = np.argsort(pvals)
+    pvals_sorted = pvals[pvals_sortind]
+    sortrevind = pvals_sortind.argsort()
     ntests = pvals.size
-    notreject = pvals > alpha / np.arange(ntests, 0, -1)
+
+    notreject = pvals_sorted > alpha / np.arange(ntests, 0, -1)
     nr_index = np.nonzero(notreject)[0]
     if nr_index.size == 0:
         # nonreject is empty, all rejected
@@ -120,9 +166,11 @@ def holm(pvals, alpha=0.05):
         notrejectmin = np.min(nr_index)
     notreject[notrejectmin:] = True
     reject = ~notreject
-    pvals_corrected_raw = pvals * np.arange(ntests, 0, -1)
+    pvals_corrected_raw = pvals_sorted * np.arange(ntests, 0, -1)
     pvals_corrected = np.maximum.accumulate(pvals_corrected_raw)
     pvals_corrected[pvals_corrected > 1.0] = 1.0
+    pvals_corrected = pvals_corrected[sortrevind].reshape(shape_init)
+    reject = reject[sortrevind].reshape(shape_init)
     reject = pvals_corrected < alpha
     return reject, pvals_corrected
 
@@ -140,7 +188,7 @@ def multicomp(pvals, alpha=0.05, method='holm'):
         Method used for testing and adjustment of pvalues. Can be either the
         full name or initial letters. Available methods are ::
 
-        'bonferroni' : one-step correction
+        'bonf' : one-step Bonferroni correction
         'holm' : step-down method using Bonferroni adjustments
         'fdr_bh' : Benjamini/Hochberg FDR correction
         'fdr_by' : Benjamini/Yekutieli FDR correction
@@ -152,6 +200,23 @@ def multicomp(pvals, alpha=0.05, method='holm'):
         true for hypothesis that can be rejected for given alpha
     pvals_corrected : array
         p-values corrected for multiple tests
+
+    See Also
+    --------
+    pairwise_ttests : Pairwise post-hocs T-tests
+
+    Examples
+    --------
+    FDR correction of an array of p-values
+
+        >>> from pingouin import multicomp
+        >>> pvals = [.50, .003, .32, .054, .0003]
+        >>> reject, pvals_corr = multicomp(pvals, method='fdr_bh')
+        >>> print(reject, pvals_corr)
+
+    **Output:**
+
+    [False True False False  True] [0.5  0.0075  0.4  0.09  0.0015]
     '''
     if not isinstance(pvals, (list, np.ndarray)):
         err = "pvals must be a list or a np.ndarray"

@@ -347,6 +347,23 @@
 <span class="sd">    -------</span>
 <span class="sd">    aov : DataFrame</span>
 <span class="sd">        ANOVA summary</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    anova : One-way ANOVA</span>
+<span class="sd">    mixed_anova : Two way mixed ANOVA</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Compute a one-way repeated-measures ANOVA.</span>
+
+<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import rm_anova, print_table</span>
+<span class="sd">        &gt;&gt;&gt; df = pd.read_csv(&#39;dataset.csv&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; aov = rm_anova(dv=&#39;DV&#39;, within=&#39;Time&#39;, data=df, correction=&#39;auto&#39;,</span>
+<span class="sd">                           remove_na=True, detailed=True,</span>
+<span class="sd">                           export_filename=&#39;rm_anova.csv&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print_table(aov)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">f</span>
     <span class="c1"># Check data</span>
@@ -482,11 +499,26 @@
 <span class="sd">        By default, the file will be created in the current python console</span>
 <span class="sd">        directory. To change that, specify the filename with full path.</span>
 
-
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    aov : DataFrame</span>
 <span class="sd">        ANOVA summary</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    rm_anova : One-way repeated measures ANOVA</span>
+<span class="sd">    mixed_anova : Two way mixed ANOVA</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Compute a one-way ANOVA.</span>
+
+<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import anova, print_table</span>
+<span class="sd">        &gt;&gt;&gt; df = pd.read_csv(&#39;dataset.csv&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; aov = anova(dv=&#39;DV&#39;, between=&#39;Group&#39;, data=df,</span>
+<span class="sd">                        detailed=True, export_filename=&#39;anova.csv&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print_table(aov)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">f</span>
 
@@ -601,7 +633,7 @@
 
 <span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import mixed_anova, print_table</span>
-<span class="sd">        &gt;&gt;&gt; df = pd.read_dataset(&#39;dataset.csv&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; df = pd.read_csv(&#39;dataset.csv&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; aov = mixed_anova(dv=&#39;DV&#39;, within=&#39;Time&#39;, between=&#39;Group&#39;, data=df,</span>
 <span class="sd">                             correction=&#39;auto&#39;, remove_na=False)</span>
 <span class="sd">        &gt;&gt;&gt; print_table(aov)</span>

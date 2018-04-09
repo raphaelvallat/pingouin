@@ -54,7 +54,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         Available methods are ::
 
         'none' : no correction
-        'bonferroni' : one-step correction
+        'bonferroni' : one-step Bonferroni correction
         'holm' : step-down method using Bonferroni adjustments
         'fdr_bh' : Benjamini/Hochberg FDR correction
         'fdr_by' : Benjamini/Yekutieli FDR correction
@@ -80,6 +80,20 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
     -------
     stats : DataFrame
         Stats summary
+
+    Examples
+    --------
+    Compute Bonferroni-corrected pairwise post-hocs T-tests from a mixed model
+    design.
+
+        >>> import pandas as pd
+        >>> from pingouin import pairwise_ttests, print_table
+        >>> df = pd.read_csv('dataset.csv')
+        >>> post_hocs = pairwise_ttests(dv='DV', within='Time',
+        >>>                        between='Group', data=df, effects='all',
+        >>>                        padjust='bonf', effsize='hedges')
+        >>> # Print the table with 3 decimals
+        >>> print_table(post_hocs, floatfmt=".3f")
     '''
     from itertools import combinations
     from scipy.stats import ttest_ind, ttest_rel

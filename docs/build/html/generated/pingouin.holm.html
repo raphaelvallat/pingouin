@@ -133,6 +133,16 @@
 </tr>
 </tbody>
 </table>
+<p class="rubric">Examples</p>
+<p>Holm correction of an array of p-values</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">holm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pvals</span> <span class="o">=</span> <span class="p">[</span><span class="o">.</span><span class="mi">50</span><span class="p">,</span> <span class="o">.</span><span class="mi">003</span><span class="p">,</span> <span class="o">.</span><span class="mi">32</span><span class="p">,</span> <span class="o">.</span><span class="mi">054</span><span class="p">,</span> <span class="o">.</span><span class="mi">0003</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corr</span> <span class="o">=</span> <span class="n">holm</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corr</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Output:</strong></p>
+<p>[False True False False True] [0.64  0.012  0.64  0.162  0.0015]</p>
 </dd></dl>
 
 </div>
