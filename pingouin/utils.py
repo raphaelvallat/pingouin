@@ -34,7 +34,7 @@ def _export_table(table, fname=None):
                  float_format='%.4f', decimal='.')
 
 def reshape_data(df, id, dv='DV', rm='Time'):
-    """Reshape data from "human-readable" to analysis shape
+    """Reshape data from human-readable to analysis shape
 
     See: https://deparkes.co.uk/2016/10/28/reshape-pandas-data-with-melt/
 
