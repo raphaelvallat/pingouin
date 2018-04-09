@@ -260,7 +260,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         >>> df = pd.read_csv('dataset.csv')
         >>> aov = rm_anova(dv='DV', within='Time', data=df, correction='auto',
                            remove_na=True, detailed=True,
-                           export_filename='anova.csv')
+                           export_filename='rm_anova.csv')
         >>> print_table(aov)
     """
     from scipy.stats import f

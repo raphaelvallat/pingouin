@@ -123,7 +123,7 @@
 <blockquote>
 <div><p>Method used for testing and adjustment of pvalues. Can be either the
 full name or initial letters. Available methods are</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;bonferroni&#39;</span> <span class="p">:</span> <span class="n">one</span><span class="o">-</span><span class="n">step</span> <span class="n">correction</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;bonf&#39;</span> <span class="p">:</span> <span class="n">one</span><span class="o">-</span><span class="n">step</span> <span class="n">Bonferroni</span> <span class="n">correction</span>
 <span class="s1">&#39;holm&#39;</span> <span class="p">:</span> <span class="n">step</span><span class="o">-</span><span class="n">down</span> <span class="n">method</span> <span class="n">using</span> <span class="n">Bonferroni</span> <span class="n">adjustments</span>
 <span class="s1">&#39;fdr_bh&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Hochberg</span> <span class="n">FDR</span> <span class="n">correction</span>
 <span class="s1">&#39;fdr_by&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Yekutieli</span> <span class="n">FDR</span> <span class="n">correction</span>
@@ -144,6 +144,24 @@ full name or initial letters. Available methods are</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="pingouin.pairwise_ttests.html#pingouin.pairwise_ttests" title="pingouin.pairwise_ttests"><code class="xref py py-obj docutils literal"><span class="pre">pairwise_ttests</span></code></a></dt>
+<dd>Pairwise post-hocs T-tests</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<p>FDR correction of an array of p-values</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">multicomp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">50</span><span class="p">,</span> <span class="o">.</span><span class="mi">003</span><span class="p">,</span> <span class="o">.</span><span class="mi">32</span><span class="p">,</span> <span class="o">.</span><span class="mi">054</span><span class="p">,</span> <span class="o">.</span><span class="mi">0003</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corr</span> <span class="o">=</span> <span class="n">multicomp</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corr</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Output:</strong></p>
+<p>[False True False False True] [0.5 0.0075 0.4 0.09 0.0015]</p>
 </dd></dl>
 
 </div>

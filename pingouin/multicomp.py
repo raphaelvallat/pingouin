@@ -92,7 +92,7 @@ def bonf(pvals, alpha=0.05):
     return reject, pvals_corrected
 
 
-def holm(pvals, alpha=0.05):
+def holm(pvals, alpha=.05):
     """P-value correction with Holm method.
 
     Parameters
@@ -108,6 +108,16 @@ def holm(pvals, alpha=0.05):
         True if a hypothesis is rejected, False if not
     pval_corrected : array
         pvalues adjusted for multiple hypothesis testing
+
+    Examples
+    --------
+    Holm correction of an array of p-values
+
+        >>> import numpy as np
+        >>> from pingouin import holm
+        >>> pvals = np.array([.50, .003, .32, .054, .0003])
+        >>> reject, pvals_corr = holm(pvals, alpha=.05)
+        >>> print(reject, pvals_corr)
     """
     pvals = np.asarray(pvals)
     ntests = pvals.size
@@ -140,7 +150,7 @@ def multicomp(pvals, alpha=0.05, method='holm'):
         Method used for testing and adjustment of pvalues. Can be either the
         full name or initial letters. Available methods are ::
 
-        'bonferroni' : one-step correction
+        'bonf' : one-step Bonferroni correction
         'holm' : step-down method using Bonferroni adjustments
         'fdr_bh' : Benjamini/Hochberg FDR correction
         'fdr_by' : Benjamini/Yekutieli FDR correction
@@ -152,6 +162,24 @@ def multicomp(pvals, alpha=0.05, method='holm'):
         true for hypothesis that can be rejected for given alpha
     pvals_corrected : array
         p-values corrected for multiple tests
+
+    See Also
+    --------
+    pairwise_ttests : Pairwise post-hocs T-tests
+
+    Examples
+    --------
+    FDR correction of an array of p-values
+
+        >>> import numpy as np
+        >>> from pingouin import multicomp
+        >>> pvals = np.array([.50, .003, .32, .054, .0003])
+        >>> reject, pvals_corr = multicomp(pvals, method='fdr_bh')
+        >>> print(reject, pvals_corr)
+
+    **Output:**
+
+    [False True False False True] [0.5 0.0075 0.4 0.09 0.0015]
     '''
     if not isinstance(pvals, (list, np.ndarray)):
         err = "pvals must be a list or a np.ndarray"

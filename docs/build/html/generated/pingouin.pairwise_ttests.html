@@ -140,7 +140,7 @@
 <div><p>Method used for testing and adjustment of pvalues.
 Available methods are</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;none&#39;</span> <span class="p">:</span> <span class="n">no</span> <span class="n">correction</span>
-<span class="s1">&#39;bonferroni&#39;</span> <span class="p">:</span> <span class="n">one</span><span class="o">-</span><span class="n">step</span> <span class="n">correction</span>
+<span class="s1">&#39;bonferroni&#39;</span> <span class="p">:</span> <span class="n">one</span><span class="o">-</span><span class="n">step</span> <span class="n">Bonferroni</span> <span class="n">correction</span>
 <span class="s1">&#39;holm&#39;</span> <span class="p">:</span> <span class="n">step</span><span class="o">-</span><span class="n">down</span> <span class="n">method</span> <span class="n">using</span> <span class="n">Bonferroni</span> <span class="n">adjustments</span>
 <span class="s1">&#39;fdr_bh&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Hochberg</span> <span class="n">FDR</span> <span class="n">correction</span>
 <span class="s1">&#39;fdr_by&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Yekutieli</span> <span class="n">FDR</span> <span class="n">correction</span>
@@ -181,6 +181,19 @@ directory. To change that, specify the filename with full path.</p>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Examples</p>
+<p>Compute Bonferroni-corrected pairwise post-hocs T-tests from a mixed model
+design.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_ttests</span><span class="p">,</span> <span class="n">print_table</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;dataset.csv&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">post_hocs</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                       <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                       <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;bonf&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Print the table with 3 decimals</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">print_table</span><span class="p">(</span><span class="n">post_hocs</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>

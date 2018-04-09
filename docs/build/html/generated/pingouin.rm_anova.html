@@ -180,7 +180,7 @@ directory. To change that, specify the filename with full path.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;dataset.csv&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aov</span> <span class="o">=</span> <span class="n">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>
 <span class="go">                   remove_na=True, detailed=True,</span>
-<span class="go">                   export_filename=&#39;anova.csv&#39;)</span>
+<span class="go">                   export_filename=&#39;rm_anova.csv&#39;)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">print_table</span><span class="p">(</span><span class="n">aov</span><span class="p">)</span>
 </pre></div>
 </div>

@@ -156,7 +156,7 @@
 <span class="sd">        Available methods are ::</span>
 
 <span class="sd">        &#39;none&#39; : no correction</span>
-<span class="sd">        &#39;bonferroni&#39; : one-step correction</span>
+<span class="sd">        &#39;bonferroni&#39; : one-step Bonferroni correction</span>
 <span class="sd">        &#39;holm&#39; : step-down method using Bonferroni adjustments</span>
 <span class="sd">        &#39;fdr_bh&#39; : Benjamini/Hochberg FDR correction</span>
 <span class="sd">        &#39;fdr_by&#39; : Benjamini/Yekutieli FDR correction</span>
@@ -182,6 +182,20 @@
 <span class="sd">    -------</span>
 <span class="sd">    stats : DataFrame</span>
 <span class="sd">        Stats summary</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Compute Bonferroni-corrected pairwise post-hocs T-tests from a mixed model</span>
+<span class="sd">    design.</span>
+
+<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import pairwise_ttests, print_table</span>
+<span class="sd">        &gt;&gt;&gt; df = pd.read_csv(&#39;dataset.csv&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; post_hocs = pairwise_ttests(dv=&#39;DV&#39;, within=&#39;Time&#39;,</span>
+<span class="sd">        &gt;&gt;&gt;                        between=&#39;Group&#39;, data=df, effects=&#39;all&#39;,</span>
+<span class="sd">        &gt;&gt;&gt;                        padjust=&#39;bonf&#39;, effsize=&#39;hedges&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; # Print the table with 3 decimals</span>
+<span class="sd">        &gt;&gt;&gt; print_table(post_hocs, floatfmt=&quot;.3f&quot;)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">combinations</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">ttest_ind</span><span class="p">,</span> <span class="n">ttest_rel</span>
