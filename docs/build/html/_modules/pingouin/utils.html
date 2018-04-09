@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pingouin.utils &#8212; pingouin 0.1.dev documentation</title>
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/copybutton.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html"><span><img src="../../_static/pingouin_128x128.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1.dev</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../examples.html">Examples</a></li>
+                <li><a href="../../api.html">API</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API reference</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <h1>Source code for pingouin.utils</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Raphael Vallat &lt;raphaelvallat9@gmail.com&gt;</span>
+<span class="c1"># Date: April 2018</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">string_types</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;print_table&quot;</span><span class="p">,</span> <span class="s2">&quot;_export_table&quot;</span><span class="p">,</span> <span class="s2">&quot;reshape_data&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;_check_eftype&quot;</span><span class="p">,</span> <span class="s2">&quot;_remove_rm_na&quot;</span><span class="p">,</span> <span class="s2">&quot;_check_data&quot;</span><span class="p">,</span> <span class="s2">&quot;_check_dataframe&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;_extract_effects&quot;</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">print_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;.4f&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Nice display of table&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;F&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">=============</span><span class="se">\n</span><span class="s1">ANOVA SUMMARY</span><span class="se">\n</span><span class="s1">=============</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="s1">&#39;A&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">==============</span><span class="se">\n</span><span class="s1">POST HOC TESTS</span><span class="se">\n</span><span class="s1">==============</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">tabulate</span> <span class="k">import</span> <span class="n">tabulate</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s2">&quot;keys&quot;</span><span class="p">,</span> <span class="n">showindex</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="n">floatfmt</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_export_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Export DataFrame to .csv&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">os.path</span> <span class="k">as</span> <span class="nn">op</span>
+    <span class="n">extension</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">())[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">extension</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">fname</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span>
+    <span class="n">table</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
+                 <span class="n">float_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.4f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="reshape_data"><a class="viewcode-back" href="../../generated/pingouin.reshape_data.html#pingouin.reshape_data">[docs]</a><span class="k">def</span> <span class="nf">reshape_data</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">rm</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reshape data from &quot;human-readable&quot; to analysis shape</span>
+
+<span class="sd">    See: https://deparkes.co.uk/2016/10/28/reshape-pandas-data-with-melt/</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : DataFrame</span>
+<span class="sd">        Dataframe in original shape</span>
+<span class="sd">    id : string</span>
+<span class="sd">        Column to use as identifier variables. (e.g. &quot;Subjects&quot;)</span>
+<span class="sd">    dv : string</span>
+<span class="sd">        Name of the dependant variables (e.g. &quot;DV&quot; or &quot;Scores&quot;)</span>
+<span class="sd">    rm : string</span>
+<span class="sd">        Name of the measurements (e.g. &quot;Time&quot; or &quot;Weekday&quot;)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    df_reshaped : DataFrame</span>
+<span class="sd">        Reshaped DataFrame</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    Human-readable:</span>
+
+<span class="sd">    *Values represent scores at a cognitive test at different times of the day.</span>
+<span class="sd">    Ss = subject*::</span>
+
+<span class="sd">        Ss    10am  2pm   6pm</span>
+<span class="sd">        1     3.5   3.2   2.8</span>
+<span class="sd">        2     2.1   2.4   2.8</span>
+
+<span class="sd">    Pingouin::</span>
+
+<span class="sd">        Ss    Score    Time</span>
+<span class="sd">        1     3.5      10am</span>
+<span class="sd">        1     3.2      2pm</span>
+<span class="sd">        1     2.8      6pm</span>
+<span class="sd">        2     2.1      10am</span>
+<span class="sd">        2     2.4      2pm</span>
+<span class="sd">        2     2.8      6pm</span>
+
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; from pingouins import reshape_data</span>
+<span class="sd">    &gt;&gt;&gt; data = {&#39;Ss&#39;: [1, 2, 3],</span>
+<span class="sd">    &gt;&gt;&gt;        &#39;10am&#39;: [12, 6, 5],</span>
+<span class="sd">    &gt;&gt;&gt;        &#39;2pm&#39;: [10, 6, 11],</span>
+<span class="sd">    &gt;&gt;&gt;        &#39;6pm&#39;: [8, 5, 7]}</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.DataFrame(data, columns=[&#39;Ss&#39;, &#39;10am&#39;, &#39;2pm&#39;, &#39;6pm&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; reshaped = reshape_data(df, &#39;Ss&#39;, dv=&quot;Score&quot;, rm=&quot;Time&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(reshaped)</span>
+<span class="sd">        Ss  Time  Score</span>
+<span class="sd">        1   10am  12</span>
+<span class="sd">        1   2pm   10</span>
+<span class="sd">        1   6pm   8</span>
+<span class="sd">        2   10am  6</span>
+<span class="sd">        2   2pm   6</span>
+<span class="sd">        2   6pm   5</span>
+<span class="sd">        3  10am   5</span>
+<span class="sd">        3   2pm   11</span>
+<span class="sd">        3   6pm   7</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">id_vars</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="n">rm</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="n">dv</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span>
+                                                                        <span class="n">by</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_remove_rm_na</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove subject(s) with one or more missing values in repeated</span>
+<span class="sd">    measurements.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rm</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">within</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+    <span class="n">n_rm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rm</span><span class="p">)</span>
+    <span class="n">n_obs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">within</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ID_Subj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_obs</span><span class="p">),</span> <span class="n">n_rm</span><span class="p">)</span>
+
+    <span class="c1"># Efficiently remove subjects with one or more missing values</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;ID_Subj&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Find index with nan</span>
+    <span class="n">iloc_nan</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">idx_nan</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">iloc_nan</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Note: </span><span class="si">%i</span><span class="s1"> subject(s) removed because of missing value(s).</span><span class="se">\n</span><span class="s1">&#39;</span>
+          <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx_nan</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">idx_nan</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_check_eftype</span><span class="p">(</span><span class="n">eftype</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check validity of eftype&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">eftype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;hedges&#39;</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="s1">&#39;glass&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;eta-square&#39;</span><span class="p">,</span> <span class="s1">&#39;odds-ratio&#39;</span><span class="p">,</span> <span class="s1">&#39;auc&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span> <span class="nf">_check_data</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extract data from dataframe or numpy arrays&quot;&quot;&quot;</span>
+
+    <span class="c1"># OPTION A: a pandas DataFrame and column names are specified</span>
+    <span class="c1"># -----------------------------------------------------------</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dv</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">data</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dv</span><span class="p">,</span> <span class="n">group</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
+                <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;Could not interpret input &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+        <span class="c1"># Check that data is a pandas dataframe</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;data must be a pandas dataframe&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+        <span class="c1"># Extract group information</span>
+        <span class="n">group_keys</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">group_keys</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;group must have exactly two unique values.&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+        <span class="c1"># Extract data</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">==</span> <span class="n">group_keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">dv</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">==</span> <span class="n">group_keys</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="n">dv</span><span class="p">]</span>
+
+    <span class="c1"># OPTION B: x and y vectors are specified</span>
+    <span class="c1"># ---------------------------------------</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+                    <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;x and y must be np.ndarray&quot;</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+    <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">dof</span> <span class="o">=</span> <span class="n">nx</span> <span class="o">+</span> <span class="n">ny</span> <span class="o">-</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">dof</span>
+
+
+<span class="k">def</span> <span class="nf">_check_dataframe</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check dataframe&quot;&quot;&quot;</span>
+    <span class="c1"># Check input arguments</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Data must be a pandas dataframe&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dv</span><span class="p">,</span> <span class="n">data</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;DV and data must be specified&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">effects</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;within&#39;</span><span class="p">,</span> <span class="s1">&#39;between&#39;</span><span class="p">,</span> <span class="s1">&#39;interaction&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Effects must be: within, between, interaction, all&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;within&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">within</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;within must be specified when effects=within&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;between&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">between</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;between must be specified when effects=between&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;interaction&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="p">[</span><span class="n">within</span><span class="p">,</span> <span class="n">between</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;within and between must be specified when </span><span class="se">\</span>
+<span class="s1">                effects=interaction&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_extract_effects</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extract main effects&quot;&quot;&quot;</span>
+    <span class="c1"># Check the dataframe</span>
+    <span class="n">_check_dataframe</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="n">effects</span><span class="p">,</span>
+                     <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">datadic</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">nobs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="c1"># Extract number of pairwise comparisons</span>
+    <span class="k">if</span> <span class="n">effects</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;within&#39;</span><span class="p">,</span> <span class="s1">&#39;between&#39;</span><span class="p">]:</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="n">within</span> <span class="k">if</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;within&#39;</span> <span class="k">else</span> <span class="n">between</span>
+        <span class="c1"># Extract data</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
+            <span class="n">datadic</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="n">l</span><span class="p">][</span><span class="n">dv</span><span class="p">]</span>
+            <span class="n">nobs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nobs</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">datadic</span><span class="p">[</span><span class="n">l</span><span class="p">]))</span>
+
+    <span class="k">elif</span> <span class="n">effects</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;interaction&#39;</span><span class="p">:</span>
+        <span class="n">labels_with</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">within</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+        <span class="n">labels_betw</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">between</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">lw</span> <span class="ow">in</span> <span class="n">labels_with</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labels_betw</span><span class="p">:</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">within</span><span class="p">]</span> <span class="o">==</span> <span class="n">lw</span><span class="p">]</span>
+                <span class="n">datadic</span><span class="p">[</span><span class="n">lw</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="n">tmp</span><span class="p">[</span><span class="n">between</span><span class="p">]</span> <span class="o">==</span> <span class="n">l</span><span class="p">][</span><span class="n">dv</span><span class="p">]</span>
+                <span class="n">nobs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nobs</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">datadic</span><span class="p">[</span><span class="n">lw</span><span class="p">,</span> <span class="n">l</span><span class="p">]))</span>
+
+    <span class="n">dt_array</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">datadic</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dt_array</span><span class="p">,</span> <span class="n">nobs</span>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2018, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
