@@ -11,8 +11,11 @@ __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
 def gzscore(x):
     """Geometric standard (Z) score.
 
-    Geometric Z-score are better than arithmetic z-scores when the data
-    comes from a log-normal or chi-squares distribution.
+    Geometric Z-scores are better measures of dispersion than arithmetic
+    z-scores when the sample data come from a log-normally distributed
+    population.
+
+    See https://en.wikipedia.org/wiki/Geometric_standard_deviation
 
     Parameters
     ----------
@@ -23,6 +26,20 @@ def gzscore(x):
     -------
     gzscore : array_like
         Array of geometric z-scores (same shape as x)
+
+    Examples
+    --------
+    Standardize a log-normal array
+
+        >>> import numpy as np
+        >>> from pingouin import gzscore
+        >>> np.random.seed(123)
+        >>> raw = np.random.lognormal(size=100)
+        >>> print(raw.mean().round(3), raw.std().round(3))
+            1.849 2.282
+        >>> z = gzscore(raw)
+        >>> print(z.mean().round(3), z.std().round(3))
+            0 0.995
     """
     from scipy.stats import gmean
     # Geometric mean

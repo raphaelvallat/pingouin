@@ -113,8 +113,11 @@
 <div class="viewcode-block" id="gzscore"><a class="viewcode-back" href="../../generated/pingouin.gzscore.html#pingouin.gzscore">[docs]</a><span class="k">def</span> <span class="nf">gzscore</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Geometric standard (Z) score.</span>
 
-<span class="sd">    Geometric Z-score are better than arithmetic z-scores when the data</span>
-<span class="sd">    comes from a log-normal or chi-squares distribution.</span>
+<span class="sd">    Geometric Z-scores are better measures of dispersion than arithmetic</span>
+<span class="sd">    z-scores when the sample data come from a log-normally distributed</span>
+<span class="sd">    population.</span>
+
+<span class="sd">    See https://en.wikipedia.org/wiki/Geometric_standard_deviation</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -125,6 +128,20 @@
 <span class="sd">    -------</span>
 <span class="sd">    gzscore : array_like</span>
 <span class="sd">        Array of geometric z-scores (same shape as x)</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Standardize a log-normal array</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import gzscore</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; raw = np.random.lognormal(size=100)</span>
+<span class="sd">        &gt;&gt;&gt; print(raw.mean().round(3), raw.std().round(3))</span>
+<span class="sd">            1.849 2.282</span>
+<span class="sd">        &gt;&gt;&gt; z = gzscore(raw)</span>
+<span class="sd">        &gt;&gt;&gt; print(z.mean().round(3), z.std().round(3))</span>
+<span class="sd">            0 0.995</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">gmean</span>
     <span class="c1"># Geometric mean</span>
