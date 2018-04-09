@@ -138,6 +138,19 @@
 <span class="sd">        True if a hypothesis is rejected, False if not</span>
 <span class="sd">    pval_corrected : array</span>
 <span class="sd">        pvalues adjusted for multiple hypothesis testing to limit FDR</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    FDR correction of an array of p-values</span>
+
+<span class="sd">        &gt;&gt;&gt; from pingouin import fdr</span>
+<span class="sd">        &gt;&gt;&gt; pvals = [.50, .003, .32, .054, .0003]</span>
+<span class="sd">        &gt;&gt;&gt; reject, pvals_corr = bonf(pvals, alpha=.05)</span>
+<span class="sd">        &gt;&gt;&gt; print(reject, pvals_corr)</span>
+
+<span class="sd">    **Output:**</span>
+
+<span class="sd">    [False True False False  True] [0.5  0.0075  0.4  0.09  0.0015]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">pvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span>
     <span class="n">shape_init</span> <span class="o">=</span> <span class="n">pvals</span><span class="o">.</span><span class="n">shape</span>
@@ -186,6 +199,19 @@
 <span class="sd">        True if a hypothesis is rejected, False if not</span>
 <span class="sd">    pval_corrected : array</span>
 <span class="sd">        pvalues adjusted for multiple hypothesis testing</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Bonferroni correction of an array of p-values</span>
+
+<span class="sd">        &gt;&gt;&gt; from pingouin import bonf</span>
+<span class="sd">        &gt;&gt;&gt; pvals = [.50, .003, .32, .054, .0003]</span>
+<span class="sd">        &gt;&gt;&gt; reject, pvals_corr = bonf(pvals, alpha=.05)</span>
+<span class="sd">        &gt;&gt;&gt; print(reject, pvals_corr)</span>
+
+<span class="sd">    **Output:**</span>
+
+<span class="sd">    [False True False False  True] [1.  0.015   1.  0.27  0.0015]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">pvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span>
     <span class="n">pvals_corrected</span> <span class="o">=</span> <span class="n">pvals</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">pvals</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
@@ -215,15 +241,25 @@
 <span class="sd">    --------</span>
 <span class="sd">    Holm correction of an array of p-values</span>
 
-<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import holm</span>
-<span class="sd">        &gt;&gt;&gt; pvals = np.array([.50, .003, .32, .054, .0003])</span>
+<span class="sd">        &gt;&gt;&gt; pvals = [.50, .003, .32, .054, .0003]</span>
 <span class="sd">        &gt;&gt;&gt; reject, pvals_corr = holm(pvals, alpha=.05)</span>
 <span class="sd">        &gt;&gt;&gt; print(reject, pvals_corr)</span>
+
+<span class="sd">    **Output:**</span>
+
+<span class="sd">    [False True False False True] [0.64  0.012  0.64  0.162  0.0015]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">pvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span>
+    <span class="n">shape_init</span> <span class="o">=</span> <span class="n">pvals</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">pvals</span> <span class="o">=</span> <span class="n">pvals</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+    <span class="n">pvals_sortind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">pvals</span><span class="p">)</span>
+    <span class="n">pvals_sorted</span> <span class="o">=</span> <span class="n">pvals</span><span class="p">[</span><span class="n">pvals_sortind</span><span class="p">]</span>
+    <span class="n">sortrevind</span> <span class="o">=</span> <span class="n">pvals_sortind</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
     <span class="n">ntests</span> <span class="o">=</span> <span class="n">pvals</span><span class="o">.</span><span class="n">size</span>
-    <span class="n">notreject</span> <span class="o">=</span> <span class="n">pvals</span> <span class="o">&gt;</span> <span class="n">alpha</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ntests</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">notreject</span> <span class="o">=</span> <span class="n">pvals_sorted</span> <span class="o">&gt;</span> <span class="n">alpha</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ntests</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">nr_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">notreject</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">nr_index</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># nonreject is empty, all rejected</span>
@@ -232,9 +268,11 @@
         <span class="n">notrejectmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">nr_index</span><span class="p">)</span>
     <span class="n">notreject</span><span class="p">[</span><span class="n">notrejectmin</span><span class="p">:]</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">reject</span> <span class="o">=</span> <span class="o">~</span><span class="n">notreject</span>
-    <span class="n">pvals_corrected_raw</span> <span class="o">=</span> <span class="n">pvals</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ntests</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">pvals_corrected_raw</span> <span class="o">=</span> <span class="n">pvals_sorted</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ntests</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">pvals_corrected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="n">pvals_corrected_raw</span><span class="p">)</span>
     <span class="n">pvals_corrected</span><span class="p">[</span><span class="n">pvals_corrected</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">pvals_corrected</span> <span class="o">=</span> <span class="n">pvals_corrected</span><span class="p">[</span><span class="n">sortrevind</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape_init</span><span class="p">)</span>
+    <span class="n">reject</span> <span class="o">=</span> <span class="n">reject</span><span class="p">[</span><span class="n">sortrevind</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape_init</span><span class="p">)</span>
     <span class="n">reject</span> <span class="o">=</span> <span class="n">pvals_corrected</span> <span class="o">&lt;</span> <span class="n">alpha</span>
     <span class="k">return</span> <span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corrected</span></div>
 
@@ -273,15 +311,14 @@
 <span class="sd">    --------</span>
 <span class="sd">    FDR correction of an array of p-values</span>
 
-<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import multicomp</span>
-<span class="sd">        &gt;&gt;&gt; pvals = np.array([.50, .003, .32, .054, .0003])</span>
+<span class="sd">        &gt;&gt;&gt; pvals = [.50, .003, .32, .054, .0003]</span>
 <span class="sd">        &gt;&gt;&gt; reject, pvals_corr = multicomp(pvals, method=&#39;fdr_bh&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; print(reject, pvals_corr)</span>
 
 <span class="sd">    **Output:**</span>
 
-<span class="sd">    [False True False False True] [0.5 0.0075 0.4 0.09 0.0015]</span>
+<span class="sd">    [False True False False  True] [0.5  0.0075  0.4  0.09  0.0015]</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
         <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;pvals must be a list or a np.ndarray&quot;</span>
