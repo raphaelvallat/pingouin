@@ -245,6 +245,23 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     -------
     aov : DataFrame
         ANOVA summary
+
+    See Also
+    --------
+    anova : One-way ANOVA
+    mixed_anova : Two way mixed ANOVA
+
+    Examples
+    --------
+    Compute a one-way repeated-measures ANOVA.
+
+        >>> import pandas as pd
+        >>> from pingouin import rm_anova, print_table
+        >>> df = pd.read_csv('dataset.csv')
+        >>> aov = rm_anova(dv='DV', within='Time', data=df, correction='auto',
+                           remove_na=True, detailed=True,
+                           export_filename='anova.csv')
+        >>> print_table(aov)
     """
     from scipy.stats import f
     # Check data
@@ -380,11 +397,26 @@ def anova(dv=None, between=None, data=None, detailed=False,
         By default, the file will be created in the current python console
         directory. To change that, specify the filename with full path.
 
-
     Returns
     -------
     aov : DataFrame
         ANOVA summary
+
+    See Also
+    --------
+    rm_anova : One-way repeated measures ANOVA
+    mixed_anova : Two way mixed ANOVA
+
+    Examples
+    --------
+    Compute a one-way ANOVA.
+
+        >>> import pandas as pd
+        >>> from pingouin import anova, print_table
+        >>> df = pd.read_csv('dataset.csv')
+        >>> aov = anova(dv='DV', between='Group', data=df,
+                        detailed=True, export_filename='anova.csv')
+        >>> print_table(aov)
     """
     from scipy.stats import f
 
@@ -499,7 +531,7 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
 
         >>> import pandas as pd
         >>> from pingouin import mixed_anova, print_table
-        >>> df = pd.read_dataset('dataset.csv')
+        >>> df = pd.read_csv('dataset.csv')
         >>> aov = mixed_anova(dv='DV', within='Time', between='Group', data=df,
                              correction='auto', remove_na=False)
         >>> print_table(aov)
