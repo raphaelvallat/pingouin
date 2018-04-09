@@ -38,6 +38,11 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     ef : float
         Desired converted effect size
 
+    See Also
+    --------
+    compute_effsize : Compute effect size from pandas dataframe or numpy arrays
+    compute_effsize_from_T : Convert a T-statistic to an effect size.
+
     Examples
     --------
     1. Convert from Cohen d to eta-square
@@ -159,6 +164,11 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
     -------
     ef : float
         Effect size
+
+    See Also
+    --------
+    convert_effsize : Conversion between effect sizes.
+    compute_effsize_from_T : Convert a T-statistic to an effect size.
     """
     # Check arguments
     if not _check_eftype(eftype):
@@ -211,6 +221,11 @@ def compute_effsize_from_T(T, nx=None, ny=None, N=None, eftype='cohen'):
     -------
     ef : float
         Effect size
+
+    See Also
+    --------
+    compute_effsize : Compute effect size from pandas dataframe or numpy arrays
+    convert_effsize : Conversion between effect sizes
 
     Examples
     --------
