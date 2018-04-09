@@ -54,7 +54,8 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
             0.05
 
 
-    2. Convert from Cohen d to Hegdes g (requires the sample sizes of each group)
+    2. Convert from Cohen d to Hegdes g (requires the sample sizes of each
+    group)
 
         >>> d = .45
         >>> g = convert_effsize(d, 'cohen', 'hedges', nx=10, ny=10)
@@ -169,6 +170,35 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
     --------
     convert_effsize : Conversion between effect sizes.
     compute_effsize_from_T : Convert a T-statistic to an effect size.
+
+    Examples
+    --------
+    1. Compute Cohen d from two independent NumPy arrays
+
+        >>> import numpy as np
+        >>> from pingouin import compute_effsize
+        >>> np.random.seed(123)
+        >>> x = np.random.normal(2, size=100)
+        >>> y = np.random.normal(2.3, size=95)
+        >>> d = compute_effsize(x=x, y=y, eftype='cohen', paired=False)
+        >>> print(d)
+            -0.28
+
+    2. Compute Hedges g from two paired samples in a pandas DataFrame
+
+        >>> import numpy as np
+        >>> import pandas as pd
+        >>> from pingouin import compute_effsize
+        >>> np.random.seed(123)
+        >>> x = np.random.normal(4, size=10)
+        >>> y = np.random.normal(5, size=10)
+        >>> df = pd.DataFrame({'dv': np.r_[x, y],
+        >>>                   'Group': np.repeat(['Pre', 'Post'], 10)})
+        >>> g = compute_effsize(dv='dv', group='Group', data=df,
+        >>>                     paired=True, eftype='hedges')
+        >>> print(g)
+            -1.46
+
     """
     # Check arguments
     if not _check_eftype(eftype):
@@ -232,10 +262,10 @@ def compute_effsize_from_T(T, nx=None, ny=None, N=None, eftype='cohen'):
     1. Compute effect size from T when both sample sizes are known.
 
         >>> from pingouin import compute_effsize_from_T
-        >>> T, nx, ny = 2.90, 30, 30
+        >>> T, nx, ny = 2.90, 35, 25
         >>> d = compute_effsize_from_T(T, nx=nx, ny=ny, eftype='cohen')
         >>> print(d)
-            0.75
+            0.76
 
     2. Compute effect size from T when only total sample size is known (nx+ny)
 

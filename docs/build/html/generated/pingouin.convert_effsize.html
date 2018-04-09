@@ -148,6 +148,15 @@ nx and ny are required to convert to Hedges g</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="pingouin.compute_effsize.html#pingouin.compute_effsize" title="pingouin.compute_effsize"><code class="xref py py-obj docutils literal"><span class="pre">compute_effsize</span></code></a></dt>
+<dd>Compute effect size from pandas dataframe or numpy arrays</dd>
+<dt><a class="reference internal" href="pingouin.compute_effsize_from_T.html#pingouin.compute_effsize_from_T" title="pingouin.compute_effsize_from_T"><code class="xref py py-obj docutils literal"><span class="pre">compute_effsize_from_T</span></code></a></dt>
+<dd>Convert a T-statistic to an effect size.</dd>
+</dl>
+</div>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">Convert from Cohen d to eta-square</p>
@@ -159,14 +168,16 @@ nx and ny are required to convert to Hedges g</p>
 </pre></div>
 </div>
 </li>
-<li><p class="first">Convert from Cohen d to Hegdes g (requires the sample sizes of each group)</p>
+</ol>
+<p>2. Convert from Cohen d to Hegdes g (requires the sample sizes of each
+group)</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="o">.</span><span class="mi">45</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">convert_effsize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="s1">&#39;hedges&#39;</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span>
 <span class="go">    0.43</span>
 </pre></div>
 </div>
-</li>
+<ol class="arabic" start="3">
 <li><p class="first">Convert Pearson r to Cohen d</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="mf">0.40</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">convert_effsize</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">)</span>
