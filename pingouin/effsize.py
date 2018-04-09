@@ -37,6 +37,40 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     -------
     ef : float
         Desired converted effect size
+
+    Examples
+    --------
+    1. Convert from Cohen d to eta-square
+
+        >>> from pingouin import convert_effsize
+        >>> d = .45
+        >>> eta = convert_effsize(d, 'cohen', 'eta-square')
+        >>> print(eta)
+            0.05
+
+
+    2. Convert from Cohen d to Hegdes g (requires the sample sizes of each group)
+
+        >>> d = .45
+        >>> g = convert_effsize(d, 'cohen', 'hedges', nx=10, ny=10)
+        >>> print(eta)
+            0.43
+
+
+    3. Convert Pearson r to Cohen d
+
+        >>> r = 0.40
+        >>> d = convert_effsize(r, 'r', 'cohen')
+        >>> print(d)
+            0.87
+
+
+    4. Reverse operation: convert Cohen d to Pearson r
+
+        >>> d = 0.873
+        >>> r = convert_effsize(d, 'cohen', 'r')
+        >>> print(r)
+            0.40
     """
     it = input_type.lower()
     ot = output_type.lower()
