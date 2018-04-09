@@ -201,7 +201,7 @@ def compute_effsize_from_T(T, nx=None, ny=None, N=None, eftype='cohen'):
     T : float
         T-value
     nx, ny : int, optional
-        Length of vector x and y.
+        Group sample sizes.
     N : int, optional
         Total sample size (will not be used if nx and ny are specified)
     eftype : string, optional
@@ -211,6 +211,23 @@ def compute_effsize_from_T(T, nx=None, ny=None, N=None, eftype='cohen'):
     -------
     ef : float
         Effect size
+
+    Examples
+    --------
+    1. Compute effect size from T when both sample sizes are known.
+
+        >>> from pingouin import compute_effsize_from_T
+        >>> T, nx, ny = 2.90, 30, 30
+        >>> d = compute_effsize_from_T(T, nx=nx, ny=ny, eftype='cohen')
+        >>> print(d)
+            0.75
+
+    2. Compute effect size from T when only total sample size is known (nx+ny)
+
+        >>> T, N = 2.90, 60
+        >>> d = compute_effsize_from_T(T, N=N, eftype='cohen')
+        >>> print(d)
+            0.75
     """
     if not _check_eftype(eftype):
         err = "Could not interpret input '{}'".format(eftype)

@@ -303,7 +303,7 @@
 <span class="sd">    T : float</span>
 <span class="sd">        T-value</span>
 <span class="sd">    nx, ny : int, optional</span>
-<span class="sd">        Length of vector x and y.</span>
+<span class="sd">        Group sample sizes.</span>
 <span class="sd">    N : int, optional</span>
 <span class="sd">        Total sample size (will not be used if nx and ny are specified)</span>
 <span class="sd">    eftype : string, optional</span>
@@ -313,6 +313,23 @@
 <span class="sd">    -------</span>
 <span class="sd">    ef : float</span>
 <span class="sd">        Effect size</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    1. Compute effect size from T when both sample sizes are known.</span>
+
+<span class="sd">        &gt;&gt;&gt; from pingouin import compute_effsize_from_T</span>
+<span class="sd">        &gt;&gt;&gt; T, nx, ny = 2.90, 30, 30</span>
+<span class="sd">        &gt;&gt;&gt; d = compute_effsize_from_T(T, nx=nx, ny=ny, eftype=&#39;cohen&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print(d)</span>
+<span class="sd">            0.75</span>
+
+<span class="sd">    2. Compute effect size from T when only total sample size is known (nx+ny)</span>
+
+<span class="sd">        &gt;&gt;&gt; T, N = 2.90, 60</span>
+<span class="sd">        &gt;&gt;&gt; d = compute_effsize_from_T(T, N=N, eftype=&#39;cohen&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print(d)</span>
+<span class="sd">            0.75</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_check_eftype</span><span class="p">(</span><span class="n">eftype</span><span class="p">):</span>
         <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;Could not interpret input &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">eftype</span><span class="p">)</span>
