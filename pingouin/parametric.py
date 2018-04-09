@@ -38,7 +38,7 @@ def gzscore(x):
         >>> print(raw.mean().round(3), raw.std().round(3))
             1.849 2.282
         >>> z = gzscore(raw)
-        >>> print(z.mean().round(3), z.std().round(3))
+        >>> print(z.mean(), z.std())
             0 0.995
     """
     from scipy.stats import gmean
@@ -64,6 +64,34 @@ def test_normality(*args, alpha=.05):
         True if x comes from a normal distribution.
     p : float
         P-value.
+
+    See Also
+    --------
+    test_homoscedasticity : Test equality of variance.
+    test_sphericity : Mauchly's test for sphericity.
+
+    Examples
+    --------
+    1. Test the normality of one array.
+
+        >>> import numpy as np
+        >>> from pingouin import test_normality
+        >>> np.random.seed(123)
+        >>> x = np.random.normal(size=100)
+        >>> normal, p = test_normality(x, alpha=.05)
+        >>> print(normal, p)
+        True 0.27
+
+    2. Test the normality of two arrays.
+
+        >>> import numpy as np
+        >>> from pingouin import test_normality
+        >>> np.random.seed(123)
+        >>> x = np.random.normal(size=100)
+        >>> y = np.random.rand(100)
+        >>> normal, p = test_normality(x, y, alpha=.05)
+        >>> print(normal, p)
+        [True   False] [0.27   0.0005]
     """
     from scipy.stats import shapiro
     # Handle empty input
@@ -102,6 +130,27 @@ def test_homoscedasticity(*args, alpha=.05):
         True if data have equal variance.
     p : float
         P-value.
+
+    See Also
+    --------
+    test_normality : Test the normality of one or more array.
+    test_sphericity : Mauchly's test for sphericity.
+
+    Examples
+    --------
+    Test the homoscedasticity of two arrays.
+
+        >>> import numpy as np
+        >>> from pingouin import test_homoscedasticity
+        >>> np.random.seed(123)
+        >>> # The scale parameters define the standard deviation of the distribution.
+        >>> x = np.random.normal(loc=0, scale=1., size=100)
+        >>> y = np.random.normal(loc=0, scale=0.8,size=100)
+        >>> print(np.var(x), np.var(y))
+            1.27 0.60
+        >>> normal, p = test_homoscedasticity(x, y, alpha=.05)
+        >>> print(normal, p)
+            False 0.0002
     """
     from scipy.stats import levene, bartlett
     # Handle empty input
@@ -187,7 +236,28 @@ def test_sphericity(X, alpha=.05):
         Degrees of freedom
     p : float
         P-value.
-    """
+
+    See Also
+    --------
+    test_homoscedasticity : Test equality of variance.
+    test_normality : Test the normality of one or more array.
+
+    Examples
+    --------
+    Test the sphericity of an array with 30 observations *
+    3 repeated measures
+
+        >>> import numpy as np
+        >>> from pingouin import test_sphericity
+        >>> np.random.seed(123)
+        >>> x = np.random.normal(loc=0, scale=1., size=30)
+        >>> y = np.random.normal(loc=0, scale=0.8,size=30)
+        >>> z = np.random.normal(loc=0, scale=0.9,size=30)
+        >>> X = np.c_[x, y, z]
+        >>> sphericity, W, chi_sq, ddof, p = test_sphericity(X)
+        >>> print(sphericity, p)
+        True 0.56
+        """
     from scipy.stats import chi2
     n = X.shape[0]
 

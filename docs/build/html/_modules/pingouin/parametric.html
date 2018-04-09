@@ -140,7 +140,7 @@
 <span class="sd">        &gt;&gt;&gt; print(raw.mean().round(3), raw.std().round(3))</span>
 <span class="sd">            1.849 2.282</span>
 <span class="sd">        &gt;&gt;&gt; z = gzscore(raw)</span>
-<span class="sd">        &gt;&gt;&gt; print(z.mean().round(3), z.std().round(3))</span>
+<span class="sd">        &gt;&gt;&gt; print(z.mean(), z.std())</span>
 <span class="sd">            0 0.995</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">gmean</span>
@@ -166,6 +166,34 @@
 <span class="sd">        True if x comes from a normal distribution.</span>
 <span class="sd">    p : float</span>
 <span class="sd">        P-value.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    test_homoscedasticity : Test equality of variance.</span>
+<span class="sd">    test_sphericity : Mauchly&#39;s test for sphericity.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    1. Test the normality of one array.</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import test_normality</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; x = np.random.normal(size=100)</span>
+<span class="sd">        &gt;&gt;&gt; normal, p = test_normality(x, alpha=.05)</span>
+<span class="sd">        &gt;&gt;&gt; print(normal, p)</span>
+<span class="sd">        True 0.27</span>
+
+<span class="sd">    2. Test the normality of two arrays.</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import test_normality</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; x = np.random.normal(size=100)</span>
+<span class="sd">        &gt;&gt;&gt; y = np.random.rand(100)</span>
+<span class="sd">        &gt;&gt;&gt; normal, p = test_normality(x, y, alpha=.05)</span>
+<span class="sd">        &gt;&gt;&gt; print(normal, p)</span>
+<span class="sd">        [True   False] [0.27   0.0005]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">shapiro</span>
     <span class="c1"># Handle empty input</span>
@@ -204,6 +232,27 @@
 <span class="sd">        True if data have equal variance.</span>
 <span class="sd">    p : float</span>
 <span class="sd">        P-value.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    test_normality : Test the normality of one or more array.</span>
+<span class="sd">    test_sphericity : Mauchly&#39;s test for sphericity.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Test the homoscedasticity of two arrays.</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import test_homoscedasticity</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; # The scale parameters define the standard deviation of the distribution.</span>
+<span class="sd">        &gt;&gt;&gt; x = np.random.normal(loc=0, scale=1., size=100)</span>
+<span class="sd">        &gt;&gt;&gt; y = np.random.normal(loc=0, scale=0.8,size=100)</span>
+<span class="sd">        &gt;&gt;&gt; print(np.var(x), np.var(y))</span>
+<span class="sd">            1.27 0.60</span>
+<span class="sd">        &gt;&gt;&gt; normal, p = test_homoscedasticity(x, y, alpha=.05)</span>
+<span class="sd">        &gt;&gt;&gt; print(normal, p)</span>
+<span class="sd">            False 0.0002</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">levene</span><span class="p">,</span> <span class="n">bartlett</span>
     <span class="c1"># Handle empty input</span>
@@ -289,7 +338,28 @@
 <span class="sd">        Degrees of freedom</span>
 <span class="sd">    p : float</span>
 <span class="sd">        P-value.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    test_homoscedasticity : Test equality of variance.</span>
+<span class="sd">    test_normality : Test the normality of one or more array.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Test the sphericity of an array with 30 observations *</span>
+<span class="sd">    3 repeated measures</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import test_sphericity</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; x = np.random.normal(loc=0, scale=1., size=30)</span>
+<span class="sd">        &gt;&gt;&gt; y = np.random.normal(loc=0, scale=0.8,size=30)</span>
+<span class="sd">        &gt;&gt;&gt; z = np.random.normal(loc=0, scale=0.9,size=30)</span>
+<span class="sd">        &gt;&gt;&gt; X = np.c_[x, y, z]</span>
+<span class="sd">        &gt;&gt;&gt; sphericity, W, chi_sq, ddof, p = test_sphericity(X)</span>
+<span class="sd">        &gt;&gt;&gt; print(sphericity, p)</span>
+<span class="sd">        True 0.56</span>
+<span class="sd">        &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">chi2</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
