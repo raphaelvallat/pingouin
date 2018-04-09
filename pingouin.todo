@@ -4,5 +4,4 @@ Doc
 
 Code
 ----
-- Check fdr_bh correction pairwise ttests
-- Check Holm correction
+- Function to reshape from excel to analysis-type dataframe
