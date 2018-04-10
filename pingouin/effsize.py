@@ -5,7 +5,41 @@ from pingouin.utils import (_check_data, _check_eftype)
 from pingouin.parametric import (test_homoscedasticity)
 
 
-__all__ = ["convert_effsize", "compute_effsize", "compute_effsize_from_T"]
+__all__ = ["compute_esci", "convert_effsize", "compute_effsize",
+           "compute_effsize_from_T"]
+
+# SUB-FUNCTIONS
+def compute_esci(ef, x, y, nx=None, ny=None, alpha=.95, method='parametric'):
+    """Compute the 95% confidence intervals of an effect size
+
+    Parameters
+    ----------
+    ef : float
+        Original effect size (Cohen d or Hedges g)
+    x, y : int
+        Data vectors (required for bootstrapping only)
+    nx, ny : int
+        Length of vector x and y.
+    alpha : float, optional
+        Confidence interval (0.95 = 95%)
+    method : string
+        Computation method
+        Available methods are ::
+
+        'parametric' : uses student's T-test.
+        'bootstrap' : uses a bootstrapping procedure.
+
+
+    Returns
+    -------
+    ci : array
+        Desired converted effect size
+
+    """
+    se = np.sqrt(((nx+ny) / (nx*ny)) + (ef**2)/(2*(nx+ny)))
+    if method == 'parametric':
+        ci = np.array([ef - 1.95996 * se, ef + 1.95996 * se])
+    return ci
 
 
 # MAIN FUNCTIONS
