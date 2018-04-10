@@ -5,7 +5,127 @@ from pingouin.utils import (_check_data, _check_eftype)
 from pingouin.parametric import (test_homoscedasticity)
 
 
-__all__ = ["convert_effsize", "compute_effsize", "compute_effsize_from_T"]
+__all__ = ["compute_esci", "convert_effsize", "compute_effsize",
+           "compute_effsize_from_T"]
+
+# SUB-FUNCTIONS
+def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
+                 method='parametric', n_boot=2000, eftype='cohen',
+                 return_dist=False):
+    """Bootstrapped or parametric confidence intervals of an effect size.
+
+    Parameters
+    ----------
+    x, y : int
+        Data vectors (required for bootstrapping only)
+    ef : float
+        Original effect size (must be Cohen d or Hedges g).
+        Required for 'parametric' method only.
+    nx, ny : int
+        Length of vector x and y.
+    alpha : float, optional
+        Confidence interval (0.95 = 95%)
+    method : string
+        Computation method
+        Available methods are ::
+
+        'parametric' : uses standard deviation of effect sizes.
+        'bootstrap' : uses a non-parametric bootstrapping procedure.
+    n_boot : int
+        Number of permutations for the bootstrap procedure
+    eftype : string
+        Effect size type for the bootstrapping procedure.
+    return_dist : boolean
+        If True, return the distribution of permutations (e.g. useful for a
+        posteriori plotting)
+
+    Returns
+    -------
+    ci : array
+        Desired converted effect size
+
+    Examples
+    --------
+    Compute the 95% **parametric** confidence interval of an effect size given
+    the two sample sizes.
+
+        >>> import numpy as np
+        >>> from pingouin import compute_esci, compute_effsize
+        >>> np.random.seed(123)
+        >>> x = np.random.normal(loc=3, size=60)
+        >>> y = np.random.normal(loc=2, size=50)
+        >>> ef = compute_effsize(x=x, y=y, eftype='cohen')
+        >>> print(ef)
+        >>> print(compute_esci(ef=ef, nx=len(x), ny=len(y)))
+            1.010
+            [0.611  1.408]
+
+
+    Compute the 95% **bootstrapped** confidence interval of an effect size.
+    In that case, we need to pass directly the original x and y arrays.
+
+        >>> print(compute_esci(x=x, y=y, method='bootstrap'))
+            [0.853 1.088]
+
+
+    Plot the bootstrapped distribution using Seaborn.
+
+        >>> import seaborn as sns
+        >>> ci, dist = compute_esci(x=x, y=y, method='bootstrap',
+        >>>                         return_dist=True, n_boot=5000)
+        >>> sns.distplot(dist)
+
+
+    Get the 68% confidence interval
+
+        >>> ci68 = compute_esci(x=x, y=y, method='bootstrap', alpha=.68)
+        >>> print(ci68)
+            [0.901 1.030]
+
+
+    Compute the bootstrapped Hedges g confidence interval
+
+        >>> ci = compute_esci(x=x, y=y, method='bootstrap', eftype='hedges')
+        >>> print(ci)
+            [0.837 1.086]
+    """
+    # Check arguments
+    if not _check_eftype(eftype):
+        err = "Could not interpret input '{}'".format(eftype)
+        raise ValueError(err)
+    if all(v is None for v in [x, y, nx, ny]):
+        raise ValueError("You must either specify x and y or nx and ny")
+    if x is None and y is None and method == 'bootstrap':
+        method = 'parametric'
+    if nx is None and ny is None and x is not None and y is not None:
+        nx = len(x)
+        ny = len(y)
+        
+    # Start computation
+    if method == 'parametric':
+        se = np.sqrt(((nx+ny) / (nx*ny)) + (ef**2)/(2*(nx+ny)))
+        ci = np.array([ef - 1.95996 * se, ef + 1.95996 * se])
+        return ci
+    elif method == 'bootstrap':
+        rd_x = np.random.choice(nx, size=n_boot)
+        rd_y = np.random.choice(ny, size=n_boot)
+        effsizes = np.zeros(n_boot)
+
+        for i in np.arange(n_boot):
+            x_new = x.copy()
+            y_new = y.copy()
+            x_new[rd_x[i]] = y[rd_y[i]]
+            y_new[rd_y[i]] = x[rd_x[i]]
+            effsizes[i] = compute_effsize(x=x_new, y=y_new, eftype=eftype)
+
+        ef_sorted = np.sort(effsizes)
+        lower = int(n_boot * ((1 - alpha) / 2))
+        upper = int(n_boot * (alpha + (1 - alpha) / 2))
+        ci = np.array([ef_sorted[lower], ef_sorted[upper]])
+        if return_dist:
+            return ci, effsizes
+        else:
+            return ci
 
 
 # MAIN FUNCTIONS
@@ -133,7 +253,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
 
 
 def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
-                    eftype=None, paired=False):
+                    eftype='cohen', paired=False):
     """Compute effect size from pandas dataframe or two numpy arrays.
 
     Parameters
