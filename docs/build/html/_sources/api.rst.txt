@@ -44,6 +44,7 @@ Effect sizes
     compute_effsize
     compute_effsize_from_T
     convert_effsize
+    compute_esci
 
 
 Distribution

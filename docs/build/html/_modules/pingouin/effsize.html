@@ -107,7 +107,123 @@
 <span class="kn">from</span> <span class="nn">pingouin.parametric</span> <span class="k">import</span> <span class="p">(</span><span class="n">test_homoscedasticity</span><span class="p">)</span>
 
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;convert_effsize&quot;</span><span class="p">,</span> <span class="s2">&quot;compute_effsize&quot;</span><span class="p">,</span> <span class="s2">&quot;compute_effsize_from_T&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;compute_esci&quot;</span><span class="p">,</span> <span class="s2">&quot;convert_effsize&quot;</span><span class="p">,</span> <span class="s2">&quot;compute_effsize&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;compute_effsize_from_T&quot;</span><span class="p">]</span>
+
+<span class="c1"># SUB-FUNCTIONS</span>
+<div class="viewcode-block" id="compute_esci"><a class="viewcode-back" href="../../generated/pingouin.compute_esci.html#pingouin.compute_esci">[docs]</a><span class="k">def</span> <span class="nf">compute_esci</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">95</span><span class="p">,</span>
+                 <span class="n">method</span><span class="o">=</span><span class="s1">&#39;parametric&#39;</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">,</span>
+                 <span class="n">return_dist</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Bootstrapped or parametric confidence intervals of an effect size.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x, y : int</span>
+<span class="sd">        Data vectors (required for bootstrapping only)</span>
+<span class="sd">    ef : float</span>
+<span class="sd">        Original effect size (must be Cohen d or Hedges g).</span>
+<span class="sd">        Required for &#39;parametric&#39; method only.</span>
+<span class="sd">    nx, ny : int</span>
+<span class="sd">        Length of vector x and y.</span>
+<span class="sd">    alpha : float, optional</span>
+<span class="sd">        Confidence interval (0.95 = 95%)</span>
+<span class="sd">    method : string</span>
+<span class="sd">        Computation method</span>
+<span class="sd">        Available methods are ::</span>
+
+<span class="sd">        &#39;parametric&#39; : uses standard deviation of effect sizes.</span>
+<span class="sd">        &#39;bootstrap&#39; : uses a non-parametric bootstrapping procedure.</span>
+<span class="sd">    n_boot : int</span>
+<span class="sd">        Number of permutations for the bootstrap procedure</span>
+<span class="sd">    eftype : string</span>
+<span class="sd">        Effect size type for the bootstrapping procedure.</span>
+<span class="sd">    return_dist : boolean</span>
+<span class="sd">        If True, return the distribution of permutations (e.g. useful for a</span>
+<span class="sd">        posteriori plotting)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ci : array</span>
+<span class="sd">        Desired converted effect size</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Compute the 95% **parametric** confidence interval of an effect size given</span>
+<span class="sd">    the two sample sizes.</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import compute_esci, compute_effsize</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; x = np.random.normal(loc=3, size=60)</span>
+<span class="sd">        &gt;&gt;&gt; y = np.random.normal(loc=2, size=50)</span>
+<span class="sd">        &gt;&gt;&gt; ef = compute_effsize(x=x, y=y, eftype=&#39;cohen&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print(ef)</span>
+<span class="sd">        &gt;&gt;&gt; print(compute_esci(ef=ef, nx=len(x), ny=len(y)))</span>
+<span class="sd">            1.010</span>
+<span class="sd">            [0.611  1.408]</span>
+
+
+<span class="sd">    Compute the 95% **bootstrapped** confidence interval of an effect size.</span>
+<span class="sd">    In that case, we need to pass directly the original x and y arrays.</span>
+
+<span class="sd">        &gt;&gt;&gt; print(compute_esci(x=x, y=y, method=&#39;bootstrap&#39;))</span>
+<span class="sd">            [0.853 1.088]</span>
+
+
+<span class="sd">    Plot the bootstrapped distribution using Seaborn.</span>
+
+<span class="sd">        &gt;&gt;&gt; import seaborn as sns</span>
+<span class="sd">        &gt;&gt;&gt; ci, dist = compute_esci(x=x, y=y, method=&#39;bootstrap&#39;,</span>
+<span class="sd">        &gt;&gt;&gt;                         return_dist=True, n_boot=5000)</span>
+<span class="sd">        &gt;&gt;&gt; sns.distplot(dist)</span>
+
+
+<span class="sd">    Get the 68% confidence interval</span>
+
+<span class="sd">        &gt;&gt;&gt; ci68 = compute_esci(x=x, y=y, method=&#39;bootstrap&#39;, alpha=.68)</span>
+<span class="sd">        &gt;&gt;&gt; print(ci68)</span>
+<span class="sd">            [0.901 1.030]</span>
+
+
+<span class="sd">    Compute the bootstrapped Hedges g confidence interval</span>
+
+<span class="sd">        &gt;&gt;&gt; ci = compute_esci(x=x, y=y, method=&#39;bootstrap&#39;, eftype=&#39;hedges&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print(ci)</span>
+<span class="sd">            [0.837 1.086]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check arguments</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You must either specify x and y or nx and ny&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;bootstrap&#39;</span><span class="p">:</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;parametric&#39;</span>
+    <span class="k">if</span> <span class="n">nx</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ny</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">nx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">ny</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="c1"># Start computation</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;parametric&#39;</span><span class="p">:</span>
+        <span class="n">se</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">nx</span><span class="o">+</span><span class="n">ny</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="n">ef</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">nx</span><span class="o">+</span><span class="n">ny</span><span class="p">)))</span>
+        <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ef</span> <span class="o">-</span> <span class="mf">1.95996</span> <span class="o">*</span> <span class="n">se</span><span class="p">,</span> <span class="n">ef</span> <span class="o">+</span> <span class="mf">1.95996</span> <span class="o">*</span> <span class="n">se</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">ci</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;bootstrap&#39;</span><span class="p">:</span>
+        <span class="n">rd_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_boot</span><span class="p">)</span>
+        <span class="n">rd_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">ny</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_boot</span><span class="p">)</span>
+        <span class="n">effsizes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_boot</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_boot</span><span class="p">):</span>
+            <span class="n">x_new</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">y_new</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">x_new</span><span class="p">[</span><span class="n">rd_x</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">rd_y</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="n">y_new</span><span class="p">[</span><span class="n">rd_y</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">rd_x</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="n">effsizes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_new</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_new</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="n">eftype</span><span class="p">)</span>
+
+        <span class="n">ef_sorted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">effsizes</span><span class="p">)</span>
+        <span class="n">lower</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_boot</span> <span class="o">*</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">upper</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_boot</span> <span class="o">*</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ef_sorted</span><span class="p">[</span><span class="n">lower</span><span class="p">],</span> <span class="n">ef_sorted</span><span class="p">[</span><span class="n">upper</span><span class="p">]])</span>
+        <span class="k">if</span> <span class="n">return_dist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ci</span><span class="p">,</span> <span class="n">effsizes</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ci</span></div>
 
 
 <span class="c1"># MAIN FUNCTIONS</span>
@@ -235,7 +351,7 @@
 
 
 <div class="viewcode-block" id="compute_effsize"><a class="viewcode-back" href="../../generated/pingouin.compute_effsize.html#pingouin.compute_effsize">[docs]</a><span class="k">def</span> <span class="nf">compute_effsize</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">eftype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                    <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Compute effect size from pandas dataframe or two numpy arrays.</span>
 
 <span class="sd">    Parameters</span>
