@@ -167,7 +167,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
 
 
 def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
-                    eftype=None, paired=False):
+                    eftype='cohen', paired=False):
     """Compute effect size from pandas dataframe or two numpy arrays.
 
     Parameters
