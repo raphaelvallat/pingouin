@@ -9,7 +9,7 @@ __all__ = ["print_table", "_export_table", "reshape_data",
            "_extract_effects"]
 
 
-def print_table(df, floatfmt=".4f"):
+def print_table(df, floatfmt=".4f", tablefmt='simple'):
     """Nice display of table"""
     if 'F' in df.keys():
         print('\n=============\nANOVA SUMMARY\n=============\n')
@@ -18,7 +18,8 @@ def print_table(df, floatfmt=".4f"):
 
     try:
         from tabulate import tabulate
-        print(tabulate(df, headers="keys", showindex=False, floatfmt=floatfmt))
+        print(tabulate(df, headers="keys", showindex=False, floatfmt=floatfmt,
+                       tablefmt=tablefmt))
         print('')
     except BaseException:
         print(df)

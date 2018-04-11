@@ -67,7 +67,8 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html#examples">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API reference</a></li>
 </ul>
@@ -111,7 +112,7 @@
            <span class="s2">&quot;_extract_effects&quot;</span><span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">print_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;.4f&quot;</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">print_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;.4f&quot;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s1">&#39;simple&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Nice display of table&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="s1">&#39;F&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">=============</span><span class="se">\n</span><span class="s1">ANOVA SUMMARY</span><span class="se">\n</span><span class="s1">=============</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -120,7 +121,8 @@
 
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">tabulate</span> <span class="k">import</span> <span class="n">tabulate</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s2">&quot;keys&quot;</span><span class="p">,</span> <span class="n">showindex</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="n">floatfmt</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s2">&quot;keys&quot;</span><span class="p">,</span> <span class="n">showindex</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="n">floatfmt</span><span class="p">,</span>
+                       <span class="n">tablefmt</span><span class="o">=</span><span class="n">tablefmt</span><span class="p">))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
