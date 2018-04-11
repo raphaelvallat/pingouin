@@ -1,0 +1,11 @@
+[run]
+branch = True
+source = pingouin
+include = */pingouin/*
+omit =
+    */setup.py
+    */examples/*
+
+[report]
+show_missing = False
+# sort = Cover
