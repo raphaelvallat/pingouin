@@ -106,8 +106,10 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
 
     # Start computation
     if method == 'parametric':
+        from scipy.stats import norm
         se = np.sqrt(((nx+ny) / (nx*ny)) + (ef**2)/(2*(nx+ny)))
-        ci = np.array([ef - 1.95996 * se, ef + 1.95996 * se])
+        crit = np.abs(norm.ppf((1 - alpha) / 2))
+        ci = np.array([ef - crit * se, ef + crit * se])
         return ci
     elif method == 'bootstrap':
         ef = compute_effsize(x=x, y=y, eftype=eftype)
