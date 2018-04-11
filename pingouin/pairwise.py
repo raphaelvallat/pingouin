@@ -31,7 +31,7 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, paired,
 
 def pairwise_ttests(dv=None, between=None, within=None, effects='all',
                     data=None, alpha=.05, tail='two-sided', padjust='none',
-                    effsize='hedges', return_desc=True, remove_nan=True,
+                    effsize='hedges', return_desc=False, remove_nan=True,
                     export_filename=None):
     '''Pairwise T-tests.
 
