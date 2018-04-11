@@ -8,7 +8,7 @@ from pingouin.parametric import (test_homoscedasticity)
 __all__ = ["compute_esci", "convert_effsize", "compute_effsize",
            "compute_effsize_from_T"]
 
-# SUB-FUNCTIONS
+
 def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
                  method='parametric', n_boot=2000, eftype='cohen',
                  return_dist=False):
@@ -100,7 +100,7 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
     if nx is None and ny is None and x is not None and y is not None:
         nx = len(x)
         ny = len(y)
-        
+
     # Start computation
     if method == 'parametric':
         se = np.sqrt(((nx+ny) / (nx*ny)) + (ef**2)/(2*(nx+ny)))
