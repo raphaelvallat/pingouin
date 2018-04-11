@@ -1,0 +1,4 @@
+# Add README, LICENSE and requirements :
+include README.rst
+include LICENSE
+include requirements.txt
