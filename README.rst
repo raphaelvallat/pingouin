@@ -1,5 +1,11 @@
 .. -*- mode: rst -*-
 
+.. image:: https://badge.fury.io/py/pingouin.svg
+  :target: https://badge.fury.io/py/pingouin
+
+.. image:: https://img.shields.io/github/license/raphaelvallat/pingouin.svg
+  :target: https://github.com/raphaelvallat/pingouin/blob/master/LICENSE
+
 Pingouin
 ########
 
