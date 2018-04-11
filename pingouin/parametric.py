@@ -361,6 +361,9 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
 
+    # Sort values (to avoid bug when creating 'Subj' column)
+    data.sort_values(by=within, inplace=True)
+
     # Groupby
     grp_with = data.groupby(within)[dv]
     N = data[dv].size
