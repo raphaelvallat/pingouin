@@ -30,7 +30,7 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
         Available methods are ::
 
         'parametric' : uses standard deviation of effect sizes.
-        'bootstrap' : uses a non-parametric bootstrapping procedure.
+        'bootstrap' : uses a bootstrapping procedure (pivotal CI).
     n_boot : int
         Number of permutations for the bootstrap procedure
     eftype : string

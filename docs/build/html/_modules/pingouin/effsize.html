@@ -133,7 +133,7 @@
 <span class="sd">        Available methods are ::</span>
 
 <span class="sd">        &#39;parametric&#39; : uses standard deviation of effect sizes.</span>
-<span class="sd">        &#39;bootstrap&#39; : uses a non-parametric bootstrapping procedure.</span>
+<span class="sd">        &#39;bootstrap&#39; : uses a bootstrapping procedure (pivotal CI).</span>
 <span class="sd">    n_boot : int</span>
 <span class="sd">        Number of permutations for the bootstrap procedure</span>
 <span class="sd">    eftype : string</span>
@@ -209,8 +209,10 @@
 
     <span class="c1"># Start computation</span>
     <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;parametric&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">norm</span>
         <span class="n">se</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">nx</span><span class="o">+</span><span class="n">ny</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="n">ef</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">nx</span><span class="o">+</span><span class="n">ny</span><span class="p">)))</span>
-        <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ef</span> <span class="o">-</span> <span class="mf">1.95996</span> <span class="o">*</span> <span class="n">se</span><span class="p">,</span> <span class="n">ef</span> <span class="o">+</span> <span class="mf">1.95996</span> <span class="o">*</span> <span class="n">se</span><span class="p">])</span>
+        <span class="n">crit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ef</span> <span class="o">-</span> <span class="n">crit</span> <span class="o">*</span> <span class="n">se</span><span class="p">,</span> <span class="n">ef</span> <span class="o">+</span> <span class="n">crit</span> <span class="o">*</span> <span class="n">se</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">ci</span>
     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;bootstrap&#39;</span><span class="p">:</span>
         <span class="n">ef</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="n">eftype</span><span class="p">)</span>
