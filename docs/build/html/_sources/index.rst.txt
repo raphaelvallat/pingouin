@@ -38,14 +38,18 @@ Pingouin requires :
 User installation
 -----------------
 
-Installing Pingouin:
+.. code-block:: shell
+
+  pip install pingouin
+
+Develop mode
 
 .. code-block:: shell
 
- git clone https://github.com/raphaelvallat/pingouin.git pingouin/
- cd pingouin/
- pip install -r requirements.txt
- python setup.py develop
+  git clone https://github.com/raphaelvallat/pingouin.git pingouin/
+  cd pingouin/
+  pip install -r requirements.txt
+  python setup.py develop
 
 
 Quick start

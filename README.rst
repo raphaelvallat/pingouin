@@ -46,7 +46,11 @@ Pingouin requires :
 User installation
 -----------------
 
-Installing Pingouin:
+.. code-block:: shell
+
+  pip install pingouin
+
+Develop mode
 
 .. code-block:: shell
 
@@ -54,7 +58,6 @@ Installing Pingouin:
   cd pingouin/
   pip install -r requirements.txt
   python setup.py develop
-
 
 Quick start
 ============
