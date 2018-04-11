@@ -3,4 +3,4 @@ Doc
 
 Code
 ----
-- Fix bug in rm_anova for mixed unbalanced model
+- Travis tests
