@@ -160,15 +160,15 @@
 <span class="sd">        &gt;&gt;&gt; ef = compute_effsize(x=x, y=y, eftype=&#39;cohen&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; print(ef)</span>
 <span class="sd">        &gt;&gt;&gt; print(compute_esci(ef=ef, nx=len(x), ny=len(y)))</span>
-<span class="sd">            1.010</span>
-<span class="sd">            [0.611  1.408]</span>
+<span class="sd">            1.01</span>
+<span class="sd">            [0.61  1.41]</span>
 
 
 <span class="sd">    Compute the 95% **bootstrapped** confidence interval of an effect size.</span>
 <span class="sd">    In that case, we need to pass directly the original x and y arrays.</span>
 
 <span class="sd">        &gt;&gt;&gt; print(compute_esci(x=x, y=y, method=&#39;bootstrap&#39;))</span>
-<span class="sd">            [0.853 1.088]</span>
+<span class="sd">            [0.93 1.17]</span>
 
 
 <span class="sd">    Plot the bootstrapped distribution using Seaborn.</span>
@@ -183,14 +183,17 @@
 
 <span class="sd">        &gt;&gt;&gt; ci68 = compute_esci(x=x, y=y, method=&#39;bootstrap&#39;, alpha=.68)</span>
 <span class="sd">        &gt;&gt;&gt; print(ci68)</span>
-<span class="sd">            [0.901 1.030]</span>
+<span class="sd">            [0.99 1.12]</span>
 
 
-<span class="sd">    Compute the bootstrapped Hedges g confidence interval</span>
+<span class="sd">    Compute the bootstrapped Pearson r confidence interval</span>
 
-<span class="sd">        &gt;&gt;&gt; ci = compute_esci(x=x, y=y, method=&#39;bootstrap&#39;, eftype=&#39;hedges&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; ef = compute_effsize(x=x, y=y, eftype=&#39;r&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; ci = compute_esci(x=x, y=y, method=&#39;bootstrap&#39;, eftype=&#39;r&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print(ef)</span>
 <span class="sd">        &gt;&gt;&gt; print(ci)</span>
-<span class="sd">            [0.837 1.086]</span>
+<span class="sd">            0.45</span>
+<span class="sd">            [0.42 0.51]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check arguments</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_check_eftype</span><span class="p">(</span><span class="n">eftype</span><span class="p">):</span>
@@ -210,6 +213,7 @@
         <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ef</span> <span class="o">-</span> <span class="mf">1.95996</span> <span class="o">*</span> <span class="n">se</span><span class="p">,</span> <span class="n">ef</span> <span class="o">+</span> <span class="mf">1.95996</span> <span class="o">*</span> <span class="n">se</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">ci</span>
     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;bootstrap&#39;</span><span class="p">:</span>
+        <span class="n">ef</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="n">eftype</span><span class="p">)</span>
         <span class="n">rd_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_boot</span><span class="p">)</span>
         <span class="n">rd_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">ny</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_boot</span><span class="p">)</span>
         <span class="n">effsizes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_boot</span><span class="p">)</span>
@@ -225,6 +229,8 @@
         <span class="n">lower</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_boot</span> <span class="o">*</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
         <span class="n">upper</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_boot</span> <span class="o">*</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
         <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ef_sorted</span><span class="p">[</span><span class="n">lower</span><span class="p">],</span> <span class="n">ef_sorted</span><span class="p">[</span><span class="n">upper</span><span class="p">]])</span>
+        <span class="c1"># Pivot confidence intervals</span>
+        <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ef</span> <span class="o">-</span> <span class="n">ci</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">return_dist</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ci</span><span class="p">,</span> <span class="n">effsizes</span>
         <span class="k">else</span><span class="p">:</span>

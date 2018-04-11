@@ -57,15 +57,15 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
         >>> ef = compute_effsize(x=x, y=y, eftype='cohen')
         >>> print(ef)
         >>> print(compute_esci(ef=ef, nx=len(x), ny=len(y)))
-            1.010
-            [0.611  1.408]
+            1.01
+            [0.61  1.41]
 
 
     Compute the 95% **bootstrapped** confidence interval of an effect size.
     In that case, we need to pass directly the original x and y arrays.
 
         >>> print(compute_esci(x=x, y=y, method='bootstrap'))
-            [0.853 1.088]
+            [0.93 1.17]
 
 
     Plot the bootstrapped distribution using Seaborn.
@@ -80,14 +80,17 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
 
         >>> ci68 = compute_esci(x=x, y=y, method='bootstrap', alpha=.68)
         >>> print(ci68)
-            [0.901 1.030]
+            [0.99 1.12]
 
 
-    Compute the bootstrapped Hedges g confidence interval
+    Compute the bootstrapped Pearson r confidence interval
 
-        >>> ci = compute_esci(x=x, y=y, method='bootstrap', eftype='hedges')
+        >>> ef = compute_effsize(x=x, y=y, eftype='r')
+        >>> ci = compute_esci(x=x, y=y, method='bootstrap', eftype='r')
+        >>> print(ef)
         >>> print(ci)
-            [0.837 1.086]
+            0.45
+            [0.42 0.51]
     """
     # Check arguments
     if not _check_eftype(eftype):
@@ -107,6 +110,7 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
         ci = np.array([ef - 1.95996 * se, ef + 1.95996 * se])
         return ci
     elif method == 'bootstrap':
+        ef = compute_effsize(x=x, y=y, eftype=eftype)
         rd_x = np.random.choice(nx, size=n_boot)
         rd_y = np.random.choice(ny, size=n_boot)
         effsizes = np.zeros(n_boot)
@@ -122,6 +126,8 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
         lower = int(n_boot * ((1 - alpha) / 2))
         upper = int(n_boot * (alpha + (1 - alpha) / 2))
         ci = np.array([ef_sorted[lower], ef_sorted[upper]])
+        # Pivot confidence intervals
+        ci = np.sort(2 * ef - ci)
         if return_dist:
             return ci, effsizes
         else:

@@ -172,14 +172,14 @@ the two sample sizes.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ef</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ef</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">compute_esci</span><span class="p">(</span><span class="n">ef</span><span class="o">=</span><span class="n">ef</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">ny</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span>
-<span class="go">    1.010</span>
-<span class="go">    [0.611  1.408]</span>
+<span class="go">    1.01</span>
+<span class="go">    [0.61  1.41]</span>
 </pre></div>
 </div>
 <p>Compute the 95% <strong>bootstrapped</strong> confidence interval of an effect size.
 In that case, we need to pass directly the original x and y arrays.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">compute_esci</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bootstrap&#39;</span><span class="p">))</span>
-<span class="go">    [0.853 1.088]</span>
+<span class="go">    [0.93 1.17]</span>
 </pre></div>
 </div>
 <p>Plot the bootstrapped distribution using Seaborn.</p>
@@ -192,13 +192,16 @@ In that case, we need to pass directly the original x and y arrays.</p>
 <p>Get the 68% confidence interval</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ci68</span> <span class="o">=</span> <span class="n">compute_esci</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bootstrap&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">68</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ci68</span><span class="p">)</span>
-<span class="go">    [0.901 1.030]</span>
+<span class="go">    [0.99 1.12]</span>
 </pre></div>
 </div>
-<p>Compute the bootstrapped Hedges g confidence interval</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ci</span> <span class="o">=</span> <span class="n">compute_esci</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bootstrap&#39;</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">)</span>
+<p>Compute the bootstrapped Pearson r confidence interval</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ef</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ci</span> <span class="o">=</span> <span class="n">compute_esci</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bootstrap&#39;</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ef</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ci</span><span class="p">)</span>
-<span class="go">    [0.837 1.086]</span>
+<span class="go">    0.45</span>
+<span class="go">    [0.42 0.51]</span>
 </pre></div>
 </div>
 </dd></dl>
