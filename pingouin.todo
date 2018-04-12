@@ -3,4 +3,5 @@ Doc
 
 Code
 ----
+- Remove function _chek_data
 - Travis tests

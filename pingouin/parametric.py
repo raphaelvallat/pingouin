@@ -148,8 +148,8 @@ def test_homoscedasticity(*args, alpha=.05):
         >>> y = np.random.normal(loc=0, scale=0.8,size=100)
         >>> print(np.var(x), np.var(y))
             1.27 0.60
-        >>> normal, p = test_homoscedasticity(x, y, alpha=.05)
-        >>> print(normal, p)
+        >>> equal_var, p = test_homoscedasticity(x, y, alpha=.05)
+        >>> print(equal_var, p)
             False 0.0002
     """
     from scipy.stats import levene, bartlett

@@ -28,11 +28,13 @@ def print_table(df, floatfmt=".4f", tablefmt='simple'):
 def _export_table(table, fname=None):
     """Export DataFrame to .csv"""
     import os.path as op
-    extension = op.splitext(fname.lower())[1]
-    if extension == '':
-        fname = fname + '.csv'
-    table.to_csv(fname, index=None, sep=',', encoding='utf-8',
-                 float_format='%.4f', decimal='.')
+    if fname is not None:
+        extension = op.splitext(fname.lower())[1]
+        if extension == '':
+            fname = fname + '.csv'
+        table.to_csv(fname, index=None, sep=',', encoding='utf-8',
+                     float_format='%.4f', decimal='.')
+
 
 def reshape_data(df, id, dv='DV', rm='Time'):
     """Reshape data from human-readable to analysis shape

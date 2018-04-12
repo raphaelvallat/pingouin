@@ -158,17 +158,20 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
     if effects.lower() == 'all':
         stats_within = pairwise_ttests(dv=dv, within=within, effects='within',
                                        data=data, alpha=alpha, tail=tail,
-                                       padjust=padjust, effsize=effsize)
+                                       padjust=padjust, effsize=effsize,
+                                       return_desc=return_desc)
         stats_between = pairwise_ttests(dv=dv, between=between,
                                         effects='between', data=data,
                                         alpha=alpha, tail=tail,
-                                        padjust=padjust, effsize=effsize)
+                                        padjust=padjust, effsize=effsize,
+                                        return_desc=return_desc)
 
         stats_interaction = pairwise_ttests(dv=dv, within=within,
                                             between=between,
                                             effects='interaction',
                                             data=data, alpha=alpha, tail=tail,
-                                            padjust=padjust, effsize=effsize)
+                                            padjust=padjust, effsize=effsize,
+                                            return_desc=return_desc)
         stats = pd.concat([stats_within, stats_between,
                            stats_interaction]).reset_index()
 
@@ -194,9 +197,6 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
     # stats['reject'] = stats['reject'].astype(bool)
     stats['Paired'] = stats['Paired'].astype(bool)
-
-    if not return_desc:
-        stats[['mean(A)', 'mean(B)', 'std(A)', 'std(B)']] = np.nan
 
     # Reorganize column order
     col_order = ['Type', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',

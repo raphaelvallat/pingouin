@@ -1,0 +1,70 @@
+language: python
+
+sudo: false
+dist: trusty
+python:
+    - '3.6'
+
+matrix:
+  include:
+    - env: TEST=standard
+      os: linux
+    - env: TEST=flake
+      os: linux
+
+  allow_failures:
+    - env: TEST=flake
+
+before_install:
+    # Instal miniconda3 :
+    - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+        wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+      else
+        wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
+      fi;
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - hash -r
+    - conda config --set always_yes yes --set changeps1 no
+    - conda update -q conda
+    - conda info -a
+    - SRC_DIR=$(pwd)
+
+
+install:
+    # Create the py3 environnement ;
+    - conda create -q -n testenv python=$TRAVIS_PYTHON_VERSION numpy scipy pip
+    - source activate testenv
+    # Install dependencies :
+    - if [ "${TEST}" == "standard" ]; then
+        pip install codecov pytest pytest-cov pytest-sugar pytest-travis-fold openpyxl;
+        pip install pandas tabulate;
+      fi;
+    - if [ "${TEST}" == "flake" ]; then
+        pip install flake8 pep8-naming;
+      fi;
+    - cd ${SRC_DIR}
+    - pip install -e .
+
+
+before_script:
+    - "export DISPLAY=:99.0"
+    - "sh -e /etc/init.d/xvfb start"
+    - sleep 3 # give xvfb some time to start
+
+
+script:
+    - if [[ "${TEST}" == "standard" ]]; then
+          py.test --cov;
+      elif [[ "${TEST}" == "flake" ]]; then
+          flake8;
+      fi;
+
+after_success:
+    - pip install codecov
+    - if [ "${TEST}" == "standard" ]; then
+        codecov;
+      fi
+
+notifications:
+    email: raphaelvallat9@gmail.com

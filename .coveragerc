@@ -5,6 +5,7 @@ include = */pingouin/*
 omit =
     */setup.py
     */examples/*
+    */tests/*
 
 [report]
 show_missing = False
