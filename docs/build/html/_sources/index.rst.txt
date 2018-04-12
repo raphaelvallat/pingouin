@@ -7,6 +7,13 @@ Pingouin
 .. image:: https://img.shields.io/github/license/raphaelvallat/pingouin.svg
   :target: https://github.com/raphaelvallat/pingouin/blob/master/LICENSE
 
+.. image:: https://travis-ci.org/raphaelvallat/pingouin.svg?branch=master
+    :target: https://travis-ci.org/raphaelvallat/pingouin
+
+.. image:: https://codecov.io/gh/raphaelvallat/pingouin/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/raphaelvallat/pingouin
+
+
 .. figure::  /pictures/pingouin.png
   :align:   center
 

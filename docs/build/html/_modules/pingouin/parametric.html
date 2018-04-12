@@ -251,8 +251,8 @@
 <span class="sd">        &gt;&gt;&gt; y = np.random.normal(loc=0, scale=0.8,size=100)</span>
 <span class="sd">        &gt;&gt;&gt; print(np.var(x), np.var(y))</span>
 <span class="sd">            1.27 0.60</span>
-<span class="sd">        &gt;&gt;&gt; normal, p = test_homoscedasticity(x, y, alpha=.05)</span>
-<span class="sd">        &gt;&gt;&gt; print(normal, p)</span>
+<span class="sd">        &gt;&gt;&gt; equal_var, p = test_homoscedasticity(x, y, alpha=.05)</span>
+<span class="sd">        &gt;&gt;&gt; print(equal_var, p)</span>
 <span class="sd">            False 0.0002</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">levene</span><span class="p">,</span> <span class="n">bartlett</span>

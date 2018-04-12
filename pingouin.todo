@@ -4,4 +4,6 @@ Doc
 Code
 ----
 - Remove function _chek_data
-- Travis tests
+- Finish travis test for ValueError
+- Better bootstrapping of confidence intervals
+- Power and sample sizes computations
