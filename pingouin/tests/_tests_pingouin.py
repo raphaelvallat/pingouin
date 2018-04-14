@@ -1,6 +1,7 @@
 """Utility function for Pingouin tests."""
 import numpy as np
 
+
 class _TestPingouin(object):
     """Visbrain testing utility methods."""
 

@@ -30,6 +30,8 @@
 
 import os
 import sys
+import time
+import pingouin
 import sphinx_bootstrap_theme
 
 
@@ -71,7 +73,6 @@ master_doc = 'index'
 # General information about the project.
 project = 'pingouin'
 author = 'Raphael Vallat'
-import time
 copyright = u'2018-{}, Raphael Vallat'.format(time.strftime("%Y"))
 
 # The version info for the project you're documenting, acts as replacement for
@@ -81,7 +82,6 @@ copyright = u'2018-{}, Raphael Vallat'.format(time.strftime("%Y"))
 # The short X.Y version.
 # The full version, including alpha/beta/rc tags.
 sys.path.insert(0, os.path.abspath(os.path.pardir))
-import pingouin
 version = pingouin.__version__
 release = pingouin.__version__
 

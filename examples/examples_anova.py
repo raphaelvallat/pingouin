@@ -15,7 +15,8 @@ os.system('mode con: cols=200 lines=50')
 # Generate a dataset
 # https://en.wikipedia.org/wiki/One-way_analysis_of_variance#Example
 df = pd.DataFrame({'Group': repeat(['A', 'B', 'C'], 6),
-                   'DV': [6, 8, 4, 5, 3, 4, 8, 12, 9, 11, 6, 8, 13, 9, 11, 8, 7, 12]
+                   'DV': [6, 8, 4, 5, 3, 4, 8, 12, 9, 11, 6, 8, 13, 9, 11, 8,
+                          7, 12]
                    })
 
 # Compute one-way ANOVA

@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 #
 # Copyright (C) 2018 Raphael Vallat
-import os
 
 DESCRIPTION = "Pingouin: statistical package for Python"
 LONG_DESCRIPTION = """Pingouin is a statistical Python package based on Pandas.

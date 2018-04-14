@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from scipy.stats import ttest_ind, pearsonr
-from pingouin.effsize import *
+from scipy.stats import ttest_ind
+from pingouin.effsize import compute_effsize, compute_effsize_from_T
 
 # Generate a fake dataset: heights in countries x and y
 np.random.seed(123)

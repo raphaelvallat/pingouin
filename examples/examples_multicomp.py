@@ -1,7 +1,5 @@
 import numpy as np
-import pandas as pd
-from scipy.stats import ttest_ind, pearsonr
-from pingouin.multicomp import *
+from pingouin.multicomp import multicomp
 
 # Generate a fake array of p-values
 np.random.seed(1234)

@@ -1,7 +1,4 @@
-import pandas as pd
-import numpy as np
 import pytest
-
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.multicomp import fdr, bonf, holm, multicomp
 
@@ -12,6 +9,7 @@ from pingouin.multicomp import fdr, bonf, holm, multicomp
 
 pvals = [.52, .12, .0001, .03, .14]
 pvals2 = [.52, .12, .10, .30, .14]
+
 
 class TestMulticomp(_TestPingouin):
     """Test effsize.py."""
