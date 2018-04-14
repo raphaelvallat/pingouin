@@ -143,7 +143,7 @@ def test_homoscedasticity(*args, alpha=.05):
         >>> import numpy as np
         >>> from pingouin import test_homoscedasticity
         >>> np.random.seed(123)
-        >>> # The scale parameters define the standard deviation of the distribution.
+        >>> # Scale = standard deviation of the distribution.
         >>> x = np.random.normal(loc=0, scale=1., size=100)
         >>> y = np.random.normal(loc=0, scale=0.8,size=100)
         >>> print(np.var(x), np.var(y))

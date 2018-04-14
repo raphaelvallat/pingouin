@@ -107,7 +107,7 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
     # Start computation
     if method == 'parametric':
         from scipy.stats import norm
-        se = np.sqrt(((nx+ny) / (nx*ny)) + (ef**2)/(2*(nx+ny)))
+        se = np.sqrt(((nx + ny) / (nx * ny)) + (ef**2) / (2 * (nx + ny)))
         crit = np.abs(norm.ppf((1 - alpha) / 2))
         ci = np.array([ef - crit * se, ef + crit * se])
         return ci

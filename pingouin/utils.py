@@ -100,7 +100,7 @@ def reshape_data(df, id, dv='DV', rm='Time'):
         3   6pm   7
     """
     return pd.melt(df, id_vars=id, var_name=rm, value_name=dv).sort_values(
-                                                                        by=id)
+        by=id)
 
 
 def _remove_rm_na(dv=None, within=None, data=None):
