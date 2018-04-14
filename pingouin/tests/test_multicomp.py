@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.multicomp import *
+from pingouin.multicomp import fdr, bonf, holm, multicomp
 
 # Dataset
 # df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],

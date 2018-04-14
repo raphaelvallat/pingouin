@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.parametric import gzscore, test_normality, anova, rm_anova, mixed_anova
+from pingouin.parametric import (gzscore, test_normality, anova, rm_anova,
+                                mixed_anova)
 
 # Generate random data for ANOVA
 n = 30

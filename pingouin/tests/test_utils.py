@@ -2,7 +2,10 @@ import pandas as pd
 import numpy as np
 
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.utils import *
+from pingouin.utils import (print_table, _export_table, _remove_rm_na,
+                           _check_eftype, _check_data, _check_dataframe,
+                           _extract_effects, reshape_data)
+
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],

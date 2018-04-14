@@ -3,7 +3,8 @@ import numpy as np
 import pytest
 
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.effsize import *
+from pingouin.effsize import (compute_esci, convert_effsize, compute_effsize,
+                              compute_effsize_from_T )
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
