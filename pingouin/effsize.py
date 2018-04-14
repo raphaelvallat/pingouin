@@ -6,7 +6,7 @@ from pingouin.parametric import (test_homoscedasticity)
 
 
 __all__ = ["compute_esci", "convert_effsize", "compute_effsize",
-           "compute_effsize_from_T"]
+           "compute_effsize_from_t"]
 
 
 def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
@@ -169,7 +169,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     See Also
     --------
     compute_effsize : Compute effect size from pandas dataframe or numpy arrays
-    compute_effsize_from_T : Convert a T-statistic to an effect size.
+    compute_effsize_from_t : Convert a T-statistic to an effect size.
 
     Examples
     --------
@@ -297,7 +297,7 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
     See Also
     --------
     convert_effsize : Conversion between effect sizes.
-    compute_effsize_from_T : Convert a T-statistic to an effect size.
+    compute_effsize_from_t : Convert a T-statistic to an effect size.
 
     Examples
     --------
@@ -361,12 +361,12 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
         return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)
 
 
-def compute_effsize_from_T(T, nx=None, ny=None, N=None, eftype='cohen'):
+def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype='cohen'):
     """Compute effect size from a T-value.
 
     Parameters
     ----------
-    T : float
+    tval : float
         T-value
     nx, ny : int, optional
         Group sample sizes.
@@ -387,18 +387,18 @@ def compute_effsize_from_T(T, nx=None, ny=None, N=None, eftype='cohen'):
 
     Examples
     --------
-    1. Compute effect size from T when both sample sizes are known.
+    1. Compute effect size from a T-value when both sample sizes are known.
 
-        >>> from pingouin import compute_effsize_from_T
-        >>> T, nx, ny = 2.90, 35, 25
-        >>> d = compute_effsize_from_T(T, nx=nx, ny=ny, eftype='cohen')
+        >>> from pingouin import compute_effsize_from_t
+        >>> tval, nx, ny = 2.90, 35, 25
+        >>> d = compute_effsize_from_t(tval, nx=nx, ny=ny, eftype='cohen')
         >>> print(d)
             0.76
 
-    2. Compute effect size from T when only total sample size is known (nx+ny)
+    2. Compute effect size when only total sample size is known (nx+ny)
 
-        >>> T, N = 2.90, 60
-        >>> d = compute_effsize_from_T(T, N=N, eftype='cohen')
+        >>> tval, N = 2.90, 60
+        >>> d = compute_effsize_from_t(tval, N=N, eftype='cohen')
         >>> print(d)
             0.75
     """
@@ -406,15 +406,15 @@ def compute_effsize_from_T(T, nx=None, ny=None, N=None, eftype='cohen'):
         err = "Could not interpret input '{}'".format(eftype)
         raise ValueError(err)
 
-    if not isinstance(T, float):
+    if not isinstance(tval, float):
         err = "T-value must be float"
         raise ValueError(err)
 
     # Compute Cohen d (Lakens, 2013)
     if nx is not None and ny is not None:
-        d = T * np.sqrt(1 / nx + 1 / ny)
+        d = tval * np.sqrt(1 / nx + 1 / ny)
     elif N is not None:
-        d = 2 * T / np.sqrt(N)
+        d = 2 * tval / np.sqrt(N)
     else:
         raise ValueError('You must specify either nx + ny, or just N')
     return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)

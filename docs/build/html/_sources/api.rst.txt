@@ -42,7 +42,7 @@ Effect sizes
    :toctree: generated/
 
     compute_effsize
-    compute_effsize_from_T
+    compute_effsize_from_t
     convert_effsize
     compute_esci
 

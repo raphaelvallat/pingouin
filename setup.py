@@ -21,6 +21,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
+
 def check_dependencies():
     install_requires = []
 
@@ -41,33 +42,33 @@ def check_dependencies():
     except ImportError:
         install_requires.append('tabulate')
 
-
     return install_requires
+
 
 if __name__ == "__main__":
 
     install_requires = check_dependencies()
 
     setup(name=DISTNAME,
-        author=MAINTAINER,
-        author_email=MAINTAINER_EMAIL,
-        maintainer=MAINTAINER,
-        maintainer_email=MAINTAINER_EMAIL,
-        description=DESCRIPTION,
-        long_description=LONG_DESCRIPTION,
-        license=LICENSE,
-        url=URL,
-        version=VERSION,
-        download_url=DOWNLOAD_URL,
-        install_requires=install_requires,
-        packages=['pingouin'],
-        package_data=PACKAGE_DATA,
-        classifiers=[
-                     'Intended Audience :: Science/Research',
-                     'Programming Language :: Python :: 3.6',
-                     'License :: OSI Approved :: BSD License',
-                     'Topic :: Scientific/Engineering :: Mathematics',
-                     'Operating System :: POSIX',
-                     'Operating System :: Unix',
-                     'Operating System :: MacOS'],
+          author=MAINTAINER,
+          author_email=MAINTAINER_EMAIL,
+          maintainer=MAINTAINER,
+          maintainer_email=MAINTAINER_EMAIL,
+          description=DESCRIPTION,
+          long_description=LONG_DESCRIPTION,
+          license=LICENSE,
+          url=URL,
+          version=VERSION,
+          download_url=DOWNLOAD_URL,
+          install_requires=install_requires,
+          packages=['pingouin'],
+          package_data=PACKAGE_DATA,
+          classifiers=[
+              'Intended Audience :: Science/Research',
+              'Programming Language :: Python :: 3.6',
+              'License :: OSI Approved :: BSD License',
+              'Topic :: Scientific/Engineering :: Mathematics',
+              'Operating System :: POSIX',
+              'Operating System :: Unix',
+              'Operating System :: MacOS'],
           )

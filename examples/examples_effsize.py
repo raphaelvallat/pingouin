@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import ttest_ind
-from pingouin.effsize import compute_effsize, compute_effsize_from_T
+from pingouin.effsize import compute_effsize, compute_effsize_from_t
 
 # Generate a fake dataset: heights in countries x and y
 np.random.seed(123)
@@ -28,11 +28,11 @@ ef = compute_effsize(x=x, y=y, eftype=eftype)
 print(eftype, ': %.3f' % ef)
 
 # 3 - using a T-value when nx and ny are known
-T, _ = ttest_ind(x, y)
-ef = compute_effsize_from_T(T, nx=len(x), ny=len(y), eftype=eftype)
+tval, _ = ttest_ind(x, y)
+ef = compute_effsize_from_t(tval, nx=len(x), ny=len(y), eftype=eftype)
 print(eftype, '(from T - nx + ny): %.3f' % ef)
 
 # 4 - using a T-value when only total sample size is known
-T, _ = ttest_ind(x, y)
-ef = compute_effsize_from_T(T, N=len(x) + len(y), eftype='cohen')
+tval, _ = ttest_ind(x, y)
+ef = compute_effsize_from_t(tval, N=len(x) + len(y), eftype='cohen')
 print('cohen (from T - only N): %.3f' % ef)

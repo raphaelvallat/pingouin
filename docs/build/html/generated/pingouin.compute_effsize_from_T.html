@@ -29,8 +29,6 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pingouin.convert_effsize" href="pingouin.convert_effsize.html" />
-    <link rel="prev" title="pingouin.compute_effsize" href="pingouin.compute_effsize.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -68,11 +66,11 @@
      href="../index.html">Site <b class="caret"></b></a>
   <ul class="dropdown-menu globaltoc"
       role="menu"
-      aria-labelledby="dLabelGlobalToc"><ul class="current">
+      aria-labelledby="dLabelGlobalToc"><ul>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html#examples">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API reference</a></li>
 </ul>
 </ul>
 </li>
@@ -105,14 +103,14 @@
   <div class="section" id="pingouin-compute-effsize-from-t">
 <h1>pingouin.compute_effsize_from_T</h1>
 <dl class="function">
-<dt id="pingouin.compute_effsize_from_T">
-<code class="descclassname">pingouin.</code><code class="descname">compute_effsize_from_T</code><span class="sig-paren">(</span><em>T</em>, <em>nx=None</em>, <em>ny=None</em>, <em>N=None</em>, <em>eftype='cohen'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/effsize.html#compute_effsize_from_T"><span class="viewcode-link">[source]</span></a></dt>
+<dt id="pingouin.compute_effsize_from_t">
+<code class="descclassname">pingouin.</code><code class="descname">compute_effsize_from_t</code><span class="sig-paren">(</span><em>tval</em>, <em>nx=None</em>, <em>ny=None</em>, <em>N=None</em>, <em>eftype='cohen'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/effsize.html#compute_effsize_from_t"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Compute effect size from a T-value.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>T</strong> : float</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>tval</strong> : float</p>
 <blockquote>
 <div><p>T-value</p>
 </div></blockquote>
@@ -149,18 +147,18 @@
 </div>
 <p class="rubric">Examples</p>
 <ol class="arabic">
-<li><p class="first">Compute effect size from T when both sample sizes are known.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">compute_effsize_from_T</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="mf">2.90</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">25</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">compute_effsize_from_T</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">)</span>
+<li><p class="first">Compute effect size from a T-value when both sample sizes are known.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">compute_effsize_from_t</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tval</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="mf">2.90</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">25</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">compute_effsize_from_t</span><span class="p">(</span><span class="n">tval</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 <span class="go">    0.76</span>
 </pre></div>
 </div>
 </li>
-<li><p class="first">Compute effect size from T when only total sample size is known (nx+ny)</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mf">2.90</span><span class="p">,</span> <span class="mi">60</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">compute_effsize_from_T</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">)</span>
+<li><p class="first">Compute effect size when only total sample size is known (nx+ny)</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tval</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mf">2.90</span><span class="p">,</span> <span class="mi">60</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">compute_effsize_from_t</span><span class="p">(</span><span class="n">tval</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 <span class="go">    0.75</span>
 </pre></div>
@@ -187,7 +185,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
     </p>
   </div>
 </footer>

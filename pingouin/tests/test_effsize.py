@@ -4,7 +4,7 @@ import pytest
 
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.effsize import (compute_esci, convert_effsize, compute_effsize,
-                              compute_effsize_from_T)
+                              compute_effsize_from_t)
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
@@ -68,18 +68,18 @@ class TestEffsize(_TestPingouin):
         with pytest.raises(ValueError):
             compute_effsize(x=x, y=y, eftype='wrong')
 
-    def test_compute_effsize_from_T(self):
-        """Test function compute_effsize_from_T"""
-        T, nx, ny = 2.90, 35, 25
-        compute_effsize_from_T(T, nx=nx, ny=ny, eftype='hedges')
-        T, N = 2.90, 60
-        compute_effsize_from_T(T, N=N, eftype='cohen')
+    def test_compute_effsize_from_t(self):
+        """Test function compute_effsize_from_t"""
+        tval, nx, ny = 2.90, 35, 25
+        compute_effsize_from_t(tval, nx=nx, ny=ny, eftype='hedges')
+        tval, N = 2.90, 60
+        compute_effsize_from_t(tval, N=N, eftype='cohen')
         # Wrong desired eftype
         with pytest.raises(ValueError):
-            compute_effsize_from_T(T=T, nx=x, ny=y, eftype='wrong')
+            compute_effsize_from_t(tval, nx=x, ny=y, eftype='wrong')
         # T is not a float
         with pytest.raises(ValueError):
-            compute_effsize_from_T(T=[1, 2, 3], nx=nx, ny=ny)
+            compute_effsize_from_t([1, 2, 3], nx=nx, ny=ny)
         # No sample size info
         with pytest.raises(ValueError):
-            compute_effsize_from_T(T=T)
+            compute_effsize_from_t(tval)
