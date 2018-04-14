@@ -4,7 +4,7 @@ import pytest
 
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.effsize import (compute_esci, convert_effsize, compute_effsize,
-                              compute_effsize_from_T )
+                              compute_effsize_from_T)
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
@@ -28,6 +28,7 @@ class TestEffsize(_TestPingouin):
         with pytest.raises(ValueError):
             compute_esci(x=x, y=y, alpha=.95, method='bootstrap', n_boot=2000,
                          eftype='wrong', return_dist=True)
+        with pytest.raises(ValueError):
             compute_esci()
 
 
@@ -41,7 +42,9 @@ class TestEffsize(_TestPingouin):
         r = convert_effsize(d, 'cohen', 'r')
         with pytest.raises(ValueError):
             r = convert_effsize(d, 'coucou', 'hibou')
+        with pytest.raises(ValueError):
             r = convert_effsize(d, 'AUC', 'eta-square')
+        with pytest.raises(ValueError):
             g = convert_effsize(d, 'cohen', 'hedges-square')
 
 

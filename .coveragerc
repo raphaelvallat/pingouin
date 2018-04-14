@@ -8,5 +8,5 @@ omit =
     */tests/*
 
 [report]
-show_missing = False
+show_missing = True
 # sort = Cover
