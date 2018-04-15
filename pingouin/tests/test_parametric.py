@@ -3,7 +3,7 @@ import numpy as np
 
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.parametric import (gzscore, test_normality, anova, rm_anova,
-                                 mixed_anova)
+                                 mixed_anova, test_dist)
 
 # Generate random data for ANOVA
 n = 30
@@ -35,17 +35,21 @@ class TestParametric(_TestPingouin):
 
     def test_test_normality(self):
         """Test function test_normality."""
-        normal, p = test_normality(x, alpha=.05)
-        normal, p = test_normality(x, y, alpha=.05)
+        test_normality(x, alpha=.05)
+        test_normality(x, y, alpha=.05)
 
     # def test_test_homoscedasticity(self):
     #     """Test function test_homoscedasticity."""
-    #     equal_var, p = test_homoscedasticity(x, y, alpha=.05)
-    #
+    #     test_homoscedasticity(x, y, alpha=.05)
     #
     # def test_test_sphericity(self):
     #     """Test function test_sphericity."""
-    #     sphericity, W, chi_sq, ddof, p = test_sphericity(np.c_[x, y, z])
+    #     test_sphericity(np.c_[x, y, z])
+
+    def test_test_dist(self):
+        """Test function test_dist."""
+        test_dist(x)
+
 
     def test_anova(self):
         """Test function anova."""

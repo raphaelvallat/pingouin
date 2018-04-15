@@ -20,7 +20,7 @@ class TestUtils(_TestPingouin):
     def test_print_table(self):
         """Test function print_table."""
         df2, df3 = df.copy(), df.copy()
-        df['F'] = 0
+        df2['F'] = 0
         print_table(df2)
         df3['A'] = 0
         print_table(df3, tablefmt='html', floatfmt='.3f')
@@ -65,8 +65,10 @@ class TestUtils(_TestPingouin):
         with pytest.raises(ValueError):
             _check_data(dv='Values', group='Group', data=0)
         with pytest.raises(ValueError):
-            df.iloc[0, 0] = 'C'
-            _check_data(dv='Values', group='Group', data=0)
+            df_wrong = pd.DataFrame({'Group': ['C', 'A', 'B'],
+                               'Time': ['Mon', 'Thur', 'Mon'],
+                               'Values': [1.52, 5.8, 8.2]})
+            _check_data(dv='Values', group='Group', data=df_wrong)
 
     def test_check_dataframe(self):
         """Test function _check_dataframe."""
@@ -85,10 +87,11 @@ class TestUtils(_TestPingouin):
             _check_dataframe(dv='Values', between='Group', effects='wrong',
                              data=df)
         with pytest.raises(ValueError):
-            _check_dataframe(between='Group', effects='within', data=df)
+            _check_dataframe(within=None, effects='within', data=df)
+        with pytest.raises(ValueError):
+            _check_dataframe(between=None, effects='between', data=df)
         with pytest.raises(ValueError):
             _check_dataframe(between='Group', effects='interaction', data=df)
-
 
     def test_extract_effects(self):
         """Test function _extract_effects."""
