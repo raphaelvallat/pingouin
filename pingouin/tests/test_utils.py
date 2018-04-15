@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import pytest
 
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.utils import (print_table, _export_table, _remove_rm_na,
@@ -26,7 +27,7 @@ class TestUtils(_TestPingouin):
 
     def test_export_table(self):
         """Test function export_table."""
-        _export_table(df, fname=None)
+        _export_table(df, fname='test_export')
 
     def test_reshape_data(self):
         """Test function reshape_data."""
@@ -56,6 +57,16 @@ class TestUtils(_TestPingouin):
         x = [1, 5, 7, 8]
         y = np.array([4, 4, 7, 5])
         _check_data(x=x, y=y)
+        # Wrong arguments
+        with pytest.raises(ValueError):
+            _check_data(x=0, y=y)
+        with pytest.raises(ValueError):
+            _check_data(dv=0, group='Group', data=df)
+        with pytest.raises(ValueError):
+            _check_data(dv='Values', group='Group', data=0)
+        with pytest.raises(ValueError):
+            df.iloc[0, 0] = 'C'
+            _check_data(dv='Values', group='Group', data=0)
 
     def test_check_dataframe(self):
         """Test function _check_dataframe."""
@@ -65,6 +76,19 @@ class TestUtils(_TestPingouin):
                          data=df)
         _check_dataframe(dv='Values', within='Time', between='Group',
                          effects='interaction', data=df)
+        # Missing arguments
+        with pytest.raises(ValueError):
+            _check_dataframe(dv='Values', between='Group', effects='between')
+        with pytest.raises(ValueError):
+            _check_dataframe(between='Group', effects='between', data=df)
+        with pytest.raises(ValueError):
+            _check_dataframe(dv='Values', between='Group', effects='wrong',
+                             data=df)
+        with pytest.raises(ValueError):
+            _check_dataframe(between='Group', effects='within', data=df)
+        with pytest.raises(ValueError):
+            _check_dataframe(between='Group', effects='interaction', data=df)
+
 
     def test_extract_effects(self):
         """Test function _extract_effects."""

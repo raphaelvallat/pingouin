@@ -96,3 +96,4 @@ ENV/
 
 # mypy
 .mypy_cache/
+test_export.csv
