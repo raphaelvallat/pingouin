@@ -360,8 +360,8 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         # Compute unbiased Cohen's d effect size
         if not paired:
             # https://en.wikipedia.org/wiki/Effect_size
-            poolsd = np.sqrt(((nx - 1) * np.std(x, ddof=1)**2 + (ny - 1)
-                                            * np.std(y, ddof=1)**2) / dof)
+            poolsd = np.sqrt(((nx - 1) * np.std(x, ddof=1)**2 +
+                              (ny - 1) * np.std(y, ddof=1)**2) / dof)
             d = (np.mean(x) - np.mean(y)) / poolsd
         else:
             # Report Cohen d-avg (Cumming 2012; Lakens 2013)

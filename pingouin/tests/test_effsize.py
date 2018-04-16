@@ -14,6 +14,7 @@ df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
 x = np.random.normal(2, 1, 30)
 y = np.random.normal(2.5, 1, 30)
 
+
 class TestEffsize(_TestPingouin):
     """Test effsize.py."""
 
@@ -69,7 +70,6 @@ class TestEffsize(_TestPingouin):
         # Unequal sample size with paired == True
         z = np.random.normal(2.5, 3, 20)
         compute_effsize(x=x, y=z, paired=True)
-
 
     def test_compute_effsize_from_t(self):
         """Test function compute_effsize_from_t"""

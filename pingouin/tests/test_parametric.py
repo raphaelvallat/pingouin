@@ -50,7 +50,6 @@ class TestParametric(_TestPingouin):
         """Test function test_dist."""
         test_dist(x)
 
-
     def test_anova(self):
         """Test function anova."""
         anova(dv='Scores', between='Group', data=df, detailed=True)

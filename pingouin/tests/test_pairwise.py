@@ -47,7 +47,7 @@ class TestPairwise(_TestPingouin):
         with pytest.raises(ValueError):
             pairwise_ttests(dv='Scores', within='Time', data=df, alpha='.05')
         # Missing values
-        df.iloc[[10, 15],0] = np.nan
+        df.iloc[[10, 15], 0] = np.nan
         pairwise_ttests(dv='Scores', within='Time', effects='within', data=df)
         # Wrong input argument
         df['Group'] = 'Control'
