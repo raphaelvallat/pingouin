@@ -3,7 +3,6 @@ Doc
 
 Code
 ----
-- Remove function _chek_data
-- Finish travis test for ValueError
+- Tukey post-hoc
 - Better bootstrapping of confidence intervals
 - Power and sample sizes computations

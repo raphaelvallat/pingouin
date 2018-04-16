@@ -31,8 +31,7 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, paired,
 
 def pairwise_ttests(dv=None, between=None, within=None, effects='all',
                     data=None, alpha=.05, tail='two-sided', padjust='none',
-                    effsize='hedges', return_desc=False, remove_nan=True,
-                    export_filename=None):
+                    effsize='hedges', return_desc=False, export_filename=None):
     '''Pairwise T-tests.
 
     Parameters
@@ -107,7 +106,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
     if not isinstance(alpha, float):
         raise ValueError('Alpha must be float')
 
-    # Check NA in repeated measurements
+    # Remove NAN in repeated measurements
     if within is not None and data[dv].isnull().values.any():
         data = _remove_rm_na(dv=dv, within=within, data=data)
 
@@ -185,7 +184,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
     # Multiple comparisons
     padjust = None if stats['p-unc'].size <= 1 else padjust
     if padjust is not None:
-        if padjust.lower() is not 'none':
+        if padjust.lower() != 'none':
             reject, stats['p-corr'] = multicomp(stats['p-unc'].values,
                                                 alpha=alpha, method=padjust)
             stats['p-adjust'] = padjust

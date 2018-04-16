@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import pytest
 
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.pairwise import pairwise_ttests
@@ -29,11 +30,26 @@ class TestPairwise(_TestPingouin):
                         effects='interaction', data=df, padjust='holm',
                         alpha=.01)
         pairwise_ttests(dv='Scores', within='Time', between='Group',
-                        effects='all', data=df, padjust='fdr_bh',
-                        remove_nan=False)
+                        effects='all', data=df, padjust='fdr_bh')
         pairwise_ttests(dv='Scores', within='Time', between=None,
                         effects='within', data=df, padjust='none',
                         return_desc=False)
         pairwise_ttests(dv='Scores', within=None, between='Group',
                         effects='between', data=df, padjust='bonf',
                         tail='one-sided', effsize='cohen')
+        pairwise_ttests(dv='Scores', within=None, between='Group',
+                        effects='between', data=df,
+                        export_filename='test_export.csv')
+        # Wrong tail argument
+        with pytest.raises(ValueError):
+            pairwise_ttests(dv='Scores', within='Time', data=df, tail='wrong')
+        # Wrong alpha argument
+        with pytest.raises(ValueError):
+            pairwise_ttests(dv='Scores', within='Time', data=df, alpha='.05')
+        # Missing values
+        df.iloc[[10, 15],0] = np.nan
+        pairwise_ttests(dv='Scores', within='Time', effects='within', data=df)
+        # Wrong input argument
+        df['Group'] = 'Control'
+        with pytest.raises(ValueError):
+            pairwise_ttests(dv='Scores', between='Group', data=df)
