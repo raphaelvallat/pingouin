@@ -3,14 +3,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pingouin.pairwise &#8212; pingouin 0.1.dev documentation</title>
+    <title>pingouin.pairwise &#8212; pingouin 0.1.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.1.dev',
+        VERSION:     '0.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -48,7 +48,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html"><span><img src="../../_static/pingouin_128x128.png"></span>
           pingouin</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.1.dev</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.1.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -67,8 +67,7 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API reference</a></li>
 </ul>
@@ -134,8 +133,7 @@
 
 <div class="viewcode-block" id="pairwise_ttests"><a class="viewcode-back" href="../../generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests">[docs]</a><span class="k">def</span> <span class="nf">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>
                     <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span>
-                    <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">,</span> <span class="n">return_desc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">remove_nan</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                    <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                    <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">,</span> <span class="n">return_desc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Pairwise T-tests.</span>
 
 <span class="sd">    Parameters</span>
@@ -210,7 +208,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Alpha must be float&#39;</span><span class="p">)</span>
 
-    <span class="c1"># Check NA in repeated measurements</span>
+    <span class="c1"># Remove NAN in repeated measurements</span>
     <span class="k">if</span> <span class="n">within</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">_remove_rm_na</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 
@@ -288,7 +286,7 @@
     <span class="c1"># Multiple comparisons</span>
     <span class="n">padjust</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-unc&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">padjust</span>
     <span class="k">if</span> <span class="n">padjust</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">padjust</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">padjust</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
             <span class="n">reject</span><span class="p">,</span> <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-corr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">multicomp</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-unc&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
                                                 <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">padjust</span><span class="p">)</span>
             <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-adjust&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">padjust</span>

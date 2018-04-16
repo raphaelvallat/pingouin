@@ -3,7 +3,7 @@
 What's new
 ##########
 
-v0.1dev (April 2018)
+v0.1.0 (April 2018)
 --------------------
 
 Initial release.
