@@ -13,8 +13,6 @@ df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
 
 x = np.random.normal(2, 1, 30)
 y = np.random.normal(2.5, 1, 30)
-z = np.random.normal(2.5, 3, 30)
-
 
 class TestEffsize(_TestPingouin):
     """Test effsize.py."""
@@ -59,14 +57,19 @@ class TestEffsize(_TestPingouin):
         compute_effsize(x=x, y=y, eftype='odds-ratio', paired=False)
         compute_effsize(x=x, y=y, eftype='eta-square', paired=False)
         compute_effsize(x=x, y=y, eftype='none', paired=False)
-        df = pd.DataFrame({'dv': np.r_[x, y],
-                           'Group': np.repeat(['Pre', 'Post'], 30)})
-        compute_effsize(dv='dv', group='Group', data=df,
-                        paired=True, eftype='hedges')
         # Unequal variances
+        z = np.random.normal(2.5, 3, 30)
         compute_effsize(x=x, y=z, eftype='cohen')
+        # Wrong effect size type
         with pytest.raises(ValueError):
             compute_effsize(x=x, y=y, eftype='wrong')
+        # Wrong input
+        with pytest.raises(ValueError):
+            compute_effsize(x=x, y='wrong')
+        # Unequal sample size with paired == True
+        z = np.random.normal(2.5, 3, 20)
+        compute_effsize(x=x, y=z, paired=True)
+
 
     def test_compute_effsize_from_t(self):
         """Test function compute_effsize_from_t"""

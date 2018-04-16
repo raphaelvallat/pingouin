@@ -109,7 +109,7 @@
 <blockquote>
 <div>Effect sizes are the most important outcome of empirical studies.</div></blockquote>
 <p>—<a class="reference external" href="https://www.frontiersin.org/articles/10.3389/fpsyg.2013.00863/full">Lakens et al. 2013</a></p>
-<p>Effect sizes are a way of quantifying the magnitude of the difference between two groups. They are useful to determine the sample size for follow-up studies, or examining effects across studies. In this tutorial, we will see how to compute effect sizes from a pandas DataFrame or two numpy arrays using pingouin.</p>
+<p>Effect sizes are a way of quantifying the magnitude of the difference between two groups. They are useful to determine the sample size for follow-up studies, or examining effects across studies. In this tutorial, we will see how to compute effect sizes using pingouin.</p>
 </div>
 <div class="section" id="dataset">
 <h2>Dataset</h2>
@@ -123,11 +123,7 @@ heights of 1000 individuals in two countries.</p>
 <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
 <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">174</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">nx</span><span class="p">)</span> <span class="c1"># mean = 174 cm, variance = 1</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">175</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">ny</span><span class="p">)</span> <span class="c1"># mean = 174 cm, variance = 1</span>
-
-<span class="c1"># Now let&#39;s assemble these two variables in a single pandas Dataframe</span>
-<span class="n">group</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="s1">&#39;France&#39;</span><span class="p">],</span> <span class="n">nx</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="s1">&#39;UK&#39;</span><span class="p">],</span> <span class="n">ny</span><span class="p">)]</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;DV&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span> <span class="s1">&#39;Group&#39;</span><span class="p">:</span> <span class="n">group</span> <span class="p">})</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">175</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">ny</span><span class="p">)</span> <span class="c1"># mean = 175 cm, variance = 1</span>
 </pre></div>
 </div>
 <p>Optionally, we can visualize the distribution of our two datasets using
@@ -139,45 +135,38 @@ heights of 1000 individuals in two countries.</p>
 </pre></div>
 </div>
 <img alt="../_images/effect_size_seaborn.png" src="../_images/effect_size_seaborn.png" />
-<div class="section" id="the-effect-sizes-currently-supported-are">
-<h3>The effect sizes currently supported are:</h3>
+<div class="section" id="calculating-the-effect-size">
+<h3>Calculating the effect size</h3>
+<p>The effect sizes currently supported are:</p>
 <ul class="simple">
 <li>Cohen’s <em>d</em> for independant measures</li>
 <li>Cohen’s <em>d-average</em> for repeated measures</li>
-<li>Hedges’ <em>g</em> (better than Cohen’s d for small sample size)</li>
+<li>Hedges’ <em>g</em> (“Corrected Cohen’s d”, better for small sample size)</li>
 <li>Glass delta (more appropriate when the two measures have different
 variance, e.g. Control vs Patient group)</li>
 <li>Eta-square</li>
 <li>Odds-ratio</li>
 <li>Area Under the Curve (AUC)</li>
 </ul>
-<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin.effsize</span> <span class="k">import</span> <span class="o">*</span>
-
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">compute_effsize</span>
 <span class="n">eftype</span> <span class="o">=</span> <span class="s1">&#39;hedges&#39;</span> <span class="c1"># &#39;cohen&#39;, &#39;hedges&#39;, &#39;glass&#39;, &#39;eta-square&#39;, &#39;odds-ratio&#39;, &#39;AUC&#39;</span>
-
-<span class="c1"># 1 - using a pandas DataFrame</span>
-<span class="n">ef</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="n">eftype</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">eftype</span><span class="p">,</span> <span class="s1">&#39;: </span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ef</span><span class="p">)</span>
-
-<span class="c1"># 2 - using two NumPy arrays</span>
-<span class="n">ef</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="n">eftype</span><span class="p">)</span>
+<span class="n">ef</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="n">eftype</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">eftype</span><span class="p">,</span> <span class="s1">&#39;: </span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ef</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">hedges</span> <span class="p">:</span> <span class="o">-</span><span class="mf">1.069</span>
-<span class="n">hedges</span> <span class="p">:</span> <span class="o">-</span><span class="mf">1.069</span>
 </pre></div>
 </div>
-<div class="section" id="using-a-t-value">
-<h4>Using a T-value</h4>
+<div class="section" id="bonus-using-a-t-value">
+<h4>Bonus: Using a T-value</h4>
 <p>Alternatively, if you don’t have the data, effect size can be computed
 from a T-value and sample size.</p>
-<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="c1"># 3 - using a T-value when nx and ny are known</span>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="c1"># using a T-value when nx and ny are known</span>
 <span class="n">tval</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ttest_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 <span class="n">ef</span> <span class="o">=</span> <span class="n">compute_effsize_from_t</span><span class="p">(</span><span class="n">tval</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">ny</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">eftype</span><span class="o">=</span><span class="n">eftype</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">eftype</span><span class="p">,</span> <span class="s1">&#39;(from T - nx + ny): </span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ef</span><span class="p">)</span>
 
-<span class="c1"># 4 - using a T-value when only total sample size is known</span>
+<span class="c1"># using a T-value when only total sample size is known</span>
 <span class="n">tval</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ttest_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 <span class="n">ef</span> <span class="o">=</span> <span class="n">compute_effsize_from_t</span><span class="p">(</span><span class="n">tval</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;cohen (from T - only N): </span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ef</span><span class="p">)</span>
@@ -208,7 +197,7 @@ from a T-value and sample size.</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
     </p>
   </div>
 </footer>

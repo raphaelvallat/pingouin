@@ -108,7 +108,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;print_table&quot;</span><span class="p">,</span> <span class="s2">&quot;_export_table&quot;</span><span class="p">,</span> <span class="s2">&quot;reshape_data&quot;</span><span class="p">,</span>
-           <span class="s2">&quot;_check_eftype&quot;</span><span class="p">,</span> <span class="s2">&quot;_remove_rm_na&quot;</span><span class="p">,</span> <span class="s2">&quot;_check_data&quot;</span><span class="p">,</span> <span class="s2">&quot;_check_dataframe&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;_check_eftype&quot;</span><span class="p">,</span> <span class="s2">&quot;_remove_rm_na&quot;</span><span class="p">,</span> <span class="s2">&quot;_check_dataframe&quot;</span><span class="p">,</span>
            <span class="s2">&quot;_extract_effects&quot;</span><span class="p">]</span>
 
 
@@ -128,15 +128,14 @@
         <span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_export_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_export_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Export DataFrame to .csv&quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">os.path</span> <span class="k">as</span> <span class="nn">op</span>
-    <span class="k">if</span> <span class="n">fname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">extension</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">())[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">extension</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-            <span class="n">fname</span> <span class="o">=</span> <span class="n">fname</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
-                     <span class="n">float_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.4f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">extension</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">())[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">extension</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">fname</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span>
+    <span class="n">table</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
+                 <span class="n">float_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.4f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="reshape_data"><a class="viewcode-back" href="../../generated/pingouin.reshape_data.html#pingouin.reshape_data">[docs]</a><span class="k">def</span> <span class="nf">reshape_data</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">rm</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">):</span>
@@ -235,42 +234,6 @@
         <span class="k">return</span> <span class="kc">False</span>
 
 
-<span class="k">def</span> <span class="nf">_check_data</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Extract data from dataframe or numpy arrays&quot;&quot;&quot;</span>
-
-    <span class="c1"># OPTION A: a pandas DataFrame and column names are specified</span>
-    <span class="c1"># -----------------------------------------------------------</span>
-    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dv</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">data</span><span class="p">]):</span>
-        <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dv</span><span class="p">,</span> <span class="n">group</span><span class="p">]:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
-                <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;Could not interpret input &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
-        <span class="c1"># Check that data is a pandas dataframe</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;data must be a pandas dataframe&quot;</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
-        <span class="c1"># Extract group information</span>
-        <span class="n">group_keys</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">group_keys</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;group must have exactly two unique values.&quot;</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
-        <span class="c1"># Extract data</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">==</span> <span class="n">group_keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">dv</span><span class="p">]</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">==</span> <span class="n">group_keys</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="n">dv</span><span class="p">]</span>
-
-    <span class="c1"># OPTION B: x and y vectors are specified</span>
-    <span class="c1"># ---------------------------------------</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]):</span>
-            <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
-                    <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;x and y must be np.ndarray&quot;</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
-    <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-    <span class="n">dof</span> <span class="o">=</span> <span class="n">nx</span> <span class="o">+</span> <span class="n">ny</span> <span class="o">-</span> <span class="mi">2</span>
-    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">dof</span>
-
-
 <span class="k">def</span> <span class="nf">_check_dataframe</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Check dataframe&quot;&quot;&quot;</span>
@@ -339,7 +302,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
     </p>
   </div>
 </footer>

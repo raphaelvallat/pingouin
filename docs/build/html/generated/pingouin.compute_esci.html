@@ -162,8 +162,9 @@ posteriori plotting)</p>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<p>Compute the 95% <strong>parametric</strong> confidence interval of an effect size given
-the two sample sizes.</p>
+<ol class="arabic">
+<li><p class="first">Compute the 95% <strong>parametric</strong> confidence interval of an effect size
+given the two sample sizes.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">compute_esci</span><span class="p">,</span> <span class="n">compute_effsize</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
@@ -176,26 +177,30 @@ the two sample sizes.</p>
 <span class="go">    [0.61  1.41]</span>
 </pre></div>
 </div>
-<p>Compute the 95% <strong>bootstrapped</strong> confidence interval of an effect size.
+</li>
+<li><p class="first">Compute the 95% <strong>bootstrapped</strong> confidence interval of an effect size.
 In that case, we need to pass directly the original x and y arrays.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">compute_esci</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bootstrap&#39;</span><span class="p">))</span>
 <span class="go">    [0.93 1.17]</span>
 </pre></div>
 </div>
-<p>Plot the bootstrapped distribution using Seaborn.</p>
+</li>
+<li><p class="first">Plot the bootstrapped distribution using Seaborn.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ci</span><span class="p">,</span> <span class="n">dist</span> <span class="o">=</span> <span class="n">compute_esci</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bootstrap&#39;</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>                        <span class="n">return_dist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sns</span><span class="o">.</span><span class="n">distplot</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Get the 68% confidence interval</p>
+</li>
+<li><p class="first">Get the 68% confidence interval</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ci68</span> <span class="o">=</span> <span class="n">compute_esci</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bootstrap&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">68</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ci68</span><span class="p">)</span>
 <span class="go">    [0.99 1.12]</span>
 </pre></div>
 </div>
-<p>Compute the bootstrapped Pearson r confidence interval</p>
+</li>
+<li><p class="first">Compute the bootstrapped Pearson r confidence interval</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ef</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ci</span> <span class="o">=</span> <span class="n">compute_esci</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bootstrap&#39;</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ef</span><span class="p">)</span>
@@ -204,6 +209,8 @@ In that case, we need to pass directly the original x and y arrays.</p>
 <span class="go">    [0.42 0.51]</span>
 </pre></div>
 </div>
+</li>
+</ol>
 </dd></dl>
 
 </div>
@@ -224,7 +231,7 @@ In that case, we need to pass directly the original x and y arrays.</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
     </p>
   </div>
 </footer>

@@ -4,7 +4,7 @@ import pytest
 
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.utils import (print_table, _export_table, _remove_rm_na,
-                            _check_eftype, _check_data, _check_dataframe,
+                            _check_eftype, _check_dataframe,
                             _extract_effects, reshape_data)
 
 
@@ -50,25 +50,6 @@ class TestUtils(_TestPingouin):
         _check_eftype(eftype)
         eftype = 'fake'
         _check_eftype(eftype)
-
-    def test_check_data(self):
-        """Test function _check_data."""
-        _check_data(dv='Values', group='Group', data=df)
-        x = [1, 5, 7, 8]
-        y = np.array([4, 4, 7, 5])
-        _check_data(x=x, y=y)
-        # Wrong arguments
-        with pytest.raises(ValueError):
-            _check_data(x=0, y=y)
-        with pytest.raises(ValueError):
-            _check_data(dv=0, group='Group', data=df)
-        with pytest.raises(ValueError):
-            _check_data(dv='Values', group='Group', data=0)
-        with pytest.raises(ValueError):
-            df_wrong = pd.DataFrame({'Group': ['C', 'A', 'B'],
-                               'Time': ['Mon', 'Thur', 'Mon'],
-                               'Values': [1.52, 5.8, 8.2]})
-            _check_data(dv='Values', group='Group', data=df_wrong)
 
     def test_check_dataframe(self):
         """Test function _check_dataframe."""

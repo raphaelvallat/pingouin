@@ -1,8 +1,8 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 import numpy as np
-from pingouin.utils import (_check_data, _check_eftype)
-from pingouin.parametric import (test_homoscedasticity)
+from pingouin.utils import _check_eftype
+from pingouin.parametric import test_homoscedasticity
 
 
 __all__ = ["compute_esci", "convert_effsize", "compute_effsize",
@@ -46,8 +46,8 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
 
     Examples
     --------
-    Compute the 95% **parametric** confidence interval of an effect size given
-    the two sample sizes.
+    1. Compute the 95% **parametric** confidence interval of an effect size
+       given the two sample sizes.
 
         >>> import numpy as np
         >>> from pingouin import compute_esci, compute_effsize
@@ -61,14 +61,14 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
             [0.61  1.41]
 
 
-    Compute the 95% **bootstrapped** confidence interval of an effect size.
-    In that case, we need to pass directly the original x and y arrays.
+    2. Compute the 95% **bootstrapped** confidence interval of an effect size.
+       In that case, we need to pass directly the original x and y arrays.
 
         >>> print(compute_esci(x=x, y=y, method='bootstrap'))
             [0.93 1.17]
 
 
-    Plot the bootstrapped distribution using Seaborn.
+    3. Plot the bootstrapped distribution using Seaborn.
 
         >>> import seaborn as sns
         >>> ci, dist = compute_esci(x=x, y=y, method='bootstrap',
@@ -76,14 +76,14 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
         >>> sns.distplot(dist)
 
 
-    Get the 68% confidence interval
+    4. Get the 68% confidence interval
 
         >>> ci68 = compute_esci(x=x, y=y, method='bootstrap', alpha=.68)
         >>> print(ci68)
             [0.99 1.12]
 
 
-    Compute the bootstrapped Pearson r confidence interval
+    5. Compute the bootstrapped Pearson r confidence interval
 
         >>> ef = compute_effsize(x=x, y=y, eftype='r')
         >>> ci = compute_esci(x=x, y=y, method='bootstrap', eftype='r')
@@ -136,7 +136,6 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
             return ci
 
 
-# MAIN FUNCTIONS
 def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     """Conversion between effect sizes.
 
@@ -168,7 +167,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
 
     See Also
     --------
-    compute_effsize : Compute effect size from pandas dataframe or numpy arrays
+    compute_effsize : Calculate effect size between two set of observations.
     compute_effsize_from_t : Convert a T-statistic to an effect size.
 
     Examples
@@ -260,22 +259,20 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
         return None
 
 
-def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
-                    eftype='cohen', paired=False):
-    """Compute effect size from pandas dataframe or two numpy arrays.
+def compute_effsize(x, y, paired=False, eftype='cohen'):
+    """Calculate effect size between two set of observations.
 
     Parameters
     ----------
-    dv : string
-        Column name of dependant variable in data, optional
-    group : string
-        Column name of group factor in data, optional
-    data : DataFrame, optional
-        Pandas Dataframe containing columns dv and group
-    x, y : vector data, optional
-        X and Y are only taken into account if dv, group and data = None
+    x : np.array or list
+        First set of observations.
+    y : np.array or list
+        Second set of observations.
+    paired : boolean
+        If True, uses Cohen d-avg formula to correct for repeated measurements
+        (Cumming 2012)
     eftype : string
-        Desired output effect size, optional
+        Desired output effect size.
         Available methods are ::
 
         'none' : no effect size
@@ -285,9 +282,6 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
         'eta-square' : Eta-square
         'odds-ratio' : Odds ratio
         'AUC' : Area Under the Curve
-    paired : boolean
-        If True, uses Cohen d-avg formula to correct for repeated measurements
-        (Cumming 2012)
 
     Returns
     -------
@@ -301,7 +295,7 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
 
     Examples
     --------
-    1. Compute Cohen d from two independent NumPy arrays
+    1. Compute Cohen d from two independent set of observations.
 
         >>> import numpy as np
         >>> from pingouin import compute_effsize
@@ -312,29 +306,44 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
         >>> print(d)
             -0.28
 
-    2. Compute Hedges g from two paired samples in a pandas DataFrame
+    2. Compute Hedges g from two paired set of observations.
 
         >>> import numpy as np
-        >>> import pandas as pd
         >>> from pingouin import compute_effsize
         >>> np.random.seed(123)
-        >>> x = np.random.normal(4, size=10)
-        >>> y = np.random.normal(5, size=10)
-        >>> df = pd.DataFrame({'dv': np.r_[x, y],
-        >>>                   'Group': np.repeat(['Pre', 'Post'], 10)})
-        >>> g = compute_effsize(dv='dv', group='Group', data=df,
-        >>>                     paired=True, eftype='hedges')
+        >>> x = [1.62, 2.21, 3.79, 1.66, 1.86, 1.87, 4.51, 4.49, 3.3 , 2.69]
+        >>> y = [0.91, 3., 2.28, 0.49, 1.42, 3.65, -0.43, 1.57, 3.27, 1.13]
+        >>> g = compute_effsize(x=x, y=y, eftype='hedges', paired=True)
         >>> print(g)
-            -1.46
+            0.88
 
+    3. Compute Glass delta from two independant set of observations. The group
+       with the lowest variance will automatically be selected as the control.
+
+        >>> import numpy as np
+        >>> from pingouin import compute_effsize
+        >>> np.random.seed(123)
+        >>> x = np.random.normal(2, scale=1, size=50)
+        >>> y = np.random.normal(2, scale=2, size=45)
+        >>> d = compute_effsize(x=x, y=y, eftype='glass')
+        >>> print(d)
+            -0.12
     """
     # Check arguments
     if not _check_eftype(eftype):
         err = "Could not interpret input '{}'".format(eftype)
         raise ValueError(err)
+    if all(v is not None for v in [x, y]):
+        for input in [x, y]:
+            if not isinstance(input, (list, np.ndarray)):
+                raise ValueError("x and y must be list or np.ndarray")
 
-    # Extract data
-    x, y, nx, ny, dof = _check_data(dv, group, data, x, y)
+    nx, ny = len(x), len(y)
+    dof = nx + ny - 2
+
+    if nx != ny and paired:
+        print('x and y have unequal sizes. Switching to paired == False.')
+        paired = False
 
     if eftype.lower() == 'glass':
         # Find group with lowest variance
@@ -345,16 +354,15 @@ def compute_effsize(dv=None, group=None, data=None, x=None, y=None,
         # Test equality of variance of data with a stringent threshold
         equal_var, p = test_homoscedasticity(x, y, alpha=.001)
         if not equal_var:
-            print('Unequal variances. You should consider reporting',
+            print('Unequal variances (p<.001). You should consider reporting',
                   'Glass delta instead.')
 
         # Compute unbiased Cohen's d effect size
         if not paired:
             # https://en.wikipedia.org/wiki/Effect_size
-            d = (np.mean(x) - np.mean(y)) / np.sqrt(((nx - 1) *
-                                                     np.std(x, ddof=1)**2 +
-                                                     (ny - 1) * np.std(y,
-                                                     ddof=1)**2) / dof)
+            poolsd = np.sqrt(((nx - 1) * np.std(x, ddof=1)**2 + (ny - 1)
+                                            * np.std(y, ddof=1)**2) / dof)
+            d = (np.mean(x) - np.mean(y)) / poolsd
         else:
             # Report Cohen d-avg (Cumming 2012; Lakens 2013)
             d = (np.mean(x) - np.mean(y)) / (.5 * (np.std(x) + np.std(y)))
@@ -382,8 +390,8 @@ def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype='cohen'):
 
     See Also
     --------
-    compute_effsize : Compute effect size from pandas dataframe or numpy arrays
-    convert_effsize : Conversion between effect sizes
+    compute_effsize : Calculate effect size between two set of observations.
+    convert_effsize : Conversion between effect sizes.
 
     Examples
     --------

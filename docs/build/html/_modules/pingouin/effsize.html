@@ -104,8 +104,8 @@
 <span></span><span class="c1"># Author: Raphael Vallat &lt;raphaelvallat9@gmail.com&gt;</span>
 <span class="c1"># Date: April 2018</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">pingouin.utils</span> <span class="k">import</span> <span class="p">(</span><span class="n">_check_data</span><span class="p">,</span> <span class="n">_check_eftype</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">pingouin.parametric</span> <span class="k">import</span> <span class="p">(</span><span class="n">test_homoscedasticity</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pingouin.utils</span> <span class="k">import</span> <span class="n">_check_eftype</span>
+<span class="kn">from</span> <span class="nn">pingouin.parametric</span> <span class="k">import</span> <span class="n">test_homoscedasticity</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;compute_esci&quot;</span><span class="p">,</span> <span class="s2">&quot;convert_effsize&quot;</span><span class="p">,</span> <span class="s2">&quot;compute_effsize&quot;</span><span class="p">,</span>
@@ -149,8 +149,8 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    Compute the 95% **parametric** confidence interval of an effect size given</span>
-<span class="sd">    the two sample sizes.</span>
+<span class="sd">    1. Compute the 95% **parametric** confidence interval of an effect size</span>
+<span class="sd">       given the two sample sizes.</span>
 
 <span class="sd">        &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import compute_esci, compute_effsize</span>
@@ -164,14 +164,14 @@
 <span class="sd">            [0.61  1.41]</span>
 
 
-<span class="sd">    Compute the 95% **bootstrapped** confidence interval of an effect size.</span>
-<span class="sd">    In that case, we need to pass directly the original x and y arrays.</span>
+<span class="sd">    2. Compute the 95% **bootstrapped** confidence interval of an effect size.</span>
+<span class="sd">       In that case, we need to pass directly the original x and y arrays.</span>
 
 <span class="sd">        &gt;&gt;&gt; print(compute_esci(x=x, y=y, method=&#39;bootstrap&#39;))</span>
 <span class="sd">            [0.93 1.17]</span>
 
 
-<span class="sd">    Plot the bootstrapped distribution using Seaborn.</span>
+<span class="sd">    3. Plot the bootstrapped distribution using Seaborn.</span>
 
 <span class="sd">        &gt;&gt;&gt; import seaborn as sns</span>
 <span class="sd">        &gt;&gt;&gt; ci, dist = compute_esci(x=x, y=y, method=&#39;bootstrap&#39;,</span>
@@ -179,14 +179,14 @@
 <span class="sd">        &gt;&gt;&gt; sns.distplot(dist)</span>
 
 
-<span class="sd">    Get the 68% confidence interval</span>
+<span class="sd">    4. Get the 68% confidence interval</span>
 
 <span class="sd">        &gt;&gt;&gt; ci68 = compute_esci(x=x, y=y, method=&#39;bootstrap&#39;, alpha=.68)</span>
 <span class="sd">        &gt;&gt;&gt; print(ci68)</span>
 <span class="sd">            [0.99 1.12]</span>
 
 
-<span class="sd">    Compute the bootstrapped Pearson r confidence interval</span>
+<span class="sd">    5. Compute the bootstrapped Pearson r confidence interval</span>
 
 <span class="sd">        &gt;&gt;&gt; ef = compute_effsize(x=x, y=y, eftype=&#39;r&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; ci = compute_esci(x=x, y=y, method=&#39;bootstrap&#39;, eftype=&#39;r&#39;)</span>
@@ -239,7 +239,6 @@
             <span class="k">return</span> <span class="n">ci</span></div>
 
 
-<span class="c1"># MAIN FUNCTIONS</span>
 <div class="viewcode-block" id="convert_effsize"><a class="viewcode-back" href="../../generated/pingouin.convert_effsize.html#pingouin.convert_effsize">[docs]</a><span class="k">def</span> <span class="nf">convert_effsize</span><span class="p">(</span><span class="n">ef</span><span class="p">,</span> <span class="n">input_type</span><span class="p">,</span> <span class="n">output_type</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Conversion between effect sizes.</span>
 
@@ -271,7 +270,7 @@
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
-<span class="sd">    compute_effsize : Compute effect size from pandas dataframe or numpy arrays</span>
+<span class="sd">    compute_effsize : Calculate effect size between two set of observations.</span>
 <span class="sd">    compute_effsize_from_t : Convert a T-statistic to an effect size.</span>
 
 <span class="sd">    Examples</span>
@@ -363,22 +362,20 @@
         <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="compute_effsize"><a class="viewcode-back" href="../../generated/pingouin.compute_effsize.html#pingouin.compute_effsize">[docs]</a><span class="k">def</span> <span class="nf">compute_effsize</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute effect size from pandas dataframe or two numpy arrays.</span>
+<div class="viewcode-block" id="compute_effsize"><a class="viewcode-back" href="../../generated/pingouin.compute_effsize.html#pingouin.compute_effsize">[docs]</a><span class="k">def</span> <span class="nf">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate effect size between two set of observations.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    dv : string</span>
-<span class="sd">        Column name of dependant variable in data, optional</span>
-<span class="sd">    group : string</span>
-<span class="sd">        Column name of group factor in data, optional</span>
-<span class="sd">    data : DataFrame, optional</span>
-<span class="sd">        Pandas Dataframe containing columns dv and group</span>
-<span class="sd">    x, y : vector data, optional</span>
-<span class="sd">        X and Y are only taken into account if dv, group and data = None</span>
+<span class="sd">    x : np.array or list</span>
+<span class="sd">        First set of observations.</span>
+<span class="sd">    y : np.array or list</span>
+<span class="sd">        Second set of observations.</span>
+<span class="sd">    paired : boolean</span>
+<span class="sd">        If True, uses Cohen d-avg formula to correct for repeated measurements</span>
+<span class="sd">        (Cumming 2012)</span>
 <span class="sd">    eftype : string</span>
-<span class="sd">        Desired output effect size, optional</span>
+<span class="sd">        Desired output effect size.</span>
 <span class="sd">        Available methods are ::</span>
 
 <span class="sd">        &#39;none&#39; : no effect size</span>
@@ -388,9 +385,6 @@
 <span class="sd">        &#39;eta-square&#39; : Eta-square</span>
 <span class="sd">        &#39;odds-ratio&#39; : Odds ratio</span>
 <span class="sd">        &#39;AUC&#39; : Area Under the Curve</span>
-<span class="sd">    paired : boolean</span>
-<span class="sd">        If True, uses Cohen d-avg formula to correct for repeated measurements</span>
-<span class="sd">        (Cumming 2012)</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -404,7 +398,7 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    1. Compute Cohen d from two independent NumPy arrays</span>
+<span class="sd">    1. Compute Cohen d from two independent set of observations.</span>
 
 <span class="sd">        &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import compute_effsize</span>
@@ -415,29 +409,44 @@
 <span class="sd">        &gt;&gt;&gt; print(d)</span>
 <span class="sd">            -0.28</span>
 
-<span class="sd">    2. Compute Hedges g from two paired samples in a pandas DataFrame</span>
+<span class="sd">    2. Compute Hedges g from two paired set of observations.</span>
 
 <span class="sd">        &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import compute_effsize</span>
 <span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
-<span class="sd">        &gt;&gt;&gt; x = np.random.normal(4, size=10)</span>
-<span class="sd">        &gt;&gt;&gt; y = np.random.normal(5, size=10)</span>
-<span class="sd">        &gt;&gt;&gt; df = pd.DataFrame({&#39;dv&#39;: np.r_[x, y],</span>
-<span class="sd">        &gt;&gt;&gt;                   &#39;Group&#39;: np.repeat([&#39;Pre&#39;, &#39;Post&#39;], 10)})</span>
-<span class="sd">        &gt;&gt;&gt; g = compute_effsize(dv=&#39;dv&#39;, group=&#39;Group&#39;, data=df,</span>
-<span class="sd">        &gt;&gt;&gt;                     paired=True, eftype=&#39;hedges&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; x = [1.62, 2.21, 3.79, 1.66, 1.86, 1.87, 4.51, 4.49, 3.3 , 2.69]</span>
+<span class="sd">        &gt;&gt;&gt; y = [0.91, 3., 2.28, 0.49, 1.42, 3.65, -0.43, 1.57, 3.27, 1.13]</span>
+<span class="sd">        &gt;&gt;&gt; g = compute_effsize(x=x, y=y, eftype=&#39;hedges&#39;, paired=True)</span>
 <span class="sd">        &gt;&gt;&gt; print(g)</span>
-<span class="sd">            -1.46</span>
+<span class="sd">            0.88</span>
 
+<span class="sd">    3. Compute Glass delta from two independant set of observations. The group</span>
+<span class="sd">       with the lowest variance will automatically be selected as the control.</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import compute_effsize</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; x = np.random.normal(2, scale=1, size=50)</span>
+<span class="sd">        &gt;&gt;&gt; y = np.random.normal(2, scale=2, size=45)</span>
+<span class="sd">        &gt;&gt;&gt; d = compute_effsize(x=x, y=y, eftype=&#39;glass&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print(d)</span>
+<span class="sd">            -0.12</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check arguments</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_check_eftype</span><span class="p">(</span><span class="n">eftype</span><span class="p">):</span>
         <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;Could not interpret input &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">eftype</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;x and y must be list or np.ndarray&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Extract data</span>
-    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">dof</span> <span class="o">=</span> <span class="n">_check_data</span><span class="p">(</span><span class="n">dv</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">dof</span> <span class="o">=</span> <span class="n">nx</span> <span class="o">+</span> <span class="n">ny</span> <span class="o">-</span> <span class="mi">2</span>
+
+    <span class="k">if</span> <span class="n">nx</span> <span class="o">!=</span> <span class="n">ny</span> <span class="ow">and</span> <span class="n">paired</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;x and y have unequal sizes. Switching to paired == False.&#39;</span><span class="p">)</span>
+        <span class="n">paired</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="n">eftype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;glass&#39;</span><span class="p">:</span>
         <span class="c1"># Find group with lowest variance</span>
@@ -448,23 +457,22 @@
         <span class="c1"># Test equality of variance of data with a stringent threshold</span>
         <span class="n">equal_var</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">test_homoscedasticity</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">001</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">equal_var</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Unequal variances. You should consider reporting&#39;</span><span class="p">,</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Unequal variances (p&lt;.001). You should consider reporting&#39;</span><span class="p">,</span>
                   <span class="s1">&#39;Glass delta instead.&#39;</span><span class="p">)</span>
 
         <span class="c1"># Compute unbiased Cohen&#39;s d effect size</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">paired</span><span class="p">:</span>
             <span class="c1"># https://en.wikipedia.org/wiki/Effect_size</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">nx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span>
-                                                     <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
-                                                     <span class="p">(</span><span class="n">ny</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">y</span><span class="p">,</span>
-                                                     <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">dof</span><span class="p">)</span>
+            <span class="n">poolsd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">nx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">ny</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                                            <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">dof</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">/</span> <span class="n">poolsd</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Report Cohen d-avg (Cumming 2012; Lakens 2013)</span>
             <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="o">.</span><span class="mi">5</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span>
         <span class="k">return</span> <span class="n">convert_effsize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">eftype</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="compute_effsize_from_t"><a class="viewcode-back" href="../../generated/pingouin.compute_effsize_from_T.html#pingouin.compute_effsize_from_t">[docs]</a><span class="k">def</span> <span class="nf">compute_effsize_from_t</span><span class="p">(</span><span class="n">tval</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="compute_effsize_from_t"><a class="viewcode-back" href="../../generated/pingouin.compute_effsize_from_t.html#pingouin.compute_effsize_from_t">[docs]</a><span class="k">def</span> <span class="nf">compute_effsize_from_t</span><span class="p">(</span><span class="n">tval</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Compute effect size from a T-value.</span>
 
 <span class="sd">    Parameters</span>
@@ -485,8 +493,8 @@
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
-<span class="sd">    compute_effsize : Compute effect size from pandas dataframe or numpy arrays</span>
-<span class="sd">    convert_effsize : Conversion between effect sizes</span>
+<span class="sd">    compute_effsize : Calculate effect size between two set of observations.</span>
+<span class="sd">    convert_effsize : Conversion between effect sizes.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -538,7 +546,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
     </p>
   </div>
 </footer>
