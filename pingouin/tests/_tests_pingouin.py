@@ -3,7 +3,7 @@ import numpy as np
 
 
 class _TestPingouin(object):
-    """Visbrain testing utility methods."""
+    """Pingouin testing utility methods."""
 
     OBJ = None
     NEEDED_FILES = {}
