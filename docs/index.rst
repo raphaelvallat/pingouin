@@ -65,7 +65,7 @@ Quick start
 .. code-block:: python
 
      import pandas as pd
-     from pingouin import pairwise_ttests, print_table
+     from pingouin import mixed_anova, pairwise_ttests, print_table
 
      # Load a fake dataset: the INSOMNIA study
      # Goal: evaluate the influence of a treatment on sleep duration in a control
