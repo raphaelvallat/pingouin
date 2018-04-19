@@ -371,20 +371,20 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     n_rm = len(rm)
     n_obs = int(data.groupby(within)[dv].count().max())
 
-    # Sums of squares
-    sstime = ss(grp_with) / n_obs - ss(grp_with, 'b') / N
-    sswithin = grp_with.apply(lambda x: x**2).sum() - \
-        (grp_with.sum()**2 / grp_with.count()).sum()
+    # Calculate degrees of freedom
+    ddof1 = n_rm - 1
+    ddof2 = ddof1 * (n_obs - 1)
 
-    # Calculating SSsubjects and SSerror
+    # Calculate sums of squares
+    sstime = ss(grp_with) / n_obs - ss(grp_with, 'b') / N
+    sswithin = grp_with.var(ddof=0).sum() * n_obs
+
     data['Subj'] = np.tile(np.arange(n_obs), n_rm)
     grp_subj = data.groupby('Subj')[dv]
     sssubj = n_rm * np.sum((grp_subj.mean() - grp_subj.mean().mean())**2)
     sserror = sswithin - sssubj
 
-    # Calculate degrees of freedom, F- and p-values
-    ddof1 = n_rm - 1
-    ddof2 = ddof1 * (n_obs - 1)
+    # Calculate F and p-values
     mserror = sserror / (ddof2 / ddof1)
     fval = sstime / mserror
     p_unc = f(ddof1, ddof2).sf(fval)
@@ -521,20 +521,21 @@ def anova(dv=None, between=None, data=None, detailed=False,
     n_groups = len(groups)
     N = data[dv].size
 
-    # Sums of squares
+    # Calculate degrees of freedom
+    ddof1 = n_groups - 1
+    ddof2 = N - n_groups
+
+    # Calculate Sums of Squares
     grp_betw = data.groupby(between)[dv]
     # Between effect
     ssbetween = (grp_betw.sum()**2 / grp_betw.count()).sum() - \
         ss(grp_betw, 'b') / N
     # Error (between)
-    sserror = grp_betw.apply(lambda x: x**2).sum() - \
-        (grp_betw.sum()**2 / grp_betw.count()).sum()
+    mserror = grp_betw.var().mean()
+    sserror = mserror * ddof2
 
-    # Calculate degrees of freedom, F- and p-values
-    ddof1 = n_groups - 1
+    # Calculate F- and p-values
     msbetween = ssbetween / ddof1
-    ddof2 = N - n_groups
-    mserror = sserror / ddof2
     fval = msbetween / mserror
     p_unc = f(ddof1, ddof2).sf(fval)
 
@@ -642,16 +643,13 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     st_time = rm_anova(dv=dv, within=within, data=data, correction=correction,
                        remove_na=False, detailed=True)
     st_between = anova(dv=dv, between=between, data=data, detailed=True)
-
     # Extract error and interactions
-    # Error (between)
     grp_betw = data.groupby(between)[dv]
-    sseb = grp_betw.apply(lambda x: x**2).sum() - \
-        (grp_betw.sum()**2 / grp_betw.count()).sum()
+    sseb = (grp_betw.var(ddof=0) * grp_betw.count()).sum()
     # Within-group effect
     grp = data.groupby([between, within])[dv]
     sstotal = grp.apply(lambda x: x**2).sum() - ss(grp, 'b') / N
-    sswg = grp.apply(lambda x: x**2).sum() - (grp.sum()**2 / grp.count()).sum()
+    sswg = (grp.var(ddof=0) * grp.count()).sum()
     # Interaction
     ssinter = sstotal - (sswg + st_time.loc[0, 'SS'] + st_between.loc[0, 'SS'])
 
