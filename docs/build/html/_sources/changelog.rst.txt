@@ -34,3 +34,8 @@ f. Area Under the Curve
 
 a. Geometric Z-score
 b. Normality, sphericity homoscedasticity and distributions tests
+
+**Code**
+
+a. PEP8 and Flake8
+b. Tests and code coverage

@@ -127,10 +127,12 @@ html_theme_options = {
     'source_link_position': "footer",
     'bootswatch_theme': "readable",
     'navbar_sidebarrel': False,
+    'nosidebar': False,
     'navbar_pagenav': False,
     'bootstrap_version': "3",
     'navbar_links': [
                      ("Examples", "examples"),
+                     ("What's new", "changelog"),
                      ("API", "api")
                      ],
 
@@ -194,7 +196,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'pingouin', 'pingouin Documentation',
-     author, 'pingouin', 'One line description of project.',
+     author, 'pingouin', 'Statistics in Python 3.',
      'Miscellaneous'),
 ]
 

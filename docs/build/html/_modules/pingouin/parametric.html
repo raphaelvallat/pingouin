@@ -55,6 +55,7 @@
           <ul class="nav navbar-nav">
             
                 <li><a href="../../examples.html">Examples</a></li>
+                <li><a href="../../changelog.html">What's new</a></li>
                 <li><a href="../../api.html">API</a></li>
             
             
@@ -473,20 +474,20 @@
     <span class="n">n_rm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rm</span><span class="p">)</span>
     <span class="n">n_obs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">within</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
 
-    <span class="c1"># Sums of squares</span>
-    <span class="n">sstime</span> <span class="o">=</span> <span class="n">ss</span><span class="p">(</span><span class="n">grp_with</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_obs</span> <span class="o">-</span> <span class="n">ss</span><span class="p">(</span><span class="n">grp_with</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
-    <span class="n">sswithin</span> <span class="o">=</span> <span class="n">grp_with</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> \
-        <span class="p">(</span><span class="n">grp_with</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">grp_with</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="c1"># Calculate degrees of freedom</span>
+    <span class="n">ddof1</span> <span class="o">=</span> <span class="n">n_rm</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">ddof2</span> <span class="o">=</span> <span class="n">ddof1</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_obs</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
-    <span class="c1"># Calculating SSsubjects and SSerror</span>
+    <span class="c1"># Calculate sums of squares</span>
+    <span class="n">sstime</span> <span class="o">=</span> <span class="n">ss</span><span class="p">(</span><span class="n">grp_with</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_obs</span> <span class="o">-</span> <span class="n">ss</span><span class="p">(</span><span class="n">grp_with</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
+    <span class="n">sswithin</span> <span class="o">=</span> <span class="n">grp_with</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">*</span> <span class="n">n_obs</span>
+
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Subj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_obs</span><span class="p">),</span> <span class="n">n_rm</span><span class="p">)</span>
     <span class="n">grp_subj</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;Subj&#39;</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
     <span class="n">sssubj</span> <span class="o">=</span> <span class="n">n_rm</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">grp_subj</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">grp_subj</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">sserror</span> <span class="o">=</span> <span class="n">sswithin</span> <span class="o">-</span> <span class="n">sssubj</span>
 
-    <span class="c1"># Calculate degrees of freedom, F- and p-values</span>
-    <span class="n">ddof1</span> <span class="o">=</span> <span class="n">n_rm</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="n">ddof2</span> <span class="o">=</span> <span class="n">ddof1</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_obs</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># Calculate F and p-values</span>
     <span class="n">mserror</span> <span class="o">=</span> <span class="n">sserror</span> <span class="o">/</span> <span class="p">(</span><span class="n">ddof2</span> <span class="o">/</span> <span class="n">ddof1</span><span class="p">)</span>
     <span class="n">fval</span> <span class="o">=</span> <span class="n">sstime</span> <span class="o">/</span> <span class="n">mserror</span>
     <span class="n">p_unc</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">ddof1</span><span class="p">,</span> <span class="n">ddof2</span><span class="p">)</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">fval</span><span class="p">)</span>
@@ -623,20 +624,21 @@
     <span class="n">n_groups</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span>
     <span class="n">N</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
 
-    <span class="c1"># Sums of squares</span>
+    <span class="c1"># Calculate degrees of freedom</span>
+    <span class="n">ddof1</span> <span class="o">=</span> <span class="n">n_groups</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">ddof2</span> <span class="o">=</span> <span class="n">N</span> <span class="o">-</span> <span class="n">n_groups</span>
+
+    <span class="c1"># Calculate Sums of Squares</span>
     <span class="n">grp_betw</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">between</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
     <span class="c1"># Between effect</span>
     <span class="n">ssbetween</span> <span class="o">=</span> <span class="p">(</span><span class="n">grp_betw</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> \
         <span class="n">ss</span><span class="p">(</span><span class="n">grp_betw</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
     <span class="c1"># Error (between)</span>
-    <span class="n">sserror</span> <span class="o">=</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> \
-        <span class="p">(</span><span class="n">grp_betw</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">mserror</span> <span class="o">=</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">sserror</span> <span class="o">=</span> <span class="n">mserror</span> <span class="o">*</span> <span class="n">ddof2</span>
 
-    <span class="c1"># Calculate degrees of freedom, F- and p-values</span>
-    <span class="n">ddof1</span> <span class="o">=</span> <span class="n">n_groups</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="c1"># Calculate F- and p-values</span>
     <span class="n">msbetween</span> <span class="o">=</span> <span class="n">ssbetween</span> <span class="o">/</span> <span class="n">ddof1</span>
-    <span class="n">ddof2</span> <span class="o">=</span> <span class="n">N</span> <span class="o">-</span> <span class="n">n_groups</span>
-    <span class="n">mserror</span> <span class="o">=</span> <span class="n">sserror</span> <span class="o">/</span> <span class="n">ddof2</span>
     <span class="n">fval</span> <span class="o">=</span> <span class="n">msbetween</span> <span class="o">/</span> <span class="n">mserror</span>
     <span class="n">p_unc</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">ddof1</span><span class="p">,</span> <span class="n">ddof2</span><span class="p">)</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">fval</span><span class="p">)</span>
 
@@ -744,16 +746,13 @@
     <span class="n">st_time</span> <span class="o">=</span> <span class="n">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="n">correction</span><span class="p">,</span>
                        <span class="n">remove_na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">st_between</span> <span class="o">=</span> <span class="n">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
     <span class="c1"># Extract error and interactions</span>
-    <span class="c1"># Error (between)</span>
     <span class="n">grp_betw</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">between</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
-    <span class="n">sseb</span> <span class="o">=</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> \
-        <span class="p">(</span><span class="n">grp_betw</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">sseb</span> <span class="o">=</span> <span class="p">(</span><span class="n">grp_betw</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">grp_betw</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="c1"># Within-group effect</span>
     <span class="n">grp</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">between</span><span class="p">,</span> <span class="n">within</span><span class="p">])[</span><span class="n">dv</span><span class="p">]</span>
     <span class="n">sstotal</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="n">ss</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
-    <span class="n">sswg</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="p">(</span><span class="n">grp</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">grp</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">sswg</span> <span class="o">=</span> <span class="p">(</span><span class="n">grp</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">grp</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="c1"># Interaction</span>
     <span class="n">ssinter</span> <span class="o">=</span> <span class="n">sstotal</span> <span class="o">-</span> <span class="p">(</span><span class="n">sswg</span> <span class="o">+</span> <span class="n">st_time</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;SS&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">st_between</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;SS&#39;</span><span class="p">])</span>
 
