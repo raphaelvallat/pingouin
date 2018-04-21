@@ -321,7 +321,7 @@
 
     <span class="k">if</span> <span class="n">it</span> <span class="o">==</span> <span class="n">ot</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">ef</span>
-        
+
     <span class="k">if</span> <span class="n">it</span> <span class="o">==</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span>
         <span class="c1"># Rosenthal 1994</span>
         <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ef</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ef</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
@@ -357,7 +357,7 @@
         <span class="c1"># Borenstein et al. 2009</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">d</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">ot</span> <span class="o">==</span> <span class="s1">&#39;auc&#39;</span><span class="p">:</span>
-        <span class="c1"># Ruscio 2008.</span>
+        <span class="c1"># Ruscio 2008</span>
         <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">norm</span>
         <span class="k">return</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">d</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">ot</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
