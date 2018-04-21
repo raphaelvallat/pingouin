@@ -213,15 +213,14 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
         if not _check_eftype(input):
             err = "Could not interpret input '{}'".format(input)
             raise ValueError(err)
+    if it not in ['r', 'cohen']:
+        raise ValueError("Input type must be 'r' or 'cohen'")
 
     if it == ot:
         return ef
 
-    if it not in ['r', 'cohen']:
-        raise ValueError("Input type must be 'r' or 'cohen'")
-
-    # First convert to Cohen's d
     if it == 'r':
+        # Rosenthal 1994
         d = (2 * ef) / np.sqrt(1 - ef**2)
     elif it == 'cohen':
         d = ef
@@ -249,10 +248,13 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
             a = 4
         return d / np.sqrt(d**2 + a)
     elif ot == 'eta-square':
+        # Cohen 1988
         return (d / 2)**2 / (1 + (d / 2)**2)
     elif ot == 'odds-ratio':
+        # Borenstein et al. 2009
         return np.exp(d * np.pi / np.sqrt(3))
     elif ot == 'auc':
+        # Ruscio 2008
         from scipy.stats import norm
         return norm.cdf(d / np.sqrt(2))
     elif ot == 'none':
