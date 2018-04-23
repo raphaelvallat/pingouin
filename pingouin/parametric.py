@@ -5,7 +5,7 @@ import pandas as pd
 from pingouin import _check_dataframe, _remove_rm_na, _export_table
 
 __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
-           "test_sphericity", "rm_anova", "anova", "mixed_anova"]
+           "test_sphericity", "ttest", "rm_anova", "anova", "mixed_anova"]
 
 
 def gzscore(x):
@@ -284,6 +284,117 @@ def test_sphericity(X, alpha=.05):
     pval = chi2.sf(chi_sq, ddof)
     sphericity = True if pval > alpha else False
     return sphericity, W, chi_sq, ddof, pval
+
+
+def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
+    """T-test. 
+
+    Parameters
+    ----------
+    x : array_like
+        First set of observations.
+    y : array_like or float
+        Second set of observations. If y is a single value, a one-sample T-test
+        is computed.
+    paired : boolean
+        Specify whether the two observations are related (i.e. repeated
+        measures) or independant.
+    tail : string
+        Specify whether to return two-sided or one-sided p-value.
+    correction : string or boolean
+        For unpaired two sample T-tests, specify whether or not to correct for
+        unequal variances using Welch separate variances T-test. If 'auto', it
+        will automatically uses Welch T-test when the sample sizes are unequal,
+        as recommended by Zimmerman 2004.
+
+    Returns
+    -------
+    tval : boolean
+        Test statistic
+    pval : float
+        P-value
+    dof : int
+        Number of degrees of freedom. If a correction is applied, returns the
+        approximated degrees of freedom using the Welch–Satterthwaite equation.
+
+    Examples
+    --------
+    1. One-sample T-test.
+
+        >>> from pingouin import ttest
+        >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
+        >>> ttest(x, 4)
+            (1.3974, 0.2348, 4)
+
+    2. Paired two-sample T-test (one-tailed).
+        >>> from pingouin import ttest
+        >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
+        >>> post = [6.4, 3.4, 6.4, 11., 4.8]
+        >>> ttest(pre, post, paired=True, tail='one-sided')
+            (-2.3078, 0.0411, 8)
+
+    3. Paired two-sample T-test with missing values.
+        >>> from pingouin import ttest
+        >>> from numpy import nan
+        >>> pre = [5.5, 2.4, nan, 9.6, 4.2]
+        >>> post = [6.4, 3.4, 6.4, 11., 4.8]
+        >>> ttest(pre, post, paired=True)
+            (-5.902, 0.0097, 8)
+
+    4. Independant two-sample T-test (equal sample size).
+        >>> from pingouin import ttest
+        >>> import numpy as np
+        >>> np.random.seed(123)
+        >>> x = np.random.normal(loc=7, size=20)
+        >>> y = np.random.normal(loc=4, size=20)
+        >>> tval, pval, dof = ttest(x, y, correction='auto')
+        >>> # Pretty printing
+        >>> print("%.2f  %.2e  %i" % (tval, pval, dof))
+            9.11  4.31e-11  38
+
+    5. Independant two-sample T-test (unequal sample size).
+        >>> from pingouin import ttest
+        >>> import numpy as np
+        >>> np.random.seed(123)
+        >>> x = np.random.normal(loc=7, size=20)
+        >>> y = np.random.normal(loc=4, size=15)
+        >>> tval, pval, dof = ttest(x, y, correction='auto')
+        >>> print("%.2f  %.2e  %.2f" % (tval, pval, dof))
+            8.24  2.82e-09  30.75
+    """
+    from scipy.stats import ttest_rel, ttest_ind, ttest_1samp
+    x = np.asarray(x)
+    y = np.asarray(y)
+    nx = x.size
+    ny = y.size
+
+    if ny == 1:
+        # Case one sample T-test
+        tval, pval = ttest_1samp(x, y)
+        dof = nx - 1
+        pval = pval / 2 if tail == 'one-sided' else pval
+        return tval, pval, dof
+
+    if paired:
+        # Case paired two samples T-test
+        tval, pval = ttest_rel(x, y, nan_policy='omit')
+        dof = nx + ny - 2
+    else:
+        # Case unpaired two samples T-test
+        if correction == True or (correction == 'auto' and nx != ny):
+            # Use the Welch separate variance T-test
+            tval, pval = ttest_ind(x, y, equal_var=False, nan_policy='omit')
+            # dof are approximated using Welch–Satterthwaite equation
+            vx = x.var(ddof=1)
+            vy = y.var(ddof=1)
+            dof = (vx / nx + vy / ny)**2 / ((vx / nx)**2 / (nx - 1) +
+                                            (vy / ny)**2 / (ny - 1))
+        else:
+            tval, pval = ttest_ind(x, y, equal_var=True, nan_policy='omit')
+            dof = nx + ny - 2
+
+    pval = pval / 2 if tail == 'one-sided' else pval
+    return tval, pval, dof
 
 
 def ss(grp, type='a'):
