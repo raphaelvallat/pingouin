@@ -39,7 +39,7 @@ print_table(post_hocs, floatfmt=".3f")
 df = pd.read_csv('sleep_dataset.csv')
 
 # to make it trickier, let's assume that one subject has a missing value.
-df.iloc[20, 0] = nan
+# df.iloc[20, 0] = nan
 
 # Compute one-way repeated measures ANOVA
 aov = rm_anova(dv='DV', within='Time', data=df, correction='auto',

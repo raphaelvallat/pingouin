@@ -401,16 +401,11 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
     return tval, pval, dof
 
 
-def ss(grp, type='a'):
-    """Helper function for sums of squares computation"""
-    return np.sum(grp.sum()**2) if type == 'a' else grp.sum().sum()**2
-
-
 def rm_anova(dv=None, within=None, data=None, correction='auto',
              remove_na=False, detailed=False, export_filename=None):
     """One-way repeated measures ANOVA.
 
-    Tested against mne.stats.f_mway_rm and ez R package.
+    Results have been tested against R and JASP.
 
     Parameters
     ----------
@@ -477,7 +472,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     data = data.reset_index(drop=True)
 
     # Sort values (to avoid bug when creating 'Subj' column)
-    data.sort_values(by=within, inplace=True)
+    data.sort_values(by=within, kind='mergesort', inplace=True)
 
     # Groupby
     grp_with = data.groupby(within)[dv]
@@ -485,18 +480,18 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     rm = list(data[within].unique())
     n_rm = len(rm)
     n_obs = int(data.groupby(within)[dv].count().max())
+    grandmean = data[dv].mean()
 
     # Calculate degrees of freedom
     ddof1 = n_rm - 1
     ddof2 = ddof1 * (n_obs - 1)
 
     # Calculate sums of squares
-    sstime = ss(grp_with) / n_obs - ss(grp_with, 'b') / N
-    sswithin = grp_with.var(ddof=0).sum() * n_obs
-
+    sstime = ((grp_with.mean() - grandmean)**2 * grp_with.count()).sum()
+    sswithin = grp_with.apply(lambda x: (x - x.mean())**2).sum()
     data['Subj'] = np.tile(np.arange(n_obs), n_rm)
     grp_subj = data.groupby('Subj')[dv]
-    sssubj = n_rm * np.sum((grp_subj.mean() - grp_subj.mean().mean())**2)
+    sssubj = n_rm * np.sum((grp_subj.mean() - grandmean)**2)
     sserror = sswithin - sssubj
 
     # Calculate F and p-values
@@ -584,7 +579,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
           export_filename=None):
     """One-way ANOVA.
 
-    Tested against ez R package.
+    Results have been tested against R and JASP.
 
     Parameters
     ----------
@@ -687,7 +682,9 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
 def mixed_anova(dv=None, within=None, between=None, data=None,
                 correction='auto', remove_na=False, export_filename=None):
-    """Mixed-design (split-plot) ANOVA .
+    """Mixed-design (split-plot) type II ANOVA.
+
+    Results have been tested against R and JASP.
 
     Parameters
     ----------
@@ -751,28 +748,29 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
 
     # SUMS OF SQUARES
     N = data[dv].size
-    # Extract main effects
-    st_time = rm_anova(dv=dv, within=within, data=data, correction=correction,
+    grandmean = data[dv].mean()
+    # Extract main effects of time and between
+    mtime = rm_anova(dv=dv, within=within, data=data, correction=correction,
                        remove_na=False, detailed=True)
-    st_between = anova(dv=dv, between=between, data=data, detailed=True)
-    # Extract error and interactions
-    grp_betw = data.groupby(between)[dv]
-    sseb = (grp_betw.var(ddof=0) * grp_betw.count()).sum()
-    # Within-group effect
+    mbetw = anova(dv=dv, between=between, data=data, detailed=True)
+    # Extract SS total, residuals and interactions
     grp = data.groupby([between, within])[dv]
-    sstotal = grp.apply(lambda x: x**2).sum() - ss(grp, 'b') / N
-    sswg = (grp.var(ddof=0) * grp.count()).sum()
+    sstotal = grp.apply(lambda x: (x - grandmean)**2).sum()
+    # sst = residuals within + residuals between
+    sst = grp.apply(lambda x: (x - x.mean())**2).sum()
     # Interaction
-    ssinter = sstotal - (sswg + st_time.loc[0, 'SS'] + st_between.loc[0, 'SS'])
+    ssinter = sstotal - (sst + mtime.loc[0, 'SS'] + mbetw.loc[0, 'SS'])
+    sswg = mtime.loc[1, 'SS'] - ssinter
+    sseb = sstotal - (mtime.loc[0, 'SS'] + mbetw.loc[0, 'SS'] + sswg + ssinter)
 
     # DEGREES OF FREEDOM
     n_obs = data.groupby(within)[dv].count().max()
-    dftime = st_time.loc[0, 'DF']
-    dfbetween = st_between.loc[0, 'DF']
-    dfeb = n_obs - grp_betw.count().count()
-    dfwg = dftime * (n_obs - grp.count().count())
+    dftime = mtime.loc[0, 'DF']
+    dfbetween = mbetw.loc[0, 'DF']
+    dfeb = n_obs - data.groupby(between)[dv].count().count()
+    dfwg = dftime * dfeb
     # dftotal = N - 1
-    dfinter = st_time.loc[0, 'DF'] * st_between.loc[0, 'DF']
+    dfinter = mtime.loc[0, 'DF'] * mbetw.loc[0, 'DF']
 
     # MEAN SQUARES
     mseb = sseb / dfeb
@@ -780,8 +778,8 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     msinter = ssinter / dfinter
 
     # F VALUES
-    fbetween = st_between.loc[0, 'MS'] / mseb
-    ftime = st_time.loc[0, 'MS'] / mswg
+    fbetween = mbetw.loc[0, 'MS'] / mseb
+    ftime = mtime.loc[0, 'MS'] / mswg
     finter = msinter / mswg
 
     # P-values
@@ -795,7 +793,7 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     npsq_inter = ssinter / (ssinter + sswg)
 
     # Stats table
-    aov = pd.concat([st_between.drop(1), st_time.drop(1)], ignore_index=True)
+    aov = pd.concat([mbetw.drop(1), mtime.drop(1)], ignore_index=True)
     # Update values
     aov.rename(columns={'DF': 'DF1'}, inplace=True)
     aov.loc[0, 'F'], aov.loc[1, 'F'] = fbetween, ftime
