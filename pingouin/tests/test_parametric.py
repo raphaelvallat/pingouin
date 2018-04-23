@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.parametric import (gzscore, test_normality, anova, rm_anova,
-                                 mixed_anova, test_dist)
+from pingouin.parametric import (gzscore, test_normality, ttest, anova,
+                                 rm_anova, mixed_anova, test_dist)
 
 # Generate random data for ANOVA
 n = 30
@@ -49,6 +49,13 @@ class TestParametric(_TestPingouin):
     def test_test_dist(self):
         """Test function test_dist."""
         test_dist(x)
+
+    def test_ttest(self):
+        """Test function ttest"""
+        ttest(x, 0.5)
+        ttest(x, y, paired=True, tail='one-sided')
+        ttest(x, y, paired=False, correction='auto')
+        ttest(x, y, paired=False, correction=True)
 
     def test_anova(self):
         """Test function anova."""

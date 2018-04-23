@@ -287,7 +287,7 @@ def test_sphericity(X, alpha=.05):
 
 
 def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
-    """T-test. 
+    """T-test.
 
     Parameters
     ----------
@@ -327,6 +327,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
             (1.3974, 0.2348, 4)
 
     2. Paired two-sample T-test (one-tailed).
+
         >>> from pingouin import ttest
         >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
         >>> post = [6.4, 3.4, 6.4, 11., 4.8]
@@ -334,6 +335,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
             (-2.3078, 0.0411, 8)
 
     3. Paired two-sample T-test with missing values.
+
         >>> from pingouin import ttest
         >>> from numpy import nan
         >>> pre = [5.5, 2.4, nan, 9.6, 4.2]
@@ -342,6 +344,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
             (-5.902, 0.0097, 8)
 
     4. Independant two-sample T-test (equal sample size).
+
         >>> from pingouin import ttest
         >>> import numpy as np
         >>> np.random.seed(123)
@@ -353,6 +356,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
             9.11  4.31e-11  38
 
     5. Independant two-sample T-test (unequal sample size).
+
         >>> from pingouin import ttest
         >>> import numpy as np
         >>> np.random.seed(123)
@@ -632,21 +636,18 @@ def anova(dv=None, between=None, data=None, detailed=False,
     n_groups = len(groups)
     N = data[dv].size
 
-    # Calculate degrees of freedom
+    # Calculate sums of squares
+    grp = data.groupby(between)[dv]
+    # Between effect
+    ssbetween = ((grp.mean() - data[dv].mean())**2 * grp.count()).sum()
+    # Within effect (= error between)
+    sserror = grp.apply(lambda x: (x - x.mean())**2).sum()
+
+    # Calculate DOF, MS, F and p-values
     ddof1 = n_groups - 1
     ddof2 = N - n_groups
-
-    # Calculate Sums of Squares
-    grp_betw = data.groupby(between)[dv]
-    # Between effect
-    ssbetween = (grp_betw.sum()**2 / grp_betw.count()).sum() - \
-        ss(grp_betw, 'b') / N
-    # Error (between)
-    mserror = grp_betw.var().mean()
-    sserror = mserror * ddof2
-
-    # Calculate F- and p-values
     msbetween = ssbetween / ddof1
+    mserror = sserror / ddof2
     fval = msbetween / mserror
     p_unc = f(ddof1, ddof2).sf(fval)
 

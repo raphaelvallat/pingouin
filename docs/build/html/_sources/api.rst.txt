@@ -17,6 +17,7 @@ ANOVA
     rm_anova
     mixed_anova
     pairwise_ttests
+    ttest
 
 
 Multiple comparisons
