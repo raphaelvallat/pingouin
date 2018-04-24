@@ -75,7 +75,6 @@ Quick start
 
     # Load dataset
     df = pd.read_csv('sleep_dataset.csv')
-    print(df.head())
 
     # Compute two-way split-plot ANOVA
     aov = mixed_anova(dv='DV', within='Time', between='Group', data=df,

@@ -10,7 +10,19 @@ __all__ = ["print_table", "_export_table", "reshape_data",
 
 
 def print_table(df, floatfmt=".4f", tablefmt='simple'):
-    """Nice display of table"""
+    """Nice display of table.
+
+    See: https://pypi.org/project/tabulate/
+
+    Parameters
+    ----------
+    df : DataFrame
+        Dataframe to print (e.g. ANOVA summary)
+    floatfmt : string
+        Decimal number formatting
+    tablefmt : string
+        Table format (e.g. 'simple', 'plain', 'html', 'latex', 'grid')
+    """
     if 'F' in df.keys():
         print('\n=============\nANOVA SUMMARY\n=============\n')
     elif 'A' in df.keys():

@@ -34,6 +34,7 @@ f. Area Under the Curve
 
 a. Geometric Z-score
 b. Normality, sphericity homoscedasticity and distributions tests
+c. T-tests
 
 **Code**
 

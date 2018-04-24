@@ -75,7 +75,6 @@ Quick start
      #   - Between-factor ('Group') = two-levels (Insomnia / Control)
      #   - Within-factor ('Time') = three levels (Pre, Post-6months, Post-12months)
      df = pd.read_csv('examples/sleep_dataset.csv')
-     print(df.head())
 
      # Compute two-way split-plot ANOVA
      aov = mixed_anova(dv='DV', within='Time', between='Group', data=df,
@@ -110,3 +109,5 @@ Development:
 ============
 
 To see the code or report a bug, please visit the `github repository <https://github.com/raphaelvallat/pingouin>`_.
+
+Note that this program is provided with NO WARRANTY OF ANY KIND. If you can, always double check the results with another statistical software.

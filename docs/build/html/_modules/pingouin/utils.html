@@ -112,8 +112,20 @@
            <span class="s2">&quot;_extract_effects&quot;</span><span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">print_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;.4f&quot;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s1">&#39;simple&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Nice display of table&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="print_table"><a class="viewcode-back" href="../../generated/pingouin.print_table.html#pingouin.print_table">[docs]</a><span class="k">def</span> <span class="nf">print_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;.4f&quot;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s1">&#39;simple&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Nice display of table.</span>
+
+<span class="sd">    See: https://pypi.org/project/tabulate/</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : DataFrame</span>
+<span class="sd">        Dataframe to print (e.g. ANOVA summary)</span>
+<span class="sd">    floatfmt : string</span>
+<span class="sd">        Decimal number formatting</span>
+<span class="sd">    tablefmt : string</span>
+<span class="sd">        Table format (e.g. &#39;simple&#39;, &#39;plain&#39;, &#39;html&#39;, &#39;latex&#39;, &#39;grid&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="s1">&#39;F&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">=============</span><span class="se">\n</span><span class="s1">ANOVA SUMMARY</span><span class="se">\n</span><span class="s1">=============</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="s1">&#39;A&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -125,7 +137,7 @@
                        <span class="n">tablefmt</span><span class="o">=</span><span class="n">tablefmt</span><span class="p">))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">_export_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>

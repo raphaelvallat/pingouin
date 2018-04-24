@@ -71,4 +71,5 @@ Miscellaneous
 .. autosummary::
      :toctree: generated/
 
+      print_table
       reshape_data
