@@ -402,7 +402,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
 
 
 def rm_anova(dv=None, within=None, data=None, correction='auto',
-             remove_na=False, detailed=False, export_filename=None):
+             remove_na=True, detailed=False, export_filename=None):
     """One-way repeated measures ANOVA.
 
     Results have been tested against R and JASP.
@@ -680,7 +680,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
 
 def mixed_anova(dv=None, within=None, between=None, data=None,
-                correction='auto', remove_na=False, export_filename=None):
+                correction='auto', remove_na=True, export_filename=None):
     """Mixed-design (split-plot) type II ANOVA.
 
     Results have been tested against R and JASP.
