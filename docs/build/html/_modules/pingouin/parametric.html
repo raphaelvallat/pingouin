@@ -505,7 +505,7 @@
 
 
 <div class="viewcode-block" id="rm_anova"><a class="viewcode-back" href="../../generated/pingouin.rm_anova.html#pingouin.rm_anova">[docs]</a><span class="k">def</span> <span class="nf">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>
-             <span class="n">remove_na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+             <span class="n">remove_na</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;One-way repeated measures ANOVA.</span>
 
 <span class="sd">    Results have been tested against R and JASP.</span>
@@ -551,6 +551,14 @@
 <span class="sd">    anova : One-way ANOVA</span>
 <span class="sd">    mixed_anova : Two way mixed ANOVA</span>
 
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The effect size reported in Pingouin is the partial eta-square.</span>
+<span class="sd">    However, one should keep in mind that for one-way repeated-measures ANOVA,</span>
+<span class="sd">    partial eta-square is the same as eta-square.</span>
+
+<span class="sd">    For more details, see Bakeman 2005; Richardson 2011.</span>
+
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    Compute a one-way repeated-measures ANOVA.</span>
@@ -584,10 +592,6 @@
     <span class="n">n_obs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">within</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
     <span class="n">grandmean</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 
-    <span class="c1"># Calculate degrees of freedom</span>
-    <span class="n">ddof1</span> <span class="o">=</span> <span class="n">n_rm</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="n">ddof2</span> <span class="o">=</span> <span class="n">ddof1</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_obs</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-
     <span class="c1"># Calculate sums of squares</span>
     <span class="n">sstime</span> <span class="o">=</span> <span class="p">((</span><span class="n">grp_with</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">grandmean</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">grp_with</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="n">sswithin</span> <span class="o">=</span> <span class="n">grp_with</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
@@ -595,6 +599,10 @@
     <span class="n">grp_subj</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;Subj&#39;</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
     <span class="n">sssubj</span> <span class="o">=</span> <span class="n">n_rm</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">grp_subj</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">grandmean</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">sserror</span> <span class="o">=</span> <span class="n">sswithin</span> <span class="o">-</span> <span class="n">sssubj</span>
+
+    <span class="c1"># Calculate degrees of freedom</span>
+    <span class="n">ddof1</span> <span class="o">=</span> <span class="n">n_rm</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">ddof2</span> <span class="o">=</span> <span class="n">ddof1</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_obs</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="c1"># Calculate F and p-values</span>
     <span class="n">mserror</span> <span class="o">=</span> <span class="n">sserror</span> <span class="o">/</span> <span class="p">(</span><span class="n">ddof2</span> <span class="o">/</span> <span class="n">ddof1</span><span class="p">)</span>
@@ -610,7 +618,7 @@
 
     <span class="c1"># Compute sphericity using Mauchly&#39;s test</span>
     <span class="c1"># Sphericity assumption only applies if there are more than 2 levels</span>
-    <span class="k">if</span> <span class="n">correction</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span> <span class="ow">or</span> <span class="n">correction</span> <span class="ow">and</span> <span class="n">n_rm</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">correction</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span> <span class="ow">or</span> <span class="p">(</span><span class="n">correction</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">n_rm</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">):</span>
         <span class="n">sphericity</span><span class="p">,</span> <span class="n">W_mauchly</span><span class="p">,</span> <span class="n">chi_sq_mauchly</span><span class="p">,</span> <span class="n">ddof_mauchly</span><span class="p">,</span> \
             <span class="n">p_mauchly</span> <span class="o">=</span> <span class="n">test_sphericity</span><span class="p">(</span><span class="n">data_pivot</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">(),</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">)</span>
 
@@ -709,6 +717,14 @@
 <span class="sd">    rm_anova : One-way repeated measures ANOVA</span>
 <span class="sd">    mixed_anova : Two way mixed ANOVA</span>
 
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The effect size reported in Pingouin is the partial eta-square.</span>
+<span class="sd">    However, one should keep in mind that for one-way ANOVA</span>
+<span class="sd">    partial eta-square is the same as eta-square and generalized eta-square.</span>
+
+<span class="sd">    For more details, see Bakeman 2005; Richardson 2011.</span>
+
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    Compute a one-way ANOVA.</span>
@@ -783,7 +799,7 @@
 
 
 <div class="viewcode-block" id="mixed_anova"><a class="viewcode-back" href="../../generated/pingouin.mixed_anova.html#pingouin.mixed_anova">[docs]</a><span class="k">def</span> <span class="nf">mixed_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">remove_na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">remove_na</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Mixed-design (split-plot) type II ANOVA.</span>
 
 <span class="sd">    Results have been tested against R and JASP.</span>
@@ -870,7 +886,6 @@
     <span class="n">dfbetween</span> <span class="o">=</span> <span class="n">mbetw</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">]</span>
     <span class="n">dfeb</span> <span class="o">=</span> <span class="n">n_obs</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">between</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
     <span class="n">dfwg</span> <span class="o">=</span> <span class="n">dftime</span> <span class="o">*</span> <span class="n">dfeb</span>
-    <span class="c1"># dftotal = N - 1</span>
     <span class="n">dfinter</span> <span class="o">=</span> <span class="n">mtime</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">mbetw</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">]</span>
 
     <span class="c1"># MEAN SQUARES</span>

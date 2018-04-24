@@ -448,6 +448,14 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     anova : One-way ANOVA
     mixed_anova : Two way mixed ANOVA
 
+    Notes
+    -----
+    The effect size reported in Pingouin is the partial eta-square.
+    However, one should keep in mind that for one-way repeated-measures ANOVA,
+    partial eta-square is the same as eta-square.
+
+    For more details, see Bakeman 2005; Richardson 2011.
+
     Examples
     --------
     Compute a one-way repeated-measures ANOVA.
@@ -459,14 +467,6 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
                            remove_na=True, detailed=True,
                            export_filename='rm_anova.csv')
         >>> print_table(aov)
-
-    Note
-    ----
-    The effect size reported in Pingouin is the partial eta-square.
-    However, one should keep in mind that for one-way repeated-measures ANOVA,
-    partial eta-square is the same as eta-square.
-
-    For more details, see Bakeman 2005; Richardson 2011.
     """
     from scipy.stats import f
     # Check data
@@ -614,6 +614,14 @@ def anova(dv=None, between=None, data=None, detailed=False,
     rm_anova : One-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
 
+    Notes
+    -----
+    The effect size reported in Pingouin is the partial eta-square.
+    However, one should keep in mind that for one-way ANOVA
+    partial eta-square is the same as eta-square and generalized eta-square.
+
+    For more details, see Bakeman 2005; Richardson 2011.
+
     Examples
     --------
     Compute a one-way ANOVA.
@@ -624,14 +632,6 @@ def anova(dv=None, between=None, data=None, detailed=False,
         >>> aov = anova(dv='DV', between='Group', data=df,
                         detailed=True, export_filename='anova.csv')
         >>> print_table(aov)
-
-    Note
-    ----
-    The effect size reported in Pingouin is the partial eta-square.
-    However, one should keep in mind that for one-way ANOVA
-    partial eta-square is the same as eta-square and generalized eta-square.
-
-    For more details, see Bakeman 2005; Richardson 2011.
     """
     from scipy.stats import f
 

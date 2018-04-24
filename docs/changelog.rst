@@ -13,6 +13,7 @@ b. One-way repeated measures
 c. Two-way split-plot (one between factor and one within factor)
 
 **Miscellaneous statistical functions**
+
 a. T-tests
 
 v0.1.0 (April 2018)
