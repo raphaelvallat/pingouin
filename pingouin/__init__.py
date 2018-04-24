@@ -5,4 +5,4 @@ from .multicomp import *
 from .pairwise import *
 from .parametric import *
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"

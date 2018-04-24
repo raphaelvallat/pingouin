@@ -3,10 +3,8 @@
 What's new
 ##########
 
-v0.1.0 (April 2018)
+v0.1.1 (April 2018)
 --------------------
-
-Initial release.
 
 **ANOVA**
 
@@ -14,6 +12,13 @@ a. One-way
 b. One-way repeated measures
 c. Two-way split-plot (one between factor and one within factor)
 
+**Miscellaneous statistical functions**
+a. T-tests
+
+v0.1.0 (April 2018)
+--------------------
+
+Initial release.
 
 **Pairwise comparisons**
 
@@ -34,7 +39,6 @@ f. Area Under the Curve
 
 a. Geometric Z-score
 b. Normality, sphericity homoscedasticity and distributions tests
-c. T-tests
 
 **Code**
 
