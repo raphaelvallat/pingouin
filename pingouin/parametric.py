@@ -767,7 +767,6 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     dfbetween = mbetw.loc[0, 'DF']
     dfeb = n_obs - data.groupby(between)[dv].count().count()
     dfwg = dftime * dfeb
-    # dftotal = N - 1
     dfinter = mtime.loc[0, 'DF'] * mbetw.loc[0, 'DF']
 
     # MEAN SQUARES
