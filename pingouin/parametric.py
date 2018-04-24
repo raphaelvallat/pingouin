@@ -481,10 +481,6 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     n_obs = int(data.groupby(within)[dv].count().max())
     grandmean = data[dv].mean()
 
-    # Calculate degrees of freedom
-    ddof1 = n_rm - 1
-    ddof2 = ddof1 * (n_obs - 1)
-
     # Calculate sums of squares
     sstime = ((grp_with.mean() - grandmean)**2 * grp_with.count()).sum()
     sswithin = grp_with.apply(lambda x: (x - x.mean())**2).sum()
@@ -492,6 +488,10 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     grp_subj = data.groupby('Subj')[dv]
     sssubj = n_rm * np.sum((grp_subj.mean() - grandmean)**2)
     sserror = sswithin - sssubj
+
+    # Calculate degrees of freedom
+    ddof1 = n_rm - 1
+    ddof2 = ddof1 * (n_obs - 1)
 
     # Calculate F and p-values
     mserror = sserror / (ddof2 / ddof1)
@@ -507,7 +507,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
 
     # Compute sphericity using Mauchly's test
     # Sphericity assumption only applies if there are more than 2 levels
-    if correction == 'auto' or correction and n_rm >= 3:
+    if correction == 'auto' or (correction is True and n_rm >= 3):
         sphericity, W_mauchly, chi_sq_mauchly, ddof_mauchly, \
             p_mauchly = test_sphericity(data_pivot.as_matrix(), alpha=.05)
 
