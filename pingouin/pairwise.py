@@ -202,9 +202,9 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
                  'std(B)', 'Paired', 'Alpha', 'T-val', 'Tail', 'p-unc',
                  'p-corr', 'p-adjust', 'reject', 'Eff_size', 'Eff_type']
 
-    if not return_desc:
+    if not return_desc and effects.lower() != 'all':
         stats.drop(columns=['mean(A)', 'mean(B)', 'std(A)', 'std(B)'],
-                    inplace=True)
+                   inplace=True)
 
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)

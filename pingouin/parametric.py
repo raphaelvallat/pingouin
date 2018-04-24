@@ -385,7 +385,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         dof = nx + ny - 2
     else:
         # Case unpaired two samples T-test
-        if correction == True or (correction == 'auto' and nx != ny):
+        if correction is True or (correction == 'auto' and nx != ny):
             # Use the Welch separate variance T-test
             tval, pval = ttest_ind(x, y, equal_var=False, nan_policy='omit')
             # dof are approximated using Welch–Satterthwaite equation
@@ -476,7 +476,6 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
 
     # Groupby
     grp_with = data.groupby(within)[dv]
-    N = data[dv].size
     rm = list(data[within].unique())
     n_rm = len(rm)
     n_obs = int(data.groupby(within)[dv].count().max())
@@ -747,11 +746,10 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     data = data.reset_index(drop=True)
 
     # SUMS OF SQUARES
-    N = data[dv].size
     grandmean = data[dv].mean()
     # Extract main effects of time and between
     mtime = rm_anova(dv=dv, within=within, data=data, correction=correction,
-                       remove_na=False, detailed=True)
+                     remove_na=False, detailed=True)
     mbetw = anova(dv=dv, between=between, data=data, detailed=True)
     # Extract SS total, residuals and interactions
     grp = data.groupby([between, within])[dv]
