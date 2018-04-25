@@ -25,7 +25,7 @@ def print_table(df, floatfmt=".4f", tablefmt='simple'):
     """
     if 'F' in df.keys():
         print('\n=============\nANOVA SUMMARY\n=============\n')
-    elif 'A' in df.keys():
+    if 'A' in df.keys():
         print('\n==============\nPOST HOC TESTS\n==============\n')
 
     try:
