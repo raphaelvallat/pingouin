@@ -63,7 +63,11 @@ class TestParametric(_TestPingouin):
 
     def test_anova(self):
         """Test function anova."""
-        anova(dv='Scores', between='Group', data=df, detailed=True)
+        aov = anova(dv='Scores', between='Group', data=df, detailed=True)
+        # Compare with JASP
+        assert np.allclose(aov.loc[0, 'F'].round(3), 5.244)
+        assert np.allclose(aov.loc[0, 'p-unc'].round(3), .023)
+        assert np.allclose(aov.loc[0, 'np2'].round(3), .029)
         anova(dv='Scores', between='Group', data=df, detailed=False,
               export_filename='test_export.csv')
 
@@ -73,8 +77,13 @@ class TestParametric(_TestPingouin):
                  detailed=False)
         rm_anova(dv='Scores', within='Time', data=df, correction=True,
                  detailed=False)
-        rm_anova(dv='Scores', within='Time', data=df, correction='auto',
+        aov = rm_anova(dv='Scores', within='Time', data=df, correction='auto',
                  detailed=True)
+        # Compare with JASP
+        assert np.allclose(aov.loc[0, 'F'].round(3), 3.913)
+        assert np.allclose(aov.loc[0, 'p-unc'].round(3), .023)
+        assert np.allclose(aov.loc[0, 'np2'].round(3), .062)
+
         rm_anova(dv='Scores', within='Time', data=df, correction=True,
                  detailed=True)
         rm_anova(dv='Scores', within='Time', data=df_nan,
@@ -82,8 +91,13 @@ class TestParametric(_TestPingouin):
 
     def test_mixed_anova(self):
         """Test function anova."""
-        mixed_anova(dv='Scores', within='Time', between='Group', data=df,
+        aov = mixed_anova(dv='Scores', within='Time', between='Group', data=df,
                     correction='auto', remove_na=False)
+        # Compare with JASP
+        assert np.allclose(aov.loc[0, 'F'].round(3), 5.052)
+        assert np.allclose(aov.loc[1, 'F'].round(3), 4.027)
+        assert np.allclose(aov.loc[2, 'F'].round(3), 2.728)
+
         mixed_anova(dv='Scores', within='Time', between='Group', data=df_nan,
                     correction=True, remove_na=True,
                     export_filename='test_export.csv')
