@@ -15,6 +15,7 @@ c. Two-way split-plot (one between factor and one within factor)
 **Miscellaneous statistical functions**
 
 a. T-tests
+b. Power of T-tests and one-way ANOVA
 
 v0.1.0 (April 2018)
 --------------------

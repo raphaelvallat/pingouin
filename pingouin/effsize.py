@@ -1,7 +1,7 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 import numpy as np
-from pingouin.utils import _check_eftype
+from pingouin.utils import _check_eftype, _remove_na
 from pingouin.parametric import test_homoscedasticity
 
 
@@ -335,17 +335,23 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
     if not _check_eftype(eftype):
         err = "Could not interpret input '{}'".format(eftype)
         raise ValueError(err)
-    if all(v is not None for v in [x, y]):
-        for input in [x, y]:
-            if not isinstance(input, (list, np.ndarray)):
-                raise ValueError("x and y must be list or np.ndarray")
 
-    nx, ny = len(x), len(y)
-    dof = nx + ny - 2
+    x = np.asarray(x)
+    y = np.asarray(y)
 
-    if nx != ny and paired:
+    if x.size != y.size and paired:
         print('x and y have unequal sizes. Switching to paired == False.')
         paired = False
+
+    # Remove NA
+    x, y = _remove_na(x, y, paired=paired)
+    nx = x.size
+    ny = y.size
+
+    if ny == 1:
+        # Case 1: One-sample Test
+        d = (np.mean(x) - y) / np.std(x)
+        return d
 
     if eftype.lower() == 'glass':
         # Find group with lowest variance
@@ -362,6 +368,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         # Compute unbiased Cohen's d effect size
         if not paired:
             # https://en.wikipedia.org/wiki/Effect_size
+            dof = nx + ny - 2
             poolsd = np.sqrt(((nx - 1) * np.std(x, ddof=1)**2 +
                               (ny - 1) * np.std(y, ddof=1)**2) / dof)
             d = (np.mean(x) - np.mean(y)) / poolsd

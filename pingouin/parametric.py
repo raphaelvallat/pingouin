@@ -2,7 +2,8 @@
 # Date: April 2018
 import numpy as np
 import pandas as pd
-from pingouin import _check_dataframe, _remove_rm_na, _export_table
+from pingouin import (_check_dataframe, _remove_rm_na, _remove_na,
+                      _export_table)
 
 __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
            "test_sphericity", "ttest", "rm_anova", "anova", "mixed_anova"]
@@ -309,13 +310,14 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
 
     Returns
     -------
-    tval : boolean
-        Test statistic
-    pval : float
-        P-value
-    dof : int
-        Number of degrees of freedom. If a correction is applied, returns the
-        approximated degrees of freedom using the Welch–Satterthwaite equation.
+    stats : dataFrame
+        T-test summary.
+
+        T-val: T-value
+        p-val: p-value
+        dof: degrees of freedom
+        cohen-d: Cohen's d effect size
+        power: achieved power of the test (1 - type II error)
 
     Examples
     --------
@@ -324,7 +326,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> from pingouin import ttest
         >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
         >>> ttest(x, 4)
-            (1.3974, 0.2348, 4)
+            T-val   p-val  dof  cohen-d  power
+            1.397  0.2348    4    0.699  0.226
 
     2. Paired two-sample T-test (one-tailed).
 
@@ -332,7 +335,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
         >>> post = [6.4, 3.4, 6.4, 11., 4.8]
         >>> ttest(pre, post, paired=True, tail='one-sided')
-            (-2.3078, 0.0411, 8)
+            T-val   p-val  dof  cohen-d  power
+            -2.308   0.04    3    -0.28  0.015
 
     3. Paired two-sample T-test with missing values.
 
@@ -341,7 +345,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> pre = [5.5, 2.4, nan, 9.6, 4.2]
         >>> post = [6.4, 3.4, 6.4, 11., 4.8]
         >>> ttest(pre, post, paired=True)
-            (-5.902, 0.0097, 8)
+            T-val    p-val  dof  cohen-d  power
+            -5.902  0.0097    2   -0.354  0.074
 
     4. Independant two-sample T-test (equal sample size).
 
@@ -350,10 +355,9 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> np.random.seed(123)
         >>> x = np.random.normal(loc=7, size=20)
         >>> y = np.random.normal(loc=4, size=20)
-        >>> tval, pval, dof = ttest(x, y, correction='auto')
-        >>> # Pretty printing
-        >>> print("%.2f  %.2e  %i" % (tval, pval, dof))
-            9.11  4.31e-11  38
+        >>> ttest(x, y, correction='auto')
+            T-val     p-val  dof  cohen-d  power
+            9.106  4.30e-11   38     2.88    1.0
 
     5. Independant two-sample T-test (unequal sample size).
 
@@ -361,29 +365,35 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> import numpy as np
         >>> np.random.seed(123)
         >>> x = np.random.normal(loc=7, size=20)
-        >>> y = np.random.normal(loc=4, size=15)
-        >>> tval, pval, dof = ttest(x, y, correction='auto')
-        >>> print("%.2f  %.2e  %.2f" % (tval, pval, dof))
-            8.24  2.82e-09  30.75
+        >>> y = np.random.normal(loc=6.5, size=15)
+        >>> ttest(x, y, correction='auto')
+            T-val     p-val  dof   dof-corr  cohen-d  power
+            2.077     0.046   33      30.13    0.711  0.524
     """
     from scipy.stats import ttest_rel, ttest_ind, ttest_1samp
+    from pingouin import ttest_power, compute_effsize
     x = np.asarray(x)
     y = np.asarray(y)
+    
+    # Remove NA
+    x, y = _remove_na(x, y, paired=paired)
     nx = x.size
     ny = y.size
+    stats = pd.DataFrame({}, index=['T-test'])
 
     if ny == 1:
         # Case one sample T-test
         tval, pval = ttest_1samp(x, y)
         dof = nx - 1
         pval = pval / 2 if tail == 'one-sided' else pval
-        return tval, pval, dof
 
-    if paired:
+    elif ny > 1 and paired is True:
         # Case paired two samples T-test
         tval, pval = ttest_rel(x, y, nan_policy='omit')
+        dof = nx - 2
+
+    elif ny > 1 and paired is False:
         dof = nx + ny - 2
-    else:
         # Case unpaired two samples T-test
         if correction is True or (correction == 'auto' and nx != ny):
             # Use the Welch separate variance T-test
@@ -391,14 +401,29 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
             # dof are approximated using Welch–Satterthwaite equation
             vx = x.var(ddof=1)
             vy = y.var(ddof=1)
-            dof = (vx / nx + vy / ny)**2 / ((vx / nx)**2 / (nx - 1) +
+            dof_corr = (vx / nx + vy / ny)**2 / ((vx / nx)**2 / (nx - 1) +
                                             (vy / ny)**2 / (ny - 1))
+            stats['dof-corr'] = dof_corr
         else:
             tval, pval = ttest_ind(x, y, equal_var=True, nan_policy='omit')
-            dof = nx + ny - 2
 
     pval = pval / 2 if tail == 'one-sided' else pval
-    return tval, pval, dof
+
+    # Effect size and achieved power
+    d = compute_effsize(x, y, paired=paired, eftype='cohen')
+    power = ttest_power(d, nx, ny, paired=paired, tail=tail)
+
+    # Fill output DataFrame
+    stats['dof'] = dof
+    stats['T-val'] = tval.round(3)
+    stats['p-val'] = pval
+    stats['cohen-d'] = np.abs(d).round(3)
+    stats['power'] = power
+
+    col_order = ['T-val', 'p-val', 'dof', 'dof-corr', 'cohen-d', 'power']
+    stats = stats.reindex(columns=col_order)
+    stats.dropna(how='all', axis=1, inplace=True)
+    return stats
 
 
 def rm_anova(dv=None, within=None, data=None, correction='auto',

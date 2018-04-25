@@ -59,7 +59,8 @@ def ttest_power(d, nx, ny=None, paired=False, tail='two-sided',
             0.721
     """
     from scipy.stats import t, nct
-    if paired is True or ny is None:
+    d = np.abs(d)
+    if paired is True or ny is None or ny == 1:
         nc = d * np.sqrt(nx)
         dof = nx - 1
     else:

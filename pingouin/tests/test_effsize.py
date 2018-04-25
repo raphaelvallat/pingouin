@@ -64,9 +64,6 @@ class TestEffsize(_TestPingouin):
         # Wrong effect size type
         with pytest.raises(ValueError):
             compute_effsize(x=x, y=y, eftype='wrong')
-        # Wrong input
-        with pytest.raises(ValueError):
-            compute_effsize(x=x, y='wrong')
         # Unequal sample size with paired == True
         z = np.random.normal(2.5, 3, 20)
         compute_effsize(x=x, y=z, paired=True)
