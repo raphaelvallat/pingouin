@@ -27,6 +27,7 @@ x = np.random.normal(scale=1., size=100)
 y = np.random.normal(scale=0.8, size=100)
 z = np.random.normal(scale=0.9, size=100)
 
+
 class TestParametric(_TestPingouin):
     """Test parametric.py."""
 
@@ -78,7 +79,7 @@ class TestParametric(_TestPingouin):
         rm_anova(dv='Scores', within='Time', data=df, correction=True,
                  detailed=False)
         aov = rm_anova(dv='Scores', within='Time', data=df, correction='auto',
-                 detailed=True)
+                       detailed=True)
         # Compare with JASP
         assert np.allclose(aov.loc[0, 'F'].round(3), 3.913)
         assert np.allclose(aov.loc[0, 'p-unc'].round(3), .023)
@@ -92,7 +93,7 @@ class TestParametric(_TestPingouin):
     def test_mixed_anova(self):
         """Test function anova."""
         aov = mixed_anova(dv='Scores', within='Time', between='Group', data=df,
-                    correction='auto', remove_na=False)
+                          correction='auto', remove_na=False)
         # Compare with JASP
         assert np.allclose(aov.loc[0, 'F'].round(3), 5.052)
         assert np.allclose(aov.loc[1, 'F'].round(3), 4.027)

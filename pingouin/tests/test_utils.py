@@ -13,6 +13,7 @@ df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
                    'Time': ['Mon', 'Thur', 'Mon', 'Thur'],
                    'Values': [1.52, 5.8, 8.2, 3.4]})
 
+
 class TestUtils(_TestPingouin):
     """Test utils.py."""
 
