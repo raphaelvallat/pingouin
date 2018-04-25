@@ -310,14 +310,19 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
 
     Returns
     -------
-    stats : dataFrame
-        T-test summary.
+    stats : pandas DataFrame
+        T-test summary ::
 
-        T-val: T-value
-        p-val: p-value
-        dof: degrees of freedom
-        cohen-d: Cohen's d effect size
-        power: achieved power of the test (1 - type II error)
+        'T-val' : T-value
+        'p-val' : p-value
+        'dof' : degrees of freedom
+        'cohen-d' : Cohen d effect size
+        'power' : achieved power of the test ( = 1 - type II error)
+
+    Notes
+    -----
+    Missing values are automatically removed from the data. If x and y are
+    paired, the entire row is removed.
 
     Examples
     --------
@@ -374,7 +379,11 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
     from pingouin import ttest_power, compute_effsize
     x = np.asarray(x)
     y = np.asarray(y)
-    
+
+    if x.size != y.size and paired:
+        print('x and y have unequal sizes. Switching to paired == False.')
+        paired = False
+
     # Remove NA
     x, y = _remove_na(x, y, paired=paired)
     nx = x.size
@@ -389,7 +398,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
 
     elif ny > 1 and paired is True:
         # Case paired two samples T-test
-        tval, pval = ttest_rel(x, y, nan_policy='omit')
+        tval, pval = ttest_rel(x, y)
         dof = nx - 2
 
     elif ny > 1 and paired is False:
@@ -397,7 +406,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         # Case unpaired two samples T-test
         if correction is True or (correction == 'auto' and nx != ny):
             # Use the Welch separate variance T-test
-            tval, pval = ttest_ind(x, y, equal_var=False, nan_policy='omit')
+            tval, pval = ttest_ind(x, y, equal_var=False)
             # dof are approximated using Welch–Satterthwaite equation
             vx = x.var(ddof=1)
             vy = y.var(ddof=1)
@@ -405,7 +414,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
                                             (vy / ny)**2 / (ny - 1))
             stats['dof-corr'] = dof_corr
         else:
-            tval, pval = ttest_ind(x, y, equal_var=True, nan_policy='omit')
+            tval, pval = ttest_ind(x, y, equal_var=True)
 
     pval = pval / 2 if tail == 'one-sided' else pval
 

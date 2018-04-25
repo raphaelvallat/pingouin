@@ -290,6 +290,11 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
     ef : float
         Effect size
 
+    Notes
+    -----
+    Missing values are automatically removed from the data. If x and y are
+    paired, the entire row is removed.
+
     See Also
     --------
     convert_effsize : Conversion between effect sizes.

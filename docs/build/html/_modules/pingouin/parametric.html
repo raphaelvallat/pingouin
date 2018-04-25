@@ -105,7 +105,8 @@
 <span class="c1"># Date: April 2018</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">_check_dataframe</span><span class="p">,</span> <span class="n">_remove_rm_na</span><span class="p">,</span> <span class="n">_export_table</span>
+<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="p">(</span><span class="n">_check_dataframe</span><span class="p">,</span> <span class="n">_remove_rm_na</span><span class="p">,</span> <span class="n">_remove_na</span><span class="p">,</span>
+                      <span class="n">_export_table</span><span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;gzscore&quot;</span><span class="p">,</span> <span class="s2">&quot;test_normality&quot;</span><span class="p">,</span> <span class="s2">&quot;test_homoscedasticity&quot;</span><span class="p">,</span> <span class="s2">&quot;test_dist&quot;</span><span class="p">,</span>
            <span class="s2">&quot;test_sphericity&quot;</span><span class="p">,</span> <span class="s2">&quot;ttest&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_anova&quot;</span><span class="p">,</span> <span class="s2">&quot;anova&quot;</span><span class="p">,</span> <span class="s2">&quot;mixed_anova&quot;</span><span class="p">]</span>
@@ -412,13 +413,19 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    tval : boolean</span>
-<span class="sd">        Test statistic</span>
-<span class="sd">    pval : float</span>
-<span class="sd">        P-value</span>
-<span class="sd">    dof : int</span>
-<span class="sd">        Number of degrees of freedom. If a correction is applied, returns the</span>
-<span class="sd">        approximated degrees of freedom using the Welch–Satterthwaite equation.</span>
+<span class="sd">    stats : pandas DataFrame</span>
+<span class="sd">        T-test summary ::</span>
+
+<span class="sd">        &#39;T-val&#39; : T-value</span>
+<span class="sd">        &#39;p-val&#39; : p-value</span>
+<span class="sd">        &#39;dof&#39; : degrees of freedom</span>
+<span class="sd">        &#39;cohen-d&#39; : Cohen d effect size</span>
+<span class="sd">        &#39;power&#39; : achieved power of the test ( = 1 - type II error)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Missing values are automatically removed from the data. If x and y are</span>
+<span class="sd">    paired, the entire row is removed.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -427,7 +434,8 @@
 <span class="sd">        &gt;&gt;&gt; from pingouin import ttest</span>
 <span class="sd">        &gt;&gt;&gt; x = [5.5, 2.4, 6.8, 9.6, 4.2]</span>
 <span class="sd">        &gt;&gt;&gt; ttest(x, 4)</span>
-<span class="sd">            (1.3974, 0.2348, 4)</span>
+<span class="sd">            T-val   p-val  dof  cohen-d  power</span>
+<span class="sd">            1.397  0.2348    4    0.699  0.226</span>
 
 <span class="sd">    2. Paired two-sample T-test (one-tailed).</span>
 
@@ -435,7 +443,8 @@
 <span class="sd">        &gt;&gt;&gt; pre = [5.5, 2.4, 6.8, 9.6, 4.2]</span>
 <span class="sd">        &gt;&gt;&gt; post = [6.4, 3.4, 6.4, 11., 4.8]</span>
 <span class="sd">        &gt;&gt;&gt; ttest(pre, post, paired=True, tail=&#39;one-sided&#39;)</span>
-<span class="sd">            (-2.3078, 0.0411, 8)</span>
+<span class="sd">            T-val   p-val  dof  cohen-d  power</span>
+<span class="sd">            -2.308   0.04    3    -0.28  0.015</span>
 
 <span class="sd">    3. Paired two-sample T-test with missing values.</span>
 
@@ -444,7 +453,8 @@
 <span class="sd">        &gt;&gt;&gt; pre = [5.5, 2.4, nan, 9.6, 4.2]</span>
 <span class="sd">        &gt;&gt;&gt; post = [6.4, 3.4, 6.4, 11., 4.8]</span>
 <span class="sd">        &gt;&gt;&gt; ttest(pre, post, paired=True)</span>
-<span class="sd">            (-5.902, 0.0097, 8)</span>
+<span class="sd">            T-val    p-val  dof  cohen-d  power</span>
+<span class="sd">            -5.902  0.0097    2   -0.354  0.074</span>
 
 <span class="sd">    4. Independant two-sample T-test (equal sample size).</span>
 
@@ -453,10 +463,9 @@
 <span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
 <span class="sd">        &gt;&gt;&gt; x = np.random.normal(loc=7, size=20)</span>
 <span class="sd">        &gt;&gt;&gt; y = np.random.normal(loc=4, size=20)</span>
-<span class="sd">        &gt;&gt;&gt; tval, pval, dof = ttest(x, y, correction=&#39;auto&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; # Pretty printing</span>
-<span class="sd">        &gt;&gt;&gt; print(&quot;%.2f  %.2e  %i&quot; % (tval, pval, dof))</span>
-<span class="sd">            9.11  4.31e-11  38</span>
+<span class="sd">        &gt;&gt;&gt; ttest(x, y, correction=&#39;auto&#39;)</span>
+<span class="sd">            T-val     p-val  dof  cohen-d  power</span>
+<span class="sd">            9.106  4.30e-11   38     2.88    1.0</span>
 
 <span class="sd">    5. Independant two-sample T-test (unequal sample size).</span>
 
@@ -464,44 +473,69 @@
 <span class="sd">        &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
 <span class="sd">        &gt;&gt;&gt; x = np.random.normal(loc=7, size=20)</span>
-<span class="sd">        &gt;&gt;&gt; y = np.random.normal(loc=4, size=15)</span>
-<span class="sd">        &gt;&gt;&gt; tval, pval, dof = ttest(x, y, correction=&#39;auto&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; print(&quot;%.2f  %.2e  %.2f&quot; % (tval, pval, dof))</span>
-<span class="sd">            8.24  2.82e-09  30.75</span>
+<span class="sd">        &gt;&gt;&gt; y = np.random.normal(loc=6.5, size=15)</span>
+<span class="sd">        &gt;&gt;&gt; ttest(x, y, correction=&#39;auto&#39;)</span>
+<span class="sd">            T-val     p-val  dof   dof-corr  cohen-d  power</span>
+<span class="sd">            2.077     0.046   33      30.13    0.711  0.524</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">ttest_rel</span><span class="p">,</span> <span class="n">ttest_ind</span><span class="p">,</span> <span class="n">ttest_1samp</span>
+    <span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest_power</span><span class="p">,</span> <span class="n">compute_effsize</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">paired</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;x and y have unequal sizes. Switching to paired == False.&#39;</span><span class="p">)</span>
+        <span class="n">paired</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># Remove NA</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">_remove_na</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="n">paired</span><span class="p">)</span>
     <span class="n">nx</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
     <span class="n">ny</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;T-test&#39;</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">ny</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="c1"># Case one sample T-test</span>
         <span class="n">tval</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">ttest_1samp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
         <span class="n">dof</span> <span class="o">=</span> <span class="n">nx</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="n">pval</span> <span class="o">=</span> <span class="n">pval</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">tail</span> <span class="o">==</span> <span class="s1">&#39;one-sided&#39;</span> <span class="k">else</span> <span class="n">pval</span>
-        <span class="k">return</span> <span class="n">tval</span><span class="p">,</span> <span class="n">pval</span><span class="p">,</span> <span class="n">dof</span>
 
-    <span class="k">if</span> <span class="n">paired</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">ny</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">paired</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="c1"># Case paired two samples T-test</span>
-        <span class="n">tval</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">ttest_rel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nan_policy</span><span class="o">=</span><span class="s1">&#39;omit&#39;</span><span class="p">)</span>
+        <span class="n">tval</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">ttest_rel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">dof</span> <span class="o">=</span> <span class="n">nx</span> <span class="o">-</span> <span class="mi">2</span>
+
+    <span class="k">elif</span> <span class="n">ny</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">paired</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
         <span class="n">dof</span> <span class="o">=</span> <span class="n">nx</span> <span class="o">+</span> <span class="n">ny</span> <span class="o">-</span> <span class="mi">2</span>
-    <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Case unpaired two samples T-test</span>
         <span class="k">if</span> <span class="n">correction</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="p">(</span><span class="n">correction</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span> <span class="ow">and</span> <span class="n">nx</span> <span class="o">!=</span> <span class="n">ny</span><span class="p">):</span>
             <span class="c1"># Use the Welch separate variance T-test</span>
-            <span class="n">tval</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">ttest_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">equal_var</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nan_policy</span><span class="o">=</span><span class="s1">&#39;omit&#39;</span><span class="p">)</span>
+            <span class="n">tval</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">ttest_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">equal_var</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="c1"># dof are approximated using Welch–Satterthwaite equation</span>
             <span class="n">vx</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">vy</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">dof</span> <span class="o">=</span> <span class="p">(</span><span class="n">vx</span> <span class="o">/</span> <span class="n">nx</span> <span class="o">+</span> <span class="n">vy</span> <span class="o">/</span> <span class="n">ny</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">((</span><span class="n">vx</span> <span class="o">/</span> <span class="n">nx</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">nx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span>
+            <span class="n">dof_corr</span> <span class="o">=</span> <span class="p">(</span><span class="n">vx</span> <span class="o">/</span> <span class="n">nx</span> <span class="o">+</span> <span class="n">vy</span> <span class="o">/</span> <span class="n">ny</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">((</span><span class="n">vx</span> <span class="o">/</span> <span class="n">nx</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">nx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span>
                                             <span class="p">(</span><span class="n">vy</span> <span class="o">/</span> <span class="n">ny</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">ny</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;dof-corr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dof_corr</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">tval</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">ttest_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">equal_var</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nan_policy</span><span class="o">=</span><span class="s1">&#39;omit&#39;</span><span class="p">)</span>
-            <span class="n">dof</span> <span class="o">=</span> <span class="n">nx</span> <span class="o">+</span> <span class="n">ny</span> <span class="o">-</span> <span class="mi">2</span>
+            <span class="n">tval</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">ttest_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">equal_var</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">pval</span> <span class="o">=</span> <span class="n">pval</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">tail</span> <span class="o">==</span> <span class="s1">&#39;one-sided&#39;</span> <span class="k">else</span> <span class="n">pval</span>
-    <span class="k">return</span> <span class="n">tval</span><span class="p">,</span> <span class="n">pval</span><span class="p">,</span> <span class="n">dof</span></div>
+
+    <span class="c1"># Effect size and achieved power</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="n">paired</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">)</span>
+    <span class="n">power</span> <span class="o">=</span> <span class="n">ttest_power</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="n">paired</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="n">tail</span><span class="p">)</span>
+
+    <span class="c1"># Fill output DataFrame</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;dof&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dof</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;T-val&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tval</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-val&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pval</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;cohen-d&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;power&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">power</span>
+
+    <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;T-val&#39;</span><span class="p">,</span> <span class="s1">&#39;p-val&#39;</span><span class="p">,</span> <span class="s1">&#39;dof&#39;</span><span class="p">,</span> <span class="s1">&#39;dof-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;cohen-d&#39;</span><span class="p">,</span> <span class="s1">&#39;power&#39;</span><span class="p">]</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
+    <span class="n">stats</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">stats</span></div>
 
 
 <div class="viewcode-block" id="rm_anova"><a class="viewcode-back" href="../../generated/pingouin.rm_anova.html#pingouin.rm_anova">[docs]</a><span class="k">def</span> <span class="nf">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>

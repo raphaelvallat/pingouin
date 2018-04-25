@@ -121,10 +121,21 @@
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.mixed_anova.html#pingouin.mixed_anova" title="pingouin.mixed_anova"><code class="xref py py-obj docutils literal"><span class="pre">mixed_anova</span></code></a>([dv,&nbsp;within,&nbsp;between,&nbsp;data,&nbsp;…])</td>
 <td>Mixed-design (split-plot) type II ANOVA.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests" title="pingouin.pairwise_ttests"><code class="xref py py-obj docutils literal"><span class="pre">pairwise_ttests</span></code></a>([dv,&nbsp;between,&nbsp;within,&nbsp;…])</td>
+</tbody>
+</table>
+</div>
+<div class="section" id="t-test">
+<h2>T-test</h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests" title="pingouin.pairwise_ttests"><code class="xref py py-obj docutils literal"><span class="pre">pairwise_ttests</span></code></a>([dv,&nbsp;between,&nbsp;within,&nbsp;…])</td>
 <td>Pairwise T-tests.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.ttest.html#pingouin.ttest" title="pingouin.ttest"><code class="xref py py-obj docutils literal"><span class="pre">ttest</span></code></a>(x,&nbsp;y[,&nbsp;paired,&nbsp;tail,&nbsp;correction])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.ttest.html#pingouin.ttest" title="pingouin.ttest"><code class="xref py py-obj docutils literal"><span class="pre">ttest</span></code></a>(x,&nbsp;y[,&nbsp;paired,&nbsp;tail,&nbsp;correction])</td>
 <td>T-test.</td>
 </tr>
 </tbody>
@@ -172,6 +183,23 @@
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.compute_esci.html#pingouin.compute_esci" title="pingouin.compute_esci"><code class="xref py py-obj docutils literal"><span class="pre">compute_esci</span></code></a>([x,&nbsp;y,&nbsp;ef,&nbsp;nx,&nbsp;ny,&nbsp;alpha,&nbsp;…])</td>
 <td>Bootstrapped or parametric confidence intervals of an effect size.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="power">
+<h2>Power</h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.ttest_power.html#pingouin.ttest_power" title="pingouin.ttest_power"><code class="xref py py-obj docutils literal"><span class="pre">ttest_power</span></code></a>(d,&nbsp;nx[,&nbsp;ny,&nbsp;paired,&nbsp;tail,&nbsp;alpha])</td>
+<td>Determine achieved power of a T test given effect size, sample size and alpha level.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.anova_power.html#pingouin.anova_power" title="pingouin.anova_power"><code class="xref py py-obj docutils literal"><span class="pre">anova_power</span></code></a>(eta,&nbsp;ntot,&nbsp;ngroups[,&nbsp;alpha])</td>
+<td>Determine achieved power of a one-way ANOVA given effect size, sample size, number of groups and alpha level.</td>
 </tr>
 </tbody>
 </table>
