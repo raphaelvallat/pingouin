@@ -19,11 +19,13 @@ df = pd.DataFrame({'Scores': np.r_[control, meditation],
                    'Group': np.repeat(['Control', 'Meditation'],
                                       len(months) * n)})
 
+df_nan = df.copy()
+df_nan.iloc[[4, 15], 1] = np.nan
+
 # Create random normal variables
 x = np.random.normal(scale=1., size=100)
 y = np.random.normal(scale=0.8, size=100)
 z = np.random.normal(scale=0.9, size=100)
-
 
 class TestParametric(_TestPingouin):
     """Test parametric.py."""
@@ -52,29 +54,36 @@ class TestParametric(_TestPingouin):
 
     def test_ttest(self):
         """Test function ttest"""
+        h = np.random.normal(scale=0.9, size=95)
         ttest(x, 0.5)
         ttest(x, y, paired=True, tail='one-sided')
         ttest(x, y, paired=False, correction='auto')
         ttest(x, y, paired=False, correction=True)
+        ttest(x, h, paired=True)
 
     def test_anova(self):
         """Test function anova."""
         anova(dv='Scores', between='Group', data=df, detailed=True)
-        anova(dv='Scores', between='Group', data=df, detailed=False)
+        anova(dv='Scores', between='Group', data=df, detailed=False,
+              export_filename='test_export.csv')
 
     def test_rm_anova(self):
         """Test function anova."""
         rm_anova(dv='Scores', within='Time', data=df, correction=False,
-                 remove_na=False, detailed=False)
-        rm_anova(dv='Scores', within='Time', data=df, correction='auto',
-                 remove_na=True, detailed=True)
+                 detailed=False)
         rm_anova(dv='Scores', within='Time', data=df, correction=True,
-                 remove_na=True, detailed=True)
+                 detailed=False)
+        rm_anova(dv='Scores', within='Time', data=df, correction='auto',
+                 detailed=True)
+        rm_anova(dv='Scores', within='Time', data=df, correction=True,
+                 detailed=True)
+        rm_anova(dv='Scores', within='Time', data=df_nan,
+                 export_filename='test_export.csv')
 
     def test_mixed_anova(self):
         """Test function anova."""
         mixed_anova(dv='Scores', within='Time', between='Group', data=df,
                     correction='auto', remove_na=False)
-        df.iloc[4, 0] = np.nan
-        mixed_anova(dv='Scores', within='Time', between='Group', data=df,
-                    correction=True, remove_na=True)
+        mixed_anova(dv='Scores', within='Time', between='Group', data=df_nan,
+                    correction=True, remove_na=True,
+                    export_filename='test_export.csv')

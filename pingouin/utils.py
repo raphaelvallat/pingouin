@@ -122,10 +122,10 @@ def _remove_na(x, y, paired=False):
     if (x_na or y_na) and paired:
         ar = np.c_[x, y]
         ar = ar[~np.isnan(ar).any(axis=1)]
-        x, y = ar[:,0], ar[:, 1]
+        x, y = ar[:, 0], ar[:, 1]
     elif (x_na or y_na) and not paired:
-        x = np.array(list(filter(lambda v: v==v, x))) if x_na else x
-        y = np.array(list(filter(lambda v: v==v, y))) if y_na else y
+        x = np.array(list(filter(lambda v: v == v, x))) if x_na else x
+        y = np.array(list(filter(lambda v: v == v, y))) if y_na else y
     return x, y
 
 

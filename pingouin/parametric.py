@@ -95,11 +95,6 @@ def test_normality(*args, alpha=.05):
         [True   False] [0.27   0.0005]
     """
     from scipy.stats import shapiro
-    # Handle empty input
-    for a in args:
-        if np.asanyarray(a).size == 0:
-            return np.nan, np.nan
-
     k = len(args)
     p = np.zeros(k)
     normal = np.zeros(k, 'bool')
@@ -154,11 +149,6 @@ def test_homoscedasticity(*args, alpha=.05):
             False 0.0002
     """
     from scipy.stats import levene, bartlett
-    # Handle empty input
-    for a in args:
-        if np.asanyarray(a).size == 0:
-            return np.nan, np.nan
-
     k = len(args)
     if k < 2:
         raise ValueError("Must enter at least two input sample vectors.")
@@ -191,11 +181,6 @@ def test_dist(*args, dist='norm'):
         True if data comes from this distribution.
     """
     from scipy.stats import anderson
-    # Handle empty input
-    for a in args:
-        if np.asanyarray(a).size == 0:
-            return np.nan, np.nan
-
     k = len(args)
     from_dist = np.zeros(k, 'bool')
     sig_level = np.zeros(k)
@@ -396,7 +381,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         dof = nx - 1
         pval = pval / 2 if tail == 'one-sided' else pval
 
-    elif ny > 1 and paired is True:
+    if ny > 1 and paired is True:
         # Case paired two samples T-test
         tval, pval = ttest_rel(x, y)
         dof = nx - 2
@@ -411,7 +396,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
             vx = x.var(ddof=1)
             vy = y.var(ddof=1)
             dof_corr = (vx / nx + vy / ny)**2 / ((vx / nx)**2 / (nx - 1) +
-                                            (vy / ny)**2 / (ny - 1))
+                                                 (vy / ny)**2 / (ny - 1))
             stats['dof-corr'] = dof_corr
         else:
             tval, pval = ttest_ind(x, y, equal_var=True)

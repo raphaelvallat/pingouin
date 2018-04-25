@@ -38,15 +38,16 @@ class TestUtils(_TestPingouin):
         df = pd.DataFrame(data, columns=['Ss', '10am', '2pm', '6pm'])
         reshape_data(df, 'Ss', dv="Score", rm="Time")
 
-    def test_remove_rm_na(self):
-        """Test function _remove_na."""
+    def test_remove_na(self):
+        """Test function remove_na."""
         x = [6.4, 3.2, 4.5, np.nan]
         y = [3.5, 7.2, 8.4, 3.2]
         z = [2.3, np.nan, 5.2, 4.6]
         _remove_na(x, y, paired=True)
         _remove_na(x, y, paired=False)
+        _remove_na(y, x, paired=False)
         x_out, _ = _remove_na(x, z, paired=True)
-        assert x_out == np.array([6.4, 4.5])
+        assert np.allclose(x_out, [6.4, 4.5])
 
     def test_remove_rm_na(self):
         """Test function _remove_rm_na."""
