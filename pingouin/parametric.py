@@ -384,7 +384,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
     if ny > 1 and paired is True:
         # Case paired two samples T-test
         tval, pval = ttest_rel(x, y)
-        dof = nx - 2
+        dof = nx - 1
 
     elif ny > 1 and paired is False:
         dof = nx + ny - 2

@@ -2,6 +2,7 @@
 # Date: April 2018
 import numpy as np
 from six import string_types
+from pingouin.external.tabulate import tabulate
 import pandas as pd
 
 __all__ = ["print_table", "_export_table", "reshape_data",
@@ -12,7 +13,7 @@ __all__ = ["print_table", "_export_table", "reshape_data",
 def print_table(df, floatfmt=".4f", tablefmt='simple'):
     """Nice display of table.
 
-    See: https://pypi.org/project/tabulate/
+    See: https://pypi.org/project/tabulate/.
 
     Parameters
     ----------
@@ -28,13 +29,9 @@ def print_table(df, floatfmt=".4f", tablefmt='simple'):
     if 'A' in df.keys():
         print('\n==============\nPOST HOC TESTS\n==============\n')
 
-    try:
-        from tabulate import tabulate
-        print(tabulate(df, headers="keys", showindex=False, floatfmt=floatfmt,
-                       tablefmt=tablefmt))
-        print('')
-    except BaseException:
-        print(df)
+    print(tabulate(df, headers="keys", showindex=False, floatfmt=floatfmt,
+                   tablefmt=tablefmt))
+    print('')
 
 
 def _export_table(table, fname):

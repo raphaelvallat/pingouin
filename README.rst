@@ -47,7 +47,6 @@ Pingouin requires :
 * NumPy
 * SciPy
 * Pandas
-* Tabulate (optional: allows pretty-printing of output table)
 
 User installation
 -----------------

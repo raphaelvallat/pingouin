@@ -9,7 +9,7 @@ LONG_DESCRIPTION = """Pingouin is a statistical Python package based on Pandas.
 DISTNAME = 'pingouin'
 MAINTAINER = 'Raphael Vallat'
 MAINTAINER_EMAIL = 'raphaelvallat9@gmail.com'
-URL = 'https://github.com/raphaelvallat/pingouin/'
+URL = 'https://raphaelvallat.github.io/pingouin/build/html/index.html'
 LICENSE = 'BSD (3-clause)'
 DOWNLOAD_URL = 'https://github.com/raphaelvallat/pingouin/'
 VERSION = '0.1.1'
@@ -37,11 +37,6 @@ def check_dependencies():
         import pandas
     except ImportError:
         install_requires.append('pandas')
-    try:
-        import tabulate
-    except ImportError:
-        install_requires.append('tabulate')
-
     return install_requires
 
 

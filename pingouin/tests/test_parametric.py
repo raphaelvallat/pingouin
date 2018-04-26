@@ -23,6 +23,7 @@ df_nan = df.copy()
 df_nan.iloc[[4, 15], 1] = np.nan
 
 # Create random normal variables
+np.random.seed(1234)
 x = np.random.normal(scale=1., size=100)
 y = np.random.normal(scale=0.8, size=100)
 z = np.random.normal(scale=0.9, size=100)
@@ -57,7 +58,10 @@ class TestParametric(_TestPingouin):
         """Test function ttest"""
         h = np.random.normal(scale=0.9, size=95)
         ttest(x, 0.5)
-        ttest(x, y, paired=True, tail='one-sided')
+        stats = ttest(x, y, paired=True, tail='one-sided')
+        # Compare with JASP
+        assert np.allclose(stats.loc['T-test', 'T-val'], 0.616)
+        assert np.allclose(stats.loc['T-test', 'p-val'].round(3), .270)
         ttest(x, y, paired=False, correction='auto')
         ttest(x, y, paired=False, correction=True)
         ttest(x, h, paired=True)
