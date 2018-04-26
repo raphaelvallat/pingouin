@@ -326,7 +326,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> post = [6.4, 3.4, 6.4, 11., 4.8]
         >>> ttest(pre, post, paired=True, tail='one-sided')
             T-val   p-val  dof  cohen-d  power
-            -2.308   0.04    3    -0.28  0.015
+            -2.308   0.04    4    -0.28  0.015
 
     3. Paired two-sample T-test with missing values.
 
@@ -336,7 +336,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> post = [6.4, 3.4, 6.4, 11., 4.8]
         >>> ttest(pre, post, paired=True)
             T-val    p-val  dof  cohen-d  power
-            -5.902  0.0097    2   -0.354  0.074
+            -5.902  0.0097    3   -0.354  0.074
 
     4. Independant two-sample T-test (equal sample size).
 
