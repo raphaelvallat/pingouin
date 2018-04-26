@@ -3,6 +3,7 @@ Doc
 
 Code
 ----
-- Tukey post-hoc
-- Better bootstrapping of confidence intervals
-- Power and sample sizes computations
+- Tested ESCI against JASP.
+- Better bootstrapping of confidence intervals.
+- Sample sizes computations.
+- Bayesian T-test.
