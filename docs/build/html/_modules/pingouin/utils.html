@@ -105,6 +105,7 @@
 <span class="c1"># Date: April 2018</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">string_types</span>
+<span class="kn">from</span> <span class="nn">pingouin.external.tabulate</span> <span class="k">import</span> <span class="n">tabulate</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;print_table&quot;</span><span class="p">,</span> <span class="s2">&quot;_export_table&quot;</span><span class="p">,</span> <span class="s2">&quot;reshape_data&quot;</span><span class="p">,</span>
@@ -115,7 +116,7 @@
 <div class="viewcode-block" id="print_table"><a class="viewcode-back" href="../../generated/pingouin.print_table.html#pingouin.print_table">[docs]</a><span class="k">def</span> <span class="nf">print_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;.4f&quot;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s1">&#39;simple&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Nice display of table.</span>
 
-<span class="sd">    See: https://pypi.org/project/tabulate/</span>
+<span class="sd">    See: https://pypi.org/project/tabulate/.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -128,16 +129,12 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="s1">&#39;F&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">=============</span><span class="se">\n</span><span class="s1">ANOVA SUMMARY</span><span class="se">\n</span><span class="s1">=============</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="s1">&#39;A&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="k">if</span> <span class="s1">&#39;A&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">==============</span><span class="se">\n</span><span class="s1">POST HOC TESTS</span><span class="se">\n</span><span class="s1">==============</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">tabulate</span> <span class="k">import</span> <span class="n">tabulate</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s2">&quot;keys&quot;</span><span class="p">,</span> <span class="n">showindex</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="n">floatfmt</span><span class="p">,</span>
-                       <span class="n">tablefmt</span><span class="o">=</span><span class="n">tablefmt</span><span class="p">))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">)</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s2">&quot;keys&quot;</span><span class="p">,</span> <span class="n">showindex</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="n">floatfmt</span><span class="p">,</span>
+                   <span class="n">tablefmt</span><span class="o">=</span><span class="n">tablefmt</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">_export_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
