@@ -3,7 +3,7 @@ Doc
 
 Code
 ----
-- Tested ESCI against JASP.
+- Test ESCI against JASP.
 - Better bootstrapping of confidence intervals.
 - Sample sizes computations.
 - Bayesian T-test.
