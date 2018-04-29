@@ -1,5 +1,4 @@
-Pingouin
-########
+|
 
 .. image:: https://badge.fury.io/py/pingouin.svg
   :target: https://badge.fury.io/py/pingouin
@@ -14,7 +13,7 @@ Pingouin
     :target: https://codecov.io/gh/raphaelvallat/pingouin
 
 
-.. figure::  /pictures/pingouin.png
+.. figure::  /pictures/logo_pingouin.png
   :align:   center
 
 **Pingouin** (French word for *penguin*) is an open-source statistical Python 3 package based on Pandas.
