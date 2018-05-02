@@ -97,3 +97,5 @@ ENV/
 # mypy
 .mypy_cache/
 test_export.csv
+desktop.ini
+examples/mixed_anova.csv
