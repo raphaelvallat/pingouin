@@ -268,6 +268,13 @@ def test_sphericity(X, alpha=.05):
     chi_sq = -np.log(W) * dd * nr
     ddof = d * (d + 1) / 2 - 1
     pval = chi2.sf(chi_sq, ddof)
+
+    # Second order approximation (to be tested!)
+    # pval2 = chi2.sf(chi_sq, ddof + 4)
+    # w2 = (d + 2) * (d - 1) * (d - 2) * (2 * d**3 + 6 * d * d + 3 * d + 2) / \
+    #      (288 * d * d * nr * nr * dd * dd)
+    # pval += w2 * (pval2 - pval)
+
     sphericity = True if pval > alpha else False
     return sphericity, W, chi_sq, ddof, pval
 
@@ -547,7 +554,12 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     if correction:
         # Compute covariance matrix
         v = data_pivot.cov().as_matrix()
-        eps = np.trace(v) ** 2 / ddof1 * np.sum(np.sum(v * v, axis=1))
+        eps = np.trace(v) ** 2 / (ddof1 * np.sum(np.sum(v * v, axis=1)))
+        # Which is the same as:
+        # eig = np.linalg.eigvals(v)
+        # eps = np.sum(eig) ** 2 / (ddof1 * np.sum(eig**2))
+        # print('eps = ', eps)
+
         corr_ddof1, corr_ddof2 = [np.maximum(d * eps, 1.) for d in
                                   (ddof1, ddof2)]
         p_corr = f(corr_ddof1, corr_ddof2).sf(fval)

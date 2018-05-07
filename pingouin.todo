@@ -3,7 +3,8 @@ Doc
 
 Code
 ----
+- URGENT: FIX SPHERICITY AND MAURY
+- Test second order approximation in Mauchly
 - Test ESCI against JASP.
 - Better bootstrapping of confidence intervals.
 - Sample sizes computations.
-- Bayesian T-test.
