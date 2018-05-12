@@ -222,6 +222,8 @@ def test_sphericity(X, alpha=.05):
         Degrees of freedom
     p : float
         P-value.
+    eps : float
+        Epsilon adjustment factor.
 
     See Also
     --------
@@ -240,7 +242,7 @@ def test_sphericity(X, alpha=.05):
         >>> y = np.random.normal(loc=0, scale=0.8,size=30)
         >>> z = np.random.normal(loc=0, scale=0.9,size=30)
         >>> X = np.c_[x, y, z]
-        >>> sphericity, W, chi_sq, ddof, p = test_sphericity(X)
+        >>> sphericity, W, chi_sq, ddof, p, eps = test_sphericity(X)
         >>> print(sphericity, p)
         True 0.56
         """
@@ -259,6 +261,13 @@ def test_sphericity(X, alpha=.05):
     d = C.shape[1]
     T = C.T.dot(S).dot(C)
 
+    # Compute epsilon
+    eig = np.linalg.eigvals(T)
+    eps = np.sum(eig) ** 2 / ((S.shape[0] - 1) * np.sum(eig**2))
+    # Alternative:
+    # eps = np.trace(T) ** 2 / ((S.shape[0] - 1) * np.sum(
+                                                    # np.sum(T * T, axis=1)))
+
     # Mauchly's statistic
     W = np.linalg.det(T) / (np.trace(T) / (p - 1))**d
 
@@ -269,14 +278,14 @@ def test_sphericity(X, alpha=.05):
     ddof = d * (d + 1) / 2 - 1
     pval = chi2.sf(chi_sq, ddof)
 
-    # Second order approximation (to be tested!)
-    # pval2 = chi2.sf(chi_sq, ddof + 4)
-    # w2 = (d + 2) * (d - 1) * (d - 2) * (2 * d**3 + 6 * d * d + 3 * d + 2) / \
-    #      (288 * d * d * nr * nr * dd * dd)
-    # pval += w2 * (pval2 - pval)
+    # Second order approximation
+    pval2 = chi2.sf(chi_sq, ddof + 4)
+    w2 = (d + 2) * (d - 1) * (d - 2) * (2 * d**3 + 6 * d * d + 3 * d + 2) / \
+         (288 * d * d * nr * nr * dd * dd)
+    pval += w2 * (pval2 - pval)
 
     sphericity = True if pval > alpha else False
-    return sphericity, W, chi_sq, ddof, pval
+    return sphericity, W, chi_sq, ddof, pval, eps
 
 
 def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
@@ -543,7 +552,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     # Sphericity assumption only applies if there are more than 2 levels
     if correction == 'auto' or (correction is True and n_rm >= 3):
         sphericity, W_mauchly, chi_sq_mauchly, ddof_mauchly, \
-            p_mauchly = test_sphericity(data_pivot.as_matrix(), alpha=.05)
+            p_mauchly, eps = test_sphericity(data_pivot.as_matrix(), alpha=.05)
 
         if correction == 'auto':
             correction = True if not sphericity else False
@@ -552,14 +561,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
 
     # If required, apply Greenhouse-Geisser correction for sphericity
     if correction:
-        # Compute covariance matrix
-        v = data_pivot.cov().as_matrix()
-        eps = np.trace(v) ** 2 / (ddof1 * np.sum(np.sum(v * v, axis=1)))
-        # Which is the same as:
-        # eig = np.linalg.eigvals(v)
-        # eps = np.sum(eig) ** 2 / (ddof1 * np.sum(eig**2))
         # print('eps = ', eps)
-
         corr_ddof1, corr_ddof2 = [np.maximum(d * eps, 1.) for d in
                                   (ddof1, ddof2)]
         p_corr = f(corr_ddof1, corr_ddof2).sf(fval)
