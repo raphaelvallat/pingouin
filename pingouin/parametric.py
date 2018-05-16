@@ -839,7 +839,8 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     npsq_inter = ssinter / (ssinter + sswg)
 
     # Stats table
-    aov = pd.concat([mbetw.drop(1), mtime.drop(1)], ignore_index=True)
+    aov = pd.concat([mbetw.drop(1), mtime.drop(1)], sort=False,
+                    ignore_index=True)
     # Update values
     aov.rename(columns={'DF': 'DF1'}, inplace=True)
     aov.loc[0, 'F'], aov.loc[1, 'F'] = fbetween, ftime

@@ -20,7 +20,7 @@ df = pd.DataFrame({'Scores': np.r_[control, meditation],
                                       len(months) * n)})
 
 df_nan = df.copy()
-df_nan.iloc[[4, 15], 1] = np.nan
+df_nan.iloc[[4, 15], 0] = np.nan
 
 # Create random normal variables
 np.random.seed(1234)
