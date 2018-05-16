@@ -1,5 +1,5 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
-# Date: April 2018
+# Date: May 2018
 import numpy as np
 import pandas as pd
 from pingouin import (_check_dataframe, _remove_na)
