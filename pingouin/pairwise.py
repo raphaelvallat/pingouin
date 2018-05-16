@@ -172,7 +172,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
                                             padjust=padjust, effsize=effsize,
                                             return_desc=return_desc)
         stats = pd.concat([stats_within, stats_between,
-                           stats_interaction]).reset_index()
+                           stats_interaction], sort=False).reset_index()
 
     # Tail and multiple comparisons
     if tail == 'one-sided':

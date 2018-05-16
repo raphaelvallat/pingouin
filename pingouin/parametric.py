@@ -552,7 +552,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     # Sphericity assumption only applies if there are more than 2 levels
     if correction == 'auto' or (correction is True and n_rm >= 3):
         sphericity, W_mauchly, chi_sq_mauchly, ddof_mauchly, \
-            p_mauchly, eps = test_sphericity(data_pivot.as_matrix(), alpha=.05)
+            p_mauchly, eps = test_sphericity(data_pivot.values, alpha=.05)
 
         if correction == 'auto':
             correction = True if not sphericity else False
