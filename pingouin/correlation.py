@@ -35,9 +35,10 @@ def percbend(x, y, beta=.2):
     """
     from scipy.stats import t
     X = np.c_[x, y]
-    M = np.median(X).repeat(X.size).reshape(X.shape)
+    nx = X.shape[0]
+    M =  np.tile(np.median(X, axis=0), nx).reshape(X.shape)
     W = np.sort(np.abs(X - M), axis=0)
-    m = int(np.floor((1 - beta) * X.shape[0]))
+    m = int((1 - beta) * nx)
     omega = W[m-1, :]
 
     # Compute correlation
@@ -46,12 +47,12 @@ def percbend(x, y, beta=.2):
     P[np.isnan(P)] = 0
 
     # Loop over columns
-    a = np.zeros((2, X.shape[0]))
+    a = np.zeros((2, nx))
     for c in [0, 1]:
         psi = P[:, c]
         i1 = np.where(psi < -1)[0].size
         i2 = np.where(psi > 1)[0].size
-        s = X[:, c]
+        s = X[:, c].copy()
         s[np.where(psi < -1)[0]] = 0
         s[np.where(psi > 1)[0]] = 0
         pbos = (np.sum(s) + omega[c] * (i2 - i1)) /  (s.size - i1 - i2)
@@ -64,8 +65,8 @@ def percbend(x, y, beta=.2):
     # Get r, tval and pval
     a, b = a
     r = (a*b).sum() / np.sqrt((a**2).sum() * (b**2).sum())
-    tval = r * np.sqrt((X.shape[0] - 2) / (1 - r**2))
-    pval = 2 * t.sf(tval, X.shape[0] - 2)
+    tval = r * np.sqrt((nx - 2) / (1 - r**2))
+    pval = 2 * t.sf(abs(tval), nx - 2)
     return r, pval
 
 def corr(x, y, tail='two-sided', method='pearson'):
@@ -114,8 +115,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     strong disagreement.
 
     The percentage bend correlation (Wilcox 1994) is a robust method that
-    protects against outliers. Use it when you suspect outliers in only one of
-    the two variables.
+    protects against outliers among the marginal distributions.
 
     Please note that NaN are automatically removed from datasets.
     """
@@ -141,6 +141,8 @@ def corr(x, y, tail='two-sided', method='pearson'):
         r, pval = kendalltau(x, y)
     elif method == 'percbend':
         r, pval = percbend(x, y)
+    else:
+        raise ValueError('Method not recognized.')
 
     # Compute adj_r2
     adj_r2 = 1 - ( ((1 - r**2) * (nx - 1)) / (nx - 3))
