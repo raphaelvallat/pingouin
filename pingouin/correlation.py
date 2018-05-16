@@ -70,7 +70,7 @@ def percbend(x, y, beta=.2):
     return r, pval
 
 def corr(x, y, tail='two-sided', method='pearson'):
-    """Compute the correlation coefficient between variables X and Y.
+    """(Robust) correlation between two variables.
 
     Parameters
     ----------
@@ -115,9 +115,43 @@ def corr(x, y, tail='two-sided', method='pearson'):
     strong disagreement.
 
     The percentage bend correlation (Wilcox 1994) is a robust method that
-    protects against outliers among the marginal distributions.
+    protects against univariate outliers.
 
     Please note that NaN are automatically removed from datasets.
+
+    Examples
+    --------
+    1. Pearson correlation
+
+        >>> import numpy as np
+        >>> from pingouin import corr
+        >>> x = [20, 22, 19, 20, 22, 18, 24, 20]
+        >>> y = [38, 37, 33, 29, 14, 12, 20, 22]
+        >>> corr(x, y)
+                    r       r2     adj_r2   p-val
+            pearson -0.023  0.001  -0.399   0.957
+
+    2. One-tailed spearman correlation
+
+        >>> import numpy as np
+        >>> from pingouin import corr
+        >>> x = [20, 22, 19, 20, 22, 18, 24, 20]
+        >>> y = [38, 37, 33, 29, 14, 12, 20, 22]
+        >>> corr(x, y, method='spearman', tail='one-sided')
+                      r       r2     adj_r2  p-val
+            spearman  0.0368  0.001  -0.398  0.465
+
+    3. Robust correlation (percentage bend)
+
+        >>> import numpy as np
+        >>> from pingouin import corr
+        >>> x = [20, 22, 19, 20, 22, 18, 24, 20]
+        >>> y = [38, 37, 33, 29, 14, 12, 20, 22]
+        >>> corr(x, y, method='percbend')
+                     r        r2     adj_r2  p-val
+            percbend -0.0411  0.002  -0.397  0.923
+
+
     """
     x = np.asarray(x)
     y = np.asarray(y)

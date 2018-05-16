@@ -18,8 +18,8 @@ ANOVA
     mixed_anova
 
 
-T-test
-------
+T-test and correlations
+-----------------------
 
 .. _ttests:
 
@@ -28,6 +28,9 @@ T-test
 
     pairwise_ttests
     ttest
+    mwu
+    wilcoxon
+    corr
 
 
 Multiple comparisons

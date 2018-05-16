@@ -118,12 +118,10 @@ def wilcoxon(x, y, tail='two-sided'):
 
         >>> import numpy as np
         >>> from pingouin import wilcoxon
-        >>> np.random.seed(123)
         >>> x = [20, 22, 19, 20, 22, 18, 24, 20]
         >>> y = [38, 37, 33, 29, 14, 12, 20, 22]
         >>> print("Medians = %.2f - %.2f" % (np.median(x), np.median(y)))
         >>> wilcoxon(x, y, tail='two-sided')
-
     """
     from scipy.stats import wilcoxon, rankdata
     x = np.asarray(x)

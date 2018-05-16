@@ -3,6 +3,24 @@
 What's new
 ##########
 
+v0.1.2 (April 2018)
+--------------------
+
+**Correlation**
+
+a. Pearson
+b. Spearman
+c. Kendall
+d. Percentage bend (robust)
+
+**Non-parametric**
+
+a. Mann-Whitney U
+b. Wilcoxon signed-rank
+c. Rank-biserial correlation effect size
+d. Common language effect size
+
+
 v0.1.1 (April 2018)
 --------------------
 

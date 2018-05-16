@@ -325,6 +325,8 @@
 <span class="sd">        Degrees of freedom</span>
 <span class="sd">    p : float</span>
 <span class="sd">        P-value.</span>
+<span class="sd">    eps : float</span>
+<span class="sd">        Epsilon adjustment factor.</span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
@@ -343,7 +345,7 @@
 <span class="sd">        &gt;&gt;&gt; y = np.random.normal(loc=0, scale=0.8,size=30)</span>
 <span class="sd">        &gt;&gt;&gt; z = np.random.normal(loc=0, scale=0.9,size=30)</span>
 <span class="sd">        &gt;&gt;&gt; X = np.c_[x, y, z]</span>
-<span class="sd">        &gt;&gt;&gt; sphericity, W, chi_sq, ddof, p = test_sphericity(X)</span>
+<span class="sd">        &gt;&gt;&gt; sphericity, W, chi_sq, ddof, p, eps = test_sphericity(X)</span>
 <span class="sd">        &gt;&gt;&gt; print(sphericity, p)</span>
 <span class="sd">        True 0.56</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -362,6 +364,13 @@
     <span class="n">d</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">T</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
 
+    <span class="c1"># Compute epsilon</span>
+    <span class="n">eig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigvals</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">eig</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">((</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">eig</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="c1"># Alternative:</span>
+    <span class="c1"># eps = np.trace(T) ** 2 / ((S.shape[0] - 1) * np.sum(</span>
+                                                    <span class="c1"># np.sum(T * T, axis=1)))</span>
+
     <span class="c1"># Mauchly&#39;s statistic</span>
     <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="n">d</span>
 
@@ -371,8 +380,15 @@
     <span class="n">chi_sq</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">W</span><span class="p">)</span> <span class="o">*</span> <span class="n">dd</span> <span class="o">*</span> <span class="n">nr</span>
     <span class="n">ddof</span> <span class="o">=</span> <span class="n">d</span> <span class="o">*</span> <span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="n">pval</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">chi_sq</span><span class="p">,</span> <span class="n">ddof</span><span class="p">)</span>
+
+    <span class="c1"># Second order approximation</span>
+    <span class="n">pval2</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">chi_sq</span><span class="p">,</span> <span class="n">ddof</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">w2</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">d</span><span class="o">**</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> \
+         <span class="p">(</span><span class="mi">288</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">nr</span> <span class="o">*</span> <span class="n">nr</span> <span class="o">*</span> <span class="n">dd</span> <span class="o">*</span> <span class="n">dd</span><span class="p">)</span>
+    <span class="n">pval</span> <span class="o">+=</span> <span class="n">w2</span> <span class="o">*</span> <span class="p">(</span><span class="n">pval2</span> <span class="o">-</span> <span class="n">pval</span><span class="p">)</span>
+
     <span class="n">sphericity</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">pval</span> <span class="o">&gt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="kc">False</span>
-    <span class="k">return</span> <span class="n">sphericity</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">chi_sq</span><span class="p">,</span> <span class="n">ddof</span><span class="p">,</span> <span class="n">pval</span></div>
+    <span class="k">return</span> <span class="n">sphericity</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">chi_sq</span><span class="p">,</span> <span class="n">ddof</span><span class="p">,</span> <span class="n">pval</span><span class="p">,</span> <span class="n">eps</span></div>
 
 
 <div class="viewcode-block" id="ttest"><a class="viewcode-back" href="../../generated/pingouin.ttest.html#pingouin.ttest">[docs]</a><span class="k">def</span> <span class="nf">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
@@ -639,7 +655,7 @@
     <span class="c1"># Sphericity assumption only applies if there are more than 2 levels</span>
     <span class="k">if</span> <span class="n">correction</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span> <span class="ow">or</span> <span class="p">(</span><span class="n">correction</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">n_rm</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">):</span>
         <span class="n">sphericity</span><span class="p">,</span> <span class="n">W_mauchly</span><span class="p">,</span> <span class="n">chi_sq_mauchly</span><span class="p">,</span> <span class="n">ddof_mauchly</span><span class="p">,</span> \
-            <span class="n">p_mauchly</span> <span class="o">=</span> <span class="n">test_sphericity</span><span class="p">(</span><span class="n">data_pivot</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">(),</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">)</span>
+            <span class="n">p_mauchly</span><span class="p">,</span> <span class="n">eps</span> <span class="o">=</span> <span class="n">test_sphericity</span><span class="p">(</span><span class="n">data_pivot</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">(),</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">correction</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
             <span class="n">correction</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">sphericity</span> <span class="k">else</span> <span class="kc">False</span>
@@ -648,9 +664,7 @@
 
     <span class="c1"># If required, apply Greenhouse-Geisser correction for sphericity</span>
     <span class="k">if</span> <span class="n">correction</span><span class="p">:</span>
-        <span class="c1"># Compute covariance matrix</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="n">data_pivot</span><span class="o">.</span><span class="n">cov</span><span class="p">()</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">()</span>
-        <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">ddof1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">v</span> <span class="o">*</span> <span class="n">v</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="c1"># print(&#39;eps = &#39;, eps)</span>
         <span class="n">corr_ddof1</span><span class="p">,</span> <span class="n">corr_ddof2</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">d</span> <span class="o">*</span> <span class="n">eps</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span>
                                   <span class="p">(</span><span class="n">ddof1</span><span class="p">,</span> <span class="n">ddof2</span><span class="p">)]</span>
         <span class="n">p_corr</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">corr_ddof1</span><span class="p">,</span> <span class="n">corr_ddof2</span><span class="p">)</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">fval</span><span class="p">)</span>

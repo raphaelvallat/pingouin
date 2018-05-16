@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pingouin.multicomp &#8212; pingouin 0.1.1 documentation</title>
+    <title>pingouin.wilcoxon &#8212; pingouin 0.1.1 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/style.css" type="text/css" />
@@ -29,8 +29,8 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pingouin.bonf" href="pingouin.bonf.html" />
-    <link rel="prev" title="pingouin.corr" href="pingouin.corr.html" />
+    <link rel="next" title="pingouin.corr" href="pingouin.corr.html" />
+    <link rel="prev" title="pingouin.mwu" href="pingouin.mwu.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -102,66 +102,59 @@
   <div class="row">
     <div class="col-md-12 content">
       
-  <div class="section" id="pingouin-multicomp">
-<h1>pingouin.multicomp</h1>
+  <div class="section" id="pingouin-wilcoxon">
+<h1>pingouin.wilcoxon</h1>
 <dl class="function">
-<dt id="pingouin.multicomp">
-<code class="descclassname">pingouin.</code><code class="descname">multicomp</code><span class="sig-paren">(</span><em>pvals</em>, <em>alpha=0.05</em>, <em>method='holm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/multicomp.html#multicomp"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>P-values correction for multiple tests.</p>
+<dt id="pingouin.wilcoxon">
+<code class="descclassname">pingouin.</code><code class="descname">wilcoxon</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>tail='two-sided'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/nonparametric.html#wilcoxon"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Wilcoxon signed-rank test. It is the non-parametric version of the
+paired T-test.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>pvals</strong> : array_like</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x, y</strong> : array_like</p>
 <blockquote>
-<div><p>uncorrected p-values</p>
+<div><p>First and second set of observations. x and y must be related (e.g
+repeated measures).</p>
 </div></blockquote>
-<p><strong>alpha</strong> : float</p>
+<p><strong>tail</strong> : string</p>
 <blockquote>
-<div><p>Significance level</p>
-</div></blockquote>
-<p><strong>method</strong> : string</p>
-<blockquote>
-<div><p>Method used for testing and adjustment of pvalues. Can be either the
-full name or initial letters. Available methods are</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;bonf&#39;</span> <span class="p">:</span> <span class="n">one</span><span class="o">-</span><span class="n">step</span> <span class="n">Bonferroni</span> <span class="n">correction</span>
-<span class="s1">&#39;holm&#39;</span> <span class="p">:</span> <span class="n">step</span><span class="o">-</span><span class="n">down</span> <span class="n">method</span> <span class="n">using</span> <span class="n">Bonferroni</span> <span class="n">adjustments</span>
-<span class="s1">&#39;fdr_bh&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Hochberg</span> <span class="n">FDR</span> <span class="n">correction</span>
-<span class="s1">&#39;fdr_by&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Yekutieli</span> <span class="n">FDR</span> <span class="n">correction</span>
-</pre></div>
-</div>
+<div><p>Specify whether to return ‘one-sided’ or ‘two-sided’ p-value.</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>reject</strong> : array, boolean</p>
-<blockquote>
-<div><p>true for hypothesis that can be rejected for given alpha</p>
-</div></blockquote>
-<p><strong>pvals_corrected</strong> : array</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>stats</strong> : pandas DataFrame</p>
 <blockquote class="last">
-<div><p>p-values corrected for multiple tests</p>
+<div><p>Test summary</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;W-val&#39;</span> <span class="p">:</span> <span class="n">W</span><span class="o">-</span><span class="n">value</span>
+<span class="s1">&#39;p-val&#39;</span> <span class="p">:</span> <span class="n">p</span><span class="o">-</span><span class="n">value</span>
+<span class="s1">&#39;RBC&#39;</span>   <span class="p">:</span> <span class="n">matched</span> <span class="n">pairs</span> <span class="n">rank</span><span class="o">-</span><span class="n">biserial</span> <span class="n">correlation</span> <span class="p">(</span><span class="n">effect</span> <span class="n">size</span><span class="p">)</span>
+<span class="s1">&#39;CLES&#39;</span>  <span class="p">:</span> <span class="n">common</span> <span class="n">language</span> <span class="n">effect</span> <span class="n">size</span>
+</pre></div>
+</div>
 </div></blockquote>
 </td>
 </tr>
 </tbody>
 </table>
-<div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<dl class="last docutils">
-<dt><a class="reference internal" href="pingouin.pairwise_ttests.html#pingouin.pairwise_ttests" title="pingouin.pairwise_ttests"><code class="xref py py-obj docutils literal"><span class="pre">pairwise_ttests</span></code></a></dt>
-<dd>Pairwise post-hocs T-tests</dd>
-</dl>
-</div>
+<p class="rubric">Notes</p>
+<p>The Wilcoxon signed-rank test tests the null hypothesis that two related
+paired samples come from the same distribution.
+A continuity correction is applied by default.</p>
 <p class="rubric">Examples</p>
-<p>FDR correction of an array of p-values</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">multicomp</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pvals</span> <span class="o">=</span> <span class="p">[</span><span class="o">.</span><span class="mi">50</span><span class="p">,</span> <span class="o">.</span><span class="mi">003</span><span class="p">,</span> <span class="o">.</span><span class="mi">32</span><span class="p">,</span> <span class="o">.</span><span class="mi">054</span><span class="p">,</span> <span class="o">.</span><span class="mi">0003</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corr</span> <span class="o">=</span> <span class="n">multicomp</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corr</span><span class="p">)</span>
+<ol class="arabic">
+<li><p class="first">Compare the medians of two related samples.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">wilcoxon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">38</span><span class="p">,</span> <span class="mi">37</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Medians = </span><span class="si">%.2f</span><span class="s2"> - </span><span class="si">%.2f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wilcoxon</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><strong>Output:</strong></p>
-<p>[False True False False  True] [0.5  0.0075  0.4  0.09  0.0015]</p>
+</li>
+</ol>
 </dd></dl>
 
 </div>
