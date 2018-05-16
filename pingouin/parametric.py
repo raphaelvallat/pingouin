@@ -266,7 +266,7 @@ def test_sphericity(X, alpha=.05):
     eps = np.sum(eig) ** 2 / ((S.shape[0] - 1) * np.sum(eig**2))
     # Alternative:
     # eps = np.trace(T) ** 2 / ((S.shape[0] - 1) * np.sum(
-                                                    # np.sum(T * T, axis=1)))
+    # np.sum(T * T, axis=1)))
 
     # Mauchly's statistic
     W = np.linalg.det(T) / (np.trace(T) / (p - 1))**d

@@ -1,4 +1,3 @@
-import pytest
 import numpy as np
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.nonparametric import (mwu, wilcoxon)
@@ -6,6 +5,7 @@ from pingouin.nonparametric import (mwu, wilcoxon)
 np.random.seed(1234)
 x = np.random.normal(size=100)
 y = np.random.normal(size=100)
+
 
 class TestNonParametric(_TestPingouin):
     """Test nonparametric.py."""

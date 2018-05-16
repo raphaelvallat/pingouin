@@ -2,7 +2,7 @@
 # Date: May 2018
 import numpy as np
 import pandas as pd
-from pingouin import (_check_dataframe, _remove_na)
+from pingouin import _remove_na
 
 __all__ = ["mwu", "wilcoxon"]
 
@@ -64,7 +64,7 @@ def mwu(x, y, tail='two-sided'):
     uval, pval = mannwhitneyu(x, y, use_continuity=True, alternative=tail)
 
     # Effect size 1: common language effect size (McGraw and Wong 1992)
-    c = np.array([(a,b) for a in x for b in y])
+    c = np.array([(a, b) for a in x for b in y])
     num = max((c[:, 0] < c[:, 1]).sum(), (c[:, 0] > c[:, 1]).sum())
     cles = num / (nx * ny)
 
@@ -123,7 +123,7 @@ def wilcoxon(x, y, tail='two-sided'):
         >>> print("Medians = %.2f - %.2f" % (np.median(x), np.median(y)))
         >>> wilcoxon(x, y, tail='two-sided')
     """
-    from scipy.stats import wilcoxon, rankdata
+    from scipy.stats import wilcoxon
     x = np.asarray(x)
     y = np.asarray(y)
 
@@ -137,7 +137,7 @@ def wilcoxon(x, y, tail='two-sided'):
     pval *= .5 if tail == 'one-sided' else pval
 
     # Effect size 1: common language effect size (McGraw and Wong 1992)
-    c = np.array([(a,b) for a in x for b in y])
+    c = np.array([(a, b) for a in x for b in y])
     num = max((c[:, 0] < c[:, 1]).sum(), (c[:, 0] > c[:, 1]).sum())
     cles = num / (nx * ny)
 

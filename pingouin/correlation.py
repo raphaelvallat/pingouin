@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr, spearmanr, kendalltau
-from pingouin import (_check_dataframe, _remove_na, test_normality)
+from pingouin import (_remove_na, test_normality)
 
 __all__ = ["corr"]
 
@@ -36,10 +36,10 @@ def percbend(x, y, beta=.2):
     from scipy.stats import t
     X = np.c_[x, y]
     nx = X.shape[0]
-    M =  np.tile(np.median(X, axis=0), nx).reshape(X.shape)
+    M = np.tile(np.median(X, axis=0), nx).reshape(X.shape)
     W = np.sort(np.abs(X - M), axis=0)
     m = int((1 - beta) * nx)
-    omega = W[m-1, :]
+    omega = W[m - 1, :]
 
     # Compute correlation
     P = (X - M) / omega
@@ -55,7 +55,7 @@ def percbend(x, y, beta=.2):
         s = X[:, c].copy()
         s[np.where(psi < -1)[0]] = 0
         s[np.where(psi > 1)[0]] = 0
-        pbos = (np.sum(s) + omega[c] * (i2 - i1)) /  (s.size - i1 - i2)
+        pbos = (np.sum(s) + omega[c] * (i2 - i1)) / (s.size - i1 - i2)
         a[c] = (X[:, c] - pbos) / omega[c]
 
     # Bend
@@ -64,10 +64,11 @@ def percbend(x, y, beta=.2):
 
     # Get r, tval and pval
     a, b = a
-    r = (a*b).sum() / np.sqrt((a**2).sum() * (b**2).sum())
+    r = (a * b).sum() / np.sqrt((a**2).sum() * (b**2).sum())
     tval = r * np.sqrt((nx - 2) / (1 - r**2))
     pval = 2 * t.sf(abs(tval), nx - 2)
     return r, pval
+
 
 def corr(x, y, tail='two-sided', method='pearson'):
     """(Robust) correlation between two variables.
@@ -156,10 +157,13 @@ def corr(x, y, tail='two-sided', method='pearson'):
     x = np.asarray(x)
     y = np.asarray(y)
 
+    # Check size
+    if x.size != y.size:
+        raise ValueError('x and y must have the same length.')
+
     # Remove NA
     x, y = _remove_na(x, y, paired=True)
     nx = x.size
-    ny = y.size
 
     # Compute correlation coefficient
     if method == 'pearson':
@@ -167,7 +171,8 @@ def corr(x, y, tail='two-sided', method='pearson'):
         normal, pnorm = test_normality(x, y)
         if not normal.all():
             print('Warning: data are not normaly distributed (x = %.3f, y =' %
-            pnorm[0], '%.3f). Consider using alternative methods.' % pnorm[1])
+                  pnorm[0], '%.3f). Consider using alternative methods.' %
+                  pnorm[1])
         r, pval = pearsonr(x, y)
     elif method == 'spearman':
         r, pval = spearmanr(x, y)
@@ -179,7 +184,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
         raise ValueError('Method not recognized.')
 
     # Compute adj_r2
-    adj_r2 = 1 - ( ((1 - r**2) * (nx - 1)) / (nx - 3))
+    adj_r2 = 1 - (((1 - r**2) * (nx - 1)) / (nx - 3))
 
     stats = pd.DataFrame({}, index=[method])
     stats['r'] = r.round(4)
