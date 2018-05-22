@@ -3,6 +3,7 @@ Doc
 
 Code
 ----
+- Pairwise correlations (using pandas DataFrame column or column-wise)
 - URGENT: FIX SPHERICITY AND MAURY
 - Test second order approximation in Mauchly
 - Test ESCI against JASP.

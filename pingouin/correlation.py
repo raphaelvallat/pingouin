@@ -151,8 +151,6 @@ def corr(x, y, tail='two-sided', method='pearson'):
         >>> corr(x, y, method='percbend')
                      r        r2     adj_r2  p-val
             percbend -0.0411  0.002  -0.397  0.923
-
-
     """
     x = np.asarray(x)
     y = np.asarray(y)

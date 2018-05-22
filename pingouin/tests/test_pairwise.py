@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.pairwise import pairwise_ttests
+from pingouin.pairwise import pairwise_ttests, pairwise_corr
 
 # Dataset
 n = 30
@@ -53,3 +53,9 @@ class TestPairwise(_TestPingouin):
         df['Group'] = 'Control'
         with pytest.raises(ValueError):
             pairwise_ttests(dv='Scores', between='Group', data=df)
+
+    def pairwise_corr(self):
+        """Test function pairwise_corr"""
+        # Load JASP Big 5 DataSets
+        data = pd.read_csv('../../examples/jasp_datasets/Big5.csv')
+        stats = pairwise_corr(data=data, method='spearman', tail='two-sided')
