@@ -2,21 +2,13 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>pingouin.multicomp &#8212; pingouin 0.1.1 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/style.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '0.1.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -36,8 +28,7 @@
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
 
-  </head>
-  <body>
+  </head><body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -100,7 +91,29 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">pingouin.multicomp</a></li>
+</ul>
+
+  <li>
+    <a href="pingouin.corr.html" title="Previous Chapter: pingouin.corr"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; pingouin.corr</span>
+    </a>
+  </li>
+  <li>
+    <a href="pingouin.bonf.html" title="Next Chapter: pingouin.bonf"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">pingouin.bonf &raquo;</span>
+    </a>
+  </li>
+<form action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
       
   <div class="section" id="pingouin-multicomp">
 <h1>pingouin.multicomp</h1>
@@ -124,7 +137,7 @@
 <blockquote>
 <div><p>Method used for testing and adjustment of pvalues. Can be either the
 full name or initial letters. Available methods are</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;bonf&#39;</span> <span class="p">:</span> <span class="n">one</span><span class="o">-</span><span class="n">step</span> <span class="n">Bonferroni</span> <span class="n">correction</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;bonf&#39;</span> <span class="p">:</span> <span class="n">one</span><span class="o">-</span><span class="n">step</span> <span class="n">Bonferroni</span> <span class="n">correction</span>
 <span class="s1">&#39;holm&#39;</span> <span class="p">:</span> <span class="n">step</span><span class="o">-</span><span class="n">down</span> <span class="n">method</span> <span class="n">using</span> <span class="n">Bonferroni</span> <span class="n">adjustments</span>
 <span class="s1">&#39;fdr_bh&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Hochberg</span> <span class="n">FDR</span> <span class="n">correction</span>
 <span class="s1">&#39;fdr_by&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Yekutieli</span> <span class="n">FDR</span> <span class="n">correction</span>
@@ -148,13 +161,13 @@ full name or initial letters. Available methods are</p>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <dl class="last docutils">
-<dt><a class="reference internal" href="pingouin.pairwise_ttests.html#pingouin.pairwise_ttests" title="pingouin.pairwise_ttests"><code class="xref py py-obj docutils literal"><span class="pre">pairwise_ttests</span></code></a></dt>
+<dt><a class="reference internal" href="pingouin.pairwise_ttests.html#pingouin.pairwise_ttests" title="pingouin.pairwise_ttests"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pairwise_ttests</span></code></a></dt>
 <dd>Pairwise post-hocs T-tests</dd>
 </dl>
 </div>
 <p class="rubric">Examples</p>
 <p>FDR correction of an array of p-values</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">multicomp</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">multicomp</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pvals</span> <span class="o">=</span> <span class="p">[</span><span class="o">.</span><span class="mi">50</span><span class="p">,</span> <span class="o">.</span><span class="mi">003</span><span class="p">,</span> <span class="o">.</span><span class="mi">32</span><span class="p">,</span> <span class="o">.</span><span class="mi">054</span><span class="p">,</span> <span class="o">.</span><span class="mi">0003</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corr</span> <span class="o">=</span> <span class="n">multicomp</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corr</span><span class="p">)</span>
@@ -182,7 +195,7 @@ full name or initial letters. Available methods are</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.<br/>
     </p>
   </div>
 </footer>

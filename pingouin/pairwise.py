@@ -215,7 +215,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
 def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
                   padjust='none', export_filename=None):
-    '''Pairwise T-tests.
+    '''Pairwise correlations between columns of a pandas dataframe.
 
     Parameters
     ----------
@@ -228,7 +228,8 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         Indicates whether to return the 'two-sided' or 'one-sided' p-values
     method : string
         Specify which method to use for the computation of the correlation
-        coefficient. Available methods are ::
+        coefficient.
+        Available methods are ::
 
         'pearson' : Pearson product-moment correlation
         'spearman' : Spearman rank-order correlation
@@ -260,7 +261,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
         >>> import pandas as pd
         >>> from pingouin import pairwise_corr, print_table
-        >>> data = pd.read_csv('data.csv')
+        >>> data = pd.read_csv('mydata.csv')
         >>> stats = pairwise_corr(data, method='spearman', tail='two-sided',
         >>>                       padjust='bonf')
         >>> print_table(stats)
@@ -269,7 +270,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
         >>> import pandas as pd
         >>> from pingouin import pairwise_corr, print_table
-        >>> data = pd.read_csv('data.csv')
+        >>> data = pd.read_csv('mydata.csv')
         >>> stats = pairwise_corr(data, columns=['Col1', 'Col2', 'Col3'],
         >>>         method='percbend', tail='two-sided')
         >>> print_table(stats)
@@ -278,16 +279,14 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
         >>> import pandas as pd
         >>> from pingouin import pairwise_corr, print_table
-        >>> data = pd.read_csv('data.csv')
-        >>> stats = pairwise_corr(data, columns=['Col1', 'Col2', 'Col3'],
+        >>> data = pd.read_csv('mydata.csv')
+        >>> pairwise_corr(data, columns=['Col1', 'Col2', 'Col3'],
         >>>         method='kendall', export_filename='pairwise_corr.csv')
     '''
     from pingouin.correlation import corr
+
     if tail not in ['one-sided', 'two-sided']:
         raise ValueError('Tail not recognized')
-
-    if not isinstance(alpha, float):
-        raise ValueError('Alpha must be float')
 
     # Initialize empty DataFrame
     stats = pd.DataFrame()

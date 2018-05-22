@@ -2,21 +2,13 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>pingouin.nonparametric &#8212; pingouin 0.1.1 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     '0.1.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
@@ -34,8 +26,7 @@
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
 
-  </head>
-  <body>
+  </head><body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -98,14 +89,25 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
       
   <h1>Source code for pingouin.nonparametric</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Author: Raphael Vallat &lt;raphaelvallat9@gmail.com&gt;</span>
 <span class="c1"># Date: May 2018</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="p">(</span><span class="n">_check_dataframe</span><span class="p">,</span> <span class="n">_remove_na</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">_remove_na</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mwu&quot;</span><span class="p">,</span> <span class="s2">&quot;wilcoxon&quot;</span><span class="p">]</span>
 
@@ -167,7 +169,7 @@
     <span class="n">uval</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">mannwhitneyu</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">use_continuity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="n">tail</span><span class="p">)</span>
 
     <span class="c1"># Effect size 1: common language effect size (McGraw and Wong 1992)</span>
-    <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">y</span><span class="p">])</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">y</span><span class="p">])</span>
     <span class="n">num</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">c</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">c</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="p">(</span><span class="n">c</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">c</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
     <span class="n">cles</span> <span class="o">=</span> <span class="n">num</span> <span class="o">/</span> <span class="p">(</span><span class="n">nx</span> <span class="o">*</span> <span class="n">ny</span><span class="p">)</span>
 
@@ -226,7 +228,7 @@
 <span class="sd">        &gt;&gt;&gt; print(&quot;Medians = %.2f - %.2f&quot; % (np.median(x), np.median(y)))</span>
 <span class="sd">        &gt;&gt;&gt; wilcoxon(x, y, tail=&#39;two-sided&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">wilcoxon</span><span class="p">,</span> <span class="n">rankdata</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">wilcoxon</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 
@@ -240,7 +242,7 @@
     <span class="n">pval</span> <span class="o">*=</span> <span class="o">.</span><span class="mi">5</span> <span class="k">if</span> <span class="n">tail</span> <span class="o">==</span> <span class="s1">&#39;one-sided&#39;</span> <span class="k">else</span> <span class="n">pval</span>
 
     <span class="c1"># Effect size 1: common language effect size (McGraw and Wong 1992)</span>
-    <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">y</span><span class="p">])</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">y</span><span class="p">])</span>
     <span class="n">num</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">c</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">c</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="p">(</span><span class="n">c</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">c</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
     <span class="n">cles</span> <span class="o">=</span> <span class="n">num</span> <span class="o">/</span> <span class="p">(</span><span class="n">nx</span> <span class="o">*</span> <span class="n">ny</span><span class="p">)</span>
 
@@ -278,7 +280,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.<br/>
     </p>
   </div>
 </footer>

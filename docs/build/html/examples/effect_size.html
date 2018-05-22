@@ -2,21 +2,13 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Computing effect sizes &#8212; pingouin 0.1.1 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/style.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '0.1.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -36,8 +28,7 @@
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
 
-  </head>
-  <body>
+  </head><body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -100,7 +91,39 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Computing effect sizes</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#dataset">Dataset</a><ul>
+<li><a class="reference internal" href="#calculating-the-effect-size">Calculating the effect size</a><ul>
+<li><a class="reference internal" href="#bonus-using-a-t-value">Bonus: Using a T-value</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <li>
+    <a href="../examples.html" title="Previous Chapter: Examples"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Examples</span>
+    </a>
+  </li>
+  <li>
+    <a href="../changelog.html" title="Next Chapter: What’s new"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">What’s new &raquo;</span>
+    </a>
+  </li>
+<form action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
       
   <div class="section" id="computing-effect-sizes">
 <h1>Computing effect sizes</h1>
@@ -115,7 +138,7 @@
 <h2>Dataset</h2>
 <p>We’ll start by generating a fake demographic dataset representing the
 heights of 1000 individuals in two countries.</p>
-<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">ttest_ind</span>
@@ -128,7 +151,7 @@ heights of 1000 individuals in two countries.</p>
 </div>
 <p>Optionally, we can visualize the distribution of our two datasets using
 <a class="reference external" href="https://seaborn.pydata.org/">seaborn</a></p>
-<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
 <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">shade</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;France&#39;</span><span class="p">)</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">shade</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;UK&#39;</span><span class="p">)</span>
@@ -148,20 +171,20 @@ variance, e.g. Control vs Patient group)</li>
 <li>Odds-ratio</li>
 <li>Area Under the Curve (AUC)</li>
 </ul>
-<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">compute_effsize</span>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">compute_effsize</span>
 <span class="n">eftype</span> <span class="o">=</span> <span class="s1">&#39;hedges&#39;</span> <span class="c1"># &#39;cohen&#39;, &#39;hedges&#39;, &#39;glass&#39;, &#39;eta-square&#39;, &#39;odds-ratio&#39;, &#39;AUC&#39;</span>
 <span class="n">ef</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="n">eftype</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">eftype</span><span class="p">,</span> <span class="s1">&#39;: </span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ef</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">hedges</span> <span class="p">:</span> <span class="o">-</span><span class="mf">1.069</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hedges</span> <span class="p">:</span> <span class="o">-</span><span class="mf">1.069</span>
 </pre></div>
 </div>
 <div class="section" id="bonus-using-a-t-value">
 <h4>Bonus: Using a T-value</h4>
 <p>Alternatively, if you don’t have the data, effect size can be computed
 from a T-value and sample size.</p>
-<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="c1"># using a T-value when nx and ny are known</span>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># using a T-value when nx and ny are known</span>
 <span class="n">tval</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ttest_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 <span class="n">ef</span> <span class="o">=</span> <span class="n">compute_effsize_from_t</span><span class="p">(</span><span class="n">tval</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">ny</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">eftype</span><span class="o">=</span><span class="n">eftype</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">eftype</span><span class="p">,</span> <span class="s1">&#39;(from T - nx + ny): </span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ef</span><span class="p">)</span>
@@ -172,7 +195,7 @@ from a T-value and sample size.</p>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;cohen (from T - only N): </span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ef</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">hedges</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">T</span> <span class="o">-</span> <span class="n">nx</span> <span class="o">+</span> <span class="n">ny</span><span class="p">):</span> <span class="o">-</span><span class="mf">1.069</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hedges</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">T</span> <span class="o">-</span> <span class="n">nx</span> <span class="o">+</span> <span class="n">ny</span><span class="p">):</span> <span class="o">-</span><span class="mf">1.069</span>
 <span class="n">cohen</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">T</span> <span class="o">-</span> <span class="n">only</span> <span class="n">N</span><span class="p">):</span> <span class="o">-</span><span class="mf">1.069</span>
 </pre></div>
 </div>
@@ -197,7 +220,7 @@ from a T-value and sample size.</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.<br/>
     </p>
   </div>
 </footer>

@@ -27,6 +27,7 @@ T-test and correlations
    :toctree: generated/
 
     pairwise_ttests
+    pairwise_corr
     ttest
     mwu
     wilcoxon

@@ -5,7 +5,7 @@ import pytest
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.pairwise import pairwise_ttests, pairwise_corr
 
-# Dataset
+# Dataset for pairwise_ttests
 n = 30
 months = ['August', 'January', 'June']
 # Generate random data
@@ -14,11 +14,16 @@ control = np.random.normal(5.5, size=len(months) * n)
 meditation = np.r_[np.random.normal(5.5, size=n),
                    np.random.normal(5.8, size=n),
                    np.random.normal(6.4, size=n)]
-# Create a dataframe
+
 df = pd.DataFrame({'Scores': np.r_[control, meditation],
                    'Time': np.r_[np.repeat(months, n), np.repeat(months, n)],
                    'Group': np.repeat(['Control', 'Meditation'],
                                       len(months) * n)})
+
+# dataset for pairwise_corr
+data = pd.DataFrame({'X': np.random.normal(size=100),
+                     'Y': np.random.normal(size=100),
+                     'Z': np.random.normal(size=100)})
 
 
 class TestPairwise(_TestPingouin):
@@ -54,8 +59,17 @@ class TestPairwise(_TestPingouin):
         with pytest.raises(ValueError):
             pairwise_ttests(dv='Scores', between='Group', data=df)
 
-    def pairwise_corr(self):
+    def test_pairwise_corr(self):
         """Test function pairwise_corr"""
         # Load JASP Big 5 DataSets
-        data = pd.read_csv('../../examples/jasp_datasets/Big5.csv')
-        stats = pairwise_corr(data=data, method='spearman', tail='two-sided')
+        pairwise_corr(data=data, method='spearman', tail='two-sided')
+        # Correct for multiple comparisons
+        pairwise_corr(data=data, method='spearman', tail='one-sided',
+                      padjust='bonf')
+        # Export
+        pairwise_corr(data=data, method='spearman', tail='one-sided',
+                      export_filename='test_export.csv')
+        # Check with a subset of columns
+        pairwise_corr(data=data, columns=['X', 'Y'])
+        with pytest.raises(ValueError):
+            pairwise_corr(data=data, tail='wrong')

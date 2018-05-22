@@ -2,21 +2,13 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>pingouin.rm_anova &#8212; pingouin 0.1.1 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/style.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '0.1.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -36,8 +28,7 @@
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
 
-  </head>
-  <body>
+  </head><body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -100,7 +91,29 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">pingouin.rm_anova</a></li>
+</ul>
+
+  <li>
+    <a href="pingouin.anova.html" title="Previous Chapter: pingouin.anova"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; pingouin.anova</span>
+    </a>
+  </li>
+  <li>
+    <a href="pingouin.mixed_anova.html" title="Next Chapter: pingouin.mixed_anova"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">pingouin.mixed_anova &raquo;</span>
+    </a>
+  </li>
+<form action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
       
   <div class="section" id="pingouin-rm-anova">
 <h1>pingouin.rm_anova</h1>
@@ -113,54 +126,50 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dv</strong> : string</p>
-<blockquote>
-<div><p>Name of column containing the dependant variable.</p>
-</div></blockquote>
-<p><strong>within</strong> : string</p>
-<blockquote>
-<div><p>Name of column containing the within factor.</p>
-</div></blockquote>
-<p><strong>data</strong> : pandas DataFrame</p>
-<blockquote>
-<div><p>DataFrame</p>
-</div></blockquote>
-<p><strong>correction</strong> : string or boolean</p>
-<blockquote>
-<div><p>If True, return Greenhouse-Geisser corrected p-value.
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>dv</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Name of column containing the dependant variable.</p>
+</dd>
+<dt><strong>within</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Name of column containing the within factor.</p>
+</dd>
+<dt><strong>data</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
+<dd><p class="first last">DataFrame</p>
+</dd>
+<dt><strong>correction</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string or boolean</span></dt>
+<dd><p class="first last">If True, return Greenhouse-Geisser corrected p-value.
 If ‘auto’ (default), compute Mauchly’s test of sphericity to determine
 whether the p-values needs to be corrected.</p>
-</div></blockquote>
-<p><strong>remove_na</strong> : boolean</p>
-<blockquote>
-<div><p>If True, automatically remove from the analysis subjects with one or
+</dd>
+<dt><strong>remove_na</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><p class="first">If True, automatically remove from the analysis subjects with one or
 more missing values:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Ss</span>    <span class="n">x1</span>       <span class="n">x2</span>       <span class="n">x3</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Ss</span>    <span class="n">x1</span>       <span class="n">x2</span>       <span class="n">x3</span>
 <span class="mi">1</span>     <span class="mf">5.0</span>      <span class="mf">4.2</span>      <span class="n">nan</span>
 <span class="mi">2</span>     <span class="mf">4.6</span>      <span class="mf">3.6</span>      <span class="mf">3.9</span>
 </pre></div>
 </div>
-<p>In this example, if remove_na == True, Ss 1 will be removed from the
+<p class="last">In this example, if remove_na == True, Ss 1 will be removed from the
 ANOVA because of the x3 missing value. If False, the two non-missing
 values will be included in the analysis.</p>
-</div></blockquote>
-<p><strong>detailed</strong> : boolean</p>
-<blockquote>
-<div><p>If True, return a full ANOVA table</p>
-</div></blockquote>
-<p><strong>export_filename</strong> : string</p>
-<blockquote>
-<div><p>Filename (without extension) for the output file.
+</dd>
+<dt><strong>detailed</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><p class="first last">If True, return a full ANOVA table</p>
+</dd>
+<dt><strong>export_filename</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Filename (without extension) for the output file.
 If None, do not export the table.
 By default, the file will be created in the current python console
 directory. To change that, specify the filename with full path.</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>aov</strong> : DataFrame</p>
-<blockquote class="last">
-<div><p>ANOVA summary</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>aov</strong> <span class="classifier-delimiter">:</span> <span class="classifier">DataFrame</span></dt>
+<dd><p class="first last">ANOVA summary</p>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -168,9 +177,9 @@ directory. To change that, specify the filename with full path.</p>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <dl class="last docutils">
-<dt><a class="reference internal" href="pingouin.anova.html#pingouin.anova" title="pingouin.anova"><code class="xref py py-obj docutils literal"><span class="pre">anova</span></code></a></dt>
+<dt><a class="reference internal" href="pingouin.anova.html#pingouin.anova" title="pingouin.anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anova</span></code></a></dt>
 <dd>One-way ANOVA</dd>
-<dt><a class="reference internal" href="pingouin.mixed_anova.html#pingouin.mixed_anova" title="pingouin.mixed_anova"><code class="xref py py-obj docutils literal"><span class="pre">mixed_anova</span></code></a></dt>
+<dt><a class="reference internal" href="pingouin.mixed_anova.html#pingouin.mixed_anova" title="pingouin.mixed_anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mixed_anova</span></code></a></dt>
 <dd>Two way mixed ANOVA</dd>
 </dl>
 </div>
@@ -181,7 +190,7 @@ partial eta-square is the same as eta-square.</p>
 <p>For more details, see Bakeman 2005; Richardson 2011.</p>
 <p class="rubric">Examples</p>
 <p>Compute a one-way repeated-measures ANOVA.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">rm_anova</span><span class="p">,</span> <span class="n">print_table</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;dataset.csv&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aov</span> <span class="o">=</span> <span class="n">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>
@@ -210,7 +219,7 @@ partial eta-square is the same as eta-square.</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.<br/>
     </p>
   </div>
 </footer>

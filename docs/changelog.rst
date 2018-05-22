@@ -12,6 +12,7 @@ a. Pearson
 b. Spearman
 c. Kendall
 d. Percentage bend (robust)
+e. Pairwise correlations between all columns of a pandas dataframe
 
 **Non-parametric**
 
