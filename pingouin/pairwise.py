@@ -79,7 +79,21 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
     Returns
     -------
     stats : DataFrame
-        Stats summary
+        Stats summary ::
+
+        'A' : Name of first measurement
+        'B' : Name of second measurement
+        'Paired' : indicates whether the two measurements are paired or not
+        'Alpha' : significance level
+        'Tail' : indicate whether the p-values are one-sided or two-sided
+        'T-val' : T-values
+        'p-unc' : Uncorrected p-values
+        'p-corr' : Corrected p-values
+        'p-adjust' : p-values correction method
+        'reject' : indicates whether the null hypothesis is rejected or not
+        'Eff_size' : effect sizes
+        'Eff_type' : type of effect size
+
 
     Examples
     --------
@@ -253,7 +267,41 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     Returns
     -------
     stats : DataFrame
-        Stats summary
+        Stats summary ::
+
+        'X' : Name(s) of first columns
+        'Y' : Name(s) of second columns
+        'method' : method used to compute the correlation
+        'tail' : indicates whether the p-values are one-sided or two-sided
+        'r' : Correlation coefficients
+        'r2' : R-squared values
+        'adj_r2' : Adjusted R-squared values
+        'z' : Standardized correlation coefficients
+        'p-unc' : uncorrected one or two tailed p-values
+        'p-corr' : corrected one or two tailed p-values
+        'p-adjust' : Correction method
+
+    Notes
+    -----
+    The Pearson correlation coefficient measures the linear relationship
+    between two datasets. Strictly speaking, Pearson's correlation requires
+    that each dataset be normally distributed. Correlations of -1 or +1 imply
+    an exact linear relationship.
+
+    The Spearman correlation is a nonparametric measure of the monotonicity of
+    the relationship between two datasets. Unlike the Pearson correlation,
+    the Spearman correlation does not assume that both datasets are normally
+    distributed. Correlations of -1 or +1 imply an exact monotonic
+    relationship.
+
+    Kendall’s tau is a measure of the correspondence between two rankings.
+    Values close to 1 indicate strong agreement, values close to -1 indicate
+    strong disagreement.
+
+    The percentage bend correlation (Wilcox 1994) is a robust method that
+    protects against univariate outliers.
+
+    Please note that NaN are automatically removed from datasets.
 
     Examples
     --------
@@ -323,7 +371,10 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         stats['p-corr'] = None
         stats['p-adjust'] = None
 
-    col_order = ['X', 'Y', 'method', 'tail', 'r', 'r2', 'adj_r2', 'p-unc',
+    # Standardize correlation coefficients (Fisher z-transformation)
+    stats['z'] = np.arctanh(stats['r'].values)
+
+    col_order = ['X', 'Y', 'method', 'tail', 'r', 'r2', 'adj_r2', 'z', 'p-unc',
                  'p-corr', 'p-adjust']
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)

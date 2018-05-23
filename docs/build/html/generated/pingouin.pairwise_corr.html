@@ -169,13 +169,42 @@ directory. To change that, specify the filename with full path.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
 <dt><strong>stats</strong> <span class="classifier-delimiter">:</span> <span class="classifier">DataFrame</span></dt>
-<dd><p class="first last">Stats summary</p>
+<dd><p class="first">Stats summary</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;X&#39;</span> <span class="p">:</span> <span class="n">Name</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">of</span> <span class="n">first</span> <span class="n">columns</span>
+<span class="s1">&#39;Y&#39;</span> <span class="p">:</span> <span class="n">Name</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">of</span> <span class="n">second</span> <span class="n">columns</span>
+<span class="s1">&#39;method&#39;</span> <span class="p">:</span> <span class="n">method</span> <span class="n">used</span> <span class="n">to</span> <span class="n">compute</span> <span class="n">the</span> <span class="n">correlation</span>
+<span class="s1">&#39;tail&#39;</span> <span class="p">:</span> <span class="n">indicates</span> <span class="n">whether</span> <span class="n">the</span> <span class="n">p</span><span class="o">-</span><span class="n">values</span> <span class="n">are</span> <span class="n">one</span><span class="o">-</span><span class="n">sided</span> <span class="ow">or</span> <span class="n">two</span><span class="o">-</span><span class="n">sided</span>
+<span class="s1">&#39;r&#39;</span> <span class="p">:</span> <span class="n">Correlation</span> <span class="n">coefficients</span>
+<span class="s1">&#39;r2&#39;</span> <span class="p">:</span> <span class="n">R</span><span class="o">-</span><span class="n">squared</span> <span class="n">values</span>
+<span class="s1">&#39;adj_r2&#39;</span> <span class="p">:</span> <span class="n">Adjusted</span> <span class="n">R</span><span class="o">-</span><span class="n">squared</span> <span class="n">values</span>
+<span class="s1">&#39;z&#39;</span> <span class="p">:</span> <span class="n">Standardized</span> <span class="n">correlation</span> <span class="n">coefficients</span>
+<span class="s1">&#39;p-unc&#39;</span> <span class="p">:</span> <span class="n">uncorrected</span> <span class="n">one</span> <span class="ow">or</span> <span class="n">two</span> <span class="n">tailed</span> <span class="n">p</span><span class="o">-</span><span class="n">values</span>
+<span class="s1">&#39;p-corr&#39;</span> <span class="p">:</span> <span class="n">corrected</span> <span class="n">one</span> <span class="ow">or</span> <span class="n">two</span> <span class="n">tailed</span> <span class="n">p</span><span class="o">-</span><span class="n">values</span>
+<span class="s1">&#39;p-adjust&#39;</span> <span class="p">:</span> <span class="n">Correction</span> <span class="n">method</span>
+</pre></div>
+</div>
 </dd>
 </dl>
 </td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>The Pearson correlation coefficient measures the linear relationship
+between two datasets. Strictly speaking, Pearson’s correlation requires
+that each dataset be normally distributed. Correlations of -1 or +1 imply
+an exact linear relationship.</p>
+<p>The Spearman correlation is a nonparametric measure of the monotonicity of
+the relationship between two datasets. Unlike the Pearson correlation,
+the Spearman correlation does not assume that both datasets are normally
+distributed. Correlations of -1 or +1 imply an exact monotonic
+relationship.</p>
+<p>Kendall’s tau is a measure of the correspondence between two rankings.
+Values close to 1 indicate strong agreement, values close to -1 indicate
+strong disagreement.</p>
+<p>The percentage bend correlation (Wilcox 1994) is a robust method that
+protects against univariate outliers.</p>
+<p>Please note that NaN are automatically removed from datasets.</p>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">One-tailed spearman correlation corrected for multiple comparisons</p>

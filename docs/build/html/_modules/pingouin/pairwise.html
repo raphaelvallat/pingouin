@@ -184,7 +184,21 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    stats : DataFrame</span>
-<span class="sd">        Stats summary</span>
+<span class="sd">        Stats summary ::</span>
+
+<span class="sd">        &#39;A&#39; : Name of first measurement</span>
+<span class="sd">        &#39;B&#39; : Name of second measurement</span>
+<span class="sd">        &#39;Paired&#39; : indicates whether the two measurements are paired or not</span>
+<span class="sd">        &#39;Alpha&#39; : significance level</span>
+<span class="sd">        &#39;Tail&#39; : indicate whether the p-values are one-sided or two-sided</span>
+<span class="sd">        &#39;T-val&#39; : T-values</span>
+<span class="sd">        &#39;p-unc&#39; : Uncorrected p-values</span>
+<span class="sd">        &#39;p-corr&#39; : Corrected p-values</span>
+<span class="sd">        &#39;p-adjust&#39; : p-values correction method</span>
+<span class="sd">        &#39;reject&#39; : indicates whether the null hypothesis is rejected or not</span>
+<span class="sd">        &#39;Eff_size&#39; : effect sizes</span>
+<span class="sd">        &#39;Eff_type&#39; : type of effect size</span>
+
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -358,7 +372,41 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    stats : DataFrame</span>
-<span class="sd">        Stats summary</span>
+<span class="sd">        Stats summary ::</span>
+
+<span class="sd">        &#39;X&#39; : Name(s) of first columns</span>
+<span class="sd">        &#39;Y&#39; : Name(s) of second columns</span>
+<span class="sd">        &#39;method&#39; : method used to compute the correlation</span>
+<span class="sd">        &#39;tail&#39; : indicates whether the p-values are one-sided or two-sided</span>
+<span class="sd">        &#39;r&#39; : Correlation coefficients</span>
+<span class="sd">        &#39;r2&#39; : R-squared values</span>
+<span class="sd">        &#39;adj_r2&#39; : Adjusted R-squared values</span>
+<span class="sd">        &#39;z&#39; : Standardized correlation coefficients</span>
+<span class="sd">        &#39;p-unc&#39; : uncorrected one or two tailed p-values</span>
+<span class="sd">        &#39;p-corr&#39; : corrected one or two tailed p-values</span>
+<span class="sd">        &#39;p-adjust&#39; : Correction method</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The Pearson correlation coefficient measures the linear relationship</span>
+<span class="sd">    between two datasets. Strictly speaking, Pearson&#39;s correlation requires</span>
+<span class="sd">    that each dataset be normally distributed. Correlations of -1 or +1 imply</span>
+<span class="sd">    an exact linear relationship.</span>
+
+<span class="sd">    The Spearman correlation is a nonparametric measure of the monotonicity of</span>
+<span class="sd">    the relationship between two datasets. Unlike the Pearson correlation,</span>
+<span class="sd">    the Spearman correlation does not assume that both datasets are normally</span>
+<span class="sd">    distributed. Correlations of -1 or +1 imply an exact monotonic</span>
+<span class="sd">    relationship.</span>
+
+<span class="sd">    Kendall’s tau is a measure of the correspondence between two rankings.</span>
+<span class="sd">    Values close to 1 indicate strong agreement, values close to -1 indicate</span>
+<span class="sd">    strong disagreement.</span>
+
+<span class="sd">    The percentage bend correlation (Wilcox 1994) is a robust method that</span>
+<span class="sd">    protects against univariate outliers.</span>
+
+<span class="sd">    Please note that NaN are automatically removed from datasets.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -428,7 +476,10 @@
         <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-corr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-adjust&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="s1">&#39;tail&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;r2&#39;</span><span class="p">,</span> <span class="s1">&#39;adj_r2&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span>
+    <span class="c1"># Standardize correlation coefficients (Fisher z-transformation)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctanh</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="s1">&#39;tail&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;r2&#39;</span><span class="p">,</span> <span class="s1">&#39;adj_r2&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span>
                  <span class="s1">&#39;p-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;p-adjust&#39;</span><span class="p">]</span>
     <span class="n">stats</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
     <span class="n">stats</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
