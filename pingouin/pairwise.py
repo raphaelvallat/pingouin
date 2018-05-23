@@ -332,6 +332,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         >>>         method='kendall', export_filename='pairwise_corr.csv')
     '''
     from pingouin.correlation import corr
+    from pingouin.effsize import compute_esci
 
     if tail not in ['one-sided', 'two-sided']:
         raise ValueError('Tail not recognized')
@@ -356,6 +357,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
             'method': method,
             'tail': tail,
             'r': cor_st['r'][0],
+            'CI95%': compute_esci(ef=cor_st['r'][0], nx=len(x), ny=len(y)),
             'r2': cor_st['r2'][0],
             'adj_r2': cor_st['adj_r2'][0],
             'p-unc': cor_st['p-val'][0]}, ignore_index=True)
@@ -371,11 +373,16 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         stats['p-corr'] = None
         stats['p-adjust'] = None
 
+
     # Standardize correlation coefficients (Fisher z-transformation)
     stats['z'] = np.arctanh(stats['r'].values)
 
-    col_order = ['X', 'Y', 'method', 'tail', 'r', 'r2', 'adj_r2', 'z', 'p-unc',
-                 'p-corr', 'p-adjust']
+    # Round values
+    # for c in ['CI95%', 'r', 'r2', 'adj_r2', 'z']:
+    #     stats[c] = stats[c].round(3)
+
+    col_order = ['X', 'Y', 'method', 'tail', 'r', 'CI95%', 'r2', 'adj_r2',
+                 'z', 'p-unc', 'p-corr', 'p-adjust']
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
     if export_filename is not None:

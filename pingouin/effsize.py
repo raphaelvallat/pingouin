@@ -60,13 +60,11 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
             1.01
             [0.61  1.41]
 
-
     2. Compute the 95% **bootstrapped** confidence interval of an effect size.
        In that case, we need to pass directly the original x and y arrays.
 
         >>> print(compute_esci(x=x, y=y, method='bootstrap'))
             [0.93 1.17]
-
 
     3. Plot the bootstrapped distribution using Seaborn.
 
@@ -75,13 +73,11 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
         >>>                         return_dist=True, n_boot=5000)
         >>> sns.distplot(dist)
 
-
     4. Get the 68% confidence interval
 
         >>> ci68 = compute_esci(x=x, y=y, method='bootstrap', alpha=.68)
         >>> print(ci68)
             [0.99 1.12]
-
 
     5. Compute the bootstrapped Pearson r confidence interval
 
@@ -109,7 +105,7 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
         from scipy.stats import norm
         se = np.sqrt(((nx + ny) / (nx * ny)) + (ef**2) / (2 * (nx + ny)))
         crit = np.abs(norm.ppf((1 - alpha) / 2))
-        ci = np.array([ef - crit * se, ef + crit * se])
+        ci = np.round(np.array([ef - crit * se, ef + crit * se]), 2)
         return ci
     elif method == 'bootstrap':
         ef = compute_effsize(x=x, y=y, eftype=eftype)
@@ -129,7 +125,7 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
         upper = int(n_boot * (alpha + (1 - alpha) / 2))
         ci = np.array([ef_sorted[lower], ef_sorted[upper]])
         # Pivot confidence intervals
-        ci = np.sort(2 * ef - ci)
+        ci =  np.round(np.sort(2 * ef - ci), 2)
         if return_dist:
             return ci, effsizes
         else:
