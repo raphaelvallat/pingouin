@@ -3,9 +3,8 @@ Doc
 
 Code
 ----
-- Pairwise correlations (using pandas DataFrame column or column-wise)
 - URGENT: FIX SPHERICITY AND MAURY
+- Add Pearson's skipped-correlation
 - Test second order approximation in Mauchly
 - Test ESCI against JASP.
-- Better bootstrapping of confidence intervals.
-- Sample sizes computations.
+- Better bootstrapping of confidence intervals (see Matlab)
