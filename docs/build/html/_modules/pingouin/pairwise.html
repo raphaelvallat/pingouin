@@ -347,8 +347,7 @@
 <span class="sd">        Indicates whether to return the &#39;two-sided&#39; or &#39;one-sided&#39; p-values</span>
 <span class="sd">    method : string</span>
 <span class="sd">        Specify which method to use for the computation of the correlation</span>
-<span class="sd">        coefficient.</span>
-<span class="sd">        Available methods are ::</span>
+<span class="sd">        coefficient. Available methods are ::</span>
 
 <span class="sd">        &#39;pearson&#39; : Pearson product-moment correlation</span>
 <span class="sd">        &#39;spearman&#39; : Spearman rank-order correlation</span>
@@ -379,6 +378,7 @@
 <span class="sd">        &#39;method&#39; : method used to compute the correlation</span>
 <span class="sd">        &#39;tail&#39; : indicates whether the p-values are one-sided or two-sided</span>
 <span class="sd">        &#39;r&#39; : Correlation coefficients</span>
+<span class="sd">        &#39;CI95&#39; : 95% parametric confidence intervals</span>
 <span class="sd">        &#39;r2&#39; : R-squared values</span>
 <span class="sd">        &#39;adj_r2&#39; : Adjusted R-squared values</span>
 <span class="sd">        &#39;z&#39; : Standardized correlation coefficients</span>
@@ -437,6 +437,7 @@
 <span class="sd">        &gt;&gt;&gt;         method=&#39;kendall&#39;, export_filename=&#39;pairwise_corr.csv&#39;)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="kn">from</span> <span class="nn">pingouin.correlation</span> <span class="k">import</span> <span class="n">corr</span>
+    <span class="kn">from</span> <span class="nn">pingouin.effsize</span> <span class="k">import</span> <span class="n">compute_esci</span>
 
     <span class="k">if</span> <span class="n">tail</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;one-sided&#39;</span><span class="p">,</span> <span class="s1">&#39;two-sided&#39;</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Tail not recognized&#39;</span><span class="p">)</span>
@@ -461,6 +462,7 @@
             <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="n">method</span><span class="p">,</span>
             <span class="s1">&#39;tail&#39;</span><span class="p">:</span> <span class="n">tail</span><span class="p">,</span>
             <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="n">cor_st</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s1">&#39;CI95%&#39;</span><span class="p">:</span> <span class="n">compute_esci</span><span class="p">(</span><span class="n">ef</span><span class="o">=</span><span class="n">cor_st</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">nx</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">ny</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span>
             <span class="s1">&#39;r2&#39;</span><span class="p">:</span> <span class="n">cor_st</span><span class="p">[</span><span class="s1">&#39;r2&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
             <span class="s1">&#39;adj_r2&#39;</span><span class="p">:</span> <span class="n">cor_st</span><span class="p">[</span><span class="s1">&#39;adj_r2&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
             <span class="s1">&#39;p-unc&#39;</span><span class="p">:</span> <span class="n">cor_st</span><span class="p">[</span><span class="s1">&#39;p-val&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]},</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -479,8 +481,12 @@
     <span class="c1"># Standardize correlation coefficients (Fisher z-transformation)</span>
     <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctanh</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
-    <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="s1">&#39;tail&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;r2&#39;</span><span class="p">,</span> <span class="s1">&#39;adj_r2&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;p-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;p-adjust&#39;</span><span class="p">]</span>
+    <span class="c1"># Round values</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;r2&#39;</span><span class="p">,</span> <span class="s1">&#39;adj_r2&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">]:</span>
+        <span class="n">stats</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">stats</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="s1">&#39;tail&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;CI95%&#39;</span><span class="p">,</span> <span class="s1">&#39;r2&#39;</span><span class="p">,</span> <span class="s1">&#39;adj_r2&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span> <span class="s1">&#39;p-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;p-adjust&#39;</span><span class="p">]</span>
     <span class="n">stats</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
     <span class="n">stats</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">export_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

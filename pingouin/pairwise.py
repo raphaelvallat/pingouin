@@ -242,7 +242,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         Indicates whether to return the 'two-sided' or 'one-sided' p-values
     method : string
         Specify which method to use for the computation of the correlation
-        coefficient.Available methods are ::
+        coefficient. Available methods are ::
 
         'pearson' : Pearson product-moment correlation
         'spearman' : Spearman rank-order correlation

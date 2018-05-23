@@ -165,13 +165,11 @@
 <span class="sd">            1.01</span>
 <span class="sd">            [0.61  1.41]</span>
 
-
 <span class="sd">    2. Compute the 95% **bootstrapped** confidence interval of an effect size.</span>
 <span class="sd">       In that case, we need to pass directly the original x and y arrays.</span>
 
 <span class="sd">        &gt;&gt;&gt; print(compute_esci(x=x, y=y, method=&#39;bootstrap&#39;))</span>
 <span class="sd">            [0.93 1.17]</span>
-
 
 <span class="sd">    3. Plot the bootstrapped distribution using Seaborn.</span>
 
@@ -180,13 +178,11 @@
 <span class="sd">        &gt;&gt;&gt;                         return_dist=True, n_boot=5000)</span>
 <span class="sd">        &gt;&gt;&gt; sns.distplot(dist)</span>
 
-
 <span class="sd">    4. Get the 68% confidence interval</span>
 
 <span class="sd">        &gt;&gt;&gt; ci68 = compute_esci(x=x, y=y, method=&#39;bootstrap&#39;, alpha=.68)</span>
 <span class="sd">        &gt;&gt;&gt; print(ci68)</span>
 <span class="sd">            [0.99 1.12]</span>
-
 
 <span class="sd">    5. Compute the bootstrapped Pearson r confidence interval</span>
 
@@ -214,7 +210,7 @@
         <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">norm</span>
         <span class="n">se</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">nx</span> <span class="o">+</span> <span class="n">ny</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">nx</span> <span class="o">*</span> <span class="n">ny</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="n">ef</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">nx</span> <span class="o">+</span> <span class="n">ny</span><span class="p">)))</span>
         <span class="n">crit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
-        <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ef</span> <span class="o">-</span> <span class="n">crit</span> <span class="o">*</span> <span class="n">se</span><span class="p">,</span> <span class="n">ef</span> <span class="o">+</span> <span class="n">crit</span> <span class="o">*</span> <span class="n">se</span><span class="p">])</span>
+        <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ef</span> <span class="o">-</span> <span class="n">crit</span> <span class="o">*</span> <span class="n">se</span><span class="p">,</span> <span class="n">ef</span> <span class="o">+</span> <span class="n">crit</span> <span class="o">*</span> <span class="n">se</span><span class="p">]),</span> <span class="mi">2</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ci</span>
     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;bootstrap&#39;</span><span class="p">:</span>
         <span class="n">ef</span> <span class="o">=</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="n">eftype</span><span class="p">)</span>
@@ -234,12 +230,12 @@
         <span class="n">upper</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_boot</span> <span class="o">*</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
         <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ef_sorted</span><span class="p">[</span><span class="n">lower</span><span class="p">],</span> <span class="n">ef_sorted</span><span class="p">[</span><span class="n">upper</span><span class="p">]])</span>
         <span class="c1"># Pivot confidence intervals</span>
-        <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ef</span> <span class="o">-</span> <span class="n">ci</span><span class="p">)</span>
+        <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ef</span> <span class="o">-</span> <span class="n">ci</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">return_dist</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ci</span><span class="p">,</span> <span class="n">effsizes</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ci</span>
-</div>
+            <span class="k">return</span> <span class="n">ci</span></div>
+
 
 <div class="viewcode-block" id="convert_effsize"><a class="viewcode-back" href="../../generated/pingouin.convert_effsize.html#pingouin.convert_effsize">[docs]</a><span class="k">def</span> <span class="nf">convert_effsize</span><span class="p">(</span><span class="n">ef</span><span class="p">,</span> <span class="n">input_type</span><span class="p">,</span> <span class="n">output_type</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Conversion between effect sizes.</span>
@@ -363,8 +359,8 @@
         <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">norm</span>
         <span class="k">return</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">d</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">ot</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-</div>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
 
 <div class="viewcode-block" id="compute_effsize"><a class="viewcode-back" href="../../generated/pingouin.compute_effsize.html#pingouin.compute_effsize">[docs]</a><span class="k">def</span> <span class="nf">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate effect size between two set of observations.</span>
@@ -485,8 +481,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Report Cohen d-avg (Cumming 2012; Lakens 2013)</span>
             <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="o">.</span><span class="mi">5</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span>
-        <span class="k">return</span> <span class="n">convert_effsize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">eftype</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">)</span>
-</div>
+        <span class="k">return</span> <span class="n">convert_effsize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">eftype</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="compute_effsize_from_t"><a class="viewcode-back" href="../../generated/pingouin.compute_effsize_from_t.html#pingouin.compute_effsize_from_t">[docs]</a><span class="k">def</span> <span class="nf">compute_effsize_from_t</span><span class="p">(</span><span class="n">tval</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Compute effect size from a T-value.</span>
@@ -544,8 +540,8 @@
         <span class="n">d</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">tval</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;You must specify either nx + ny, or just N&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">convert_effsize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">eftype</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">)</span>
-</pre></div></div>
+    <span class="k">return</span> <span class="n">convert_effsize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">eftype</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">)</span></div>
+</pre></div>
 
     </div>
       
