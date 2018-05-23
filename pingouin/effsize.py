@@ -125,7 +125,7 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
         upper = int(n_boot * (alpha + (1 - alpha) / 2))
         ci = np.array([ef_sorted[lower], ef_sorted[upper]])
         # Pivot confidence intervals
-        ci =  np.round(np.sort(2 * ef - ci), 2)
+        ci = np.round(np.sort(2 * ef - ci), 2)
         if return_dist:
             return ci, effsizes
         else:

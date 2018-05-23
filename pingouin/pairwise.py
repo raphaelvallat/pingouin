@@ -242,8 +242,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         Indicates whether to return the 'two-sided' or 'one-sided' p-values
     method : string
         Specify which method to use for the computation of the correlation
-        coefficient.
-        Available methods are ::
+        coefficient.Available methods are ::
 
         'pearson' : Pearson product-moment correlation
         'spearman' : Spearman rank-order correlation
@@ -274,6 +273,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         'method' : method used to compute the correlation
         'tail' : indicates whether the p-values are one-sided or two-sided
         'r' : Correlation coefficients
+        'CI95' : 95% parametric confidence intervals
         'r2' : R-squared values
         'adj_r2' : Adjusted R-squared values
         'z' : Standardized correlation coefficients
@@ -373,13 +373,12 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         stats['p-corr'] = None
         stats['p-adjust'] = None
 
-
     # Standardize correlation coefficients (Fisher z-transformation)
     stats['z'] = np.arctanh(stats['r'].values)
 
     # Round values
-    # for c in ['CI95%', 'r', 'r2', 'adj_r2', 'z']:
-    #     stats[c] = stats[c].round(3)
+    for c in ['r', 'r2', 'adj_r2', 'z']:
+        stats[c] = stats[c].round(3)
 
     col_order = ['X', 'Y', 'method', 'tail', 'r', 'CI95%', 'r2', 'adj_r2',
                  'z', 'p-unc', 'p-corr', 'p-adjust']
