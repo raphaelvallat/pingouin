@@ -6,6 +6,7 @@ omit =
     */setup.py
     */examples/*
     */tests/*
+    */external/*
 
 [report]
 show_missing = True

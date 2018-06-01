@@ -2,21 +2,13 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>pingouin.test_sphericity &#8212; pingouin 0.1.1 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/style.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '0.1.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -36,8 +28,7 @@
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
 
-  </head>
-  <body>
+  </head><body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -100,7 +91,29 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">pingouin.test_sphericity</a></li>
+</ul>
+
+  <li>
+    <a href="pingouin.test_homoscedasticity.html" title="Previous Chapter: pingouin.test_homoscedasticity"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; pingouin.test...</span>
+    </a>
+  </li>
+  <li>
+    <a href="pingouin.test_dist.html" title="Next Chapter: pingouin.test_dist"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">pingouin.test_dist &raquo;</span>
+    </a>
+  </li>
+<form action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
       
   <div class="section" id="pingouin-test-sphericity">
 <h1>pingouin.test_sphericity</h1>
@@ -115,36 +128,36 @@ always double-check your results.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : array_like</p>
-<blockquote>
-<div><p>Data array of shape (n_observations, n_repetitions)</p>
-</div></blockquote>
-<p><strong>alpha</strong> : float, optional</p>
-<blockquote>
-<div><p>Significance level</p>
-</div></blockquote>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array_like</span></dt>
+<dd><p class="first last">Data array of shape (n_observations, n_repetitions)</p>
+</dd>
+<dt><strong>alpha</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float, optional</span></dt>
+<dd><p class="first last">Significance level</p>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>sphericity</strong> : boolean</p>
-<blockquote>
-<div><p>True if data have the sphericity property.</p>
-</div></blockquote>
-<p><strong>W</strong> : float</p>
-<blockquote>
-<div><p>Mauchly’s W statistic</p>
-</div></blockquote>
-<p><strong>chi_sq</strong> : float</p>
-<blockquote>
-<div><p>Chi-square statistic</p>
-</div></blockquote>
-<p><strong>ddof</strong> : int</p>
-<blockquote>
-<div><p>Degrees of freedom</p>
-</div></blockquote>
-<p><strong>p</strong> : float</p>
-<blockquote class="last">
-<div><p>P-value.</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>sphericity</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><p class="first last">True if data have the sphericity property.</p>
+</dd>
+<dt><strong>W</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Mauchly’s W statistic</p>
+</dd>
+<dt><strong>chi_sq</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Chi-square statistic</p>
+</dd>
+<dt><strong>ddof</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">Degrees of freedom</p>
+</dd>
+<dt><strong>p</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">P-value.</p>
+</dd>
+<dt><strong>eps</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Epsilon adjustment factor.</p>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -152,23 +165,23 @@ always double-check your results.</p>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <dl class="last docutils">
-<dt><a class="reference internal" href="pingouin.test_homoscedasticity.html#pingouin.test_homoscedasticity" title="pingouin.test_homoscedasticity"><code class="xref py py-obj docutils literal"><span class="pre">test_homoscedasticity</span></code></a></dt>
+<dt><a class="reference internal" href="pingouin.test_homoscedasticity.html#pingouin.test_homoscedasticity" title="pingouin.test_homoscedasticity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_homoscedasticity</span></code></a></dt>
 <dd>Test equality of variance.</dd>
-<dt><a class="reference internal" href="pingouin.test_normality.html#pingouin.test_normality" title="pingouin.test_normality"><code class="xref py py-obj docutils literal"><span class="pre">test_normality</span></code></a></dt>
+<dt><a class="reference internal" href="pingouin.test_normality.html#pingouin.test_normality" title="pingouin.test_normality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_normality</span></code></a></dt>
 <dd>Test the normality of one or more array.</dd>
 </dl>
 </div>
 <p class="rubric">Examples</p>
 <p>Test the sphericity of an array with 30 observations *
 3 repeated measures</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">test_sphericity</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sphericity</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">chi_sq</span><span class="p">,</span> <span class="n">ddof</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">test_sphericity</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sphericity</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">chi_sq</span><span class="p">,</span> <span class="n">ddof</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">eps</span> <span class="o">=</span> <span class="n">test_sphericity</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sphericity</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
 <span class="go">True 0.56</span>
 </pre></div>
@@ -193,7 +206,7 @@ always double-check your results.</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.<br/>
     </p>
   </div>
 </footer>

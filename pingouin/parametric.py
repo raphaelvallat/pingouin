@@ -2,7 +2,8 @@
 # Date: April 2018
 import numpy as np
 import pandas as pd
-from pingouin import _check_dataframe, _remove_rm_na, _export_table
+from pingouin import (_check_dataframe, _remove_rm_na, _remove_na,
+                      _export_table)
 
 __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
            "test_sphericity", "ttest", "rm_anova", "anova", "mixed_anova"]
@@ -94,11 +95,6 @@ def test_normality(*args, alpha=.05):
         [True   False] [0.27   0.0005]
     """
     from scipy.stats import shapiro
-    # Handle empty input
-    for a in args:
-        if np.asanyarray(a).size == 0:
-            return np.nan, np.nan
-
     k = len(args)
     p = np.zeros(k)
     normal = np.zeros(k, 'bool')
@@ -153,11 +149,6 @@ def test_homoscedasticity(*args, alpha=.05):
             False 0.0002
     """
     from scipy.stats import levene, bartlett
-    # Handle empty input
-    for a in args:
-        if np.asanyarray(a).size == 0:
-            return np.nan, np.nan
-
     k = len(args)
     if k < 2:
         raise ValueError("Must enter at least two input sample vectors.")
@@ -190,11 +181,6 @@ def test_dist(*args, dist='norm'):
         True if data comes from this distribution.
     """
     from scipy.stats import anderson
-    # Handle empty input
-    for a in args:
-        if np.asanyarray(a).size == 0:
-            return np.nan, np.nan
-
     k = len(args)
     from_dist = np.zeros(k, 'bool')
     sig_level = np.zeros(k)
@@ -236,6 +222,8 @@ def test_sphericity(X, alpha=.05):
         Degrees of freedom
     p : float
         P-value.
+    eps : float
+        Epsilon adjustment factor.
 
     See Also
     --------
@@ -254,7 +242,7 @@ def test_sphericity(X, alpha=.05):
         >>> y = np.random.normal(loc=0, scale=0.8,size=30)
         >>> z = np.random.normal(loc=0, scale=0.9,size=30)
         >>> X = np.c_[x, y, z]
-        >>> sphericity, W, chi_sq, ddof, p = test_sphericity(X)
+        >>> sphericity, W, chi_sq, ddof, p, eps = test_sphericity(X)
         >>> print(sphericity, p)
         True 0.56
         """
@@ -273,6 +261,13 @@ def test_sphericity(X, alpha=.05):
     d = C.shape[1]
     T = C.T.dot(S).dot(C)
 
+    # Compute epsilon
+    eig = np.linalg.eigvals(T)
+    eps = np.sum(eig) ** 2 / ((S.shape[0] - 1) * np.sum(eig**2))
+    # Alternative:
+    # eps = np.trace(T) ** 2 / ((S.shape[0] - 1) * np.sum(
+    # np.sum(T * T, axis=1)))
+
     # Mauchly's statistic
     W = np.linalg.det(T) / (np.trace(T) / (p - 1))**d
 
@@ -282,8 +277,15 @@ def test_sphericity(X, alpha=.05):
     chi_sq = -np.log(W) * dd * nr
     ddof = d * (d + 1) / 2 - 1
     pval = chi2.sf(chi_sq, ddof)
+
+    # Second order approximation
+    pval2 = chi2.sf(chi_sq, ddof + 4)
+    w2 = (d + 2) * (d - 1) * (d - 2) * (2 * d**3 + 6 * d * d + 3 * d + 2) / \
+         (288 * d * d * nr * nr * dd * dd)
+    pval += w2 * (pval2 - pval)
+
     sphericity = True if pval > alpha else False
-    return sphericity, W, chi_sq, ddof, pval
+    return sphericity, W, chi_sq, ddof, pval, eps
 
 
 def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
@@ -309,13 +311,19 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
 
     Returns
     -------
-    tval : boolean
-        Test statistic
-    pval : float
-        P-value
-    dof : int
-        Number of degrees of freedom. If a correction is applied, returns the
-        approximated degrees of freedom using the Welch–Satterthwaite equation.
+    stats : pandas DataFrame
+        T-test summary ::
+
+        'T-val' : T-value
+        'p-val' : p-value
+        'dof' : degrees of freedom
+        'cohen-d' : Cohen d effect size
+        'power' : achieved power of the test ( = 1 - type II error)
+
+    Notes
+    -----
+    Missing values are automatically removed from the data. If x and y are
+    paired, the entire row is removed.
 
     Examples
     --------
@@ -324,7 +332,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> from pingouin import ttest
         >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
         >>> ttest(x, 4)
-            (1.3974, 0.2348, 4)
+            T-val   p-val  dof  cohen-d  power
+            1.397  0.2348    4    0.699  0.226
 
     2. Paired two-sample T-test (one-tailed).
 
@@ -332,7 +341,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
         >>> post = [6.4, 3.4, 6.4, 11., 4.8]
         >>> ttest(pre, post, paired=True, tail='one-sided')
-            (-2.3078, 0.0411, 8)
+            T-val   p-val  dof  cohen-d  power
+            -2.308   0.04    4    -0.28  0.015
 
     3. Paired two-sample T-test with missing values.
 
@@ -341,7 +351,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> pre = [5.5, 2.4, nan, 9.6, 4.2]
         >>> post = [6.4, 3.4, 6.4, 11., 4.8]
         >>> ttest(pre, post, paired=True)
-            (-5.902, 0.0097, 8)
+            T-val    p-val  dof  cohen-d  power
+            -5.902  0.0097    3   -0.354  0.074
 
     4. Independant two-sample T-test (equal sample size).
 
@@ -350,10 +361,9 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> np.random.seed(123)
         >>> x = np.random.normal(loc=7, size=20)
         >>> y = np.random.normal(loc=4, size=20)
-        >>> tval, pval, dof = ttest(x, y, correction='auto')
-        >>> # Pretty printing
-        >>> print("%.2f  %.2e  %i" % (tval, pval, dof))
-            9.11  4.31e-11  38
+        >>> ttest(x, y, correction='auto')
+            T-val     p-val  dof  cohen-d  power
+            9.106  4.30e-11   38     2.88    1.0
 
     5. Independant two-sample T-test (unequal sample size).
 
@@ -361,48 +371,73 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> import numpy as np
         >>> np.random.seed(123)
         >>> x = np.random.normal(loc=7, size=20)
-        >>> y = np.random.normal(loc=4, size=15)
-        >>> tval, pval, dof = ttest(x, y, correction='auto')
-        >>> print("%.2f  %.2e  %.2f" % (tval, pval, dof))
-            8.24  2.82e-09  30.75
+        >>> y = np.random.normal(loc=6.5, size=15)
+        >>> ttest(x, y, correction='auto')
+            T-val     p-val  dof   dof-corr  cohen-d  power
+            2.077     0.046   33      30.13    0.711  0.524
     """
     from scipy.stats import ttest_rel, ttest_ind, ttest_1samp
+    from pingouin import ttest_power, compute_effsize
     x = np.asarray(x)
     y = np.asarray(y)
+
+    if x.size != y.size and paired:
+        print('x and y have unequal sizes. Switching to paired == False.')
+        paired = False
+
+    # Remove NA
+    x, y = _remove_na(x, y, paired=paired)
     nx = x.size
     ny = y.size
+    stats = pd.DataFrame({}, index=['T-test'])
 
     if ny == 1:
         # Case one sample T-test
         tval, pval = ttest_1samp(x, y)
         dof = nx - 1
         pval = pval / 2 if tail == 'one-sided' else pval
-        return tval, pval, dof
 
-    if paired:
+    if ny > 1 and paired is True:
         # Case paired two samples T-test
-        tval, pval = ttest_rel(x, y, nan_policy='omit')
+        tval, pval = ttest_rel(x, y)
+        dof = nx - 1
+
+    elif ny > 1 and paired is False:
         dof = nx + ny - 2
-    else:
         # Case unpaired two samples T-test
         if correction is True or (correction == 'auto' and nx != ny):
             # Use the Welch separate variance T-test
-            tval, pval = ttest_ind(x, y, equal_var=False, nan_policy='omit')
+            tval, pval = ttest_ind(x, y, equal_var=False)
             # dof are approximated using Welch–Satterthwaite equation
             vx = x.var(ddof=1)
             vy = y.var(ddof=1)
-            dof = (vx / nx + vy / ny)**2 / ((vx / nx)**2 / (nx - 1) +
-                                            (vy / ny)**2 / (ny - 1))
+            dof_corr = (vx / nx + vy / ny)**2 / ((vx / nx)**2 / (nx - 1) +
+                                                 (vy / ny)**2 / (ny - 1))
+            stats['dof-corr'] = dof_corr
         else:
-            tval, pval = ttest_ind(x, y, equal_var=True, nan_policy='omit')
-            dof = nx + ny - 2
+            tval, pval = ttest_ind(x, y, equal_var=True)
 
     pval = pval / 2 if tail == 'one-sided' else pval
-    return tval, pval, dof
+
+    # Effect size and achieved power
+    d = compute_effsize(x, y, paired=paired, eftype='cohen')
+    power = ttest_power(d, nx, ny, paired=paired, tail=tail)
+
+    # Fill output DataFrame
+    stats['dof'] = dof
+    stats['T-val'] = tval.round(3)
+    stats['p-val'] = pval
+    stats['cohen-d'] = np.abs(d).round(3)
+    stats['power'] = power
+
+    col_order = ['T-val', 'p-val', 'dof', 'dof-corr', 'cohen-d', 'power']
+    stats = stats.reindex(columns=col_order)
+    stats.dropna(how='all', axis=1, inplace=True)
+    return stats
 
 
 def rm_anova(dv=None, within=None, data=None, correction='auto',
-             remove_na=False, detailed=False, export_filename=None):
+             remove_na=True, detailed=False, export_filename=None):
     """One-way repeated measures ANOVA.
 
     Results have been tested against R and JASP.
@@ -448,6 +483,14 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     anova : One-way ANOVA
     mixed_anova : Two way mixed ANOVA
 
+    Notes
+    -----
+    The effect size reported in Pingouin is the partial eta-square.
+    However, one should keep in mind that for one-way repeated-measures ANOVA,
+    partial eta-square is the same as eta-square.
+
+    For more details, see Bakeman 2005; Richardson 2011.
+
     Examples
     --------
     Compute a one-way repeated-measures ANOVA.
@@ -481,10 +524,6 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     n_obs = int(data.groupby(within)[dv].count().max())
     grandmean = data[dv].mean()
 
-    # Calculate degrees of freedom
-    ddof1 = n_rm - 1
-    ddof2 = ddof1 * (n_obs - 1)
-
     # Calculate sums of squares
     sstime = ((grp_with.mean() - grandmean)**2 * grp_with.count()).sum()
     sswithin = grp_with.apply(lambda x: (x - x.mean())**2).sum()
@@ -492,6 +531,10 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     grp_subj = data.groupby('Subj')[dv]
     sssubj = n_rm * np.sum((grp_subj.mean() - grandmean)**2)
     sserror = sswithin - sssubj
+
+    # Calculate degrees of freedom
+    ddof1 = n_rm - 1
+    ddof2 = ddof1 * (n_obs - 1)
 
     # Calculate F and p-values
     mserror = sserror / (ddof2 / ddof1)
@@ -507,9 +550,9 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
 
     # Compute sphericity using Mauchly's test
     # Sphericity assumption only applies if there are more than 2 levels
-    if correction == 'auto' or correction and n_rm >= 3:
+    if correction == 'auto' or (correction is True and n_rm >= 3):
         sphericity, W_mauchly, chi_sq_mauchly, ddof_mauchly, \
-            p_mauchly = test_sphericity(data_pivot.as_matrix(), alpha=.05)
+            p_mauchly, eps = test_sphericity(data_pivot.values, alpha=.05)
 
         if correction == 'auto':
             correction = True if not sphericity else False
@@ -518,9 +561,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
 
     # If required, apply Greenhouse-Geisser correction for sphericity
     if correction:
-        # Compute covariance matrix
-        v = data_pivot.cov().as_matrix()
-        eps = np.trace(v) ** 2 / ddof1 * np.sum(np.sum(v * v, axis=1))
+        # print('eps = ', eps)
         corr_ddof1, corr_ddof2 = [np.maximum(d * eps, 1.) for d in
                                   (ddof1, ddof2)]
         p_corr = f(corr_ddof1, corr_ddof2).sf(fval)
@@ -606,6 +647,14 @@ def anova(dv=None, between=None, data=None, detailed=False,
     rm_anova : One-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
 
+    Notes
+    -----
+    The effect size reported in Pingouin is the partial eta-square.
+    However, one should keep in mind that for one-way ANOVA
+    partial eta-square is the same as eta-square and generalized eta-square.
+
+    For more details, see Bakeman 2005; Richardson 2011.
+
     Examples
     --------
     Compute a one-way ANOVA.
@@ -680,7 +729,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
 
 def mixed_anova(dv=None, within=None, between=None, data=None,
-                correction='auto', remove_na=False, export_filename=None):
+                correction='auto', remove_na=True, export_filename=None):
     """Mixed-design (split-plot) type II ANOVA.
 
     Results have been tested against R and JASP.
@@ -767,7 +816,6 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     dfbetween = mbetw.loc[0, 'DF']
     dfeb = n_obs - data.groupby(between)[dv].count().count()
     dfwg = dftime * dfeb
-    # dftotal = N - 1
     dfinter = mtime.loc[0, 'DF'] * mbetw.loc[0, 'DF']
 
     # MEAN SQUARES
@@ -791,7 +839,8 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     npsq_inter = ssinter / (ssinter + sswg)
 
     # Stats table
-    aov = pd.concat([mbetw.drop(1), mtime.drop(1)], ignore_index=True)
+    aov = pd.concat([mbetw.drop(1), mtime.drop(1)], sort=False,
+                    ignore_index=True)
     # Update values
     aov.rename(columns={'DF': 'DF1'}, inplace=True)
     aov.loc[0, 'F'], aov.loc[1, 'F'] = fbetween, ftime

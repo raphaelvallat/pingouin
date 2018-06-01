@@ -1,5 +1,7 @@
 .. -*- mode: rst -*-
 
+|
+
 .. image:: https://badge.fury.io/py/pingouin.svg
   :target: https://badge.fury.io/py/pingouin
 
@@ -12,10 +14,9 @@
 .. image:: https://codecov.io/gh/raphaelvallat/pingouin/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/raphaelvallat/pingouin
 
-Pingouin
-########
 
-.. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/pictures/pingouin.png
+
+.. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/pictures/logo_pingouin.png
    :align:   center
 
 
@@ -47,7 +48,6 @@ Pingouin requires :
 * NumPy
 * SciPy
 * Pandas
-* Tabulate (optional: allows pretty-printing of output table)
 
 User installation
 -----------------

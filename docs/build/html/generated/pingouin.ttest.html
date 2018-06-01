@@ -2,21 +2,13 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>pingouin.ttest &#8212; pingouin 0.1.1 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/style.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '0.1.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -29,15 +21,14 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pingouin.multicomp" href="pingouin.multicomp.html" />
-    <link rel="prev" title="pingouin.pairwise_ttests" href="pingouin.pairwise_ttests.html" />
+    <link rel="next" title="pingouin.mwu" href="pingouin.mwu.html" />
+    <link rel="prev" title="pingouin.pairwise_corr" href="pingouin.pairwise_corr.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
 
-  </head>
-  <body>
+  </head><body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -100,7 +91,29 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">pingouin.ttest</a></li>
+</ul>
+
+  <li>
+    <a href="pingouin.pairwise_corr.html" title="Previous Chapter: pingouin.pairwise_corr"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; pingouin.pair...</span>
+    </a>
+  </li>
+  <li>
+    <a href="pingouin.mwu.html" title="Next Chapter: pingouin.mwu"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">pingouin.mwu &raquo;</span>
+    </a>
+  </li>
+<form action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
       
   <div class="section" id="pingouin-ttest">
 <h1>pingouin.ttest</h1>
@@ -112,101 +125,102 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x</strong> : array_like</p>
-<blockquote>
-<div><p>First set of observations.</p>
-</div></blockquote>
-<p><strong>y</strong> : array_like or float</p>
-<blockquote>
-<div><p>Second set of observations. If y is a single value, a one-sample T-test
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array_like</span></dt>
+<dd><p class="first last">First set of observations.</p>
+</dd>
+<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array_like or float</span></dt>
+<dd><p class="first last">Second set of observations. If y is a single value, a one-sample T-test
 is computed.</p>
-</div></blockquote>
-<p><strong>paired</strong> : boolean</p>
-<blockquote>
-<div><p>Specify whether the two observations are related (i.e. repeated
+</dd>
+<dt><strong>paired</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><p class="first last">Specify whether the two observations are related (i.e. repeated
 measures) or independant.</p>
-</div></blockquote>
-<p><strong>tail</strong> : string</p>
-<blockquote>
-<div><p>Specify whether to return two-sided or one-sided p-value.</p>
-</div></blockquote>
-<p><strong>correction</strong> : string or boolean</p>
-<blockquote>
-<div><p>For unpaired two sample T-tests, specify whether or not to correct for
+</dd>
+<dt><strong>tail</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Specify whether to return two-sided or one-sided p-value.</p>
+</dd>
+<dt><strong>correction</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string or boolean</span></dt>
+<dd><p class="first last">For unpaired two sample T-tests, specify whether or not to correct for
 unequal variances using Welch separate variances T-test. If ‘auto’, it
 will automatically uses Welch T-test when the sample sizes are unequal,
 as recommended by Zimmerman 2004.</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>tval</strong> : boolean</p>
-<blockquote>
-<div><p>Test statistic</p>
-</div></blockquote>
-<p><strong>pval</strong> : float</p>
-<blockquote>
-<div><p>P-value</p>
-</div></blockquote>
-<p><strong>dof</strong> : int</p>
-<blockquote class="last">
-<div><p>Number of degrees of freedom. If a correction is applied, returns the
-approximated degrees of freedom using the Welch–Satterthwaite equation.</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>stats</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
+<dd><p class="first">T-test summary</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;T-val&#39;</span> <span class="p">:</span> <span class="n">T</span><span class="o">-</span><span class="n">value</span>
+<span class="s1">&#39;p-val&#39;</span> <span class="p">:</span> <span class="n">p</span><span class="o">-</span><span class="n">value</span>
+<span class="s1">&#39;dof&#39;</span> <span class="p">:</span> <span class="n">degrees</span> <span class="n">of</span> <span class="n">freedom</span>
+<span class="s1">&#39;cohen-d&#39;</span> <span class="p">:</span> <span class="n">Cohen</span> <span class="n">d</span> <span class="n">effect</span> <span class="n">size</span>
+<span class="s1">&#39;power&#39;</span> <span class="p">:</span> <span class="n">achieved</span> <span class="n">power</span> <span class="n">of</span> <span class="n">the</span> <span class="n">test</span> <span class="p">(</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="nb">type</span> <span class="n">II</span> <span class="n">error</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>Missing values are automatically removed from the data. If x and y are
+paired, the entire row is removed.</p>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">One-sample T-test.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">2.4</span><span class="p">,</span> <span class="mf">6.8</span><span class="p">,</span> <span class="mf">9.6</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-<span class="go">    (1.3974, 0.2348, 4)</span>
+<span class="go">    T-val   p-val  dof  cohen-d  power</span>
+<span class="go">    1.397  0.2348    4    0.699  0.226</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">Paired two-sample T-test (one-tailed).</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pre</span> <span class="o">=</span> <span class="p">[</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">2.4</span><span class="p">,</span> <span class="mf">6.8</span><span class="p">,</span> <span class="mf">9.6</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">post</span> <span class="o">=</span> <span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">,</span> <span class="mf">6.4</span><span class="p">,</span> <span class="mf">11.</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;one-sided&#39;</span><span class="p">)</span>
-<span class="go">    (-2.3078, 0.0411, 8)</span>
+<span class="go">    T-val   p-val  dof  cohen-d  power</span>
+<span class="go">    -2.308   0.04    4    -0.28  0.015</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">Paired two-sample T-test with missing values.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">nan</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pre</span> <span class="o">=</span> <span class="p">[</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">2.4</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="mf">9.6</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">post</span> <span class="o">=</span> <span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">,</span> <span class="mf">6.4</span><span class="p">,</span> <span class="mf">11.</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="go">    (-5.902, 0.0097, 8)</span>
+<span class="go">    T-val    p-val  dof  cohen-d  power</span>
+<span class="go">    -5.902  0.0097    3   -0.354  0.074</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">Independant two-sample T-test (equal sample size).</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tval</span><span class="p">,</span> <span class="n">pval</span><span class="p">,</span> <span class="n">dof</span> <span class="o">=</span> <span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Pretty printing</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2">  </span><span class="si">%.2e</span><span class="s2">  </span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tval</span><span class="p">,</span> <span class="n">pval</span><span class="p">,</span> <span class="n">dof</span><span class="p">))</span>
-<span class="go">    9.11  4.31e-11  38</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+<span class="go">    T-val     p-val  dof  cohen-d  power</span>
+<span class="go">    9.106  4.30e-11   38     2.88    1.0</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">Independant two-sample T-test (unequal sample size).</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tval</span><span class="p">,</span> <span class="n">pval</span><span class="p">,</span> <span class="n">dof</span> <span class="o">=</span> <span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2">  </span><span class="si">%.2e</span><span class="s2">  </span><span class="si">%.2f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tval</span><span class="p">,</span> <span class="n">pval</span><span class="p">,</span> <span class="n">dof</span><span class="p">))</span>
-<span class="go">    8.24  2.82e-09  30.75</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mf">6.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+<span class="go">    T-val     p-val  dof   dof-corr  cohen-d  power</span>
+<span class="go">    2.077     0.046   33      30.13    0.711  0.524</span>
 </pre></div>
 </div>
 </li>
@@ -231,7 +245,7 @@ approximated degrees of freedom using the Welch–Satterthwaite equation.</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.<br/>
     </p>
   </div>
 </footer>

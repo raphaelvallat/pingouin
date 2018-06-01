@@ -19,7 +19,11 @@ df = pd.DataFrame({'Scores': np.r_[control, meditation],
                    'Group': np.repeat(['Control', 'Meditation'],
                                       len(months) * n)})
 
+df_nan = df.copy()
+df_nan.iloc[[4, 15], 0] = np.nan
+
 # Create random normal variables
+np.random.seed(1234)
 x = np.random.normal(scale=1., size=100)
 y = np.random.normal(scale=0.8, size=100)
 z = np.random.normal(scale=0.9, size=100)
@@ -52,29 +56,53 @@ class TestParametric(_TestPingouin):
 
     def test_ttest(self):
         """Test function ttest"""
+        h = np.random.normal(scale=0.9, size=95)
         ttest(x, 0.5)
-        ttest(x, y, paired=True, tail='one-sided')
+        stats = ttest(x, y, paired=True, tail='one-sided')
+        # Compare with JASP
+        assert np.allclose(stats.loc['T-test', 'T-val'], 0.616)
+        assert np.allclose(stats.loc['T-test', 'p-val'].round(3), .270)
         ttest(x, y, paired=False, correction='auto')
         ttest(x, y, paired=False, correction=True)
+        ttest(x, h, paired=True)
 
     def test_anova(self):
         """Test function anova."""
-        anova(dv='Scores', between='Group', data=df, detailed=True)
-        anova(dv='Scores', between='Group', data=df, detailed=False)
+        aov = anova(dv='Scores', between='Group', data=df, detailed=True)
+        # Compare with JASP
+        assert np.allclose(aov.loc[0, 'F'].round(3), 5.244)
+        assert np.allclose(aov.loc[0, 'p-unc'].round(3), .023)
+        assert np.allclose(aov.loc[0, 'np2'].round(3), .029)
+        anova(dv='Scores', between='Group', data=df, detailed=False,
+              export_filename='test_export.csv')
 
     def test_rm_anova(self):
         """Test function anova."""
         rm_anova(dv='Scores', within='Time', data=df, correction=False,
-                 remove_na=False, detailed=False)
-        rm_anova(dv='Scores', within='Time', data=df, correction='auto',
-                 remove_na=True, detailed=True)
+                 detailed=False)
         rm_anova(dv='Scores', within='Time', data=df, correction=True,
-                 remove_na=True, detailed=True)
+                 detailed=False)
+        aov = rm_anova(dv='Scores', within='Time', data=df, correction='auto',
+                       detailed=True)
+        # Compare with JASP
+        assert np.allclose(aov.loc[0, 'F'].round(3), 3.913)
+        assert np.allclose(aov.loc[0, 'p-unc'].round(3), .023)
+        assert np.allclose(aov.loc[0, 'np2'].round(3), .062)
+
+        rm_anova(dv='Scores', within='Time', data=df, correction=True,
+                 detailed=True)
+        rm_anova(dv='Scores', within='Time', data=df_nan,
+                 export_filename='test_export.csv')
 
     def test_mixed_anova(self):
         """Test function anova."""
-        mixed_anova(dv='Scores', within='Time', between='Group', data=df,
-                    correction='auto', remove_na=False)
-        df.iloc[4, 0] = np.nan
-        mixed_anova(dv='Scores', within='Time', between='Group', data=df,
-                    correction=True, remove_na=True)
+        aov = mixed_anova(dv='Scores', within='Time', between='Group', data=df,
+                          correction='auto', remove_na=False)
+        # Compare with JASP
+        assert np.allclose(aov.loc[0, 'F'].round(3), 5.052)
+        assert np.allclose(aov.loc[1, 'F'].round(3), 4.027)
+        assert np.allclose(aov.loc[2, 'F'].round(3), 2.728)
+
+        mixed_anova(dv='Scores', within='Time', between='Group', data=df_nan,
+                    correction=True, remove_na=True,
+                    export_filename='test_export.csv')

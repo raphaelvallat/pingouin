@@ -3,6 +3,25 @@
 What's new
 ##########
 
+v0.1.2 (June 2018)
+--------------------
+
+**Correlation**
+
+a. Pearson
+b. Spearman
+c. Kendall
+d. Percentage bend (robust)
+e. Pairwise correlations between all columns of a pandas dataframe
+
+**Non-parametric**
+
+a. Mann-Whitney U
+b. Wilcoxon signed-rank
+c. Rank-biserial correlation effect size
+d. Common language effect size
+
+
 v0.1.1 (April 2018)
 --------------------
 
@@ -13,7 +32,9 @@ b. One-way repeated measures
 c. Two-way split-plot (one between factor and one within factor)
 
 **Miscellaneous statistical functions**
+
 a. T-tests
+b. Power of T-tests and one-way ANOVA
 
 v0.1.0 (April 2018)
 --------------------

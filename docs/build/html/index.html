@@ -2,21 +2,13 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Pingouin &#8212; pingouin 0.1.1 documentation</title>
+    <title>Installation &#8212; pingouin 0.1.1 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/style.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
@@ -35,8 +27,7 @@
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
 
-  </head>
-  <body>
+  </head><body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -99,16 +90,42 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li><a class="reference internal" href="#user-installation">User installation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#quick-start">Quick start</a></li>
+<li><a class="reference internal" href="#contents">Contents:</a></li>
+<li><a class="reference internal" href="#development">Development:</a></li>
+</ul>
+
+  <li>
+    <a href="examples.html" title="Next Chapter: Examples"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Examples &raquo;</span>
+    </a>
+  </li>
+<form action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
       
-  <div class="section" id="pingouin">
-<h1>Pingouin</h1>
+  <div class="line-block">
+<div class="line"><br /></div>
+</div>
 <a class="reference external image-reference" href="https://badge.fury.io/py/pingouin"><img alt="https://badge.fury.io/py/pingouin.svg" src="https://badge.fury.io/py/pingouin.svg" /></a>
 <a class="reference external image-reference" href="https://github.com/raphaelvallat/pingouin/blob/master/LICENSE"><img alt="https://img.shields.io/github/license/raphaelvallat/pingouin.svg" src="https://img.shields.io/github/license/raphaelvallat/pingouin.svg" /></a>
 <a class="reference external image-reference" href="https://travis-ci.org/raphaelvallat/pingouin"><img alt="https://travis-ci.org/raphaelvallat/pingouin.svg?branch=master" src="https://travis-ci.org/raphaelvallat/pingouin.svg?branch=master" /></a>
 <a class="reference external image-reference" href="https://codecov.io/gh/raphaelvallat/pingouin"><img alt="https://codecov.io/gh/raphaelvallat/pingouin/branch/master/graph/badge.svg" src="https://codecov.io/gh/raphaelvallat/pingouin/branch/master/graph/badge.svg" /></a>
 <div class="figure align-center">
-<img alt="_images/pingouin.png" src="_images/pingouin.png" />
+<img alt="_images/logo_pingouin.png" src="_images/logo_pingouin.png" />
 </div>
 <p><strong>Pingouin</strong> (French word for <em>penguin</em>) is an open-source statistical Python 3 package based on Pandas.</p>
 <p>Its main features are:</p>
@@ -119,9 +136,9 @@
 <li>Computation and conversion of effect sizes</li>
 </ol>
 <div class="section" id="installation">
-<h2>Installation</h2>
+<h1>Installation</h1>
 <div class="section" id="dependencies">
-<h3>Dependencies</h3>
+<h2>Dependencies</h2>
 <p>Pingouin requires :</p>
 <ul class="simple">
 <li>NumPy</li>
@@ -130,12 +147,12 @@
 </ul>
 </div>
 <div class="section" id="user-installation">
-<h3>User installation</h3>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>pip install pingouin
+<h2>User installation</h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install pingouin
 </pre></div>
 </div>
 <p>Develop mode</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>git clone https://github.com/raphaelvallat/pingouin.git pingouin/
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/raphaelvallat/pingouin.git pingouin/
 <span class="nb">cd</span> pingouin/
 pip install -r requirements.txt
 python setup.py develop
@@ -144,8 +161,8 @@ python setup.py develop
 </div>
 </div>
 <div class="section" id="quick-start">
-<h2>Quick start</h2>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<h1>Quick start</h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">pingouin</span> <span class="kn">import</span> <span class="n">mixed_anova</span><span class="p">,</span> <span class="n">pairwise_ttests</span><span class="p">,</span> <span class="n">print_table</span>
 
 <span class="c1"># Load a fake dataset: the INSOMNIA study</span>
@@ -175,7 +192,7 @@ python setup.py develop
 </div>
 </div>
 <div class="section" id="contents">
-<h2>Contents:</h2>
+<h1>Contents:</h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
@@ -185,10 +202,9 @@ python setup.py develop
 </div>
 </div>
 <div class="section" id="development">
-<h2>Development:</h2>
+<h1>Development:</h1>
 <p>To see the code or report a bug, please visit the <a class="reference external" href="https://github.com/raphaelvallat/pingouin">github repository</a>.</p>
 <p>Note that this program is provided with NO WARRANTY OF ANY KIND. If you can, always double check the results with another statistical software.</p>
-</div>
 </div>
 
 
@@ -207,7 +223,7 @@ python setup.py develop
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.<br/>
     </p>
   </div>
 </footer>

@@ -99,3 +99,4 @@ ENV/
 test_export.csv
 desktop.ini
 examples/mixed_anova.csv
+.pytest_cache/v/cache/nodeids

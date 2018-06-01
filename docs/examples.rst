@@ -3,12 +3,11 @@
 Examples
 ========
 
-- Two-way mixed model ANOVA_
+- `Two-way mixed model ANOVA`_
 
-.. _ANOVA: https://raphaelvallat.github.io/pingouin.html
+.. _Two-way mixed model ANOVA: https://raphaelvallat.github.io/pingouin.html
 
 .. toctree::
    :maxdepth: 1
 
    examples/effect_size
-   examples/pairwise_ttests

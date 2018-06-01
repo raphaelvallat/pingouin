@@ -38,7 +38,7 @@ install:
     # Install dependencies :
     - if [ "${TEST}" == "standard" ]; then
         pip install codecov pytest pytest-cov pytest-sugar pytest-travis-fold openpyxl;
-        pip install pandas tabulate;
+        pip install pandas;
       fi;
     - if [ "${TEST}" == "flake" ]; then
         pip install flake8 pep8-naming;

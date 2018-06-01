@@ -2,10 +2,11 @@
 # Date: April 2018
 import numpy as np
 import pandas as pd
+from itertools import combinations
 from pingouin import (compute_effsize, _remove_rm_na, _extract_effects,
                       multicomp, _export_table)
 
-__all__ = ["pairwise_ttests"]
+__all__ = ["pairwise_ttests", "pairwise_corr"]
 
 
 def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, paired,
@@ -78,7 +79,21 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
     Returns
     -------
     stats : DataFrame
-        Stats summary
+        Stats summary ::
+
+        'A' : Name of first measurement
+        'B' : Name of second measurement
+        'Paired' : indicates whether the two measurements are paired or not
+        'Alpha' : significance level
+        'Tail' : indicate whether the p-values are one-sided or two-sided
+        'T-val' : T-values
+        'p-unc' : Uncorrected p-values
+        'p-corr' : Corrected p-values
+        'p-adjust' : p-values correction method
+        'reject' : indicates whether the null hypothesis is rejected or not
+        'Eff_size' : effect sizes
+        'Eff_type' : type of effect size
+
 
     Examples
     --------
@@ -94,7 +109,6 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         >>> # Print the table with 3 decimals
         >>> print_table(post_hocs, floatfmt=".3f")
     '''
-    from itertools import combinations
     from scipy.stats import ttest_ind, ttest_rel
 
     effects = 'within' if between is None else effects
@@ -172,7 +186,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
                                             padjust=padjust, effsize=effsize,
                                             return_desc=return_desc)
         stats = pd.concat([stats_within, stats_between,
-                           stats_interaction]).reset_index()
+                           stats_interaction], sort=False).reset_index()
 
     # Tail and multiple comparisons
     if tail == 'one-sided':
@@ -206,6 +220,168 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         stats.drop(columns=['mean(A)', 'mean(B)', 'std(A)', 'std(B)'],
                    inplace=True)
 
+    stats = stats.reindex(columns=col_order)
+    stats.dropna(how='all', axis=1, inplace=True)
+    if export_filename is not None:
+        _export_table(stats, export_filename)
+    return stats
+
+
+def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
+                  padjust='none', export_filename=None):
+    '''Pairwise correlations between columns of a pandas dataframe.
+
+    Parameters
+    ----------
+    data : pandas DataFrame
+        DataFrame
+    columns : list
+        Names of columns in data containing the all the dependant variables.
+        If columns is None, compute the pairwise correlations on all columns.
+    tail : string
+        Indicates whether to return the 'two-sided' or 'one-sided' p-values
+    method : string
+        Specify which method to use for the computation of the correlation
+        coefficient. Available methods are ::
+
+        'pearson' : Pearson product-moment correlation
+        'spearman' : Spearman rank-order correlation
+        'kendall' : Kendall’s tau (ordinal data)
+        'percbend' : percentage bend correlation (robust)
+    padjust : string
+        Method used for testing and adjustment of pvalues.
+        Available methods are ::
+
+        'none' : no correction
+        'bonferroni' : one-step Bonferroni correction
+        'holm' : step-down method using Bonferroni adjustments
+        'fdr_bh' : Benjamini/Hochberg FDR correction
+        'fdr_by' : Benjamini/Yekutieli FDR correction
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
+
+    Returns
+    -------
+    stats : DataFrame
+        Stats summary ::
+
+        'X' : Name(s) of first columns
+        'Y' : Name(s) of second columns
+        'method' : method used to compute the correlation
+        'tail' : indicates whether the p-values are one-sided or two-sided
+        'r' : Correlation coefficients
+        'CI95' : 95% parametric confidence intervals
+        'r2' : R-squared values
+        'adj_r2' : Adjusted R-squared values
+        'z' : Standardized correlation coefficients
+        'p-unc' : uncorrected one or two tailed p-values
+        'p-corr' : corrected one or two tailed p-values
+        'p-adjust' : Correction method
+
+    Notes
+    -----
+    The Pearson correlation coefficient measures the linear relationship
+    between two datasets. Strictly speaking, Pearson's correlation requires
+    that each dataset be normally distributed. Correlations of -1 or +1 imply
+    an exact linear relationship.
+
+    The Spearman correlation is a nonparametric measure of the monotonicity of
+    the relationship between two datasets. Unlike the Pearson correlation,
+    the Spearman correlation does not assume that both datasets are normally
+    distributed. Correlations of -1 or +1 imply an exact monotonic
+    relationship.
+
+    Kendall’s tau is a measure of the correspondence between two rankings.
+    Values close to 1 indicate strong agreement, values close to -1 indicate
+    strong disagreement.
+
+    The percentage bend correlation (Wilcox 1994) is a robust method that
+    protects against univariate outliers.
+
+    Please note that NaN are automatically removed from datasets.
+
+    Examples
+    --------
+    1. One-tailed spearman correlation corrected for multiple comparisons
+
+        >>> import pandas as pd
+        >>> from pingouin import pairwise_corr, print_table
+        >>> data = pd.read_csv('mydata.csv')
+        >>> stats = pairwise_corr(data, method='spearman', tail='two-sided',
+        >>>                       padjust='bonf')
+        >>> print_table(stats)
+
+    2. Robust two-sided correlation with uncorrected p-values
+
+        >>> import pandas as pd
+        >>> from pingouin import pairwise_corr, print_table
+        >>> data = pd.read_csv('mydata.csv')
+        >>> stats = pairwise_corr(data, columns=['Col1', 'Col2', 'Col3'],
+        >>>         method='percbend', tail='two-sided')
+        >>> print_table(stats)
+
+    3. Export the results to a .csv file
+
+        >>> import pandas as pd
+        >>> from pingouin import pairwise_corr, print_table
+        >>> data = pd.read_csv('mydata.csv')
+        >>> pairwise_corr(data, columns=['Col1', 'Col2', 'Col3'],
+        >>>         method='kendall', export_filename='pairwise_corr.csv')
+    '''
+    from pingouin.correlation import corr
+    from pingouin.effsize import compute_esci
+
+    if tail not in ['one-sided', 'two-sided']:
+        raise ValueError('Tail not recognized')
+
+    # Initialize empty DataFrame
+    stats = pd.DataFrame()
+
+    # Combinations between columns
+    if columns is None:
+        columns = data.keys().values
+    combs = list(combinations(columns, 2))
+
+    # Initialize vectors
+    for comb in combs:
+        col1, col2 = comb
+        x = data[col1].values
+        y = data[col2].values
+        cor_st = corr(x, y, tail=tail, method=method).reset_index(drop=True)
+        stats = stats.append({
+            'X': col1,
+            'Y': col2,
+            'method': method,
+            'tail': tail,
+            'r': cor_st['r'][0],
+            'CI95%': compute_esci(ef=cor_st['r'][0], nx=len(x), ny=len(y)),
+            'r2': cor_st['r2'][0],
+            'adj_r2': cor_st['adj_r2'][0],
+            'p-unc': cor_st['p-val'][0]}, ignore_index=True)
+
+    # Multiple comparisons
+    padjust = None if stats['p-unc'].size <= 1 else padjust
+    if padjust is not None:
+        if padjust.lower() != 'none':
+            reject, stats['p-corr'] = multicomp(stats['p-unc'].values,
+                                                method=padjust)
+            stats['p-adjust'] = padjust
+    else:
+        stats['p-corr'] = None
+        stats['p-adjust'] = None
+
+    # Standardize correlation coefficients (Fisher z-transformation)
+    stats['z'] = np.arctanh(stats['r'].values)
+
+    # Round values
+    for c in ['r', 'r2', 'adj_r2', 'z']:
+        stats[c] = stats[c].round(3)
+
+    col_order = ['X', 'Y', 'method', 'tail', 'r', 'CI95%', 'r2', 'adj_r2',
+                 'z', 'p-unc', 'p-corr', 'p-adjust']
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
     if export_filename is not None:

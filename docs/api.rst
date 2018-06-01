@@ -16,8 +16,22 @@ ANOVA
     anova
     rm_anova
     mixed_anova
+
+
+T-test and correlations
+-----------------------
+
+.. _ttests:
+
+.. autosummary::
+   :toctree: generated/
+
     pairwise_ttests
+    pairwise_corr
     ttest
+    mwu
+    wilcoxon
+    corr
 
 
 Multiple comparisons
@@ -46,6 +60,18 @@ Effect sizes
     compute_effsize_from_t
     convert_effsize
     compute_esci
+
+
+Power
+-----
+
+.. _power:
+
+.. autosummary::
+   :toctree: generated/
+
+    ttest_power
+    anova_power
 
 
 Distribution

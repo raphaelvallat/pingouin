@@ -2,17 +2,18 @@
 # Date: April 2018
 import numpy as np
 from six import string_types
+from pingouin.external.tabulate import tabulate
 import pandas as pd
 
 __all__ = ["print_table", "_export_table", "reshape_data",
-           "_check_eftype", "_remove_rm_na", "_check_dataframe",
+           "_check_eftype", "_remove_rm_na", "_remove_na", "_check_dataframe",
            "_extract_effects"]
 
 
 def print_table(df, floatfmt=".4f", tablefmt='simple'):
     """Nice display of table.
 
-    See: https://pypi.org/project/tabulate/
+    See: https://pypi.org/project/tabulate/.
 
     Parameters
     ----------
@@ -25,16 +26,12 @@ def print_table(df, floatfmt=".4f", tablefmt='simple'):
     """
     if 'F' in df.keys():
         print('\n=============\nANOVA SUMMARY\n=============\n')
-    elif 'A' in df.keys():
+    if 'A' in df.keys():
         print('\n==============\nPOST HOC TESTS\n==============\n')
 
-    try:
-        from tabulate import tabulate
-        print(tabulate(df, headers="keys", showindex=False, floatfmt=floatfmt,
-                       tablefmt=tablefmt))
-        print('')
-    except BaseException:
-        print(df)
+    print(tabulate(df, headers="keys", showindex=False, floatfmt=floatfmt,
+                   tablefmt=tablefmt))
+    print('')
 
 
 def _export_table(table, fname):
@@ -112,6 +109,21 @@ def reshape_data(df, id, dv='DV', rm='Time'):
     """
     return pd.melt(df, id_vars=id, var_name=rm, value_name=dv).sort_values(
         by=id)
+
+
+def _remove_na(x, y, paired=False):
+    """Remove missing values in paired and independant measurements.
+    """
+    x_na = np.any(np.isnan(x))
+    y_na = np.any(np.isnan(y))
+    if (x_na or y_na) and paired:
+        ar = np.c_[x, y]
+        ar = ar[~np.isnan(ar).any(axis=1)]
+        x, y = ar[:, 0], ar[:, 1]
+    elif (x_na or y_na) and not paired:
+        x = np.array(list(filter(lambda v: v == v, x))) if x_na else x
+        y = np.array(list(filter(lambda v: v == v, y))) if y_na else y
+    return x, y
 
 
 def _remove_rm_na(dv=None, within=None, data=None):
