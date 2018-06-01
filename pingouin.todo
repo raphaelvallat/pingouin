@@ -3,8 +3,8 @@ Doc
 
 Code
 ----
-- URGENT: FIX SPHERICITY AND MAURY
 - Add Pearson's skipped-correlation
+- Test sphericity / Mauchly
 - Test second order approximation in Mauchly
 - Test ESCI against JASP.
 - Better bootstrapping of confidence intervals (see Matlab)
