@@ -122,6 +122,16 @@ correlation r and sample size n.</p>
 <a class="reference external" href="https://github.com/anne-urai/Tools/blob/master/stats/BayesFactors/corrbf.m">https://github.com/anne-urai/Tools/blob/master/stats/BayesFactors/corrbf.m</a></p>
 <p>If you would like to compute the Bayes Factor directly from the raw data
 instead of from the correlation coefficient, use the corr function.</p>
+<p class="rubric">Examples</p>
+<ol class="arabic">
+<li><p class="first">Bayes Factor of a Pearson correlation</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">bayesfactor_pearson</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bf</span> <span class="o">=</span> <span class="n">bayesfactor_pearson</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bayes Factor: </span><span class="si">%.3f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">bf</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
 </dd></dl>
 
 </div>

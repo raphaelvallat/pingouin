@@ -39,8 +39,8 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, r=.707):
     If you would like to compute the Bayes Factor directly from the raw data
     instead of from the T-value, use the ttest function.
 
-    Example
-    -------
+    Examples
+    --------
     1. Bayes Factor of an independant two-sample T-test
 
         >>> from pingouin import bayesfactor_ttest
@@ -116,8 +116,8 @@ def bayesfactor_pearson(r, n):
     If you would like to compute the Bayes Factor directly from the raw data
     instead of from the correlation coefficient, use the corr function.
 
-    Example
-    -------
+    Examples
+    --------
     1. Bayes Factor of a Pearson correlation
 
         >>> from pingouin import bayesfactor_pearson
