@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from itertools import combinations
 from pingouin import (compute_effsize, _remove_rm_na, _extract_effects,
-                      multicomp, _export_table, ttest)
+                      multicomp, _export_table)
 
 __all__ = ["pairwise_ttests", "pairwise_corr"]
 
@@ -109,6 +109,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         >>> # Print the table with 3 decimals
         >>> print_table(post_hocs, floatfmt=".3f")
     '''
+    from pingouin.parametric import ttest
     effects = 'within' if between is None else effects
     effects = 'between' if within is None else effects
 
@@ -352,7 +353,9 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
             'CI95%': compute_esci(ef=cor_st['r'][0], nx=len(x), ny=len(y)),
             'r2': cor_st['r2'][0],
             'adj_r2': cor_st['adj_r2'][0],
-            'p-unc': cor_st['p-val'][0]}, ignore_index=True)
+            'p-unc': cor_st['p-val'][0],
+            'BF10': cor_st['BF10'][0] if method == 'pearson' else np.nan},
+            ignore_index=True)
 
     # Multiple comparisons
     padjust = None if stats['p-unc'].size <= 1 else padjust
@@ -373,7 +376,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         stats[c] = stats[c].round(3)
 
     col_order = ['X', 'Y', 'method', 'tail', 'r', 'CI95%', 'r2', 'adj_r2',
-                 'z', 'p-unc', 'p-corr', 'p-adjust']
+                 'z', 'p-unc', 'p-corr', 'p-adjust', 'BF10']
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
     if export_filename is not None:
