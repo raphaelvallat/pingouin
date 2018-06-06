@@ -5,7 +5,7 @@ import numpy as np
 __all__ = ["bayesfactor_ttest", "bayesfactor_pearson"]
 
 
-def bayesfactor_ttest(t, nx, ny=None, paired=False, r=.707):
+def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     """
     Calculates the Jeffrey-Zellner-Siow (JZS) Bayes Factor for a one or
     two-sample T-test given t-value and sample size(s).
@@ -21,8 +21,13 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, r=.707):
     ny : int
         Sample size of second group (only needed in case of an independant
         two-sample T-test)
+    paired : boolean
+        Specify whether the two observations are related (i.e. repeated
+        measures) or independant.
+    tail : string
+        Specify whether the test is 'one-sided' or 'two-sided'
     r : float
-        Scale factor. The default is 0.707.
+        Cauchy scale factor. The default is 0.707.
 
     Return
     ------
@@ -53,10 +58,10 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, r=.707):
         >>> bf = bayesfactor_ttest(3.5, 20, 20, paired=True)
         >>> print("Bayes Factor: %.2f (two-sample paired)" % bf)
 
-    3. Bayes Factor of an one-sample T-test
+    3. Bayes Factor of an one-sided one-sample T-test
 
         >>> from pingouin import bayesfactor_ttest
-        >>> bf = bayesfactor_ttest(3.5, 20)
+        >>> bf = bayesfactor_ttest(3.5, 20, tail='one-sided')
         >>> print("Bayes Factor: %.2f (one-sample)" % bf)
     """
     from scipy.integrate import quad
@@ -82,6 +87,9 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, r=.707):
     else:
         bf01 = (1 + t**2 / (nx + ny - 2))**(-(nx + ny - 1) / 2) / \
             quad(F_ind, 0, np.inf, args=(t, nx, ny, r))[0]
+
+    # Tail
+    bf01 /= 2 if tail == 'one-sided' else 1
 
     # Invert Bayes Factor (alternative hypothesis)
     return np.round(1 / bf01, 3)

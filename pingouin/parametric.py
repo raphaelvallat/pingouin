@@ -426,18 +426,19 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
     power = ttest_power(d, nx, ny, paired=paired, tail=tail)
 
     # Bayes factor
-    bf = bayesfactor_ttest(tval, nx, ny, paired=paired)
+    bf = bayesfactor_ttest(tval, nx, ny, paired=paired, tail=tail)
 
     # Fill output DataFrame
     stats['dof'] = dof
     stats['T-val'] = tval.round(3)
     stats['p-val'] = pval
+    stats['tail'] = tail
     stats['cohen-d'] = np.abs(d).round(3)
     stats['power'] = power
     stats['BF10'] = bf
 
-    col_order = ['T-val', 'p-val', 'dof', 'dof-corr', 'cohen-d', 'power',
-                 'BF10']
+    col_order = ['T-val', 'p-val', 'dof', 'dof-corr', 'tail', 'cohen-d',
+                 'power', 'BF10']
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
     return stats
