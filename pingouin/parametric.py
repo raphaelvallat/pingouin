@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 from pingouin import (_check_dataframe, _remove_rm_na, _remove_na,
-                      _export_table)
+                      _export_table, bayesfactor_ttest)
 
 __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
            "test_sphericity", "ttest", "rm_anova", "anova", "mixed_anova"]
@@ -319,6 +319,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         'dof' : degrees of freedom
         'cohen-d' : Cohen d effect size
         'power' : achieved power of the test ( = 1 - type II error)
+        'BF10' : Bayes Factor of the alternative hypothesis
 
     Notes
     -----
@@ -332,8 +333,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> from pingouin import ttest
         >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
         >>> ttest(x, 4)
-            T-val   p-val  dof  cohen-d  power
-            1.397  0.2348    4    0.699  0.226
+            T-val   p-val  dof  cohen-d  power   BF10
+            1.397  0.2348    4    0.699  0.226  0.766
 
     2. Paired two-sample T-test (one-tailed).
 
@@ -341,8 +342,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
         >>> post = [6.4, 3.4, 6.4, 11., 4.8]
         >>> ttest(pre, post, paired=True, tail='one-sided')
-            T-val   p-val  dof  cohen-d  power
-            -2.308   0.04    4    -0.28  0.015
+            T-val   p-val  dof  cohen-d  power   BF10
+            -2.308   0.04    4     0.28  0.132  1.864
 
     3. Paired two-sample T-test with missing values.
 
@@ -351,8 +352,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> pre = [5.5, 2.4, nan, 9.6, 4.2]
         >>> post = [6.4, 3.4, 6.4, 11., 4.8]
         >>> ttest(pre, post, paired=True)
-            T-val    p-val  dof  cohen-d  power
-            -5.902  0.0097    3   -0.354  0.074
+            T-val    p-val  dof  cohen-d  power    BF10
+            -5.902  0.0097    3   -0.354  0.074  24.926
 
     4. Independant two-sample T-test (equal sample size).
 
@@ -362,8 +363,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> x = np.random.normal(loc=7, size=20)
         >>> y = np.random.normal(loc=4, size=20)
         >>> ttest(x, y, correction='auto')
-            T-val     p-val  dof  cohen-d  power
-            9.106  4.30e-11   38     2.88    1.0
+            T-val     p-val  dof  cohen-d  power   BF10
+            9.106  4.30e-11   38     2.88    1.0  1.4e8
 
     5. Independant two-sample T-test (unequal sample size).
 
@@ -373,8 +374,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         >>> x = np.random.normal(loc=7, size=20)
         >>> y = np.random.normal(loc=6.5, size=15)
         >>> ttest(x, y, correction='auto')
-            T-val     p-val  dof   dof-corr  cohen-d  power
-            2.077     0.046   33      30.13    0.711  0.524
+            T-val     p-val  dof   dof-corr  cohen-d  power   BF10
+            2.327     0.027   33      30.75    0.792  0.614  2.454
     """
     from scipy.stats import ttest_rel, ttest_ind, ttest_1samp
     from pingouin import ttest_power, compute_effsize
@@ -401,6 +402,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         # Case paired two samples T-test
         tval, pval = ttest_rel(x, y)
         dof = nx - 1
+        bf = bayesfactor_ttest(tval, nx, ny, paired=True)
 
     elif ny > 1 and paired is False:
         dof = nx + ny - 2
@@ -423,14 +425,19 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
     d = compute_effsize(x, y, paired=paired, eftype='cohen')
     power = ttest_power(d, nx, ny, paired=paired, tail=tail)
 
+    # Bayes factor
+    bf = bayesfactor_ttest(tval, nx, ny, paired=False)
+
     # Fill output DataFrame
     stats['dof'] = dof
     stats['T-val'] = tval.round(3)
     stats['p-val'] = pval
     stats['cohen-d'] = np.abs(d).round(3)
     stats['power'] = power
+    stats['BF10'] = bf
 
-    col_order = ['T-val', 'p-val', 'dof', 'dof-corr', 'cohen-d', 'power']
+    col_order = ['T-val', 'p-val', 'dof', 'dof-corr', 'cohen-d', 'power',
+                 'BF10']
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
     return stats
