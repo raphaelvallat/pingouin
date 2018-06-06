@@ -70,26 +70,23 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     from scipy.integrate import quad
     one_sample = True if ny is None or ny == 1 else False
 
-    # Define functions
-    def F_ind(g, t, nx, ny, r):
-        return (1 + (nx * ny / (nx + ny)) * g * r**2)**(-.5) * \
-               (1 + t**2. / ((1 + (nx * ny / (nx + ny)) * g * r**2) *
-                             (nx + ny - 2)))**(-(nx + ny - 1) / 2) * \
-               (2 * np.pi)**(-1. / 2) * g**(-3 / 2) * np.exp(-1. / (2 * g))
-
-    def F_paired(g, t, n, r):
+    # Function to be integrated
+    def F(g, t, n, r, df):
         return (1 + n * g * r**2)**(-.5) * (1 + t**2 / ((1 + n * g * r**2) *
-                                            (n - 1)))**(-n / 2) *  \
+                                            df))**(-(df + 1) / 2) *  \
                (2 * np.pi)**(-.5) * g**(-3. / 2) * np.exp(-1 / (2 * g))
 
-    # JZS Bayes factor calculation: eq. 1 in Rouder et al. (2009)
+    # Define n and degrees of freedom
     if one_sample or paired:
-        bf01 = (1 + t**2 / (nx - 1))**(-nx / 2) / \
-            quad(F_paired, 0, np.inf, args=(t, nx, r))[0]
-
+        n = nx
+        df = n - 1
     else:
-        bf01 = (1 + t**2 / (nx + ny - 2))**(-(nx + ny - 1) / 2) / \
-            quad(F_ind, 0, np.inf, args=(t, nx, ny, r))[0]
+        n = nx * ny / (nx + ny)
+        df = nx + ny - 2
+
+    # JZS Bayes factor calculation: eq. 1 in Rouder et al. (2009)
+    integr = quad(F, 0, np.inf, args=(t, n, r, df))[0]
+    bf01 = (1 + t**2 / df)**(-(df + 1) / 2) / integr
 
     # Tail
     bf01 /= 2 if tail == 'one-sided' else 1
