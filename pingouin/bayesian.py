@@ -36,6 +36,9 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, r=.707):
     Adapted from a Matlab code found at
     https://github.com/anne-urai/Tools/tree/master/stats/BayesFactors
 
+    If you would like to compute the Bayes Factor directly from the raw data
+    instead of from the T-value, use the ttest function.
+
     Example
     -------
     1. Bayes Factor of an independant two-sample T-test
@@ -109,6 +112,9 @@ def bayesfactor_pearson(r, n):
     -----
     Adapted from a Matlab code found at
     https://github.com/anne-urai/Tools/blob/master/stats/BayesFactors/corrbf.m
+
+    If you would like to compute the Bayes Factor directly from the raw data
+    instead of from the correlation coefficient, use the corr function.
 
     Example
     -------
