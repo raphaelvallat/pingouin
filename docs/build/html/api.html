@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="pingouin.anova" href="generated/pingouin.anova.html" />
-    <link rel="prev" title="What’s new" href="changelog.html" />
+    <link rel="prev" title="Installation" href="index.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -47,9 +47,9 @@
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
             
+                <li><a href="#">API</a></li>
                 <li><a href="examples.html">Examples</a></li>
                 <li><a href="changelog.html">What's new</a></li>
-                <li><a href="#">API</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -61,9 +61,9 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog.html">What’s new</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
 </ul>
 </li>
@@ -91,38 +91,7 @@
 
 <div class="container">
   <div class="row">
-      <div class="col-md-3">
-        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
-<li><a class="reference internal" href="#">API reference</a><ul>
-<li><a class="reference internal" href="#anova">ANOVA</a></li>
-<li><a class="reference internal" href="#t-test-and-correlations">T-test and correlations</a></li>
-<li><a class="reference internal" href="#multiple-comparisons">Multiple comparisons</a></li>
-<li><a class="reference internal" href="#effect-sizes">Effect sizes</a></li>
-<li><a class="reference internal" href="#power">Power</a></li>
-<li><a class="reference internal" href="#distribution">Distribution</a></li>
-<li><a class="reference internal" href="#miscellaneous">Miscellaneous</a></li>
-</ul>
-</li>
-</ul>
-
-  <li>
-    <a href="changelog.html" title="Previous Chapter: What’s new"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; What’s new</span>
-    </a>
-  </li>
-  <li>
-    <a href="generated/pingouin.anova.html" title="Next Chapter: pingouin.anova"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">pingouin.anova &raquo;</span>
-    </a>
-  </li>
-<form action="search.html" method="get">
- <div class="form-group">
-  <input type="text" name="q" class="form-control" placeholder="Search" />
- </div>
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
-        </div>
-      </div>
-    <div class="col-md-9 content">
+    <div class="col-md-12 content">
       
   <div class="section" id="api-reference">
 <span id="api-ref"></span><h1>API reference</h1>
@@ -146,94 +115,36 @@
 </tbody>
 </table>
 </div>
-<div class="section" id="t-test-and-correlations">
-<h2>T-test and correlations</h2>
+<div class="section" id="bayesian">
+<h2>Bayesian</h2>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests" title="pingouin.pairwise_ttests"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pairwise_ttests</span></code></a>([dv,&nbsp;between,&nbsp;within,&nbsp;…])</td>
-<td>Pairwise T-tests.</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.bayesfactor_ttest.html#pingouin.bayesfactor_ttest" title="pingouin.bayesfactor_ttest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bayesfactor_ttest</span></code></a>(t,&nbsp;nx[,&nbsp;ny,&nbsp;paired,&nbsp;r])</td>
+<td>Calculates the Jeffrey-Zellner-Siow (JZS) Bayes Factor for a one or two-sample T-test given t-value and sample size(s).</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.bayesfactor_pearson.html#pingouin.bayesfactor_pearson" title="pingouin.bayesfactor_pearson"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bayesfactor_pearson</span></code></a>(r,&nbsp;n)</td>
+<td>Calculates the Jeffrey-Zellner-Siow (JZS) Bayes Factor for correlation r and sample size n.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="correlation">
+<h2>Correlation</h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.corr.html#pingouin.corr" title="pingouin.corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr</span></code></a>(x,&nbsp;y[,&nbsp;tail,&nbsp;method])</td>
+<td>(Robust) correlation between two variables.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.pairwise_corr.html#pingouin.pairwise_corr" title="pingouin.pairwise_corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pairwise_corr</span></code></a>(data[,&nbsp;columns,&nbsp;tail,&nbsp;method,&nbsp;…])</td>
 <td>Pairwise correlations between columns of a pandas dataframe.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.ttest.html#pingouin.ttest" title="pingouin.ttest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ttest</span></code></a>(x,&nbsp;y[,&nbsp;paired,&nbsp;tail,&nbsp;correction])</td>
-<td>T-test.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.mwu.html#pingouin.mwu" title="pingouin.mwu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mwu</span></code></a>(x,&nbsp;y[,&nbsp;tail])</td>
-<td>Mann-Whitney U Test (= Wilcoxon rank-sum test).</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.wilcoxon.html#pingouin.wilcoxon" title="pingouin.wilcoxon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wilcoxon</span></code></a>(x,&nbsp;y[,&nbsp;tail])</td>
-<td>Wilcoxon signed-rank test.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.corr.html#pingouin.corr" title="pingouin.corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr</span></code></a>(x,&nbsp;y[,&nbsp;tail,&nbsp;method])</td>
-<td>(Robust) correlation between two variables.</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="multiple-comparisons">
-<h2>Multiple comparisons</h2>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.multicomp.html#pingouin.multicomp" title="pingouin.multicomp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multicomp</span></code></a>(pvals[,&nbsp;alpha,&nbsp;method])</td>
-<td>P-values correction for multiple tests.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.bonf.html#pingouin.bonf" title="pingouin.bonf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bonf</span></code></a>(pvals[,&nbsp;alpha])</td>
-<td>P-values correction with Bonferroni method.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.holm.html#pingouin.holm" title="pingouin.holm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">holm</span></code></a>(pvals[,&nbsp;alpha])</td>
-<td>P-values correction with Holm method.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.fdr.html#pingouin.fdr" title="pingouin.fdr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fdr</span></code></a>(pvals[,&nbsp;alpha,&nbsp;method])</td>
-<td>P-values correction with False Discovery Rate (FDR).</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="effect-sizes">
-<h2>Effect sizes</h2>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.compute_effsize.html#pingouin.compute_effsize" title="pingouin.compute_effsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_effsize</span></code></a>(x,&nbsp;y[,&nbsp;paired,&nbsp;eftype])</td>
-<td>Calculate effect size between two set of observations.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.compute_effsize_from_t.html#pingouin.compute_effsize_from_t" title="pingouin.compute_effsize_from_t"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_effsize_from_t</span></code></a>(tval[,&nbsp;nx,&nbsp;ny,&nbsp;N,&nbsp;eftype])</td>
-<td>Compute effect size from a T-value.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.convert_effsize.html#pingouin.convert_effsize" title="pingouin.convert_effsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_effsize</span></code></a>(ef,&nbsp;input_type,&nbsp;output_type)</td>
-<td>Conversion between effect sizes.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.compute_esci.html#pingouin.compute_esci" title="pingouin.compute_esci"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_esci</span></code></a>([x,&nbsp;y,&nbsp;ef,&nbsp;nx,&nbsp;ny,&nbsp;alpha,&nbsp;…])</td>
-<td>Bootstrapped or parametric confidence intervals of an effect size.</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="power">
-<h2>Power</h2>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.ttest_power.html#pingouin.ttest_power" title="pingouin.ttest_power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ttest_power</span></code></a>(d,&nbsp;nx[,&nbsp;ny,&nbsp;paired,&nbsp;tail,&nbsp;alpha])</td>
-<td>Determine achieved power of a T test given effect size, sample size and alpha level.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.anova_power.html#pingouin.anova_power" title="pingouin.anova_power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anova_power</span></code></a>(eta,&nbsp;ntot,&nbsp;ngroups[,&nbsp;alpha])</td>
-<td>Determine achieved power of a one-way ANOVA given effect size, sample size, number of groups and alpha level.</td>
 </tr>
 </tbody>
 </table>
@@ -264,6 +175,29 @@
 </tbody>
 </table>
 </div>
+<div class="section" id="effect-sizes">
+<h2>Effect sizes</h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.compute_effsize.html#pingouin.compute_effsize" title="pingouin.compute_effsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_effsize</span></code></a>(x,&nbsp;y[,&nbsp;paired,&nbsp;eftype])</td>
+<td>Calculate effect size between two set of observations.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.compute_effsize_from_t.html#pingouin.compute_effsize_from_t" title="pingouin.compute_effsize_from_t"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_effsize_from_t</span></code></a>(tval[,&nbsp;nx,&nbsp;ny,&nbsp;N,&nbsp;eftype])</td>
+<td>Compute effect size from a T-value.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.convert_effsize.html#pingouin.convert_effsize" title="pingouin.convert_effsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_effsize</span></code></a>(ef,&nbsp;input_type,&nbsp;output_type)</td>
+<td>Conversion between effect sizes.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.compute_esci.html#pingouin.compute_esci" title="pingouin.compute_esci"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_esci</span></code></a>([x,&nbsp;y,&nbsp;ef,&nbsp;nx,&nbsp;ny,&nbsp;alpha,&nbsp;…])</td>
+<td>Bootstrapped or parametric confidence intervals of an effect size.</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div class="section" id="miscellaneous">
 <h2>Miscellaneous</h2>
 <table border="1" class="longtable docutils">
@@ -277,6 +211,72 @@
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.reshape_data.html#pingouin.reshape_data" title="pingouin.reshape_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reshape_data</span></code></a>(df,&nbsp;id[,&nbsp;dv,&nbsp;rm])</td>
 <td>Reshape data from human-readable to analysis shape</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="multiple-comparisons">
+<h2>Multiple comparisons</h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.multicomp.html#pingouin.multicomp" title="pingouin.multicomp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multicomp</span></code></a>(pvals[,&nbsp;alpha,&nbsp;method])</td>
+<td>P-values correction for multiple tests.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.bonf.html#pingouin.bonf" title="pingouin.bonf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bonf</span></code></a>(pvals[,&nbsp;alpha])</td>
+<td>P-values correction with Bonferroni method.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.holm.html#pingouin.holm" title="pingouin.holm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">holm</span></code></a>(pvals[,&nbsp;alpha])</td>
+<td>P-values correction with Holm method.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.fdr.html#pingouin.fdr" title="pingouin.fdr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fdr</span></code></a>(pvals[,&nbsp;alpha,&nbsp;method])</td>
+<td>P-values correction with False Discovery Rate (FDR).</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="power">
+<h2>Power</h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.ttest_power.html#pingouin.ttest_power" title="pingouin.ttest_power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ttest_power</span></code></a>(d,&nbsp;nx[,&nbsp;ny,&nbsp;paired,&nbsp;tail,&nbsp;alpha])</td>
+<td>Determine achieved power of a T test given effect size, sample size and alpha level.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.anova_power.html#pingouin.anova_power" title="pingouin.anova_power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anova_power</span></code></a>(eta,&nbsp;ntot,&nbsp;ngroups[,&nbsp;alpha])</td>
+<td>Determine achieved power of a one-way ANOVA given effect size, sample size, number of groups and alpha level.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="t-tests">
+<h2>T-tests</h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.ttest.html#pingouin.ttest" title="pingouin.ttest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ttest</span></code></a>(x,&nbsp;y[,&nbsp;paired,&nbsp;tail,&nbsp;correction])</td>
+<td>T-test.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests" title="pingouin.pairwise_ttests"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pairwise_ttests</span></code></a>([dv,&nbsp;between,&nbsp;within,&nbsp;…])</td>
+<td>Pairwise T-tests.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.mwu.html#pingouin.mwu" title="pingouin.mwu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mwu</span></code></a>(x,&nbsp;y[,&nbsp;tail])</td>
+<td>Mann-Whitney U Test (= Wilcoxon rank-sum test).</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.wilcoxon.html#pingouin.wilcoxon" title="pingouin.wilcoxon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wilcoxon</span></code></a>(x,&nbsp;y[,&nbsp;tail])</td>
+<td>Wilcoxon signed-rank test.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.corr.html#pingouin.corr" title="pingouin.corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr</span></code></a>(x,&nbsp;y[,&nbsp;tail,&nbsp;method])</td>
+<td>(Robust) correlation between two variables.</td>
 </tr>
 </tbody>
 </table>

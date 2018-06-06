@@ -18,61 +18,27 @@ ANOVA
     mixed_anova
 
 
-T-test and correlations
------------------------
+Bayesian
+--------
 
-.. _ttests:
+.. _bayesian:
 
 .. autosummary::
    :toctree: generated/
 
-    pairwise_ttests
-    pairwise_corr
-    ttest
-    mwu
-    wilcoxon
+    bayesfactor_ttest
+    bayesfactor_pearson
+
+Correlation
+-----------
+
+.. _correlations:
+
+.. autosummary::
+   :toctree: generated/
+
     corr
-
-
-Multiple comparisons
---------------------
-
-.. _multicomp:
-
-.. autosummary::
-   :toctree: generated/
-
-    multicomp
-    bonf
-    holm
-    fdr
-
-
-Effect sizes
-------------
-
-.. _effsize:
-
-.. autosummary::
-   :toctree: generated/
-
-    compute_effsize
-    compute_effsize_from_t
-    convert_effsize
-    compute_esci
-
-
-Power
------
-
-.. _power:
-
-.. autosummary::
-   :toctree: generated/
-
-    ttest_power
-    anova_power
-
+    pairwise_corr
 
 Distribution
 ------------
@@ -89,6 +55,20 @@ Distribution
     test_dist
 
 
+Effect sizes
+------------
+
+.. _effsize:
+
+.. autosummary::
+   :toctree: generated/
+
+    compute_effsize
+    compute_effsize_from_t
+    convert_effsize
+    compute_esci
+
+
 Miscellaneous
 -------------
 
@@ -99,3 +79,44 @@ Miscellaneous
 
       print_table
       reshape_data
+
+
+Multiple comparisons
+--------------------
+
+.. _multicomp:
+
+.. autosummary::
+   :toctree: generated/
+
+    multicomp
+    bonf
+    holm
+    fdr
+
+
+Power
+-----
+
+.. _power:
+
+.. autosummary::
+   :toctree: generated/
+
+    ttest_power
+    anova_power
+
+
+T-tests
+-------
+
+.. _ttests:
+
+.. autosummary::
+   :toctree: generated/
+
+    ttest
+    pairwise_ttests
+    mwu
+    wilcoxon
+    corr

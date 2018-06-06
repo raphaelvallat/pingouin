@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pingouin.gzscore &#8212; pingouin 0.1.2 documentation</title>
+    <title>pingouin.bayesfactor_pearson &#8212; pingouin 0.1.2 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/style.css" type="text/css" />
@@ -21,8 +21,8 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pingouin.test_normality" href="pingouin.test_normality.html" />
-    <link rel="prev" title="pingouin.pairwise_corr" href="pingouin.pairwise_corr.html" />
+    <link rel="next" title="pingouin.corr" href="pingouin.corr.html" />
+    <link rel="prev" title="pingouin.bayesfactor_ttest" href="pingouin.bayesfactor_ttest.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -93,49 +93,35 @@
   <div class="row">
     <div class="col-md-12 content">
       
-  <div class="section" id="pingouin-gzscore">
-<h1>pingouin.gzscore</h1>
+  <div class="section" id="pingouin-bayesfactor-pearson">
+<h1>pingouin.bayesfactor_pearson</h1>
 <dl class="function">
-<dt id="pingouin.gzscore">
-<code class="descclassname">pingouin.</code><code class="descname">gzscore</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#gzscore"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Geometric standard (Z) score.</p>
-<p>Geometric Z-scores are better measures of dispersion than arithmetic
-z-scores when the sample data come from a log-normally distributed
-population.</p>
-<p>See <a class="reference external" href="https://en.wikipedia.org/wiki/Geometric_standard_deviation">https://en.wikipedia.org/wiki/Geometric_standard_deviation</a></p>
+<dt id="pingouin.bayesfactor_pearson">
+<code class="descclassname">pingouin.</code><code class="descname">bayesfactor_pearson</code><span class="sig-paren">(</span><em>r</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/bayesian.html#bayesfactor_pearson"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculates the Jeffrey-Zellner-Siow (JZS) Bayes Factor for
+correlation r and sample size n.</p>
+<p>See Wetzels &amp; Wagemakers (2012) for details.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array_like</span></dt>
-<dd><p class="first last">Array of raw values</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>r</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Pearson correlation coefficient</p>
 </dd>
-</dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>gzscore</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array_like</span></dt>
-<dd><p class="first last">Array of geometric z-scores (same shape as x)</p>
+<dt><strong>n</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">Sample size</p>
 </dd>
 </dl>
 </td>
 </tr>
 </tbody>
 </table>
-<p class="rubric">Examples</p>
-<p>Standardize a log-normal array</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">gzscore</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">lognormal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">raw</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
-<span class="go">    1.849 2.282</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">gzscore</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">z</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
-<span class="go">    0 0.995</span>
-</pre></div>
-</div>
+<p class="rubric">Notes</p>
+<p>Adapted from a Matlab code found at
+<a class="reference external" href="https://github.com/anne-urai/Tools/blob/master/stats/BayesFactors/corrbf.m">https://github.com/anne-urai/Tools/blob/master/stats/BayesFactors/corrbf.m</a></p>
+<p>If you would like to compute the Bayes Factor directly from the raw data
+instead of from the correlation coefficient, use the corr function.</p>
 </dd></dl>
 
 </div>

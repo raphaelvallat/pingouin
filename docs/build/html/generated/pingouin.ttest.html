@@ -21,8 +21,8 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pingouin.mwu" href="pingouin.mwu.html" />
-    <link rel="prev" title="pingouin.pairwise_corr" href="pingouin.pairwise_corr.html" />
+    <link rel="next" title="pingouin.pairwise_ttests" href="pingouin.pairwise_ttests.html" />
+    <link rel="prev" title="pingouin.anova_power" href="pingouin.anova_power.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -47,9 +47,9 @@
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
             
+                <li><a href="../api.html">API</a></li>
                 <li><a href="../examples.html">Examples</a></li>
                 <li><a href="../changelog.html">What's new</a></li>
-                <li><a href="../api.html">API</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -61,9 +61,9 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
 </ul>
 </ul>
 </li>
@@ -91,29 +91,7 @@
 
 <div class="container">
   <div class="row">
-      <div class="col-md-3">
-        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
-<li><a class="reference internal" href="#">pingouin.ttest</a></li>
-</ul>
-
-  <li>
-    <a href="pingouin.pairwise_corr.html" title="Previous Chapter: pingouin.pairwise_corr"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; pingouin.pair...</span>
-    </a>
-  </li>
-  <li>
-    <a href="pingouin.mwu.html" title="Next Chapter: pingouin.mwu"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">pingouin.mwu &raquo;</span>
-    </a>
-  </li>
-<form action="../search.html" method="get">
- <div class="form-group">
-  <input type="text" name="q" class="form-control" placeholder="Search" />
- </div>
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
-        </div>
-      </div>
-    <div class="col-md-9 content">
+    <div class="col-md-12 content">
       
   <div class="section" id="pingouin-ttest">
 <h1>pingouin.ttest</h1>
@@ -157,6 +135,7 @@ as recommended by Zimmerman 2004.</p>
 <span class="s1">&#39;dof&#39;</span> <span class="p">:</span> <span class="n">degrees</span> <span class="n">of</span> <span class="n">freedom</span>
 <span class="s1">&#39;cohen-d&#39;</span> <span class="p">:</span> <span class="n">Cohen</span> <span class="n">d</span> <span class="n">effect</span> <span class="n">size</span>
 <span class="s1">&#39;power&#39;</span> <span class="p">:</span> <span class="n">achieved</span> <span class="n">power</span> <span class="n">of</span> <span class="n">the</span> <span class="n">test</span> <span class="p">(</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="nb">type</span> <span class="n">II</span> <span class="n">error</span><span class="p">)</span>
+<span class="s1">&#39;BF10&#39;</span> <span class="p">:</span> <span class="n">Bayes</span> <span class="n">Factor</span> <span class="n">of</span> <span class="n">the</span> <span class="n">alternative</span> <span class="n">hypothesis</span>
 </pre></div>
 </div>
 </dd>
@@ -174,8 +153,8 @@ paired, the entire row is removed.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">2.4</span><span class="p">,</span> <span class="mf">6.8</span><span class="p">,</span> <span class="mf">9.6</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-<span class="go">    T-val   p-val  dof  cohen-d  power</span>
-<span class="go">    1.397  0.2348    4    0.699  0.226</span>
+<span class="go">    T-val   p-val  dof  cohen-d  power   BF10</span>
+<span class="go">    1.397  0.2348    4    0.699  0.226  0.766</span>
 </pre></div>
 </div>
 </li>
@@ -184,8 +163,8 @@ paired, the entire row is removed.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pre</span> <span class="o">=</span> <span class="p">[</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">2.4</span><span class="p">,</span> <span class="mf">6.8</span><span class="p">,</span> <span class="mf">9.6</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">post</span> <span class="o">=</span> <span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">,</span> <span class="mf">6.4</span><span class="p">,</span> <span class="mf">11.</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;one-sided&#39;</span><span class="p">)</span>
-<span class="go">    T-val   p-val  dof  cohen-d  power</span>
-<span class="go">    -2.308   0.04    4    -0.28  0.015</span>
+<span class="go">    T-val   p-val  dof  cohen-d  power   BF10</span>
+<span class="go">    -2.308   0.04    4     0.28  0.132  1.864</span>
 </pre></div>
 </div>
 </li>
@@ -195,8 +174,8 @@ paired, the entire row is removed.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pre</span> <span class="o">=</span> <span class="p">[</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">2.4</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="mf">9.6</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">post</span> <span class="o">=</span> <span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">,</span> <span class="mf">6.4</span><span class="p">,</span> <span class="mf">11.</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="go">    T-val    p-val  dof  cohen-d  power</span>
-<span class="go">    -5.902  0.0097    3   -0.354  0.074</span>
+<span class="go">    T-val    p-val  dof  cohen-d  power    BF10</span>
+<span class="go">    -5.902  0.0097    3   -0.354  0.074  24.926</span>
 </pre></div>
 </div>
 </li>
@@ -207,8 +186,8 @@ paired, the entire row is removed.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
-<span class="go">    T-val     p-val  dof  cohen-d  power</span>
-<span class="go">    9.106  4.30e-11   38     2.88    1.0</span>
+<span class="go">    T-val     p-val  dof  cohen-d  power   BF10</span>
+<span class="go">    9.106  4.30e-11   38     2.88    1.0  1.4e8</span>
 </pre></div>
 </div>
 </li>
@@ -219,8 +198,8 @@ paired, the entire row is removed.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mf">6.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
-<span class="go">    T-val     p-val  dof   dof-corr  cohen-d  power</span>
-<span class="go">    2.077     0.046   33      30.13    0.711  0.524</span>
+<span class="go">    T-val     p-val  dof   dof-corr  cohen-d  power   BF10</span>
+<span class="go">    2.327     0.027   33      30.75    0.792  0.614  2.454</span>
 </pre></div>
 </div>
 </li>

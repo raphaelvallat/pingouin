@@ -120,6 +120,7 @@ todo_include_todos = False
 #     'includehidden': True,
 #     'titles_only': False
 # }
+
 # Bootstrap theme
 html_theme = 'bootstrap'
 html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
@@ -127,13 +128,13 @@ html_theme_options = {
     'source_link_position': "footer",
     'bootswatch_theme': "readable",
     'navbar_sidebarrel': False,
-    'nosidebar': False,
+    'nosidebar': True,
     'navbar_pagenav': False,
     'bootstrap_version': "3",
     'navbar_links': [
+                     ("API", "api"),
                      ("Examples", "examples"),
-                     ("What's new", "changelog"),
-                     ("API", "api")
+                     ("What's new", "changelog")
                      ],
 
     }

@@ -20,17 +20,29 @@
    :align:   center
 
 
-**Pingouin** (French word for *penguin*) is an open-source statistical Python 3 package based on Pandas.
+**Pingouin** is an open-source statistical package written in Python 3 and based on Pandas and NumPy.
 
-Its main features are:
+It provides easy-to-grasp functions for computing several statistical tests:
 
-1. ANOVA: one-way, repeated measures, and mixed (split-plot)
+1. ANOVAs: one-way, repeated measures, and mixed (split-plot)
 
-2. Post-hocs pairwise T-tests
+2. Post-hocs tests
 
-3. Tests for sphericity, normality and homoscedasticity
+3. Parametric and non-parametric T-tests
 
-4. Computation and conversion of effect sizes
+4. Bayes Factor
+
+5. (Robust) Correlations
+
+6. Tests for sphericity, normality and homoscedasticity
+
+7. Effect sizes
+
+Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
+
+For example, the :code:`ttest_ind` function of SciPy returns only the T-value and the p-value. By contrast,
+the :code:`ttest` function of Pingouin returns the t-value, p-value, degrees of freedom, effect size (Cohen's d), statistical power and Bayes Factor (BF10) of the test.
+
 
 Documentation
 =============

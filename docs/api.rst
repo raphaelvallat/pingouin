@@ -29,6 +29,16 @@ Bayesian
     bayesfactor_ttest
     bayesfactor_pearson
 
+Correlation
+-----------
+
+.. _correlations:
+
+.. autosummary::
+   :toctree: generated/
+
+    corr
+    pairwise_corr
 
 Distribution
 ------------
@@ -97,17 +107,16 @@ Power
     anova_power
 
 
-T-test and correlations
------------------------
+T-tests
+-------
 
 .. _ttests:
 
 .. autosummary::
    :toctree: generated/
 
-    pairwise_ttests
-    pairwise_corr
     ttest
+    pairwise_ttests
     mwu
     wilcoxon
     corr
