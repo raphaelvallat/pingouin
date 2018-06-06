@@ -4,26 +4,28 @@ import numpy as np
 import pandas as pd
 from itertools import combinations
 from pingouin import (compute_effsize, _remove_rm_na, _extract_effects,
-                      multicomp, _export_table)
+                      multicomp, _export_table, ttest)
 
 __all__ = ["pairwise_ttests", "pairwise_corr"]
 
 
-def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, paired,
-                            alpha, t, p, ef, eftype, time=np.nan):
+def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, alpha,
+                            paired, df_ttest, ef, eftype, time=np.nan):
     stats = stats.append({
         'A': xlabel,
         'B': ylabel,
-        'mean(A)': np.mean(x),
-        'mean(B)': np.mean(y),
+        'mean(A)': np.round(np.mean(x), 3),
+        'mean(B)': np.round(np.mean(y), 3),
         # Use ddof=1 for unibiased estimator (pandas default)
-        'std(A)': np.std(x, ddof=1),
-        'std(B)': np.std(y, ddof=1),
+        'std(A)': np.round(np.std(x, ddof=1), 3),
+        'std(B)': np.round(np.std(y, ddof=1), 3),
         'Type': effects,
         'Paired': paired,
+        'tail': df_ttest.loc['T-test', 'tail'],
         # 'Alpha': alpha,
-        'T-val': t,
-        'p-unc': p,
+        'T-val': df_ttest.loc['T-test', 'T-val'],
+        'p-unc': df_ttest.loc['T-test', 'p-val'],
+        'BF10': df_ttest.loc['T-test', 'BF10'],
         'efsize': ef,
         'eftype': eftype,
         'Time': time}, ignore_index=True)
@@ -84,15 +86,14 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         'A' : Name of first measurement
         'B' : Name of second measurement
         'Paired' : indicates whether the two measurements are paired or not
-        'Alpha' : significance level
         'Tail' : indicate whether the p-values are one-sided or two-sided
         'T-val' : T-values
         'p-unc' : Uncorrected p-values
         'p-corr' : Corrected p-values
         'p-adjust' : p-values correction method
+        'BF10' : Bayes Factor
         'efsize' : effect sizes
         'eftype' : type of effect size
-
 
     Examples
     --------
@@ -108,8 +109,6 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         >>> # Print the table with 3 decimals
         >>> print_table(post_hocs, floatfmt=".3f")
     '''
-    from scipy.stats import ttest_ind, ttest_rel
-
     effects = 'within' if between is None else effects
     effects = 'between' if within is None else effects
 
@@ -149,10 +148,11 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
             col1, col2 = comb
             x = dt_array[col1].dropna().values
             y = dt_array[col2].dropna().values
-            t, p = ttest_rel(x, y) if paired else ttest_ind(x, y)
+            df_ttest = ttest(x, y, paired=paired, tail=tail)
             ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
             stats = _append_stats_dataframe(stats, x, y, col1, col2, effects,
-                                            paired, alpha, t, p, ef, effsize)
+                                            alpha, paired, df_ttest, ef,
+                                            effsize)
 
     # OPTION B: interaction
     if effects.lower() == 'interaction':
@@ -161,11 +161,11 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
             col1, col2 = sub_dt.columns.get_level_values(1)
             x = sub_dt[(time, col1)].dropna().values
             y = sub_dt[(time, col2)].dropna().values
-            t, p = ttest_rel(x, y) if paired else ttest_ind(x, y)
+            df_ttest = ttest(x, y, paired=paired, tail=tail)
             ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
             stats = _append_stats_dataframe(stats, x, y, col1, col2, effects,
-                                            paired, alpha, t, p, ef, effsize,
-                                            time)
+                                            alpha, paired, df_ttest, ef,
+                                            effsize, time)
 
     if effects.lower() == 'all':
         stats_within = pairwise_ttests(dv=dv, within=within, effects='within',
@@ -187,13 +187,6 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         stats = pd.concat([stats_within, stats_between,
                            stats_interaction], sort=False).reset_index()
 
-    # Tail and multiple comparisons
-    if tail == 'one-sided':
-        stats['p-unc'] *= .5
-        stats['Tail'] = 'one-sided'
-    else:
-        stats['Tail'] = 'two-sided'
-
     # Multiple comparisons
     padjust = None if stats['p-unc'].size <= 1 else padjust
     if padjust is not None:
@@ -212,8 +205,8 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
     # Reorganize column order
     col_order = ['Type', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
-                 'std(B)', 'Paired', 'Alpha', 'T-val', 'Tail', 'p-unc',
-                 'p-corr', 'p-adjust', 'reject', 'efsize', 'eftype']
+                 'std(B)', 'Paired', 'T-val', 'tail', 'p-unc',
+                 'p-corr', 'p-adjust', 'BF10', 'efsize', 'eftype']
 
     if not return_desc and effects.lower() != 'all':
         stats.drop(columns=['mean(A)', 'mean(B)', 'std(A)', 'std(B)'],

@@ -10,7 +10,7 @@ __all__ = ["print_table", "_export_table", "reshape_data",
            "_extract_effects"]
 
 
-def print_table(df, floatfmt=".4f", tablefmt='simple'):
+def print_table(df, floatfmt=".3f", tablefmt='simple'):
     """Nice display of table.
 
     See: https://pypi.org/project/tabulate/.
