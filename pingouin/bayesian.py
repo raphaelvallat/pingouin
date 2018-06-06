@@ -27,7 +27,10 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     tail : string
         Specify whether the test is 'one-sided' or 'two-sided'
     r : float
-        Cauchy scale factor. The default is 0.707.
+        Cauchy scale factor. Smaller values of r (e.g. 0.5), may be appropriate
+        when small effect sizes are expected a priori; larger values of r are
+        appropriate when large effect sizes are expected (Rouder et al 2009).
+        The default is 0.707.
 
     Return
     ------
