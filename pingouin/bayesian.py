@@ -2,7 +2,7 @@
 # Date: April 2018
 import numpy as np
 
-__all__ = ["bayesfactor_ttest"]
+__all__ = ["bayesfactor_ttest", "bayesfactor_pearson"]
 
 
 def bayesfactor_ttest(t, nx, ny=None, paired=False, r=.707):
@@ -40,16 +40,19 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, r=.707):
     -------
     1. Bayes Factor of an independant two-sample T-test
 
+        >>> from pingouin import bayesfactor_ttest
         >>> bf = bayesfactor_ttest(3.5, 20, 20)
         >>> print("Bayes Factor: %.2f (two-sample independant)" % bf)
 
     2. Bayes Factor of a paired two-sample T-test
 
+        >>> from pingouin import bayesfactor_ttest
         >>> bf = bayesfactor_ttest(3.5, 20, 20, paired=True)
         >>> print("Bayes Factor: %.2f (two-sample paired)" % bf)
 
     3. Bayes Factor of an one-sample T-test
 
+        >>> from pingouin import bayesfactor_ttest
         >>> bf = bayesfactor_ttest(3.5, 20)
         >>> print("Bayes Factor: %.2f (one-sample)" % bf)
     """
@@ -79,3 +82,51 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, r=.707):
 
     # Invert Bayes Factor (alternative hypothesis)
     return np.round(1 / bf01, 3)
+
+
+def bayesfactor_pearson(r, n):
+    """
+    Calculates the Jeffrey-Zellner-Siow (JZS) Bayes Factor for
+    correlation r and sample size n.
+
+    See Wetzels & Wagemakers (2012) for details.
+
+    Parameters
+    ----------
+    r : float
+        Pearson correlation coefficient
+    n : int
+        Sample size
+
+    Return
+    ------
+    bf : float
+        Bayes Factor (BF10).
+        The Bayes Factor quantifies the evidence in favour of the alternative
+        hypothesis.
+
+    Notes
+    -----
+    Adapted from a Matlab code found at
+    https://github.com/anne-urai/Tools/blob/master/stats/BayesFactors/corrbf.m
+
+    Example
+    -------
+    1. Bayes Factor of a Pearson correlation
+
+        >>> from pingouin import bayesfactor_pearson
+        >>> bf = bayesfactor_pearson(0.6, 20)
+        >>> print("Bayes Factor: %.3f" % bf)
+    """
+    from scipy.integrate import quad
+    from scipy.special import gamma
+
+    # Function to be integrated
+    def F(g, r, n):
+        return np.exp(((n - 2) / 2) * np.log(1 + g) + (-(n - 1) / 2) *
+                      np.log(1 + (1 - r**2) * g) + (-3 / 2) *
+                      np.log(g) + - n / (2 * g))
+
+    # JZS Bayes factor calculation
+    bf10 = np.sqrt((n / 2)) / gamma(1 / 2) * quad(F, 0, np.inf, args=(r, n))[0]
+    return np.round(bf10, 3)

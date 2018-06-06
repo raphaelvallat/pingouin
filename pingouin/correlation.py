@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr, spearmanr, kendalltau
-from pingouin import (_remove_na, test_normality)
+from pingouin import (_remove_na, test_normality, bayesfactor_pearson)
 
 __all__ = ["corr"]
 
@@ -97,6 +97,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
         'r2' : R-squared
         'adj_r2' : Adjusted R-squared
         'p-val' : one or two tailed p-value
+        'BF10' : Bayes Factor of the alternative hypothesis (Pearson only)
 
     Notes
     -----
@@ -124,33 +125,30 @@ def corr(x, y, tail='two-sided', method='pearson'):
     --------
     1. Pearson correlation
 
-        >>> import numpy as np
         >>> from pingouin import corr
         >>> x = [20, 22, 19, 20, 22, 18, 24, 20]
-        >>> y = [38, 37, 33, 29, 14, 12, 20, 22]
+        >>> y = [30, 32, 31, 29, 32, 28, 34, 31]
         >>> corr(x, y)
-                    r       r2     adj_r2   p-val
-            pearson -0.023  0.001  -0.399   0.957
+                    r      r2     adj_r2  p-val  BF10
+            pearson 0.892  0.795  0.713   0.003  20.596
 
     2. One-tailed spearman correlation
 
-        >>> import numpy as np
         >>> from pingouin import corr
         >>> x = [20, 22, 19, 20, 22, 18, 24, 20]
-        >>> y = [38, 37, 33, 29, 14, 12, 20, 22]
+        >>> y = [30, 32, 31, 29, 32, 28, 34, 31]
         >>> corr(x, y, method='spearman', tail='one-sided')
-                      r       r2     adj_r2  p-val
-            spearman  0.0368  0.001  -0.398  0.465
+                      r      r2     adj_r2  p-val
+            spearman  0.857  0.735  0.629   0.003
 
     3. Robust correlation (percentage bend)
 
-        >>> import numpy as np
         >>> from pingouin import corr
         >>> x = [20, 22, 19, 20, 22, 18, 24, 20]
-        >>> y = [38, 37, 33, 29, 14, 12, 20, 22]
+        >>> y = [30, 32, 31, 29, 32, 28, 34, 31]
         >>> corr(x, y, method='percbend')
-                     r        r2     adj_r2  p-val
-            percbend -0.0411  0.002  -0.397  0.923
+                     r      r2     adj_r2  p-val
+            percbend 0.824  0.678  0.55    0.012
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -185,11 +183,16 @@ def corr(x, y, tail='two-sided', method='pearson'):
     adj_r2 = 1 - (((1 - r**2) * (nx - 1)) / (nx - 3))
 
     stats = pd.DataFrame({}, index=[method])
-    stats['r'] = r.round(4)
-    stats['r2'] = r**2
-    stats['adj_r2'] = adj_r2
+    stats['r'] = np.round(r, 3)
+    stats['r2'] = np.round(r**2, 3)
+    stats['adj_r2'] = np.round(adj_r2, 3)
     stats['p-val'] = pval if tail == 'two-sided' else .5 * pval
 
-    col_order = ['r', 'r2', 'adj_r2', 'p-val']
+    # Compute the BF10 for Pearson correlation only
+    if method == 'pearson':
+        stats['BF10'] = bayesfactor_pearson(r, nx)
+
+    col_order = ['r', 'r2', 'adj_r2', 'p-val', 'BF10']
     stats = stats.reindex(columns=col_order)
+    stats.dropna(how='all', axis=1, inplace=True)
     return stats
