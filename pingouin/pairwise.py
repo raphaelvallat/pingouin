@@ -24,8 +24,8 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, paired,
         # 'Alpha': alpha,
         'T-val': t,
         'p-unc': p,
-        'Eff_size': ef,
-        'Eff_type': eftype,
+        'efsize': ef,
+        'eftype': eftype,
         'Time': time}, ignore_index=True)
     return stats
 
@@ -90,9 +90,8 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         'p-unc' : Uncorrected p-values
         'p-corr' : Corrected p-values
         'p-adjust' : p-values correction method
-        'reject' : indicates whether the null hypothesis is rejected or not
-        'Eff_size' : effect sizes
-        'Eff_type' : type of effect size
+        'efsize' : effect sizes
+        'eftype' : type of effect size
 
 
     Examples
@@ -214,7 +213,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
     # Reorganize column order
     col_order = ['Type', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
                  'std(B)', 'Paired', 'Alpha', 'T-val', 'Tail', 'p-unc',
-                 'p-corr', 'p-adjust', 'reject', 'Eff_size', 'Eff_type']
+                 'p-corr', 'p-adjust', 'reject', 'efsize', 'eftype']
 
     if not return_desc and effects.lower() != 'all':
         stats.drop(columns=['mean(A)', 'mean(B)', 'std(A)', 'std(B)'],
