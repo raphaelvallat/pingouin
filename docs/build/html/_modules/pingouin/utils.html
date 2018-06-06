@@ -104,7 +104,7 @@
            <span class="s2">&quot;_extract_effects&quot;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="print_table"><a class="viewcode-back" href="../../generated/pingouin.print_table.html#pingouin.print_table">[docs]</a><span class="k">def</span> <span class="nf">print_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;.4f&quot;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s1">&#39;simple&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="print_table"><a class="viewcode-back" href="../../generated/pingouin.print_table.html#pingouin.print_table">[docs]</a><span class="k">def</span> <span class="nf">print_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s1">&#39;simple&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Nice display of table.</span>
 
 <span class="sd">    See: https://pypi.org/project/tabulate/.</span>
@@ -125,8 +125,8 @@
 
     <span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s2">&quot;keys&quot;</span><span class="p">,</span> <span class="n">showindex</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="n">floatfmt</span><span class="p">,</span>
                    <span class="n">tablefmt</span><span class="o">=</span><span class="n">tablefmt</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-</div>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
 
 <span class="k">def</span> <span class="nf">_export_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Export DataFrame to .csv&quot;&quot;&quot;</span>
@@ -202,8 +202,8 @@
 <span class="sd">        3   6pm   7</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">id_vars</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="n">rm</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="n">dv</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span>
-        <span class="n">by</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
-</div>
+        <span class="n">by</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span></div>
+
 
 <span class="k">def</span> <span class="nf">_remove_na</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Remove missing values in paired and independant measurements.</span>

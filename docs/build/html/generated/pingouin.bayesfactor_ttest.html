@@ -97,7 +97,7 @@
 <h1>pingouin.bayesfactor_ttest</h1>
 <dl class="function">
 <dt id="pingouin.bayesfactor_ttest">
-<code class="descclassname">pingouin.</code><code class="descname">bayesfactor_ttest</code><span class="sig-paren">(</span><em>t</em>, <em>nx</em>, <em>ny=None</em>, <em>paired=False</em>, <em>r=0.707</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/bayesian.html#bayesfactor_ttest"><span class="viewcode-link">[source]</span></a></dt>
+<code class="descclassname">pingouin.</code><code class="descname">bayesfactor_ttest</code><span class="sig-paren">(</span><em>t</em>, <em>nx</em>, <em>ny=None</em>, <em>paired=False</em>, <em>tail='two-sided'</em>, <em>r=0.707</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/bayesian.html#bayesfactor_ttest"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Calculates the Jeffrey-Zellner-Siow (JZS) Bayes Factor for a one or
 two-sample T-test given t-value and sample size(s).</p>
 <p>See Rouder et al. (2009) for details.</p>
@@ -116,8 +116,15 @@ two-sample T-test given t-value and sample size(s).</p>
 <dd><p class="first last">Sample size of second group (only needed in case of an independant
 two-sample T-test)</p>
 </dd>
+<dt><strong>paired</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><p class="first last">Specify whether the two observations are related (i.e. repeated
+measures) or independant.</p>
+</dd>
+<dt><strong>tail</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Specify whether the test is ‘one-sided’ or ‘two-sided’</p>
+</dd>
 <dt><strong>r</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">Scale factor. The default is 0.707.</p>
+<dd><p class="first last">Cauchy scale factor. The default is 0.707.</p>
 </dd>
 </dl>
 </td>
@@ -145,9 +152,9 @@ instead of from the T-value, use the ttest function.</p>
 </pre></div>
 </div>
 </li>
-<li><p class="first">Bayes Factor of an one-sample T-test</p>
+<li><p class="first">Bayes Factor of an one-sided one-sample T-test</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">bayesfactor_ttest</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bf</span> <span class="o">=</span> <span class="n">bayesfactor_ttest</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bf</span> <span class="o">=</span> <span class="n">bayesfactor_ttest</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;one-sided&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bayes Factor: </span><span class="si">%.2f</span><span class="s2"> (one-sample)&quot;</span> <span class="o">%</span> <span class="n">bf</span><span class="p">)</span>
 </pre></div>
 </div>

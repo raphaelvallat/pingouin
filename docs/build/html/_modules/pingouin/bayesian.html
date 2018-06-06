@@ -99,7 +99,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;bayesfactor_ttest&quot;</span><span class="p">,</span> <span class="s2">&quot;bayesfactor_pearson&quot;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="bayesfactor_ttest"><a class="viewcode-back" href="../../generated/pingouin.bayesfactor_ttest.html#pingouin.bayesfactor_ttest">[docs]</a><span class="k">def</span> <span class="nf">bayesfactor_ttest</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">r</span><span class="o">=.</span><span class="mi">707</span><span class="p">):</span>
+<div class="viewcode-block" id="bayesfactor_ttest"><a class="viewcode-back" href="../../generated/pingouin.bayesfactor_ttest.html#pingouin.bayesfactor_ttest">[docs]</a><span class="k">def</span> <span class="nf">bayesfactor_ttest</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">r</span><span class="o">=.</span><span class="mi">707</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the Jeffrey-Zellner-Siow (JZS) Bayes Factor for a one or</span>
 <span class="sd">    two-sample T-test given t-value and sample size(s).</span>
@@ -115,8 +115,13 @@
 <span class="sd">    ny : int</span>
 <span class="sd">        Sample size of second group (only needed in case of an independant</span>
 <span class="sd">        two-sample T-test)</span>
+<span class="sd">    paired : boolean</span>
+<span class="sd">        Specify whether the two observations are related (i.e. repeated</span>
+<span class="sd">        measures) or independant.</span>
+<span class="sd">    tail : string</span>
+<span class="sd">        Specify whether the test is &#39;one-sided&#39; or &#39;two-sided&#39;</span>
 <span class="sd">    r : float</span>
-<span class="sd">        Scale factor. The default is 0.707.</span>
+<span class="sd">        Cauchy scale factor. The default is 0.707.</span>
 
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
@@ -147,10 +152,10 @@
 <span class="sd">        &gt;&gt;&gt; bf = bayesfactor_ttest(3.5, 20, 20, paired=True)</span>
 <span class="sd">        &gt;&gt;&gt; print(&quot;Bayes Factor: %.2f (two-sample paired)&quot; % bf)</span>
 
-<span class="sd">    3. Bayes Factor of an one-sample T-test</span>
+<span class="sd">    3. Bayes Factor of an one-sided one-sample T-test</span>
 
 <span class="sd">        &gt;&gt;&gt; from pingouin import bayesfactor_ttest</span>
-<span class="sd">        &gt;&gt;&gt; bf = bayesfactor_ttest(3.5, 20)</span>
+<span class="sd">        &gt;&gt;&gt; bf = bayesfactor_ttest(3.5, 20, tail=&#39;one-sided&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; print(&quot;Bayes Factor: %.2f (one-sample)&quot; % bf)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="k">import</span> <span class="n">quad</span>
@@ -176,6 +181,9 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">bf01</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">t</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">nx</span> <span class="o">+</span> <span class="n">ny</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">nx</span> <span class="o">+</span> <span class="n">ny</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> \
             <span class="n">quad</span><span class="p">(</span><span class="n">F_ind</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">r</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Tail</span>
+    <span class="n">bf01</span> <span class="o">/=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">tail</span> <span class="o">==</span> <span class="s1">&#39;one-sided&#39;</span> <span class="k">else</span> <span class="mi">1</span>
 
     <span class="c1"># Invert Bayes Factor (alternative hypothesis)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">bf01</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span></div>
