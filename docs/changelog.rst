@@ -9,6 +9,7 @@ v0.1.3 (June 2018)
 **Bayesian**
 
 a. T-test now reports the Bayes factor of the alternative hypothesis (BF10)
+b. Pearson correlation now reports the Bayes factor of the alternative hypothesis (BF10)
 
 v0.1.2 (June 2018)
 --------------------
