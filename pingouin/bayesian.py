@@ -79,7 +79,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
                                             (n - 1)))**(-n / 2) *  \
                (2 * np.pi)**(-.5) * g**(-3. / 2) * np.exp(-1 / (2 * g))
 
-    # JZS Bayes factor calculation
+    # JZS Bayes factor calculation: eq. 1 in Rouder et al. (2009)
     if one_sample or paired:
         bf01 = (1 + t**2 / (nx - 1))**(-nx / 2) / \
             quad(F_paired, 0, np.inf, args=(t, nx, r))[0]
