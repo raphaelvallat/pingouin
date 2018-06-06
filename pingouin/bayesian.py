@@ -7,7 +7,7 @@ __all__ = ["bayesfactor_ttest", "bayesfactor_pearson"]
 
 def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     """
-    Calculates the Jeffrey-Zellner-Siow (JZS) Bayes Factor for a one or
+    Calculates the scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor for a one or
     two-sample T-test given t-value and sample size(s).
 
     See Rouder et al. (2009) for details.
