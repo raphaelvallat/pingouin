@@ -426,7 +426,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
     power = ttest_power(d, nx, ny, paired=paired, tail=tail)
 
     # Bayes factor
-    bf = bayesfactor_ttest(tval, nx, ny, paired=False)
+    bf = bayesfactor_ttest(tval, nx, ny, paired=paired)
 
     # Fill output DataFrame
     stats['dof'] = dof
