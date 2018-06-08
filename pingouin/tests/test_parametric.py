@@ -64,6 +64,7 @@ class TestParametric(_TestPingouin):
         assert np.allclose(stats.loc['T-test', 'p-val'].round(3), .270)
         ttest(x, y, paired=False, correction='auto')
         ttest(x, y, paired=False, correction=True)
+        ttest(x, y, paired=False, r=0.5)
         ttest(x, h, paired=True)
 
     def test_anova(self):

@@ -288,7 +288,7 @@ def test_sphericity(X, alpha=.05):
     return sphericity, W, chi_sq, ddof, pval, eps
 
 
-def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
+def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     """T-test.
 
     Parameters
@@ -308,6 +308,12 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         unequal variances using Welch separate variances T-test. If 'auto', it
         will automatically uses Welch T-test when the sample sizes are unequal,
         as recommended by Zimmerman 2004.
+    r : float
+        Cauchy scale factor for computing the Bayes Factor.
+        Smaller values of r (e.g. 0.5), may be appropriate when small effect
+        sizes are expected a priori; larger values of r are appropriate when
+        large effect sizes are expected (Rouder et al 2009).
+        The default is 0.707 (= np.sqrt(2) / 2).
 
     Returns
     -------
@@ -402,7 +408,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
         # Case paired two samples T-test
         tval, pval = ttest_rel(x, y)
         dof = nx - 1
-        bf = bayesfactor_ttest(tval, nx, ny, paired=True)
+        bf = bayesfactor_ttest(tval, nx, ny, paired=True, r=r)
 
     elif ny > 1 and paired is False:
         dof = nx + ny - 2
@@ -426,7 +432,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto'):
     power = ttest_power(d, nx, ny, paired=paired, tail=tail)
 
     # Bayes factor
-    bf = bayesfactor_ttest(tval, nx, ny, paired=paired, tail=tail)
+    bf = bayesfactor_ttest(tval, nx, ny, paired=paired, tail=tail, r=r)
 
     # Fill output DataFrame
     stats['dof'] = dof

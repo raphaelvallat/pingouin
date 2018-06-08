@@ -9,4 +9,4 @@ from .correlation import *
 from .pairwise import *
 from .power import *
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"

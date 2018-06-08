@@ -11,3 +11,4 @@ Examples
    :maxdepth: 1
 
    examples/effect_size
+   examples/bayesian_ttest

@@ -4,11 +4,11 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pingouin.compute_esci &#8212; pingouin 0.1.2 documentation</title>
+    <title>pingouin.compute_esci &#8212; pingouin 0.1.3 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/style.css" type="text/css" />
-    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -41,7 +41,7 @@
         </button>
         <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin_128x128.png"></span>
           pingouin</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.1.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.1.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -103,46 +103,51 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt><strong>x, y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first last">Data vectors (required for bootstrapping only)</p>
-</dd>
-<dt><strong>ef</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">Original effect size (must be Cohen d or Hedges g).
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x, y</strong> : int</p>
+<blockquote>
+<div><p>Data vectors (required for bootstrapping only)</p>
+</div></blockquote>
+<p><strong>ef</strong> : float</p>
+<blockquote>
+<div><p>Original effect size (must be Cohen d or Hedges g).
 Required for ‘parametric’ method only.</p>
-</dd>
-<dt><strong>nx, ny</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first last">Length of vector x and y.</p>
-</dd>
-<dt><strong>alpha</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float, optional</span></dt>
-<dd><p class="first last">Confidence interval (0.95 = 95%)</p>
-</dd>
-<dt><strong>method</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd><p class="first">Computation method
+</div></blockquote>
+<p><strong>nx, ny</strong> : int</p>
+<blockquote>
+<div><p>Length of vector x and y.</p>
+</div></blockquote>
+<p><strong>alpha</strong> : float, optional</p>
+<blockquote>
+<div><p>Confidence interval (0.95 = 95%)</p>
+</div></blockquote>
+<p><strong>method</strong> : string</p>
+<blockquote>
+<div><p>Computation method
 Available methods are</p>
-<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;parametric&#39;</span> <span class="p">:</span> <span class="n">uses</span> <span class="n">standard</span> <span class="n">deviation</span> <span class="n">of</span> <span class="n">effect</span> <span class="n">sizes</span><span class="o">.</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;parametric&#39;</span> <span class="p">:</span> <span class="n">uses</span> <span class="n">standard</span> <span class="n">deviation</span> <span class="n">of</span> <span class="n">effect</span> <span class="n">sizes</span><span class="o">.</span>
 <span class="s1">&#39;bootstrap&#39;</span> <span class="p">:</span> <span class="n">uses</span> <span class="n">a</span> <span class="n">bootstrapping</span> <span class="n">procedure</span> <span class="p">(</span><span class="n">pivotal</span> <span class="n">CI</span><span class="p">)</span><span class="o">.</span>
 </pre></div>
 </div>
-</dd>
-<dt><strong>n_boot</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first last">Number of permutations for the bootstrap procedure</p>
-</dd>
-<dt><strong>eftype</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd><p class="first last">Effect size type for the bootstrapping procedure.</p>
-</dd>
-<dt><strong>return_dist</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
-<dd><p class="first last">If True, return the distribution of permutations (e.g. useful for a
+</div></blockquote>
+<p><strong>n_boot</strong> : int</p>
+<blockquote>
+<div><p>Number of permutations for the bootstrap procedure</p>
+</div></blockquote>
+<p><strong>eftype</strong> : string</p>
+<blockquote>
+<div><p>Effect size type for the bootstrapping procedure.</p>
+</div></blockquote>
+<p><strong>return_dist</strong> : boolean</p>
+<blockquote>
+<div><p>If True, return the distribution of permutations (e.g. useful for a
 posteriori plotting)</p>
-</dd>
-</dl>
+</div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>ci</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
-<dd><p class="first last">Desired converted effect size</p>
-</dd>
-</dl>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ci</strong> : array</p>
+<blockquote class="last">
+<div><p>Desired converted effect size</p>
+</div></blockquote>
 </td>
 </tr>
 </tbody>
@@ -217,7 +222,7 @@ In that case, we need to pass directly the original x and y arrays.</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
     </p>
   </div>
 </footer>

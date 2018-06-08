@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Performing a Bayesian T-test &#8212; pingouin 0.1.3 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/style.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Computing effect sizes" href="effect_size.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin_128x128.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1.3</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">API</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="performing-a-bayesian-t-test">
+<h1>Performing a Bayesian T-test</h1>
+<p>In this tutorial we will see how to compute a classical and Bayesian T-test in Pingouin using the <a class="reference external" href="https://raphaelvallat.github.io/pingouin/build/html/generated/pingouin.ttest.html#pingouin.ttest">ttest</a> function.</p>
+<p>The method used in Pingouin is derived from <a class="reference external" href="http://pcl.missouri.edu/sites/default/files/Rouder.bf_.pdf">Rouder et al. 2009</a> and uses the recommended Cauchy prior distribution on effect size, centered around 0 and with a width (r) factor of 0.707. This default values applies well for most cases (at least for psychological studies with typically small to moderate effect sizes). In simple words, it means that you expect (i.e. your prior) that the effect size will most likely fall between -.707 and +.707. Note that this parameter can be adjusted by using the <code class="code docutils literal notranslate"><span class="pre">r</span></code> optional argument function. Use smaller values if you expect smaller effect sizes, and larger values if you expect larger effect sizes.</p>
+<p>For the sake of this example, we will generate a fake drug / placebo study with 30 subjects in each group.
+We are interested in comparing the memory performances after administration of the drug or the placebo.</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="n">drug</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">placebo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then to compute the T-test, simply:</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest</span>
+<span class="n">ttest</span><span class="p">(</span><span class="n">drug</span><span class="p">,</span> <span class="n">placebo</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id2">
+<caption><span class="caption-text">Output</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">T -val</th>
+<th class="head">p-val</th>
+<th class="head">dof</th>
+<th class="head">tail</th>
+<th class="head">cohen-d</th>
+<th class="head">power</th>
+<th class="head">BF10</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>2.891</td>
+<td>0.005</td>
+<td>58</td>
+<td>two-sided</td>
+<td>0.746</td>
+<td>0.811</td>
+<td>7.71</td>
+</tr>
+</tbody>
+</table>
+<p>The p-value is significantly inferior to 0.05, meaning that we can reject the null hypothesis that the two groups have similar performances. However, the p-value can simply be used to reject or accept the null hypothesis, given an arbitrary threshold. It does not allow to quantify <em>per se</em> the evidence in favor of the alternative hypothesis (which is that the groups have different performances).</p>
+<p>To do so, we need to rely on the Bayes Factor (<code class="code docutils literal notranslate"><span class="pre">BF10</span></code>), first introduced by Jeffreys in 1961. The Bayes Factor is an odds ratio and has therefore an intuitive interpretation: in the example above, it means that the <strong>alternative hypothesis is 7.71 times more likely than the null hypothesis</strong>, given the data. To quantify the odds in favor of the null hypothesis (BF01), we can simply compute the reciprocal of the BF10:</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BF01</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">BF10</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">7.71</span> <span class="o">=</span> <span class="mf">0.13</span>
+</pre></div>
+</div>
+<p>As a rule of thumbs, Jeffreys (1961) recommended that a Bayes Factor greater than 3 be considered <em>“some evidence”</em>, greater than 10 <em>“strong evidence”</em>, and greater than 30 <em>“very strong evidence”</em>. In the example above, it means that there are a moderate to strong evidence that the drug actually works.</p>
+<hr class="docutils" />
+<p>Note that the <a class="reference external" href="https://raphaelvallat.github.io/pingouin/build/html/generated/pingouin.ttest.html#pingouin.ttest">ttest</a> function has several optional arguments. For instance, if the data come from a single group (paired measurements), and if we have an a priori that the drug will indeed work, we could adjust the <code class="code docutils literal notranslate"><span class="pre">tail</span></code> and <code class="code docutils literal notranslate"><span class="pre">paired</span></code> arguments:</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ttest</span><span class="p">(</span><span class="n">drug</span><span class="p">,</span> <span class="n">placebo</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;one-sided&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id3">
+<caption><span class="caption-text">Output</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">T -val</th>
+<th class="head">p-val</th>
+<th class="head">dof</th>
+<th class="head">tail</th>
+<th class="head">cohen-d</th>
+<th class="head">power</th>
+<th class="head">BF10</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>2.717</td>
+<td>0.005</td>
+<td>29</td>
+<td>one-sided</td>
+<td>0.759</td>
+<td>0.992</td>
+<td>8.31</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2018, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
