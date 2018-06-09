@@ -12,3 +12,4 @@ Examples
 
    examples/effect_size
    examples/bayesian_ttest
+   examples/pairwise_corr

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Pairwise correlations in a pandas dataframe &#8212; pingouin 0.1.3 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/style.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Performing a Bayesian T-test" href="bayesian_ttest.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin_128x128.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1.3</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">API</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="pairwise-correlations-in-a-pandas-dataframe">
+<h1>Pairwise correlations in a pandas dataframe</h1>
+<p>In this tutorial we will see how to compute pairwise correlations coefficients across columns of a pandas DataFrame using the <a class="reference external" href="https://raphaelvallat.github.io/pingouin/build/html/generated/pingouin.pairwise_corr.html#pingouin.pairwise_corr">pairwise_corr</a> function.</p>
+<p>We’ll start by generating a pandas dataframe with three continuous variables, each in a separate column.</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="n">raw</span><span class="p">,</span>
+                   <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="n">raw</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">),</span>
+                   <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)})</span>
+</pre></div>
+</div>
+<p>Let’s compute the pairwise correlations between all the columns of the DataFrame:</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_corr</span>
+<span class="n">pairwise_corr</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id1">
+<caption><span class="caption-text">Output</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">X</th>
+<th class="head">Y</th>
+<th class="head">method</th>
+<th class="head">tail</th>
+<th class="head">r</th>
+<th class="head">CI95%</th>
+<th class="head">r2</th>
+<th class="head">adj_r2</th>
+<th class="head">z</th>
+<th class="head">p-unc</th>
+<th class="head">BF10</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>X</td>
+<td>Y</td>
+<td>pearson</td>
+<td>two-sided</td>
+<td>0.716</td>
+<td>[0.08 1.36]</td>
+<td>0.513</td>
+<td>0.456</td>
+<td>0.899</td>
+<td>0.000</td>
+<td>86.949</td>
+</tr>
+<tr class="row-odd"><td>X</td>
+<td>Z</td>
+<td>pearson</td>
+<td>two-sided</td>
+<td>0.233</td>
+<td>[-0.39  0.85]</td>
+<td>0.054</td>
+<td>-0.057</td>
+<td>0.237</td>
+<td>0.323</td>
+<td>0.278</td>
+</tr>
+<tr class="row-even"><td>Y</td>
+<td>Z</td>
+<td>pearson</td>
+<td>two-sided</td>
+<td>0.002</td>
+<td>[-0.62  0.62]</td>
+<td>0.000</td>
+<td>-0.118</td>
+<td>0.002</td>
+<td>0.995</td>
+<td>0.171</td>
+</tr>
+</tbody>
+</table>
+<p>By default, the function returns the two-sided Pearson’s correlation coefficients. This can be adjusted using the <code class="code docutils literal notranslate"><span class="pre">tail</span></code> and <code class="code docutils literal notranslate"><span class="pre">method</span></code> arguments. In addition, the table comprises:</p>
+<ol class="arabic simple">
+<li>the parametric 95% confidence intervals of the r value (<code class="code docutils literal notranslate"><span class="pre">CI95%</span></code>)</li>
+<li>the R<sup>2</sup> (= coefficient of determination, <code class="code docutils literal notranslate"><span class="pre">r2</span></code>)</li>
+<li>the adjusted R<sup>2</sup> (<code class="code docutils literal notranslate"><span class="pre">adj_r2</span></code>)</li>
+<li>the standardized (Z-transformed) correlation coefficients (<code class="code docutils literal notranslate"><span class="pre">z</span></code>)</li>
+<li>the uncorrected p-values (<code class="code docutils literal notranslate"><span class="pre">p-unc</span></code>)</li>
+<li>the Bayes Factor for the alternative hypothesis (<code class="code docutils literal notranslate"><span class="pre">BF10</span></code>)</li>
+</ol>
+<p>In the example above, we can see that there is a strong correlation between variables <code class="code docutils literal notranslate"><span class="pre">X</span></code> and <code class="code docutils literal notranslate"><span class="pre">Y</span></code>, as indicated by the correlation coefficient (0.716), the p-value (&lt;.001) and the Bayes Factor (86.9, meaning that the alternative hypothesis is ~87 times more likely than the null hypothesis given the data).</p>
+<hr class="docutils" />
+<div class="section" id="non-parametric-correlation">
+<h2>Non-parametric correlation</h2>
+<p>If your data do not follow a normal distribution, the software will display a warning message suggesting you to use a non-parametric method such as the Spearman rank-correlation.
+In the example below, we compute the one-sided Spearman pairwise correlations between a subset of columns:</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">print_table</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">],</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;one-sided&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;spearman&#39;</span><span class="p">)</span>
+<span class="n">print_table</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id2">
+<caption><span class="caption-text">Output</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">X</th>
+<th class="head">Y</th>
+<th class="head">method</th>
+<th class="head">tail</th>
+<th class="head">r</th>
+<th class="head">CI95%</th>
+<th class="head">r2</th>
+<th class="head">adj_r2</th>
+<th class="head">z</th>
+<th class="head">p-unc</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>X</td>
+<td>Y</td>
+<td>spearman</td>
+<td>one-sided</td>
+<td>0.662</td>
+<td>[0.03 1.3 ]</td>
+<td>0.438</td>
+<td>0.372</td>
+<td>0.796</td>
+<td>0.001</td>
+</tr>
+</tbody>
+</table>
+<p><em>Note that the Bayes Factor is only computed when using the Pearson method and is therefore not present in the table above.</em></p>
+</div>
+<hr class="docutils" />
+<div class="section" id="robust-correlation">
+<h2>Robust correlation</h2>
+<p>If you believe that your dataset contains outliers, you can use a robust correlation method (percentage bend, see <a class="reference external" href="https://link.springer.com/article/10.1007/BF02294395">Wilcox 1994</a>:)</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">print_table</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;percbend&#39;</span><span class="p">)</span>
+<span class="n">print_table</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id3">
+<caption><span class="caption-text">Output</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">X</th>
+<th class="head">Y</th>
+<th class="head">method</th>
+<th class="head">tail</th>
+<th class="head">r</th>
+<th class="head">CI95%</th>
+<th class="head">r2</th>
+<th class="head">adj_r2</th>
+<th class="head">z</th>
+<th class="head">p-unc</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>X</td>
+<td>Y</td>
+<td>percbend</td>
+<td>two-sided</td>
+<td>0.730</td>
+<td>[0.09 1.37]</td>
+<td>0.533</td>
+<td>0.478</td>
+<td>0.929</td>
+<td>0.000</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<div class="section" id="correction-for-multiple-comparisons">
+<h2>Correction for multiple comparisons</h2>
+<p>Finally, if you are computing a large number of correlation coefficients, you might want to correct the p-values for multiple comparisons. This can be done with <code class="code docutils literal notranslate"><span class="pre">padjust</span></code> argument:</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stats</span> <span class="o">=</span> <span class="n">pairwise_corr</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s2">&quot;fdr_bh&quot;</span><span class="p">)</span>
+<span class="n">print_table</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id4">
+<caption><span class="caption-text">Output</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">X</th>
+<th class="head">Y</th>
+<th class="head">method</th>
+<th class="head">tail</th>
+<th class="head">r</th>
+<th class="head">CI95%</th>
+<th class="head">r2</th>
+<th class="head">adj_r2</th>
+<th class="head">z</th>
+<th class="head">p-unc</th>
+<th class="head">p-corr</th>
+<th class="head">p-adjust</th>
+<th class="head">BF10</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>X</td>
+<td>Y</td>
+<td>pearson</td>
+<td>two-sided</td>
+<td>0.716</td>
+<td>[0.08 1.36]</td>
+<td>0.513</td>
+<td>0.456</td>
+<td>0.899</td>
+<td>0.000</td>
+<td>0.001</td>
+<td>fdr_bh</td>
+<td>86.949</td>
+</tr>
+<tr class="row-odd"><td>X</td>
+<td>Z</td>
+<td>pearson</td>
+<td>two-sided</td>
+<td>0.233</td>
+<td>[-0.39  0.85]</td>
+<td>0.054</td>
+<td>-0.057</td>
+<td>0.237</td>
+<td>0.323</td>
+<td>0.484</td>
+<td>fdr_bh</td>
+<td>0.278</td>
+</tr>
+<tr class="row-even"><td>Y</td>
+<td>Z</td>
+<td>pearson</td>
+<td>two-sided</td>
+<td>0.002</td>
+<td>[-0.62  0.62]</td>
+<td>0.000</td>
+<td>-0.118</td>
+<td>0.002</td>
+<td>0.995</td>
+<td>0.995</td>
+<td>fdr_bh</td>
+<td>0.171</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2018, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
