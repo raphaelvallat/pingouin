@@ -119,4 +119,3 @@ T-tests
     pairwise_ttests
     mwu
     wilcoxon
-    corr
