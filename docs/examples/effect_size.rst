@@ -1,14 +1,10 @@
 .. examples_effect_size:
 
-Computing effect sizes
-======================
+Computing the effect size of a T-test
+=====================================
 
 Introduction
 ------------
-
-  Effect sizes are the most important outcome of empirical studies.
-
-—`Lakens et al. 2013 <https://www.frontiersin.org/articles/10.3389/fpsyg.2013.00863/full>`_
 
 Effect sizes are a way of quantifying the magnitude of the difference between two groups. They are useful to determine the sample size for follow-up studies, or examining effects across studies. In this tutorial, we will see how to compute effect sizes using pingouin.
 

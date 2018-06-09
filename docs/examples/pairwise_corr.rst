@@ -1,8 +1,8 @@
 .. examples_pairwise_corr:
 
-===========================================
-Pairwise correlations in a pandas dataframe
-===========================================
+===========================================================
+Calculating the pairwise correlations in a pandas dataframe
+===========================================================
 
 In this tutorial we will see how to compute pairwise correlations coefficients across columns of a pandas DataFrame using the `pairwise_corr <https://raphaelvallat.github.io/pingouin/build/html/generated/pingouin.pairwise_corr.html#pingouin.pairwise_corr>`_ function.
 

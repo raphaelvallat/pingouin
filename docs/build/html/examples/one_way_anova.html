@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Performing a one-way ANOVA &#8212; pingouin 0.1.3 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/style.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2. Performing a Bayesian T-test" href="bayesian_ttest.html" />
+    <link rel="prev" title="Examples" href="../examples.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin_128x128.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1.3</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">API</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="performing-a-one-way-anova">
+<h1>Performing a one-way ANOVA</h1>
+<p>The one-way ANOVA tests the null hypothesis that two or more groups have the same population mean. In Pingouin, the one-way ANOVA is implemented in the <a class="reference external" href="https://raphaelvallat.github.io/pingouin/build/html/generated/pingouin.anova.html">anova</a> function. The ANOVA test has several assumptions that must be satisfied to provide accurate results:</p>
+<ol class="arabic simple">
+<li>The samples must be independent (i.e. by opposition with repeated measurements in a single group, see <a class="reference external" href="https://raphaelvallat.github.io/pingouin/build/html/generated/pingouin.rm_anova.html">rm_anova</a>)</li>
+<li>Each sample should be normally distributed</li>
+<li>The variance of the samples are all equal (= homoscedasticity)</li>
+</ol>
+<p>Assumptions #2 and #3 can be checked using the <a class="reference external" href="https://raphaelvallat.github.io/pingouin/build/html/generated/pingouin.test_normality.html">test_normality</a> and <a class="reference external" href="https://raphaelvallat.github.io/pingouin/build/html/generated/pingouin.test_homoscedasticity.html">test_homoscedasticity</a> functions.</p>
+<p>We’ll start by generating a pandas dataframe with one column containing the dependent variable (<code class="code docutils literal notranslate"><span class="pre">DV</span></code>) and one column containing the factor (<code class="code docutils literal notranslate"><span class="pre">Group</span></code>):</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;dv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.99</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.42</span><span class="p">,</span> <span class="mf">0.66</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.61</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.12</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.41</span><span class="p">,</span> <span class="mf">1.43</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.55</span><span class="p">,</span>
+                          <span class="mf">0.08</span><span class="p">,</span> <span class="mf">1.36</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.09</span><span class="p">,</span> <span class="mf">3.79</span><span class="p">,</span> <span class="mf">1.86</span><span class="p">,</span> <span class="mf">2.19</span><span class="p">,</span> <span class="mf">3.7</span><span class="p">,</span> <span class="mf">1.46</span><span class="p">,</span> <span class="mf">1.91</span><span class="p">],</span>
+                   <span class="s1">&#39;Group&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">],</span> <span class="mi">6</span><span class="p">),</span>
+                   <span class="p">})</span>
+<span class="c1"># Print group means and standard deviations</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;Group&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">([</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;std&#39;</span><span class="p">]))</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id3">
+<caption><span class="caption-text">Group means and STD</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Group</th>
+<th class="head">mean</th>
+<th class="head">std</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>A</td>
+<td>0.015</td>
+<td>0.655</td>
+</tr>
+<tr class="row-odd"><td>B</td>
+<td>0.530</td>
+<td>0.828</td>
+</tr>
+<tr class="row-even"><td>C</td>
+<td>2.485</td>
+<td>1.004</td>
+</tr>
+</tbody>
+</table>
+<p>Let’s now compute the one-way ANOVA:</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">anova</span>
+<span class="n">aov</span> <span class="o">=</span> <span class="n">anova</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;dv&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">aov</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id4">
+<caption><span class="caption-text">ANOVA summary</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Source</th>
+<th class="head">ddof1</th>
+<th class="head">ddof2</th>
+<th class="head">F</th>
+<th class="head">p-unc</th>
+<th class="head">np2</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Group</td>
+<td>2</td>
+<td>15</td>
+<td>14.401</td>
+<td>0.000</td>
+<td>0.658</td>
+</tr>
+</tbody>
+</table>
+<p>And to get a more detailed summary table:</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">anova</span>
+<span class="n">aov</span> <span class="o">=</span> <span class="n">anova</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;dv&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">aov</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id5">
+<caption><span class="caption-text">ANOVA summary</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Source</th>
+<th class="head">SS</th>
+<th class="head">DF</th>
+<th class="head">MS</th>
+<th class="head">F</th>
+<th class="head">p-unc</th>
+<th class="head">np2</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Group</td>
+<td>20.376</td>
+<td>2</td>
+<td>10.188</td>
+<td>14.401</td>
+<td>0.000</td>
+<td>0.658</td>
+</tr>
+<tr class="row-odd"><td>Within</td>
+<td>10.612</td>
+<td>15</td>
+<td>0.707</td>
+<td>nan</td>
+<td>nan</td>
+<td>nan</td>
+</tr>
+</tbody>
+</table>
+<p>The detailed ANOVA summary table includes the following columns:</p>
+<ol class="arabic simple">
+<li><code class="code docutils literal notranslate"><span class="pre">SS</span></code> : sums of squares</li>
+<li><code class="code docutils literal notranslate"><span class="pre">DF</span></code> : degrees of freedom</li>
+<li><code class="code docutils literal notranslate"><span class="pre">MS</span></code> : mean squares (= SS / DF)</li>
+<li><code class="code docutils literal notranslate"><span class="pre">F</span></code> : F-value (test statistic)</li>
+<li><code class="code docutils literal notranslate"><span class="pre">p-unc</span></code> : uncorrected p-values</li>
+<li><code class="code docutils literal notranslate"><span class="pre">np2</span></code> : partial eta-square effect size*</li>
+</ol>
+<p>* <em>In one-way ANOVA, partial eta-square is the same as eta-square and generalized eta-square.</em></p>
+<p>In the example above, there is a main effect of group (F(2, 15) = 14, p &lt; .001)), so we can reject the null hypothesis that the groups have equal means.</p>
+<hr class="docutils" />
+<div class="section" id="post-hoc-tests">
+<h2>Post-hoc tests</h2>
+<p>Often, you will want to compute post-hoc tests to look at the pairwise differences between the groups. This can be achieved using the <a class="reference external" href="https://raphaelvallat.github.io/pingouin/build/html/generated/pingouin.pairwise_ttests.html">pairwise_ttests</a> function:</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_ttests</span>
+<span class="n">posthocs</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;dv&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">posthocs</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id6">
+<caption><span class="caption-text">Post-hoc T-tests</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Type</th>
+<th class="head">A</th>
+<th class="head">B</th>
+<th class="head">Paired</th>
+<th class="head">T-val</th>
+<th class="head">tail</th>
+<th class="head">p-unc</th>
+<th class="head">BF10</th>
+<th class="head">efsize</th>
+<th class="head">eftype</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>between</td>
+<td>A</td>
+<td>B</td>
+<td>False</td>
+<td>-1.195</td>
+<td>two-sided</td>
+<td>0.260</td>
+<td>0.725</td>
+<td>-0.637</td>
+<td>hedges</td>
+</tr>
+<tr class="row-odd"><td>between</td>
+<td>A</td>
+<td>C</td>
+<td>False</td>
+<td>-5.048</td>
+<td>two-sided</td>
+<td>0.001</td>
+<td>48.277</td>
+<td>-2.690</td>
+<td>hedges</td>
+</tr>
+<tr class="row-even"><td>between</td>
+<td>B</td>
+<td>C</td>
+<td>False</td>
+<td>-3.680</td>
+<td>two-sided</td>
+<td>0.004</td>
+<td>9.570</td>
+<td>-1.961</td>
+<td>hedges</td>
+</tr>
+</tbody>
+</table>
+<p>Looking at the table above, it is clear that the mean of group C is significantly higher than the mean of group A and group B. Note that the <code class="code docutils literal notranslate"><span class="pre">pairwise_ttests</span></code> function accepts several optional arguments allowing you to specify the tail of the test, whether to correct the p-values for multiple comparisons, the type of effect size and so on. Take a look at the <a class="reference external" href="https://raphaelvallat.github.io/pingouin/build/html/generated/pingouin.pairwise_ttests.html">API</a> for more details.</p>
+</div>
+<hr class="docutils" />
+<div class="section" id="power">
+<h2>Power</h2>
+<p>In some cases, it might be useful to compute the power of the test, i.e. the probability that we correctly reject the null hypothesis when it is indeed false (with higher power indicating higher reliability). This can be calculated easily from the ANOVA summary using the <a class="reference external" href="https://raphaelvallat.github.io/pingouin/build/html/generated/pingouin.anova_power.html">anova_power</a> function:</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">anova_power</span>
+<span class="c1"># eta = &#39;np2&#39; column of the ANOVA summary</span>
+<span class="n">achieved_power</span> <span class="o">=</span> <span class="n">anova_power</span><span class="p">(</span><span class="n">eta</span><span class="o">=</span><span class="mf">0.658</span><span class="p">,</span> <span class="n">ntot</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span> <span class="n">ngroups</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">achieved_power</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">0.998</span>
+</pre></div>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="assumptions-check">
+<h2>Assumptions check</h2>
+<p>Finally, to check that (1) each sample is normally distributed and (2) the variance of the samples are all equal, we can use the <a class="reference external" href="https://raphaelvallat.github.io/pingouin/build/html/generated/pingouin.test_normality.html">test_normality</a> and <a class="reference external" href="https://raphaelvallat.github.io/pingouin/build/html/generated/pingouin.test_homoscedasticity.html">test_homoscedasticity</a> functions, respectively:</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">test_normality</span>
+<span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Group&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">test_normality</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Group&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">group</span><span class="p">][</span><span class="s1">&#39;dv&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mf">0.185</span><span class="p">)</span> <span class="c1"># Sample 1 is normally distributed</span>
+<span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mf">0.375</span><span class="p">)</span> <span class="c1"># idem</span>
+<span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mf">0.098</span><span class="p">)</span> <span class="c1"># idem</span>
+</pre></div>
+</div>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">test_homoscedasticity</span>
+<span class="n">equal_var</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">test_homoscedasticity</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">12</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">12</span><span class="p">:</span><span class="mi">18</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">equal_var</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kc">True</span> <span class="mf">0.665</span> <span class="c1"># The variance of the samples are all equal</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2018, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

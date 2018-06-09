@@ -10,6 +10,7 @@ Examples
 .. toctree::
    :maxdepth: 1
 
-   examples/effect_size
+   examples/one_way_anova
    examples/bayesian_ttest
+   examples/effect_size
    examples/pairwise_corr
