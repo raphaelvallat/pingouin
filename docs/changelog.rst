@@ -5,6 +5,9 @@ What's new
 
 v0.1.3 (June 2018)
 --------------------
+**Documentation**
+
+Added several tutorials
 
 **Bayesian**
 
