@@ -584,7 +584,20 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    aov : DataFrame</span>
-<span class="sd">        ANOVA summary</span>
+<span class="sd">        ANOVA summary ::</span>
+
+<span class="sd">        &#39;Source&#39; : Name of the within-group factor</span>
+<span class="sd">        &#39;ddof1&#39; : Degrees of freedom (numerator)</span>
+<span class="sd">        &#39;ddof2&#39; : Degrees of freedom (denominator)</span>
+<span class="sd">        &#39;F&#39; : F-value</span>
+<span class="sd">        &#39;p-unc&#39; : Uncorrected p-value</span>
+<span class="sd">        &#39;np2&#39; : Partial eta-square effect size</span>
+<span class="sd">        &#39;p-GG-corr&#39; : Greenhouse-Geisser corrected p-value</span>
+<span class="sd">        &#39;W-Mauchly&#39; : Mauchly statistic</span>
+<span class="sd">        &#39;X2-Mauchly&#39; : Chi-square statistic of the Mauchly test</span>
+<span class="sd">        &#39;DF-Mauchly&#39; : Degrees of freedom for the Mauchly test</span>
+<span class="sd">        &#39;p-Mauchly&#39; : p-value of the Mauchly test</span>
+<span class="sd">        &#39;sphericity&#39; : sphericity of the data (boolean)</span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
@@ -623,7 +636,7 @@
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># Sort values (to avoid bug when creating &#39;Subj&#39; column)</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;mergesort&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;mergesort&#39;</span><span class="p">)</span>
 
     <span class="c1"># Groupby</span>
     <span class="n">grp_with</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">within</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
@@ -748,7 +761,14 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    aov : DataFrame</span>
-<span class="sd">        ANOVA summary</span>
+<span class="sd">        ANOVA summary ::</span>
+
+<span class="sd">        &#39;Source&#39; : name of the between-group factor</span>
+<span class="sd">        &#39;ddof1&#39; : degrees of freedom (numerator)</span>
+<span class="sd">        &#39;ddof2&#39; : degrees of freedom (denominator)</span>
+<span class="sd">        &#39;F&#39; : F-value</span>
+<span class="sd">        &#39;p-unc&#39; : uncorrected p-value</span>
+<span class="sd">        &#39;np2&#39; : Partial eta-square effect size</span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
@@ -874,7 +894,20 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    aov : DataFrame</span>
-<span class="sd">        ANOVA summary</span>
+<span class="sd">        ANOVA summary ::</span>
+
+<span class="sd">        &#39;Source&#39; : Names of the factor considered</span>
+<span class="sd">        &#39;ddof1&#39; : Degrees of freedom (numerator)</span>
+<span class="sd">        &#39;ddof2&#39; : Degrees of freedom (denominator)</span>
+<span class="sd">        &#39;F&#39; : F-values</span>
+<span class="sd">        &#39;p-unc&#39; : Uncorrected p-values</span>
+<span class="sd">        &#39;np2&#39; : Partial eta-square effect sizes</span>
+<span class="sd">        &#39;p-GG-corr&#39; : Greenhouse-Geisser corrected p-values</span>
+<span class="sd">        &#39;W-Mauchly&#39; : Mauchly statistic</span>
+<span class="sd">        &#39;X2-Mauchly&#39; : Chi-square statistic of the Mauchly test</span>
+<span class="sd">        &#39;DF-Mauchly&#39; : Degrees of freedom for the Mauchly test</span>
+<span class="sd">        &#39;p-Mauchly&#39; : p-value of the Mauchly test</span>
+<span class="sd">        &#39;sphericity&#39; : sphericity of the data (boolean)</span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>

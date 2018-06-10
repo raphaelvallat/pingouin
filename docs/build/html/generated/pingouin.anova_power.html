@@ -118,8 +118,14 @@ sample size, number of groups and alpha level.</p>
 <div><p>Number of groups.</p>
 </div></blockquote>
 <p><strong>alpha</strong> : float</p>
-<blockquote class="last">
+<blockquote>
 <div><p>Significance level of the test.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>power</strong> : float</p>
+<blockquote class="last">
+<div><p>Achieved power of the test.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -128,9 +134,7 @@ sample size, number of groups and alpha level.</p>
 <p class="rubric">Notes</p>
 <p>For one-way ANOVA, partial eta-square is the same as eta-square. It can be
 evaluated from the f-value and degrees of freedom of the ANOVA using
-the following formula:</p>
-<blockquote>
-<div>eta = (fval * dof1) / (fval * dof1 + dof2)</div></blockquote>
+the following formula: eta = (fval * dof1) / (fval * dof1 + dof2)</p>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">Achieved power of a one-way ANOVA.</p>

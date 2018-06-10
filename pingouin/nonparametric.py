@@ -2,9 +2,9 @@
 # Date: May 2018
 import numpy as np
 import pandas as pd
-from pingouin import _remove_na
+from pingouin import _remove_na, _check_dataframe, _export_table
 
-__all__ = ["mwu", "wilcoxon"]
+__all__ = ["mwu", "wilcoxon", "kruskal"]
 
 
 def mwu(x, y, tail='two-sided'):
@@ -157,4 +157,109 @@ def wilcoxon(x, y, tail='two-sided'):
 
     col_order = ['W-val', 'p-val', 'RBC', 'CLES']
     stats = stats.reindex(columns=col_order)
+    return stats
+
+
+def kruskal(dv=None, between=None, data=None, detailed=False,
+            export_filename=None):
+    """Kruskal-Wallis H-test for independent samples.
+
+    Parameters
+    ----------
+    dv : string
+        Name of column containing the dependant variable.
+    between : string
+        Name of column containing the between factor.
+    data : pandas DataFrame
+        DataFrame
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
+
+    Returns
+    -------
+    stats : DataFrame
+        Test summary ::
+
+        'H' : The Kruskal-Wallis H statistic, corrected for ties
+        'p-unc' : Uncorrected p-value
+        'dof' : degrees of freedom
+
+    Notes
+    -----
+    The Kruskal-Wallis H-test tests the null hypothesis that the population
+    median of all of the groups are equal. It is a non-parametric version of
+    ANOVA. The test works on 2 or more independent samples, which may have
+    different sizes.
+
+    Due to the assumption that H has a chi square distribution, the number of
+    samples in each group must not be too small. A typical rule is that each
+    sample must have at least 5 measurements.
+
+    NaN values are automatically removed.
+
+    Examples
+    --------
+    Compute the Kruskal-Wallis H-test for independent samples.
+
+        >>> import pandas as pd
+        >>> from pingouin import kruskal, print_table
+        >>> df = pd.read_csv('dataset.csv')
+        >>> stats = kruskal(dv='DV', between='Group', data=df)
+        >>> print_table(stats)
+    """
+    from scipy.stats import chi2, rankdata, tiecorrect
+
+    # Check data
+    _check_dataframe(dv=dv, between=between, data=data,
+                     effects='between')
+
+    # Remove NaN values
+    print(data.head(20))
+    data = data.dropna()
+    print(data.head(20))
+
+    # Reset index (avoid duplicate axis error)
+    data = data.reset_index(drop=True)
+
+    # Extract number of groups and total sample size
+    groups = list(data[between].unique())
+    n_groups = len(groups)
+    n = data[dv].size
+
+    # Rank data, dealing with ties appropriately
+    data['rank'] = rankdata(data['DV'])
+
+    # Find the total of rank per groups
+    grp = data.groupby(between)['rank']
+    sum_rk_grp = grp.sum().values
+    n_per_grp = grp.count().values
+
+    # Calculate chi-square statistic (H)
+    H = (12 / (n * (n + 1)) * np.sum(sum_rk_grp**2 / n_per_grp)) - 3 * (n + 1)
+
+    # Correct for ties
+    H /= tiecorrect(data['rank'].values)
+
+    # Calculate DOF and p-value
+    ddof1 = n_groups - 1
+    p_unc = chi2.sf(H, ddof1)
+
+    # Create output dataframe
+    stats = pd.DataFrame({'Source': between,
+                          'ddof1': ddof1,
+                          'H': np.round(H, 3),
+                          'p-unc': p_unc,
+                          }, index=['Kruskal'])
+
+    col_order = ['Source', 'ddof1', 'H', 'p-unc']
+
+    stats = stats.reindex(columns=col_order)
+    stats.dropna(how='all', axis=1, inplace=True)
+
+    # Export to .csv
+    if export_filename is not None:
+        _export_table(stats, export_filename)
     return stats

@@ -26,8 +26,8 @@ def ttest_power(d, nx, ny=None, paired=False, tail='two-sided',
     alpha : float
         Significance level of the test.
 
-    Return
-    ------
+    Returns
+    -------
     power : float
         Achieved power of the test.
 
@@ -91,8 +91,8 @@ def anova_power(eta, ntot, ngroups, alpha=.05):
     alpha : float
         Significance level of the test.
 
-    Return
-    ------
+    Returns
+    -------
     power : float
         Achieved power of the test.
 
@@ -100,9 +100,7 @@ def anova_power(eta, ntot, ngroups, alpha=.05):
     -----
     For one-way ANOVA, partial eta-square is the same as eta-square. It can be
     evaluated from the f-value and degrees of freedom of the ANOVA using
-    the following formula:
-
-        eta = (fval * dof1) / (fval * dof1 + dof2)
+    the following formula: eta = (fval * dof1) / (fval * dof1 + dof2)
 
     Examples
     --------

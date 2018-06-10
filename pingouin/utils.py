@@ -136,7 +136,7 @@ def _remove_rm_na(dv=None, within=None, data=None):
     data['ID_Subj'] = np.tile(np.arange(n_obs), n_rm)
 
     # Efficiently remove subjects with one or more missing values
-    data.set_index('ID_Subj', inplace=True)
+    data = data.set_index('ID_Subj')
 
     # Find index with nan
     iloc_nan = pd.isnull(data).any(1).nonzero()[0]

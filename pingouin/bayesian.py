@@ -32,8 +32,8 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
         appropriate when large effect sizes are expected (Rouder et al 2009).
         The default is 0.707.
 
-    Return
-    ------
+    Returns
+    -------
     bf : float
         Bayes Factor (BF10).
         The Bayes Factor quantifies the evidence in favour of the
@@ -109,8 +109,8 @@ def bayesfactor_pearson(r, n):
     n : int
         Sample size
 
-    Return
-    ------
+    Returns
+    -------
     bf : float
         Bayes Factor (BF10).
         The Bayes Factor quantifies the evidence in favour of the alternative

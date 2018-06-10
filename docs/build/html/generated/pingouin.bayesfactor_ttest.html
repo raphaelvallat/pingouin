@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="pingouin.bayesfactor_pearson" href="pingouin.bayesfactor_pearson.html" />
-    <link rel="prev" title="pingouin.mixed_anova" href="pingouin.mixed_anova.html" />
+    <link rel="prev" title="pingouin.kruskal" href="pingouin.kruskal.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -128,11 +128,19 @@ measures) or independant.</p>
 <div><p>Specify whether the test is ‘one-sided’ or ‘two-sided’</p>
 </div></blockquote>
 <p><strong>r</strong> : float</p>
-<blockquote class="last">
+<blockquote>
 <div><p>Cauchy scale factor. Smaller values of r (e.g. 0.5), may be appropriate
 when small effect sizes are expected a priori; larger values of r are
 appropriate when large effect sizes are expected (Rouder et al 2009).
 The default is 0.707.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>bf</strong> : float</p>
+<blockquote class="last">
+<div><p>Bayes Factor (BF10).
+The Bayes Factor quantifies the evidence in favour of the
+alternative hypothesis.</p>
 </div></blockquote>
 </td>
 </tr>

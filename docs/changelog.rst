@@ -7,12 +7,17 @@ v0.1.3 (June 2018)
 --------------------
 **Documentation**
 
-Added several tutorials
+a. Added several tutorials
+b. Improved doc of several functions
 
 **Bayesian**
 
 a. T-test now reports the Bayes factor of the alternative hypothesis (BF10)
 b. Pearson correlation now reports the Bayes factor of the alternative hypothesis (BF10)
+
+**Non-parametric**
+
+a. Kruskal-Wallis test
 
 v0.1.2 (June 2018)
 --------------------

@@ -490,7 +490,20 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     Returns
     -------
     aov : DataFrame
-        ANOVA summary
+        ANOVA summary ::
+
+        'Source' : Name of the within-group factor
+        'ddof1' : Degrees of freedom (numerator)
+        'ddof2' : Degrees of freedom (denominator)
+        'F' : F-value
+        'p-unc' : Uncorrected p-value
+        'np2' : Partial eta-square effect size
+        'p-GG-corr' : Greenhouse-Geisser corrected p-value
+        'W-Mauchly' : Mauchly statistic
+        'X2-Mauchly' : Chi-square statistic of the Mauchly test
+        'DF-Mauchly' : Degrees of freedom for the Mauchly test
+        'p-Mauchly' : p-value of the Mauchly test
+        'sphericity' : sphericity of the data (boolean)
 
     See Also
     --------
@@ -529,7 +542,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     data = data.reset_index(drop=True)
 
     # Sort values (to avoid bug when creating 'Subj' column)
-    data.sort_values(by=within, kind='mergesort', inplace=True)
+    data = data.sort_values(by=within, kind='mergesort')
 
     # Groupby
     grp_with = data.groupby(within)[dv]
@@ -654,7 +667,14 @@ def anova(dv=None, between=None, data=None, detailed=False,
     Returns
     -------
     aov : DataFrame
-        ANOVA summary
+        ANOVA summary ::
+
+        'Source' : name of the between-group factor
+        'ddof1' : degrees of freedom (numerator)
+        'ddof2' : degrees of freedom (denominator)
+        'F' : F-value
+        'p-unc' : uncorrected p-value
+        'np2' : Partial eta-square effect size
 
     See Also
     --------
@@ -780,7 +800,20 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     Returns
     -------
     aov : DataFrame
-        ANOVA summary
+        ANOVA summary ::
+
+        'Source' : Names of the factor considered
+        'ddof1' : Degrees of freedom (numerator)
+        'ddof2' : Degrees of freedom (denominator)
+        'F' : F-values
+        'p-unc' : Uncorrected p-values
+        'np2' : Partial eta-square effect sizes
+        'p-GG-corr' : Greenhouse-Geisser corrected p-values
+        'W-Mauchly' : Mauchly statistic
+        'X2-Mauchly' : Chi-square statistic of the Mauchly test
+        'DF-Mauchly' : Degrees of freedom for the Mauchly test
+        'p-Mauchly' : p-value of the Mauchly test
+        'sphericity' : sphericity of the data (boolean)
 
     See Also
     --------
