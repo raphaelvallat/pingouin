@@ -509,6 +509,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     --------
     anova : One-way ANOVA
     mixed_anova : Two way mixed ANOVA
+    friedman : Non-parametric one-way repeated measures ANOVA
 
     Notes
     -----
@@ -680,6 +681,8 @@ def anova(dv=None, between=None, data=None, detailed=False,
     --------
     rm_anova : One-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
+    kruskal : Non-parametric one-way ANOVA
+
 
     Notes
     -----

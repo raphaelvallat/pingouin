@@ -18,6 +18,7 @@ b. Pearson correlation now reports the Bayes factor of the alternative hypothesi
 **Non-parametric**
 
 a. Kruskal-Wallis test
+b. Friedman test
 
 v0.1.2 (June 2018)
 --------------------

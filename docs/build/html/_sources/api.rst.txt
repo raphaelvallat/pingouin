@@ -17,6 +17,7 @@ ANOVA
     rm_anova
     mixed_anova
     kruskal
+    friedman
 
 Bayesian
 --------

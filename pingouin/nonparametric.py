@@ -292,8 +292,7 @@ def friedman(dv=None, within=None, data=None, detailed=False,
 
     Notes
     -----
-    The Friedman test is used for one-way repeated measures analysis of
-    variance by ranks.
+    The Friedman test is used for one-way repeated measures ANOVA by ranks.
 
     Due to the assumption that the test statistic has a chi squared
     distribution, the p-value is only reliable for n > 10 and more than 6
