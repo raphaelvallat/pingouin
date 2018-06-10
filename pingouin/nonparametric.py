@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from pingouin import _remove_na, _remove_rm_na, _check_dataframe, _export_table
 
-__all__ = ["mwu", "wilcoxon", "kruskal"]
+__all__ = ["mwu", "wilcoxon", "kruskal", "friedman"]
 
 
 def mwu(x, y, tail='two-sided'):
@@ -311,7 +311,7 @@ def friedman(dv=None, within=None, data=None, detailed=False,
         >>> stats = friedman(dv='DV', within='Time', data=df)
         >>> print_table(stats)
     """
-    # from scipy.stats import friedmanchisquare
+    from scipy.stats import rankdata, chi2, find_repeats
 
     # Check data
     _check_dataframe(dv=dv, within=within, data=data,
@@ -321,31 +321,53 @@ def friedman(dv=None, within=None, data=None, detailed=False,
     if data[dv].isnull().values.any():
         data = _remove_rm_na(dv=dv, within=within, data=data)
 
-    return None
+    # Reset index (avoid duplicate axis error)
+    data = data.reset_index(drop=True)
 
-    # # Reset index (avoid duplicate axis error)
-    # data = data.reset_index(drop=True)
-    #
-    # # Extract number of groups and total sample size
-    # grp_with = data.groupby(within)[dv]
-    # rm = list(data[within].unique())
-    # n_rm = len(rm)
-    #
-    # # TO BE CONTINUED
-    #
-    # # Create output dataframe
-    # stats = pd.DataFrame({'Source': between,
-    #                       'ddof1': ddof1,
-    #                       'Q': np.round(Q, 3),
-    #                       'p-unc': p_unc,
-    #                       }, index=['Friedman'])
-    #
-    # col_order = ['Source', 'ddof1', 'Q', 'p-unc']
-    #
-    # stats = stats.reindex(columns=col_order)
-    # stats.dropna(how='all', axis=1, inplace=True)
-    #
-    # # Export to .csv
-    # if export_filename is not None:
-    #     _export_table(stats, export_filename)
-    # return stats
+    # Extract number of groups and total sample size
+    grp = data.groupby(within)[dv]
+    rm = list(data[within].unique())
+    k = len(rm)
+    X = np.array([grp.get_group(r).values for r in rm]).T
+    n = X.shape[0]
+
+    # Rank per subject
+    ranked = np.zeros(X.shape)
+    for i in range(n):
+        ranked[i] = rankdata(X[i, :])
+
+    ssbn = (ranked.sum(axis=0)**2).sum()
+
+    # Compute the test statistic
+    Q = (12 / (n * k * (k + 1))) * ssbn - 3 * n * (k + 1)
+
+    # Correct for ties
+    ties = 0
+    for i in range(n):
+        replist, repnum = find_repeats(X[i])
+        for t in repnum:
+            ties += t * (t * t - 1)
+
+    c = 1 - ties / float(k * (k * k - 1) * n)
+    Q /= c
+
+    # Approximate the p-value
+    ddof1 = k - 1
+    p_unc = chi2.sf(Q, ddof1)
+
+    # Create output dataframe
+    stats = pd.DataFrame({'Source': within,
+                          'ddof1': ddof1,
+                          'Q': np.round(Q, 3),
+                          'p-unc': p_unc,
+                          }, index=['Friedman'])
+
+    col_order = ['Source', 'ddof1', 'Q', 'p-unc']
+
+    stats = stats.reindex(columns=col_order)
+    stats.dropna(how='all', axis=1, inplace=True)
+
+    # Export to .csv
+    if export_filename is not None:
+        _export_table(stats, export_filename)
+    return stats
