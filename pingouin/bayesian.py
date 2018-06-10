@@ -71,7 +71,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     one_sample = True if ny is None or ny == 1 else False
 
     # Function to be integrated
-    def F(g, t, n, r, df):
+    def fun(g, t, n, r, df):
         return (1 + n * g * r**2)**(-.5) * (1 + t**2 / ((1 + n * g * r**2) *
                                             df))**(-(df + 1) / 2) *  \
                (2 * np.pi)**(-.5) * g**(-3. / 2) * np.exp(-1 / (2 * g))
@@ -85,7 +85,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
         df = nx + ny - 2
 
     # JZS Bayes factor calculation: eq. 1 in Rouder et al. (2009)
-    integr = quad(F, 0, np.inf, args=(t, n, r, df))[0]
+    integr = quad(fun, 0, np.inf, args=(t, n, r, df))[0]
     bf01 = (1 + t**2 / df)**(-(df + 1) / 2) / integr
 
     # Tail
@@ -136,11 +136,12 @@ def bayesfactor_pearson(r, n):
     from scipy.special import gamma
 
     # Function to be integrated
-    def F(g, r, n):
+    def fun(g, r, n):
         return np.exp(((n - 2) / 2) * np.log(1 + g) + (-(n - 1) / 2) *
                       np.log(1 + (1 - r**2) * g) + (-3 / 2) *
                       np.log(g) + - n / (2 * g))
 
     # JZS Bayes factor calculation
-    bf10 = np.sqrt((n / 2)) / gamma(1 / 2) * quad(F, 0, np.inf, args=(r, n))[0]
+    integr = quad(fun, 0, np.inf, args=(r, n))[0]
+    bf10 = np.sqrt((n / 2)) / gamma(1 / 2) * integr
     return np.round(bf10, 3)
