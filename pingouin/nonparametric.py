@@ -2,7 +2,7 @@
 # Date: May 2018
 import numpy as np
 import pandas as pd
-from pingouin import _remove_na, _check_dataframe, _export_table
+from pingouin import _remove_na, _remove_rm_na, _check_dataframe, _export_table
 
 __all__ = ["mwu", "wilcoxon", "kruskal"]
 
@@ -217,9 +217,7 @@ def kruskal(dv=None, between=None, data=None, detailed=False,
                      effects='between')
 
     # Remove NaN values
-    print(data.head(20))
     data = data.dropna()
-    print(data.head(20))
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
@@ -263,3 +261,91 @@ def kruskal(dv=None, between=None, data=None, detailed=False,
     if export_filename is not None:
         _export_table(stats, export_filename)
     return stats
+
+
+def friedman(dv=None, within=None, data=None, detailed=False,
+             export_filename=None):
+    """Friedman test for repeated measurements.
+
+    Parameters
+    ----------
+    dv : string
+        Name of column containing the dependant variable.
+    within : string
+        Name of column containing the within-subject factor.
+    data : pandas DataFrame
+        DataFrame
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
+
+    Returns
+    -------
+    stats : DataFrame
+        Test summary ::
+
+        'Q' : The Friedman Q statistic, corrected for ties
+        'p-unc' : Uncorrected p-value
+        'dof' : degrees of freedom
+
+    Notes
+    -----
+    The Friedman test is used for one-way repeated measures analysis of
+    variance by ranks.
+
+    Due to the assumption that the test statistic has a chi squared
+    distribution, the p-value is only reliable for n > 10 and more than 6
+    repeated measurements.
+
+    NaN values are automatically removed.
+
+    Examples
+    --------
+    Compute the Friedman test for repeated measurements.
+
+        >>> import pandas as pd
+        >>> from pingouin import friedman, print_table
+        >>> df = pd.read_csv('dataset.csv')
+        >>> stats = friedman(dv='DV', within='Time', data=df)
+        >>> print_table(stats)
+    """
+    # from scipy.stats import friedmanchisquare
+
+    # Check data
+    _check_dataframe(dv=dv, within=within, data=data,
+                     effects='within')
+
+    # Remove NaN values
+    if data[dv].isnull().values.any():
+        data = _remove_rm_na(dv=dv, within=within, data=data)
+
+    return None
+
+    # # Reset index (avoid duplicate axis error)
+    # data = data.reset_index(drop=True)
+    #
+    # # Extract number of groups and total sample size
+    # grp_with = data.groupby(within)[dv]
+    # rm = list(data[within].unique())
+    # n_rm = len(rm)
+    #
+    # # TO BE CONTINUED
+    #
+    # # Create output dataframe
+    # stats = pd.DataFrame({'Source': between,
+    #                       'ddof1': ddof1,
+    #                       'Q': np.round(Q, 3),
+    #                       'p-unc': p_unc,
+    #                       }, index=['Friedman'])
+    #
+    # col_order = ['Source', 'ddof1', 'Q', 'p-unc']
+    #
+    # stats = stats.reindex(columns=col_order)
+    # stats.dropna(how='all', axis=1, inplace=True)
+    #
+    # # Export to .csv
+    # if export_filename is not None:
+    #     _export_table(stats, export_filename)
+    # return stats
