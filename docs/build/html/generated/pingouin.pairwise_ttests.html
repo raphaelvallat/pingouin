@@ -103,46 +103,39 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dv</strong> : string</p>
-<blockquote>
-<div><p>Name of column containing the dependant variable.</p>
-</div></blockquote>
-<p><strong>between: string</strong></p>
-<blockquote>
-<div><p>Name of column containing the between factor.</p>
-</div></blockquote>
-<p><strong>within</strong> : string</p>
-<blockquote>
-<div><p>Name of column containing the within factor.</p>
-</div></blockquote>
-<p><strong>data</strong> : pandas DataFrame</p>
-<blockquote>
-<div><p>DataFrame</p>
-</div></blockquote>
-<p><strong>alpha</strong> : float</p>
-<blockquote>
-<div><p>Significance level</p>
-</div></blockquote>
-<p><strong>tail</strong> : string</p>
-<blockquote>
-<div><p>Indicates whether to return the ‘two-sided’ or ‘one-sided’ p-values</p>
-</div></blockquote>
-<p><strong>padjust</strong> : string</p>
-<blockquote>
-<div><p>Method used for testing and adjustment of pvalues.
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>dv</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Name of column containing the dependant variable.</p>
+</dd>
+<dt><strong>between: string</strong></dt>
+<dd><p class="first last">Name of column containing the between factor.</p>
+</dd>
+<dt><strong>within</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Name of column containing the within factor.</p>
+</dd>
+<dt><strong>data</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
+<dd><p class="first last">DataFrame</p>
+</dd>
+<dt><strong>alpha</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Significance level</p>
+</dd>
+<dt><strong>tail</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Indicates whether to return the ‘two-sided’ or ‘one-sided’ p-values</p>
+</dd>
+<dt><strong>padjust</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first">Method used for testing and adjustment of pvalues.
 Available methods are</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;none&#39;</span> <span class="p">:</span> <span class="n">no</span> <span class="n">correction</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;none&#39;</span> <span class="p">:</span> <span class="n">no</span> <span class="n">correction</span>
 <span class="s1">&#39;bonferroni&#39;</span> <span class="p">:</span> <span class="n">one</span><span class="o">-</span><span class="n">step</span> <span class="n">Bonferroni</span> <span class="n">correction</span>
 <span class="s1">&#39;holm&#39;</span> <span class="p">:</span> <span class="n">step</span><span class="o">-</span><span class="n">down</span> <span class="n">method</span> <span class="n">using</span> <span class="n">Bonferroni</span> <span class="n">adjustments</span>
 <span class="s1">&#39;fdr_bh&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Hochberg</span> <span class="n">FDR</span> <span class="n">correction</span>
 <span class="s1">&#39;fdr_by&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Yekutieli</span> <span class="n">FDR</span> <span class="n">correction</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><strong>effsize</strong> : string or None</p>
-<blockquote>
-<div><p>Effect size type. Available methods are</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;none&#39;</span> <span class="p">:</span> <span class="n">no</span> <span class="n">effect</span> <span class="n">size</span>
+</dd>
+<dt><strong>effsize</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string or None</span></dt>
+<dd><p class="first">Effect size type. Available methods are</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;none&#39;</span> <span class="p">:</span> <span class="n">no</span> <span class="n">effect</span> <span class="n">size</span>
 <span class="s1">&#39;cohen&#39;</span> <span class="p">:</span> <span class="n">Unbiased</span> <span class="n">Cohen</span> <span class="n">d</span>
 <span class="s1">&#39;hedges&#39;</span> <span class="p">:</span> <span class="n">Hedges</span> <span class="n">g</span>
 <span class="s1">&#39;glass&#39;</span><span class="p">:</span> <span class="n">Glass</span> <span class="n">delta</span>
@@ -151,24 +144,23 @@ Available methods are</p>
 <span class="s1">&#39;AUC&#39;</span> <span class="p">:</span> <span class="n">Area</span> <span class="n">Under</span> <span class="n">the</span> <span class="n">Curve</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><strong>return_desc</strong> : boolean</p>
-<blockquote>
-<div><p>If True, return group means and std</p>
-</div></blockquote>
-<p><strong>export_filename</strong> : string</p>
-<blockquote>
-<div><p>Filename (without extension) for the output file.
+</dd>
+<dt><strong>return_desc</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><p class="first last">If True, return group means and std</p>
+</dd>
+<dt><strong>export_filename</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Filename (without extension) for the output file.
 If None, do not export the table.
 By default, the file will be created in the current python console
 directory. To change that, specify the filename with full path.</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>stats</strong> : DataFrame</p>
-<blockquote class="last">
-<div><p>Stats summary</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;A&#39;</span> <span class="p">:</span> <span class="n">Name</span> <span class="n">of</span> <span class="n">first</span> <span class="n">measurement</span>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>stats</strong> <span class="classifier-delimiter">:</span> <span class="classifier">DataFrame</span></dt>
+<dd><p class="first">Stats summary</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;A&#39;</span> <span class="p">:</span> <span class="n">Name</span> <span class="n">of</span> <span class="n">first</span> <span class="n">measurement</span>
 <span class="s1">&#39;B&#39;</span> <span class="p">:</span> <span class="n">Name</span> <span class="n">of</span> <span class="n">second</span> <span class="n">measurement</span>
 <span class="s1">&#39;Paired&#39;</span> <span class="p">:</span> <span class="n">indicates</span> <span class="n">whether</span> <span class="n">the</span> <span class="n">two</span> <span class="n">measurements</span> <span class="n">are</span> <span class="n">paired</span> <span class="ow">or</span> <span class="ow">not</span>
 <span class="s1">&#39;Tail&#39;</span> <span class="p">:</span> <span class="n">indicate</span> <span class="n">whether</span> <span class="n">the</span> <span class="n">p</span><span class="o">-</span><span class="n">values</span> <span class="n">are</span> <span class="n">one</span><span class="o">-</span><span class="n">sided</span> <span class="ow">or</span> <span class="n">two</span><span class="o">-</span><span class="n">sided</span>
@@ -181,7 +173,8 @@ directory. To change that, specify the filename with full path.</p>
 <span class="s1">&#39;eftype&#39;</span> <span class="p">:</span> <span class="nb">type</span> <span class="n">of</span> <span class="n">effect</span> <span class="n">size</span>
 </pre></div>
 </div>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>

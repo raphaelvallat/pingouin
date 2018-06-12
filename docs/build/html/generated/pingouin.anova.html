@@ -104,35 +104,32 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dv</strong> : string</p>
-<blockquote>
-<div><p>Name of column containing the dependant variable.</p>
-</div></blockquote>
-<p><strong>between</strong> : string</p>
-<blockquote>
-<div><p>Name of column containing the between factor.</p>
-</div></blockquote>
-<p><strong>data</strong> : pandas DataFrame</p>
-<blockquote>
-<div><p>DataFrame</p>
-</div></blockquote>
-<p><strong>detailed</strong> : boolean</p>
-<blockquote>
-<div><p>If True, return a detailed ANOVA table</p>
-</div></blockquote>
-<p><strong>export_filename</strong> : string</p>
-<blockquote>
-<div><p>Filename (without extension) for the output file.
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>dv</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Name of column containing the dependant variable.</p>
+</dd>
+<dt><strong>between</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Name of column containing the between factor.</p>
+</dd>
+<dt><strong>data</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
+<dd><p class="first last">DataFrame</p>
+</dd>
+<dt><strong>detailed</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><p class="first last">If True, return a detailed ANOVA table</p>
+</dd>
+<dt><strong>export_filename</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Filename (without extension) for the output file.
 If None, do not export the table.
 By default, the file will be created in the current python console
 directory. To change that, specify the filename with full path.</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>aov</strong> : DataFrame</p>
-<blockquote class="last">
-<div><p>ANOVA summary</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;Source&#39;</span> <span class="p">:</span> <span class="n">name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">between</span><span class="o">-</span><span class="n">group</span> <span class="n">factor</span>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>aov</strong> <span class="classifier-delimiter">:</span> <span class="classifier">DataFrame</span></dt>
+<dd><p class="first">ANOVA summary</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;Source&#39;</span> <span class="p">:</span> <span class="n">name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">between</span><span class="o">-</span><span class="n">group</span> <span class="n">factor</span>
 <span class="s1">&#39;ddof1&#39;</span> <span class="p">:</span> <span class="n">degrees</span> <span class="n">of</span> <span class="n">freedom</span> <span class="p">(</span><span class="n">numerator</span><span class="p">)</span>
 <span class="s1">&#39;ddof2&#39;</span> <span class="p">:</span> <span class="n">degrees</span> <span class="n">of</span> <span class="n">freedom</span> <span class="p">(</span><span class="n">denominator</span><span class="p">)</span>
 <span class="s1">&#39;F&#39;</span> <span class="p">:</span> <span class="n">F</span><span class="o">-</span><span class="n">value</span>
@@ -140,7 +137,8 @@ directory. To change that, specify the filename with full path.</p>
 <span class="s1">&#39;np2&#39;</span> <span class="p">:</span> <span class="n">Partial</span> <span class="n">eta</span><span class="o">-</span><span class="n">square</span> <span class="n">effect</span> <span class="n">size</span>
 </pre></div>
 </div>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>

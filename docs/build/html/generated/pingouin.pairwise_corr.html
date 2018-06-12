@@ -103,55 +103,52 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : pandas DataFrame</p>
-<blockquote>
-<div><p>DataFrame</p>
-</div></blockquote>
-<p><strong>columns</strong> : list</p>
-<blockquote>
-<div><p>Names of columns in data containing the all the dependant variables.
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>data</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
+<dd><p class="first last">DataFrame</p>
+</dd>
+<dt><strong>columns</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd><p class="first last">Names of columns in data containing the all the dependant variables.
 If columns is None, compute the pairwise correlations on all columns.</p>
-</div></blockquote>
-<p><strong>tail</strong> : string</p>
-<blockquote>
-<div><p>Indicates whether to return the ‘two-sided’ or ‘one-sided’ p-values</p>
-</div></blockquote>
-<p><strong>method</strong> : string</p>
-<blockquote>
-<div><p>Specify which method to use for the computation of the correlation
+</dd>
+<dt><strong>tail</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Indicates whether to return the ‘two-sided’ or ‘one-sided’ p-values</p>
+</dd>
+<dt><strong>method</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first">Specify which method to use for the computation of the correlation
 coefficient. Available methods are</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&#39;pearson&#39; : Pearson product-moment correlation
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span>&#39;pearson&#39; : Pearson product-moment correlation
 &#39;spearman&#39; : Spearman rank-order correlation
 &#39;kendall&#39; : Kendall’s tau (ordinal data)
 &#39;percbend&#39; : percentage bend correlation (robust)
+&#39;shepherd&#39; : Shepherd&#39;s pi correlation (robust Spearman)
 </pre></div>
 </div>
-</div></blockquote>
-<p><strong>padjust</strong> : string</p>
-<blockquote>
-<div><p>Method used for testing and adjustment of pvalues.
+</dd>
+<dt><strong>padjust</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first">Method used for testing and adjustment of pvalues.
 Available methods are</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;none&#39;</span> <span class="p">:</span> <span class="n">no</span> <span class="n">correction</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;none&#39;</span> <span class="p">:</span> <span class="n">no</span> <span class="n">correction</span>
 <span class="s1">&#39;bonferroni&#39;</span> <span class="p">:</span> <span class="n">one</span><span class="o">-</span><span class="n">step</span> <span class="n">Bonferroni</span> <span class="n">correction</span>
 <span class="s1">&#39;holm&#39;</span> <span class="p">:</span> <span class="n">step</span><span class="o">-</span><span class="n">down</span> <span class="n">method</span> <span class="n">using</span> <span class="n">Bonferroni</span> <span class="n">adjustments</span>
 <span class="s1">&#39;fdr_bh&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Hochberg</span> <span class="n">FDR</span> <span class="n">correction</span>
 <span class="s1">&#39;fdr_by&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Yekutieli</span> <span class="n">FDR</span> <span class="n">correction</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><strong>export_filename</strong> : string</p>
-<blockquote>
-<div><p>Filename (without extension) for the output file.
+</dd>
+<dt><strong>export_filename</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Filename (without extension) for the output file.
 If None, do not export the table.
 By default, the file will be created in the current python console
 directory. To change that, specify the filename with full path.</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>stats</strong> : DataFrame</p>
-<blockquote class="last">
-<div><p>Stats summary</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;X&#39;</span> <span class="p">:</span> <span class="n">Name</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">of</span> <span class="n">first</span> <span class="n">columns</span>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>stats</strong> <span class="classifier-delimiter">:</span> <span class="classifier">DataFrame</span></dt>
+<dd><p class="first">Stats summary</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;X&#39;</span> <span class="p">:</span> <span class="n">Name</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">of</span> <span class="n">first</span> <span class="n">columns</span>
 <span class="s1">&#39;Y&#39;</span> <span class="p">:</span> <span class="n">Name</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">of</span> <span class="n">second</span> <span class="n">columns</span>
 <span class="s1">&#39;method&#39;</span> <span class="p">:</span> <span class="n">method</span> <span class="n">used</span> <span class="n">to</span> <span class="n">compute</span> <span class="n">the</span> <span class="n">correlation</span>
 <span class="s1">&#39;tail&#39;</span> <span class="p">:</span> <span class="n">indicates</span> <span class="n">whether</span> <span class="n">the</span> <span class="n">p</span><span class="o">-</span><span class="n">values</span> <span class="n">are</span> <span class="n">one</span><span class="o">-</span><span class="n">sided</span> <span class="ow">or</span> <span class="n">two</span><span class="o">-</span><span class="n">sided</span>
@@ -165,7 +162,8 @@ directory. To change that, specify the filename with full path.</p>
 <span class="s1">&#39;p-adjust&#39;</span> <span class="p">:</span> <span class="n">Correction</span> <span class="n">method</span>
 </pre></div>
 </div>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -185,6 +183,8 @@ Values close to 1 indicate strong agreement, values close to -1 indicate
 strong disagreement.</p>
 <p>The percentage bend correlation (Wilcox 1994) is a robust method that
 protects against univariate outliers.</p>
+<p>The Shepherd’s pi correlation (Schwarzkopf et al. 2012) is a robust method
+that returns the equivalent of the Spearman’s rho after outliers removal.</p>
 <p>Please note that NaN are automatically removed from datasets.</p>
 <p class="rubric">Examples</p>
 <ol class="arabic">

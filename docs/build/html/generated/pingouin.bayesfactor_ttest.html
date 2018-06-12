@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="pingouin.bayesfactor_pearson" href="pingouin.bayesfactor_pearson.html" />
-    <link rel="prev" title="pingouin.kruskal" href="pingouin.kruskal.html" />
+    <link rel="prev" title="pingouin.friedman" href="pingouin.friedman.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -105,43 +105,40 @@ two-sample T-test given t-value and sample size(s).</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>t</strong> : float</p>
-<blockquote>
-<div><p>T-value of the T-test</p>
-</div></blockquote>
-<p><strong>nx</strong> : int</p>
-<blockquote>
-<div><p>Sample size of first group</p>
-</div></blockquote>
-<p><strong>ny</strong> : int</p>
-<blockquote>
-<div><p>Sample size of second group (only needed in case of an independant
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>t</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">T-value of the T-test</p>
+</dd>
+<dt><strong>nx</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">Sample size of first group</p>
+</dd>
+<dt><strong>ny</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">Sample size of second group (only needed in case of an independant
 two-sample T-test)</p>
-</div></blockquote>
-<p><strong>paired</strong> : boolean</p>
-<blockquote>
-<div><p>Specify whether the two observations are related (i.e. repeated
+</dd>
+<dt><strong>paired</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><p class="first last">Specify whether the two observations are related (i.e. repeated
 measures) or independant.</p>
-</div></blockquote>
-<p><strong>tail</strong> : string</p>
-<blockquote>
-<div><p>Specify whether the test is ‘one-sided’ or ‘two-sided’</p>
-</div></blockquote>
-<p><strong>r</strong> : float</p>
-<blockquote>
-<div><p>Cauchy scale factor. Smaller values of r (e.g. 0.5), may be appropriate
+</dd>
+<dt><strong>tail</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Specify whether the test is ‘one-sided’ or ‘two-sided’</p>
+</dd>
+<dt><strong>r</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Cauchy scale factor. Smaller values of r (e.g. 0.5), may be appropriate
 when small effect sizes are expected a priori; larger values of r are
 appropriate when large effect sizes are expected (Rouder et al 2009).
 The default is 0.707.</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>bf</strong> : float</p>
-<blockquote class="last">
-<div><p>Bayes Factor (BF10).
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>bf</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Bayes Factor (BF10).
 The Bayes Factor quantifies the evidence in favour of the
 alternative hypothesis.</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>

@@ -103,35 +103,34 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>pvals</strong> : array_like</p>
-<blockquote>
-<div><p>uncorrected p-values</p>
-</div></blockquote>
-<p><strong>alpha</strong> : float</p>
-<blockquote>
-<div><p>Significance level</p>
-</div></blockquote>
-<p><strong>method</strong> : string</p>
-<blockquote>
-<div><p>Method used for testing and adjustment of pvalues. Can be either the
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>pvals</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array_like</span></dt>
+<dd><p class="first last">uncorrected p-values</p>
+</dd>
+<dt><strong>alpha</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Significance level</p>
+</dd>
+<dt><strong>method</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first">Method used for testing and adjustment of pvalues. Can be either the
 full name or initial letters. Available methods are</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;bonf&#39;</span> <span class="p">:</span> <span class="n">one</span><span class="o">-</span><span class="n">step</span> <span class="n">Bonferroni</span> <span class="n">correction</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;bonf&#39;</span> <span class="p">:</span> <span class="n">one</span><span class="o">-</span><span class="n">step</span> <span class="n">Bonferroni</span> <span class="n">correction</span>
 <span class="s1">&#39;holm&#39;</span> <span class="p">:</span> <span class="n">step</span><span class="o">-</span><span class="n">down</span> <span class="n">method</span> <span class="n">using</span> <span class="n">Bonferroni</span> <span class="n">adjustments</span>
 <span class="s1">&#39;fdr_bh&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Hochberg</span> <span class="n">FDR</span> <span class="n">correction</span>
 <span class="s1">&#39;fdr_by&#39;</span> <span class="p">:</span> <span class="n">Benjamini</span><span class="o">/</span><span class="n">Yekutieli</span> <span class="n">FDR</span> <span class="n">correction</span>
 </pre></div>
 </div>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>reject</strong> : array, boolean</p>
-<blockquote>
-<div><p>true for hypothesis that can be rejected for given alpha</p>
-</div></blockquote>
-<p><strong>pvals_corrected</strong> : array</p>
-<blockquote class="last">
-<div><p>p-values corrected for multiple tests</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>reject</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array, boolean</span></dt>
+<dd><p class="first last">true for hypothesis that can be rejected for given alpha</p>
+</dd>
+<dt><strong>pvals_corrected</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd><p class="first last">p-values corrected for multiple tests</p>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>

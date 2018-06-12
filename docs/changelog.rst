@@ -20,6 +20,10 @@ b. Pearson correlation now reports the Bayes factor of the alternative hypothesi
 a. Kruskal-Wallis test
 b. Friedman test
 
+**Correlations**
+
+a. Added Shepherd's pi correlation (Schwarzkopf et al. 2012)
+
 v0.1.2 (June 2018)
 --------------------
 

@@ -234,11 +234,12 @@ def corr(x, y, tail='two-sided', method='pearson'):
 
     References
     ----------
-    .. [Wilcox] Wilcox, R. R. (1994). The percentage bend correlation
-       coefficient. Psychometrika, 59(4), 601-616.
-    .. [Schwarzkopf] Schwarzkopf, D. S., De Haas, B., & Rees, G. (2012).
-       Better ways to improve standards in brain-behavior correlation analysis.
-       Frontiers in human neuroscience, 6, 200.
+    Wilcox, R. R. (1994). The percentage bend correlation
+    coefficient. Psychometrika, 59(4), 601-616.
+
+    Schwarzkopf, D. S., De Haas, B., & Rees, G. (2012).
+    Better ways to improve standards in brain-behavior correlation analysis.
+    Frontiers in human neuroscience, 6, 200.
 
     Examples
     --------

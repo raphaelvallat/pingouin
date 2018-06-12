@@ -104,50 +104,46 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dv</strong> : string</p>
-<blockquote>
-<div><p>Name of column containing the dependant variable.</p>
-</div></blockquote>
-<p><strong>between</strong> : string</p>
-<blockquote>
-<div><p>Name of column containing the between factor.</p>
-</div></blockquote>
-<p><strong>data</strong> : pandas DataFrame</p>
-<blockquote>
-<div><p>DataFrame</p>
-</div></blockquote>
-<p><strong>correction</strong> : string or boolean</p>
-<blockquote>
-<div><p>If True, return Greenhouse-Geisser corrected p-value.
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>dv</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Name of column containing the dependant variable.</p>
+</dd>
+<dt><strong>between</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Name of column containing the between factor.</p>
+</dd>
+<dt><strong>data</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
+<dd><p class="first last">DataFrame</p>
+</dd>
+<dt><strong>correction</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string or boolean</span></dt>
+<dd><p class="first last">If True, return Greenhouse-Geisser corrected p-value.
 If ‘auto’ (default), compute Mauchly’s test of sphericity to determine
 whether the p-values needs to be corrected.</p>
-</div></blockquote>
-<p><strong>remove_na</strong> : boolean</p>
-<blockquote>
-<div><p>If True, automatically remove from the analysis subjects with one or
+</dd>
+<dt><strong>remove_na</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><p class="first">If True, automatically remove from the analysis subjects with one or
 more missing values:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Ss</span>    <span class="n">x1</span>       <span class="n">x2</span>       <span class="n">x3</span>
 <span class="mi">1</span>     <span class="mf">5.0</span>      <span class="mf">4.2</span>      <span class="n">nan</span>
 <span class="mi">2</span>     <span class="mf">4.6</span>      <span class="mf">3.6</span>      <span class="mf">3.9</span>
 </pre></div>
 </div>
-<p>In this example, if remove_na == True, Ss 1 will be removed from the
+<p class="last">In this example, if remove_na == True, Ss 1 will be removed from the
 ANOVA because of the x3 missing value. If False, the two non-missing
 values will be included in the analysis.</p>
-</div></blockquote>
-<p><strong>export_filename</strong> : string</p>
-<blockquote>
-<div><p>Filename (without extension) for the output file.
+</dd>
+<dt><strong>export_filename</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Filename (without extension) for the output file.
 If None, do not export the table.
 By default, the file will be created in the current python console
 directory. To change that, specify the filename with full path.</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>aov</strong> : DataFrame</p>
-<blockquote class="last">
-<div><p>ANOVA summary</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;Source&#39;</span> <span class="p">:</span> <span class="n">Names</span> <span class="n">of</span> <span class="n">the</span> <span class="n">factor</span> <span class="n">considered</span>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>aov</strong> <span class="classifier-delimiter">:</span> <span class="classifier">DataFrame</span></dt>
+<dd><p class="first">ANOVA summary</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;Source&#39;</span> <span class="p">:</span> <span class="n">Names</span> <span class="n">of</span> <span class="n">the</span> <span class="n">factor</span> <span class="n">considered</span>
 <span class="s1">&#39;ddof1&#39;</span> <span class="p">:</span> <span class="n">Degrees</span> <span class="n">of</span> <span class="n">freedom</span> <span class="p">(</span><span class="n">numerator</span><span class="p">)</span>
 <span class="s1">&#39;ddof2&#39;</span> <span class="p">:</span> <span class="n">Degrees</span> <span class="n">of</span> <span class="n">freedom</span> <span class="p">(</span><span class="n">denominator</span><span class="p">)</span>
 <span class="s1">&#39;F&#39;</span> <span class="p">:</span> <span class="n">F</span><span class="o">-</span><span class="n">values</span>
@@ -161,7 +157,8 @@ directory. To change that, specify the filename with full path.</p>
 <span class="s1">&#39;sphericity&#39;</span> <span class="p">:</span> <span class="n">sphericity</span> <span class="n">of</span> <span class="n">the</span> <span class="n">data</span> <span class="p">(</span><span class="n">boolean</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>

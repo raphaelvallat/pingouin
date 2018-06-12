@@ -335,6 +335,7 @@
 <span class="sd">        &#39;spearman&#39; : Spearman rank-order correlation</span>
 <span class="sd">        &#39;kendall&#39; : Kendall’s tau (ordinal data)</span>
 <span class="sd">        &#39;percbend&#39; : percentage bend correlation (robust)</span>
+<span class="sd">        &#39;shepherd&#39; : Shepherd&#39;s pi correlation (robust Spearman)</span>
 <span class="sd">    padjust : string</span>
 <span class="sd">        Method used for testing and adjustment of pvalues.</span>
 <span class="sd">        Available methods are ::</span>
@@ -387,6 +388,9 @@
 
 <span class="sd">    The percentage bend correlation (Wilcox 1994) is a robust method that</span>
 <span class="sd">    protects against univariate outliers.</span>
+
+<span class="sd">    The Shepherd&#39;s pi correlation (Schwarzkopf et al. 2012) is a robust method</span>
+<span class="sd">    that returns the equivalent of the Spearman&#39;s rho after outliers removal.</span>
 
 <span class="sd">    Please note that NaN are automatically removed from datasets.</span>
 

@@ -102,6 +102,114 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;corr&quot;</span><span class="p">]</span>
 
 
+<span class="k">def</span> <span class="nf">mahal</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mahalanobis distance.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Y : ndarray (shape=(n, m))</span>
+<span class="sd">        Data</span>
+<span class="sd">    X : ndarray (shape=(p, m))</span>
+<span class="sd">        Reference samples</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    MD : 1D-array (shape=(n,))</span>
+<span class="sd">        Squared Mahalanobis distance of each observation in Y to the</span>
+<span class="sd">        reference samples in X.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rx</span><span class="p">,</span> <span class="n">cx</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">ry</span><span class="p">,</span> <span class="n">cy</span> <span class="o">=</span> <span class="n">Y</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">ry</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ry</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">X</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">rx</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">rx</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">Q</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">qr</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
+    <span class="n">ri</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="p">(</span><span class="n">Y</span> <span class="o">-</span> <span class="n">M</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ri</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">rx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">bsmahal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="mi">5000</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Bootstraps Mahalanobis distances.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ndarray (shape=(n, 2))</span>
+<span class="sd">        Data</span>
+<span class="sd">    b : ndarray (shape=(n, 2))</span>
+<span class="sd">        Data</span>
+<span class="sd">    j : int</span>
+<span class="sd">        Number of bootstrap samples to calculate.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    m : ndarray (shape=(n,))</span>
+<span class="sd">        Mahalanobis distance for each row in a, averaged across all the</span>
+<span class="sd">        bootstrap resamples.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">MD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">j</span><span class="p">))</span>
+
+    <span class="c1"># Bootstrap the MD</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">s1</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">s2</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">mahal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+        <span class="n">MD</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span>
+
+    <span class="c1"># Average across all bootstraps</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">MD</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">shepherd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Shepherd&#39;s Pi correlation, equivalent to Spearman&#39;s rho after outliers</span>
+<span class="sd">    removal.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x, y : array_like</span>
+<span class="sd">        First and second set of observations. x and y must be independent.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Pi : float</span>
+<span class="sd">        Pi correlation coefficient</span>
+<span class="sd">    pval : float</span>
+<span class="sd">        Two-tailed adjusted p-value.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    It first bootstraps the Mahalanobis distances, removes all observations</span>
+<span class="sd">    with m &gt;= 6 and finally calculates the correlation of the remaining data.</span>
+
+<span class="sd">    Pi is Spearman&#39;s Rho after outlier removal.</span>
+
+<span class="sd">    The p-value is multiplied by 2 to achieve a nominal false alarm rate.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">spearmanr</span>
+
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># Bootstrapping on Mahalanobis distance</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">bsmahal</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+
+    <span class="c1"># Determine outliers</span>
+    <span class="n">outliers</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span> <span class="o">&gt;=</span> <span class="mi">6</span><span class="p">)</span>
+
+    <span class="c1"># Compute correlation</span>
+    <span class="n">pi</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">])</span>
+
+    <span class="c1"># Adjust p-values</span>
+    <span class="n">pval</span> <span class="o">*=</span> <span class="mi">2</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">pval</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">pval</span>
+
+    <span class="k">return</span> <span class="n">pi</span><span class="p">,</span> <span class="n">pval</span>
+
+
 <span class="k">def</span> <span class="nf">percbend</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">beta</span><span class="o">=.</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the percentage bend correlation (Wilcox 1994).</span>
@@ -116,7 +224,6 @@
 <span class="sd">    ----------</span>
 <span class="sd">    x, y : array_like</span>
 <span class="sd">        First and second set of observations. x and y must be independent.</span>
-
 <span class="sd">    beta : float</span>
 <span class="sd">        Bending constant for omega (0 &lt;= beta &lt;= 0.5).</span>
 
@@ -181,6 +288,7 @@
 <span class="sd">        &#39;spearman&#39; : Spearman rank-order correlation</span>
 <span class="sd">        &#39;kendall&#39; : Kendall’s tau (ordinal data)</span>
 <span class="sd">        &#39;percbend&#39; : percentage bend correlation (robust)</span>
+<span class="sd">        &#39;shepherd&#39; : Shepherd&#39;s pi correlation (robust Spearman)</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -213,36 +321,64 @@
 <span class="sd">    The percentage bend correlation (Wilcox 1994) is a robust method that</span>
 <span class="sd">    protects against univariate outliers.</span>
 
+<span class="sd">    The Shepherd&#39;s pi correlation (Schwarzkopf et al. 2012) is a robust method</span>
+<span class="sd">    that returns the equivalent of the Spearman&#39;s rho after outliers removal.</span>
+
 <span class="sd">    Please note that NaN are automatically removed from datasets.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Wilcox, R. R. (1994). The percentage bend correlation</span>
+<span class="sd">    coefficient. Psychometrika, 59(4), 601-616.</span>
+
+<span class="sd">    Schwarzkopf, D. S., De Haas, B., &amp; Rees, G. (2012).</span>
+<span class="sd">    Better ways to improve standards in brain-behavior correlation analysis.</span>
+<span class="sd">    Frontiers in human neuroscience, 6, 200.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    1. Pearson correlation</span>
 
+<span class="sd">        &gt;&gt;&gt; # Generate random correlated samples</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; mean, cov = [4, 6], [(1, .5), (.5, 1)]</span>
+<span class="sd">        &gt;&gt;&gt; x, y = np.random.multivariate_normal(mean, cov, 30).T</span>
+<span class="sd">        &gt;&gt;&gt; # Compute Pearson correlation</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import corr</span>
-<span class="sd">        &gt;&gt;&gt; x = [20, 22, 19, 20, 22, 18, 24, 20]</span>
-<span class="sd">        &gt;&gt;&gt; y = [30, 32, 31, 29, 32, 28, 34, 31]</span>
 <span class="sd">        &gt;&gt;&gt; corr(x, y)</span>
-<span class="sd">                    r      r2     adj_r2  p-val  BF10</span>
-<span class="sd">            pearson 0.892  0.795  0.713   0.003  20.596</span>
+<span class="sd">            method   r      r2     adj_r2  p-val   BF10</span>
+<span class="sd">            pearson  0.491  0.242  0.185   0.0058  6.135</span>
 
-<span class="sd">    2. One-tailed spearman correlation</span>
+<span class="sd">    2. Pearson correlation but with two outliers</span>
 
-<span class="sd">        &gt;&gt;&gt; from pingouin import corr</span>
-<span class="sd">        &gt;&gt;&gt; x = [20, 22, 19, 20, 22, 18, 24, 20]</span>
-<span class="sd">        &gt;&gt;&gt; y = [30, 32, 31, 29, 32, 28, 34, 31]</span>
-<span class="sd">        &gt;&gt;&gt; corr(x, y, method=&#39;spearman&#39;, tail=&#39;one-sided&#39;)</span>
-<span class="sd">                      r      r2     adj_r2  p-val</span>
-<span class="sd">            spearman  0.857  0.735  0.629   0.003</span>
+<span class="sd">        &gt;&gt;&gt; x[3], y[5] = 12, -8</span>
+<span class="sd">        &gt;&gt;&gt; corr(x, y)</span>
+<span class="sd">            method   r      r2     adj_r2  p-val  BF10</span>
+<span class="sd">            pearson  0.147  0.022  -0.051  0.439  0.19</span>
 
-<span class="sd">    3. Robust correlation (percentage bend)</span>
+<span class="sd">    3. Spearman correlation</span>
 
-<span class="sd">        &gt;&gt;&gt; from pingouin import corr</span>
-<span class="sd">        &gt;&gt;&gt; x = [20, 22, 19, 20, 22, 18, 24, 20]</span>
-<span class="sd">        &gt;&gt;&gt; y = [30, 32, 31, 29, 32, 28, 34, 31]</span>
+<span class="sd">        &gt;&gt;&gt; corr(x, y, method=&quot;spearman&quot;)</span>
+<span class="sd">            method    r      r2     adj_r2  p-val</span>
+<span class="sd">            spearman  0.401  0.161  0.099   0.028</span>
+
+<span class="sd">    4. Percentage bend correlation (robust)</span>
+
 <span class="sd">        &gt;&gt;&gt; corr(x, y, method=&#39;percbend&#39;)</span>
-<span class="sd">                     r      r2     adj_r2  p-val</span>
-<span class="sd">            percbend 0.824  0.678  0.55    0.012</span>
+<span class="sd">            method    r      r2     adj_r2  p-val</span>
+<span class="sd">            percbend  0.389  0.151  0.089   0.034</span>
+
+<span class="sd">    5. Shepherd&#39;s pi correlation (robust)</span>
+
+<span class="sd">        &gt;&gt;&gt; corr(x, y, method=&#39;shepherd&#39;)</span>
+<span class="sd">            method    r      r2     adj_r2  p-val</span>
+<span class="sd">            percbend  0.437  0.191  0.131   0.040</span>
+
+<span class="sd">    6. One-tailed Spearman correlation</span>
+
+<span class="sd">        &gt;&gt;&gt; corr(x, y, tail=&quot;one-sided&quot;, method=&#39;shepherd&#39;)</span>
+<span class="sd">            method    r      r2     adj_r2  p-val</span>
+<span class="sd">            spearman  0.401  0.161  0.099   0.014</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -270,6 +406,8 @@
         <span class="n">r</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">kendalltau</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;percbend&#39;</span><span class="p">:</span>
         <span class="n">r</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">percbend</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;shepherd&#39;</span><span class="p">:</span>
+        <span class="n">r</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">shepherd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Method not recognized.&#39;</span><span class="p">)</span>
 

@@ -103,38 +103,39 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x, y</strong> : array_like</p>
-<blockquote>
-<div><p>First and second set of observations. x and y must be independent.</p>
-</div></blockquote>
-<p><strong>tail</strong> : string</p>
-<blockquote>
-<div><p>Specify whether to return ‘one-sided’ or ‘two-sided’ p-value.</p>
-</div></blockquote>
-<p><strong>method</strong> : string</p>
-<blockquote>
-<div><p>Specify which method to use for the computation of the correlation
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>x, y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array_like</span></dt>
+<dd><p class="first last">First and second set of observations. x and y must be independent.</p>
+</dd>
+<dt><strong>tail</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Specify whether to return ‘one-sided’ or ‘two-sided’ p-value.</p>
+</dd>
+<dt><strong>method</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first">Specify which method to use for the computation of the correlation
 coefficient. Available methods are</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&#39;pearson&#39; : Pearson product-moment correlation
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span>&#39;pearson&#39; : Pearson product-moment correlation
 &#39;spearman&#39; : Spearman rank-order correlation
 &#39;kendall&#39; : Kendall’s tau (ordinal data)
 &#39;percbend&#39; : percentage bend correlation (robust)
+&#39;shepherd&#39; : Shepherd&#39;s pi correlation (robust Spearman)
 </pre></div>
 </div>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>stats</strong> : pandas DataFrame</p>
-<blockquote class="last">
-<div><p>Test summary</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;r&#39;</span> <span class="p">:</span> <span class="n">Correlation</span> <span class="n">coefficient</span>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>stats</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
+<dd><p class="first">Test summary</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;r&#39;</span> <span class="p">:</span> <span class="n">Correlation</span> <span class="n">coefficient</span>
 <span class="s1">&#39;r2&#39;</span> <span class="p">:</span> <span class="n">R</span><span class="o">-</span><span class="n">squared</span>
 <span class="s1">&#39;adj_r2&#39;</span> <span class="p">:</span> <span class="n">Adjusted</span> <span class="n">R</span><span class="o">-</span><span class="n">squared</span>
 <span class="s1">&#39;p-val&#39;</span> <span class="p">:</span> <span class="n">one</span> <span class="ow">or</span> <span class="n">two</span> <span class="n">tailed</span> <span class="n">p</span><span class="o">-</span><span class="n">value</span>
 <span class="s1">&#39;BF10&#39;</span> <span class="p">:</span> <span class="n">Bayes</span> <span class="n">Factor</span> <span class="n">of</span> <span class="n">the</span> <span class="n">alternative</span> <span class="n">hypothesis</span> <span class="p">(</span><span class="n">Pearson</span> <span class="n">only</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
@@ -154,36 +155,63 @@ Values close to 1 indicate strong agreement, values close to -1 indicate
 strong disagreement.</p>
 <p>The percentage bend correlation (Wilcox 1994) is a robust method that
 protects against univariate outliers.</p>
+<p>The Shepherd’s pi correlation (Schwarzkopf et al. 2012) is a robust method
+that returns the equivalent of the Spearman’s rho after outliers removal.</p>
 <p>Please note that NaN are automatically removed from datasets.</p>
+<p class="rubric">References</p>
+<p>Wilcox, R. R. (1994). The percentage bend correlation
+coefficient. Psychometrika, 59(4), 601-616.</p>
+<p>Schwarzkopf, D. S., De Haas, B., &amp; Rees, G. (2012).
+Better ways to improve standards in brain-behavior correlation analysis.
+Frontiers in human neuroscience, 6, 200.</p>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">Pearson correlation</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">corr</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">31</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Generate random correlated samples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mean</span><span class="p">,</span> <span class="n">cov</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Compute Pearson correlation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">corr</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="go">            r      r2     adj_r2  p-val  BF10</span>
-<span class="go">    pearson 0.892  0.795  0.713   0.003  20.596</span>
+<span class="go">    method   r      r2     adj_r2  p-val   BF10</span>
+<span class="go">    pearson  0.491  0.242  0.185   0.0058  6.135</span>
 </pre></div>
 </div>
 </li>
-<li><p class="first">One-tailed spearman correlation</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">corr</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">31</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;spearman&#39;</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;one-sided&#39;</span><span class="p">)</span>
-<span class="go">              r      r2     adj_r2  p-val</span>
-<span class="go">    spearman  0.857  0.735  0.629   0.003</span>
+<li><p class="first">Pearson correlation but with two outliers</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span> <span class="o">-</span><span class="mi">8</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="go">    method   r      r2     adj_r2  p-val  BF10</span>
+<span class="go">    pearson  0.147  0.022  -0.051  0.439  0.19</span>
 </pre></div>
 </div>
 </li>
-<li><p class="first">Robust correlation (percentage bend)</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">corr</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">31</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;percbend&#39;</span><span class="p">)</span>
-<span class="go">             r      r2     adj_r2  p-val</span>
-<span class="go">    percbend 0.824  0.678  0.55    0.012</span>
+<li><p class="first">Spearman correlation</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;spearman&quot;</span><span class="p">)</span>
+<span class="go">    method    r      r2     adj_r2  p-val</span>
+<span class="go">    spearman  0.401  0.161  0.099   0.028</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Percentage bend correlation (robust)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;percbend&#39;</span><span class="p">)</span>
+<span class="go">    method    r      r2     adj_r2  p-val</span>
+<span class="go">    percbend  0.389  0.151  0.089   0.034</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Shepherd’s pi correlation (robust)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;shepherd&#39;</span><span class="p">)</span>
+<span class="go">    method    r      r2     adj_r2  p-val</span>
+<span class="go">    percbend  0.437  0.191  0.131   0.040</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">One-tailed Spearman correlation</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s2">&quot;one-sided&quot;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;shepherd&#39;</span><span class="p">)</span>
+<span class="go">    method    r      r2     adj_r2  p-val</span>
+<span class="go">    spearman  0.401  0.161  0.099   0.014</span>
 </pre></div>
 </div>
 </li>

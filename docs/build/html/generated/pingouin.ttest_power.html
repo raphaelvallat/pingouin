@@ -105,33 +105,31 @@ and alpha level.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d</strong> : float</p>
-<blockquote>
-<div><p>Effect size (Cohen d, Hedges g or Glass delta)</p>
-</div></blockquote>
-<p><strong>nx, ny</strong> : int</p>
-<blockquote>
-<div><p>Sample sizes of the two groups. Must be equal when paired is True.
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>d</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Effect size (Cohen d, Hedges g or Glass delta)</p>
+</dd>
+<dt><strong>nx, ny</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">Sample sizes of the two groups. Must be equal when paired is True.
 If only nx is specified, assumes that the test is a one-sample T-test.</p>
-</div></blockquote>
-<p><strong>paired</strong> : boolean</p>
-<blockquote>
-<div><p>Specify the two groups are independant or related (i.e. repeated).</p>
-</div></blockquote>
-<p><strong>tail</strong> : string</p>
-<blockquote>
-<div><p>Specify whether the test is ‘one-sided’ or ‘two-sided’.</p>
-</div></blockquote>
-<p><strong>alpha</strong> : float</p>
-<blockquote>
-<div><p>Significance level of the test.</p>
-</div></blockquote>
+</dd>
+<dt><strong>paired</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><p class="first last">Specify the two groups are independant or related (i.e. repeated).</p>
+</dd>
+<dt><strong>tail</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Specify whether the test is ‘one-sided’ or ‘two-sided’.</p>
+</dd>
+<dt><strong>alpha</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Significance level of the test.</p>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>power</strong> : float</p>
-<blockquote class="last">
-<div><p>Achieved power of the test.</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>power</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Achieved power of the test.</p>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>

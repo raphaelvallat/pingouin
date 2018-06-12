@@ -103,36 +103,35 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dv</strong> : string</p>
-<blockquote>
-<div><p>Name of column containing the dependant variable.</p>
-</div></blockquote>
-<p><strong>within</strong> : string</p>
-<blockquote>
-<div><p>Name of column containing the within-subject factor.</p>
-</div></blockquote>
-<p><strong>data</strong> : pandas DataFrame</p>
-<blockquote>
-<div><p>DataFrame</p>
-</div></blockquote>
-<p><strong>export_filename</strong> : string</p>
-<blockquote>
-<div><p>Filename (without extension) for the output file.
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>dv</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Name of column containing the dependant variable.</p>
+</dd>
+<dt><strong>within</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Name of column containing the within-subject factor.</p>
+</dd>
+<dt><strong>data</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
+<dd><p class="first last">DataFrame</p>
+</dd>
+<dt><strong>export_filename</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Filename (without extension) for the output file.
 If None, do not export the table.
 By default, the file will be created in the current python console
 directory. To change that, specify the filename with full path.</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>stats</strong> : DataFrame</p>
-<blockquote class="last">
-<div><p>Test summary</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;Q&#39;</span> <span class="p">:</span> <span class="n">The</span> <span class="n">Friedman</span> <span class="n">Q</span> <span class="n">statistic</span><span class="p">,</span> <span class="n">corrected</span> <span class="k">for</span> <span class="n">ties</span>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>stats</strong> <span class="classifier-delimiter">:</span> <span class="classifier">DataFrame</span></dt>
+<dd><p class="first">Test summary</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;Q&#39;</span> <span class="p">:</span> <span class="n">The</span> <span class="n">Friedman</span> <span class="n">Q</span> <span class="n">statistic</span><span class="p">,</span> <span class="n">corrected</span> <span class="k">for</span> <span class="n">ties</span>
 <span class="s1">&#39;p-unc&#39;</span> <span class="p">:</span> <span class="n">Uncorrected</span> <span class="n">p</span><span class="o">-</span><span class="n">value</span>
 <span class="s1">&#39;dof&#39;</span> <span class="p">:</span> <span class="n">degrees</span> <span class="n">of</span> <span class="n">freedom</span>
 </pre></div>
 </div>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>

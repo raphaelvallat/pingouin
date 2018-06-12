@@ -103,19 +103,17 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ef</strong> : float</p>
-<blockquote>
-<div><p>Original effect size</p>
-</div></blockquote>
-<p><strong>input_type</strong> : string</p>
-<blockquote>
-<div><p>Effect size type of ef. Must be ‘r’ or ‘d’.</p>
-</div></blockquote>
-<p><strong>output_type</strong> : string</p>
-<blockquote>
-<div><p>Desired effect size type.
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>ef</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Original effect size</p>
+</dd>
+<dt><strong>input_type</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Effect size type of ef. Must be ‘r’ or ‘d’.</p>
+</dd>
+<dt><strong>output_type</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first">Desired effect size type.
 Available methods are</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;none&#39;</span> <span class="p">:</span> <span class="n">no</span> <span class="n">effect</span> <span class="n">size</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;none&#39;</span> <span class="p">:</span> <span class="n">no</span> <span class="n">effect</span> <span class="n">size</span>
 <span class="s1">&#39;cohen&#39;</span> <span class="p">:</span> <span class="n">Unbiased</span> <span class="n">Cohen</span> <span class="n">d</span>
 <span class="s1">&#39;hedges&#39;</span> <span class="p">:</span> <span class="n">Hedges</span> <span class="n">g</span>
 <span class="s1">&#39;glass&#39;</span><span class="p">:</span> <span class="n">Glass</span> <span class="n">delta</span>
@@ -124,18 +122,19 @@ Available methods are</p>
 <span class="s1">&#39;AUC&#39;</span> <span class="p">:</span> <span class="n">Area</span> <span class="n">Under</span> <span class="n">the</span> <span class="n">Curve</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><strong>nx, ny</strong> : int, optional</p>
-<blockquote>
-<div><p>Length of vector x and y.
+</dd>
+<dt><strong>nx, ny</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span></dt>
+<dd><p class="first last">Length of vector x and y.
 nx and ny are required to convert to Hedges g</p>
-</div></blockquote>
+</dd>
+</dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ef</strong> : float</p>
-<blockquote class="last">
-<div><p>Desired converted effect size</p>
-</div></blockquote>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>ef</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Desired converted effect size</p>
+</dd>
+</dl>
 </td>
 </tr>
 </tbody>
