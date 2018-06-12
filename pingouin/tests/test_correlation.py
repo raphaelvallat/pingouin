@@ -9,14 +9,17 @@ class TestCorrelation(_TestPingouin):
 
     def test_corr(self):
         """Test function corr"""
-        x = np.random.normal(size=100)
-        y = np.random.normal(size=100)
+        mean, cov = [4, 6], [(1, .5), (.5, 1)]
+        x, y = np.random.multivariate_normal(mean, cov, 30).T
+        # Add one outlier
+        x[3] = 12
         corr(x, y, method='pearson', tail='one-sided')
         corr(x, y, method='spearman', tail='two-sided')
+        corr(x, y, method='shepherd', tail='two-sided')
         corr(x, y, method='kendall')
         corr(x, y, method='percbend')
         # Not normally distributed
-        z = np.random.uniform(size=100)
+        z = np.random.uniform(size=30)
         corr(x, z, method='pearson')
         # With NaN values
         x[3] = np.nan

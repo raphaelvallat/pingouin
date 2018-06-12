@@ -241,6 +241,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         'spearman' : Spearman rank-order correlation
         'kendall' : Kendall’s tau (ordinal data)
         'percbend' : percentage bend correlation (robust)
+        'shepherd' : Shepherd's pi correlation (robust Spearman)
     padjust : string
         Method used for testing and adjustment of pvalues.
         Available methods are ::
@@ -293,6 +294,9 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
     The percentage bend correlation (Wilcox 1994) is a robust method that
     protects against univariate outliers.
+
+    The Shepherd's pi correlation (Schwarzkopf et al. 2012) is a robust method
+    that returns the equivalent of the Spearman's rho after outliers removal.
 
     Please note that NaN are automatically removed from datasets.
 

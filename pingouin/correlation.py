@@ -8,6 +8,114 @@ from pingouin import (_remove_na, test_normality, bayesfactor_pearson)
 __all__ = ["corr"]
 
 
+def mahal(Y, X):
+    """Mahalanobis distance.
+
+    Parameters
+    ----------
+    Y : ndarray (shape=(n, m))
+        Data
+    X : ndarray (shape=(p, m))
+        Reference samples
+
+    Returns
+    -------
+    MD : 1D-array (shape=(n,))
+        Squared Mahalanobis distance of each observation in Y to the
+        reference samples in X.
+    """
+    rx, cx = X.shape
+    ry, cy = Y.shape
+
+    m = np.mean(X, 0)
+    M = np.tile(m, ry).reshape(ry, 2)
+    C = X - np.tile(m, rx).reshape(rx, 2)
+    Q, R = np.linalg.qr(C)
+    ri = np.linalg.solve(R.T, (Y - M).T)
+    return np.sum(ri**2, 0) * (rx - 1)
+
+
+def bsmahal(a, b, j=5000):
+    """
+    Bootstraps Mahalanobis distances.
+
+    Parameters
+    ----------
+    a : ndarray (shape=(n, 2))
+        Data
+    b : ndarray (shape=(n, 2))
+        Data
+    j : int
+        Number of bootstrap samples to calculate.
+
+    Returns
+    -------
+    m : ndarray (shape=(n,))
+        Mahalanobis distance for each row in a, averaged across all the
+        bootstrap resamples.
+    """
+    n = b.shape[0]
+    MD = np.zeros((n, j))
+
+    # Bootstrap the MD
+    for i in np.arange(j):
+        x = np.random.choice(np.arange(n), size=n, replace=True)
+        s1 = b[x, 0]
+        s2 = b[x, 1]
+        Y = np.vstack([s1, s2]).T
+        m = mahal(a, Y)
+        MD[:, i] = m
+
+    # Average across all bootstraps
+    return np.mean(MD, 1)
+
+
+def shepherd(x, y):
+    """
+    Shepherd's Pi correlation, equivalent to Spearman's rho after outliers
+    removal.
+
+    Parameters
+    ----------
+    x, y : array_like
+        First and second set of observations. x and y must be independent.
+
+    Returns
+    -------
+    Pi : float
+        Pi correlation coefficient
+    pval : float
+        Two-tailed adjusted p-value.
+
+    Notes
+    -----
+    It first bootstraps the Mahalanobis distances, removes all observations
+    with m >= 6 and finally calculates the correlation of the remaining data.
+
+    Pi is Spearman's Rho after outlier removal.
+
+    The p-value is multiplied by 2 to achieve a nominal false alarm rate.
+    """
+    from scipy.stats import spearmanr
+
+    X = np.vstack([x, y]).T
+
+    # Bootstrapping on Mahalanobis distance
+    m = bsmahal(X, X)
+
+    # Determine outliers
+    outliers = (m >= 6)
+
+    # Compute correlation
+    pi, pval = spearmanr(x[~outliers], y[~outliers])
+
+    # Adjust p-values
+    pval *= 2
+    pval = 1 if pval > 1 else pval
+
+    return pi, pval
+
+
 def percbend(x, y, beta=.2):
     """
     Compute the percentage bend correlation (Wilcox 1994).
@@ -22,7 +130,6 @@ def percbend(x, y, beta=.2):
     ----------
     x, y : array_like
         First and second set of observations. x and y must be independent.
-
     beta : float
         Bending constant for omega (0 <= beta <= 0.5).
 
@@ -87,6 +194,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
         'spearman' : Spearman rank-order correlation
         'kendall' : Kendall’s tau (ordinal data)
         'percbend' : percentage bend correlation (robust)
+        'shepherd' : Shepherd's pi correlation (robust Spearman)
 
     Returns
     -------
@@ -119,36 +227,63 @@ def corr(x, y, tail='two-sided', method='pearson'):
     The percentage bend correlation (Wilcox 1994) is a robust method that
     protects against univariate outliers.
 
+    The Shepherd's pi correlation (Schwarzkopf et al. 2012) is a robust method
+    that returns the equivalent of the Spearman's rho after outliers removal.
+
     Please note that NaN are automatically removed from datasets.
+
+    References
+    ----------
+    .. [Wilcox] Wilcox, R. R. (1994). The percentage bend correlation
+       coefficient. Psychometrika, 59(4), 601-616.
+    .. [Schwarzkopf] Schwarzkopf, D. S., De Haas, B., & Rees, G. (2012).
+       Better ways to improve standards in brain-behavior correlation analysis.
+       Frontiers in human neuroscience, 6, 200.
 
     Examples
     --------
     1. Pearson correlation
 
+        >>> # Generate random correlated samples
+        >>> np.random.seed(123)
+        >>> mean, cov = [4, 6], [(1, .5), (.5, 1)]
+        >>> x, y = np.random.multivariate_normal(mean, cov, 30).T
+        >>> # Compute Pearson correlation
         >>> from pingouin import corr
-        >>> x = [20, 22, 19, 20, 22, 18, 24, 20]
-        >>> y = [30, 32, 31, 29, 32, 28, 34, 31]
         >>> corr(x, y)
-                    r      r2     adj_r2  p-val  BF10
-            pearson 0.892  0.795  0.713   0.003  20.596
+            method   r      r2     adj_r2  p-val   BF10
+            pearson  0.491  0.242  0.185   0.0058  6.135
 
-    2. One-tailed spearman correlation
+    2. Pearson correlation but with two outliers
 
-        >>> from pingouin import corr
-        >>> x = [20, 22, 19, 20, 22, 18, 24, 20]
-        >>> y = [30, 32, 31, 29, 32, 28, 34, 31]
-        >>> corr(x, y, method='spearman', tail='one-sided')
-                      r      r2     adj_r2  p-val
-            spearman  0.857  0.735  0.629   0.003
+        >>> x[3], y[5] = 12, -8
+        >>> corr(x, y)
+            method   r      r2     adj_r2  p-val  BF10
+            pearson  0.147  0.022  -0.051  0.439  0.19
 
-    3. Robust correlation (percentage bend)
+    3. Spearman correlation
 
-        >>> from pingouin import corr
-        >>> x = [20, 22, 19, 20, 22, 18, 24, 20]
-        >>> y = [30, 32, 31, 29, 32, 28, 34, 31]
+        >>> corr(x, y, method="spearman")
+            method    r      r2     adj_r2  p-val
+            spearman  0.401  0.161  0.099   0.028
+
+    4. Percentage bend correlation (robust)
+
         >>> corr(x, y, method='percbend')
-                     r      r2     adj_r2  p-val
-            percbend 0.824  0.678  0.55    0.012
+            method    r      r2     adj_r2  p-val
+            percbend  0.389  0.151  0.089   0.034
+
+    5. Shepherd's pi correlation (robust)
+
+        >>> corr(x, y, method='shepherd')
+            method    r      r2     adj_r2  p-val
+            percbend  0.437  0.191  0.131   0.040
+
+    6. One-tailed Spearman correlation
+
+        >>> corr(x, y, tail="one-sided", method='shepherd')
+            method    r      r2     adj_r2  p-val
+            spearman  0.401  0.161  0.099   0.014
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -176,6 +311,8 @@ def corr(x, y, tail='two-sided', method='pearson'):
         r, pval = kendalltau(x, y)
     elif method == 'percbend':
         r, pval = percbend(x, y)
+    elif method == 'shepherd':
+        r, pval = shepherd(x, y)
     else:
         raise ValueError('Method not recognized.')
 
