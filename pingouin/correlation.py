@@ -11,6 +11,8 @@ __all__ = ["corr"]
 def mahal(Y, X):
     """Mahalanobis distance.
 
+    Equivalent to the Matlab mahal function.
+
     Parameters
     ----------
     Y : ndarray (shape=(n, m))
@@ -37,7 +39,7 @@ def mahal(Y, X):
 
 def bsmahal(a, b, j=5000):
     """
-    Bootstraps Mahalanobis distances.
+    Bootstraps Mahalanobis distances for Shepherd's pi correlation.
 
     Parameters
     ----------
@@ -56,10 +58,11 @@ def bsmahal(a, b, j=5000):
     """
     n = b.shape[0]
     MD = np.zeros((n, j))
+    nr = np.arange(n)
 
     # Bootstrap the MD
     for i in np.arange(j):
-        x = np.random.choice(np.arange(n), size=n, replace=True)
+        x = np.random.choice(nr, size=n, replace=True)
         s1 = b[x, 0]
         s2 = b[x, 1]
         Y = np.vstack([s1, s2]).T
