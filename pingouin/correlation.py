@@ -258,7 +258,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
             method   r      r2     adj_r2  p-val   BF10
             pearson  0.491  0.242  0.185   0.0058  6.135
 
-    2. Pearson correlation but with two outliers
+    2. Pearson correlation with two outliers
 
         >>> x[3], y[5] = 12, -8
         >>> corr(x, y)
