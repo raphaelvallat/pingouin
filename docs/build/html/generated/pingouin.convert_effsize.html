@@ -159,8 +159,7 @@ nx and ny are required to convert to Hedges g</p>
 </pre></div>
 </div>
 </li>
-</ol>
-<p>2. Convert from Cohen d to Hegdes g (requires the sample sizes of each
+<li><p class="first">Convert from Cohen d to Hegdes g (requires the sample sizes of each
 group)</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="o">.</span><span class="mi">45</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">convert_effsize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="s1">&#39;hedges&#39;</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
@@ -168,7 +167,7 @@ group)</p>
 <span class="go">    0.43</span>
 </pre></div>
 </div>
-<ol class="arabic" start="3">
+</li>
 <li><p class="first">Convert Pearson r to Cohen d</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="mf">0.40</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">convert_effsize</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">)</span>

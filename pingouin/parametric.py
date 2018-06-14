@@ -775,6 +775,8 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
     ----------
     dv : string
         Name of column containing the dependant variable.
+    within : string
+        Name of column containing the within factor.
     between : string
         Name of column containing the between factor.
     data : pandas DataFrame

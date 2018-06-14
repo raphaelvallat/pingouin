@@ -72,32 +72,234 @@ Develop mode
 Quick start
 ============
 
-.. code-block:: python
+10 minutes to Pingouin
+----------------------
 
-    import pandas as pd
-    from pingouin import mixed_anova, pairwise_ttests, print_table
+1. T-test
+#########
 
-    # Load dataset
-    df = pd.read_csv('sleep_dataset.csv')
+.. code-block:: ipython3
 
-    # Compute two-way split-plot ANOVA
-    aov = mixed_anova(dv='DV', within='Time', between='Group', data=df,
-                     correction='auto', remove_na=False)
-    print_table(aov)
+  # Generate two correlated random variables
+  import numpy as np
+  np.random.seed(123)
+  mean, cov, n = [4, 5], [(1, .6), (.6, 1)], 30
+  x, y = np.random.multivariate_normal(mean, cov, n).T
 
-    # Compute FDR-corrected post-hocs with effect sizes
-    posthocs = pairwise_ttests(dv='DV', within='Time', between='Group', data=df,
-                               tail='two-sided', padjust='fdr_bh', effsize='cohen',
-                               return_desc=False)
-    print_table(posthocs)
+  # T-test
+  from pingouin import ttest
+  ttest(x, y)
+
+.. table:: Output
+   :widths: auto
+
+   =======  =======  =====  =========  =========  =======  ======
+     T-val    p-val    dof  tail         cohen-d    power    BF10
+   =======  =======  =====  =========  =========  =======  ======
+    -3.401    0.001     58  two-sided      0.878    0.917  26.155
+   =======  =======  =====  =========  =========  =======  ======
+
+------------
+
+2. Pearson's correlation
+########################
+
+.. code-block:: ipython3
+
+  # T-test
+  from pingouin import corr
+  corr(x, y)
+
+.. table:: Output
+   :widths: auto
+
+   =====  ===========  =====  ========  =======  ======
+       r  CI95%           r2    adj_r2    p-val    BF10
+   =====  ===========  =====  ========  =======  ======
+   0.595  [0.3  0.79]  0.354     0.306    0.001  54.222
+   =====  ===========  =====  ========  =======  ======
+
+------------
+
+3. Robust correlation
+#####################
+
+.. code-block:: ipython3
+
+  # Introduce an outlier
+  x[5] = 18
+  # Use the robust Shepherd's pi correlation
+  corr(x, y, method="shepherd")
+
+.. table:: Output
+   :widths: auto
+
+   =====  ===========  =====  ========  =======
+       r  CI95%           r2    adj_r2    p-val
+   =====  ===========  =====  ========  =======
+   0.561  [0.25 0.77]  0.315     0.264    0.003
+   =====  ===========  =====  ========  =======
+
+------------
+
+4. Test the normality of the data
+#################################
+
+.. code-block:: ipython3
+
+   from pingouin import test_normality
+   # Return a boolean (true if normal) and the associated p-value
+   test_normality(x, y)
+
+.. parsed-literal::
+
+   [False,  True], [2.71e-04, 0.552]
+
+------------
+
+5. One-way ANOVA using a pandas DataFrame
+#########################################
+
+.. code-block:: ipython3
+
+  # Generate a pandas DataFrame
+  import pandas as pd
+  np.random.seed(123)
+  mean, cov, n = [4, 6], [(1, .6), (.6, 1)], 10
+  x, y = np.random.multivariate_normal(mean, cov, n).T
+  z = np.random.normal(4, size=n)
+
+  # DV = dependant variable / Group = between-subject factor
+  df = pd.DataFrame({'Group': np.repeat(['A', 'B', 'C'], 10),
+                     'DV': np.hstack([x, y, z])})
+
+  # One-way ANOVA
+  from pingouin import anova
+  stats = anova(data=df, dv='DV', between='Group', detailed=True)
+  print(stats)
+
+.. table:: Output
+  :widths: auto
+
+  ========  ======  ====  ======  =======  =======  =======
+  Source        SS    DF      MS        F    p-unc      np2
+  ========  ======  ====  ======  =======  =======  =======
+  Group     28.995     2  14.498    8.929    0.001    0.398
+  Within    43.837    27   1.624  nan      nan      nan
+  ========  ======  ====  ======  =======  =======  =======
+
+------------
+
+6. One-way non-parametric ANOVA (Kruskal-Wallis)
+################################################
+
+.. code-block:: ipython3
+
+  from pingouin import kruskal
+  stats = kruskal(data=df, dv='DV', between='Group')
+  print(stats)
+
+.. table:: Output
+  :widths: auto
+
+  ========  =======  ======  =======
+  Source      ddof1       H    p-unc
+  ========  =======  ======  =======
+  Group           2  10.622    0.005
+  ========  =======  ======  =======
+
+------------
+
+7. Post-hoc tests corrected for multiple-comparisons
+####################################################
+
+.. code-block:: ipython3
+
+  from pingouin import pairwise_ttests, print_table
+
+  # FDR-corrected post hocs with Hedges'g effect size
+  posthoc = pairwise_ttests(data=df, dv='DV', between='Group', padjust='fdr_bh',
+                            effsize='hedges')
+
+  # Pretty printing of table
+  print_table(posthoc)
+
+.. table:: Output
+  :widths: auto
+
+  =======  ===  ===  ========  =======  =========  =======  ========  ==========  ======  ========  ========
+  Type     A    B    Paired      T-val  tail         p-unc    p-corr  p-adjust      BF10    efsize  eftype
+  =======  ===  ===  ========  =======  =========  =======  ========  ==========  ======  ========  ========
+  between  A    B    False      -3.472  two-sided    0.003     0.004  fdr_bh      13.734    -1.487  hedges
+  between  A    C    False      -0.096  two-sided    0.925     0.925  fdr_bh       0.399    -0.041  hedges
+  between  B    C    False       3.851  two-sided    0.001     0.004  fdr_bh      26.509     1.650  hedges
+  =======  ===  ===  ========  =======  =========  =======  ========  ==========  ======  ========  ========
+
+------------
+
+8. Two-way mixed ANOVA
+######################
+
+.. code-block:: ipython3
+
+  # Add a "Time" column in the DataFrame
+  df['Time'] = np.tile(np.repeat(['Pre', 'Post'], 5), 3)
+
+  # Compute the two-way mixed ANOVA and export to a .csv file
+  from pingouin import mixed_anova
+  stats = mixed_anova(data=df, dv='DV', between='Group', within='Time',
+                      correction=False, export_filename='mixed_anova.csv')
+  print_table(stats)
+
+.. table:: Output
+  :widths: auto
+
+  ===========  ======  =====  =====  ======  =====  =======  =====
+  Source           SS    DF1    DF2      MS      F    p-unc    np2
+  ===========  ======  =====  =====  ======  =====  =======  =====
+  Group        28.995      2     12  14.498  8.622    0.005  0.590
+  Time          6.839      1     12   6.839  4.995    0.045  0.294
+  Interaction   0.391      2     12   0.195  0.143    0.868  0.023
+  ===========  ======  =====  =====  ======  =====  =======  =====
+
+------------
+
+9. Pairwise correlations between columns of a dataframe
+#######################################################
+
+.. code-block:: ipython3
+
+    df = pd.DataFrame({'X': x, 'Y': y, 'Z': z})
+    from pingouin import pairwise_corr
+    pairwise_corr(df, columns=['X', 'Y', 'Z'])
+
+.. table:: Output
+  :widths: auto
+
+  ===  ===  ========  =========  =====  =============  =====  ========  =====  =======  ======
+  X    Y    method    tail           r  CI95%             r2    adj_r2      z    p-unc    BF10
+  ===  ===  ========  =========  =====  =============  =====  ========  =====  =======  ======
+  X    Y    pearson   two-sided  0.707  [0.14 0.92]    0.500     0.357  0.881    0.022   3.227
+  X    Z    pearson   two-sided  0.283  [-0.42  0.77]  0.080    -0.183  0.291    0.428   0.321
+  Y    Z    pearson   two-sided  0.105  [-0.56  0.69]  0.011    -0.271  0.105    0.772   0.243
+  ===  ===  ========  =========  =====  =============  =====  ========  =====  =======  ======
 
 
-.. figure::  /pictures/readme_anova.png
-  :align:   center
+10. Convert between effect sizes
+################################
 
+.. code-block:: ipython3
 
-Contents:
-=========
+    from pingouin import convert_effsize
+    # Convert from Cohen's d to Hedges' g
+    convert_effsize(0.4, 'cohen', 'hedges', nx=10, ny=12)
+
+.. parsed-literal::
+
+    0.384
+
+Contents
+========
 
 .. toctree::
    :maxdepth: 1
@@ -107,8 +309,8 @@ Contents:
    examples
 
 
-Development:
-============
+Development
+===========
 
 To see the code or report a bug, please visit the `github repository <https://github.com/raphaelvallat/pingouin>`_.
 

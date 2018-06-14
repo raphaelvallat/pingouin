@@ -194,7 +194,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
             0.05
 
     2. Convert from Cohen d to Hegdes g (requires the sample sizes of each
-    group)
+       group)
 
         >>> d = .45
         >>> g = convert_effsize(d, 'cohen', 'hedges', nx=10, ny=10)

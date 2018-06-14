@@ -143,30 +143,403 @@ python setup.py develop
 </div>
 <div class="section" id="quick-start">
 <h1>Quick start</h1>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">pingouin</span> <span class="kn">import</span> <span class="n">mixed_anova</span><span class="p">,</span> <span class="n">pairwise_ttests</span><span class="p">,</span> <span class="n">print_table</span>
+<div class="section" id="minutes-to-pingouin">
+<h2>10 minutes to Pingouin</h2>
+<div class="section" id="t-test">
+<h3>1. T-test</h3>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate two correlated random variables</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="o">.</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> <span class="mi">30</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
-<span class="c1"># Load dataset</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;sleep_dataset.csv&#39;</span><span class="p">)</span>
-
-<span class="c1"># Compute two-way split-plot ANOVA</span>
-<span class="n">aov</span> <span class="o">=</span> <span class="n">mixed_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
-                 <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">remove_na</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-<span class="n">print_table</span><span class="p">(</span><span class="n">aov</span><span class="p">)</span>
-
-<span class="c1"># Compute FDR-corrected post-hocs with effect sizes</span>
-<span class="n">posthocs</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
-                           <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">,</span>
-                           <span class="n">return_desc</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-<span class="n">print_table</span><span class="p">(</span><span class="n">posthocs</span><span class="p">)</span>
+<span class="c1"># T-test</span>
+<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest</span>
+<span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="figure align-center">
-<img alt="_images/readme_anova.png" src="_images/readme_anova.png" />
+<table border="1" class="colwidths-auto docutils" id="id1">
+<caption><span class="caption-text">Output</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">T-val</th>
+<th class="head">p-val</th>
+<th class="head">dof</th>
+<th class="head">tail</th>
+<th class="head">cohen-d</th>
+<th class="head">power</th>
+<th class="head">BF10</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>-3.401</td>
+<td>0.001</td>
+<td>58</td>
+<td>two-sided</td>
+<td>0.878</td>
+<td>0.917</td>
+<td>26.155</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<div class="section" id="pearson-s-correlation">
+<h3>2. Pearson’s correlation</h3>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># T-test</span>
+<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">corr</span>
+<span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id2">
+<caption><span class="caption-text">Output</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">r</th>
+<th class="head">CI95%</th>
+<th class="head">r2</th>
+<th class="head">adj_r2</th>
+<th class="head">p-val</th>
+<th class="head">BF10</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>0.595</td>
+<td>[0.3  0.79]</td>
+<td>0.354</td>
+<td>0.306</td>
+<td>0.001</td>
+<td>54.222</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<div class="section" id="robust-correlation">
+<h3>3. Robust correlation</h3>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Introduce an outlier</span>
+<span class="n">x</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">18</span>
+<span class="c1"># Use the robust Shepherd&#39;s pi correlation</span>
+<span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;shepherd&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id3">
+<caption><span class="caption-text">Output</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">r</th>
+<th class="head">CI95%</th>
+<th class="head">r2</th>
+<th class="head">adj_r2</th>
+<th class="head">p-val</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>0.561</td>
+<td>[0.25 0.77]</td>
+<td>0.315</td>
+<td>0.264</td>
+<td>0.003</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<div class="section" id="test-the-normality-of-the-data">
+<h3>4. Test the normality of the data</h3>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">test_normality</span>
+<span class="c1"># Return a boolean (true if normal) and the associated p-value</span>
+<span class="n">test_normality</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="kc">False</span><span class="p">,</span>  <span class="kc">True</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.71e-04</span><span class="p">,</span> <span class="mf">0.552</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="one-way-anova-using-a-pandas-dataframe">
+<h3>5. One-way ANOVA using a pandas DataFrame</h3>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate a pandas DataFrame</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="o">.</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> <span class="mi">10</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+
+<span class="c1"># DV = dependant variable / Group = between-subject factor</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Group&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">],</span> <span class="mi">10</span><span class="p">),</span>
+                   <span class="s1">&#39;DV&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])})</span>
+
+<span class="c1"># One-way ANOVA</span>
+<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">anova</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">anova</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id4">
+<caption><span class="caption-text">Output</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Source</th>
+<th class="head">SS</th>
+<th class="head">DF</th>
+<th class="head">MS</th>
+<th class="head">F</th>
+<th class="head">p-unc</th>
+<th class="head">np2</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Group</td>
+<td>28.995</td>
+<td>2</td>
+<td>14.498</td>
+<td>8.929</td>
+<td>0.001</td>
+<td>0.398</td>
+</tr>
+<tr class="row-odd"><td>Within</td>
+<td>43.837</td>
+<td>27</td>
+<td>1.624</td>
+<td>nan</td>
+<td>nan</td>
+<td>nan</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<div class="section" id="one-way-non-parametric-anova-kruskal-wallis">
+<h3>6. One-way non-parametric ANOVA (Kruskal-Wallis)</h3>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">kruskal</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">kruskal</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id5">
+<caption><span class="caption-text">Output</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Source</th>
+<th class="head">ddof1</th>
+<th class="head">H</th>
+<th class="head">p-unc</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Group</td>
+<td>2</td>
+<td>10.622</td>
+<td>0.005</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<div class="section" id="post-hoc-tests-corrected-for-multiple-comparisons">
+<h3>7. Post-hoc tests corrected for multiple-comparisons</h3>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_ttests</span><span class="p">,</span> <span class="n">print_table</span>
+
+<span class="c1"># FDR-corrected post hocs with Hedges&#39;g effect size</span>
+<span class="n">posthoc</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">,</span>
+                          <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">)</span>
+
+<span class="c1"># Pretty printing of table</span>
+<span class="n">print_table</span><span class="p">(</span><span class="n">posthoc</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id6">
+<caption><span class="caption-text">Output</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Type</th>
+<th class="head">A</th>
+<th class="head">B</th>
+<th class="head">Paired</th>
+<th class="head">T-val</th>
+<th class="head">tail</th>
+<th class="head">p-unc</th>
+<th class="head">p-corr</th>
+<th class="head">p-adjust</th>
+<th class="head">BF10</th>
+<th class="head">efsize</th>
+<th class="head">eftype</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>between</td>
+<td>A</td>
+<td>B</td>
+<td>False</td>
+<td>-3.472</td>
+<td>two-sided</td>
+<td>0.003</td>
+<td>0.004</td>
+<td>fdr_bh</td>
+<td>13.734</td>
+<td>-1.487</td>
+<td>hedges</td>
+</tr>
+<tr class="row-odd"><td>between</td>
+<td>A</td>
+<td>C</td>
+<td>False</td>
+<td>-0.096</td>
+<td>two-sided</td>
+<td>0.925</td>
+<td>0.925</td>
+<td>fdr_bh</td>
+<td>0.399</td>
+<td>-0.041</td>
+<td>hedges</td>
+</tr>
+<tr class="row-even"><td>between</td>
+<td>B</td>
+<td>C</td>
+<td>False</td>
+<td>3.851</td>
+<td>two-sided</td>
+<td>0.001</td>
+<td>0.004</td>
+<td>fdr_bh</td>
+<td>26.509</td>
+<td>1.650</td>
+<td>hedges</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<div class="section" id="two-way-mixed-anova">
+<h3>8. Two-way mixed ANOVA</h3>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add a &quot;Time&quot; column in the DataFrame</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="s1">&#39;Pre&#39;</span><span class="p">,</span> <span class="s1">&#39;Post&#39;</span><span class="p">],</span> <span class="mi">5</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+
+<span class="c1"># Compute the two-way mixed ANOVA and export to a .csv file</span>
+<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">mixed_anova</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">mixed_anova</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span>
+                    <span class="n">correction</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="s1">&#39;mixed_anova.csv&#39;</span><span class="p">)</span>
+<span class="n">print_table</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id7">
+<caption><span class="caption-text">Output</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Source</th>
+<th class="head">SS</th>
+<th class="head">DF1</th>
+<th class="head">DF2</th>
+<th class="head">MS</th>
+<th class="head">F</th>
+<th class="head">p-unc</th>
+<th class="head">np2</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Group</td>
+<td>28.995</td>
+<td>2</td>
+<td>12</td>
+<td>14.498</td>
+<td>8.622</td>
+<td>0.005</td>
+<td>0.590</td>
+</tr>
+<tr class="row-odd"><td>Time</td>
+<td>6.839</td>
+<td>1</td>
+<td>12</td>
+<td>6.839</td>
+<td>4.995</td>
+<td>0.045</td>
+<td>0.294</td>
+</tr>
+<tr class="row-even"><td>Interaction</td>
+<td>0.391</td>
+<td>2</td>
+<td>12</td>
+<td>0.195</td>
+<td>0.143</td>
+<td>0.868</td>
+<td>0.023</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<div class="section" id="pairwise-correlations-between-columns-of-a-dataframe">
+<h3>9. Pairwise correlations between columns of a dataframe</h3>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="n">z</span><span class="p">})</span>
+<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_corr</span>
+<span class="n">pairwise_corr</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id8">
+<caption><span class="caption-text">Output</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">X</th>
+<th class="head">Y</th>
+<th class="head">method</th>
+<th class="head">tail</th>
+<th class="head">r</th>
+<th class="head">CI95%</th>
+<th class="head">r2</th>
+<th class="head">adj_r2</th>
+<th class="head">z</th>
+<th class="head">p-unc</th>
+<th class="head">BF10</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>X</td>
+<td>Y</td>
+<td>pearson</td>
+<td>two-sided</td>
+<td>0.707</td>
+<td>[0.14 0.92]</td>
+<td>0.500</td>
+<td>0.357</td>
+<td>0.881</td>
+<td>0.022</td>
+<td>3.227</td>
+</tr>
+<tr class="row-odd"><td>X</td>
+<td>Z</td>
+<td>pearson</td>
+<td>two-sided</td>
+<td>0.283</td>
+<td>[-0.42  0.77]</td>
+<td>0.080</td>
+<td>-0.183</td>
+<td>0.291</td>
+<td>0.428</td>
+<td>0.321</td>
+</tr>
+<tr class="row-even"><td>Y</td>
+<td>Z</td>
+<td>pearson</td>
+<td>two-sided</td>
+<td>0.105</td>
+<td>[-0.56  0.69]</td>
+<td>0.011</td>
+<td>-0.271</td>
+<td>0.105</td>
+<td>0.772</td>
+<td>0.243</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="convert-between-effect-sizes">
+<h3>10. Convert between effect sizes</h3>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">convert_effsize</span>
+<span class="c1"># Convert from Cohen&#39;s d to Hedges&#39; g</span>
+<span class="n">convert_effsize</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="s1">&#39;hedges&#39;</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">0.384</span>
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 <div class="section" id="contents">
-<h1>Contents:</h1>
+<h1>Contents</h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a></li>
@@ -176,7 +549,7 @@ python setup.py develop
 </div>
 </div>
 <div class="section" id="development">
-<h1>Development:</h1>
+<h1>Development</h1>
 <p>To see the code or report a bug, please visit the <a class="reference external" href="https://github.com/raphaelvallat/pingouin">github repository</a>.</p>
 <p>Note that this program is provided with NO WARRANTY OF ANY KIND. If you can, always double check the results with another statistical software.</p>
 </div>
