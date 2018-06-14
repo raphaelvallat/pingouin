@@ -306,16 +306,6 @@ Quick start
 
     0.384
 
-Contents
-========
-
-.. toctree::
-   :maxdepth: 1
-
-   api
-   changelog
-   examples
-
 
 Development
 ===========
