@@ -3,7 +3,6 @@ Doc
 
 Code
 ----
-5 Test ESCI against JASP
 4 Better bootstrapping of confidence intervals (see Matlab)
 3 Test second order approximation in Mauchly
 2 Add Pearson's skipped-correlation
