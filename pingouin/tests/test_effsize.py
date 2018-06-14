@@ -40,6 +40,7 @@ class TestEffsize(_TestPingouin):
         r = .65
         convert_effsize(d, 'cohen', 'eta-square')
         convert_effsize(d, 'cohen', 'hedges', nx=10, ny=10)
+        convert_effsize(d, 'cohen', 'r', nx=10, ny=10)
         convert_effsize(r, 'r', 'cohen')
         convert_effsize(d, 'cohen', 'r')
         convert_effsize(d, 'cohen', 'hedges')
