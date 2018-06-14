@@ -116,7 +116,7 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
             # Standardize correlation coefficient
             z = np.arctanh(ef)
             se = 1 / np.sqrt(nx - 3)
-            ci_z = np.array([ef - crit * se, ef + crit * se])
+            ci_z = np.array([z - crit * se, z + crit * se])
             # Transform back to r
             return np.round(np.tanh(ci_z), 2)
         else:

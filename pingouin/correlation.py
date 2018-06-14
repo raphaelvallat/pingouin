@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr, spearmanr, kendalltau
-from pingouin import (_remove_na, test_normality, bayesfactor_pearson)
+from pingouin import (_remove_na, test_normality)
 
 __all__ = ["corr"]
 
@@ -255,39 +255,39 @@ def corr(x, y, tail='two-sided', method='pearson'):
         >>> # Compute Pearson correlation
         >>> from pingouin import corr
         >>> corr(x, y)
-            method   r      r2     adj_r2  p-val   BF10
-            pearson  0.491  0.242  0.185   0.0058  6.135
+            method   r      CI95%         r2     adj_r2  p-val   BF10
+            pearson  0.491  [0.16, 0.72]  0.242  0.185   0.0058  6.135
 
     2. Pearson correlation with two outliers
 
         >>> x[3], y[5] = 12, -8
         >>> corr(x, y)
-            method   r      r2     adj_r2  p-val  BF10
-            pearson  0.147  0.022  -0.051  0.439  0.19
+            method   r      CI95%          r2     adj_r2  p-val  BF10
+            pearson  0.147  [-0.23, 0.48]  0.022  -0.051  0.439  0.19
 
     3. Spearman correlation
 
         >>> corr(x, y, method="spearman")
-            method    r      r2     adj_r2  p-val
-            spearman  0.401  0.161  0.099   0.028
+            method    r      CI95%         r2     adj_r2  p-val
+            spearman  0.401  [0.05, 0.67]  0.161  0.099   0.028
 
     4. Percentage bend correlation (robust)
 
         >>> corr(x, y, method='percbend')
-            method    r      r2     adj_r2  p-val
-            percbend  0.389  0.151  0.089   0.034
+            method    r      CI95%         r2     adj_r2  p-val
+            percbend  0.389  [0.03, 0.66]  0.151  0.089   0.034
 
     5. Shepherd's pi correlation (robust)
 
         >>> corr(x, y, method='shepherd')
-            method    r      r2     adj_r2  p-val
-            percbend  0.437  0.191  0.131   0.040
+            method    r      CI95%         r2     adj_r2  p-val
+            percbend  0.437  [0.09, 0.69]  0.191  0.131   0.040
 
     6. One-tailed Spearman correlation
 
         >>> corr(x, y, tail="one-sided", method='shepherd')
-            method    r      r2     adj_r2  p-val
-            spearman  0.401  0.161  0.099   0.014
+            method    r      CI95%         r2     adj_r2  p-val
+            spearman  0.401  [0.05, 0.67]  0.161  0.099   0.014
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -323,17 +323,23 @@ def corr(x, y, tail='two-sided', method='pearson'):
     # Compute adj_r2
     adj_r2 = 1 - (((1 - r**2) * (nx - 1)) / (nx - 3))
 
+    # Compute the parametric 95% confidence interval
+    from pingouin.effsize import compute_esci
+    ci = compute_esci(ef=r, nx=nx, ny=nx, eftype='r')
+
     stats = pd.DataFrame({}, index=[method])
     stats['r'] = np.round(r, 3)
+    stats['CI95%'] = [ci]
     stats['r2'] = np.round(r**2, 3)
     stats['adj_r2'] = np.round(adj_r2, 3)
     stats['p-val'] = pval if tail == 'two-sided' else .5 * pval
 
     # Compute the BF10 for Pearson correlation only
+    from pingouin.bayesian import bayesfactor_pearson
     if method == 'pearson':
         stats['BF10'] = bayesfactor_pearson(r, nx)
 
-    col_order = ['r', 'r2', 'adj_r2', 'p-val', 'BF10']
+    col_order = ['r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'BF10']
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
     return stats
