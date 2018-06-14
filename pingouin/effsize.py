@@ -193,7 +193,6 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
         >>> print(eta)
             0.05
 
-
     2. Convert from Cohen d to Hegdes g (requires the sample sizes of each
     group)
 
@@ -202,14 +201,12 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
         >>> print(eta)
             0.43
 
-
     3. Convert Pearson r to Cohen d
 
         >>> r = 0.40
         >>> d = convert_effsize(r, 'r', 'cohen')
         >>> print(d)
             0.87
-
 
     4. Reverse operation: convert Cohen d to Pearson r
 
@@ -294,6 +291,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         'cohen' : Unbiased Cohen d
         'hedges' : Hedges g
         'glass': Glass delta
+        'r' : correlation coefficient
         'eta-square' : Eta-square
         'odds-ratio' : Odds ratio
         'AUC' : Area Under the Curve

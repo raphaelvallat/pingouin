@@ -100,10 +100,10 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
 <span class="n">n</span> <span class="o">=</span> <span class="mi">20</span>
-<span class="n">raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="n">raw</span><span class="p">,</span>
-                   <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="n">raw</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">),</span>
-                   <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)})</span>
+<span class="n">mean</span><span class="p">,</span> <span class="n">cov</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="o">.</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="n">z</span><span class="p">})</span>
 </pre></div>
 </div>
 <p>Let’s compute the pairwise correlations between all the columns of the DataFrame:</p>
@@ -132,37 +132,37 @@
 <td>Y</td>
 <td>pearson</td>
 <td>two-sided</td>
-<td>0.716</td>
-<td>[0.08 1.36]</td>
-<td>0.513</td>
-<td>0.456</td>
-<td>0.899</td>
-<td>0.000</td>
-<td>86.949</td>
+<td>0.583</td>
+<td>[0.19 0.82]</td>
+<td>0.340</td>
+<td>0.262</td>
+<td>0.667</td>
+<td>0.007</td>
+<td>6.270</td>
 </tr>
 <tr class="row-odd"><td>X</td>
 <td>Z</td>
 <td>pearson</td>
 <td>two-sided</td>
-<td>0.233</td>
-<td>[-0.39  0.85]</td>
-<td>0.054</td>
-<td>-0.057</td>
-<td>0.237</td>
-<td>0.323</td>
-<td>0.278</td>
+<td>-0.083</td>
+<td>[-0.51  0.37]</td>
+<td>0.007</td>
+<td>-0.110</td>
+<td>-0.083</td>
+<td>0.729</td>
+<td>0.181</td>
 </tr>
 <tr class="row-even"><td>Y</td>
 <td>Z</td>
 <td>pearson</td>
 <td>two-sided</td>
-<td>0.002</td>
-<td>[-0.62  0.62]</td>
-<td>0.000</td>
-<td>-0.118</td>
-<td>0.002</td>
-<td>0.995</td>
-<td>0.171</td>
+<td>-0.197</td>
+<td>[-0.59  0.27]</td>
+<td>0.039</td>
+<td>-0.074</td>
+<td>-0.200</td>
+<td>0.404</td>
+<td>0.241</td>
 </tr>
 </tbody>
 </table>
@@ -175,7 +175,7 @@
 <li>the uncorrected p-values (<code class="code docutils literal notranslate"><span class="pre">p-unc</span></code>)</li>
 <li>the Bayes Factor for the alternative hypothesis (<code class="code docutils literal notranslate"><span class="pre">BF10</span></code>)</li>
 </ol>
-<p>In the example above, we can see that there is a strong correlation between variables <code class="code docutils literal notranslate"><span class="pre">X</span></code> and <code class="code docutils literal notranslate"><span class="pre">Y</span></code>, as indicated by the correlation coefficient (0.716), the p-value (&lt;.001) and the Bayes Factor (86.9, meaning that the alternative hypothesis is ~87 times more likely than the null hypothesis given the data).</p>
+<p>In the example above, we can see that there is a strong correlation between variables <code class="code docutils literal notranslate"><span class="pre">X</span></code> and <code class="code docutils literal notranslate"><span class="pre">Y</span></code>, as indicated by the correlation coefficient (0.583), the p-value (.007) and the Bayes Factor (6.27, meaning that the alternative hypothesis is ~6 times more likely than the null hypothesis given the data).</p>
 <hr class="docutils" />
 <div class="section" id="non-parametric-correlation">
 <h2>Non-parametric correlation</h2>
@@ -206,12 +206,12 @@ In the example below, we compute the one-sided Spearman pairwise correlations be
 <td>Y</td>
 <td>spearman</td>
 <td>one-sided</td>
-<td>0.662</td>
-<td>[0.03 1.3 ]</td>
-<td>0.438</td>
-<td>0.372</td>
-<td>0.796</td>
-<td>0.001</td>
+<td>0.537</td>
+<td>[0.12 0.79]</td>
+<td>0.288</td>
+<td>0.204</td>
+<td>0.600</td>
+<td>0.007</td>
 </tr>
 </tbody>
 </table>
@@ -220,8 +220,9 @@ In the example below, we compute the one-sided Spearman pairwise correlations be
 <hr class="docutils" />
 <div class="section" id="robust-correlation">
 <h2>Robust correlation</h2>
-<p>If you believe that your dataset contains outliers, you can use a robust correlation method (percentage bend, see <a class="reference external" href="https://link.springer.com/article/10.1007/BF02294395">Wilcox 1994</a>:)</p>
-<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">print_table</span>
+<p>If you believe that your dataset contains outliers, you can use a robust correlation method. There are currently two robust correlation methods implemented in Pingouin, namely the percentage bend correlation (<a class="reference external" href="https://link.springer.com/article/10.1007/BF02294395">Wilcox 1994</a>) and Shepherd’s pi correlation (<a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3397314/">Schwarzkopf et al. 2012</a>).</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Introduce two outliers in variable X</span>
+<span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span> <span class="s1">&#39;X&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">18</span>
 <span class="n">stats</span> <span class="o">=</span> <span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;percbend&#39;</span><span class="p">)</span>
 <span class="n">print_table</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
 </pre></div>
@@ -246,21 +247,16 @@ In the example below, we compute the one-sided Spearman pairwise correlations be
 <td>Y</td>
 <td>percbend</td>
 <td>two-sided</td>
-<td>0.730</td>
-<td>[0.09 1.37]</td>
-<td>0.533</td>
-<td>0.478</td>
-<td>0.929</td>
-<td>0.000</td>
+<td>0.560</td>
+<td>[0.16 0.8 ]</td>
+<td>0.313</td>
+<td>0.232</td>
+<td>0.633</td>
+<td>0.010</td>
 </tr>
 </tbody>
 </table>
-</div>
-<hr class="docutils" />
-<div class="section" id="correction-for-multiple-comparisons">
-<h2>Correction for multiple comparisons</h2>
-<p>Finally, if you are computing a large number of correlation coefficients, you might want to correct the p-values for multiple comparisons. This can be done with <code class="code docutils literal notranslate"><span class="pre">padjust</span></code> argument:</p>
-<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stats</span> <span class="o">=</span> <span class="n">pairwise_corr</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s2">&quot;fdr_bh&quot;</span><span class="p">)</span>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stats</span> <span class="o">=</span> <span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;shepherd&#39;</span><span class="p">)</span>
 <span class="n">print_table</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -277,53 +273,87 @@ In the example below, we compute the one-sided Spearman pairwise correlations be
 <th class="head">adj_r2</th>
 <th class="head">z</th>
 <th class="head">p-unc</th>
-<th class="head">p-corr</th>
-<th class="head">p-adjust</th>
-<th class="head">BF10</th>
 </tr>
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td>X</td>
 <td>Y</td>
-<td>pearson</td>
+<td>shepherd</td>
 <td>two-sided</td>
-<td>0.716</td>
-<td>[0.08 1.36]</td>
-<td>0.513</td>
-<td>0.456</td>
-<td>0.899</td>
-<td>0.000</td>
-<td>0.001</td>
+<td>0.507</td>
+<td>[0.08 0.78]</td>
+<td>0.257</td>
+<td>0.169</td>
+<td>0.559</td>
+<td>0.064</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<div class="section" id="correction-for-multiple-comparisons">
+<h2>Correction for multiple comparisons</h2>
+<p>Finally, if you are computing a large number of correlation coefficients, you might want to correct the p-values for multiple comparisons. This can be done with <code class="code docutils literal notranslate"><span class="pre">padjust</span></code> argument:</p>
+<div class="code ipython3 highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stats</span> <span class="o">=</span> <span class="n">pairwise_corr</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s2">&quot;fdr_bh&quot;</span><span class="p">)</span>
+<span class="n">print_table</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+</pre></div>
+</div>
+<table border="1" class="colwidths-auto docutils" id="id5">
+<caption><span class="caption-text">Output</span></caption>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">X</th>
+<th class="head">Y</th>
+<th class="head">method</th>
+<th class="head">tail</th>
+<th class="head">r</th>
+<th class="head">CI95%</th>
+<th class="head">r2</th>
+<th class="head">adj_r2</th>
+<th class="head">z</th>
+<th class="head">p-unc</th>
+<th class="head">p-corr</th>
+<th class="head">p-adjust</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>X</td>
+<td>Y</td>
+<td>shepherd</td>
+<td>two-sided</td>
+<td>0.507</td>
+<td>[0.08 0.78]</td>
+<td>0.257</td>
+<td>0.169</td>
+<td>0.559</td>
+<td>0.064</td>
+<td>0.191</td>
 <td>fdr_bh</td>
-<td>86.949</td>
 </tr>
 <tr class="row-odd"><td>X</td>
 <td>Z</td>
-<td>pearson</td>
+<td>shepherd</td>
 <td>two-sided</td>
-<td>0.233</td>
-<td>[-0.39  0.85]</td>
-<td>0.054</td>
-<td>-0.057</td>
-<td>0.237</td>
-<td>0.323</td>
-<td>0.484</td>
+<td>-0.148</td>
+<td>[-0.55  0.32]</td>
+<td>0.022</td>
+<td>-0.093</td>
+<td>-0.149</td>
+<td>1.000</td>
+<td>1.000</td>
 <td>fdr_bh</td>
-<td>0.278</td>
 </tr>
 <tr class="row-even"><td>Y</td>
 <td>Z</td>
-<td>pearson</td>
+<td>shepherd</td>
 <td>two-sided</td>
-<td>0.002</td>
-<td>[-0.62  0.62]</td>
-<td>0.000</td>
-<td>-0.118</td>
-<td>0.002</td>
-<td>0.995</td>
-<td>0.995</td>
+<td>-0.330</td>
+<td>[-0.67  0.13]</td>
+<td>0.109</td>
+<td>0.004</td>
+<td>-0.343</td>
+<td>0.336</td>
+<td>0.504</td>
 <td>fdr_bh</td>
-<td>0.171</td>
 </tr>
 </tbody>
 </table>

@@ -423,7 +423,6 @@
 <span class="sd">        &gt;&gt;&gt;         method=&#39;kendall&#39;, export_filename=&#39;pairwise_corr.csv&#39;)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="kn">from</span> <span class="nn">pingouin.correlation</span> <span class="k">import</span> <span class="n">corr</span>
-    <span class="kn">from</span> <span class="nn">pingouin.effsize</span> <span class="k">import</span> <span class="n">compute_esci</span>
 
     <span class="k">if</span> <span class="n">tail</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;one-sided&#39;</span><span class="p">,</span> <span class="s1">&#39;two-sided&#39;</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Tail not recognized&#39;</span><span class="p">)</span>
@@ -448,7 +447,7 @@
             <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="n">method</span><span class="p">,</span>
             <span class="s1">&#39;tail&#39;</span><span class="p">:</span> <span class="n">tail</span><span class="p">,</span>
             <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="n">cor_st</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
-            <span class="s1">&#39;CI95%&#39;</span><span class="p">:</span> <span class="n">compute_esci</span><span class="p">(</span><span class="n">ef</span><span class="o">=</span><span class="n">cor_st</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">nx</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">ny</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span>
+            <span class="s1">&#39;CI95%&#39;</span><span class="p">:</span> <span class="n">cor_st</span><span class="p">[</span><span class="s1">&#39;CI95%&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
             <span class="s1">&#39;r2&#39;</span><span class="p">:</span> <span class="n">cor_st</span><span class="p">[</span><span class="s1">&#39;r2&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
             <span class="s1">&#39;adj_r2&#39;</span><span class="p">:</span> <span class="n">cor_st</span><span class="p">[</span><span class="s1">&#39;adj_r2&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
             <span class="s1">&#39;p-unc&#39;</span><span class="p">:</span> <span class="n">cor_st</span><span class="p">[</span><span class="s1">&#39;p-val&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>

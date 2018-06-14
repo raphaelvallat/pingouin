@@ -205,6 +205,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
         Test summary ::
 
         'r' : Correlation coefficient
+        'CI95' : 95% parametric confidence intervals
         'r2' : R-squared
         'adj_r2' : Adjusted R-squared
         'p-val' : one or two tailed p-value

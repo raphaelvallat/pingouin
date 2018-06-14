@@ -78,7 +78,7 @@ In the example below, we compute the one-sided Spearman pairwise correlations be
 Robust correlation
 ------------------
 
-If you believe that your dataset contains outliers, you can use a robust correlation method. There are currently two robust correlation methods implemented in Pingouin, namely the percentage bend correlation (`Wilcox 1994 <https://link.springer.com/article/10.1007/BF02294395>`_) and Shepherd's pi correlation (`Schwarzkopf et al. (2012). <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3397314/`_).
+If you believe that your dataset contains outliers, you can use a robust correlation method. There are currently two robust correlation methods implemented in Pingouin, namely the percentage bend correlation (`Wilcox 1994 <https://link.springer.com/article/10.1007/BF02294395>`_) and Shepherd's pi correlation (`Schwarzkopf et al. 2012 <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3397314/>`_).
 
 .. code:: ipython3
 

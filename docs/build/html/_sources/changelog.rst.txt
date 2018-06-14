@@ -23,6 +23,8 @@ b. Friedman test
 **Correlations**
 
 a. Added Shepherd's pi correlation (Schwarzkopf et al. 2012)
+b. Fixed bug in confidence intervals of correlation coefficients
+c. Parametric 95% CI are returned by default when calling corr
 
 v0.1.2 (June 2018)
 --------------------

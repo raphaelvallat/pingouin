@@ -97,13 +97,15 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">pearsonr</span><span class="p">,</span> <span class="n">spearmanr</span><span class="p">,</span> <span class="n">kendalltau</span>
-<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="p">(</span><span class="n">_remove_na</span><span class="p">,</span> <span class="n">test_normality</span><span class="p">,</span> <span class="n">bayesfactor_pearson</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="p">(</span><span class="n">_remove_na</span><span class="p">,</span> <span class="n">test_normality</span><span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;corr&quot;</span><span class="p">]</span>
 
 
 <span class="k">def</span> <span class="nf">mahal</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Mahalanobis distance.</span>
+
+<span class="sd">    Equivalent to the Matlab mahal function.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -131,7 +133,7 @@
 
 <span class="k">def</span> <span class="nf">bsmahal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="mi">5000</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Bootstraps Mahalanobis distances.</span>
+<span class="sd">    Bootstraps Mahalanobis distances for Shepherd&#39;s pi correlation.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -150,10 +152,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">MD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">j</span><span class="p">))</span>
+    <span class="n">nr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 
     <span class="c1"># Bootstrap the MD</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">nr</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">s1</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">s2</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
         <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
@@ -296,6 +299,7 @@
 <span class="sd">        Test summary ::</span>
 
 <span class="sd">        &#39;r&#39; : Correlation coefficient</span>
+<span class="sd">        &#39;CI95&#39; : 95% parametric confidence intervals</span>
 <span class="sd">        &#39;r2&#39; : R-squared</span>
 <span class="sd">        &#39;adj_r2&#39; : Adjusted R-squared</span>
 <span class="sd">        &#39;p-val&#39; : one or two tailed p-value</span>
@@ -346,39 +350,39 @@
 <span class="sd">        &gt;&gt;&gt; # Compute Pearson correlation</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import corr</span>
 <span class="sd">        &gt;&gt;&gt; corr(x, y)</span>
-<span class="sd">            method   r      r2     adj_r2  p-val   BF10</span>
-<span class="sd">            pearson  0.491  0.242  0.185   0.0058  6.135</span>
+<span class="sd">            method   r      CI95%         r2     adj_r2  p-val   BF10</span>
+<span class="sd">            pearson  0.491  [0.16, 0.72]  0.242  0.185   0.0058  6.135</span>
 
-<span class="sd">    2. Pearson correlation but with two outliers</span>
+<span class="sd">    2. Pearson correlation with two outliers</span>
 
 <span class="sd">        &gt;&gt;&gt; x[3], y[5] = 12, -8</span>
 <span class="sd">        &gt;&gt;&gt; corr(x, y)</span>
-<span class="sd">            method   r      r2     adj_r2  p-val  BF10</span>
-<span class="sd">            pearson  0.147  0.022  -0.051  0.439  0.19</span>
+<span class="sd">            method   r      CI95%          r2     adj_r2  p-val  BF10</span>
+<span class="sd">            pearson  0.147  [-0.23, 0.48]  0.022  -0.051  0.439  0.19</span>
 
 <span class="sd">    3. Spearman correlation</span>
 
 <span class="sd">        &gt;&gt;&gt; corr(x, y, method=&quot;spearman&quot;)</span>
-<span class="sd">            method    r      r2     adj_r2  p-val</span>
-<span class="sd">            spearman  0.401  0.161  0.099   0.028</span>
+<span class="sd">            method    r      CI95%         r2     adj_r2  p-val</span>
+<span class="sd">            spearman  0.401  [0.05, 0.67]  0.161  0.099   0.028</span>
 
 <span class="sd">    4. Percentage bend correlation (robust)</span>
 
 <span class="sd">        &gt;&gt;&gt; corr(x, y, method=&#39;percbend&#39;)</span>
-<span class="sd">            method    r      r2     adj_r2  p-val</span>
-<span class="sd">            percbend  0.389  0.151  0.089   0.034</span>
+<span class="sd">            method    r      CI95%         r2     adj_r2  p-val</span>
+<span class="sd">            percbend  0.389  [0.03, 0.66]  0.151  0.089   0.034</span>
 
 <span class="sd">    5. Shepherd&#39;s pi correlation (robust)</span>
 
 <span class="sd">        &gt;&gt;&gt; corr(x, y, method=&#39;shepherd&#39;)</span>
-<span class="sd">            method    r      r2     adj_r2  p-val</span>
-<span class="sd">            percbend  0.437  0.191  0.131   0.040</span>
+<span class="sd">            method    r      CI95%         r2     adj_r2  p-val</span>
+<span class="sd">            percbend  0.437  [0.09, 0.69]  0.191  0.131   0.040</span>
 
 <span class="sd">    6. One-tailed Spearman correlation</span>
 
 <span class="sd">        &gt;&gt;&gt; corr(x, y, tail=&quot;one-sided&quot;, method=&#39;shepherd&#39;)</span>
-<span class="sd">            method    r      r2     adj_r2  p-val</span>
-<span class="sd">            spearman  0.401  0.161  0.099   0.014</span>
+<span class="sd">            method    r      CI95%         r2     adj_r2  p-val</span>
+<span class="sd">            spearman  0.401  [0.05, 0.67]  0.161  0.099   0.014</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -414,17 +418,23 @@
     <span class="c1"># Compute adj_r2</span>
     <span class="n">adj_r2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">nx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">nx</span> <span class="o">-</span> <span class="mi">3</span><span class="p">))</span>
 
+    <span class="c1"># Compute the parametric 95% confidence interval</span>
+    <span class="kn">from</span> <span class="nn">pingouin.effsize</span> <span class="k">import</span> <span class="n">compute_esci</span>
+    <span class="n">ci</span> <span class="o">=</span> <span class="n">compute_esci</span><span class="p">(</span><span class="n">ef</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
     <span class="n">stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">method</span><span class="p">])</span>
     <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;CI95%&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ci</span><span class="p">]</span>
     <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;r2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
     <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;adj_r2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">adj_r2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
     <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-val&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pval</span> <span class="k">if</span> <span class="n">tail</span> <span class="o">==</span> <span class="s1">&#39;two-sided&#39;</span> <span class="k">else</span> <span class="o">.</span><span class="mi">5</span> <span class="o">*</span> <span class="n">pval</span>
 
     <span class="c1"># Compute the BF10 for Pearson correlation only</span>
+    <span class="kn">from</span> <span class="nn">pingouin.bayesian</span> <span class="k">import</span> <span class="n">bayesfactor_pearson</span>
     <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;pearson&#39;</span><span class="p">:</span>
         <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;BF10&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bayesfactor_pearson</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">nx</span><span class="p">)</span>
 
-    <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;r2&#39;</span><span class="p">,</span> <span class="s1">&#39;adj_r2&#39;</span><span class="p">,</span> <span class="s1">&#39;p-val&#39;</span><span class="p">,</span> <span class="s1">&#39;BF10&#39;</span><span class="p">]</span>
+    <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;CI95%&#39;</span><span class="p">,</span> <span class="s1">&#39;r2&#39;</span><span class="p">,</span> <span class="s1">&#39;adj_r2&#39;</span><span class="p">,</span> <span class="s1">&#39;p-val&#39;</span><span class="p">,</span> <span class="s1">&#39;BF10&#39;</span><span class="p">]</span>
     <span class="n">stats</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
     <span class="n">stats</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">stats</span></div>
