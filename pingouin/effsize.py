@@ -20,7 +20,7 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
         Data vectors (required for bootstrapping only)
     ef : float
         Original effect size (must be Cohen d or Hedges g).
-        Required for 'parametric' method only.
+        Required for parametric method only.
     nx, ny : int
         Length of vector x and y.
     alpha : float, optional
@@ -79,14 +79,22 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
         >>> print(ci68)
             [0.99 1.12]
 
-    5. Compute the bootstrapped Pearson r confidence interval
+    5. Compute the confidence interval of a correlation coefficient
 
-        >>> ef = compute_effsize(x=x, y=y, eftype='r')
-        >>> ci = compute_esci(x=x, y=y, method='bootstrap', eftype='r')
-        >>> print(ef)
-        >>> print(ci)
-            0.45
-            [0.42 0.51]
+        >>> # Generate random correlated samples
+        >>> np.random.seed(123)
+        >>> mean, cov = [4, 6], [(1, .5), (.5, 1)]
+        >>> n = 30
+        >>> x, y = np.random.multivariate_normal(mean, cov, 30).T
+        >>> # Compute correlation
+        >>> from pingouin import corr
+        >>> r = corr(x, y)['r'][0]
+        >>> # Compute parametric 95%CI
+        >>> ci_pm = compute_esci(ef=r, nx=n, ny=n, eftype='r')
+        >>> # Compute bootstrapped 95% CI
+        >>> ci_bt = compute_esci(x=x, y=y, method='bootstrap', eftype='r')
+        >>> print(r, ci_pm, ci_bt)
+            0.491 [0.11 0.7 ] [0.42 0.83]
     """
     # Check arguments
     if not _check_eftype(eftype):
@@ -103,10 +111,19 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
     # Start computation
     if method == 'parametric':
         from scipy.stats import norm
-        se = np.sqrt(((nx + ny) / (nx * ny)) + (ef**2) / (2 * (nx + ny)))
         crit = np.abs(norm.ppf((1 - alpha) / 2))
-        ci = np.round(np.array([ef - crit * se, ef + crit * se]), 2)
-        return ci
+        if eftype == 'r':
+            # Standardize correlation coefficient
+            z = np.arctanh(ef)
+            se = 1 / np.sqrt(nx - 3)
+            ci_z = np.array([ef - crit * se, ef + crit * se])
+            # Transform back to r
+            return np.round(np.tanh(ci_z), 2)
+        else:
+            se = np.sqrt(((nx + ny) / (nx * ny)) + (ef**2) / (2 * (nx + ny)))
+            ci = np.round(np.array([ef - crit * se, ef + crit * se]), 2)
+            return ci
+
     elif method == 'bootstrap':
         ef = compute_effsize(x=x, y=y, eftype=eftype)
         rd_x = np.random.choice(nx, size=n_boot)
@@ -359,6 +376,11 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         sd_control = np.min([np.std(x), np.std(y)])
         d = (np.mean(x) - np.mean(y)) / sd_control
         return d
+    elif eftype.lower() == 'r':
+        # Return correlation coefficient (useful for CI bootstrapping)
+        from scipy.stats import pearsonr
+        r, _ = pearsonr(x, y)
+        return r
     else:
         # Test equality of variance of data with a stringent threshold
         equal_var, p = test_homoscedasticity(x, y, alpha=.001)

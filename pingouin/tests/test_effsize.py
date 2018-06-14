@@ -24,6 +24,7 @@ class TestEffsize(_TestPingouin):
                      eftype='hedges', return_dist=True)
         compute_esci(x=x, y=y, alpha=.99, method='bootstrap', n_boot=1000,
                      eftype='r', return_dist=False)
+        compute_esci(ef=.6, nx=30, ny=30, eftype='r')
         compute_esci(ef=.4, nx=len(x), ny=len(y), alpha=.95)
         # Wrong input
         compute_esci(ef=.4, nx=len(x), ny=len(y), method='bootstrap')
