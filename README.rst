@@ -86,7 +86,7 @@ Quick start
 1. T-test
 #########
 
-.. code-block:: ipython3
+.. code-block:: python
 
   # Generate two correlated random variables
   import numpy as np
@@ -112,7 +112,7 @@ Quick start
 2. Pearson's correlation
 ########################
 
-.. code-block:: ipython3
+.. code-block:: python
 
   # T-test
   from pingouin import corr
@@ -132,7 +132,7 @@ Quick start
 3. Robust correlation
 #####################
 
-.. code-block:: ipython3
+.. code-block:: python
 
   # Introduce an outlier
   x[5] = 18
@@ -153,7 +153,7 @@ Quick start
 4. Test the normality of the data
 #################################
 
-.. code-block:: ipython3
+.. code-block:: python
 
    from pingouin import test_normality
    # Return a boolean (true if normal) and the associated p-value
@@ -168,7 +168,7 @@ Quick start
 5. One-way ANOVA using a pandas DataFrame
 #########################################
 
-.. code-block:: ipython3
+.. code-block:: python
 
   # Generate a pandas DataFrame
   import pandas as pd
@@ -201,7 +201,7 @@ Quick start
 6. One-way non-parametric ANOVA (Kruskal-Wallis)
 ################################################
 
-.. code-block:: ipython3
+.. code-block:: python
 
   from pingouin import kruskal
   stats = kruskal(data=df, dv='DV', between='Group')
@@ -221,7 +221,7 @@ Quick start
 7. Post-hoc tests corrected for multiple-comparisons
 ####################################################
 
-.. code-block:: ipython3
+.. code-block:: python
 
   from pingouin import pairwise_ttests, print_table
 
@@ -248,7 +248,7 @@ Quick start
 8. Two-way mixed ANOVA
 ######################
 
-.. code-block:: ipython3
+.. code-block:: python
 
   # Add a "Time" column in the DataFrame
   df['Time'] = np.tile(np.repeat(['Pre', 'Post'], 5), 3)
@@ -275,7 +275,7 @@ Quick start
 9. Pairwise correlations between columns of a dataframe
 #######################################################
 
-.. code-block:: ipython3
+.. code-block:: python
 
     df = pd.DataFrame({'X': x, 'Y': y, 'Z': z})
     from pingouin import pairwise_corr
@@ -296,7 +296,7 @@ Quick start
 10. Convert between effect sizes
 ################################
 
-.. code-block:: ipython3
+.. code-block:: python
 
     from pingouin import convert_effsize
     # Convert from Cohen's d to Hedges' g
