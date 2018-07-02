@@ -16,10 +16,10 @@ def circ_corrcc(x, y, tail='two-sided'):
     Parameters
     ----------
     x: np.array
-        First circular variable (angles in radians)
+        First circular variable (expressed in radians)
     y: np.array
-        Second circular variable (angles in radians)
-    tail : string
+        Second circular variable (expressed in radians)
+    tail: string
         Specify whether to return 'one-sided' or 'two-sided' p-value.
 
     Returns
@@ -31,16 +31,18 @@ def circ_corrcc(x, y, tail='two-sided'):
 
     Notes
     -----
-    Adapted from the CircStats MATLAB toolbox.
+    Adapted from the CircStats MATLAB toolbox (Berens 2009).
 
-    Please note that NaN are automatically removed from datasets.
+    Use the np.deg2rad function to convert angles from degrees to radians.
+
+    Please note that NaN are automatically removed.
 
     Examples
     --------
-    Compute the r and p-value of two circular variables (in radians)
+    Compute the r and p-value of two circular variables
 
         >>> x = [0.785, 1.570, 3.141, 3.839, 5.934]
-        >>> y = [0.593,	1.291,	2.879,	3.892,	6.108]
+        >>> y = [0.593, 1.291, 2.879, 3.892, 6.108]
         >>> r, pval = circ_corrcc(x, y)
         >>> print(r, pval)
             0.942, 0.066
