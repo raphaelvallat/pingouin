@@ -148,7 +148,8 @@ def circ_r(alpha, w=None, d=None, axis=0):
         Number of incidences in case of binned angle data
     d: float
         Spacing (in radians) of bin centers for binned data. If supplied,
-         a correction factor is used to correct for bias in the estimation of r.
+         a correction factor is used to correct for bias in the estimation
+         of r.
     axis: int
         Compute along this dimension
 
@@ -200,7 +201,8 @@ def circ_rayleigh(alpha, w=None, d=None):
         Number of incidences in case of binned angle data.
     d: float
         Spacing (in radians) of bin centers for binned data. If supplied,
-         a correction factor is used to correct for bias in the estimation of r.
+         a correction factor is used to correct for bias in the estimation
+         of r.
 
     Returns
     -------
