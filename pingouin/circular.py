@@ -67,9 +67,7 @@ def circ_corrcc(x, y, tail='two-sided'):
     # Compute T- and p-values
     tval = np.sqrt((n * (x_sin**2).mean() * (y_sin**2).mean()) /
                    np.mean(x_sin**2 * y_sin**2)) * r
-    # Original code in CircStats
+    # Approximately distributed as a standard normal
     pval = 2 * norm.sf(abs(tval))
-    # It seems that the next line might however be more accurate...
-    # pval = 2 * t.sf(abs(tval), n - 2)
     pval = pval / 2 if tail == 'one-sided' else pval
     return np.round(r, 3), pval
