@@ -6,6 +6,7 @@ from .multicomp import *
 from .parametric import *
 from .nonparametric import *
 from .correlation import *
+from .circular import *
 from .pairwise import *
 from .power import *
 
