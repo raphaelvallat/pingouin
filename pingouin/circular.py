@@ -1,6 +1,9 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: July 2018
-# Translated from the CircStats MATLAB toolbox.
+# Python code inspired from the CircStats MATLAB toolbox (Berens 2009)
+# and the brainpipe Python package.
+# package.
+# Reference:
 # Berens, Philipp. 2009. CircStat: A MATLAB Toolbox for Circular Statistics.
 # Journal of Statistical Software, Articles 31 (10): 1–21.
 import numpy as np
@@ -160,7 +163,10 @@ def circ_r(alpha, w=None, d=None, axis=0):
 
     Notes
     -----
-    Python code borrowed from brainpipe (based on the MATLAB toolbox CircStats)
+    The length of the mean resultant vector is a crucial quantity for the
+    measurement of circular spread or hypothesis testing in directional
+    statistics. The closer it is to one, the more concentrated the data
+    sample is around the mean direction (Berens 2009).
 
     Examples
     --------
@@ -213,7 +219,8 @@ def circ_rayleigh(alpha, w=None, d=None):
 
     Notes
     -----
-    Python code borrowed from brainpipe (based on the MATLAB toolbox CircStats)
+    The Rayleigh test asks how large the resultant vector length R must be
+    to indicate a non-uniform  distribution (Fisher 1995).
 
     H0: the population is uniformly distributed around the circle
     HA: the populatoin is not distributed uniformly around the circle
@@ -235,7 +242,6 @@ def circ_rayleigh(alpha, w=None, d=None):
 
         >>> circ_rayleigh(x, w=[.1, .2, .3, .4, .5], d=0.2)
             0.278, 0.807
-
     """
     alpha = np.array(alpha)
     if w is None:
@@ -251,7 +257,7 @@ def circ_rayleigh(alpha, w=None, d=None):
     R = n * r
     z = (R**2) / n
 
-    # Compute p value using approxation in Zar, p. 617
+    # Compute p value using approxation in Zar (1999), p. 617
     pval = np.exp(np.sqrt(1 + 4 * n + 4 * (n**2 - R**2)) - (1 + 2 * n))
 
     return np.round(z, 3), pval
