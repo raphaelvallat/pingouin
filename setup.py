@@ -37,6 +37,7 @@ def check_dependencies():
         import pandas
     except ImportError:
         install_requires.append('pandas')
+
     return install_requires
 
 
@@ -56,7 +57,7 @@ if __name__ == "__main__":
           version=VERSION,
           download_url=DOWNLOAD_URL,
           install_requires=install_requires,
-          packages=['pingouin'],
+          packages=['pingouin', 'pingouin.external'],
           package_data=PACKAGE_DATA,
           classifiers=[
               'Intended Audience :: Science/Research',
