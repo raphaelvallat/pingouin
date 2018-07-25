@@ -11,6 +11,9 @@
 .. image:: https://travis-ci.org/raphaelvallat/pingouin.svg?branch=master
     :target: https://travis-ci.org/raphaelvallat/pingouin
 
+.. image:: https://ci.appveyor.com/api/projects/status/v7fhavoqj8ig1bs2?svg=true
+    :target: https://ci.appveyor.com/project/raphaelvallat/pingouin
+
 .. image:: https://codecov.io/gh/raphaelvallat/pingouin/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/raphaelvallat/pingouin
 
@@ -37,6 +40,8 @@ It provides easy-to-grasp functions for computing several statistical tests:
 6. Tests for sphericity, normality and homoscedasticity
 
 7. Effect sizes
+
+8. Circular statistics
 
 Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
 
