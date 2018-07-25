@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pingouin.circ_corrcc &#8212; pingouin 0.1.4 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/style.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pingouin.circ_corrcl" href="pingouin.circ_corrcl.html" />
+    <link rel="prev" title="pingouin.bayesfactor_pearson" href="pingouin.bayesfactor_pearson.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin_128x128.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1.4</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">API</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="pingouin-circ-corrcc">
+<h1>pingouin.circ_corrcc</h1>
+<dl class="function">
+<dt id="pingouin.circ_corrcc">
+<code class="descclassname">pingouin.</code><code class="descname">circ_corrcc</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>tail='two-sided'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/circular.html#circ_corrcc"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Correlation coefficient between two circular variables.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">np.array</span></dt>
+<dd><p class="first last">First circular variable (expressed in radians)</p>
+</dd>
+<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">np.array</span></dt>
+<dd><p class="first last">Second circular variable (expressed in radians)</p>
+</dd>
+<dt><strong>tail</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Specify whether to return ‘one-sided’ or ‘two-sided’ p-value.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>r</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Correlation coefficient</p>
+</dd>
+<dt><strong>pval</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Uncorrected p-value</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Adapted from the CircStats MATLAB toolbox (Berens 2009).</p>
+<p>Use the np.deg2rad function to convert angles from degrees to radians.</p>
+<p>Please note that NaN are automatically removed.</p>
+<p class="rubric">Examples</p>
+<p>Compute the r and p-value of two circular variables</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">circ_corrcc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.785</span><span class="p">,</span> <span class="mf">1.570</span><span class="p">,</span> <span class="mf">3.141</span><span class="p">,</span> <span class="mf">3.839</span><span class="p">,</span> <span class="mf">5.934</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.593</span><span class="p">,</span> <span class="mf">1.291</span><span class="p">,</span> <span class="mf">2.879</span><span class="p">,</span> <span class="mf">3.892</span><span class="p">,</span> <span class="mf">6.108</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">circ_corrcc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">pval</span><span class="p">)</span>
+<span class="go">    0.942, 0.066</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2018, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

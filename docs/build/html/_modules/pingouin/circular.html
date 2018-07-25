@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pingouin.circular &#8212; pingouin 0.1.4 documentation</title>
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/copybutton.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html"><span><img src="../../_static/pingouin_128x128.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1.4</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../api.html">API</a></li>
+                <li><a href="../../examples.html">Examples</a></li>
+                <li><a href="../../changelog.html">What's new</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <h1>Source code for pingouin.circular</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Raphael Vallat &lt;raphaelvallat9@gmail.com&gt;</span>
+<span class="c1"># Date: July 2018</span>
+<span class="c1"># Python code inspired from the CircStats MATLAB toolbox (Berens 2009)</span>
+<span class="c1"># and the brainpipe Python package.</span>
+<span class="c1"># package.</span>
+<span class="c1"># Reference:</span>
+<span class="c1"># Berens, Philipp. 2009. CircStat: A MATLAB Toolbox for Circular Statistics.</span>
+<span class="c1"># Journal of Statistical Software, Articles 31 (10): 1–21.</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">circmean</span>
+<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">_remove_na</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;circ_corrcc&quot;</span><span class="p">,</span> <span class="s2">&quot;circ_corrcl&quot;</span><span class="p">,</span> <span class="s2">&quot;circ_r&quot;</span><span class="p">,</span> <span class="s2">&quot;circ_rayleigh&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="circ_corrcc"><a class="viewcode-back" href="../../generated/pingouin.circ_corrcc.html#pingouin.circ_corrcc">[docs]</a><span class="k">def</span> <span class="nf">circ_corrcc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Correlation coefficient between two circular variables.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : np.array</span>
+<span class="sd">        First circular variable (expressed in radians)</span>
+<span class="sd">    y : np.array</span>
+<span class="sd">        Second circular variable (expressed in radians)</span>
+<span class="sd">    tail : string</span>
+<span class="sd">        Specify whether to return &#39;one-sided&#39; or &#39;two-sided&#39; p-value.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    r : float</span>
+<span class="sd">        Correlation coefficient</span>
+<span class="sd">    pval : float</span>
+<span class="sd">        Uncorrected p-value</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Adapted from the CircStats MATLAB toolbox (Berens 2009).</span>
+
+<span class="sd">    Use the np.deg2rad function to convert angles from degrees to radians.</span>
+
+<span class="sd">    Please note that NaN are automatically removed.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Compute the r and p-value of two circular variables</span>
+
+<span class="sd">        &gt;&gt;&gt; from pingouin import circ_corrcc</span>
+<span class="sd">        &gt;&gt;&gt; x = [0.785, 1.570, 3.141, 3.839, 5.934]</span>
+<span class="sd">        &gt;&gt;&gt; y = [0.593, 1.291, 2.879, 3.892, 6.108]</span>
+<span class="sd">        &gt;&gt;&gt; r, pval = circ_corrcc(x, y)</span>
+<span class="sd">        &gt;&gt;&gt; print(r, pval)</span>
+<span class="sd">            0.942, 0.066</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">norm</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="c1"># Check size</span>
+    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;x and y must have the same length.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Remove NA</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">_remove_na</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="c1"># Compute correlation coefficient</span>
+    <span class="n">x_sin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">circmean</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="n">y_sin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">circmean</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x_sin</span> <span class="o">*</span> <span class="n">y_sin</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x_sin</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_sin</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="c1"># Compute T- and p-values</span>
+    <span class="n">tval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">x_sin</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="n">y_sin</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span>
+                   <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x_sin</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">y_sin</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="n">r</span>
+    <span class="c1"># Approximately distributed as a standard normal</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">tval</span><span class="p">))</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="n">pval</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">tail</span> <span class="o">==</span> <span class="s1">&#39;one-sided&#39;</span> <span class="k">else</span> <span class="n">pval</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">pval</span></div>
+
+
+<div class="viewcode-block" id="circ_corrcl"><a class="viewcode-back" href="../../generated/pingouin.circ_corrcl.html#pingouin.circ_corrcl">[docs]</a><span class="k">def</span> <span class="nf">circ_corrcl</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Correlation coefficient between one circular and one linear variable</span>
+<span class="sd">    random variables.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : np.array</span>
+<span class="sd">        First circular variable (expressed in radians)</span>
+<span class="sd">    y : np.array</span>
+<span class="sd">        Second circular variable (linear)</span>
+<span class="sd">    tail : string</span>
+<span class="sd">        Specify whether to return &#39;one-sided&#39; or &#39;two-sided&#39; p-value.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    r : float</span>
+<span class="sd">        Correlation coefficient</span>
+<span class="sd">    pval : float</span>
+<span class="sd">        Uncorrected p-value</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Python code borrowed from brainpipe (based on the MATLAB toolbox CircStats)</span>
+
+<span class="sd">    Please note that NaN are automatically removed from datasets.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Compute the r and p-value between one circular and one linear variables.</span>
+
+<span class="sd">        &gt;&gt;&gt; from pingouin import circ_corrcl</span>
+<span class="sd">        &gt;&gt;&gt; x = [0.785, 1.570, 3.141, 0.839, 5.934]</span>
+<span class="sd">        &gt;&gt;&gt; y = [1.593, 1.291, -0.248, -2.892, 0.102]</span>
+<span class="sd">        &gt;&gt;&gt; r, pval = circ_corrcl(x, y)</span>
+<span class="sd">        &gt;&gt;&gt; print(r, pval)</span>
+<span class="sd">            0.109, 0.971</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">pearsonr</span><span class="p">,</span> <span class="n">chi2</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="c1"># Check size</span>
+    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;x and y must have the same length.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Remove NA</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">_remove_na</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="c1"># Compute correlation coefficent for sin and cos independently</span>
+    <span class="n">rxs</span> <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">rxc</span> <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">rcs</span> <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Compute angular-linear correlation (equ. 27.47)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">rxc</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">rxs</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">rxc</span> <span class="o">*</span> <span class="n">rxs</span> <span class="o">*</span> <span class="n">rcs</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">rcs</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="c1"># Compute p-value</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="n">pval</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">tail</span> <span class="o">==</span> <span class="s1">&#39;one-sided&#39;</span> <span class="k">else</span> <span class="n">pval</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">pval</span></div>
+
+
+<div class="viewcode-block" id="circ_r"><a class="viewcode-back" href="../../generated/pingouin.circ_r.html#pingouin.circ_r">[docs]</a><span class="k">def</span> <span class="nf">circ_r</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mean resultant vector length for circular data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alpha : array</span>
+<span class="sd">        Sample of angles in radians</span>
+<span class="sd">    w : array</span>
+<span class="sd">        Number of incidences in case of binned angle data</span>
+<span class="sd">    d : float</span>
+<span class="sd">        Spacing (in radians) of bin centers for binned data. If supplied,</span>
+<span class="sd">        a correction factor is used to correct for bias in the estimation</span>
+<span class="sd">        of r.</span>
+<span class="sd">    axis : int</span>
+<span class="sd">        Compute along this dimension</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    r : float</span>
+<span class="sd">        Mean resultant length</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The length of the mean resultant vector is a crucial quantity for the</span>
+<span class="sd">    measurement of circular spread or hypothesis testing in directional</span>
+<span class="sd">    statistics. The closer it is to one, the more concentrated the data</span>
+<span class="sd">    sample is around the mean direction (Berens 2009).</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Mean resultant vector length of circular data</span>
+
+<span class="sd">        &gt;&gt;&gt; from pingouin import circ_r</span>
+<span class="sd">        &gt;&gt;&gt; x = [0.785, 1.570, 3.141, 0.839, 5.934]</span>
+<span class="sd">        &gt;&gt;&gt; circ_r(x)</span>
+<span class="sd">            0.497</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">alpha</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">alpha</span><span class="o">.</span><span class="n">size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">w</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input dimensions do not match&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Compute weighted sum of cos and sin of angles:</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+
+    <span class="c1"># Obtain length:</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">/</span> <span class="n">w</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+
+    <span class="c1"># For data with known spacing, apply correction factor</span>
+    <span class="k">if</span> <span class="n">d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">d</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">d</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">c</span> <span class="o">*</span> <span class="n">r</span>
+
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="circ_rayleigh"><a class="viewcode-back" href="../../generated/pingouin.circ_rayleigh.html#pingouin.circ_rayleigh">[docs]</a><span class="k">def</span> <span class="nf">circ_rayleigh</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Rayleigh test for non-uniformity of circular data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alpha : np.array</span>
+<span class="sd">        Sample of angles in radians.</span>
+<span class="sd">    w : np.array</span>
+<span class="sd">        Number of incidences in case of binned angle data.</span>
+<span class="sd">    d : float</span>
+<span class="sd">        Spacing (in radians) of bin centers for binned data. If supplied,</span>
+<span class="sd">        a correction factor is used to correct for bias in the estimation</span>
+<span class="sd">        of r.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    z : float</span>
+<span class="sd">        Z-statistic</span>
+<span class="sd">    pval : float</span>
+<span class="sd">        P-value</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The Rayleigh test asks how large the resultant vector length R must be</span>
+<span class="sd">    to indicate a non-uniform  distribution (Fisher 1995).</span>
+
+<span class="sd">    H0: the population is uniformly distributed around the circle</span>
+<span class="sd">    HA: the populatoin is not distributed uniformly around the circle</span>
+
+<span class="sd">    The assumptions for the Rayleigh test are that (1) the distribution has</span>
+<span class="sd">    only one mode and (2) the data is sampled from a von Mises distribution.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    1. Simple Rayleigh test for non-uniformity of circular data.</span>
+
+<span class="sd">        &gt;&gt;&gt; from pingouin import circ_rayleigh</span>
+<span class="sd">        &gt;&gt;&gt; x = [0.785, 1.570, 3.141, 0.839, 5.934]</span>
+<span class="sd">        &gt;&gt;&gt; z, pval = circ_rayleigh(x)</span>
+<span class="sd">        &gt;&gt;&gt; print(z, pval)</span>
+<span class="sd">            1.236 0.3048</span>
+
+<span class="sd">    2. Specifying w and d</span>
+
+<span class="sd">        &gt;&gt;&gt; circ_rayleigh(x, w=[.1, .2, .3, .4, .5], d=0.2)</span>
+<span class="sd">            0.278, 0.807</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">circ_r</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input dimensions do not match&quot;</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">circ_r</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+
+    <span class="c1"># Compute Rayleigh&#39;s statistic</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="n">r</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">R</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span>
+
+    <span class="c1"># Compute p value using approxation in Zar (1999), p. 617</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">R</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">pval</span></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2018, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

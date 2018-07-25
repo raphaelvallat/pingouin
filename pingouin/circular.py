@@ -18,18 +18,18 @@ def circ_corrcc(x, y, tail='two-sided'):
 
     Parameters
     ----------
-    x: np.array
+    x : np.array
         First circular variable (expressed in radians)
-    y: np.array
+    y : np.array
         Second circular variable (expressed in radians)
-    tail: string
+    tail : string
         Specify whether to return 'one-sided' or 'two-sided' p-value.
 
     Returns
     -------
-    r: float
+    r : float
         Correlation coefficient
-    pval: float
+    pval : float
         Uncorrected p-value
 
     Notes
@@ -83,18 +83,18 @@ def circ_corrcl(x, y, tail='two-sided'):
 
     Parameters
     ----------
-    x: np.array
+    x : np.array
         First circular variable (expressed in radians)
-    y: np.array
+    y : np.array
         Second circular variable (linear)
-    tail: string
+    tail : string
         Specify whether to return 'one-sided' or 'two-sided' p-value.
 
     Returns
     -------
-    r: float
+    r : float
         Correlation coefficient
-    pval: float
+    pval : float
         Uncorrected p-value
 
     Notes
@@ -145,20 +145,20 @@ def circ_r(alpha, w=None, d=None, axis=0):
 
     Parameters
     ----------
-    alpha: array
+    alpha : array
         Sample of angles in radians
-    w: array
+    w : array
         Number of incidences in case of binned angle data
-    d: float
+    d : float
         Spacing (in radians) of bin centers for binned data. If supplied,
-         a correction factor is used to correct for bias in the estimation
-         of r.
-    axis: int
+        a correction factor is used to correct for bias in the estimation
+        of r.
+    axis : int
         Compute along this dimension
 
     Returns
     -------
-    r: float
+    r : float
         Mean resultant length
 
     Notes
@@ -201,20 +201,20 @@ def circ_rayleigh(alpha, w=None, d=None):
 
     Parameters
     ----------
-    alpha: np.array
+    alpha : np.array
         Sample of angles in radians.
-    w: np.array
+    w : np.array
         Number of incidences in case of binned angle data.
-    d: float
+    d : float
         Spacing (in radians) of bin centers for binned data. If supplied,
-         a correction factor is used to correct for bias in the estimation
-         of r.
+        a correction factor is used to correct for bias in the estimation
+        of r.
 
     Returns
     -------
-    z: float
+    z : float
         Z-statistic
-    pval: float
+    pval : float
         P-value
 
     Notes
