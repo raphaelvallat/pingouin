@@ -30,6 +30,19 @@ Bayesian
     bayesfactor_ttest
     bayesfactor_pearson
 
+Circular
+--------
+
+.. _circular:
+
+.. autosummary::
+   :toctree: generated/
+
+    circ_corrcc
+    circ_corrcl
+    circ_r
+    circ_rayleigh
+
 Correlation
 -----------
 

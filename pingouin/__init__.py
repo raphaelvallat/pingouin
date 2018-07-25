@@ -10,4 +10,4 @@ from .circular import *
 from .pairwise import *
 from .power import *
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"

@@ -3,8 +3,18 @@
 What's new
 ##########
 
+v0.1.4 (July 2018)
+------------------
+**Installation**
+
+a. Fix bug with pip install caused by pingouin.external
+
+**Circular statistics**
+
+a. Added circ_corrcc, circ_corrcl, circ_r, circ_rayleigh
+
 v0.1.3 (June 2018)
---------------------
+------------------
 **Documentation**
 
 a. Added several tutorials
