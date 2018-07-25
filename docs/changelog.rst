@@ -3,6 +3,12 @@
 What's new
 ##########
 
+v0.1.5
+------
+**Testing**
+
+a. Added AppVeyor CI (Windows)
+
 v0.1.4 (July 2018)
 ------------------
 **Installation**
@@ -37,7 +43,7 @@ b. Fixed bug in confidence intervals of correlation coefficients
 c. Parametric 95% CI are returned by default when calling corr
 
 v0.1.2 (June 2018)
---------------------
+------------------
 
 **Correlation**
 
@@ -56,7 +62,7 @@ d. Common language effect size
 
 
 v0.1.1 (April 2018)
---------------------
+-------------------
 
 **ANOVA**
 
@@ -70,7 +76,7 @@ a. T-tests
 b. Power of T-tests and one-way ANOVA
 
 v0.1.0 (April 2018)
---------------------
+-------------------
 
 Initial release.
 
