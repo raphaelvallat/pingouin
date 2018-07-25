@@ -6,7 +6,8 @@ from pingouin import (_check_dataframe, _remove_rm_na, _remove_na,
                       _export_table, bayesfactor_ttest)
 
 __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
-           "test_sphericity", "ttest", "rm_anova", "anova", "mixed_anova"]
+           "test_sphericity", "ttest", "rm_anova", "anova", "anova2",
+           "mixed_anova"]
 
 
 def gzscore(x):
@@ -756,6 +757,133 @@ def anova(dv=None, between=None, data=None, detailed=False,
                             'np2': [np2, np.nan]
                             })
         col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'np2']
+
+    aov = aov.reindex(columns=col_order)
+    aov.dropna(how='all', axis=1, inplace=True)
+    # Export to .csv
+    if export_filename is not None:
+        _export_table(aov, export_filename)
+    return aov
+
+
+def anova2(dv=None, between=None, data=None, export_filename=None):
+    """Two-way ANOVA.
+
+    Results have been tested against JASP.
+
+    Parameters
+    ----------
+    dv : string
+        Name of column containing the dependant variable.
+    between : list of string
+        Name of column containing the two between factors. Must contain exactly
+        two values (e.g. ['factor1', 'factor2'])
+    data : pandas DataFrame
+        DataFrame
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
+
+    Returns
+    -------
+    aov : DataFrame
+        ANOVA summary ::
+
+        'Source' : Factor names
+        'SS' :Sums of squares
+        'DF' : Degrees of freedom
+        'MS' : Mean squares
+        'F' : F-values
+        'p-unc' : uncorrected p-values
+        'np2' : Partial eta-square effect sizes
+
+    See Also
+    --------
+    anova : One-way ANOVA
+    rm_anova : One-way repeated measures ANOVA
+    mixed_anova : Two way mixed ANOVA
+    kruskal : Non-parametric one-way ANOVA
+
+    Examples
+    --------
+    Compute a two-way ANOVA.
+
+        >>> import pandas as pd
+        >>> from pingouin import anova2, print_table
+        >>> df = pd.read_csv('dataset.csv')
+        >>> aov = anova(dv='DV', between=['factor1', 'factor2'], data=df,
+                        export_filename='anova.csv')
+        >>> print_table(aov)
+    """
+    from scipy.stats import f
+
+    # Assert that there are two factors
+    if not isinstance(between, list):
+        return anova(dv=dv, between=between, data=data,
+                     export_filename=export_filename, detailed=True)
+
+    if len(between) == 1:
+        return anova(dv=dv, between=between, data=data,
+                     export_filename=export_filename, detailed=True)
+
+
+    # Reset index (avoid duplicate axis error)
+    data = data.reset_index(drop=True)
+
+    fac1, fac2 = between
+    aov_fac1 = anova(data=data, dv=dv, between=fac1, detailed=True)
+    aov_fac2 = anova(data=data, dv=dv, between=fac2, detailed=True)
+
+    # Sums of squares
+    ss_fac1 = aov_fac1.loc[0, 'SS']
+    ss_fac2 = aov_fac2.loc[0, 'SS']
+    ss_tot = ((data[dv] - data[dv].mean())**2).sum()
+    ss_resid = np.sum(data.groupby([fac1, fac2]).apply(lambda x:
+                                                      (x - x.mean())**2))[0]
+    ss_inter = ss_tot - (ss_resid + ss_fac1 + ss_fac2)
+
+    # Degrees of freedom
+    df_fac1 = aov_fac1.loc[0, 'DF']
+    df_fac2 = aov_fac2.loc[0, 'DF']
+    df_tot = data[dv].size - 1
+    df_inter = (data[fac1].unique().size - 1) * (data[fac2].unique().size - 1)
+    df_resid = data[dv].size - (data[fac1].unique().size *
+                                            data[fac2].unique().size)
+
+    # Mean squares
+    ms_fac1 = aov_fac1.loc[0, 'MS']
+    ms_fac2 = aov_fac2.loc[0, 'MS']
+    ms_inter = ss_inter / df_inter
+    ms_resid = ss_resid / df_resid
+
+    # F-values
+    fval_fac1 = ms_fac1 / ms_resid
+    fval_fac2 = ms_fac2 / ms_resid
+    fval_inter = ms_inter / ms_resid
+
+    # P-values
+    pval_fac1 = f(df_fac1, df_resid).sf(fval_fac1)
+    pval_fac2 = f(df_fac2, df_resid).sf(fval_fac2)
+    pval_inter = f(df_inter, df_resid).sf(fval_inter)
+
+    # Partial eta-square
+    np2_fac1 = (fval_fac1 * df_fac1) / (fval_fac1 * df_fac1 + df_resid)
+    np2_fac2 = (fval_fac2 * df_fac2) / (fval_fac2 * df_fac2 + df_resid)
+    np2_inter = (fval_inter * df_inter) / (fval_inter * df_inter + df_resid)
+
+    # Create output dataframe
+    aov = pd.DataFrame({'Source': [fac1, fac2, fac1 + ' * ' + fac2,
+                                   'residual'],
+                        'SS': [ss_fac1, ss_fac2, ss_inter, ss_resid],
+                        'DF': [df_fac1, df_fac2, df_inter, df_resid],
+                        'MS': [ms_fac1, ms_fac2, ms_inter, ms_resid],
+                        'F': [fval_fac1, fval_fac2, fval_inter, np.nan],
+                        'p-unc': [pval_fac1, pval_fac2, pval_inter, np.nan],
+                        'np2': [np2_fac1, np2_fac2, np2_inter, np.nan]
+                        })
+    col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'np2']
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
