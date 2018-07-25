@@ -646,16 +646,18 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
 
 def anova(dv=None, between=None, data=None, detailed=False,
           export_filename=None):
-    """One-way ANOVA.
+    """One-way and two-way ANOVA.
 
-    Results have been tested against R and JASP.
+    Results have been tested against R, Matlab and JASP.
 
     Parameters
     ----------
     dv : string
         Name of column containing the dependant variable.
-    between : string
-        Name of column containing the between factor.
+    between : string or list
+        Name(s) of column containing the between factor.
+        If between is a single string, then compute a one-way ANOVA, if between
+        is a list with two strings, compute a two-way ANOVA.
     data : pandas DataFrame
         DataFrame
     detailed : boolean
@@ -671,12 +673,13 @@ def anova(dv=None, between=None, data=None, detailed=False,
     aov : DataFrame
         ANOVA summary ::
 
-        'Source' : name of the between-group factor
-        'ddof1' : degrees of freedom (numerator)
-        'ddof2' : degrees of freedom (denominator)
-        'F' : F-value
-        'p-unc' : uncorrected p-value
-        'np2' : Partial eta-square effect size
+        'Source' : Factor names
+        'SS' :Sums of squares
+        'DF' : Degrees of freedom
+        'MS' : Mean squares
+        'F' : F-values
+        'p-unc' : uncorrected p-values
+        'np2' : Partial eta-square effect sizes
 
     See Also
     --------
@@ -695,7 +698,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
     Examples
     --------
-    Compute a one-way ANOVA.
+    1. One-way ANOVA.
 
         >>> import pandas as pd
         >>> from pingouin import anova, print_table
@@ -703,12 +706,26 @@ def anova(dv=None, between=None, data=None, detailed=False,
         >>> aov = anova(dv='DV', between='Group', data=df,
                         detailed=True, export_filename='anova.csv')
         >>> print_table(aov)
+
+    2. Two-way ANOVA.
+
+        >>> import pandas as pd
+        >>> from pingouin import anova, print_table
+        >>> df = pd.read_csv('dataset.csv')
+        >>> aov = anova(dv='DV', between=['factor1, 'factor2'], data=df,
+                        export_filename='anova.csv')
+        >>> print_table(aov)
+
     """
-    from scipy.stats import f
+    if isinstance(between, list):
+        if len(between) == 2:
+            return anova2(dv=dv, between=between, data=data,
+                          export_filename=export_filename)
+        elif len(between) == 1:
+            between = between[0]
 
     # Check data
-    _check_dataframe(dv=dv, between=between, data=data,
-                     effects='between')
+    _check_dataframe(dv=dv, between=between, data=data, effects='between')
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
@@ -730,6 +747,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
     msbetween = ssbetween / ddof1
     mserror = sserror / ddof2
     fval = msbetween / mserror
+    from scipy.stats import f
     p_unc = f(ddof1, ddof2).sf(fval)
 
     # Calculating partial eta-square
@@ -825,9 +843,8 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
                      export_filename=export_filename, detailed=True)
 
     if len(between) == 1:
-        return anova(dv=dv, between=between, data=data,
+        return anova(dv=dv, between=between[0], data=data,
                      export_filename=export_filename, detailed=True)
-
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
@@ -841,16 +858,15 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
     ss_fac2 = aov_fac2.loc[0, 'SS']
     ss_tot = ((data[dv] - data[dv].mean())**2).sum()
     ss_resid = np.sum(data.groupby([fac1, fac2]).apply(lambda x:
-                                                      (x - x.mean())**2))[0]
+                                                       (x - x.mean())**2))[0]
     ss_inter = ss_tot - (ss_resid + ss_fac1 + ss_fac2)
 
     # Degrees of freedom
     df_fac1 = aov_fac1.loc[0, 'DF']
     df_fac2 = aov_fac2.loc[0, 'DF']
-    df_tot = data[dv].size - 1
     df_inter = (data[fac1].unique().size - 1) * (data[fac2].unique().size - 1)
     df_resid = data[dv].size - (data[fac1].unique().size *
-                                            data[fac2].unique().size)
+                                data[fac2].unique().size)
 
     # Mean squares
     ms_fac1 = aov_fac1.loc[0, 'MS']

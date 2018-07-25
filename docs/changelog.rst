@@ -9,6 +9,10 @@ v0.1.5
 
 a. Added AppVeyor CI (Windows)
 
+**Parametric**
+
+a. Added two-way ANOVA.
+
 v0.1.4 (July 2018)
 ------------------
 **Installation**

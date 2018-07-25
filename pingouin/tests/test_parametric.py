@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.parametric import (gzscore, test_normality, ttest, anova,
+from pingouin.parametric import (gzscore, test_normality, ttest, anova, anova2,
                                  rm_anova, mixed_anova, test_dist)
 
 # Generate random data for ANOVA
@@ -70,12 +70,19 @@ class TestParametric(_TestPingouin):
     def test_anova(self):
         """Test function anova."""
         aov = anova(dv='Scores', between='Group', data=df, detailed=True)
+        anova(dv='Scores', between=['Group'], data=df)
         # Compare with JASP
         assert np.allclose(aov.loc[0, 'F'].round(3), 5.244)
         assert np.allclose(aov.loc[0, 'p-unc'].round(3), .023)
         assert np.allclose(aov.loc[0, 'np2'].round(3), .029)
         anova(dv='Scores', between='Group', data=df, detailed=False,
               export_filename='test_export.csv')
+        # Two-way ANOVA
+        anova(dv='Scores', between=['Group', 'Time'], data=df,
+              export_filename='test_export.csv')
+        anova2(dv='Scores', between=['Group', 'Time'], data=df)
+        anova2(dv='Scores', between=['Group'], data=df)
+        anova2(dv='Scores', between='Group', data=df)
 
     def test_rm_anova(self):
         """Test function anova."""
