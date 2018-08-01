@@ -111,7 +111,6 @@ Quick start
 
 .. code-block:: ipython3
 
-  # T-test
   from pingouin import corr
   corr(x, y)
 
