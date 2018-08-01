@@ -4,6 +4,7 @@ sudo: false
 dist: trusty
 python:
     - '3.6'
+    - '3.7'
 
 matrix:
   include:

@@ -8,7 +8,7 @@ platform:
 
 environment:
   matrix:
-    - PYTHON_VERSION: 3.6
+    - PYTHON_VERSION: 3.7
       MINICONDA: C:\Miniconda36-x64
       PYTHON_ARCH: 64
 
