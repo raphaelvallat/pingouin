@@ -269,6 +269,20 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
     Tukey HSD procedure is best for balanced one-way ANOVA.
     It has been proven to be conservative for one-way ANOVA with unequal
     sample sizes. Tukey HSD is not valid in repeated measures ANOVA.
+
+    Examples
+    --------
+    Pairwise Tukey post-hocs
+
+        >>> import pandas as pd
+        >>> from pingouin import pairwise_tukey
+        >>> df = pd.DataFrame({'Group': ['A', 'A', 'A', 'A', 'A', 'B', 'B',
+                                         'B', 'B', 'B', 'C', 'C', 'C', 'C'],
+                               'Scores': [62, 60, 71, 55, 48, 63, 57, 52, 41,
+                                          43, 42, 50, 41, 37]})
+        >>> tukey = pairwise_tukey(dv='Scores', between='Group', data=df)
+        >>> tukey['p-tukey'].values
+            array([0.30322291, 0.0265957, 0.28709861])
     '''
     from itertools import combinations
     from pingouin.effsize import convert_effsize
