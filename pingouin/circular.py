@@ -9,7 +9,7 @@ import numpy as np
 from scipy.stats import circmean
 from pingouin import _remove_na
 
-__all__ = ["circ_axial", "circ_corrcc", "circ_corrcl", "circ_r",
+__all__ = ["circ_axial", "circ_corrcc", "circ_corrcl", "circ_mean", "circ_r",
            "circ_rayleigh"]
 
 
@@ -174,6 +174,39 @@ def circ_corrcl(x, y, tail='two-sided'):
     pval = chi2.sf(n * r**2, 2)
     pval = pval / 2 if tail == 'one-sided' else pval
     return np.round(r, 3), pval
+
+
+def circ_mean(alpha, w=None, axis=0):
+    """Mean direction for circular data.
+
+    Parameters
+    ----------
+    alpha : array
+        Sample of angles in radians
+    w : array
+        Number of incidences in case of binned angle data
+    axis : int
+        Compute along this dimension
+
+    Returns
+    -------
+    mu : float
+        Mean direction
+
+    Examples
+    --------
+    Mean resultant vector of circular data
+
+        >>> from pingouin import circ_mean
+        >>> alpha = [0.785, 1.570, 3.141, 0.839, 5.934]
+        >>> circ_mean(alpha)
+            1.013
+    """
+    alpha = np.array(alpha)
+    w = np.array(w) if w is not None else np.ones(alpha.shape)
+    if alpha.size is not w.size:
+        raise ValueError("Input dimensions do not match")
+    return np.angle(np.multiply(w, np.exp(1j * alpha)).sum(axis=axis))
 
 
 def circ_r(alpha, w=None, d=None, axis=0):

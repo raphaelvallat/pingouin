@@ -2,8 +2,8 @@ import pytest
 import numpy as np
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.datasets import read_dataset
-from pingouin.circular import (circ_axial, circ_corrcc, circ_corrcl, circ_r,
-                               circ_rayleigh)
+from pingouin.circular import (circ_axial, circ_corrcc, circ_corrcl, circ_mean,
+                               circ_r, circ_rayleigh)
 
 
 class TestCircular(_TestPingouin):
@@ -46,6 +46,16 @@ class TestCircular(_TestPingouin):
         # Wrong argument
         with pytest.raises(ValueError):
             circ_corrcl(x, [0.52, 1.29, 2.87])
+
+    def test_circ_mean(self):
+        """Test function circ_mean."""
+        x = [0.785, 1.570, 3.141, 0.839, 5.934]
+        mu = circ_mean(x)
+        # Compare with the CircStats MATLAB toolbox
+        assert np.round(mu, 3) == 1.013
+        # Wrong argument
+        with pytest.raises(ValueError):
+            circ_mean(x, w=[0.1, 0.2, 0.3])
 
     def test_circ_r(self):
         """Test function circ_r."""
