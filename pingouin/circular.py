@@ -2,7 +2,6 @@
 # Date: July 2018
 # Python code inspired from the CircStats MATLAB toolbox (Berens 2009)
 # and the brainpipe Python package.
-# package.
 # Reference:
 # Berens, Philipp. 2009. CircStat: A MATLAB Toolbox for Circular Statistics.
 # Journal of Statistical Software, Articles 31 (10): 1–21.
