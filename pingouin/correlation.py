@@ -152,8 +152,6 @@ def percbend(x, y, beta=.2):
     W = np.sort(np.abs(X - M), axis=0)
     m = int((1 - beta) * nx)
     omega = W[m - 1, :]
-
-    # Compute correlation
     P = (X - M) / omega
     P[np.isinf(P)] = 0
     P[np.isnan(P)] = 0
