@@ -280,10 +280,10 @@ def test_sphericity(X, alpha=.05):
     pval = chi2.sf(chi_sq, ddof)
 
     # Second order approximation
-    pval2 = chi2.sf(chi_sq, ddof + 4)
-    w2 = (d + 2) * (d - 1) * (d - 2) * (2 * d**3 + 6 * d * d + 3 * d + 2) / \
-         (288 * d * d * nr * nr * dd * dd)
-    pval += w2 * (pval2 - pval)
+    # pval2 = chi2.sf(chi_sq, ddof + 4)
+    # w2 = (d + 2) * (d - 1) * (d - 2) * (2 * d**3 + 6 * d * d + 3 * d + 2) / \
+    #      (288 * d * d * nr * nr * dd * dd)
+    # pval += w2 * (pval2 - pval)
 
     sphericity = True if pval > alpha else False
     return sphericity, W, chi_sq, ddof, pval, eps
@@ -453,7 +453,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
 def rm_anova(dv=None, within=None, data=None, correction='auto',
              remove_na=True, detailed=False, export_filename=None):
-    """One-way repeated measures ANOVA.
+    """One-way repeated measures ANOVA (type II).
 
     Results have been tested against R and JASP.
 
