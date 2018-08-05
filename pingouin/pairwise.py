@@ -417,29 +417,28 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     --------
     1. One-tailed spearman correlation corrected for multiple comparisons
 
-        >>> import pandas as pd
+        >>> from pingouin.datasets import read_dataset
         >>> from pingouin import pairwise_corr, print_table
-        >>> data = pd.read_csv('mydata.csv')
+        >>> data = read_dataset('dolan2009').iloc[:, 1:]
         >>> stats = pairwise_corr(data, method='spearman', tail='two-sided',
         >>>                       padjust='bonf')
         >>> print_table(stats)
 
     2. Robust two-sided correlation with uncorrected p-values
 
-        >>> import pandas as pd
+        >>> from pingouin.datasets import read_dataset
         >>> from pingouin import pairwise_corr, print_table
-        >>> data = pd.read_csv('mydata.csv')
-        >>> stats = pairwise_corr(data, columns=['Col1', 'Col2', 'Col3'],
-        >>>         method='percbend', tail='two-sided')
+        >>> data = read_dataset('dolan2009').iloc[:, 1:]
+        >>> stats = pairwise_corr(data, columns=['Openness', 'Extraversion',
+        >>>                       'Neuroticism'], method='percbend')
         >>> print_table(stats)
 
     3. Export the results to a .csv file
 
-        >>> import pandas as pd
+        >>> from pingouin.datasets import read_dataset
         >>> from pingouin import pairwise_corr, print_table
-        >>> data = pd.read_csv('mydata.csv')
-        >>> pairwise_corr(data, columns=['Col1', 'Col2', 'Col3'],
-        >>>         method='kendall', export_filename='pairwise_corr.csv')
+        >>> data = read_dataset('dolan2009').iloc[:, 1:]
+        >>> pairwise_corr(data, export_filename='pairwise_corr.csv')
     '''
     from pingouin.correlation import corr
 

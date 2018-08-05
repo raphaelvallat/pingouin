@@ -30,6 +30,10 @@ class TestCorrelation(_TestPingouin):
             corr(x, y, method='error')
         with pytest.raises(ValueError):
             corr(x, y[:-10])
+        # Compare with JASP
+        df = read_dataset('dolan2009')
+        stats = corr(df['Neuroticism'], df['Extraversion'])
+        assert np.isclose(1 / stats['BF10'].values, 1.478e-13)
 
     def test_rmcorr(self):
         """Test function rm_corr"""

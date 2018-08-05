@@ -21,11 +21,6 @@ df = pd.DataFrame({'Scores': np.r_[control, meditation],
                    'Group': np.repeat(['Control', 'Meditation'],
                                       len(months) * n)})
 
-# dataset for pairwise_corr
-data = pd.DataFrame({'X': np.random.normal(size=100),
-                     'Y': np.random.normal(size=100),
-                     'Z': np.random.normal(size=100)})
-
 
 class TestPairwise(_TestPingouin):
     """Test pairwise.py."""
@@ -65,13 +60,17 @@ class TestPairwise(_TestPingouin):
         df = read_dataset('mcclave1991')
         stats = pairwise_tukey(dv='Pain threshold', between='Hair color',
                                data=df)
-        np.allclose([0.074, 0.435, 0.415, 0.004, 0.789, 0.037],
-                    stats.loc[:, 'p-tukey'].values.round(3), atol=0.05)
+        assert np.allclose([0.074, 0.435, 0.415, 0.004, 0.789, 0.037],
+                           stats.loc[:, 'p-tukey'].values.round(3), atol=0.05)
 
     def test_pairwise_corr(self):
         """Test function pairwise_corr"""
-        # Load JASP Big 5 DataSets
-        pairwise_corr(data=data, method='spearman', tail='two-sided')
+        # Load JASP Big 5 DataSets (remove subject column)
+        data = read_dataset('dolan2009').iloc[:, 1:]
+        stats = pairwise_corr(data=data, method='pearson', tail='two-sided')
+        jasp_rval = [-0.350, -0.01, -.134, -.368, .267, .055, .065, .159,
+                     -.013, .159]
+        assert np.allclose(stats['r'].values, jasp_rval)
         # Correct for multiple comparisons
         pairwise_corr(data=data, method='spearman', tail='one-sided',
                       padjust='bonf')
@@ -79,6 +78,6 @@ class TestPairwise(_TestPingouin):
         pairwise_corr(data=data, method='spearman', tail='one-sided',
                       export_filename='test_export.csv')
         # Check with a subset of columns
-        pairwise_corr(data=data, columns=['X', 'Y'])
+        pairwise_corr(data=data, columns=['Neuroticism', 'Extraversion'])
         with pytest.raises(ValueError):
             pairwise_corr(data=data, tail='wrong')

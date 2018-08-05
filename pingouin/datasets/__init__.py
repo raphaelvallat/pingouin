@@ -2,13 +2,8 @@ import pandas as pd
 import os.path as op
 from pingouin.utils import print_table
 
-dts = pd.DataFrame({'dataset': ['bland1995', 'mcclave1991'],
-                    '# rows': [47, 19],
-                    '# cols': [3, 3],
-                    'useful for': ['rm_corr', ['anova', 'pairwise_tukey']],
-                    'ref': ['Bland & Altman (1995)',
-                            'McClave and Dietrich (1991)'],
-                     })
+ddir = op.dirname(op.realpath(__file__))
+dts = pd.read_csv(op.join(ddir, 'datasets.csv'), sep=',')
 
 __all__ = ["read_dataset", "list_dataset"]
 
@@ -42,7 +37,6 @@ def read_dataset(dname):
         raise ValueError('Dataset does not exist. Valid datasets names are',
                          dts['dataset'].values)
     # Load dataset
-    ddir = op.dirname(op.realpath(__file__))
     return pd.read_csv(op.join(ddir, dname + '.csv'), sep=',')
 
 
