@@ -307,8 +307,8 @@ def corr(x, y, tail='two-sided', method='pearson'):
         # Test normality of the data
         # normal, pnorm = test_normality(x, y)
         # if not normal.all():
-        #     print('Warning: data are not normaly distributed (x = %.3f, y =' %
-        #           pnorm[0], '%.3f). Consider using alternative methods.' %
+        #     print('Warning: data are not normaly distributed (x = %.3f, y ='
+        #           % pnorm[0], '%.3f). Consider using alternative methods.' %
         #           pnorm[1])
         r, pval = pearsonr(x, y)
     elif method == 'spearman':
