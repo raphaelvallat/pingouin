@@ -37,7 +37,7 @@ def mahal(Y, X):
     return np.sum(ri**2, 0) * (rx - 1)
 
 
-def bsmahal(a, b, j=5000):
+def bsmahal(a, b, n_boot=2000):
     """
     Bootstraps Mahalanobis distances for Shepherd's pi correlation.
 
@@ -47,7 +47,7 @@ def bsmahal(a, b, j=5000):
         Data
     b : ndarray (shape=(n, 2))
         Data
-    j : int
+    n_boot : int
         Number of bootstrap samples to calculate.
 
     Returns
@@ -57,11 +57,11 @@ def bsmahal(a, b, j=5000):
         bootstrap resamples.
     """
     n = b.shape[0]
-    MD = np.zeros((n, j))
+    MD = np.zeros((n, n_boot))
     nr = np.arange(n)
 
     # Bootstrap the MD
-    for i in np.arange(j):
+    for i in np.arange(n_boot):
         x = np.random.choice(nr, size=n, replace=True)
         s1 = b[x, 0]
         s2 = b[x, 1]
@@ -73,7 +73,7 @@ def bsmahal(a, b, j=5000):
     return np.mean(MD, 1)
 
 
-def shepherd(x, y):
+def shepherd(x, y, n_boot=2000):
     """
     Shepherd's Pi correlation, equivalent to Spearman's rho after outliers
     removal.
@@ -82,6 +82,8 @@ def shepherd(x, y):
     ----------
     x, y : array_like
         First and second set of observations. x and y must be independent.
+    n_boot : int
+        Number of bootstrap samples to calculate.
 
     Returns
     -------
@@ -104,7 +106,7 @@ def shepherd(x, y):
     X = np.vstack([x, y]).T
 
     # Bootstrapping on Mahalanobis distance
-    m = bsmahal(X, X)
+    m = bsmahal(X, X, n_boot)
 
     # Determine outliers
     outliers = (m >= 6)
