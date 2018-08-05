@@ -28,7 +28,7 @@ install:
   - "activate testenv"
   - "python -m pip install --upgrade pip"
   # Install dependencies :
-  - "pip install pytest pandas statsmodels scikit-learn"
+  - "pip install pytest pandas statsmodels scikit-learn patsy"
   - "dir"
   # ------------------- PINGOUIN -------------------
   - "python setup.py develop"
