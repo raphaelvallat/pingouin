@@ -94,6 +94,7 @@ Miscellaneous
 
       print_table
       read_dataset
+      list_dataset
       reshape_data
 
 
