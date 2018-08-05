@@ -511,29 +511,28 @@
 <span class="sd">    --------</span>
 <span class="sd">    1. One-tailed spearman correlation corrected for multiple comparisons</span>
 
-<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import pairwise_corr, print_table</span>
-<span class="sd">        &gt;&gt;&gt; data = pd.read_csv(&#39;mydata.csv&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; data = read_dataset(&#39;dolan2009&#39;).iloc[:, 1:]</span>
 <span class="sd">        &gt;&gt;&gt; stats = pairwise_corr(data, method=&#39;spearman&#39;, tail=&#39;two-sided&#39;,</span>
 <span class="sd">        &gt;&gt;&gt;                       padjust=&#39;bonf&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; print_table(stats)</span>
 
 <span class="sd">    2. Robust two-sided correlation with uncorrected p-values</span>
 
-<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import pairwise_corr, print_table</span>
-<span class="sd">        &gt;&gt;&gt; data = pd.read_csv(&#39;mydata.csv&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; stats = pairwise_corr(data, columns=[&#39;Col1&#39;, &#39;Col2&#39;, &#39;Col3&#39;],</span>
-<span class="sd">        &gt;&gt;&gt;         method=&#39;percbend&#39;, tail=&#39;two-sided&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; data = read_dataset(&#39;dolan2009&#39;).iloc[:, 1:]</span>
+<span class="sd">        &gt;&gt;&gt; stats = pairwise_corr(data, columns=[&#39;Openness&#39;, &#39;Extraversion&#39;,</span>
+<span class="sd">        &gt;&gt;&gt;                       &#39;Neuroticism&#39;], method=&#39;percbend&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; print_table(stats)</span>
 
 <span class="sd">    3. Export the results to a .csv file</span>
 
-<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import pairwise_corr, print_table</span>
-<span class="sd">        &gt;&gt;&gt; data = pd.read_csv(&#39;mydata.csv&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; pairwise_corr(data, columns=[&#39;Col1&#39;, &#39;Col2&#39;, &#39;Col3&#39;],</span>
-<span class="sd">        &gt;&gt;&gt;         method=&#39;kendall&#39;, export_filename=&#39;pairwise_corr.csv&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; data = read_dataset(&#39;dolan2009&#39;).iloc[:, 1:]</span>
+<span class="sd">        &gt;&gt;&gt; pairwise_corr(data, export_filename=&#39;pairwise_corr.csv&#39;)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="kn">from</span> <span class="nn">pingouin.correlation</span> <span class="k">import</span> <span class="n">corr</span>
 

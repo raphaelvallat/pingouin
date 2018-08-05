@@ -96,13 +96,8 @@
 <span class="kn">import</span> <span class="nn">os.path</span> <span class="k">as</span> <span class="nn">op</span>
 <span class="kn">from</span> <span class="nn">pingouin.utils</span> <span class="k">import</span> <span class="n">print_table</span>
 
-<span class="n">dts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;dataset&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;bland1995&#39;</span><span class="p">,</span> <span class="s1">&#39;mcclave1991&#39;</span><span class="p">],</span>
-                    <span class="s1">&#39;# rows&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">47</span><span class="p">,</span> <span class="mi">19</span><span class="p">],</span>
-                    <span class="s1">&#39;# cols&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
-                    <span class="s1">&#39;useful for&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;rm_corr&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;anova&#39;</span><span class="p">,</span> <span class="s1">&#39;pairwise_tukey&#39;</span><span class="p">]],</span>
-                    <span class="s1">&#39;ref&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Bland &amp; Altman (1995)&#39;</span><span class="p">,</span>
-                            <span class="s1">&#39;McClave and Dietrich (1991)&#39;</span><span class="p">],</span>
-                     <span class="p">})</span>
+<span class="n">ddir</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+<span class="n">dts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ddir</span><span class="p">,</span> <span class="s1">&#39;datasets.csv&#39;</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;read_dataset&quot;</span><span class="p">,</span> <span class="s2">&quot;list_dataset&quot;</span><span class="p">]</span>
 
@@ -136,7 +131,6 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Dataset does not exist. Valid datasets names are&#39;</span><span class="p">,</span>
                          <span class="n">dts</span><span class="p">[</span><span class="s1">&#39;dataset&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
     <span class="c1"># Load dataset</span>
-    <span class="n">ddir</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ddir</span><span class="p">,</span> <span class="n">dname</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span></div>
 
 

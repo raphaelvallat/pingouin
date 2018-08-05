@@ -41,6 +41,7 @@ Circular
     circ_axial
     circ_corrcc
     circ_corrcl
+    circ_mean
     circ_r
     circ_rayleigh
 

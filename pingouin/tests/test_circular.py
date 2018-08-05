@@ -18,7 +18,6 @@ class TestCircular(_TestPingouin):
                            [0, 0.7854, 1.5708, 2.3562, 3.1416, 3.9270, 4.7124,
                            5.4978])
 
-
     def test_circ_corrcc(self):
         """Test function circ_corrcc."""
         x = [0.785, 1.570, 3.141, 3.839, 5.934]

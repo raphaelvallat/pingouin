@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pingouin.circ_corrcc &#8212; pingouin 0.1.4 documentation</title>
+    <title>pingouin.circ_mean &#8212; pingouin 0.1.4 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/style.css" type="text/css" />
@@ -21,8 +21,8 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pingouin.circ_corrcl" href="pingouin.circ_corrcl.html" />
-    <link rel="prev" title="pingouin.circ_axial" href="pingouin.circ_axial.html" />
+    <link rel="next" title="pingouin.circ_r" href="pingouin.circ_r.html" />
+    <link rel="prev" title="pingouin.circ_corrcl" href="pingouin.circ_corrcl.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -93,53 +93,44 @@
   <div class="row">
     <div class="col-md-12 content">
       
-  <div class="section" id="pingouin-circ-corrcc">
-<h1>pingouin.circ_corrcc</h1>
+  <div class="section" id="pingouin-circ-mean">
+<h1>pingouin.circ_mean</h1>
 <dl class="function">
-<dt id="pingouin.circ_corrcc">
-<code class="descclassname">pingouin.</code><code class="descname">circ_corrcc</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>tail='two-sided'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/circular.html#circ_corrcc"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Correlation coefficient between two circular variables.</p>
+<dt id="pingouin.circ_mean">
+<code class="descclassname">pingouin.</code><code class="descname">circ_mean</code><span class="sig-paren">(</span><em>alpha</em>, <em>w=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/circular.html#circ_mean"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Mean direction for circular data.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">np.array</span></dt>
-<dd><p class="first last">First circular variable (expressed in radians)</p>
+<dt><strong>alpha</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd><p class="first last">Sample of angles in radians</p>
 </dd>
-<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">np.array</span></dt>
-<dd><p class="first last">Second circular variable (expressed in radians)</p>
+<dt><strong>w</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd><p class="first last">Number of incidences in case of binned angle data</p>
 </dd>
-<dt><strong>tail</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd><p class="first last">Specify whether to return ‘one-sided’ or ‘two-sided’ p-value.</p>
+<dt><strong>axis</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">Compute along this dimension</p>
 </dd>
 </dl>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>r</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">Correlation coefficient</p>
-</dd>
-<dt><strong>pval</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">Uncorrected p-value</p>
+<dt><strong>mu</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">Mean direction</p>
 </dd>
 </dl>
 </td>
 </tr>
 </tbody>
 </table>
-<p class="rubric">Notes</p>
-<p>Adapted from the CircStats MATLAB toolbox (Berens 2009).</p>
-<p>Use the np.deg2rad function to convert angles from degrees to radians.</p>
-<p>Please note that NaN are automatically removed.</p>
 <p class="rubric">Examples</p>
-<p>Compute the r and p-value of two circular variables</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">circ_corrcc</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.785</span><span class="p">,</span> <span class="mf">1.570</span><span class="p">,</span> <span class="mf">3.141</span><span class="p">,</span> <span class="mf">3.839</span><span class="p">,</span> <span class="mf">5.934</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.593</span><span class="p">,</span> <span class="mf">1.291</span><span class="p">,</span> <span class="mf">2.879</span><span class="p">,</span> <span class="mf">3.892</span><span class="p">,</span> <span class="mf">6.108</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">circ_corrcc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">pval</span><span class="p">)</span>
-<span class="go">    0.942, 0.066</span>
+<p>Mean resultant vector of circular data</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">circ_mean</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.785</span><span class="p">,</span> <span class="mf">1.570</span><span class="p">,</span> <span class="mf">3.141</span><span class="p">,</span> <span class="mf">0.839</span><span class="p">,</span> <span class="mf">5.934</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">circ_mean</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+<span class="go">    1.013</span>
 </pre></div>
 </div>
 </dd></dl>

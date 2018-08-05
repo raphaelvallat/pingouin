@@ -103,7 +103,44 @@
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">circmean</span>
 <span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">_remove_na</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;circ_corrcc&quot;</span><span class="p">,</span> <span class="s2">&quot;circ_corrcl&quot;</span><span class="p">,</span> <span class="s2">&quot;circ_r&quot;</span><span class="p">,</span> <span class="s2">&quot;circ_rayleigh&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;circ_axial&quot;</span><span class="p">,</span> <span class="s2">&quot;circ_corrcc&quot;</span><span class="p">,</span> <span class="s2">&quot;circ_corrcl&quot;</span><span class="p">,</span> <span class="s2">&quot;circ_mean&quot;</span><span class="p">,</span> <span class="s2">&quot;circ_r&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;circ_rayleigh&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="circ_axial"><a class="viewcode-back" href="../../generated/pingouin.circ_axial.html#pingouin.circ_axial">[docs]</a><span class="k">def</span> <span class="nf">circ_axial</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transforms n-axial data to a common scale.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alpha : array</span>
+<span class="sd">        Sample of angles in radians</span>
+<span class="sd">    n : int</span>
+<span class="sd">        Number of modes</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    alpha : float</span>
+<span class="sd">        Transformed angles</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Tranform data with multiple modes (known as axial data) to a unimodal</span>
+<span class="sd">    sample, for the purpose of certain analysis such as computation of a</span>
+<span class="sd">    mean resultant vector (see Berens 2009).</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Transform degrees to unimodal radians in the Berens 2009 neuro dataset.</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin.circular import circ_axial</span>
+<span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;berens2009&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; alpha = df[&#39;Orientation&#39;].values</span>
+<span class="sd">        &gt;&gt;&gt; alpha = circ_axial(np.deg2rad(alpha), 2)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">n</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="circ_corrcc"><a class="viewcode-back" href="../../generated/pingouin.circ_corrcc.html#pingouin.circ_corrcc">[docs]</a><span class="k">def</span> <span class="nf">circ_corrcc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">):</span>
@@ -231,6 +268,39 @@
     <span class="n">pval</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">pval</span> <span class="o">=</span> <span class="n">pval</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">tail</span> <span class="o">==</span> <span class="s1">&#39;one-sided&#39;</span> <span class="k">else</span> <span class="n">pval</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">pval</span></div>
+
+
+<div class="viewcode-block" id="circ_mean"><a class="viewcode-back" href="../../generated/pingouin.circ_mean.html#pingouin.circ_mean">[docs]</a><span class="k">def</span> <span class="nf">circ_mean</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mean direction for circular data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alpha : array</span>
+<span class="sd">        Sample of angles in radians</span>
+<span class="sd">    w : array</span>
+<span class="sd">        Number of incidences in case of binned angle data</span>
+<span class="sd">    axis : int</span>
+<span class="sd">        Compute along this dimension</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mu : float</span>
+<span class="sd">        Mean direction</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Mean resultant vector of circular data</span>
+
+<span class="sd">        &gt;&gt;&gt; from pingouin import circ_mean</span>
+<span class="sd">        &gt;&gt;&gt; alpha = [0.785, 1.570, 3.141, 0.839, 5.934]</span>
+<span class="sd">        &gt;&gt;&gt; circ_mean(alpha)</span>
+<span class="sd">            1.013</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">alpha</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">alpha</span><span class="o">.</span><span class="n">size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">w</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input dimensions do not match&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="circ_r"><a class="viewcode-back" href="../../generated/pingouin.circ_r.html#pingouin.circ_r">[docs]</a><span class="k">def</span> <span class="nf">circ_r</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
