@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 from itertools import combinations
 from pingouin import (compute_effsize, _remove_rm_na, _extract_effects,
-                      multicomp, _export_table)
+                      multicomp, _export_table, anova)
 
-__all__ = ["pairwise_ttests", "pairwise_corr"]
+__all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_corr"]
 
 
 def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, alpha,
@@ -217,6 +217,110 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
     stats.dropna(how='all', axis=1, inplace=True)
     if export_filename is not None:
         _export_table(stats, export_filename)
+    return stats
+
+
+def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
+                   tail='two-sided', effsize='hedges'):
+    '''Pairwise Tukey-HSD post-hoc tests.
+
+    Parameters
+    ----------
+    dv : string
+        Name of column containing the dependant variable.
+    between: string
+        Name of column containing the between factor.
+    data : pandas DataFrame
+        DataFrame
+    alpha : float
+        Significance level
+    tail : string
+        Indicates whether to return the 'two-sided' or 'one-sided' p-values
+    effsize : string or None
+        Effect size type. Available methods are ::
+
+        'none' : no effect size
+        'cohen' : Unbiased Cohen d
+        'hedges' : Hedges g
+        'glass': Glass delta
+        'eta-square' : Eta-square
+        'odds-ratio' : Odds ratio
+        'AUC' : Area Under the Curve
+
+    Returns
+    -------
+    stats : DataFrame
+        Stats summary ::
+
+        'A' : Name of first measurement
+        'B' : Name of second measurement
+        'mean(A)' : Mean of first measurement
+        'mean(B)' : Mean of second measurement
+        'diff' : Mean difference
+        'SE' : Standard error
+        'tail' : indicate whether the p-values are one-sided or two-sided
+        'T-val' : T-values
+        'p-tukey' : Tukey-HSD corrected p-values
+        'efsize' : effect sizes
+        'eftype' : type of effect size
+
+    Notes
+    -----
+    Tukey HSD procedure is best for balanced one-way ANOVA.
+    It has been proven to be conservative for one-way ANOVA with unequal
+    sample sizes. Tukey HSD is not valid in repeated measures ANOVA.
+    '''
+    from itertools import combinations
+    from pingouin.effsize import convert_effsize
+    from pingouin.external.qsturng import psturng
+
+    # First compute the ANOVA
+    aov = anova(dv=dv, data=data, between=between, detailed=True)
+    df = aov.loc[1, 'DF']
+    ng = aov.loc[0, 'DF'] + 1
+    n = data.groupby(between)[dv].count().values
+    group_means = data.groupby(between)[dv].mean().values
+    gcov = np.diag(aov.loc[1, 'MS'] / n)
+
+    # Pairwise combinations
+    g1, g2 = np.array(list(combinations(np.arange(ng), 2))).T
+    mn = group_means[g1] - group_means[g2]
+    idx = g2 + g1 * np.shape(gcov)[0]
+    gvar = np.diag(gcov)
+    se = np.sqrt(gvar[g1] + gvar[g2] - 2 * gcov.flatten()[idx])
+    tval = mn / se
+
+    # Critical values and p-values
+    # from pingouin.external.qsturng import qsturng
+    # crit = qsturng(1 - alpha, ng, df) / np.sqrt(2)
+    pval = psturng(np.sqrt(2) * np.abs(tval), ng, df)
+    pval *= 0.5 if tail == 'one-sided' else 1
+
+    # Uncorrected p-values
+    # from scipy.stats import t
+    # punc = t.sf(np.abs(tval), n[g1].size + n[g2].size - 2) * 2
+
+    # Effect size
+    d = tval * np.sqrt(1 / n[g1].size + 1 / n[g2].size)
+    ef = convert_effsize(d, 'cohen', effsize, n[g1].size, n[g2].size)
+
+    # Create dataframe
+    # Careful: pd.unique does NOT sort whereas numpy does
+    stats = pd.DataFrame({
+                         'A': np.unique(data[between])[g1],
+                         'B': np.unique(data[between])[g2],
+                         'mean(A)': group_means[g1],
+                         'mean(B)': group_means[g2],
+                         'diff': mn,
+                         'SE': np.round(se, 3),
+                         'tail': tail,
+                         'T-val': np.round(tval, 3),
+                         # 'alpha': alpha,
+                         # 'crit': np.round(crit, 3),
+                         'p-tukey': pval,
+                         'efsize': np.round(ef, 3),
+                         'eftype': effsize,
+                         })
     return stats
 
 
