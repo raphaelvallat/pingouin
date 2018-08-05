@@ -5,8 +5,8 @@ import pytest
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.utils import (print_table, _export_table, _remove_rm_na,
                             _check_eftype, _check_dataframe, _remove_na,
-                            _extract_effects, reshape_data)
-
+                            _extract_effects, reshape_data,
+                            is_sklearn_installed, is_statsmodels_installed)
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
@@ -93,3 +93,11 @@ class TestUtils(_TestPingouin):
                          effects='interaction', data=df)
         _extract_effects(dv='Values', within='Time',
                          effects='within', data=df)
+
+    def is_statsmodels_installed(self):
+        """Test function is_statsmodels_installed."""
+        assert isinstance(is_statsmodels_installed(), bool)
+
+    def is_sklearn_installed(self):
+        """Test function is_statsmodels_installed."""
+        assert isinstance(is_sklearn_installed(), bool)

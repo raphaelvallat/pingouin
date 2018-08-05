@@ -6,7 +6,7 @@ from scipy.stats import pearsonr, spearmanr, kendalltau
 # from pingouin import test_normality
 from pingouin import _remove_na
 
-__all__ = ["corr"]
+__all__ = ["corr", "rm_corr"]
 
 
 def mahal(Y, X):
@@ -345,3 +345,81 @@ def corr(x, y, tail='two-sided', method='pearson'):
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
     return stats
+
+
+def rm_corr(data=None, x=None, y=None, subject=None):
+    """Repeated measures correlation (Bakdash and Marusich 2017).
+
+    https://www.frontiersin.org/articles/10.3389/fpsyg.2017.00456/full
+
+    Tested against the `rmcorr` R package. Requires statsmodels.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Dataframe containing the variables
+    x, y : string
+        Name of columns in data containing the two dependent variables
+    subject : string
+        Name of column in data containing the subject indicator
+
+    Returns
+    -------
+    r : float
+        Repeated measures correlation coefficient
+    p : float
+        P-value
+    dof : int
+        Degrees of freedom
+
+    Notes
+    -----
+    Repeated measures correlation (rmcorr) is a statistical technique
+    for determining the common within-individual association for paired
+    measures assessed on two or more occasions for multiple individuals.
+
+    Please note that NaN are automatically removed from the dataframe.
+
+    Examples
+    --------
+
+        >>> import numpy as np
+        >>> import pandas as pd
+        >>> from pingouin import rm_corr
+        >>> # Generate random correlated data
+        >>> np.random.seed(123)
+        >>> mean, cov = [4, 6], [[1, 0.6], [0.6, 1]]
+        >>> x, y = np.round(np.random.multivariate_normal(mean, cov, 30), 1).T
+        >>> data = pd.DataFrame({'X': x, 'Y': y,
+                                 'Ss': np.repeat(np.arange(10), 3)})
+        >>> # Compute the repeated measure correlation
+        >>> rmcorr(data, x='X', y='Y', subject='Ss')
+            (0.647, 0.001, 19)
+    """
+    # Check that statsmodels is installed
+    from pingouin.utils import is_statsmodels_installed
+    is_statsmodels_installed(raise_error=True)
+    import statsmodels.api as sm
+    from statsmodels.formula.api import ols
+
+    # Remove Nans
+    data = data[[x, y, subject]].dropna(axis=0)
+
+    # ANCOVA model
+    formula = y + ' ~ ' + 'C(' + subject + ') + ' + x
+    model = ols(formula, data=data).fit()
+    table = sm.stats.anova_lm(model, typ=3)
+
+    # Extract the sign of the correlation and dof
+    sign = np.sign(model.params[x])
+    dof = int(table.loc['Residual', 'df'])
+
+    # Extract correlation coefficient from sum of squares
+    ssfactor = table.loc[x, 'sum_sq']
+    sserror = table.loc['Residual', 'sum_sq']
+    rm = sign * np.sqrt(ssfactor / (ssfactor + sserror))
+
+    # Extract p-value
+    pval = table.loc[x, 'PR(>F)']
+
+    return np.round(rm, 3), pval, dof

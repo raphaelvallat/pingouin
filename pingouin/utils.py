@@ -7,7 +7,8 @@ import pandas as pd
 
 __all__ = ["print_table", "_export_table", "reshape_data",
            "_check_eftype", "_remove_rm_na", "_remove_na", "_check_dataframe",
-           "_extract_effects"]
+           "_extract_effects", "is_statsmodels_installed",
+           "is_sklearn_installed"]
 
 
 def print_table(df, floatfmt=".3f", tablefmt='simple'):
@@ -206,3 +207,25 @@ def _extract_effects(dv=None, between=None, within=None, effects=None,
 
     dt_array = pd.DataFrame.from_dict(datadic)
     return dt_array, nobs
+
+def is_statsmodels_installed(raise_error=False):
+    try:
+        import statsmodels  # noqa
+        is_installed = True
+    except:
+        is_installed = False
+    # Raise error (if needed) :
+    if raise_error and not is_installed:
+        raise IOError("statsmodels is not installed.")
+    return is_installed
+
+def is_sklearn_installed(raise_error=False):
+    try:
+        import sklearn  # noqa
+        is_installed = True
+    except:
+        is_installed = False
+    # Raise error (if needed) :
+    if raise_error and not is_installed:
+        raise IOError("sklearn is not installed.")
+    return is_installed
