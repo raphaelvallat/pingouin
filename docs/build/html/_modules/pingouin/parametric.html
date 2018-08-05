@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
@@ -100,7 +100,8 @@
                       <span class="n">_export_table</span><span class="p">,</span> <span class="n">bayesfactor_ttest</span><span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;gzscore&quot;</span><span class="p">,</span> <span class="s2">&quot;test_normality&quot;</span><span class="p">,</span> <span class="s2">&quot;test_homoscedasticity&quot;</span><span class="p">,</span> <span class="s2">&quot;test_dist&quot;</span><span class="p">,</span>
-           <span class="s2">&quot;test_sphericity&quot;</span><span class="p">,</span> <span class="s2">&quot;ttest&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_anova&quot;</span><span class="p">,</span> <span class="s2">&quot;anova&quot;</span><span class="p">,</span> <span class="s2">&quot;mixed_anova&quot;</span><span class="p">]</span>
+           <span class="s2">&quot;test_sphericity&quot;</span><span class="p">,</span> <span class="s2">&quot;ttest&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_anova&quot;</span><span class="p">,</span> <span class="s2">&quot;anova&quot;</span><span class="p">,</span> <span class="s2">&quot;anova2&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;mixed_anova&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="gzscore"><a class="viewcode-back" href="../../generated/pingouin.gzscore.html#pingouin.gzscore">[docs]</a><span class="k">def</span> <span class="nf">gzscore</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
@@ -373,10 +374,10 @@
     <span class="n">pval</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">chi_sq</span><span class="p">,</span> <span class="n">ddof</span><span class="p">)</span>
 
     <span class="c1"># Second order approximation</span>
-    <span class="n">pval2</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">chi_sq</span><span class="p">,</span> <span class="n">ddof</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
-    <span class="n">w2</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">d</span><span class="o">**</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> \
-         <span class="p">(</span><span class="mi">288</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">nr</span> <span class="o">*</span> <span class="n">nr</span> <span class="o">*</span> <span class="n">dd</span> <span class="o">*</span> <span class="n">dd</span><span class="p">)</span>
-    <span class="n">pval</span> <span class="o">+=</span> <span class="n">w2</span> <span class="o">*</span> <span class="p">(</span><span class="n">pval2</span> <span class="o">-</span> <span class="n">pval</span><span class="p">)</span>
+    <span class="c1"># pval2 = chi2.sf(chi_sq, ddof + 4)</span>
+    <span class="c1"># w2 = (d + 2) * (d - 1) * (d - 2) * (2 * d**3 + 6 * d * d + 3 * d + 2) / \</span>
+    <span class="c1">#      (288 * d * d * nr * nr * dd * dd)</span>
+    <span class="c1"># pval += w2 * (pval2 - pval)</span>
 
     <span class="n">sphericity</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">pval</span> <span class="o">&gt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="kc">False</span>
     <span class="k">return</span> <span class="n">sphericity</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">chi_sq</span><span class="p">,</span> <span class="n">ddof</span><span class="p">,</span> <span class="n">pval</span><span class="p">,</span> <span class="n">eps</span></div>
@@ -546,7 +547,7 @@
 
 <div class="viewcode-block" id="rm_anova"><a class="viewcode-back" href="../../generated/pingouin.rm_anova.html#pingouin.rm_anova">[docs]</a><span class="k">def</span> <span class="nf">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>
              <span class="n">remove_na</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;One-way repeated measures ANOVA.</span>
+    <span class="sd">&quot;&quot;&quot;One-way repeated measures ANOVA (type II).</span>
 
 <span class="sd">    Results have been tested against R and JASP.</span>
 
@@ -739,16 +740,18 @@
 
 <div class="viewcode-block" id="anova"><a class="viewcode-back" href="../../generated/pingouin.anova.html#pingouin.anova">[docs]</a><span class="k">def</span> <span class="nf">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
           <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;One-way ANOVA.</span>
+    <span class="sd">&quot;&quot;&quot;One-way and two-way ANOVA.</span>
 
-<span class="sd">    Results have been tested against R and JASP.</span>
+<span class="sd">    Results have been tested against R, Matlab and JASP.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    dv : string</span>
 <span class="sd">        Name of column containing the dependant variable.</span>
-<span class="sd">    between : string</span>
-<span class="sd">        Name of column containing the between factor.</span>
+<span class="sd">    between : string or list</span>
+<span class="sd">        Name(s) of column containing the between factor.</span>
+<span class="sd">        If between is a single string, then compute a one-way ANOVA, if between</span>
+<span class="sd">        is a list with two strings, compute a two-way ANOVA.</span>
 <span class="sd">    data : pandas DataFrame</span>
 <span class="sd">        DataFrame</span>
 <span class="sd">    detailed : boolean</span>
@@ -764,12 +767,13 @@
 <span class="sd">    aov : DataFrame</span>
 <span class="sd">        ANOVA summary ::</span>
 
-<span class="sd">        &#39;Source&#39; : name of the between-group factor</span>
-<span class="sd">        &#39;ddof1&#39; : degrees of freedom (numerator)</span>
-<span class="sd">        &#39;ddof2&#39; : degrees of freedom (denominator)</span>
-<span class="sd">        &#39;F&#39; : F-value</span>
-<span class="sd">        &#39;p-unc&#39; : uncorrected p-value</span>
-<span class="sd">        &#39;np2&#39; : Partial eta-square effect size</span>
+<span class="sd">        &#39;Source&#39; : Factor names</span>
+<span class="sd">        &#39;SS&#39; :Sums of squares</span>
+<span class="sd">        &#39;DF&#39; : Degrees of freedom</span>
+<span class="sd">        &#39;MS&#39; : Mean squares</span>
+<span class="sd">        &#39;F&#39; : F-values</span>
+<span class="sd">        &#39;p-unc&#39; : uncorrected p-values</span>
+<span class="sd">        &#39;np2&#39; : Partial eta-square effect sizes</span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
@@ -788,7 +792,7 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    Compute a one-way ANOVA.</span>
+<span class="sd">    1. One-way ANOVA.</span>
 
 <span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import anova, print_table</span>
@@ -796,12 +800,26 @@
 <span class="sd">        &gt;&gt;&gt; aov = anova(dv=&#39;DV&#39;, between=&#39;Group&#39;, data=df,</span>
 <span class="sd">                        detailed=True, export_filename=&#39;anova.csv&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; print_table(aov)</span>
+
+<span class="sd">    2. Two-way ANOVA.</span>
+
+<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import anova, print_table</span>
+<span class="sd">        &gt;&gt;&gt; df = pd.read_csv(&#39;dataset.csv&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; aov = anova(dv=&#39;DV&#39;, between=[&#39;factor1, &#39;factor2&#39;], data=df,</span>
+<span class="sd">                        export_filename=&#39;anova.csv&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print_table(aov)</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">f</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">between</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">between</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">anova2</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                          <span class="n">export_filename</span><span class="o">=</span><span class="n">export_filename</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">between</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">between</span> <span class="o">=</span> <span class="n">between</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="c1"># Check data</span>
-    <span class="n">_check_dataframe</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-                     <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;between&#39;</span><span class="p">)</span>
+    <span class="n">_check_dataframe</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;between&#39;</span><span class="p">)</span>
 
     <span class="c1"># Reset index (avoid duplicate axis error)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -823,6 +841,7 @@
     <span class="n">msbetween</span> <span class="o">=</span> <span class="n">ssbetween</span> <span class="o">/</span> <span class="n">ddof1</span>
     <span class="n">mserror</span> <span class="o">=</span> <span class="n">sserror</span> <span class="o">/</span> <span class="n">ddof2</span>
     <span class="n">fval</span> <span class="o">=</span> <span class="n">msbetween</span> <span class="o">/</span> <span class="n">mserror</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">f</span>
     <span class="n">p_unc</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">ddof1</span><span class="p">,</span> <span class="n">ddof2</span><span class="p">)</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">fval</span><span class="p">)</span>
 
     <span class="c1"># Calculating partial eta-square</span>
@@ -857,6 +876,131 @@
     <span class="k">if</span> <span class="n">export_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">_export_table</span><span class="p">(</span><span class="n">aov</span><span class="p">,</span> <span class="n">export_filename</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">aov</span></div>
+
+
+<span class="k">def</span> <span class="nf">anova2</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Two-way ANOVA.</span>
+
+<span class="sd">    Results have been tested against JASP.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dv : string</span>
+<span class="sd">        Name of column containing the dependant variable.</span>
+<span class="sd">    between : list of string</span>
+<span class="sd">        Name of column containing the two between factors. Must contain exactly</span>
+<span class="sd">        two values (e.g. [&#39;factor1&#39;, &#39;factor2&#39;])</span>
+<span class="sd">    data : pandas DataFrame</span>
+<span class="sd">        DataFrame</span>
+<span class="sd">    export_filename : string</span>
+<span class="sd">        Filename (without extension) for the output file.</span>
+<span class="sd">        If None, do not export the table.</span>
+<span class="sd">        By default, the file will be created in the current python console</span>
+<span class="sd">        directory. To change that, specify the filename with full path.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    aov : DataFrame</span>
+<span class="sd">        ANOVA summary ::</span>
+
+<span class="sd">        &#39;Source&#39; : Factor names</span>
+<span class="sd">        &#39;SS&#39; :Sums of squares</span>
+<span class="sd">        &#39;DF&#39; : Degrees of freedom</span>
+<span class="sd">        &#39;MS&#39; : Mean squares</span>
+<span class="sd">        &#39;F&#39; : F-values</span>
+<span class="sd">        &#39;p-unc&#39; : uncorrected p-values</span>
+<span class="sd">        &#39;np2&#39; : Partial eta-square effect sizes</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    anova : One-way ANOVA</span>
+<span class="sd">    rm_anova : One-way repeated measures ANOVA</span>
+<span class="sd">    mixed_anova : Two way mixed ANOVA</span>
+<span class="sd">    kruskal : Non-parametric one-way ANOVA</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Compute a two-way ANOVA.</span>
+
+<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import anova2, print_table</span>
+<span class="sd">        &gt;&gt;&gt; df = pd.read_csv(&#39;dataset.csv&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; aov = anova(dv=&#39;DV&#39;, between=[&#39;factor1&#39;, &#39;factor2&#39;], data=df,</span>
+<span class="sd">                        export_filename=&#39;anova.csv&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print_table(aov)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">f</span>
+
+    <span class="c1"># Assert that there are two factors</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">between</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                     <span class="n">export_filename</span><span class="o">=</span><span class="n">export_filename</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">between</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                     <span class="n">export_filename</span><span class="o">=</span><span class="n">export_filename</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Reset index (avoid duplicate axis error)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">fac1</span><span class="p">,</span> <span class="n">fac2</span> <span class="o">=</span> <span class="n">between</span>
+    <span class="n">aov_fac1</span> <span class="o">=</span> <span class="n">anova</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">fac1</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">aov_fac2</span> <span class="o">=</span> <span class="n">anova</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">fac2</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Sums of squares</span>
+    <span class="n">ss_fac1</span> <span class="o">=</span> <span class="n">aov_fac1</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;SS&#39;</span><span class="p">]</span>
+    <span class="n">ss_fac2</span> <span class="o">=</span> <span class="n">aov_fac2</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;SS&#39;</span><span class="p">]</span>
+    <span class="n">ss_tot</span> <span class="o">=</span> <span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">ss_resid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">fac1</span><span class="p">,</span> <span class="n">fac2</span><span class="p">])</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span>
+                                                       <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">**</span><span class="mi">2</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ss_inter</span> <span class="o">=</span> <span class="n">ss_tot</span> <span class="o">-</span> <span class="p">(</span><span class="n">ss_resid</span> <span class="o">+</span> <span class="n">ss_fac1</span> <span class="o">+</span> <span class="n">ss_fac2</span><span class="p">)</span>
+
+    <span class="c1"># Degrees of freedom</span>
+    <span class="n">df_fac1</span> <span class="o">=</span> <span class="n">aov_fac1</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">]</span>
+    <span class="n">df_fac2</span> <span class="o">=</span> <span class="n">aov_fac2</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">]</span>
+    <span class="n">df_inter</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">fac1</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">fac2</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">df_resid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">fac1</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">*</span>
+                                <span class="n">data</span><span class="p">[</span><span class="n">fac2</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="c1"># Mean squares</span>
+    <span class="n">ms_fac1</span> <span class="o">=</span> <span class="n">aov_fac1</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">]</span>
+    <span class="n">ms_fac2</span> <span class="o">=</span> <span class="n">aov_fac2</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">]</span>
+    <span class="n">ms_inter</span> <span class="o">=</span> <span class="n">ss_inter</span> <span class="o">/</span> <span class="n">df_inter</span>
+    <span class="n">ms_resid</span> <span class="o">=</span> <span class="n">ss_resid</span> <span class="o">/</span> <span class="n">df_resid</span>
+
+    <span class="c1"># F-values</span>
+    <span class="n">fval_fac1</span> <span class="o">=</span> <span class="n">ms_fac1</span> <span class="o">/</span> <span class="n">ms_resid</span>
+    <span class="n">fval_fac2</span> <span class="o">=</span> <span class="n">ms_fac2</span> <span class="o">/</span> <span class="n">ms_resid</span>
+    <span class="n">fval_inter</span> <span class="o">=</span> <span class="n">ms_inter</span> <span class="o">/</span> <span class="n">ms_resid</span>
+
+    <span class="c1"># P-values</span>
+    <span class="n">pval_fac1</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">df_fac1</span><span class="p">,</span> <span class="n">df_resid</span><span class="p">)</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">fval_fac1</span><span class="p">)</span>
+    <span class="n">pval_fac2</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">df_fac2</span><span class="p">,</span> <span class="n">df_resid</span><span class="p">)</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">fval_fac2</span><span class="p">)</span>
+    <span class="n">pval_inter</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">df_inter</span><span class="p">,</span> <span class="n">df_resid</span><span class="p">)</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">fval_inter</span><span class="p">)</span>
+
+    <span class="c1"># Partial eta-square</span>
+    <span class="n">np2_fac1</span> <span class="o">=</span> <span class="p">(</span><span class="n">fval_fac1</span> <span class="o">*</span> <span class="n">df_fac1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">fval_fac1</span> <span class="o">*</span> <span class="n">df_fac1</span> <span class="o">+</span> <span class="n">df_resid</span><span class="p">)</span>
+    <span class="n">np2_fac2</span> <span class="o">=</span> <span class="p">(</span><span class="n">fval_fac2</span> <span class="o">*</span> <span class="n">df_fac2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">fval_fac2</span> <span class="o">*</span> <span class="n">df_fac2</span> <span class="o">+</span> <span class="n">df_resid</span><span class="p">)</span>
+    <span class="n">np2_inter</span> <span class="o">=</span> <span class="p">(</span><span class="n">fval_inter</span> <span class="o">*</span> <span class="n">df_inter</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">fval_inter</span> <span class="o">*</span> <span class="n">df_inter</span> <span class="o">+</span> <span class="n">df_resid</span><span class="p">)</span>
+
+    <span class="c1"># Create output dataframe</span>
+    <span class="n">aov</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Source&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">fac1</span><span class="p">,</span> <span class="n">fac2</span><span class="p">,</span> <span class="n">fac1</span> <span class="o">+</span> <span class="s1">&#39; * &#39;</span> <span class="o">+</span> <span class="n">fac2</span><span class="p">,</span>
+                                   <span class="s1">&#39;residual&#39;</span><span class="p">],</span>
+                        <span class="s1">&#39;SS&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">ss_fac1</span><span class="p">,</span> <span class="n">ss_fac2</span><span class="p">,</span> <span class="n">ss_inter</span><span class="p">,</span> <span class="n">ss_resid</span><span class="p">],</span>
+                        <span class="s1">&#39;DF&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">df_fac1</span><span class="p">,</span> <span class="n">df_fac2</span><span class="p">,</span> <span class="n">df_inter</span><span class="p">,</span> <span class="n">df_resid</span><span class="p">],</span>
+                        <span class="s1">&#39;MS&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">ms_fac1</span><span class="p">,</span> <span class="n">ms_fac2</span><span class="p">,</span> <span class="n">ms_inter</span><span class="p">,</span> <span class="n">ms_resid</span><span class="p">],</span>
+                        <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">fval_fac1</span><span class="p">,</span> <span class="n">fval_fac2</span><span class="p">,</span> <span class="n">fval_inter</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+                        <span class="s1">&#39;p-unc&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">pval_fac1</span><span class="p">,</span> <span class="n">pval_fac2</span><span class="p">,</span> <span class="n">pval_inter</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+                        <span class="s1">&#39;np2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np2_fac1</span><span class="p">,</span> <span class="n">np2_fac2</span><span class="p">,</span> <span class="n">np2_inter</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+                        <span class="p">})</span>
+    <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Source&#39;</span><span class="p">,</span> <span class="s1">&#39;SS&#39;</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">]</span>
+
+    <span class="n">aov</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
+    <span class="n">aov</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Export to .csv</span>
+    <span class="k">if</span> <span class="n">export_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_export_table</span><span class="p">(</span><span class="n">aov</span><span class="p">,</span> <span class="n">export_filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">aov</span>
 
 
 <div class="viewcode-block" id="mixed_anova"><a class="viewcode-back" href="../../generated/pingouin.mixed_anova.html#pingouin.mixed_anova">[docs]</a><span class="k">def</span> <span class="nf">mixed_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1030,7 +1174,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.<br/>
     </p>
   </div>
 </footer>

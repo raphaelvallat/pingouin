@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/style.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
@@ -104,10 +104,10 @@
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.anova.html#pingouin.anova" title="pingouin.anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anova</span></code></a>([dv,&nbsp;between,&nbsp;data,&nbsp;detailed,&nbsp;…])</td>
-<td>One-way ANOVA.</td>
+<td>One-way and two-way ANOVA.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.rm_anova.html#pingouin.rm_anova" title="pingouin.rm_anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rm_anova</span></code></a>([dv,&nbsp;within,&nbsp;data,&nbsp;correction,&nbsp;…])</td>
-<td>One-way repeated measures ANOVA.</td>
+<td>One-way repeated measures ANOVA (type II).</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.mixed_anova.html#pingouin.mixed_anova" title="pingouin.mixed_anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mixed_anova</span></code></a>([dv,&nbsp;within,&nbsp;between,&nbsp;data,&nbsp;…])</td>
 <td>Mixed-design (split-plot) type II ANOVA.</td>
@@ -215,7 +215,7 @@
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.compute_effsize.html#pingouin.compute_effsize" title="pingouin.compute_effsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_effsize</span></code></a>(x,&nbsp;y[,&nbsp;paired,&nbsp;eftype])</td>
 <td>Calculate effect size between two set of observations.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.compute_effsize_from_t.html#pingouin.compute_effsize_from_t" title="pingouin.compute_effsize_from_t"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_effsize_from_t</span></code></a>(tval[,&nbsp;nx,&nbsp;ny,&nbsp;N,&nbsp;eftype])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.compute_effsize_from_T.html#pingouin.compute_effsize_from_t" title="pingouin.compute_effsize_from_t"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_effsize_from_t</span></code></a>(tval[,&nbsp;nx,&nbsp;ny,&nbsp;N,&nbsp;eftype])</td>
 <td>Compute effect size from a T-value.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.convert_effsize.html#pingouin.convert_effsize" title="pingouin.convert_effsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_effsize</span></code></a>(ef,&nbsp;input_type,&nbsp;output_type)</td>
@@ -239,7 +239,7 @@
 <td>Nice display of table.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.reshape_data.html#pingouin.reshape_data" title="pingouin.reshape_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reshape_data</span></code></a>(df,&nbsp;id[,&nbsp;dv,&nbsp;rm])</td>
-<td>Reshape data from human-readable to analysis shape</td>
+<td>Reshape data from human-readable to long-format.</td>
 </tr>
 </tbody>
 </table>
@@ -252,6 +252,12 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests" title="pingouin.pairwise_ttests"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pairwise_ttests</span></code></a>([dv,&nbsp;between,&nbsp;within,&nbsp;…])</td>
+<td>Pairwise T-tests.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.pairwise_tukey.html#pingouin.pairwise_tukey" title="pingouin.pairwise_tukey"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pairwise_tukey</span></code></a>([dv,&nbsp;between,&nbsp;data,&nbsp;alpha,&nbsp;…])</td>
+<td>Pairwise Tukey-HSD post-hoc tests.</td>
+</tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.multicomp.html#pingouin.multicomp" title="pingouin.multicomp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multicomp</span></code></a>(pvals[,&nbsp;alpha,&nbsp;method])</td>
 <td>P-values correction for multiple tests.</td>
 </tr>
@@ -295,13 +301,10 @@
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.ttest.html#pingouin.ttest" title="pingouin.ttest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ttest</span></code></a>(x,&nbsp;y[,&nbsp;paired,&nbsp;tail,&nbsp;correction,&nbsp;r])</td>
 <td>T-test.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests" title="pingouin.pairwise_ttests"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pairwise_ttests</span></code></a>([dv,&nbsp;between,&nbsp;within,&nbsp;…])</td>
-<td>Pairwise T-tests.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.mwu.html#pingouin.mwu" title="pingouin.mwu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mwu</span></code></a>(x,&nbsp;y[,&nbsp;tail])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.mwu.html#pingouin.mwu" title="pingouin.mwu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mwu</span></code></a>(x,&nbsp;y[,&nbsp;tail])</td>
 <td>Mann-Whitney U Test (= Wilcoxon rank-sum test).</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.wilcoxon.html#pingouin.wilcoxon" title="pingouin.wilcoxon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wilcoxon</span></code></a>(x,&nbsp;y[,&nbsp;tail])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.wilcoxon.html#pingouin.wilcoxon" title="pingouin.wilcoxon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wilcoxon</span></code></a>(x,&nbsp;y[,&nbsp;tail])</td>
 <td>Wilcoxon signed-rank test.</td>
 </tr>
 </tbody>
@@ -325,7 +328,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.<br/>
     </p>
   </div>
 </footer>

@@ -105,7 +105,6 @@ Multiple comparisons
 
     pairwise_ttests
     pairwise_tukey
-    pairwise_corr
     multicomp
     bonf
     holm
