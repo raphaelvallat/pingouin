@@ -107,7 +107,7 @@ def test_normality(*args, alpha=.05):
         normal = bool(normal)
         p = float(p)
 
-    return normal, p
+    return normal, np.round(p, 3)
 
 
 def test_homoscedasticity(*args, alpha=.05):
@@ -163,7 +163,7 @@ def test_homoscedasticity(*args, alpha=.05):
         _, p = bartlett(*args)
 
     equal_var = True if p > alpha else False
-    return equal_var, p
+    return equal_var, np.round(p, 3)
 
 
 def test_dist(*args, dist='norm'):

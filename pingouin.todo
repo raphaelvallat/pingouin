@@ -13,3 +13,5 @@ Code
 - Add Pearson's skipped-correlation (requires sklearn)
 - Add two-way repeated measures ANOVA
 - Add type III rm_anova
+- pingouin.plotting module?
+- Add more circular stats
