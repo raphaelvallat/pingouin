@@ -12,6 +12,7 @@ a. Added AppVeyor CI (Windows)
 **Parametric**
 
 a. Added two-way ANOVA.
+b. Added pairwise_tukey function
 
 v0.1.4 (July 2018)
 ------------------
