@@ -272,17 +272,12 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
 
     Examples
     --------
-    Pairwise Tukey post-hocs
+    Pairwise Tukey post-hocs on the pain threshold dataset.
 
-        >>> import pandas as pd
         >>> from pingouin import pairwise_tukey
-        >>> df = pd.DataFrame({'Group': ['A', 'A', 'A', 'A', 'A', 'B', 'B',
-                                         'B', 'B', 'B', 'C', 'C', 'C', 'C'],
-                               'Scores': [62, 60, 71, 55, 48, 63, 57, 52, 41,
-                                          43, 42, 50, 41, 37]})
-        >>> tukey = pairwise_tukey(dv='Scores', between='Group', data=df)
-        >>> tukey['p-tukey'].values
-            array([0.30322291, 0.0265957, 0.28709861])
+        >>> from pingouin.datasets import read_dataset
+        >>> df = read_dataset('mcclave1991')
+        >>> pairwise_tukey(dv='Pain threshold', between='Hair color', data=df)
     '''
     from itertools import combinations
     from pingouin.effsize import convert_effsize

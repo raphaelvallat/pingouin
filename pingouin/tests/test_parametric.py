@@ -4,6 +4,7 @@ import numpy as np
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.parametric import (gzscore, test_normality, ttest, anova, anova2,
                                  rm_anova, mixed_anova, test_dist)
+from pingouin.datasets import read_dataset
 
 # Generate random data for ANOVA
 n = 30
@@ -69,14 +70,15 @@ class TestParametric(_TestPingouin):
 
     def test_anova(self):
         """Test function anova."""
-        aov = anova(dv='Scores', between='Group', data=df, detailed=True)
-        anova(dv='Scores', between=['Group'], data=df)
+        # Pain dataset
+        df_pain = read_dataset('mcclave1991')
+        aov = anova(dv='Pain threshold', between='Hair color', data=df_pain,
+                    detailed=True)
+        anova(dv='Pain threshold', between=['Hair color'], data=df_pain)
         # Compare with JASP
-        assert np.allclose(aov.loc[0, 'F'].round(3), 5.244)
-        assert np.allclose(aov.loc[0, 'p-unc'].round(3), .023)
-        assert np.allclose(aov.loc[0, 'np2'].round(3), .029)
-        anova(dv='Scores', between='Group', data=df, detailed=False,
-              export_filename='test_export.csv')
+        assert np.allclose(aov.loc[0, 'F'].round(3), 6.791)
+        assert np.allclose(aov.loc[0, 'p-unc'].round(3), .004)
+        assert np.allclose(aov.loc[0, 'np2'].round(3), .576)
         # Two-way ANOVA
         anova(dv='Scores', between=['Group', 'Time'], data=df,
               export_filename='test_export.csv')

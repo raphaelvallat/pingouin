@@ -698,13 +698,13 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
     Examples
     --------
-    1. One-way ANOVA.
+    1. One-way ANOVA on the pain threshold dataset.
 
-        >>> import pandas as pd
         >>> from pingouin import anova, print_table
-        >>> df = pd.read_csv('dataset.csv')
-        >>> aov = anova(dv='DV', between='Group', data=df,
-                        detailed=True, export_filename='anova.csv')
+        >>> from pingouin.dataset import read_dataset
+        >>> df = read_dataset('mcclave1991')
+        >>> aov = anova(dv='Pain threshold', between='Hair color', data=df,
+                        detailed=True, export_filename='pain_anova.csv')
         >>> print_table(aov)
 
     2. Two-way ANOVA.

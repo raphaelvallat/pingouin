@@ -4,6 +4,7 @@ import pytest
 
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.pairwise import pairwise_ttests, pairwise_corr, pairwise_tukey
+from pingouin.datasets import read_dataset
 
 # Dataset for pairwise_ttests
 n = 30
@@ -24,13 +25,6 @@ df = pd.DataFrame({'Scores': np.r_[control, meditation],
 data = pd.DataFrame({'X': np.random.normal(size=100),
                      'Y': np.random.normal(size=100),
                      'Z': np.random.normal(size=100)})
-
-# "Pain thresholds" dataset (McClave and Dietrich, 1991) in JASP.
-df_pain = pd.DataFrame({'Color': ['LB', 'LB', 'LB', 'LB', 'LB', 'DB', 'DB',
-                                  'DB', 'DB', 'DB', 'LBr', 'LBr', 'LBr',
-                                  'LBr', 'DBr', 'DBr', 'DBr', 'DBr', 'DBr'],
-                        'Pain': [62, 60, 71, 55, 48, 63, 57, 52, 41, 43, 42,
-                                 50, 41, 37, 32, 39, 51, 30, 35]})
 
 
 class TestPairwise(_TestPingouin):
@@ -68,7 +62,9 @@ class TestPairwise(_TestPingouin):
 
     def test_pairwise_tukey(self):
         """Test function pairwise_tukey"""
-        stats = pairwise_tukey(dv='Pain', between='Color', data=df_pain)
+        df = read_dataset('mcclave1991')
+        stats = pairwise_tukey(dv='Pain threshold', between='Hair color',
+                               data=df)
         np.allclose([0.074, 0.435, 0.415, 0.004, 0.789, 0.037],
                     stats.loc[:, 'p-tukey'].values.round(3), atol=0.05)
 
