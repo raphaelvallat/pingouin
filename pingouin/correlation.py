@@ -399,7 +399,7 @@ def rm_corr(data=None, x=None, y=None, subject=None):
     # Check that statsmodels is installed
     from pingouin.utils import is_statsmodels_installed
     is_statsmodels_installed(raise_error=True)
-    import statsmodels.api as sm
+    from statsmodels.api import stats
     from statsmodels.formula.api import ols
 
     # Remove Nans
@@ -408,7 +408,7 @@ def rm_corr(data=None, x=None, y=None, subject=None):
     # ANCOVA model
     formula = y + ' ~ ' + 'C(' + subject + ') + ' + x
     model = ols(formula, data=data).fit()
-    table = sm.stats.anova_lm(model, typ=3)
+    table = stats.anova_lm(model, typ=3)
 
     # Extract the sign of the correlation and dof
     sign = np.sign(model.params[x])
