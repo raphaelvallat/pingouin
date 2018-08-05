@@ -9,7 +9,44 @@ import numpy as np
 from scipy.stats import circmean
 from pingouin import _remove_na
 
-__all__ = ["circ_corrcc", "circ_corrcl", "circ_r", "circ_rayleigh"]
+__all__ = ["circ_axial", "circ_corrcc", "circ_corrcl", "circ_r",
+           "circ_rayleigh"]
+
+
+def circ_axial(alpha, n):
+    """Transforms n-axial data to a common scale.
+
+    Parameters
+    ----------
+    alpha : array
+        Sample of angles in radians
+    n : int
+        Number of modes
+
+    Returns
+    -------
+    alpha : float
+        Transformed angles
+
+    Notes
+    -----
+    Tranform data with multiple modes (known as axial data) to a unimodal
+    sample, for the purpose of certain analysis such as computation of a
+    mean resultant vector (see Berens 2009).
+
+    Examples
+    --------
+    Transform degrees to unimodal radians in the Berens 2009 neuro dataset.
+
+        >>> import numpy as np
+        >>> from pingouin.datasets import read_dataset
+        >>> from pingouin.circular import circ_axial
+        >>> df = read_dataset('berens2009')
+        >>> alpha = df['Orientation'].values
+        >>> alpha = circ_axial(np.deg2rad(alpha), 2)
+    """
+    alpha = np.array(alpha)
+    return np.remainder(alpha * n, 2 * np.pi)
 
 
 def circ_corrcc(x, y, tail='two-sided'):

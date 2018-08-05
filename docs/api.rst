@@ -38,6 +38,7 @@ Circular
 .. autosummary::
    :toctree: generated/
 
+    circ_axial
     circ_corrcc
     circ_corrcl
     circ_r

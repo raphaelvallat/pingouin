@@ -1,11 +1,20 @@
 import pytest
 import numpy as np
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.circular import circ_corrcc, circ_corrcl, circ_r, circ_rayleigh
+from pingouin.datasets import read_dataset
+from pingouin.circular import (circ_axial, circ_corrcc, circ_corrcl, circ_r,
+                               circ_rayleigh)
 
 
 class TestCircular(_TestPingouin):
     """Test circular.py."""
+
+    def test_circ_axial(self):
+        """Test function circ_axial."""
+        df = read_dataset('berens2009')
+        alpha = df['Orientation'].values
+        alpha = circ_axial(np.deg2rad(alpha))
+
 
     def test_circ_corrcc(self):
         """Test function circ_corrcc."""

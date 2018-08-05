@@ -57,7 +57,7 @@ Berens (2009). Used in the CircStats Matlab toolbox.
 Circular statistics.
 
 #### Structure
-- 3 columns (*Orientation*, *N1_Spikes*, *N2_Spikes*, *N3_Spikes*)
+- 3 columns (*Orientation*, *N1Spikes*, *N2Spikes*, *N3Spikes*)
 - 8 rows
 
 **********************************************************
