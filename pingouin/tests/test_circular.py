@@ -13,7 +13,10 @@ class TestCircular(_TestPingouin):
         """Test function circ_axial."""
         df = read_dataset('berens2009')
         alpha = df['Orientation'].values
-        alpha = circ_axial(np.deg2rad(alpha))
+        alpha = circ_axial(np.deg2rad(alpha), 2)
+        assert np.allclose(np.round(alpha, 4),
+                           [0, 0.7854, 1.5708, 2.3562, 3.1416, 3.9270, 4.7124,
+                           5.4978])
 
 
     def test_circ_corrcc(self):
