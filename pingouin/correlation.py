@@ -347,7 +347,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     return stats
 
 
-def rm_corr(data=None, x=None, y=None, subject=None):
+def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     """Repeated measures correlation (Bakdash and Marusich 2017).
 
     https://www.frontiersin.org/articles/10.3389/fpsyg.2017.00456/full
@@ -362,6 +362,8 @@ def rm_corr(data=None, x=None, y=None, subject=None):
         Name of columns in data containing the two dependent variables
     subject : string
         Name of column in data containing the subject indicator
+    tail : string
+        Specify whether to return 'one-sided' or 'two-sided' p-value.
 
     Returns
     -------
@@ -383,18 +385,12 @@ def rm_corr(data=None, x=None, y=None, subject=None):
     Examples
     --------
 
-        >>> import numpy as np
-        >>> import pandas as pd
         >>> from pingouin import rm_corr
-        >>> # Generate random correlated data
-        >>> np.random.seed(123)
-        >>> mean, cov = [4, 6], [[1, 0.6], [0.6, 1]]
-        >>> x, y = np.round(np.random.multivariate_normal(mean, cov, 30), 1).T
-        >>> data = pd.DataFrame({'X': x, 'Y': y,
-                                 'Ss': np.repeat(np.arange(10), 3)})
+        >>> from pingouin.datasets import read_dataset
+        >>> df = read_dataset('bland1995')
         >>> # Compute the repeated measure correlation
-        >>> rmcorr(data, x='X', y='Y', subject='Ss')
-            (0.647, 0.001, 19)
+        >>> rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
+            (-0.507, 0.0008, 38)
     """
     # Check that statsmodels is installed
     from pingouin.utils import is_statsmodels_installed
@@ -421,5 +417,6 @@ def rm_corr(data=None, x=None, y=None, subject=None):
 
     # Extract p-value
     pval = table.loc[x, 'PR(>F)']
+    pval *= 0.5 if tail == 'one-sided' else 1
 
     return np.round(rm, 3), pval, dof

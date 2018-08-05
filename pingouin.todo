@@ -8,8 +8,7 @@ Code
 ----
 - Better bootstrapping of confidence intervals (see Matlab `bootci` function)
 - Test second order approximation in Mauchly (test_sphericity)
-- Re-do pairwise_ttests using the same method / syntax as in pairwise_tukey
+- Re-do pairwise_ttests using the same method / syntax as in pairwise_tukey?
 - Add Pearson's skipped-correlation (requires sklearn)
-- Add repeated measures correlation (requires statsmodels)
 - Add two-way repeated measures ANOVA
 - Add type III rm_anova

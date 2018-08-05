@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
-import pandas as pd
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.correlation import corr, rm_corr
+from pingouin.datasets import read_dataset
 
 
 class TestCorrelation(_TestPingouin):
@@ -33,12 +33,9 @@ class TestCorrelation(_TestPingouin):
 
     def test_rmcorr(self):
         """Test function rm_corr"""
-        np.random.seed(123)
-        mean, cov = [4, 6], [[1, 0.6], [0.6, 1]]
-        x, y = np.round(np.random.multivariate_normal(mean, cov, 30), 1).T
-        data = pd.DataFrame({'X': x, 'Y': y,
-                             'Ss': np.repeat(np.arange(10), 3)})
-        # Compute the repeated measure correlation
-        r, p, dof = rm_corr(data, x='X', y='Y', subject='Ss')
-        assert r == 0.647
-        assert dof == 19
+        df = read_dataset('bland1995')
+        # Test again rmcorr R package.
+        r, p, dof = rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
+        assert r == -0.507
+        assert dof == 38
+        assert np.round(p, 3) == 0.001

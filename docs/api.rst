@@ -52,6 +52,7 @@ Correlation
    :toctree: generated/
 
     corr
+    rm_corr
     pairwise_corr
 
 Distribution
@@ -92,6 +93,7 @@ Miscellaneous
      :toctree: generated/
 
       print_table
+      read_dataset
       reshape_data
 
 
