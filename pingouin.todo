@@ -12,5 +12,4 @@ Code
 - Add Pearson's skipped-correlation (requires sklearn)
 - Add repeated measures correlation (requires statsmodels)
 - Add two-way repeated measures ANOVA
-- Add Tukey post-hocs for non repeated measures ANOVA
 - Add type III rm_anova

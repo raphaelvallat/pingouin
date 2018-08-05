@@ -103,6 +103,9 @@ Multiple comparisons
 .. autosummary::
    :toctree: generated/
 
+    pairwise_ttests
+    pairwise_tukey
+    pairwise_corr
     multicomp
     bonf
     holm
@@ -130,6 +133,5 @@ T-tests
    :toctree: generated/
 
     ttest
-    pairwise_ttests
     mwu
     wilcoxon
