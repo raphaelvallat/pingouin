@@ -792,13 +792,13 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    1. One-way ANOVA.</span>
+<span class="sd">    1. One-way ANOVA on the pain threshold dataset.</span>
 
-<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import anova, print_table</span>
-<span class="sd">        &gt;&gt;&gt; df = pd.read_csv(&#39;dataset.csv&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; aov = anova(dv=&#39;DV&#39;, between=&#39;Group&#39;, data=df,</span>
-<span class="sd">                        detailed=True, export_filename=&#39;anova.csv&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin.dataset import read_dataset</span>
+<span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;mcclave1991&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; aov = anova(dv=&#39;Pain threshold&#39;, between=&#39;Hair color&#39;, data=df,</span>
+<span class="sd">                        detailed=True, export_filename=&#39;pain_anova.csv&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; print_table(aov)</span>
 
 <span class="sd">    2. Two-way ANOVA.</span>

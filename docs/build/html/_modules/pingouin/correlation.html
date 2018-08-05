@@ -100,7 +100,7 @@
 <span class="c1"># from pingouin import test_normality</span>
 <span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">_remove_na</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;corr&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;corr&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_corr&quot;</span><span class="p">]</span>
 
 
 <span class="k">def</span> <span class="nf">mahal</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
@@ -439,6 +439,81 @@
     <span class="n">stats</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
     <span class="n">stats</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">stats</span></div>
+
+
+<div class="viewcode-block" id="rm_corr"><a class="viewcode-back" href="../../generated/pingouin.rm_corr.html#pingouin.rm_corr">[docs]</a><span class="k">def</span> <span class="nf">rm_corr</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Repeated measures correlation (Bakdash and Marusich 2017).</span>
+
+<span class="sd">    https://www.frontiersin.org/articles/10.3389/fpsyg.2017.00456/full</span>
+
+<span class="sd">    Tested against the `rmcorr` R package. Requires statsmodels.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : pd.DataFrame</span>
+<span class="sd">        Dataframe containing the variables</span>
+<span class="sd">    x, y : string</span>
+<span class="sd">        Name of columns in data containing the two dependent variables</span>
+<span class="sd">    subject : string</span>
+<span class="sd">        Name of column in data containing the subject indicator</span>
+<span class="sd">    tail : string</span>
+<span class="sd">        Specify whether to return &#39;one-sided&#39; or &#39;two-sided&#39; p-value.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    r : float</span>
+<span class="sd">        Repeated measures correlation coefficient</span>
+<span class="sd">    p : float</span>
+<span class="sd">        P-value</span>
+<span class="sd">    dof : int</span>
+<span class="sd">        Degrees of freedom</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Repeated measures correlation (rmcorr) is a statistical technique</span>
+<span class="sd">    for determining the common within-individual association for paired</span>
+<span class="sd">    measures assessed on two or more occasions for multiple individuals.</span>
+
+<span class="sd">    Please note that NaN are automatically removed from the dataframe.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">        &gt;&gt;&gt; from pingouin import rm_corr</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
+<span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;bland1995&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; # Compute the repeated measure correlation</span>
+<span class="sd">        &gt;&gt;&gt; rm_corr(data=df, x=&#39;pH&#39;, y=&#39;PacO2&#39;, subject=&#39;Subject&#39;)</span>
+<span class="sd">            (-0.507, 0.0008, 38)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check that statsmodels is installed</span>
+    <span class="kn">from</span> <span class="nn">pingouin.utils</span> <span class="k">import</span> <span class="n">is_statsmodels_installed</span>
+    <span class="n">is_statsmodels_installed</span><span class="p">(</span><span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">statsmodels.api</span> <span class="k">import</span> <span class="n">stats</span>
+    <span class="kn">from</span> <span class="nn">statsmodels.formula.api</span> <span class="k">import</span> <span class="n">ols</span>
+
+    <span class="c1"># Remove Nans</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">subject</span><span class="p">]]</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># ANCOVA model</span>
+    <span class="n">formula</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="s1">&#39; ~ &#39;</span> <span class="o">+</span> <span class="s1">&#39;C(&#39;</span> <span class="o">+</span> <span class="n">subject</span> <span class="o">+</span> <span class="s1">&#39;) + &#39;</span> <span class="o">+</span> <span class="n">x</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">ols</span><span class="p">(</span><span class="n">formula</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">anova_lm</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="c1"># Extract the sign of the correlation and dof</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">x</span><span class="p">])</span>
+    <span class="n">dof</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Residual&#39;</span><span class="p">,</span> <span class="s1">&#39;df&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Extract correlation coefficient from sum of squares</span>
+    <span class="n">ssfactor</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;sum_sq&#39;</span><span class="p">]</span>
+    <span class="n">sserror</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Residual&#39;</span><span class="p">,</span> <span class="s1">&#39;sum_sq&#39;</span><span class="p">]</span>
+    <span class="n">rm</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ssfactor</span> <span class="o">/</span> <span class="p">(</span><span class="n">ssfactor</span> <span class="o">+</span> <span class="n">sserror</span><span class="p">))</span>
+
+    <span class="c1"># Extract p-value</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;PR(&gt;F)&#39;</span><span class="p">]</span>
+    <span class="n">pval</span> <span class="o">*=</span> <span class="mf">0.5</span> <span class="k">if</span> <span class="n">tail</span> <span class="o">==</span> <span class="s1">&#39;one-sided&#39;</span> <span class="k">else</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">rm</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">pval</span><span class="p">,</span> <span class="n">dof</span></div>
 </pre></div>
 
     </div>

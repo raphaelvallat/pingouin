@@ -93,8 +93,8 @@ Miscellaneous
      :toctree: generated/
 
       print_table
-      read_dataset
-      list_dataset
+      pingouin.datasets.read_dataset
+      pingouin.datasets.list_dataset
       reshape_data
 
 

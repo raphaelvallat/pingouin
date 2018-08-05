@@ -5,6 +5,12 @@ What's new
 
 v0.1.5
 ------
+
+**Dataset**
+
+a. Added pingouin.datasets module (read_dataset & list_dataset functions)
+b. Added datasets: bland1995, mcclave1991
+
 **Testing**
 
 a. Added AppVeyor CI (Windows)
@@ -13,6 +19,11 @@ a. Added AppVeyor CI (Windows)
 
 a. Added two-way ANOVA.
 b. Added pairwise_tukey function
+
+**Correlation**
+
+a. Added repeated measures correlation (Bakdash and Marusich 2017).
+
 
 v0.1.4 (July 2018)
 ------------------

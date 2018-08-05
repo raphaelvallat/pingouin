@@ -172,7 +172,10 @@
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.corr.html#pingouin.corr" title="pingouin.corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr</span></code></a>(x,&nbsp;y[,&nbsp;tail,&nbsp;method])</td>
 <td>(Robust) correlation between two variables.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.pairwise_corr.html#pingouin.pairwise_corr" title="pingouin.pairwise_corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pairwise_corr</span></code></a>(data[,&nbsp;columns,&nbsp;tail,&nbsp;method,&nbsp;…])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.rm_corr.html#pingouin.rm_corr" title="pingouin.rm_corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rm_corr</span></code></a>([data,&nbsp;x,&nbsp;y,&nbsp;subject,&nbsp;tail])</td>
+<td>Repeated measures correlation (Bakdash and Marusich 2017).</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.pairwise_corr.html#pingouin.pairwise_corr" title="pingouin.pairwise_corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pairwise_corr</span></code></a>(data[,&nbsp;columns,&nbsp;tail,&nbsp;method,&nbsp;…])</td>
 <td>Pairwise correlations between columns of a pandas dataframe.</td>
 </tr>
 </tbody>
@@ -237,6 +240,12 @@
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.print_table.html#pingouin.print_table" title="pingouin.print_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_table</span></code></a>(df[,&nbsp;floatfmt,&nbsp;tablefmt])</td>
 <td>Nice display of table.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.datasets.read_dataset.html#pingouin.datasets.read_dataset" title="pingouin.datasets.read_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pingouin.datasets.read_dataset</span></code></a>(dname)</td>
+<td>Read example datasets.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.datasets.list_dataset.html#pingouin.datasets.list_dataset" title="pingouin.datasets.list_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pingouin.datasets.list_dataset</span></code></a>()</td>
+<td>List available example datasets.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.reshape_data.html#pingouin.reshape_data" title="pingouin.reshape_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reshape_data</span></code></a>(df,&nbsp;id[,&nbsp;dv,&nbsp;rm])</td>
 <td>Reshape data from human-readable to long-format.</td>

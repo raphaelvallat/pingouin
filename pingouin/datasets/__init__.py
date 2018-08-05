@@ -48,5 +48,12 @@ def read_dataset(dname):
 
 def list_dataset():
     """List available example datasets.
+
+    Examples
+    --------
+
+        >>> from pingouin.datasets import list_dataset
+        >>> list_dataset()
+
     """
     print_table(dts)
