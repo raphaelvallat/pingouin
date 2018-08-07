@@ -118,6 +118,7 @@ coefficient. Available methods are</p>
 &#39;kendall&#39; : Kendall’s tau (ordinal data)
 &#39;percbend&#39; : percentage bend correlation (robust)
 &#39;shepherd&#39; : Shepherd&#39;s pi correlation (robust Spearman)
+&#39;skipped&#39; : skipped correlation (robust Spearman, requires sklearn)
 </pre></div>
 </div>
 </dd>
@@ -156,8 +157,11 @@ Values close to 1 indicate strong agreement, values close to -1 indicate
 strong disagreement.</p>
 <p>The percentage bend correlation (Wilcox 1994) is a robust method that
 protects against univariate outliers.</p>
-<p>The Shepherd’s pi correlation (Schwarzkopf et al. 2012) is a robust method
-that returns the equivalent of the Spearman’s rho after outliers removal.</p>
+<p>The Shepherd’s pi (Schwarzkopf et al. 2012) and skipped (Rousselet and
+Pernet 2012) correlations are both robust methods that returns the
+Spearman’s rho after outliers removal. Note that the skipped correlation
+requires that the scikit-learn package is installed (for computing the
+minimum covariance determinant).</p>
 <p>Please note that NaN are automatically removed from datasets.</p>
 <p class="rubric">References</p>
 <p>Wilcox, R.R., 1994. The percentage bend correlation coefficient.
@@ -251,7 +255,7 @@ source matlab toolbox. Front. Psychol. 3, 606.
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
     </p>
   </div>
 </footer>

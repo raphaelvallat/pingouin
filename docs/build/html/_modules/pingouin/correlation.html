@@ -335,6 +335,7 @@
 <span class="sd">        &#39;kendall&#39; : Kendall’s tau (ordinal data)</span>
 <span class="sd">        &#39;percbend&#39; : percentage bend correlation (robust)</span>
 <span class="sd">        &#39;shepherd&#39; : Shepherd&#39;s pi correlation (robust Spearman)</span>
+<span class="sd">        &#39;skipped&#39; : skipped correlation (robust Spearman, requires sklearn)</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -368,8 +369,11 @@
 <span class="sd">    The percentage bend correlation (Wilcox 1994) is a robust method that</span>
 <span class="sd">    protects against univariate outliers.</span>
 
-<span class="sd">    The Shepherd&#39;s pi correlation (Schwarzkopf et al. 2012) is a robust method</span>
-<span class="sd">    that returns the equivalent of the Spearman&#39;s rho after outliers removal.</span>
+<span class="sd">    The Shepherd&#39;s pi (Schwarzkopf et al. 2012) and skipped (Rousselet and</span>
+<span class="sd">    Pernet 2012) correlations are both robust methods that returns the</span>
+<span class="sd">    Spearman&#39;s rho after outliers removal. Note that the skipped correlation</span>
+<span class="sd">    requires that the scikit-learn package is installed (for computing the</span>
+<span class="sd">    minimum covariance determinant).</span>
 
 <span class="sd">    Please note that NaN are automatically removed from datasets.</span>
 
@@ -590,7 +594,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
     </p>
   </div>
 </footer>

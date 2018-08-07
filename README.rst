@@ -314,11 +314,18 @@ Quick start
 Development
 ===========
 
+Pingouin was created and is maintained by `Raphael Vallat <https://raphaelvallat.github.io>`_. Contributions are more than welcome so feel free to contact me, open an issue or submit a pull request!
+
 To see the code or report a bug, please visit the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
 
 Note that this program is provided with NO WARRANTY OF ANY KIND. If you can, always double check the results with another statistical software.
 
-Author
-======
+Acknowledgement
+===============
 
-* `Raphael Vallat <https://raphaelvallat.github.io>`_
+Several functions of Pingouin were translated to Python from the original R or Matlab toolboxes, including:
+
+- `effsize package (R) <https://cran.r-project.org/web/packages/effsize/effsize.pdf>`_
+- `circular statistics (Matlab) <https://www.mathworks.com/matlabcentral/fileexchange/10676-circular-statistics-toolbox-directional-statistics>`_ (Berens 2009)
+- `robust correlations (Matlab) <https://sourceforge.net/projects/robustcorrtool/>`_ (Pernet, Wilcox & Rousselet, 2012)
+- `repeated-measure correlation (R) <https://cran.r-project.org/web/packages/rmcorr/index.html>`_ (Bakdash & Marusich, 2017)
