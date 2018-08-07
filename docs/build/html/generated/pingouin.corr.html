@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/style.css" type="text/css" />
-    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -160,11 +160,18 @@ protects against univariate outliers.</p>
 that returns the equivalent of the Spearman’s rho after outliers removal.</p>
 <p>Please note that NaN are automatically removed from datasets.</p>
 <p class="rubric">References</p>
-<p>Wilcox, R. R. (1994). The percentage bend correlation
-coefficient. Psychometrika, 59(4), 601-616.</p>
-<p>Schwarzkopf, D. S., De Haas, B., &amp; Rees, G. (2012).
-Better ways to improve standards in brain-behavior correlation analysis.
-Frontiers in human neuroscience, 6, 200.</p>
+<p>Wilcox, R.R., 1994. The percentage bend correlation coefficient.
+Psychometrika 59, 601–616. <a class="reference external" href="https://doi.org/10.1007/BF02294395">https://doi.org/10.1007/BF02294395</a></p>
+<p>Schwarzkopf, D.S., De Haas, B., Rees, G., 2012. Better ways to improve
+standards in brain-behavior correlation analysis. Front. Hum. Neurosci.
+6, 200. <a class="reference external" href="https://doi.org/10.3389/fnhum.2012.00200">https://doi.org/10.3389/fnhum.2012.00200</a></p>
+<p>Rousselet, G.A., Pernet, C.R., 2012. Improving standards in brain-behavior
+correlation analyses. Front. Hum. Neurosci. 6, 119.
+<a class="reference external" href="https://doi.org/10.3389/fnhum.2012.00119">https://doi.org/10.3389/fnhum.2012.00119</a></p>
+<p>Pernet, C.R., Wilcox, R., Rousselet, G.A., 2012. Robust correlation
+analyses: false positive and power validation using a new open
+source matlab toolbox. Front. Psychol. 3, 606.
+<a class="reference external" href="https://doi.org/10.3389/fpsyg.2012.00606">https://doi.org/10.3389/fpsyg.2012.00606</a></p>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">Pearson correlation</p>
@@ -205,7 +212,14 @@ Frontiers in human neuroscience, 6, 200.</p>
 <li><p class="first">Shepherd’s pi correlation (robust)</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;shepherd&#39;</span><span class="p">)</span>
 <span class="go">    method    r      CI95%         r2     adj_r2  p-val</span>
-<span class="go">    percbend  0.437  [0.09, 0.69]  0.191  0.131   0.040</span>
+<span class="go">    percbend  0.437  [0.09, 0.69]  0.191  0.131   0.020</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Skipped spearman correlation (robust)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;skipped&#39;</span><span class="p">)</span>
+<span class="go">    method    r      CI95%         r2     adj_r2  p-val</span>
+<span class="go">    percbend  0.437  [0.09, 0.69]  0.191  0.131   0.020</span>
 </pre></div>
 </div>
 </li>
@@ -237,7 +251,7 @@ Frontiers in human neuroscience, 6, 200.</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
     </p>
   </div>
 </footer>

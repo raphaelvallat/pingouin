@@ -9,7 +9,7 @@ v0.1.5
 **Dataset**
 
 a. Added pingouin.datasets module (read_dataset & list_dataset functions)
-b. Added datasets: bland1995, mcclave1991
+b. Added datasets: bland1995, berens2009, dolan2009, mcclave1991
 
 **Testing**
 

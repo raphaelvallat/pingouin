@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
-    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
@@ -98,38 +98,82 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">pearsonr</span><span class="p">,</span> <span class="n">spearmanr</span><span class="p">,</span> <span class="n">kendalltau</span>
 <span class="c1"># from pingouin import test_normality</span>
-<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">_remove_na</span>
+<span class="kn">from</span> <span class="nn">pingouin.utils</span> <span class="k">import</span> <span class="n">mahal</span><span class="p">,</span> <span class="n">mad</span><span class="p">,</span> <span class="n">madmedianrule</span><span class="p">,</span> <span class="n">_remove_na</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;corr&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_corr&quot;</span><span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">mahal</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Mahalanobis distance.</span>
+<span class="k">def</span> <span class="nf">skipped</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the skipped correlation (Rousselet and Pernet 2012).</span>
 
-<span class="sd">    Equivalent to the Matlab mahal function.</span>
+<span class="sd">    Code inspired by Matlab code from Cyril Pernet and Guillaume Rousselet:</span>
+
+<span class="sd">    Pernet CR, Wilcox R, Rousselet GA. Robust Correlation Analyses:</span>
+<span class="sd">    False Positive and Power Validation Using a New Open Source Matlab Toolbox.</span>
+<span class="sd">    Frontiers in Psychology. 2012;3:606. doi:10.3389/fpsyg.2012.00606.</span>
+
+<span class="sd">    Requires scikit-learn.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    Y : ndarray (shape=(n, m))</span>
-<span class="sd">        Data</span>
-<span class="sd">    X : ndarray (shape=(p, m))</span>
-<span class="sd">        Reference samples</span>
+<span class="sd">    x, y : array_like</span>
+<span class="sd">        First and second set of observations. x and y must be independent.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    MD : 1D-array (shape=(n,))</span>
-<span class="sd">        Squared Mahalanobis distance of each observation in Y to the</span>
-<span class="sd">        reference samples in X.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">rx</span><span class="p">,</span> <span class="n">cx</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
-    <span class="n">ry</span><span class="p">,</span> <span class="n">cy</span> <span class="o">=</span> <span class="n">Y</span><span class="o">.</span><span class="n">shape</span>
+<span class="sd">    r : float</span>
+<span class="sd">        Skipped correlation coefficient.</span>
+<span class="sd">    pval : float</span>
+<span class="sd">        Two-tailed p-value.</span>
 
-    <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">ry</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ry</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">C</span> <span class="o">=</span> <span class="n">X</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">rx</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">rx</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">Q</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">qr</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
-    <span class="n">ri</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="p">(</span><span class="n">Y</span> <span class="o">-</span> <span class="n">M</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ri</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">rx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The skipped correlation involves multivariate outlier detection using a</span>
+<span class="sd">    projection technique (Wilcox, 2004, 2005). First, a robust estimator of</span>
+<span class="sd">    multivariate location and scatter, for instance the minimum covariance</span>
+<span class="sd">    determinant estimator (MCD; Rousseeuw, 1984; Rousseeuw and van Driessen,</span>
+<span class="sd">    1999; Hubert et al., 2008) is computed. Second, data points are</span>
+<span class="sd">    orthogonally projected on lines joining each of the data point to the</span>
+<span class="sd">    location estimator. Third, outliers are detected using a robust technique.</span>
+<span class="sd">    Finally, Spearman correlations are computed on the remaining data points</span>
+<span class="sd">    and calculations are adjusted by taking into account the dependency among</span>
+<span class="sd">    the remaining data points.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check that sklearn is installed</span>
+    <span class="kn">from</span> <span class="nn">pingouin.utils</span> <span class="k">import</span> <span class="n">is_sklearn_installed</span>
+    <span class="n">is_sklearn_installed</span><span class="p">(</span><span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">chi2</span>
+    <span class="kn">from</span> <span class="nn">sklearn.covariance</span> <span class="k">import</span> <span class="n">MinCovDet</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">center</span> <span class="o">=</span> <span class="n">MinCovDet</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">location_</span>
+
+    <span class="c1"># Detect outliers based on robust covariance</span>
+    <span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">gval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">0.975</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="c1"># Loop over rows</span>
+    <span class="n">record</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="n">nrows</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nrows</span><span class="p">):</span>
+        <span class="n">dis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nrows</span><span class="p">)</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">center</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">bot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">B</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bot</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nrows</span><span class="p">):</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">center</span>
+                <span class="n">dis</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">A</span> <span class="o">*</span> <span class="n">B</span> <span class="o">/</span> <span class="n">bot</span> <span class="o">*</span> <span class="n">B</span><span class="p">)</span>
+
+            <span class="c1"># Apply the MAD median rule</span>
+            <span class="n">MAD</span> <span class="o">=</span> <span class="n">mad</span><span class="p">(</span><span class="n">dis</span><span class="p">)</span>
+            <span class="n">outliers</span> <span class="o">=</span> <span class="n">madmedianrule</span><span class="p">(</span><span class="n">dis</span><span class="p">)</span>
+            <span class="n">record</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">dis</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">dis</span><span class="p">)</span> <span class="o">+</span> <span class="n">gval</span> <span class="o">*</span> <span class="n">MAD</span><span class="p">)</span>
+
+    <span class="n">outliers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span>
+
+    <span class="c1"># Compute correlation on remaining data</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">r</span><span class="p">,</span> <span class="n">pval</span>
 
 
 <span class="k">def</span> <span class="nf">bsmahal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">2000</span><span class="p">):</span>
@@ -182,7 +226,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Pi : float</span>
+<span class="sd">    r : float</span>
 <span class="sd">        Pi correlation coefficient</span>
 <span class="sd">    pval : float</span>
 <span class="sd">        Two-tailed adjusted p-value.</span>
@@ -193,8 +237,6 @@
 <span class="sd">    with m &gt;= 6 and finally calculates the correlation of the remaining data.</span>
 
 <span class="sd">    Pi is Spearman&#39;s Rho after outlier removal.</span>
-
-<span class="sd">    The p-value is multiplied by 2 to achieve a nominal false alarm rate.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">spearmanr</span>
 
@@ -207,13 +249,13 @@
     <span class="n">outliers</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span> <span class="o">&gt;=</span> <span class="mi">6</span><span class="p">)</span>
 
     <span class="c1"># Compute correlation</span>
-    <span class="n">pi</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">])</span>
+    <span class="n">r</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">])</span>
 
-    <span class="c1"># Adjust p-values</span>
-    <span class="n">pval</span> <span class="o">*=</span> <span class="mi">2</span>
-    <span class="n">pval</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">pval</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">pval</span>
+    <span class="c1"># (optional) double the p-value to achieve a nominal false alarm rate</span>
+    <span class="c1"># pval *= 2</span>
+    <span class="c1"># pval = 1 if pval &gt; 1 else pval</span>
 
-    <span class="k">return</span> <span class="n">pi</span><span class="p">,</span> <span class="n">pval</span>
+    <span class="k">return</span> <span class="n">r</span><span class="p">,</span> <span class="n">pval</span>
 
 
 <span class="k">def</span> <span class="nf">percbend</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">beta</span><span class="o">=.</span><span class="mi">2</span><span class="p">):</span>
@@ -333,12 +375,21 @@
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
-<span class="sd">    Wilcox, R. R. (1994). The percentage bend correlation</span>
-<span class="sd">    coefficient. Psychometrika, 59(4), 601-616.</span>
+<span class="sd">    Wilcox, R.R., 1994. The percentage bend correlation coefficient.</span>
+<span class="sd">    Psychometrika 59, 601–616. https://doi.org/10.1007/BF02294395</span>
 
-<span class="sd">    Schwarzkopf, D. S., De Haas, B., &amp; Rees, G. (2012).</span>
-<span class="sd">    Better ways to improve standards in brain-behavior correlation analysis.</span>
-<span class="sd">    Frontiers in human neuroscience, 6, 200.</span>
+<span class="sd">    Schwarzkopf, D.S., De Haas, B., Rees, G., 2012. Better ways to improve</span>
+<span class="sd">    standards in brain-behavior correlation analysis. Front. Hum. Neurosci.</span>
+<span class="sd">    6, 200. https://doi.org/10.3389/fnhum.2012.00200</span>
+
+<span class="sd">    Rousselet, G.A., Pernet, C.R., 2012. Improving standards in brain-behavior</span>
+<span class="sd">    correlation analyses. Front. Hum. Neurosci. 6, 119.</span>
+<span class="sd">    https://doi.org/10.3389/fnhum.2012.00119</span>
+
+<span class="sd">    Pernet, C.R., Wilcox, R., Rousselet, G.A., 2012. Robust correlation</span>
+<span class="sd">    analyses: false positive and power validation using a new open</span>
+<span class="sd">    source matlab toolbox. Front. Psychol. 3, 606.</span>
+<span class="sd">    https://doi.org/10.3389/fpsyg.2012.00606</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -377,9 +428,15 @@
 
 <span class="sd">        &gt;&gt;&gt; corr(x, y, method=&#39;shepherd&#39;)</span>
 <span class="sd">            method    r      CI95%         r2     adj_r2  p-val</span>
-<span class="sd">            percbend  0.437  [0.09, 0.69]  0.191  0.131   0.040</span>
+<span class="sd">            percbend  0.437  [0.09, 0.69]  0.191  0.131   0.020</span>
 
-<span class="sd">    6. One-tailed Spearman correlation</span>
+<span class="sd">    6. Skipped spearman correlation (robust)</span>
+
+<span class="sd">        &gt;&gt;&gt; corr(x, y, method=&#39;skipped&#39;)</span>
+<span class="sd">            method    r      CI95%         r2     adj_r2  p-val</span>
+<span class="sd">            percbend  0.437  [0.09, 0.69]  0.191  0.131   0.020</span>
+
+<span class="sd">    7. One-tailed Spearman correlation</span>
 
 <span class="sd">        &gt;&gt;&gt; corr(x, y, tail=&quot;one-sided&quot;, method=&#39;shepherd&#39;)</span>
 <span class="sd">            method    r      CI95%         r2     adj_r2  p-val</span>
@@ -413,6 +470,8 @@
         <span class="n">r</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">percbend</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;shepherd&#39;</span><span class="p">:</span>
         <span class="n">r</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">shepherd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;skipped&#39;</span><span class="p">:</span>
+        <span class="n">r</span><span class="p">,</span> <span class="n">pval</span> <span class="o">=</span> <span class="n">skipped</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Method not recognized.&#39;</span><span class="p">)</span>
 
@@ -531,7 +590,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
     </p>
   </div>
 </footer>

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
-    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
@@ -99,10 +99,100 @@
 <span class="kn">from</span> <span class="nn">pingouin.external.tabulate</span> <span class="k">import</span> <span class="n">tabulate</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;print_table&quot;</span><span class="p">,</span> <span class="s2">&quot;_export_table&quot;</span><span class="p">,</span> <span class="s2">&quot;reshape_data&quot;</span><span class="p">,</span>
-           <span class="s2">&quot;_check_eftype&quot;</span><span class="p">,</span> <span class="s2">&quot;_remove_rm_na&quot;</span><span class="p">,</span> <span class="s2">&quot;_remove_na&quot;</span><span class="p">,</span> <span class="s2">&quot;_check_dataframe&quot;</span><span class="p">,</span>
-           <span class="s2">&quot;_extract_effects&quot;</span><span class="p">,</span> <span class="s2">&quot;is_statsmodels_installed&quot;</span><span class="p">,</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mad&quot;</span><span class="p">,</span> <span class="s2">&quot;madmedianrule&quot;</span><span class="p">,</span> <span class="s2">&quot;mahal&quot;</span><span class="p">,</span> <span class="s2">&quot;print_table&quot;</span><span class="p">,</span> <span class="s2">&quot;_export_table&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;reshape_data&quot;</span><span class="p">,</span> <span class="s2">&quot;_check_eftype&quot;</span><span class="p">,</span> <span class="s2">&quot;_remove_rm_na&quot;</span><span class="p">,</span> <span class="s2">&quot;_remove_na&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;_check_dataframe&quot;</span><span class="p">,</span> <span class="s2">&quot;_extract_effects&quot;</span><span class="p">,</span> <span class="s2">&quot;is_statsmodels_installed&quot;</span><span class="p">,</span>
            <span class="s2">&quot;is_sklearn_installed&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="mad"><a class="viewcode-back" href="../../generated/pingouin.mad.html#pingouin.mad">[docs]</a><span class="k">def</span> <span class="nf">mad</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Median Absolute Deviation along given axis of an array</span>
+
+<span class="sd">    See https://en.wikipedia.org/wiki/Median_absolute_deviation</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : array-like</span>
+<span class="sd">        Input array.</span>
+<span class="sd">    normalize : boolean.</span>
+<span class="sd">        If True, scale by a normalization constant (~0.67)</span>
+<span class="sd">    axis : int, optional</span>
+<span class="sd">        The defaul is 0. Can also be None.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mad : float</span>
+<span class="sd">        mad = median(abs(a - median(a))) / c</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">        &gt;&gt;&gt;  a = [1.2, 5.4, 3.2, 7.8, 2.5]</span>
+<span class="sd">        &gt;&gt;&gt; mad(a)</span>
+<span class="sd">            2.965</span>
+<span class="sd">        &gt;&gt;&gt; mad(a, normalize=False)</span>
+<span class="sd">            2.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">norm</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mf">4.</span><span class="p">)</span> <span class="k">if</span> <span class="n">normalize</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">/</span> <span class="n">c</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="madmedianrule"><a class="viewcode-back" href="../../generated/pingouin.madmedianrule.html#pingouin.madmedianrule">[docs]</a><span class="k">def</span> <span class="nf">madmedianrule</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Outlier detection based on the MAD-median rule described in</span>
+<span class="sd">    Wilcox 2012.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : array-like</span>
+<span class="sd">        Input array.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    outliers: boolean (same shape as a)</span>
+<span class="sd">        Boolean array indicating whether each sample is an outlier (True) or</span>
+<span class="sd">        not (False).</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">        &gt;&gt;&gt; a = [-1.09, 1., 0.28, -1.51, -0.58, 6.61, -2.43, -0.43]</span>
+<span class="sd">        &gt;&gt;&gt; madmedianrule(a)</span>
+<span class="sd">            array([False, False, False, False, False, True, False, False])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">chi2</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">0.975</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">/</span> <span class="n">mad</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">k</span></div>
+
+
+<div class="viewcode-block" id="mahal"><a class="viewcode-back" href="../../generated/pingouin.mahal.html#pingouin.mahal">[docs]</a><span class="k">def</span> <span class="nf">mahal</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mahalanobis distance.</span>
+
+<span class="sd">    Equivalent to the Matlab mahal function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Y : ndarray (shape=(n, m))</span>
+<span class="sd">        Data</span>
+<span class="sd">    X : ndarray (shape=(p, m))</span>
+<span class="sd">        Reference samples</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    MD : 1D-array (shape=(n,))</span>
+<span class="sd">        Squared Mahalanobis distance of each observation in Y to the</span>
+<span class="sd">        reference samples in X.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rx</span><span class="p">,</span> <span class="n">cx</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">ry</span><span class="p">,</span> <span class="n">cy</span> <span class="o">=</span> <span class="n">Y</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">ry</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ry</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">X</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">rx</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">rx</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">Q</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">qr</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
+    <span class="n">ri</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="p">(</span><span class="n">Y</span> <span class="o">-</span> <span class="n">M</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ri</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">rx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="print_table"><a class="viewcode-back" href="../../generated/pingouin.print_table.html#pingouin.print_table">[docs]</a><span class="k">def</span> <span class="nf">print_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s1">&#39;simple&#39;</span><span class="p">):</span>
@@ -342,7 +432,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
     </p>
   </div>
 </footer>

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
-    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
@@ -201,7 +201,7 @@
         <span class="n">normal</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span>
         <span class="n">p</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">normal</span><span class="p">,</span> <span class="n">p</span></div>
+    <span class="k">return</span> <span class="n">normal</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="test_homoscedasticity"><a class="viewcode-back" href="../../generated/pingouin.test_homoscedasticity.html#pingouin.test_homoscedasticity">[docs]</a><span class="k">def</span> <span class="nf">test_homoscedasticity</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">):</span>
@@ -257,7 +257,7 @@
         <span class="n">_</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">bartlett</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
 
     <span class="n">equal_var</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">p</span> <span class="o">&gt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="kc">False</span>
-    <span class="k">return</span> <span class="n">equal_var</span><span class="p">,</span> <span class="n">p</span></div>
+    <span class="k">return</span> <span class="n">equal_var</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="test_dist"><a class="viewcode-back" href="../../generated/pingouin.test_dist.html#pingouin.test_dist">[docs]</a><span class="k">def</span> <span class="nf">test_dist</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="s1">&#39;norm&#39;</span><span class="p">):</span>
@@ -1174,7 +1174,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
     </p>
   </div>
 </footer>
