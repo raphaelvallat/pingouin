@@ -114,7 +114,7 @@ def wilcoxon(x, y, tail='two-sided'):
 
     Examples
     --------
-    1. Compare the medians of two related samples.
+    1. Wilcoxon test on two related samples.
 
         >>> import numpy as np
         >>> from pingouin import wilcoxon
