@@ -241,6 +241,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
         'kendall' : Kendall’s tau (ordinal data)
         'percbend' : percentage bend correlation (robust)
         'shepherd' : Shepherd's pi correlation (robust Spearman)
+        'skipped' : skipped correlation (robust Spearman)
 
     Returns
     -------
@@ -274,8 +275,9 @@ def corr(x, y, tail='two-sided', method='pearson'):
     The percentage bend correlation (Wilcox 1994) is a robust method that
     protects against univariate outliers.
 
-    The Shepherd's pi correlation (Schwarzkopf et al. 2012) is a robust method
-    that returns the equivalent of the Spearman's rho after outliers removal.
+    The Shepherd's pi (Schwarzkopf et al. 2012) and skipped (Rousselet and
+    Pernet 2012) correlations are both robust methods that returns the
+    Spearman's rho after outliers removal.
 
     Please note that NaN are automatically removed from datasets.
 
