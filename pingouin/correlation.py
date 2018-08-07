@@ -241,7 +241,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
         'kendall' : Kendall’s tau (ordinal data)
         'percbend' : percentage bend correlation (robust)
         'shepherd' : Shepherd's pi correlation (robust Spearman)
-        'skipped' : skipped correlation (robust Spearman)
+        'skipped' : skipped correlation (robust Spearman, requires sklearn)
 
     Returns
     -------
@@ -277,7 +277,9 @@ def corr(x, y, tail='two-sided', method='pearson'):
 
     The Shepherd's pi (Schwarzkopf et al. 2012) and skipped (Rousselet and
     Pernet 2012) correlations are both robust methods that returns the
-    Spearman's rho after outliers removal.
+    Spearman's rho after outliers removal. Note that the skipped correlation
+    requires that the scikit-learn package is installed (for computing the
+    minimum covariance determinant).
 
     Please note that NaN are automatically removed from datasets.
 

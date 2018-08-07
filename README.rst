@@ -314,7 +314,7 @@ Quick start
 Development
 ===========
 
-To see the code or report a bug, please visit the `github repository <https://github.com/raphaelvallat/pingouin>`_.
+To see the code or report a bug, please visit the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
 
 Note that this program is provided with NO WARRANTY OF ANY KIND. If you can, always double check the results with another statistical software.
 
