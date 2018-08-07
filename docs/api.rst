@@ -57,6 +57,19 @@ Correlation
     rm_corr
     pairwise_corr
 
+
+Datasets
+--------
+
+.. _datasets:
+
+.. autosummary::
+   :toctree: generated/
+
+    pingouin.datasets.read_dataset
+    pingouin.datasets.list_dataset
+    
+
 Distribution
 ------------
 
@@ -95,9 +108,10 @@ Miscellaneous
      :toctree: generated/
 
       print_table
-      pingouin.datasets.read_dataset
-      pingouin.datasets.list_dataset
       reshape_data
+      mad
+      madmedianrule
+      mahal
 
 
 Multiple comparisons

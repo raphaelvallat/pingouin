@@ -10,15 +10,19 @@ class TestCorrelation(_TestPingouin):
 
     def test_corr(self):
         """Test function corr"""
-        mean, cov = [4, 6], [(1, .5), (.5, 1)]
+        np.random.seed(123)
+        mean, cov = [4, 6], [(1, .6), (.6, 1)]
         x, y = np.random.multivariate_normal(mean, cov, 30).T
-        # Add one outlier
-        x[3] = 12
+        x[3], y[5] = 12, -8
         corr(x, y, method='pearson', tail='one-sided')
         corr(x, y, method='spearman', tail='two-sided')
-        corr(x, y, method='shepherd', tail='two-sided')
         corr(x, y, method='kendall')
-        corr(x, y, method='percbend')
+        corr(x, y, method='shepherd', tail='two-sided')
+        # Compare with robust corr toolbox
+        stats = corr(x, y, method='skipped')
+        assert np.round(stats['r'].values, 3) == 0.512
+        stats = corr(x, y, method='percbend')
+        assert np.round(stats['r'].values, 3) == 0.484
         # Not normally distributed
         z = np.random.uniform(size=30)
         corr(x, z, method='pearson')

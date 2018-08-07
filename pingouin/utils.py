@@ -5,10 +5,100 @@ from six import string_types
 from pingouin.external.tabulate import tabulate
 import pandas as pd
 
-__all__ = ["print_table", "_export_table", "reshape_data",
-           "_check_eftype", "_remove_rm_na", "_remove_na", "_check_dataframe",
-           "_extract_effects", "is_statsmodels_installed",
+__all__ = ["mad", "madmedianrule", "mahal", "print_table", "_export_table",
+           "reshape_data", "_check_eftype", "_remove_rm_na", "_remove_na",
+           "_check_dataframe", "_extract_effects", "is_statsmodels_installed",
            "is_sklearn_installed"]
+
+
+def mad(a, normalize=True, axis=0):
+    """
+    Median Absolute Deviation along given axis of an array
+
+    See https://en.wikipedia.org/wiki/Median_absolute_deviation
+
+    Parameters
+    ----------
+    a : array-like
+        Input array.
+    normalize : boolean.
+        If True, scale by a normalization constant (~0.67)
+    axis : int, optional
+        The defaul is 0. Can also be None.
+
+    Returns
+    -------
+    mad : float
+        mad = median(abs(a - median(a))) / c
+
+    Examples
+    --------
+
+        >>>  a = [1.2, 5.4, 3.2, 7.8, 2.5]
+        >>> mad(a)
+            2.965
+        >>> mad(a, normalize=False)
+            2.0
+    """
+    from scipy.stats import norm
+    c = norm.ppf(3 / 4.) if normalize else 1
+    return np.median(np.abs(a - np.median(a)) / c, axis=axis)
+
+
+def madmedianrule(a):
+    """Outlier detection based on the MAD-median rule described in
+    Wilcox 2012.
+
+    Parameters
+    ----------
+    a : array-like
+        Input array.
+
+    Returns
+    -------
+    outliers: boolean (same shape as a)
+        Boolean array indicating whether each sample is an outlier (True) or
+        not (False).
+
+    Examples
+    --------
+
+        >>> a = [-1.09, 1., 0.28, -1.51, -0.58, 6.61, -2.43, -0.43]
+        >>> madmedianrule(a)
+            array([False, False, False, False, False, True, False, False])
+    """
+    from scipy.stats import chi2
+    k = np.sqrt(chi2.ppf(0.975, 1))
+    return (np.abs(a - np.median(a)) / mad(a)) > k
+
+
+def mahal(Y, X):
+    """Mahalanobis distance.
+
+    Equivalent to the Matlab mahal function.
+
+    Parameters
+    ----------
+    Y : ndarray (shape=(n, m))
+        Data
+    X : ndarray (shape=(p, m))
+        Reference samples
+
+    Returns
+    -------
+    MD : 1D-array (shape=(n,))
+        Squared Mahalanobis distance of each observation in Y to the
+        reference samples in X.
+    """
+    rx, cx = X.shape
+    ry, cy = Y.shape
+
+    m = np.mean(X, 0)
+    M = np.tile(m, ry).reshape(ry, 2)
+    C = X - np.tile(m, rx).reshape(rx, 2)
+    Q, R = np.linalg.qr(C)
+    ri = np.linalg.solve(R.T, (Y - M).T)
+    return np.sum(ri**2, 0) * (rx - 1)
 
 
 def print_table(df, floatfmt=".3f", tablefmt='simple'):

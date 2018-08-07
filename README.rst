@@ -27,7 +27,7 @@
 
 It provides easy-to-grasp functions for computing several statistical tests:
 
-1. ANOVAs: one-way, repeated measures, and mixed (split-plot)
+1. ANOVAs: one- and two-ways, repeated measures, and mixed (split-plot)
 
 2. Post-hocs tests
 

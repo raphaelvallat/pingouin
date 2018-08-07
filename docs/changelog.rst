@@ -23,6 +23,13 @@ b. Added pairwise_tukey function
 **Correlation**
 
 a. Added repeated measures correlation (Bakdash and Marusich 2017).
+b. Added robust skipped correlation (Rousselet and Pernet 2012).
+
+**Misc**
+
+a. Added median absolute deviation (mad)
+b. Added mad median rule (Wilcox 2012)
+c. Added mahal function (equivalent of Matlab mahal function)
 
 
 v0.1.4 (July 2018)

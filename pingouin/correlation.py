@@ -4,38 +4,82 @@ import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr, spearmanr, kendalltau
 # from pingouin import test_normality
-from pingouin import _remove_na
+from pingouin.utils import mahal, mad, madmedianrule, _remove_na
 
 __all__ = ["corr", "rm_corr"]
 
 
-def mahal(Y, X):
-    """Mahalanobis distance.
+def skipped(x, y):
+    """
+    Compute the skipped correlation (Rousselet and Pernet 2012).
 
-    Equivalent to the Matlab mahal function.
+    Code inspired by Matlab code from Cyril Pernet and Guillaume Rousselet:
+
+    Pernet CR, Wilcox R, Rousselet GA. Robust Correlation Analyses:
+    False Positive and Power Validation Using a New Open Source Matlab Toolbox.
+    Frontiers in Psychology. 2012;3:606. doi:10.3389/fpsyg.2012.00606.
+
+    Requires scikit-learn.
 
     Parameters
     ----------
-    Y : ndarray (shape=(n, m))
-        Data
-    X : ndarray (shape=(p, m))
-        Reference samples
+    x, y : array_like
+        First and second set of observations. x and y must be independent.
 
     Returns
     -------
-    MD : 1D-array (shape=(n,))
-        Squared Mahalanobis distance of each observation in Y to the
-        reference samples in X.
-    """
-    rx, cx = X.shape
-    ry, cy = Y.shape
+    r : float
+        Skipped correlation coefficient.
+    pval : float
+        Two-tailed p-value.
 
-    m = np.mean(X, 0)
-    M = np.tile(m, ry).reshape(ry, 2)
-    C = X - np.tile(m, rx).reshape(rx, 2)
-    Q, R = np.linalg.qr(C)
-    ri = np.linalg.solve(R.T, (Y - M).T)
-    return np.sum(ri**2, 0) * (rx - 1)
+    Notes
+    -----
+    The skipped correlation involves multivariate outlier detection using a
+    projection technique (Wilcox, 2004, 2005). First, a robust estimator of
+    multivariate location and scatter, for instance the minimum covariance
+    determinant estimator (MCD; Rousseeuw, 1984; Rousseeuw and van Driessen,
+    1999; Hubert et al., 2008) is computed. Second, data points are
+    orthogonally projected on lines joining each of the data point to the
+    location estimator. Third, outliers are detected using a robust technique.
+    Finally, Spearman correlations are computed on the remaining data points
+    and calculations are adjusted by taking into account the dependency among
+    the remaining data points.
+    """
+    # Check that sklearn is installed
+    from pingouin.utils import is_sklearn_installed
+    is_sklearn_installed(raise_error=True)
+    from scipy.stats import chi2
+    from sklearn.covariance import MinCovDet
+    X = np.vstack([x, y]).T
+    center = MinCovDet().fit(X).location_
+
+    # Detect outliers based on robust covariance
+    nrows, ncols = X.shape
+    gval = np.sqrt(chi2.ppf(0.975, 2))
+
+    # Loop over rows
+    record = np.zeros(shape=(nrows, nrows))
+    for i in np.arange(nrows):
+        dis = np.zeros(nrows)
+        B = (X[i, :] - center).T
+        bot = np.sum(B**2)
+        if bot != 0:
+            for j in np.arange(nrows):
+                A = X[j, :] - center
+                dis[j] = np.linalg.norm(A * B / bot * B)
+
+            # Apply the MAD median rule
+            MAD = mad(dis)
+            outliers = madmedianrule(dis)
+            record[i, :] = dis > (np.median(dis) + gval * MAD)
+
+    outliers = np.sum(record, axis=0) >= 1
+
+    # Compute correlation on remaining data
+    x, y = X[~outliers, 0], X[~outliers, 1]
+    r, pval = spearmanr(x, y)
+    return r, pval
 
 
 def bsmahal(a, b, n_boot=2000):
@@ -88,7 +132,7 @@ def shepherd(x, y, n_boot=2000):
 
     Returns
     -------
-    Pi : float
+    r : float
         Pi correlation coefficient
     pval : float
         Two-tailed adjusted p-value.
@@ -99,8 +143,6 @@ def shepherd(x, y, n_boot=2000):
     with m >= 6 and finally calculates the correlation of the remaining data.
 
     Pi is Spearman's Rho after outlier removal.
-
-    The p-value is multiplied by 2 to achieve a nominal false alarm rate.
     """
     from scipy.stats import spearmanr
 
@@ -113,13 +155,13 @@ def shepherd(x, y, n_boot=2000):
     outliers = (m >= 6)
 
     # Compute correlation
-    pi, pval = spearmanr(x[~outliers], y[~outliers])
+    r, pval = spearmanr(x[~outliers], y[~outliers])
 
-    # Adjust p-values
-    pval *= 2
-    pval = 1 if pval > 1 else pval
+    # (optional) double the p-value to achieve a nominal false alarm rate
+    # pval *= 2
+    # pval = 1 if pval > 1 else pval
 
-    return pi, pval
+    return r, pval
 
 
 def percbend(x, y, beta=.2):
@@ -239,12 +281,21 @@ def corr(x, y, tail='two-sided', method='pearson'):
 
     References
     ----------
-    Wilcox, R. R. (1994). The percentage bend correlation
-    coefficient. Psychometrika, 59(4), 601-616.
+    Wilcox, R.R., 1994. The percentage bend correlation coefficient.
+    Psychometrika 59, 601–616. https://doi.org/10.1007/BF02294395
 
-    Schwarzkopf, D. S., De Haas, B., & Rees, G. (2012).
-    Better ways to improve standards in brain-behavior correlation analysis.
-    Frontiers in human neuroscience, 6, 200.
+    Schwarzkopf, D.S., De Haas, B., Rees, G., 2012. Better ways to improve
+    standards in brain-behavior correlation analysis. Front. Hum. Neurosci.
+    6, 200. https://doi.org/10.3389/fnhum.2012.00200
+
+    Rousselet, G.A., Pernet, C.R., 2012. Improving standards in brain-behavior
+    correlation analyses. Front. Hum. Neurosci. 6, 119.
+    https://doi.org/10.3389/fnhum.2012.00119
+
+    Pernet, C.R., Wilcox, R., Rousselet, G.A., 2012. Robust correlation
+    analyses: false positive and power validation using a new open
+    source matlab toolbox. Front. Psychol. 3, 606.
+    https://doi.org/10.3389/fpsyg.2012.00606
 
     Examples
     --------
@@ -283,9 +334,15 @@ def corr(x, y, tail='two-sided', method='pearson'):
 
         >>> corr(x, y, method='shepherd')
             method    r      CI95%         r2     adj_r2  p-val
-            percbend  0.437  [0.09, 0.69]  0.191  0.131   0.040
+            percbend  0.437  [0.09, 0.69]  0.191  0.131   0.020
 
-    6. One-tailed Spearman correlation
+    6. Skipped spearman correlation (robust)
+
+        >>> corr(x, y, method='skipped')
+            method    r      CI95%         r2     adj_r2  p-val
+            percbend  0.437  [0.09, 0.69]  0.191  0.131   0.020
+
+    7. One-tailed Spearman correlation
 
         >>> corr(x, y, tail="one-sided", method='shepherd')
             method    r      CI95%         r2     adj_r2  p-val
@@ -319,6 +376,8 @@ def corr(x, y, tail='two-sided', method='pearson'):
         r, pval = percbend(x, y)
     elif method == 'shepherd':
         r, pval = shepherd(x, y)
+    elif method == 'skipped':
+        r, pval = skipped(x, y)
     else:
         raise ValueError('Method not recognized.')
 
