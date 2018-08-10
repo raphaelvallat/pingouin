@@ -12,7 +12,8 @@ from pingouin.utils import (print_table, _export_table, _remove_rm_na,
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
                    'Time': ['Mon', 'Thur', 'Mon', 'Thur'],
-                   'Values': [1.52, 5.8, 8.2, 3.4]})
+                   'Values': [1.52, 5.8, 8.2, 3.4],
+                   'Subject': [1, 1, 2, 2]})
 
 
 class TestUtils(_TestPingouin):
@@ -67,10 +68,10 @@ class TestUtils(_TestPingouin):
         """Test function _check_dataframe."""
         _check_dataframe(dv='Values', between='Group', effects='between',
                          data=df)
-        _check_dataframe(dv='Values', within='Time', effects='within',
-                         data=df)
-        _check_dataframe(dv='Values', within='Time', between='Group',
-                         effects='interaction', data=df)
+        _check_dataframe(dv='Values', within='Time', subject='Subject',
+                         effects='within', data=df)
+        _check_dataframe(dv='Values', within='Time', subject='Subject',
+                         between='Group', effects='interaction', data=df)
         # Missing arguments
         with pytest.raises(ValueError):
             _check_dataframe(dv='Values', between='Group', effects='between')
@@ -85,14 +86,17 @@ class TestUtils(_TestPingouin):
             _check_dataframe(between=None, effects='between', data=df)
         with pytest.raises(ValueError):
             _check_dataframe(between='Group', effects='interaction', data=df)
+        with pytest.raises(ValueError):
+            _check_dataframe(dv='Values', between='Group', within='Time',
+                             effects='within', data=df)
 
     def test_extract_effects(self):
         """Test function _extract_effects."""
         _extract_effects(dv='Values', between='Group', effects='all',
                          data=df)
         _extract_effects(dv='Values', within='Time', between='Group',
-                         effects='interaction', data=df)
-        _extract_effects(dv='Values', within='Time',
+                         subject='Subject', effects='interaction', data=df)
+        _extract_effects(dv='Values', within='Time', subject='Subject',
                          effects='within', data=df)
 
     def is_statsmodels_installed(self):

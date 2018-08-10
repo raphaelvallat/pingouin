@@ -97,7 +97,7 @@
 <h1>pingouin.pairwise_ttests</h1>
 <dl class="function">
 <dt id="pingouin.pairwise_ttests">
-<code class="descclassname">pingouin.</code><code class="descname">pairwise_ttests</code><span class="sig-paren">(</span><em>dv=None</em>, <em>between=None</em>, <em>within=None</em>, <em>effects='all'</em>, <em>data=None</em>, <em>alpha=0.05</em>, <em>tail='two-sided'</em>, <em>padjust='none'</em>, <em>effsize='hedges'</em>, <em>return_desc=False</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/pairwise.html#pairwise_ttests"><span class="viewcode-link">[source]</span></a></dt>
+<code class="descclassname">pingouin.</code><code class="descname">pairwise_ttests</code><span class="sig-paren">(</span><em>dv=None</em>, <em>between=None</em>, <em>within=None</em>, <em>subject=None</em>, <em>effects='all'</em>, <em>data=None</em>, <em>alpha=0.05</em>, <em>tail='two-sided'</em>, <em>padjust='none'</em>, <em>effsize='hedges'</em>, <em>return_desc=False</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/pairwise.html#pairwise_ttests"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Pairwise T-tests.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -112,6 +112,10 @@
 </dd>
 <dt><strong>within</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd><p class="first last">Name of column containing the within factor.</p>
+</dd>
+<dt><strong>subject</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Name of column containing the subject identifier. Only useful when
+effects == ‘within’ or effects == ‘interaction’.</p>
 </dd>
 <dt><strong>data</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
 <dd><p class="first last">DataFrame</p>
@@ -185,9 +189,10 @@ design.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_ttests</span><span class="p">,</span> <span class="n">print_table</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;dataset.csv&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">post_hocs</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>                       <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>                       <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;bonf&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">post_hocs</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Ss&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                            <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                            <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                            <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;bonf&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Print the table with 3 decimals</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">print_table</span><span class="p">(</span><span class="n">post_hocs</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">)</span>
 </pre></div>
@@ -212,7 +217,7 @@ design.</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
     </p>
   </div>
 </footer>

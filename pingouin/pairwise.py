@@ -32,9 +32,10 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, alpha,
     return stats
 
 
-def pairwise_ttests(dv=None, between=None, within=None, effects='all',
-                    data=None, alpha=.05, tail='two-sided', padjust='none',
-                    effsize='hedges', return_desc=False, export_filename=None):
+def pairwise_ttests(dv=None, between=None, within=None, subject=None,
+                    effects='all', data=None, alpha=.05, tail='two-sided',
+                    padjust='none', effsize='hedges', return_desc=False,
+                    export_filename=None):
     '''Pairwise T-tests.
 
     Parameters
@@ -45,6 +46,9 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         Name of column containing the between factor.
     within : string
         Name of column containing the within factor.
+    subject : string
+        Name of column containing the subject identifier. Only useful when
+        effects == 'within' or effects == 'interaction'.
     data : pandas DataFrame
         DataFrame
     alpha : float
@@ -103,9 +107,10 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
         >>> import pandas as pd
         >>> from pingouin import pairwise_ttests, print_table
         >>> df = pd.read_csv('dataset.csv')
-        >>> post_hocs = pairwise_ttests(dv='DV', within='Time',
-        >>>                        between='Group', data=df, effects='all',
-        >>>                        padjust='bonf', effsize='hedges')
+        >>> post_hocs = pairwise_ttests(dv='DV', within='Time', subject='Ss',
+        >>>                             between='Group', data=df,
+        >>>                             effects='all',
+        >>>                             padjust='bonf', effsize='hedges')
         >>> # Print the table with 3 decimals
         >>> print_table(post_hocs, floatfmt=".3f")
     '''
@@ -121,11 +126,12 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
     # Remove NAN in repeated measurements
     if within is not None and data[dv].isnull().values.any():
-        data = _remove_rm_na(dv=dv, within=within, data=data)
+        data = _remove_rm_na(dv=dv, within=within, subject=subject, data=data)
 
     # Extract main effects
     dt_array, nobs = _extract_effects(dv=dv, between=between, within=within,
-                                      effects=effects, data=data)
+                                      subject=subject, effects=effects,
+                                      data=data)
 
     stats = pd.DataFrame([])
 
@@ -170,8 +176,9 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
 
     if effects.lower() == 'all':
         stats_within = pairwise_ttests(dv=dv, within=within, effects='within',
-                                       data=data, alpha=alpha, tail=tail,
-                                       padjust=padjust, effsize=effsize,
+                                       subject=subject, data=data, alpha=alpha,
+                                       tail=tail, padjust=padjust,
+                                       effsize=effsize,
                                        return_desc=return_desc)
         stats_between = pairwise_ttests(dv=dv, between=between,
                                         effects='between', data=data,
@@ -180,7 +187,7 @@ def pairwise_ttests(dv=None, between=None, within=None, effects='all',
                                         return_desc=return_desc)
 
         stats_interaction = pairwise_ttests(dv=dv, within=within,
-                                            between=between,
+                                            between=between, subject=subject,
                                             effects='interaction',
                                             data=data, alpha=alpha, tail=tail,
                                             padjust=padjust, effsize=effsize,

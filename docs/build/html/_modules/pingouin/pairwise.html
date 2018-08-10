@@ -126,9 +126,10 @@
     <span class="k">return</span> <span class="n">stats</span>
 
 
-<div class="viewcode-block" id="pairwise_ttests"><a class="viewcode-back" href="../../generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests">[docs]</a><span class="k">def</span> <span class="nf">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>
-                    <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span>
-                    <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">,</span> <span class="n">return_desc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="pairwise_ttests"><a class="viewcode-back" href="../../generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests">[docs]</a><span class="k">def</span> <span class="nf">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span>
+                    <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">,</span> <span class="n">return_desc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Pairwise T-tests.</span>
 
 <span class="sd">    Parameters</span>
@@ -139,6 +140,9 @@
 <span class="sd">        Name of column containing the between factor.</span>
 <span class="sd">    within : string</span>
 <span class="sd">        Name of column containing the within factor.</span>
+<span class="sd">    subject : string</span>
+<span class="sd">        Name of column containing the subject identifier. Only useful when</span>
+<span class="sd">        effects == &#39;within&#39; or effects == &#39;interaction&#39;.</span>
 <span class="sd">    data : pandas DataFrame</span>
 <span class="sd">        DataFrame</span>
 <span class="sd">    alpha : float</span>
@@ -197,9 +201,10 @@
 <span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import pairwise_ttests, print_table</span>
 <span class="sd">        &gt;&gt;&gt; df = pd.read_csv(&#39;dataset.csv&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; post_hocs = pairwise_ttests(dv=&#39;DV&#39;, within=&#39;Time&#39;,</span>
-<span class="sd">        &gt;&gt;&gt;                        between=&#39;Group&#39;, data=df, effects=&#39;all&#39;,</span>
-<span class="sd">        &gt;&gt;&gt;                        padjust=&#39;bonf&#39;, effsize=&#39;hedges&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; post_hocs = pairwise_ttests(dv=&#39;DV&#39;, within=&#39;Time&#39;, subject=&#39;Ss&#39;,</span>
+<span class="sd">        &gt;&gt;&gt;                             between=&#39;Group&#39;, data=df,</span>
+<span class="sd">        &gt;&gt;&gt;                             effects=&#39;all&#39;,</span>
+<span class="sd">        &gt;&gt;&gt;                             padjust=&#39;bonf&#39;, effsize=&#39;hedges&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; # Print the table with 3 decimals</span>
 <span class="sd">        &gt;&gt;&gt; print_table(post_hocs, floatfmt=&quot;.3f&quot;)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -215,11 +220,12 @@
 
     <span class="c1"># Remove NAN in repeated measurements</span>
     <span class="k">if</span> <span class="n">within</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">_remove_rm_na</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">_remove_rm_na</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 
     <span class="c1"># Extract main effects</span>
     <span class="n">dt_array</span><span class="p">,</span> <span class="n">nobs</span> <span class="o">=</span> <span class="n">_extract_effects</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span>
-                                      <span class="n">effects</span><span class="o">=</span><span class="n">effects</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+                                      <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="n">effects</span><span class="p">,</span>
+                                      <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 
     <span class="n">stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([])</span>
 
@@ -264,8 +270,9 @@
 
     <span class="k">if</span> <span class="n">effects</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
         <span class="n">stats_within</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;within&#39;</span><span class="p">,</span>
-                                       <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="n">tail</span><span class="p">,</span>
-                                       <span class="n">padjust</span><span class="o">=</span><span class="n">padjust</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="n">effsize</span><span class="p">,</span>
+                                       <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+                                       <span class="n">tail</span><span class="o">=</span><span class="n">tail</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="n">padjust</span><span class="p">,</span>
+                                       <span class="n">effsize</span><span class="o">=</span><span class="n">effsize</span><span class="p">,</span>
                                        <span class="n">return_desc</span><span class="o">=</span><span class="n">return_desc</span><span class="p">)</span>
         <span class="n">stats_between</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span>
                                         <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;between&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
@@ -274,7 +281,7 @@
                                         <span class="n">return_desc</span><span class="o">=</span><span class="n">return_desc</span><span class="p">)</span>
 
         <span class="n">stats_interaction</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span>
-                                            <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span>
+                                            <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
                                             <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;interaction&#39;</span><span class="p">,</span>
                                             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="n">tail</span><span class="p">,</span>
                                             <span class="n">padjust</span><span class="o">=</span><span class="n">padjust</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="n">effsize</span><span class="p">,</span>
@@ -608,7 +615,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
     </p>
   </div>
 </footer>

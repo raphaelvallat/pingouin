@@ -19,7 +19,9 @@ meditation = np.r_[np.random.normal(5.5, size=n),
 df = pd.DataFrame({'Scores': np.r_[control, meditation],
                    'Time': np.r_[np.repeat(months, n), np.repeat(months, n)],
                    'Group': np.repeat(['Control', 'Meditation'],
-                                      len(months) * n)})
+                                      len(months) * n),
+                   'Subject': np.r_[np.tile(np.arange(n), 3),
+                                    np.tile(np.arange(n, n + n), 3)]})
 
 
 class TestPairwise(_TestPingouin):
@@ -28,11 +30,12 @@ class TestPairwise(_TestPingouin):
     def test_pairwise_ttests(self):
         """Test function pairwise_ttests"""
         pairwise_ttests(dv='Scores', within='Time', between='Group',
-                        effects='interaction', data=df, padjust='holm',
-                        alpha=.01)
+                        subject='Subject', effects='interaction', data=df,
+                        padjust='holm', alpha=.01)
         pairwise_ttests(dv='Scores', within='Time', between='Group',
-                        effects='all', data=df, padjust='fdr_bh')
-        pairwise_ttests(dv='Scores', within='Time', between=None,
+                        subject='Subject', effects='all', data=df,
+                        padjust='fdr_bh')
+        pairwise_ttests(dv='Scores', within='Time', subject='Subject',
                         effects='within', data=df, padjust='none',
                         return_desc=False)
         pairwise_ttests(dv='Scores', within=None, between='Group',
@@ -49,7 +52,8 @@ class TestPairwise(_TestPingouin):
             pairwise_ttests(dv='Scores', within='Time', data=df, alpha='.05')
         # Missing values
         df.iloc[[10, 15], 0] = np.nan
-        pairwise_ttests(dv='Scores', within='Time', effects='within', data=df)
+        pairwise_ttests(dv='Scores', within='Time', effects='within',
+                        subject='Subject', data=df)
         # Wrong input argument
         df['Group'] = 'Control'
         with pytest.raises(ValueError):

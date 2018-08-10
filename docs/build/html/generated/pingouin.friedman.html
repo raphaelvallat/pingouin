@@ -97,7 +97,7 @@
 <h1>pingouin.friedman</h1>
 <dl class="function">
 <dt id="pingouin.friedman">
-<code class="descclassname">pingouin.</code><code class="descname">friedman</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>data=None</em>, <em>detailed=False</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/nonparametric.html#friedman"><span class="viewcode-link">[source]</span></a></dt>
+<code class="descclassname">pingouin.</code><code class="descname">friedman</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>subject=None</em>, <em>data=None</em>, <em>detailed=False</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/nonparametric.html#friedman"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Friedman test for repeated measurements.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -109,6 +109,9 @@
 </dd>
 <dt><strong>within</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd><p class="first last">Name of column containing the within-subject factor.</p>
+</dd>
+<dt><strong>subject</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Name of column containing the subject identifier.</p>
 </dd>
 <dt><strong>data</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
 <dd><p class="first last">DataFrame</p>
@@ -138,6 +141,11 @@ directory. To change that, specify the filename with full path.</p>
 </table>
 <p class="rubric">Notes</p>
 <p>The Friedman test is used for one-way repeated measures ANOVA by ranks.</p>
+<p>Data are expected to be in long-format.</p>
+<p>Note that if the dataset contains one or more other within subject
+factors, an automatic collapsing to the mean is applied on the dependant
+variable (same behavior as the ezANOVA R package). As such, results can
+differ from those of JASP. If you can, always double-check the results.</p>
 <p>Due to the assumption that the test statistic has a chi squared
 distribution, the p-value is only reliable for n &gt; 10 and more than 6
 repeated measurements.</p>
@@ -147,7 +155,7 @@ repeated measurements.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">friedman</span><span class="p">,</span> <span class="n">print_table</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;dataset.csv&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span> <span class="o">=</span> <span class="n">friedman</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span> <span class="o">=</span> <span class="n">friedman</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Ss&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">print_table</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -171,7 +179,7 @@ repeated measurements.</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
     </p>
   </div>
 </footer>

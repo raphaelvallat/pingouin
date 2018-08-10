@@ -357,7 +357,7 @@
     <span class="k">return</span> <span class="n">stats</span></div>
 
 
-<div class="viewcode-block" id="friedman"><a class="viewcode-back" href="../../generated/pingouin.friedman.html#pingouin.friedman">[docs]</a><span class="k">def</span> <span class="nf">friedman</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<div class="viewcode-block" id="friedman"><a class="viewcode-back" href="../../generated/pingouin.friedman.html#pingouin.friedman">[docs]</a><span class="k">def</span> <span class="nf">friedman</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
              <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Friedman test for repeated measurements.</span>
 
@@ -367,6 +367,8 @@
 <span class="sd">        Name of column containing the dependant variable.</span>
 <span class="sd">    within : string</span>
 <span class="sd">        Name of column containing the within-subject factor.</span>
+<span class="sd">    subject : string</span>
+<span class="sd">        Name of column containing the subject identifier.</span>
 <span class="sd">    data : pandas DataFrame</span>
 <span class="sd">        DataFrame</span>
 <span class="sd">    export_filename : string</span>
@@ -388,6 +390,13 @@
 <span class="sd">    -----</span>
 <span class="sd">    The Friedman test is used for one-way repeated measures ANOVA by ranks.</span>
 
+<span class="sd">    Data are expected to be in long-format.</span>
+
+<span class="sd">    Note that if the dataset contains one or more other within subject</span>
+<span class="sd">    factors, an automatic collapsing to the mean is applied on the dependant</span>
+<span class="sd">    variable (same behavior as the ezANOVA R package). As such, results can</span>
+<span class="sd">    differ from those of JASP. If you can, always double-check the results.</span>
+
 <span class="sd">    Due to the assumption that the test statistic has a chi squared</span>
 <span class="sd">    distribution, the p-value is only reliable for n &gt; 10 and more than 6</span>
 <span class="sd">    repeated measurements.</span>
@@ -401,21 +410,21 @@
 <span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import friedman, print_table</span>
 <span class="sd">        &gt;&gt;&gt; df = pd.read_csv(&#39;dataset.csv&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; stats = friedman(dv=&#39;DV&#39;, within=&#39;Time&#39;, data=df)</span>
+<span class="sd">        &gt;&gt;&gt; stats = friedman(dv=&#39;DV&#39;, within=&#39;Time&#39;, subject=&#39;Ss&#39;, data=df)</span>
 <span class="sd">        &gt;&gt;&gt; print_table(stats)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">rankdata</span><span class="p">,</span> <span class="n">chi2</span><span class="p">,</span> <span class="n">find_repeats</span>
 
     <span class="c1"># Check data</span>
-    <span class="n">_check_dataframe</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">_check_dataframe</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
                      <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;within&#39;</span><span class="p">)</span>
 
-    <span class="c1"># Remove NaN values</span>
-    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">_remove_rm_na</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="c1"># Collapse to the mean</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">subject</span><span class="p">,</span> <span class="n">within</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
 
-    <span class="c1"># Reset index (avoid duplicate axis error)</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Remove NaN</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">_remove_rm_na</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 
     <span class="c1"># Extract number of groups and total sample size</span>
     <span class="n">grp</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">within</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
@@ -481,7 +490,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
     </p>
   </div>
 </footer>

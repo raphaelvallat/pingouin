@@ -263,7 +263,7 @@ def kruskal(dv=None, between=None, data=None, detailed=False,
     return stats
 
 
-def friedman(dv=None, within=None, data=None, detailed=False,
+def friedman(dv=None, within=None, subject=None, data=None, detailed=False,
              export_filename=None):
     """Friedman test for repeated measurements.
 
@@ -273,6 +273,8 @@ def friedman(dv=None, within=None, data=None, detailed=False,
         Name of column containing the dependant variable.
     within : string
         Name of column containing the within-subject factor.
+    subject : string
+        Name of column containing the subject identifier.
     data : pandas DataFrame
         DataFrame
     export_filename : string
@@ -294,6 +296,13 @@ def friedman(dv=None, within=None, data=None, detailed=False,
     -----
     The Friedman test is used for one-way repeated measures ANOVA by ranks.
 
+    Data are expected to be in long-format.
+
+    Note that if the dataset contains one or more other within subject
+    factors, an automatic collapsing to the mean is applied on the dependant
+    variable (same behavior as the ezANOVA R package). As such, results can
+    differ from those of JASP. If you can, always double-check the results.
+
     Due to the assumption that the test statistic has a chi squared
     distribution, the p-value is only reliable for n > 10 and more than 6
     repeated measurements.
@@ -307,21 +316,21 @@ def friedman(dv=None, within=None, data=None, detailed=False,
         >>> import pandas as pd
         >>> from pingouin import friedman, print_table
         >>> df = pd.read_csv('dataset.csv')
-        >>> stats = friedman(dv='DV', within='Time', data=df)
+        >>> stats = friedman(dv='DV', within='Time', subject='Ss', data=df)
         >>> print_table(stats)
     """
     from scipy.stats import rankdata, chi2, find_repeats
 
     # Check data
-    _check_dataframe(dv=dv, within=within, data=data,
+    _check_dataframe(dv=dv, within=within, data=data, subject=subject,
                      effects='within')
 
-    # Remove NaN values
-    if data[dv].isnull().values.any():
-        data = _remove_rm_na(dv=dv, within=within, data=data)
+    # Collapse to the mean
+    data = data.groupby([subject, within]).mean().reset_index()
 
-    # Reset index (avoid duplicate axis error)
-    data = data.reset_index(drop=True)
+    # Remove NaN
+    if data[dv].isnull().any():
+        data = _remove_rm_na(dv=dv, within=within, subject=subject, data=data)
 
     # Extract number of groups and total sample size
     grp = data.groupby(within)[dv]

@@ -451,7 +451,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     return stats
 
 
-def rm_anova(dv=None, within=None, data=None, correction='auto',
+def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
              remove_na=True, detailed=False, export_filename=None):
     """One-way repeated measures ANOVA (type II).
 
@@ -463,6 +463,8 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         Name of column containing the dependant variable.
     within : string
         Name of column containing the within factor.
+    subject : string
+        Name of column containing the subject identifier.
     data : pandas DataFrame
         DataFrame
     correction : string or boolean
@@ -514,11 +516,17 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
 
     Notes
     -----
+    Data are expected to be in long-format.
+
+    Note that if the dataset contains one or more other within subject
+    factors, an automatic collapsing to the mean is applied on the dependant
+    variable (same behavior as the ezANOVA R package). As such, results can
+    differ from those of JASP. If you can, always double-check the results.
+
     The effect size reported in Pingouin is the partial eta-square.
     However, one should keep in mind that for one-way repeated-measures ANOVA,
-    partial eta-square is the same as eta-square.
-
-    For more details, see Bakeman 2005; Richardson 2011.
+    partial eta-square is the same as eta-square
+    (Bakeman 2005; Richardson 2011).
 
     Examples
     --------
@@ -527,24 +535,23 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
         >>> import pandas as pd
         >>> from pingouin import rm_anova, print_table
         >>> df = pd.read_csv('dataset.csv')
-        >>> aov = rm_anova(dv='DV', within='Time', data=df, correction='auto',
-                           remove_na=True, detailed=True,
-                           export_filename='rm_anova.csv')
+        >>> aov = rm_anova(dv='DV', within='Time', subject='Subject',
+                           data=df, correction='auto', remove_na=True,
+                           detailed=True, export_filename='rm_anova.csv')
         >>> print_table(aov)
     """
     from scipy.stats import f
+
     # Check data
-    _check_dataframe(dv=dv, within=within, data=data, effects='within')
+    _check_dataframe(dv=dv, within=within, data=data, subject=subject,
+                     effects='within')
+
+    # Collapse to the mean
+    data = data.groupby([subject, within]).mean().reset_index()
 
     # Remove NaN
-    if remove_na and data[dv].isnull().values.any():
-        data = _remove_rm_na(dv=dv, within=within, data=data)
-
-    # Reset index (avoid duplicate axis error)
-    data = data.reset_index(drop=True)
-
-    # Sort values (to avoid bug when creating 'Subj' column)
-    data = data.sort_values(by=within, kind='mergesort')
+    if remove_na and data[dv].isnull().any():
+        data = _remove_rm_na(dv=dv, within=within, subject=subject, data=data)
 
     # Groupby
     grp_with = data.groupby(within)[dv]
@@ -556,8 +563,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     # Calculate sums of squares
     sstime = ((grp_with.mean() - grandmean)**2 * grp_with.count()).sum()
     sswithin = grp_with.apply(lambda x: (x - x.mean())**2).sum()
-    data['Subj'] = np.tile(np.arange(n_obs), n_rm)
-    grp_subj = data.groupby('Subj')[dv]
+    grp_subj = data.groupby(subject)[dv]
     sssubj = n_rm * np.sum((grp_subj.mean() - grandmean)**2)
     sserror = sswithin - sssubj
 
@@ -575,7 +581,7 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
     np2 = sstime / (sstime + sserror)
 
     # Reshape and remove NAN for sphericity estimation and correction
-    data_pivot = data.pivot(index='Subj', columns=within, values=dv).dropna()
+    data_pivot = data.pivot(index=subject, columns=within, values=dv).dropna()
 
     # Compute sphericity using Mauchly's test
     # Sphericity assumption only applies if there are more than 2 levels
@@ -617,12 +623,13 @@ def rm_anova(dv=None, within=None, data=None, correction='auto',
                      'X2-Mauchly', 'DF-Mauchly', 'p-Mauchly']
     else:
         aov = pd.DataFrame({'Source': [within, 'Error'],
-                            'SS': [sstime, sserror],
+                            'SS': np.round([sstime, sserror], 3),
                             'DF': [ddof1, ddof2],
-                            'MS': [sstime / ddof1, sserror / ddof2],
+                            'MS': np.round([sstime / ddof1, sserror / ddof2],
+                                           3),
                             'F': [fval, np.nan],
                             'p-unc': [p_unc, np.nan],
-                            'np2': [np2, np.nan]
+                            'np2': [np2, np.nan],
                             })
         if correction:
             aov['p-GG-corr'] = [p_corr, np.nan]
@@ -909,7 +916,7 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
     return aov
 
 
-def mixed_anova(dv=None, within=None, between=None, data=None,
+def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
                 correction='auto', remove_na=True, export_filename=None):
     """Mixed-design (split-plot) type II ANOVA.
 
@@ -921,6 +928,8 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
         Name of column containing the dependant variable.
     within : string
         Name of column containing the within factor.
+    subject : string
+        Name of column containing the subject identifier.
     between : string
         Name of column containing the between factor.
     data : pandas DataFrame
@@ -976,25 +985,29 @@ def mixed_anova(dv=None, within=None, between=None, data=None,
         >>> import pandas as pd
         >>> from pingouin import mixed_anova, print_table
         >>> df = pd.read_csv('dataset.csv')
-        >>> aov = mixed_anova(dv='DV', within='Time', between='Group', data=df,
-                             correction='auto', remove_na=False)
+        >>> aov = mixed_anova(dv='DV', within='Time', between='Group',
+                              subject='Ss', data=df, correction='auto',
+                              remove_na=False)
         >>> print_table(aov)
     """
     from scipy.stats import f
+
     # Check data
     _check_dataframe(dv=dv, within=within, between=between, data=data,
-                     effects='interaction')
+                     subject=subject, effects='interaction')
+
+    # Collapse to the mean
+    data = data.groupby([subject, within, between]).mean().reset_index()
+
     # Remove NaN
-    if remove_na and data[dv].isnull().values.any():
-        data = _remove_rm_na(dv=dv, within=within, data=data)
-    # Reset index (avoid duplicate axis error)
-    data = data.reset_index(drop=True)
+    if remove_na and data[dv].isnull().any():
+        data = _remove_rm_na(dv=dv, within=within, subject=subject, data=data)
 
     # SUMS OF SQUARES
     grandmean = data[dv].mean()
     # Extract main effects of time and between
-    mtime = rm_anova(dv=dv, within=within, data=data, correction=correction,
-                     remove_na=False, detailed=True)
+    mtime = rm_anova(dv=dv, within=within, subject=subject, data=data,
+                     correction=correction, remove_na=False, detailed=True)
     mbetw = anova(dv=dv, between=between, data=data, detailed=True)
     # Extract SS total, residuals and interactions
     grp = data.groupby([between, within])[dv]

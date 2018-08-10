@@ -217,24 +217,25 @@ def _remove_na(x, y, paired=False):
     return x, y
 
 
-def _remove_rm_na(dv=None, within=None, data=None):
+def _remove_rm_na(dv=None, within=None, subject=None, data=None):
     """Remove subject(s) with one or more missing values in repeated
     measurements.
     """
-    rm = list(data[within].dropna().unique())
-    n_rm = len(rm)
-    n_obs = int(data.groupby(within)[dv].count().max())
-    data['ID_Subj'] = np.tile(np.arange(n_obs), n_rm)
-
-    # Efficiently remove subjects with one or more missing values
-    data = data.set_index('ID_Subj')
+    if subject is None:
+        rm = list(data[within].dropna().unique())
+        n_rm = len(rm)
+        n_obs = int(data.groupby(within)[dv].count().max())
+        data['ID_Subj'] = np.tile(np.arange(n_obs), n_rm)
+        data = data.set_index('ID_Subj')
+    else:
+        data = data.set_index(subject)
 
     # Find index with nan
     iloc_nan = pd.isnull(data).any(1).nonzero()[0]
     idx_nan = data.index[iloc_nan].values
     print('\nNote: %i subject(s) removed because of missing value(s).\n'
           % len(idx_nan))
-    return data.drop(idx_nan).reset_index(drop=True)
+    return data.drop(idx_nan).reset_index(drop=False)
 
 
 def _check_eftype(eftype):
@@ -246,8 +247,8 @@ def _check_eftype(eftype):
         return False
 
 
-def _check_dataframe(dv=None, between=None, within=None, effects=None,
-                     data=None):
+def _check_dataframe(dv=None, between=None, within=None, subject=None,
+                     effects=None, data=None):
     """Check dataframe"""
     # Check input arguments
     if not isinstance(data, pd.DataFrame):
@@ -265,14 +266,17 @@ def _check_dataframe(dv=None, between=None, within=None, effects=None,
             if not isinstance(input, string_types):
                 raise ValueError('within and between must be specified when \
                 effects=interaction')
+    # Check that subject identifier is provided in rm_anova and friedman.
+    if effects == 'within' and subject is None:
+        raise ValueError('subject must be specified when effects=within')
 
 
-def _extract_effects(dv=None, between=None, within=None, effects=None,
-                     data=None):
+def _extract_effects(dv=None, between=None, within=None, subject=None,
+                     effects=None, data=None):
     """Extract main effects"""
     # Check the dataframe
-    _check_dataframe(dv=dv, between=between, within=within, effects=effects,
-                     data=data)
+    _check_dataframe(dv=dv, between=between, within=within, subject=subject,
+                     effects=effects, data=data)
 
     datadic = {}
     nobs = np.array([], dtype=int)

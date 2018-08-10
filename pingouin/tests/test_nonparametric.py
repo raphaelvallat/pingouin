@@ -25,9 +25,10 @@ class TestNonParametric(_TestPingouin):
     def test_friedman(self):
         """Test function friedman"""
         df = pd.DataFrame({'DV': np.r_[x, y, z],
-                           'Time': np.repeat(['A', 'B', 'C'], 100)})
-        friedman(data=df, dv='DV', within='Time')
-        summary = friedman(data=df, dv='DV', within='Time',
+                           'Time': np.repeat(['A', 'B', 'C'], 100),
+                           'Subject': np.tile(np.arange(100), 3)})
+        friedman(data=df, dv='DV', subject='Subject', within='Time')
+        summary = friedman(data=df, dv='DV', within='Time', subject='Subject',
                            export_filename='test_export.csv')
         # Compare with SciPy built-in function
         from scipy import stats
@@ -36,7 +37,7 @@ class TestNonParametric(_TestPingouin):
         assert np.allclose(p, summary['p-unc']['Friedman'])
         # Test with NaN
         df.loc[10, 'DV'] = np.nan
-        friedman(data=df, dv='DV', within='Time')
+        friedman(data=df, dv='DV', subject='Subject', within='Time')
 
     def test_kruskal(self):
         """Test function kruskal"""
