@@ -317,8 +317,8 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
     # punc = t.sf(np.abs(tval), n[g1].size + n[g2].size - 2) * 2
 
     # Effect size
-    d = tval * np.sqrt(1 / n[g1].size + 1 / n[g2].size)
-    ef = convert_effsize(d, 'cohen', effsize, n[g1].size, n[g2].size)
+    d = tval * np.sqrt(1 / n[g1] + 1 / n[g2])
+    ef = convert_effsize(d, 'cohen', effsize, n[g1], n[g2])
 
     # Create dataframe
     # Careful: pd.unique does NOT sort whereas numpy does
