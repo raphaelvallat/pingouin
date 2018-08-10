@@ -328,6 +328,7 @@ Acknowledgement
 Several functions of Pingouin were translated to Python from the original R or Matlab toolboxes, including:
 
 - `effsize package (R) <https://cran.r-project.org/web/packages/effsize/effsize.pdf>`_
+- `ezANOVA package (R) <https://cran.r-project.org/web/packages/ez/ez.pdf>`_
 - `circular statistics (Matlab) <https://www.mathworks.com/matlabcentral/fileexchange/10676-circular-statistics-toolbox-directional-statistics>`_ (Berens 2009)
 - `robust correlations (Matlab) <https://sourceforge.net/projects/robustcorrtool/>`_ (Pernet, Wilcox & Rousselet, 2012)
 - `repeated-measure correlation (R) <https://cran.r-project.org/web/packages/rmcorr/index.html>`_ (Bakdash & Marusich, 2017)
