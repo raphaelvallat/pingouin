@@ -73,15 +73,8 @@ Repeated measures and mixed ANOVA.
 Test the relation between hostility towards insects and their disgustingness and frighteningness for males and females separately
 
 #### Structure
-- 6 columns (*Subject*, *Gender*, *Region*, *Education*, *DesireToKill*, *InsectType*)
+- 7 columns (*Subject*, *Gender*, *Region*, *Education*, *DesireToKill*, *Disgustingness*, *Frighteningness*)
 - 372 rows
-
-#### Variables
-
-* Lo D, Lo F - low frighteningness and low disgustingness.
-* Lo D, Hi F - high frighteningness and high disgustingness.
-* Hi D, Lo F - high frighteningness and low disgustingness.
-* Hi D, Hi F - high frighteningness and high disgustingness.
 
 The desire to kill was indicated on a scale from 0 to 10.
 
