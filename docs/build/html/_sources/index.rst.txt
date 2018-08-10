@@ -248,11 +248,15 @@ Quick start
 
   # Add a "Time" column in the DataFrame
   df['Time'] = np.tile(np.repeat(['Pre', 'Post'], 5), 3)
+  # Create a subject identifier column
+  df['Subject'] = np.r_[np.tile(np.arange(5), 2), np.tile(np.arange(5, 10), 2),
+                        np.tile(np.arange(10, 15), 2)]
 
   # Compute the two-way mixed ANOVA and export to a .csv file
   from pingouin import mixed_anova
   stats = mixed_anova(data=df, dv='DV', between='Group', within='Time',
-                      correction=False, export_filename='mixed_anova.csv')
+                      subject='Subject', correction=False,
+                      export_filename='mixed_anova.csv')
   print_table(stats)
 
 .. table:: Output
@@ -328,6 +332,7 @@ Acknowledgement
 Several functions of Pingouin were translated to Python from the original R or Matlab toolboxes, including:
 
 - `effsize package (R) <https://cran.r-project.org/web/packages/effsize/effsize.pdf>`_
+- `ezANOVA package (R) <https://cran.r-project.org/web/packages/ez/ez.pdf>`_
 - `circular statistics (Matlab) <https://www.mathworks.com/matlabcentral/fileexchange/10676-circular-statistics-toolbox-directional-statistics>`_ (Berens 2009)
 - `robust correlations (Matlab) <https://sourceforge.net/projects/robustcorrtool/>`_ (Pernet, Wilcox & Rousselet, 2012)
 - `repeated-measure correlation (R) <https://cran.r-project.org/web/packages/rmcorr/index.html>`_ (Bakdash & Marusich, 2017)

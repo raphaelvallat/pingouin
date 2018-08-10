@@ -410,11 +410,15 @@ python setup.py develop
 <h3>8. Two-way mixed ANOVA</h3>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add a &quot;Time&quot; column in the DataFrame</span>
 <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="s1">&#39;Pre&#39;</span><span class="p">,</span> <span class="s1">&#39;Post&#39;</span><span class="p">],</span> <span class="mi">5</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="c1"># Create a subject identifier column</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span>
+                      <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span> <span class="mi">2</span><span class="p">)]</span>
 
 <span class="c1"># Compute the two-way mixed ANOVA and export to a .csv file</span>
 <span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">mixed_anova</span>
 <span class="n">stats</span> <span class="o">=</span> <span class="n">mixed_anova</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span>
-                    <span class="n">correction</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="s1">&#39;mixed_anova.csv&#39;</span><span class="p">)</span>
+                    <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">export_filename</span><span class="o">=</span><span class="s1">&#39;mixed_anova.csv&#39;</span><span class="p">)</span>
 <span class="n">print_table</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -560,6 +564,7 @@ python setup.py develop
 <p>Several functions of Pingouin were translated to Python from the original R or Matlab toolboxes, including:</p>
 <ul class="simple">
 <li><a class="reference external" href="https://cran.r-project.org/web/packages/effsize/effsize.pdf">effsize package (R)</a></li>
+<li><a class="reference external" href="https://cran.r-project.org/web/packages/ez/ez.pdf">ezANOVA package (R)</a></li>
 <li><a class="reference external" href="https://www.mathworks.com/matlabcentral/fileexchange/10676-circular-statistics-toolbox-directional-statistics">circular statistics (Matlab)</a> (Berens 2009)</li>
 <li><a class="reference external" href="https://sourceforge.net/projects/robustcorrtool/">robust correlations (Matlab)</a> (Pernet, Wilcox &amp; Rousselet, 2012)</li>
 <li><a class="reference external" href="https://cran.r-project.org/web/packages/rmcorr/index.html">repeated-measure correlation (R)</a> (Bakdash &amp; Marusich, 2017)</li>

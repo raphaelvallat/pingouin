@@ -248,11 +248,15 @@ Quick start
 
   # Add a "Time" column in the DataFrame
   df['Time'] = np.tile(np.repeat(['Pre', 'Post'], 5), 3)
+  # Create a subject identifier column
+  df['Subject'] = np.r_[np.tile(np.arange(5), 2), np.tile(np.arange(5, 10), 2),
+                        np.tile(np.arange(10, 15), 2)]
 
   # Compute the two-way mixed ANOVA and export to a .csv file
   from pingouin import mixed_anova
   stats = mixed_anova(data=df, dv='DV', between='Group', within='Time',
-                      correction=False, export_filename='mixed_anova.csv')
+                      subject='Subject', correction=False,
+                      export_filename='mixed_anova.csv')
   print_table(stats)
 
 .. table:: Output

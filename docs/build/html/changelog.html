@@ -97,30 +97,36 @@
 <span id="changelog"></span><h1>What’s new</h1>
 <div class="section" id="v0-1-5">
 <h2>v0.1.5</h2>
+<p><strong>ANOVA</strong></p>
+<p>a. rm_anova, friedman and mixed_anova now require a subject identifier. This
+avoids improper collapsing when multiple repeated measures factors are present
+in the dataset.
+b. rm_anova, friedman and mixed_anova now support the presence of other
+repeated measures factors in the dataset.</p>
+<p><strong>Correlation</strong></p>
+<ol class="loweralpha simple">
+<li>Added repeated measures correlation (Bakdash and Marusich 2017).</li>
+<li>Added robust skipped correlation (Rousselet and Pernet 2012).</li>
+</ol>
 <p><strong>Dataset</strong></p>
 <ol class="loweralpha simple">
 <li>Added pingouin.datasets module (read_dataset &amp; list_dataset functions)</li>
 <li>Added datasets: bland1995, berens2009, dolan2009, mcclave1991</li>
-</ol>
-<p><strong>Testing</strong></p>
-<ol class="loweralpha simple">
-<li>Added AppVeyor CI (Windows)</li>
 </ol>
 <p><strong>Parametric</strong></p>
 <ol class="loweralpha simple">
 <li>Added two-way ANOVA.</li>
 <li>Added pairwise_tukey function</li>
 </ol>
-<p><strong>Correlation</strong></p>
-<ol class="loweralpha simple">
-<li>Added repeated measures correlation (Bakdash and Marusich 2017).</li>
-<li>Added robust skipped correlation (Rousselet and Pernet 2012).</li>
-</ol>
 <p><strong>Misc</strong></p>
 <ol class="loweralpha simple">
 <li>Added median absolute deviation (mad)</li>
 <li>Added mad median rule (Wilcox 2012)</li>
 <li>Added mahal function (equivalent of Matlab mahal function)</li>
+</ol>
+<p><strong>Testing</strong></p>
+<ol class="loweralpha simple">
+<li>Added AppVeyor CI (Windows)</li>
 </ol>
 </div>
 <div class="section" id="v0-1-4-july-2018">
