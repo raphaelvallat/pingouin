@@ -8,6 +8,7 @@ Doc
 Code
 ----
 - Rewrite pairwise_ttests in a clearner way!
+- Remove _extract_effects function
 - Better bootstrapping of confidence intervals (see Matlab `bootci` function)
 - Test second order approximation in Mauchly (test_sphericity)
 - Repeated measures ANOVA: automatic groupby if multiple within factor?
