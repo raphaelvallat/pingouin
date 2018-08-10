@@ -774,9 +774,9 @@ def anova(dv=None, between=None, data=None, detailed=False,
         col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc', 'np2']
     else:
         aov = pd.DataFrame({'Source': [between, 'Within'],
-                            'SS': [ssbetween, sserror],
+                            'SS': np.round([ssbetween, sserror], 3),
                             'DF': [ddof1, ddof2],
-                            'MS': [msbetween, mserror],
+                            'MS': np.round([msbetween, mserror], 3),
                             'F': [fval, np.nan],
                             'p-unc': [p_unc, np.nan],
                             'np2': [np2, np.nan]
@@ -899,9 +899,11 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
     # Create output dataframe
     aov = pd.DataFrame({'Source': [fac1, fac2, fac1 + ' * ' + fac2,
                                    'residual'],
-                        'SS': [ss_fac1, ss_fac2, ss_inter, ss_resid],
+                        'SS': np.round([ss_fac1, ss_fac2, ss_inter,
+                                        ss_resid], 3),
                         'DF': [df_fac1, df_fac2, df_inter, df_resid],
-                        'MS': [ms_fac1, ms_fac2, ms_inter, ms_resid],
+                        'MS': np.round([ms_fac1, ms_fac2, ms_inter,
+                                        ms_resid], 3),
                         'F': [fval_fac1, fval_fac2, fval_inter, np.nan],
                         'p-unc': [pval_fac1, pval_fac2, pval_inter, np.nan],
                         'np2': [np2_fac1, np2_fac2, np2_inter, np.nan]
@@ -1064,6 +1066,8 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
                       'np2': npsq_inter
                       }, ignore_index=True)
 
+    aov['SS'] = aov['SS'].round(3)
+    aov['MS'] = aov['MS'].round(3)
     aov['DF2'] = [dfeb, dfwg, dfwg]
     col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc', 'np2',
                  'p-GG-corr', 'sphericity', 'W-Mauchly', 'X2-Mauchly',
