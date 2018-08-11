@@ -7,12 +7,10 @@ Doc
 
 Code
 ----
-- Rewrite pairwise_ttests in a clearner way!
-- Remove _extract_effects function
+- Rewrite pairwise_ttests in a cleaner way and remove _extract_effects
 - Better bootstrapping of confidence intervals (see Matlab `bootci` function)
+- Validate test_sphericity against R, Matlab or JASP.
 - Test second order approximation in Mauchly (test_sphericity)
-- Repeated measures ANOVA: automatic groupby if multiple within factor?
 - Add two-way repeated measures ANOVA
-- Add type III rm_anova
 - pingouin.plotting module?
 - Add more circular stats
