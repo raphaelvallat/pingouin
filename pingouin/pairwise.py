@@ -452,6 +452,9 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     if tail not in ['one-sided', 'two-sided']:
         raise ValueError('Tail not recognized')
 
+    # Keep only numeric columns
+    data = data._get_numeric_data()
+
     # Initialize empty DataFrame
     stats = pd.DataFrame()
 
