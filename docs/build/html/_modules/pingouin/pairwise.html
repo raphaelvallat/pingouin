@@ -411,8 +411,8 @@
     <span class="c1"># punc = t.sf(np.abs(tval), n[g1].size + n[g2].size - 2) * 2</span>
 
     <span class="c1"># Effect size</span>
-    <span class="n">d</span> <span class="o">=</span> <span class="n">tval</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">g2</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
-    <span class="n">ef</span> <span class="o">=</span> <span class="n">convert_effsize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="p">,</span> <span class="n">n</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">n</span><span class="p">[</span><span class="n">g2</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">tval</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">g2</span><span class="p">])</span>
+    <span class="n">ef</span> <span class="o">=</span> <span class="n">convert_effsize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="p">,</span> <span class="n">n</span><span class="p">[</span><span class="n">g1</span><span class="p">],</span> <span class="n">n</span><span class="p">[</span><span class="n">g2</span><span class="p">])</span>
 
     <span class="c1"># Create dataframe</span>
     <span class="c1"># Careful: pd.unique does NOT sort whereas numpy does</span>
@@ -615,7 +615,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
     </p>
   </div>
 </footer>

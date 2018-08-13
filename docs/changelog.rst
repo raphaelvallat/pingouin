@@ -8,11 +8,8 @@ v0.1.5
 
 **ANOVA**
 
-a. rm_anova, friedman and mixed_anova now require a subject identifier. This
-avoids improper collapsing when multiple repeated measures factors are present
-in the dataset.
-b. rm_anova, friedman and mixed_anova now support the presence of other
-repeated measures factors in the dataset.
+a. rm_anova, friedman and mixed_anova now require a subject identifier. This avoids improper collapsing when multiple repeated measures factors are present in the dataset.
+b. rm_anova, friedman and mixed_anova now support the presence of other repeated measures factors in the dataset.
 
 **Correlation**
 
