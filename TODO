@@ -8,8 +8,6 @@ Doc
 Code
 ----
 - Better bootstrapping of confidence intervals (see Matlab `bootci` function)
-- Validate test_sphericity against R, Matlab or JASP.
-- Test second order approximation in Mauchly (test_sphericity)
 - Add two-way repeated measures ANOVA
 - pingouin.plotting module?
 - Add more circular stats
