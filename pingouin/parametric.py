@@ -236,7 +236,7 @@ def epsilon(data, correction='gg'):
     return eps
 
 
-def test_sphericity(data, alpha=.05, method='jsn'):
+def test_sphericity(data, alpha=.05):
     """Mauchly's test for sphericity
 
     Parameters
@@ -245,11 +245,6 @@ def test_sphericity(data, alpha=.05, method='jsn'):
         DataFrame containing the repeated measurements
     alpha : float, optional
         Significance level
-    method : str
-        Method to use ::
-
-            'jsn' : John, Sugiura and Nagao's test (more powerful).
-            'mauchly' : Mauchly's test (more widely-used)
 
     Returns
     -------
@@ -275,34 +270,33 @@ def test_sphericity(data, alpha=.05, method='jsn'):
     p = data.shape[1]
     d = p - 1
 
-    if method == 'jsn':
-        eps = epsilon(data)
-        W = eps * d
-        chi_sq = 0.5 * n * d ** 2 * (W - 1 / d)
+    # if method == 'jsn':
+    #     eps = epsilon(data, correction='gg')
+    #     W = eps * d
+    #     chi_sq = 0.5 * n * d ** 2 * (W - 1 / d)
 
-    else:
-        # Population covariance
-        S_mean = S.mean().mean()
-        S_pop = pd.DataFrame()
-        S['mean'] = S.mean(1)
-        S.loc['mean', :] = S.mean(0)
+    # Population covariance
+    S_mean = S.mean().mean()
+    S_pop = pd.DataFrame()
+    S['mean'] = S.mean(1)
+    S.loc['mean', :] = S.mean(0)
 
-        for k in S.keys().drop('mean'):
-            for l in S.index.drop('mean'):
-                S_pop.loc[k, l] = S.loc[k, l] - S.loc[k, 'mean'] - \
-                    S.loc['mean', l] + S_mean
+    for k in S.keys().drop('mean'):
+        for l in S.index.drop('mean'):
+            S_pop.loc[k, l] = S.loc[k, l] - S.loc[k, 'mean'] - \
+                S.loc['mean', l] + S_mean
 
-        # Eigenvalues
-        eig = np.linalg.eigvals(S_pop)
-        # Remove very low eigenvalues
-        eig = eig[eig > 1e-4]
+    # Eigenvalues
+    eig = np.linalg.eigvals(S_pop)
+    # Remove very low eigenvalues
+    eig = eig[eig > 1e-4]
 
-        # Mauchly's statistic
-        W = np.product(eig) / (eig.sum() / d)**d
+    # Mauchly's statistic
+    W = np.product(eig) / (eig.sum() / d)**d
 
-        # F-statistic
-        f = (2 * d**2 + p + 1) / (6 * d * (n - 1))
-        chi_sq = (f - 1) * (n - 1) * np.log(W)
+    # Chi-square
+    f = (2 * d**2 + p + 1) / (6 * d * (n - 1))
+    chi_sq = (f - 1) * (n - 1) * np.log(W)
 
     # Compute dof and pval
     ddof = d * p / 2 - 1
@@ -530,10 +524,9 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
         'F' : F-value
         'p-unc' : Uncorrected p-value
         'np2' : Partial eta-square effect size
+        'eps' : Greenhouse-Geisser epsilon factor (= index of sphericity)
         'p-GG-corr' : Greenhouse-Geisser corrected p-value
         'W-Mauchly' : Mauchly statistic
-        'X2-Mauchly' : Chi-square statistic of the Mauchly test
-        'DF-Mauchly' : Degrees of freedom for the Mauchly test
         'p-Mauchly' : p-value of the Mauchly test
         'sphericity' : sphericity of the data (boolean)
 
@@ -622,9 +615,11 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     else:
         correction = False
 
+    # Compute epsilon adjustement factor
+    eps = epsilon(data_pivot, correction='gg')
+
     # If required, apply Greenhouse-Geisser correction for sphericity
     if correction:
-        eps = epsilon(data_pivot, correction='gg')
         corr_ddof1, corr_ddof2 = [np.maximum(d * eps, 1.) for d in
                                   (ddof1, ddof2)]
         p_corr = f(corr_ddof1, corr_ddof2).sf(fval)
@@ -636,19 +631,18 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
                             'ddof2': ddof2,
                             'F': fval,
                             'p-unc': p_unc,
-                            'np2': np2
+                            'np2': np2,
+                            'eps': eps,
                             }, index=[0])
         if correction:
             aov['p-GG-corr'] = p_corr
             aov['W-Mauchly'] = W_mauchly
-            aov['X2-Mauchly'] = chi_sq_mauchly
-            aov['DF-Mauchly'] = ddof_mauchly
             aov['p-Mauchly'] = p_mauchly
             aov['sphericity'] = sphericity
 
         col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc',
-                     'p-GG-corr', 'np2', 'sphericity', 'W-Mauchly',
-                     'X2-Mauchly', 'DF-Mauchly', 'p-Mauchly']
+                     'p-GG-corr', 'np2', 'eps', 'sphericity', 'W-Mauchly',
+                     'p-Mauchly']
     else:
         aov = pd.DataFrame({'Source': [within, 'Error'],
                             'SS': np.round([sstime, sserror], 3),
@@ -658,18 +652,22 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
                             'F': [fval, np.nan],
                             'p-unc': [p_unc, np.nan],
                             'np2': [np2, np.nan],
+                            'eps': [eps, np.nan]
                             })
         if correction:
             aov['p-GG-corr'] = [p_corr, np.nan]
             aov['W-Mauchly'] = [W_mauchly, np.nan]
-            aov['X2-Mauchly'] = [chi_sq_mauchly, np.nan]
-            aov['DF-Mauchly'] = np.array([ddof_mauchly, 0], 'int')
             aov['p-Mauchly'] = [p_mauchly, np.nan]
             aov['sphericity'] = [sphericity, np.nan]
 
         col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'p-GG-corr',
-                     'np2', 'sphericity', 'W-Mauchly', 'X2-Mauchly',
-                     'DF-Mauchly', 'p-Mauchly']
+                     'np2', 'eps', 'sphericity', 'W-Mauchly', 'p-Mauchly']
+
+    # Round
+    aov[['F', 'eps', 'np2']] = aov[['F', 'eps', 'np2']].round(3)
+
+    # Replace NaN
+    aov = aov.fillna('-')
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
@@ -810,6 +808,12 @@ def anova(dv=None, between=None, data=None, detailed=False,
                             'np2': [np2, np.nan]
                             })
         col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'np2']
+
+    # Round
+    aov[['F', 'np2']] = aov[['F', 'np2']].round(3)
+
+    # Replace NaN
+    aov = aov.fillna('-')
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
@@ -996,10 +1000,9 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
         'F' : F-values
         'p-unc' : Uncorrected p-values
         'np2' : Partial eta-square effect sizes
+        'eps' : Greenhouse-Geisser epsilon factor ( = index of sphericity)
         'p-GG-corr' : Greenhouse-Geisser corrected p-values
         'W-Mauchly' : Mauchly statistic
-        'X2-Mauchly' : Chi-square statistic of the Mauchly test
-        'DF-Mauchly' : Degrees of freedom for the Mauchly test
         'p-Mauchly' : p-value of the Mauchly test
         'sphericity' : sphericity of the data (boolean)
 
@@ -1091,15 +1094,22 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
                       'MS': msinter,
                       'F': finter,
                       'p-unc': pinter,
-                      'np2': npsq_inter
+                      'np2': npsq_inter,
                       }, ignore_index=True)
 
     aov['SS'] = aov['SS'].round(3)
     aov['MS'] = aov['MS'].round(3)
     aov['DF2'] = [dfeb, dfwg, dfwg]
-    col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc', 'np2',
-                 'p-GG-corr', 'sphericity', 'W-Mauchly', 'X2-Mauchly',
-                 'DF-Mauchly', 'p-Mauchly']
+    aov['eps'] = [np.nan, mtime.loc[0, 'eps'], np.nan]
+    col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc',
+                 'p-GG-corr', 'np2', 'eps', 'sphericity', 'W-Mauchly',
+                 'p-Mauchly']
+
+    # Round
+    aov[['F', 'eps', 'np2']] = aov[['F', 'eps', 'np2']].round(3)
+
+    # Replace NaN
+    aov = aov.fillna('-')
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)

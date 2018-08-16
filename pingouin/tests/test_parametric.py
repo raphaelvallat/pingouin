@@ -3,7 +3,7 @@ import numpy as np
 
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.parametric import (gzscore, test_normality, ttest, anova, anova2,
-                                 rm_anova, mixed_anova, test_dist)
+                                 rm_anova, mixed_anova, test_dist, epsilon)
 from pingouin.datasets import read_dataset
 
 # Generate random data for ANOVA
@@ -49,9 +49,23 @@ class TestParametric(_TestPingouin):
     #     """Test function test_homoscedasticity."""
     #     test_homoscedasticity(x, y, alpha=.05)
     #
+
+    def test_epsilon(self):
+        """Test function epsilon."""
+        df_pivot = df.pivot(index='Subject', columns='Time',
+                            values='Scores').reset_index(drop=True)
+        eps_gg = epsilon(df_pivot)
+        eps_hf = epsilon(df_pivot, correction='hf')
+        # Compare with ezANOVA
+        assert np.allclose([eps_gg, eps_hf], [0.9987509, 1])
+
     # def test_test_sphericity(self):
     #     """Test function test_sphericity."""
-    #     test_sphericity(np.c_[x, y, z])
+    #     df_pivot = df.pivot(index='Subject', columns='Time',
+    #                         values='Scores').reset_index(drop=True)
+    #     _, W, _, _, p = test_sphericity(df_pivot)
+    #     # Compare with ezANOVA
+    #     assert np.allclose([W, p], [0.9987493, 0.9643574])
 
     def test_test_dist(self):
         """Test function test_dist."""
@@ -78,9 +92,9 @@ class TestParametric(_TestPingouin):
                     detailed=True)
         anova(dv='Pain threshold', between=['Hair color'], data=df_pain)
         # Compare with JASP
-        assert np.allclose(aov.loc[0, 'F'].round(3), 6.791)
-        assert np.allclose(aov.loc[0, 'p-unc'].round(3), .004)
-        assert np.allclose(aov.loc[0, 'np2'].round(3), .576)
+        assert np.allclose(aov.loc[0, 'F'], 6.791)
+        assert np.allclose(np.round(aov.loc[0, 'p-unc'], 3), .004)
+        assert np.allclose(aov.loc[0, 'np2'], .576)
         # Two-way ANOVA
         anova(dv='Scores', between=['Group', 'Time'], data=df,
               export_filename='test_export.csv')
@@ -97,9 +111,9 @@ class TestParametric(_TestPingouin):
         aov = rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
                        correction='auto', detailed=True)
         # Compare with JASP
-        assert np.allclose(aov.loc[0, 'F'].round(3), 3.913)
-        assert np.allclose(aov.loc[0, 'p-unc'].round(3), .023)
-        assert np.allclose(aov.loc[0, 'np2'].round(3), .062)
+        assert np.allclose(aov.loc[0, 'F'], 3.913)
+        assert np.allclose(np.round(aov.loc[0, 'p-unc'], 3), .023)
+        assert np.allclose(aov.loc[0, 'np2'], .062)
 
         rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
                  correction=True, detailed=True)
