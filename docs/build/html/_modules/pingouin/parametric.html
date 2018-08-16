@@ -295,8 +295,12 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    data : pd.DataFrame (shape = n_subj, n_groups)</span>
-<span class="sd">        DataFrame containing the repeated measurements</span>
+<span class="sd">    data : pd.DataFrame</span>
+<span class="sd">        DataFrame containing the repeated measurements.</span>
+
+<span class="sd">        Note that data are NOT expected to be in long format but rather with</span>
+<span class="sd">        shape (n_subj, n_groups). If your data are in long format, use the</span>
+<span class="sd">        pandas pivot function first.</span>
 <span class="sd">    correction : string</span>
 <span class="sd">        Specify the epsilon version ::</span>
 
@@ -335,8 +339,12 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    data : pd.DataFrame (shape = n_subj, n_groups)</span>
-<span class="sd">        DataFrame containing the repeated measurements</span>
+<span class="sd">    data : pd.DataFrame</span>
+<span class="sd">        DataFrame containing the repeated measurements.</span>
+
+<span class="sd">        Note that data are NOT expected to be in long format but rather with</span>
+<span class="sd">        shape (n_subj, n_groups). If your data are in long format, use the</span>
+<span class="sd">        pandas pivot function first.</span>
 <span class="sd">    alpha : float, optional</span>
 <span class="sd">        Significance level</span>
 
@@ -1199,14 +1207,14 @@
                  <span class="s1">&#39;p-GG-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">,</span> <span class="s1">&#39;eps&#39;</span><span class="p">,</span> <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span> <span class="s1">&#39;W-Mauchly&#39;</span><span class="p">,</span>
                  <span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span>
 
-    <span class="c1"># Round</span>
-    <span class="n">aov</span><span class="p">[[</span><span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;eps&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">aov</span><span class="p">[[</span><span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;eps&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-
     <span class="c1"># Replace NaN</span>
     <span class="n">aov</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
 
     <span class="n">aov</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
     <span class="n">aov</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Round</span>
+    <span class="n">aov</span><span class="p">[[</span><span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;eps&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">aov</span><span class="p">[[</span><span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;eps&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
     <span class="c1"># Export to .csv</span>
     <span class="k">if</span> <span class="n">export_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

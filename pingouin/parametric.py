@@ -201,8 +201,12 @@ def epsilon(data, correction='gg'):
 
     Parameters
     ----------
-    data : pd.DataFrame (shape = n_subj, n_groups)
-        DataFrame containing the repeated measurements
+    data : pd.DataFrame
+        DataFrame containing the repeated measurements.
+
+        Note that data are NOT expected to be in long format but rather with
+        shape (n_subj, n_groups). If your data are in long format, use the
+        pandas pivot function first.
     correction : string
         Specify the epsilon version ::
 
@@ -241,8 +245,12 @@ def test_sphericity(data, alpha=.05):
 
     Parameters
     ----------
-    data : pd.DataFrame (shape = n_subj, n_groups)
-        DataFrame containing the repeated measurements
+    data : pd.DataFrame
+        DataFrame containing the repeated measurements.
+
+        Note that data are NOT expected to be in long format but rather with
+        shape (n_subj, n_groups). If your data are in long format, use the
+        pandas pivot function first.
     alpha : float, optional
         Significance level
 
