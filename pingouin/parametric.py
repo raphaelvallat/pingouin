@@ -6,8 +6,8 @@ from pingouin import (_check_dataframe, _remove_rm_na, _remove_na,
                       _export_table, bayesfactor_ttest)
 
 __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
-           "test_sphericity", "ttest", "rm_anova", "anova", "anova2",
-           "mixed_anova"]
+           "epsilon", "test_sphericity", "ttest", "rm_anova", "anova",
+           "anova2", "mixed_anova"]
 
 
 def gzscore(x):
@@ -196,87 +196,116 @@ def test_dist(*args, dist='norm'):
     return from_dist, sig_level
 
 
-def test_sphericity(X, alpha=.05):
-    """Mauchly's test for sphericity
-
-    https://www.mathworks.com/help/stats/mauchlys-test-of-sphericity.html
-
-    Warning: results can slightly differ than R or Matlab. If you can,
-    always double-check your results.
+def epsilon(data, correction='gg'):
+    """Compute Epsilon adjustement factor for repeated measurements.
 
     Parameters
     ----------
-    X : array_like
-        Data array of shape (n_observations, n_repetitions)
+    data : pd.DataFrame (shape = n_subj, n_groups)
+        DataFrame containing the repeated measurements
+    correction : string
+        Specify the epsilon version ::
+
+            'gg' : Greenhouse-Geisser
+            'hf' : Huynh-Feldt
+
+    Returns
+    -------
+    eps : float
+        Epsilon adjustement factor.
+    """
+    # Covariance matrix
+    S = data.cov()
+
+    k = data.shape[1]
+    mean_var = np.diag(S).mean()
+    S_mean = S.mean().mean()
+    ss_mat = (S**2).sum().sum()
+    ss_rows = (S.mean(1)**2).sum().sum()
+
+    # Compute GGEpsilon
+    num = (k * (mean_var - S_mean))**2
+    den = (k - 1) * (ss_mat - 2 * k * ss_rows + k**2 * S_mean**2)
+    eps = num / den
+
+    if correction == 'hf':
+        num = n * (k - 1) * eps - 2
+        den = (k - 1) * (n - 1 - (k - 1) * eps)
+        eps = np.min([num / den, 1])
+
+    return eps
+
+
+def test_sphericity(data, alpha=.05, method='jsn'):
+    """Mauchly's test for sphericity
+
+    Parameters
+    ----------
+    data : pd.DataFrame (shape = n_subj, n_groups)
+        DataFrame containing the repeated measurements
     alpha : float, optional
         Significance level
+    method : str
+        Method to use ::
+
+            'jsn' : John, Sugiura and Nagao's test (more powerful).
+            'mauchly' : Mauchly's test (more widely-used)
 
     Returns
     -------
     sphericity : boolean
         True if data have the sphericity property.
     W : float
-        Mauchly's W statistic
+        Test statistic
     chi_sq : float
         Chi-square statistic
     ddof : int
         Degrees of freedom
     p : float
         P-value.
-    eps : float
-        Epsilon adjustment factor.
 
     See Also
     --------
     test_homoscedasticity : Test equality of variance.
     test_normality : Test the normality of one or more array.
-
-    Examples
-    --------
-    Test the sphericity of an array with 30 observations *
-    3 repeated measures
-
-        >>> import numpy as np
-        >>> from pingouin import test_sphericity
-        >>> np.random.seed(123)
-        >>> x = np.random.normal(loc=0, scale=1., size=30)
-        >>> y = np.random.normal(loc=0, scale=0.8,size=30)
-        >>> z = np.random.normal(loc=0, scale=0.9,size=30)
-        >>> X = np.c_[x, y, z]
-        >>> sphericity, W, chi_sq, ddof, p, eps = test_sphericity(X)
-        >>> print(sphericity, p)
-        True 0.56
-        """
+    """
     from scipy.stats import chi2
-    n = X.shape[0]
-
-    # Compute the covariance matrix
-    S = np.cov(X, rowvar=0)
-    p = S.shape[1]
+    S = data.cov()
+    n = data.shape[0]
+    p = data.shape[1]
     d = p - 1
 
-    # Orthonormal contrast matrix
-    C = np.array(np.triu(np.ones((p, d))), order='F')
-    C.reshape(-1, order='F')[1::p + 1] = -np.arange(d)
-    C, _ = np.linalg.qr(C)
-    d = C.shape[1]
-    T = C.T.dot(S).dot(C)
+    if method == 'jsn':
+        eps = epsilon(data)
+        W = eps * d
+        chi_sq = 0.5 * n * d ** 2 * (W - 1 / d)
 
-    # Compute epsilon
-    eig = np.linalg.eigvals(T)
-    eps = np.sum(eig) ** 2 / ((S.shape[0] - 1) * np.sum(eig**2))
-    # Alternative:
-    # eps = np.trace(T) ** 2 / ((S.shape[0] - 1) * np.sum(
-    # np.sum(T * T, axis=1)))
+    else:
+        # Population covariance
+        S_mean = S.mean().mean()
+        S_pop = pd.DataFrame()
+        S['mean'] = S.mean(1)
+        S.loc['mean', :] = S.mean(0)
 
-    # Mauchly's statistic
-    W = np.linalg.det(T) / (np.trace(T) / (p - 1))**d
+        for k in S.keys().drop('mean'):
+            for l in S.index.drop('mean'):
+                S_pop.loc[k, l] = S.loc[k, l] - S.loc[k, 'mean'] -  \
+                                  S.loc['mean', l] + S_mean
 
-    # Chi-square statistic
-    nr = n - np.linalg.matrix_rank(X)
-    dd = 1 - (2 * d**2 + d + 2) / (6 * d * nr)
-    chi_sq = -np.log(W) * dd * nr
-    ddof = d * (d + 1) / 2 - 1
+        # Eigenvalues
+        eig = np.linalg.eigvals(S_pop)
+        # Remove very low eigenvalues
+        eig = eig[eig > 1e-4]
+
+        # Mauchly's statistic
+        W = np.product(eig) / (eig.sum() / d)**d
+
+        # F-statistic
+        f = (2 * d**2 + p + 1) / (6 *d * (n - 1))
+        chi_sq = (f - 1) * (n - 1) * np.log(W)
+
+    # Compute dof and pval
+    ddof = d * p / 2 - 1
     pval = chi2.sf(chi_sq, ddof)
 
     # Second order approximation
@@ -286,7 +315,7 @@ def test_sphericity(X, alpha=.05):
     # pval += w2 * (pval2 - pval)
 
     sphericity = True if pval > alpha else False
-    return sphericity, W, chi_sq, ddof, pval, eps
+    return sphericity, W, chi_sq, ddof, pval
 
 
 def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
@@ -587,8 +616,7 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     # Sphericity assumption only applies if there are more than 2 levels
     if correction == 'auto' or (correction is True and n_rm >= 3):
         sphericity, W_mauchly, chi_sq_mauchly, ddof_mauchly, \
-            p_mauchly, eps = test_sphericity(data_pivot.values, alpha=.05)
-
+            p_mauchly = test_sphericity(data_pivot, alpha=.05)
         if correction == 'auto':
             correction = True if not sphericity else False
     else:
@@ -596,7 +624,7 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
 
     # If required, apply Greenhouse-Geisser correction for sphericity
     if correction:
-        # print('eps = ', eps)
+        eps = epsilon(data_pivot, correction='gg')
         corr_ddof1, corr_ddof2 = [np.maximum(d * eps, 1.) for d in
                                   (ddof1, ddof2)]
         p_corr = f(corr_ddof1, corr_ddof2).sf(fval)
