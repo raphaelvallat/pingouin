@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.nonparametric import (mwu, wilcoxon, kruskal, friedman)
+from pingouin.nonparametric import (mad, madmedianrule, mwu, wilcoxon,
+                                    kruskal, friedman)
 
 np.random.seed(1234)
 x = np.random.normal(size=100)
@@ -11,6 +12,19 @@ z = np.random.normal(size=100)
 
 class TestNonParametric(_TestPingouin):
     """Test nonparametric.py."""
+
+    def test_mad(self):
+        """Test function mad."""
+        a = [1.2, 3, 4.5, 2.4, 5, 6.7, 0.4]
+        # Compare to Matlab
+        assert mad(a, normalize=False) == 1.8
+        assert np.round(mad(a), 3) == np.round(1.8 * 1.4826, 3)
+
+    def test_madmedianrule(self):
+        """Test function madmedianrule."""
+        a = [1.2, 3, 4.5, 2.4, 5, 12.7, 0.4]
+        assert np.alltrue(madmedianrule(a) == [False, False, False,
+                                               False, False, True, False])
 
     def test_mwu(self):
         """Test function mwu"""

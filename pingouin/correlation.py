@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr, spearmanr, kendalltau
 # from pingouin import test_normality
-from pingouin.utils import mahal, mad, madmedianrule, _remove_na
+from pingouin.utils import _remove_na
+from pingouin.nonparametric import mad, madmedianrule
 
 __all__ = ["corr", "rm_corr"]
 
@@ -80,6 +81,35 @@ def skipped(x, y):
     x, y = X[~outliers, 0], X[~outliers, 1]
     r, pval = spearmanr(x, y)
     return r, pval
+
+
+def mahal(Y, X):
+    """Mahalanobis distance.
+
+    Equivalent to the Matlab mahal function.
+
+    Parameters
+    ----------
+    Y : ndarray (shape=(n, m))
+        Data
+    X : ndarray (shape=(p, m))
+        Reference samples
+
+    Returns
+    -------
+    MD : 1D-array (shape=(n,))
+        Squared Mahalanobis distance of each observation in Y to the
+        reference samples in X.
+    """
+    rx, cx = X.shape
+    ry, cy = Y.shape
+
+    m = np.mean(X, 0)
+    M = np.tile(m, ry).reshape(ry, 2)
+    C = X - np.tile(m, rx).reshape(rx, 2)
+    Q, R = np.linalg.qr(C)
+    ri = np.linalg.solve(R.T, (Y - M).T)
+    return np.sum(ri**2, 0) * (rx - 1)
 
 
 def bsmahal(a, b, n_boot=2000):

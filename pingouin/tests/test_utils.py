@@ -5,9 +5,7 @@ import pytest
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.utils import (print_table, _export_table, _remove_rm_na,
                             _check_eftype, _check_dataframe, _remove_na,
-                            reshape_data, is_sklearn_installed,
-                            is_statsmodels_installed, mad, madmedianrule,
-                            mahal)
+                            is_sklearn_installed, is_statsmodels_installed)
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
@@ -30,15 +28,6 @@ class TestUtils(_TestPingouin):
     def test_export_table(self):
         """Test function export_table."""
         _export_table(df, fname='test_export')
-
-    def test_reshape_data(self):
-        """Test function reshape_data."""
-        data = {'Ss': [1, 2, 3],
-                '10am': [12, 6, 5],
-                '2pm': [10, 6, 11],
-                '6pm': [8, 5, 7]}
-        df = pd.DataFrame(data, columns=['Ss', '10am', '2pm', '6pm'])
-        reshape_data(df, 'Ss', dv="Score", rm="Time")
 
     def test_remove_na(self):
         """Test function remove_na."""
@@ -97,24 +86,3 @@ class TestUtils(_TestPingouin):
     def is_sklearn_installed(self):
         """Test function is_statsmodels_installed."""
         assert isinstance(is_sklearn_installed(), bool)
-
-    def test_mad(self):
-        """Test function mad."""
-        a = [1.2, 3, 4.5, 2.4, 5, 6.7, 0.4]
-        # Compare to Matlab
-        assert mad(a, normalize=False) == 1.8
-        assert np.round(mad(a), 3) == np.round(1.8 * 1.4826, 3)
-
-    def test_madmedianrule(self):
-        """Test function madmedianrule."""
-        a = [1.2, 3, 4.5, 2.4, 5, 12.7, 0.4]
-        assert np.alltrue(madmedianrule(a) == [False, False, False,
-                                               False, False, True, False])
-
-    def test_mahal(self):
-        """Test function mahal."""
-        # Compare to Matlab mahal function
-        x = np.array([[-1.06, 1.60, 1.23, -0.23, -1.51],
-                      [-1.15, 1.38, 1.23, -0.32, -1.16]]).T
-        y = np.array([[1, 1, -1], [1, -1, 1]]).T
-        np.allclose(np.round(mahal(y, x), 4), [0.9758, 131.4219, 134.05044])
