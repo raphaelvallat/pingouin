@@ -1,5 +1,5 @@
-pingouin\.anova\_power
-======================
+pingouin.anova\_power
+=====================
 
 .. currentmodule:: pingouin
 

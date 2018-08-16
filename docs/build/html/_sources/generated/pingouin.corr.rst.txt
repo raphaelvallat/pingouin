@@ -1,5 +1,5 @@
-pingouin\.corr
-==============
+pingouin.corr
+=============
 
 .. currentmodule:: pingouin
 

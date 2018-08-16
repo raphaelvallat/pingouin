@@ -1,5 +1,5 @@
-pingouin\.mixed\_anova
-======================
+pingouin.mixed\_anova
+=====================
 
 .. currentmodule:: pingouin
 

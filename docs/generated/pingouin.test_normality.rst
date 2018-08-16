@@ -1,5 +1,5 @@
-pingouin\.test\_normality
-=========================
+pingouin.test\_normality
+========================
 
 .. currentmodule:: pingouin
 

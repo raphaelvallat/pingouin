@@ -1,5 +1,5 @@
-pingouin\.holm
-==============
+pingouin.holm
+=============
 
 .. currentmodule:: pingouin
 

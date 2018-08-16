@@ -1,5 +1,5 @@
-pingouin\.multicomp
-===================
+pingouin.multicomp
+==================
 
 .. currentmodule:: pingouin
 

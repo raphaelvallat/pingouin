@@ -1,5 +1,5 @@
-pingouin\.mwu
-=============
+pingouin.mwu
+============
 
 .. currentmodule:: pingouin
 

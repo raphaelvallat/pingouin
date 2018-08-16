@@ -1,5 +1,5 @@
-pingouin\.ttest\_power
-======================
+pingouin.ttest\_power
+=====================
 
 .. currentmodule:: pingouin
 

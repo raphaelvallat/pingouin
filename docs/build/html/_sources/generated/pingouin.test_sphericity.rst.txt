@@ -1,5 +1,5 @@
-pingouin\.test\_sphericity
-==========================
+pingouin.test\_sphericity
+=========================
 
 .. currentmodule:: pingouin
 

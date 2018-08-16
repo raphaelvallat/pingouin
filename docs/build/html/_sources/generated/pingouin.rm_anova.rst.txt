@@ -1,5 +1,5 @@
-pingouin\.rm\_anova
-===================
+pingouin.rm\_anova
+==================
 
 .. currentmodule:: pingouin
 

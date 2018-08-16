@@ -99,104 +99,13 @@
 <span class="kn">from</span> <span class="nn">pingouin.external.tabulate</span> <span class="k">import</span> <span class="n">tabulate</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mad&quot;</span><span class="p">,</span> <span class="s2">&quot;madmedianrule&quot;</span><span class="p">,</span> <span class="s2">&quot;mahal&quot;</span><span class="p">,</span> <span class="s2">&quot;print_table&quot;</span><span class="p">,</span> <span class="s2">&quot;_export_table&quot;</span><span class="p">,</span>
-           <span class="s2">&quot;reshape_data&quot;</span><span class="p">,</span> <span class="s2">&quot;_check_eftype&quot;</span><span class="p">,</span> <span class="s2">&quot;_remove_rm_na&quot;</span><span class="p">,</span> <span class="s2">&quot;_remove_na&quot;</span><span class="p">,</span>
-           <span class="s2">&quot;_check_dataframe&quot;</span><span class="p">,</span> <span class="s2">&quot;_extract_effects&quot;</span><span class="p">,</span> <span class="s2">&quot;is_statsmodels_installed&quot;</span><span class="p">,</span>
-           <span class="s2">&quot;is_sklearn_installed&quot;</span><span class="p">]</span>
-
-
-<div class="viewcode-block" id="mad"><a class="viewcode-back" href="../../generated/pingouin.mad.html#pingouin.mad">[docs]</a><span class="k">def</span> <span class="nf">mad</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Median Absolute Deviation along given axis of an array</span>
-
-<span class="sd">    See https://en.wikipedia.org/wiki/Median_absolute_deviation</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    a : array-like</span>
-<span class="sd">        Input array.</span>
-<span class="sd">    normalize : boolean.</span>
-<span class="sd">        If True, scale by a normalization constant (~0.67)</span>
-<span class="sd">    axis : int, optional</span>
-<span class="sd">        The defaul is 0. Can also be None.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    mad : float</span>
-<span class="sd">        mad = median(abs(a - median(a))) / c</span>
-
-<span class="sd">    Examples</span>
-<span class="sd">    --------</span>
-
-<span class="sd">        &gt;&gt;&gt;  a = [1.2, 5.4, 3.2, 7.8, 2.5]</span>
-<span class="sd">        &gt;&gt;&gt; mad(a)</span>
-<span class="sd">            2.965</span>
-<span class="sd">        &gt;&gt;&gt; mad(a, normalize=False)</span>
-<span class="sd">            2.0</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">norm</span>
-    <span class="n">c</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mf">4.</span><span class="p">)</span> <span class="k">if</span> <span class="n">normalize</span> <span class="k">else</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">/</span> <span class="n">c</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="madmedianrule"><a class="viewcode-back" href="../../generated/pingouin.madmedianrule.html#pingouin.madmedianrule">[docs]</a><span class="k">def</span> <span class="nf">madmedianrule</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Outlier detection based on the MAD-median rule described in</span>
-<span class="sd">    Wilcox 2012.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    a : array-like</span>
-<span class="sd">        Input array.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    outliers: boolean (same shape as a)</span>
-<span class="sd">        Boolean array indicating whether each sample is an outlier (True) or</span>
-<span class="sd">        not (False).</span>
-
-<span class="sd">    Examples</span>
-<span class="sd">    --------</span>
-
-<span class="sd">        &gt;&gt;&gt; a = [-1.09, 1., 0.28, -1.51, -0.58, 6.61, -2.43, -0.43]</span>
-<span class="sd">        &gt;&gt;&gt; madmedianrule(a)</span>
-<span class="sd">            array([False, False, False, False, False, True, False, False])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">chi2</span>
-    <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">0.975</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">/</span> <span class="n">mad</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">k</span></div>
-
-
-<div class="viewcode-block" id="mahal"><a class="viewcode-back" href="../../generated/pingouin.mahal.html#pingouin.mahal">[docs]</a><span class="k">def</span> <span class="nf">mahal</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Mahalanobis distance.</span>
-
-<span class="sd">    Equivalent to the Matlab mahal function.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    Y : ndarray (shape=(n, m))</span>
-<span class="sd">        Data</span>
-<span class="sd">    X : ndarray (shape=(p, m))</span>
-<span class="sd">        Reference samples</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    MD : 1D-array (shape=(n,))</span>
-<span class="sd">        Squared Mahalanobis distance of each observation in Y to the</span>
-<span class="sd">        reference samples in X.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">rx</span><span class="p">,</span> <span class="n">cx</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
-    <span class="n">ry</span><span class="p">,</span> <span class="n">cy</span> <span class="o">=</span> <span class="n">Y</span><span class="o">.</span><span class="n">shape</span>
-
-    <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">ry</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ry</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">C</span> <span class="o">=</span> <span class="n">X</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">rx</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">rx</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">Q</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">qr</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
-    <span class="n">ri</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="p">(</span><span class="n">Y</span> <span class="o">-</span> <span class="n">M</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ri</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">rx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></div>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;print_table&quot;</span><span class="p">,</span> <span class="s2">&quot;_export_table&quot;</span><span class="p">,</span> <span class="s2">&quot;_check_eftype&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;_remove_rm_na&quot;</span><span class="p">,</span> <span class="s2">&quot;_remove_na&quot;</span><span class="p">,</span> <span class="s2">&quot;_check_dataframe&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;is_statsmodels_installed&quot;</span><span class="p">,</span> <span class="s2">&quot;is_sklearn_installed&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="print_table"><a class="viewcode-back" href="../../generated/pingouin.print_table.html#pingouin.print_table">[docs]</a><span class="k">def</span> <span class="nf">print_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s1">&#39;simple&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Nice display of table.</span>
+    <span class="sd">&quot;&quot;&quot;Pretty display of table.</span>
 
 <span class="sd">    See: https://pypi.org/project/tabulate/.</span>
 
@@ -227,73 +136,6 @@
         <span class="n">fname</span> <span class="o">=</span> <span class="n">fname</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span>
     <span class="n">table</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
                  <span class="n">float_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.4f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
-
-
-<div class="viewcode-block" id="reshape_data"><a class="viewcode-back" href="../../generated/pingouin.reshape_data.html#pingouin.reshape_data">[docs]</a><span class="k">def</span> <span class="nf">reshape_data</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">rm</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Reshape data from human-readable to long-format.</span>
-
-<span class="sd">    See: https://deparkes.co.uk/2016/10/28/reshape-pandas-data-with-melt/</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    df : DataFrame</span>
-<span class="sd">        Dataframe in original shape</span>
-<span class="sd">    id : string</span>
-<span class="sd">        Column to use as identifier variables. (e.g. &quot;Subjects&quot;)</span>
-<span class="sd">    dv : string</span>
-<span class="sd">        Name of the dependant variables (e.g. &quot;DV&quot; or &quot;Scores&quot;)</span>
-<span class="sd">    rm : string</span>
-<span class="sd">        Name of the measurements (e.g. &quot;Time&quot; or &quot;Weekday&quot;)</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    df_reshaped : DataFrame</span>
-<span class="sd">        Reshaped DataFrame</span>
-
-<span class="sd">    Examples</span>
-<span class="sd">    --------</span>
-
-<span class="sd">    Human-readable:</span>
-
-<span class="sd">    *Values represent scores at a cognitive test at different times of the day.</span>
-<span class="sd">    Ss = subject*::</span>
-
-<span class="sd">        Ss    10am  2pm   6pm</span>
-<span class="sd">        1     3.5   3.2   2.8</span>
-<span class="sd">        2     2.1   2.4   2.8</span>
-
-<span class="sd">    Pingouin::</span>
-
-<span class="sd">        Ss    Score    Time</span>
-<span class="sd">        1     3.5      10am</span>
-<span class="sd">        1     3.2      2pm</span>
-<span class="sd">        1     2.8      6pm</span>
-<span class="sd">        2     2.1      10am</span>
-<span class="sd">        2     2.4      2pm</span>
-<span class="sd">        2     2.8      6pm</span>
-
-<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
-<span class="sd">    &gt;&gt;&gt; from pingouins import reshape_data</span>
-<span class="sd">    &gt;&gt;&gt; data = {&#39;Ss&#39;: [1, 2, 3],</span>
-<span class="sd">    &gt;&gt;&gt;        &#39;10am&#39;: [12, 6, 5],</span>
-<span class="sd">    &gt;&gt;&gt;        &#39;2pm&#39;: [10, 6, 11],</span>
-<span class="sd">    &gt;&gt;&gt;        &#39;6pm&#39;: [8, 5, 7]}</span>
-<span class="sd">    &gt;&gt;&gt; df = pd.DataFrame(data, columns=[&#39;Ss&#39;, &#39;10am&#39;, &#39;2pm&#39;, &#39;6pm&#39;])</span>
-<span class="sd">    &gt;&gt;&gt; reshaped = reshape_data(df, &#39;Ss&#39;, dv=&quot;Score&quot;, rm=&quot;Time&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; print(reshaped)</span>
-<span class="sd">        Ss  Time  Score</span>
-<span class="sd">        1   10am  12</span>
-<span class="sd">        1   2pm   10</span>
-<span class="sd">        1   6pm   8</span>
-<span class="sd">        2   10am  6</span>
-<span class="sd">        2   2pm   6</span>
-<span class="sd">        2   6pm   5</span>
-<span class="sd">        3  10am   5</span>
-<span class="sd">        3   2pm   11</span>
-<span class="sd">        3   6pm   7</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">id_vars</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="n">rm</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="n">dv</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span>
-        <span class="n">by</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">_remove_na</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -365,38 +207,6 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;subject must be specified when effects=within&#39;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_extract_effects</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                     <span class="n">effects</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Extract main effects&quot;&quot;&quot;</span>
-    <span class="c1"># Check the dataframe</span>
-    <span class="n">_check_dataframe</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
-                     <span class="n">effects</span><span class="o">=</span><span class="n">effects</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
-
-    <span class="n">datadic</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">nobs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-
-    <span class="c1"># Extract number of pairwise comparisons</span>
-    <span class="k">if</span> <span class="n">effects</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;within&#39;</span><span class="p">,</span> <span class="s1">&#39;between&#39;</span><span class="p">]:</span>
-        <span class="n">col</span> <span class="o">=</span> <span class="n">within</span> <span class="k">if</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;within&#39;</span> <span class="k">else</span> <span class="n">between</span>
-        <span class="c1"># Extract data</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
-        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
-            <span class="n">datadic</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="n">l</span><span class="p">][</span><span class="n">dv</span><span class="p">]</span>
-            <span class="n">nobs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nobs</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">datadic</span><span class="p">[</span><span class="n">l</span><span class="p">]))</span>
-
-    <span class="k">elif</span> <span class="n">effects</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;interaction&#39;</span><span class="p">:</span>
-        <span class="n">labels_with</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">within</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
-        <span class="n">labels_betw</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">between</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
-        <span class="k">for</span> <span class="n">lw</span> <span class="ow">in</span> <span class="n">labels_with</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labels_betw</span><span class="p">:</span>
-                <span class="n">tmp</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">within</span><span class="p">]</span> <span class="o">==</span> <span class="n">lw</span><span class="p">]</span>
-                <span class="n">datadic</span><span class="p">[</span><span class="n">lw</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="n">tmp</span><span class="p">[</span><span class="n">between</span><span class="p">]</span> <span class="o">==</span> <span class="n">l</span><span class="p">][</span><span class="n">dv</span><span class="p">]</span>
-                <span class="n">nobs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nobs</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">datadic</span><span class="p">[</span><span class="n">lw</span><span class="p">,</span> <span class="n">l</span><span class="p">]))</span>
-
-    <span class="n">dt_array</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">datadic</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">dt_array</span><span class="p">,</span> <span class="n">nobs</span>
-
-
 <span class="k">def</span> <span class="nf">is_statsmodels_installed</span><span class="p">(</span><span class="n">raise_error</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">statsmodels</span>  <span class="c1"># noqa</span>
@@ -436,7 +246,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
     </p>
   </div>
 </footer>

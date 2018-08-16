@@ -1,5 +1,5 @@
-pingouin\.gzscore
-=================
+pingouin.gzscore
+================
 
 .. currentmodule:: pingouin
 

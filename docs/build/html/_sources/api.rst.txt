@@ -68,7 +68,7 @@ Datasets
 
     pingouin.datasets.read_dataset
     pingouin.datasets.list_dataset
-    
+
 
 Distribution
 ------------
@@ -108,10 +108,8 @@ Miscellaneous
      :toctree: generated/
 
       print_table
-      reshape_data
       mad
       madmedianrule
-      mahal
 
 
 Multiple comparisons

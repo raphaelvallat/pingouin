@@ -1,5 +1,5 @@
-pingouin\.wilcoxon
-==================
+pingouin.wilcoxon
+=================
 
 .. currentmodule:: pingouin
 

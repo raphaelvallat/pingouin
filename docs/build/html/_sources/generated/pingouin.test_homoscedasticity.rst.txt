@@ -1,5 +1,5 @@
-pingouin\.test\_homoscedasticity
-================================
+pingouin.test\_homoscedasticity
+===============================
 
 .. currentmodule:: pingouin
 

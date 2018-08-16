@@ -1,5 +1,5 @@
-pingouin\.fdr
-=============
+pingouin.fdr
+============
 
 .. currentmodule:: pingouin
 

@@ -1,5 +1,5 @@
-pingouin\.convert\_effsize
-==========================
+pingouin.convert\_effsize
+=========================
 
 .. currentmodule:: pingouin
 

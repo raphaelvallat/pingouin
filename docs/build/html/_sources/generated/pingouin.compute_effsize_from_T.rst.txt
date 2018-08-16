@@ -1,5 +1,5 @@
-pingouin\.compute\_effsize\_from\_t
-===================================
+pingouin.compute\_effsize\_from\_t
+==================================
 
 .. currentmodule:: pingouin
 

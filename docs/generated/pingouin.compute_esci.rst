@@ -1,5 +1,5 @@
-pingouin\.compute\_esci
-=======================
+pingouin.compute\_esci
+======================
 
 .. currentmodule:: pingouin
 

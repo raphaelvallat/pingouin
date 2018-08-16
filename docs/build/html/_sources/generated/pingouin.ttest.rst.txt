@@ -1,5 +1,5 @@
-pingouin\.ttest
-===============
+pingouin.ttest
+==============
 
 .. currentmodule:: pingouin
 

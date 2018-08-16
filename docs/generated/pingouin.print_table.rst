@@ -1,5 +1,5 @@
-pingouin\.print\_table
-======================
+pingouin.print\_table
+=====================
 
 .. currentmodule:: pingouin
 

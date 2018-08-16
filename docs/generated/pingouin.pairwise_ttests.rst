@@ -1,5 +1,5 @@
-pingouin\.pairwise\_ttests
-==========================
+pingouin.pairwise\_ttests
+=========================
 
 .. currentmodule:: pingouin
 

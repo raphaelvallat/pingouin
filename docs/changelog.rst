@@ -11,6 +11,11 @@ v0.1.5
 a. rm_anova, friedman and mixed_anova now require a subject identifier. This avoids improper collapsing when multiple repeated measures factors are present in the dataset.
 b. rm_anova, friedman and mixed_anova now support the presence of other repeated measures factors in the dataset.
 
+**Code**
+
+a. Added AppVeyor CI (Windows)
+b. Cleaned some old functions
+
 **Correlation**
 
 a. Added repeated measures correlation (Bakdash and Marusich 2017).
@@ -22,21 +27,16 @@ c. Pairwise_corr function now automatically delete non-numeric columns.
 a. Added pingouin.datasets module (read_dataset & list_dataset functions)
 b. Added datasets: bland1995, berens2009, dolan2009, mcclave1991
 
-**Parametric**
-
-a. Added two-way ANOVA.
-b. Added pairwise_tukey function
-
 **Misc**
 
 a. Added median absolute deviation (mad)
 b. Added mad median rule (Wilcox 2012)
 c. Added mahal function (equivalent of Matlab mahal function)
 
+**Parametric**
 
-**Testing**
-
-a. Added AppVeyor CI (Windows)
+a. Added two-way ANOVA.
+b. Added pairwise_tukey function
 
 
 v0.1.4 (July 2018)

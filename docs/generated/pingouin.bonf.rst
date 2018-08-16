@@ -1,5 +1,5 @@
-pingouin\.bonf
-==============
+pingouin.bonf
+=============
 
 .. currentmodule:: pingouin
 

@@ -97,8 +97,10 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">combinations</span>
-<span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="p">(</span><span class="n">compute_effsize</span><span class="p">,</span> <span class="n">_remove_rm_na</span><span class="p">,</span> <span class="n">_extract_effects</span><span class="p">,</span>
-                      <span class="n">multicomp</span><span class="p">,</span> <span class="n">_export_table</span><span class="p">,</span> <span class="n">anova</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pingouin.parametric</span> <span class="k">import</span> <span class="n">anova</span>
+<span class="kn">from</span> <span class="nn">pingouin.multicomp</span> <span class="k">import</span> <span class="n">multicomp</span>
+<span class="kn">from</span> <span class="nn">pingouin.effsize</span> <span class="k">import</span> <span class="n">compute_effsize</span>
+<span class="kn">from</span> <span class="nn">pingouin.utils</span> <span class="k">import</span> <span class="n">_remove_rm_na</span><span class="p">,</span> <span class="n">_export_table</span><span class="p">,</span> <span class="n">_check_dataframe</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;pairwise_ttests&quot;</span><span class="p">,</span> <span class="s2">&quot;pairwise_tukey&quot;</span><span class="p">,</span> <span class="s2">&quot;pairwise_corr&quot;</span><span class="p">]</span>
 
@@ -209,8 +211,13 @@
 <span class="sd">        &gt;&gt;&gt; print_table(post_hocs, floatfmt=&quot;.3f&quot;)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="kn">from</span> <span class="nn">pingouin.parametric</span> <span class="k">import</span> <span class="n">ttest</span>
+
+    <span class="c1"># Safety checks</span>
     <span class="n">effects</span> <span class="o">=</span> <span class="s1">&#39;within&#39;</span> <span class="k">if</span> <span class="n">between</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">effects</span>
     <span class="n">effects</span> <span class="o">=</span> <span class="s1">&#39;between&#39;</span> <span class="k">if</span> <span class="n">within</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">effects</span>
+
+    <span class="n">_check_dataframe</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                     <span class="n">effects</span><span class="o">=</span><span class="n">effects</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">tail</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;one-sided&#39;</span><span class="p">,</span> <span class="s1">&#39;two-sided&#39;</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Tail not recognized&#39;</span><span class="p">)</span>
@@ -222,17 +229,22 @@
     <span class="k">if</span> <span class="n">within</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">_remove_rm_na</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 
-    <span class="c1"># Extract main effects</span>
-    <span class="n">dt_array</span><span class="p">,</span> <span class="n">nobs</span> <span class="o">=</span> <span class="n">_extract_effects</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span>
-                                      <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="n">effects</span><span class="p">,</span>
-                                      <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
-
+    <span class="c1"># Initialize empty variables</span>
     <span class="n">stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([])</span>
+    <span class="n">ddic</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># OPTION A: simple main effects</span>
     <span class="k">if</span> <span class="n">effects</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;within&#39;</span><span class="p">,</span> <span class="s1">&#39;between&#39;</span><span class="p">]:</span>
         <span class="c1"># Compute T-tests</span>
         <span class="n">paired</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;within&#39;</span> <span class="k">else</span> <span class="kc">False</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="n">within</span> <span class="k">if</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;within&#39;</span> <span class="k">else</span> <span class="n">between</span>
+
+        <span class="c1"># Extract effects</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
+            <span class="n">ddic</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="n">l</span><span class="p">][</span><span class="n">dv</span><span class="p">]</span>
+
+        <span class="n">dt_array</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">ddic</span><span class="p">)</span>
 
         <span class="c1"># Extract column names</span>
         <span class="n">col_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dt_array</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
@@ -258,6 +270,16 @@
     <span class="c1"># OPTION B: interaction</span>
     <span class="k">if</span> <span class="n">effects</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;interaction&#39;</span><span class="p">:</span>
         <span class="n">paired</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># Extract data</span>
+        <span class="n">labels_with</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">within</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+        <span class="n">labels_betw</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">between</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">lw</span> <span class="ow">in</span> <span class="n">labels_with</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labels_betw</span><span class="p">:</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">within</span><span class="p">]</span> <span class="o">==</span> <span class="n">lw</span><span class="p">]</span>
+                <span class="n">ddic</span><span class="p">[</span><span class="n">lw</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="n">tmp</span><span class="p">[</span><span class="n">between</span><span class="p">]</span> <span class="o">==</span> <span class="n">l</span><span class="p">][</span><span class="n">dv</span><span class="p">]</span>
+        <span class="n">dt_array</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">ddic</span><span class="p">)</span>
+
+        <span class="c1"># Pairwise comparisons</span>
         <span class="k">for</span> <span class="n">time</span><span class="p">,</span> <span class="n">sub_dt</span> <span class="ow">in</span> <span class="n">dt_array</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
             <span class="n">col1</span><span class="p">,</span> <span class="n">col2</span> <span class="o">=</span> <span class="n">sub_dt</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">sub_dt</span><span class="p">[(</span><span class="n">time</span><span class="p">,</span> <span class="n">col1</span><span class="p">)]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
@@ -546,6 +568,9 @@
     <span class="k">if</span> <span class="n">tail</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;one-sided&#39;</span><span class="p">,</span> <span class="s1">&#39;two-sided&#39;</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Tail not recognized&#39;</span><span class="p">)</span>
 
+    <span class="c1"># Keep only numeric columns</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">_get_numeric_data</span><span class="p">()</span>
+
     <span class="c1"># Initialize empty DataFrame</span>
     <span class="n">stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
 
@@ -615,7 +640,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
     </p>
   </div>
 </footer>

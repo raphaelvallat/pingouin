@@ -1,5 +1,5 @@
-pingouin\.test\_dist
-====================
+pingouin.test\_dist
+===================
 
 .. currentmodule:: pingouin
 
