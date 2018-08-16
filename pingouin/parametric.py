@@ -216,7 +216,7 @@ def epsilon(data, correction='gg'):
     """
     # Covariance matrix
     S = data.cov()
-
+    n = data.shape[0]
     k = data.shape[1]
     mean_var = np.diag(S).mean()
     S_mean = S.mean().mean()
@@ -289,8 +289,8 @@ def test_sphericity(data, alpha=.05, method='jsn'):
 
         for k in S.keys().drop('mean'):
             for l in S.index.drop('mean'):
-                S_pop.loc[k, l] = S.loc[k, l] - S.loc[k, 'mean'] -  \
-                                  S.loc['mean', l] + S_mean
+                S_pop.loc[k, l] = S.loc[k, l] - S.loc[k, 'mean'] - \
+                    S.loc['mean', l] + S_mean
 
         # Eigenvalues
         eig = np.linalg.eigvals(S_pop)
@@ -301,7 +301,7 @@ def test_sphericity(data, alpha=.05, method='jsn'):
         W = np.product(eig) / (eig.sum() / d)**d
 
         # F-statistic
-        f = (2 * d**2 + p + 1) / (6 *d * (n - 1))
+        f = (2 * d**2 + p + 1) / (6 * d * (n - 1))
         chi_sq = (f - 1) * (n - 1) * np.log(W)
 
     # Compute dof and pval
