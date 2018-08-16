@@ -7,7 +7,6 @@ Doc
 
 Code
 ----
-- Rewrite pairwise_ttests in a cleaner way and remove _extract_effects
 - Better bootstrapping of confidence intervals (see Matlab `bootci` function)
 - Validate test_sphericity against R, Matlab or JASP.
 - Test second order approximation in Mauchly (test_sphericity)

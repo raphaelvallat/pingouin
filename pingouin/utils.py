@@ -7,7 +7,7 @@ import pandas as pd
 
 __all__ = ["mad", "madmedianrule", "mahal", "print_table", "_export_table",
            "reshape_data", "_check_eftype", "_remove_rm_na", "_remove_na",
-           "_check_dataframe", "_extract_effects", "is_statsmodels_installed",
+           "_check_dataframe", "is_statsmodels_installed",
            "is_sklearn_installed"]
 
 
@@ -269,38 +269,6 @@ def _check_dataframe(dv=None, between=None, within=None, subject=None,
     # Check that subject identifier is provided in rm_anova and friedman.
     if effects == 'within' and subject is None:
         raise ValueError('subject must be specified when effects=within')
-
-
-def _extract_effects(dv=None, between=None, within=None, subject=None,
-                     effects=None, data=None):
-    """Extract main effects"""
-    # Check the dataframe
-    _check_dataframe(dv=dv, between=between, within=within, subject=subject,
-                     effects=effects, data=data)
-
-    datadic = {}
-    nobs = np.array([], dtype=int)
-
-    # Extract number of pairwise comparisons
-    if effects.lower() in ['within', 'between']:
-        col = within if effects == 'within' else between
-        # Extract data
-        labels = list(data[col].unique())
-        for l in labels:
-            datadic[l] = data[data[col] == l][dv]
-            nobs = np.append(nobs, len(datadic[l]))
-
-    elif effects.lower() == 'interaction':
-        labels_with = list(data[within].unique())
-        labels_betw = list(data[between].unique())
-        for lw in labels_with:
-            for l in labels_betw:
-                tmp = data[data[within] == lw]
-                datadic[lw, l] = tmp[tmp[between] == l][dv]
-                nobs = np.append(nobs, len(datadic[lw, l]))
-
-    dt_array = pd.DataFrame.from_dict(datadic)
-    return dt_array, nobs
 
 
 def is_statsmodels_installed(raise_error=False):

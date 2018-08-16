@@ -5,9 +5,9 @@ import pytest
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.utils import (print_table, _export_table, _remove_rm_na,
                             _check_eftype, _check_dataframe, _remove_na,
-                            _extract_effects, reshape_data,
-                            is_sklearn_installed, is_statsmodels_installed,
-                            mad, madmedianrule, mahal)
+                            reshape_data, is_sklearn_installed,
+                            is_statsmodels_installed, mad, madmedianrule,
+                            mahal)
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
@@ -89,15 +89,6 @@ class TestUtils(_TestPingouin):
         with pytest.raises(ValueError):
             _check_dataframe(dv='Values', between='Group', within='Time',
                              effects='within', data=df)
-
-    def test_extract_effects(self):
-        """Test function _extract_effects."""
-        _extract_effects(dv='Values', between='Group', effects='all',
-                         data=df)
-        _extract_effects(dv='Values', within='Time', between='Group',
-                         subject='Subject', effects='interaction', data=df)
-        _extract_effects(dv='Values', within='Time', subject='Subject',
-                         effects='within', data=df)
 
     def is_statsmodels_installed(self):
         """Test function is_statsmodels_installed."""

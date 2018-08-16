@@ -3,8 +3,10 @@
 import numpy as np
 import pandas as pd
 from itertools import combinations
-from pingouin import (compute_effsize, _remove_rm_na, _extract_effects,
-                      multicomp, _export_table, anova)
+from pingouin.parametric import anova
+from pingouin.multicomp import multicomp
+from pingouin.effsize import compute_effsize
+from pingouin.utils import _remove_rm_na, _export_table, _check_dataframe
 
 __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_corr"]
 
@@ -115,8 +117,13 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         >>> print_table(post_hocs, floatfmt=".3f")
     '''
     from pingouin.parametric import ttest
+
+    # Safety checks
     effects = 'within' if between is None else effects
     effects = 'between' if within is None else effects
+
+    _check_dataframe(dv=dv, between=between, within=within, subject=subject,
+                     effects=effects, data=data)
 
     if tail not in ['one-sided', 'two-sided']:
         raise ValueError('Tail not recognized')
@@ -128,17 +135,22 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     if within is not None and data[dv].isnull().values.any():
         data = _remove_rm_na(dv=dv, within=within, subject=subject, data=data)
 
-    # Extract main effects
-    dt_array, nobs = _extract_effects(dv=dv, between=between, within=within,
-                                      subject=subject, effects=effects,
-                                      data=data)
-
+    # Initialize empty variables
     stats = pd.DataFrame([])
+    ddic = {}
 
     # OPTION A: simple main effects
     if effects.lower() in ['within', 'between']:
         # Compute T-tests
         paired = True if effects == 'within' else False
+        col = within if effects == 'within' else between
+
+        # Extract effects
+        labels = list(data[col].unique())
+        for l in labels:
+            ddic[l] = data[data[col] == l][dv]
+
+        dt_array = pd.DataFrame.from_dict(ddic)
 
         # Extract column names
         col_names = list(dt_array.columns.values)
@@ -164,6 +176,16 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     # OPTION B: interaction
     if effects.lower() == 'interaction':
         paired = False
+        # Extract data
+        labels_with = list(data[within].unique())
+        labels_betw = list(data[between].unique())
+        for lw in labels_with:
+            for l in labels_betw:
+                tmp = data[data[within] == lw]
+                ddic[lw, l] = tmp[tmp[between] == l][dv]
+        dt_array = pd.DataFrame.from_dict(ddic)
+
+        # Pairwise comparisons
         for time, sub_dt in dt_array.groupby(level=0, axis=1):
             col1, col2 = sub_dt.columns.get_level_values(1)
             x = sub_dt[(time, col1)].dropna().values
