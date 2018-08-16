@@ -1105,14 +1105,14 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
                  'p-GG-corr', 'np2', 'eps', 'sphericity', 'W-Mauchly',
                  'p-Mauchly']
 
-    # Round
-    aov[['F', 'eps', 'np2']] = aov[['F', 'eps', 'np2']].round(3)
-
     # Replace NaN
     aov = aov.fillna('-')
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
+
+    # Round
+    aov[['F', 'eps', 'np2']] = aov[['F', 'eps', 'np2']].round(3)
 
     # Export to .csv
     if export_filename is not None:
