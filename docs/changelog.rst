@@ -10,6 +10,9 @@ v0.1.5
 
 a. rm_anova, friedman and mixed_anova now require a subject identifier. This avoids improper collapsing when multiple repeated measures factors are present in the dataset.
 b. rm_anova, friedman and mixed_anova now support the presence of other repeated measures factors in the dataset.
+c. Improved test_sphericity
+d. Better output of ANOVA summary
+e. Added epsilon function
 
 **Code**
 
