@@ -3,14 +3,9 @@
 Examples
 ========
 
-- `Two-way mixed model ANOVA`_
+Please click on the link below and navigate to the *notebooks* folder to open a collection of interactive Jupyter notebooks demonstrating the main functionalities of Pingouin.
 
-.. _Two-way mixed model ANOVA: https://raphaelvallat.github.io/pingouin.html
+.. image:: https://mybinder.org/badge.svg
+    :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
 
-.. toctree::
-   :maxdepth: 1
-
-   examples/one_way_anova
-   examples/bayesian_ttest
-   examples/effect_size
-   examples/pairwise_corr
+|

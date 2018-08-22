@@ -17,6 +17,8 @@
 .. image:: https://codecov.io/gh/raphaelvallat/pingouin/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/raphaelvallat/pingouin
 
+.. image:: https://mybinder.org/badge.svg
+    :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
 
 
 .. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/pictures/logo_pingouin.png
@@ -82,6 +84,11 @@ Develop mode
 
 Quick start
 ============
+
+Try before you buy! Click on the link below and navigate to the notebooks folder to load a collection of interactive Jupyter notebooks demonstrating the main functionalities of Pingouin. No need to install Pingouin beforehand as the notebooks run in a Binder environment.
+
+.. image:: https://mybinder.org/badge.svg
+    :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
 
 10 minutes to Pingouin
 ----------------------
@@ -273,7 +280,7 @@ Quick start
   ===========  ======  =====  =====  ======  =====  =======  =====  ===
   Group        28.995      2     12  14.498  8.622    0.005  0.590
   Time          6.839      1     12   6.839  4.995    0.045  0.294  1.0
-  Interaction   0.391      2     12   0.195  0.143    0.868  0.023     
+  Interaction   0.391      2     12   0.195  0.143    0.868  0.023
   ===========  ======  =====  =====  ======  =====  =======  =====  ===
 
 ------------

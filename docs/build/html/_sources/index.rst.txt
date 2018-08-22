@@ -15,6 +15,9 @@
 .. image:: https://codecov.io/gh/raphaelvallat/pingouin/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/raphaelvallat/pingouin
 
+.. image:: https://mybinder.org/badge.svg
+    :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
+
 
 .. figure::  /pictures/logo_pingouin.png
   :align:   center
@@ -72,6 +75,11 @@ Develop mode
 
 Quick start
 ============
+
+Try before you buy! Click on the link below and navigate to the notebooks folder to load a collection of interactive Jupyter notebooks demonstrating the main functionalities of Pingouin. No need to install Pingouin beforehand as the notebooks run in a Binder environment.
+
+.. image:: https://mybinder.org/badge.svg
+    :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
 
 10 minutes to Pingouin
 ----------------------
@@ -185,7 +193,7 @@ Quick start
   Source        SS    DF      MS        F    p-unc      np2
   ========  ======  ====  ======  =======  =======  =======
   Group     28.995     2  14.498    8.929    0.001    0.398
-  Within    43.837    27   1.624                           
+  Within    43.837    27   1.624
   ========  ======  ====  ======  =======  =======  =======
 
 ------------
