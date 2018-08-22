@@ -98,6 +98,7 @@ ENV/
 # mypy
 .mypy_cache/
 test_export.csv
+notebooks/mixed_anova.csv
 desktop.ini
 examples/mixed_anova.csv
 .pytest_cache/v/cache/nodeids
