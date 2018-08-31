@@ -30,6 +30,11 @@ c. Pairwise_corr function now automatically delete non-numeric columns.
 a. Added pingouin.datasets module (read_dataset & list_dataset functions)
 b. Added datasets: bland1995, berens2009, dolan2009, mcclave1991
 
+**Doc**
+
+a. Examples are now Jupyter Notebooks.
+b. Binder integration
+
 **Misc**
 
 a. Added median absolute deviation (mad)
