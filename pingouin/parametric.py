@@ -543,8 +543,8 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
         'np2' : Partial eta-square effect size
         'eps' : Greenhouse-Geisser epsilon factor (= index of sphericity)
         'p-GG-corr' : Greenhouse-Geisser corrected p-value
-        'W-Mauchly' : Mauchly statistic
-        'p-Mauchly' : p-value of the Mauchly test
+        'W-spher' : Sphericity test statistic
+        'p-spher' : p-value of the sphericity test
         'sphericity' : sphericity of the data (boolean)
 
     See Also
@@ -1019,8 +1019,8 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
         'np2' : Partial eta-square effect sizes
         'eps' : Greenhouse-Geisser epsilon factor ( = index of sphericity)
         'p-GG-corr' : Greenhouse-Geisser corrected p-values
-        'W-Mauchly' : Mauchly statistic
-        'p-Mauchly' : p-value of the Mauchly test
+        'W-spher' : Sphericity test statistic
+        'p-spher' : p-value of the sphericity test
         'sphericity' : sphericity of the data (boolean)
 
     See Also
