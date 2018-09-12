@@ -334,8 +334,8 @@
     <span class="k">return</span> <span class="n">eps</span></div>
 
 
-<div class="viewcode-block" id="test_sphericity"><a class="viewcode-back" href="../../generated/pingouin.test_sphericity.html#pingouin.test_sphericity">[docs]</a><span class="k">def</span> <span class="nf">test_sphericity</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Mauchly&#39;s test for sphericity</span>
+<div class="viewcode-block" id="test_sphericity"><a class="viewcode-back" href="../../generated/pingouin.test_sphericity.html#pingouin.test_sphericity">[docs]</a><span class="k">def</span> <span class="nf">test_sphericity</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mauchly&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mauchly and JNS test for sphericity.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -345,6 +345,12 @@
 <span class="sd">        Note that data are NOT expected to be in long format but rather with</span>
 <span class="sd">        shape (n_subj, n_groups). If your data are in long format, use the</span>
 <span class="sd">        pandas pivot function first.</span>
+<span class="sd">    method : str</span>
+<span class="sd">        Method to compute sphericity ::</span>
+
+<span class="sd">        &#39;jns&#39; : John, Nagao and Sugiura&#39;s test.</span>
+<span class="sd">        &#39;mauchly&#39; : Mauchly&#39;s test, more widely-used than JSN but less robust.</span>
+
 <span class="sd">    alpha : float, optional</span>
 <span class="sd">        Significance level</span>
 
@@ -372,36 +378,39 @@
     <span class="n">p</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">d</span> <span class="o">=</span> <span class="n">p</span> <span class="o">-</span> <span class="mi">1</span>
 
-    <span class="c1"># if method == &#39;jsn&#39;:</span>
-    <span class="c1">#     eps = epsilon(data, correction=&#39;gg&#39;)</span>
-    <span class="c1">#     W = eps * d</span>
-    <span class="c1">#     chi_sq = 0.5 * n * d ** 2 * (W - 1 / d)</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;jns&#39;</span><span class="p">:</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="n">epsilon</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;gg&#39;</span><span class="p">)</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="n">eps</span> <span class="o">*</span> <span class="n">d</span>
+        <span class="n">chi_sq</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">n</span> <span class="o">*</span> <span class="n">d</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">W</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span>
 
-    <span class="c1"># Population covariance</span>
-    <span class="n">S_mean</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-    <span class="n">S_pop</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
-    <span class="n">S</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">S</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;mauchly&#39;</span><span class="p">:</span>
+        <span class="c1"># Population covariance</span>
+        <span class="n">S_mean</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">S_pop</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="n">S</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">S</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">S</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">S</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
-            <span class="n">S_pop</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="o">-</span> <span class="n">S</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">]</span> <span class="o">-</span> \
-                <span class="n">S</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="o">+</span> <span class="n">S_mean</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">S</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">S</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
+                <span class="n">S_pop</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="o">-</span> <span class="n">S</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">]</span> <span class="o">-</span> \
+                    <span class="n">S</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="o">+</span> <span class="n">S_mean</span>
 
-    <span class="c1"># Eigenvalues</span>
-    <span class="n">eig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigvals</span><span class="p">(</span><span class="n">S_pop</span><span class="p">)</span>
-    <span class="c1"># Remove very low eigenvalues</span>
-    <span class="n">eig</span> <span class="o">=</span> <span class="n">eig</span><span class="p">[</span><span class="n">eig</span> <span class="o">&gt;</span> <span class="mf">1e-4</span><span class="p">]</span>
+        <span class="c1"># Eigenvalues</span>
+        <span class="n">eig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigvals</span><span class="p">(</span><span class="n">S_pop</span><span class="p">)</span>
+        <span class="c1"># Remove very low eigenvalues</span>
+        <span class="n">eig</span> <span class="o">=</span> <span class="n">eig</span><span class="p">[</span><span class="n">eig</span> <span class="o">&gt;</span> <span class="mf">1e-4</span><span class="p">]</span>
 
-    <span class="c1"># Mauchly&#39;s statistic</span>
-    <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">eig</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">eig</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span><span class="o">**</span><span class="n">d</span>
+        <span class="c1"># Mauchly&#39;s statistic</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">eig</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">eig</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span><span class="o">**</span><span class="n">d</span>
 
-    <span class="c1"># Chi-square</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">d</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">6</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="n">chi_sq</span> <span class="o">=</span> <span class="p">(</span><span class="n">f</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">W</span><span class="p">)</span>
+        <span class="c1"># Chi-square</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">d</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">p</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">6</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">chi_sq</span> <span class="o">=</span> <span class="p">(</span><span class="n">f</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">W</span><span class="p">)</span>
 
     <span class="c1"># Compute dof and pval</span>
     <span class="n">ddof</span> <span class="o">=</span> <span class="n">d</span> <span class="o">*</span> <span class="n">p</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="c1"># Ensure that dof is not zero</span>
+    <span class="n">ddof</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">ddof</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">ddof</span>
     <span class="n">pval</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">chi_sq</span><span class="p">,</span> <span class="n">ddof</span><span class="p">)</span>
 
     <span class="c1"># Second order approximation</span>
@@ -707,11 +716,11 @@
     <span class="c1"># Reshape and remove NAN for sphericity estimation and correction</span>
     <span class="n">data_pivot</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">dv</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
 
-    <span class="c1"># Compute sphericity using Mauchly&#39;s test</span>
+    <span class="c1"># Compute sphericity using JNS test</span>
     <span class="c1"># Sphericity assumption only applies if there are more than 2 levels</span>
     <span class="k">if</span> <span class="n">correction</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span> <span class="ow">or</span> <span class="p">(</span><span class="n">correction</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">n_rm</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">):</span>
-        <span class="n">sphericity</span><span class="p">,</span> <span class="n">W_mauchly</span><span class="p">,</span> <span class="n">chi_sq_mauchly</span><span class="p">,</span> <span class="n">ddof_mauchly</span><span class="p">,</span> \
-            <span class="n">p_mauchly</span> <span class="o">=</span> <span class="n">test_sphericity</span><span class="p">(</span><span class="n">data_pivot</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">)</span>
+        <span class="n">sphericity</span><span class="p">,</span> <span class="n">W_spher</span><span class="p">,</span> <span class="n">chi_sq_spher</span><span class="p">,</span> <span class="n">ddof_spher</span><span class="p">,</span> \
+            <span class="n">p_spher</span> <span class="o">=</span> <span class="n">test_sphericity</span><span class="p">(</span><span class="n">data_pivot</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">correction</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
             <span class="n">correction</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">sphericity</span> <span class="k">else</span> <span class="kc">False</span>
     <span class="k">else</span><span class="p">:</span>
@@ -738,13 +747,13 @@
                             <span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">correction</span><span class="p">:</span>
             <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-GG-corr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_corr</span>
-            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;W-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">W_mauchly</span>
-            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_mauchly</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;W-spher&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">W_spher</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-spher&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_spher</span>
             <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;sphericity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sphericity</span>
 
         <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Source&#39;</span><span class="p">,</span> <span class="s1">&#39;ddof1&#39;</span><span class="p">,</span> <span class="s1">&#39;ddof2&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;p-GG-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">,</span> <span class="s1">&#39;eps&#39;</span><span class="p">,</span> <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span> <span class="s1">&#39;W-Mauchly&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span>
+                     <span class="s1">&#39;p-GG-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">,</span> <span class="s1">&#39;eps&#39;</span><span class="p">,</span> <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span> <span class="s1">&#39;W-spher&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;p-spher&#39;</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">aov</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Source&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">within</span><span class="p">,</span> <span class="s1">&#39;Error&#39;</span><span class="p">],</span>
                             <span class="s1">&#39;SS&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">([</span><span class="n">sstime</span><span class="p">,</span> <span class="n">sserror</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span>
@@ -758,12 +767,12 @@
                             <span class="p">})</span>
         <span class="k">if</span> <span class="n">correction</span><span class="p">:</span>
             <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-GG-corr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">p_corr</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
-            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;W-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">W_mauchly</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
-            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">p_mauchly</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;W-spher&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">W_spher</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+            <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;p-spher&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">p_spher</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
             <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;sphericity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">sphericity</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
 
         <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Source&#39;</span><span class="p">,</span> <span class="s1">&#39;SS&#39;</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span> <span class="s1">&#39;p-GG-corr&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;np2&#39;</span><span class="p">,</span> <span class="s1">&#39;eps&#39;</span><span class="p">,</span> <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span> <span class="s1">&#39;W-Mauchly&#39;</span><span class="p">,</span> <span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span>
+                     <span class="s1">&#39;np2&#39;</span><span class="p">,</span> <span class="s1">&#39;eps&#39;</span><span class="p">,</span> <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span> <span class="s1">&#39;W-spher&#39;</span><span class="p">,</span> <span class="s1">&#39;p-spher&#39;</span><span class="p">]</span>
 
     <span class="c1"># Round</span>
     <span class="n">aov</span><span class="p">[[</span><span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;eps&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">aov</span><span class="p">[[</span><span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;eps&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -1204,8 +1213,8 @@
     <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;DF2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">dfeb</span><span class="p">,</span> <span class="n">dfwg</span><span class="p">,</span> <span class="n">dfwg</span><span class="p">]</span>
     <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;eps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">mtime</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;eps&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
     <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Source&#39;</span><span class="p">,</span> <span class="s1">&#39;SS&#39;</span><span class="p">,</span> <span class="s1">&#39;DF1&#39;</span><span class="p">,</span> <span class="s1">&#39;DF2&#39;</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;p-GG-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">,</span> <span class="s1">&#39;eps&#39;</span><span class="p">,</span> <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span> <span class="s1">&#39;W-Mauchly&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;p-Mauchly&#39;</span><span class="p">]</span>
+                 <span class="s1">&#39;p-GG-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">,</span> <span class="s1">&#39;eps&#39;</span><span class="p">,</span> <span class="s1">&#39;sphericity&#39;</span><span class="p">,</span> <span class="s1">&#39;W-spher&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;p-spher&#39;</span><span class="p">]</span>
 
     <span class="c1"># Replace NaN</span>
     <span class="n">aov</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
@@ -1237,7 +1246,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
     </p>
   </div>
 </footer>

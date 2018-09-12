@@ -97,8 +97,8 @@
 <h1>pingouin.test_sphericity</h1>
 <dl class="function">
 <dt id="pingouin.test_sphericity">
-<code class="descclassname">pingouin.</code><code class="descname">test_sphericity</code><span class="sig-paren">(</span><em>data</em>, <em>alpha=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#test_sphericity"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Mauchly’s test for sphericity</p>
+<code class="descclassname">pingouin.</code><code class="descname">test_sphericity</code><span class="sig-paren">(</span><em>data</em>, <em>method='mauchly'</em>, <em>alpha=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#test_sphericity"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Mauchly and JNS test for sphericity.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -109,6 +109,13 @@
 <p class="last">Note that data are NOT expected to be in long format but rather with
 shape (n_subj, n_groups). If your data are in long format, use the
 pandas pivot function first.</p>
+</dd>
+<dt><strong>method</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first">Method to compute sphericity</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;jns&#39;</span> <span class="p">:</span> <span class="n">John</span><span class="p">,</span> <span class="n">Nagao</span> <span class="ow">and</span> <span class="n">Sugiura</span><span class="s1">&#39;s test.</span>
+<span class="s1">&#39;mauchly&#39;</span> <span class="p">:</span> <span class="n">Mauchly</span><span class="s1">&#39;s test, more widely-used than JSN but less robust.</span>
+</pre></div>
+</div>
 </dd>
 <dt><strong>alpha</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float, optional</span></dt>
 <dd><p class="first last">Significance level</p>
@@ -166,7 +173,7 @@ pandas pivot function first.</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
     </p>
   </div>
 </footer>
