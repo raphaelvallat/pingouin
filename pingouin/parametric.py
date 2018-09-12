@@ -240,8 +240,8 @@ def epsilon(data, correction='gg'):
     return eps
 
 
-def test_sphericity(data, alpha=.05):
-    """Mauchly's test for sphericity
+def test_sphericity(data, method='mauchly', alpha=.05):
+    """Mauchly and JNS test for sphericity.
 
     Parameters
     ----------
@@ -251,6 +251,12 @@ def test_sphericity(data, alpha=.05):
         Note that data are NOT expected to be in long format but rather with
         shape (n_subj, n_groups). If your data are in long format, use the
         pandas pivot function first.
+    method : str
+        Method to compute sphericity ::
+
+        'jns' : John, Nagao and Sugiura's test.
+        'mauchly' : Mauchly's test, more widely-used than JSN but less robust.
+
     alpha : float, optional
         Significance level
 
@@ -278,36 +284,39 @@ def test_sphericity(data, alpha=.05):
     p = data.shape[1]
     d = p - 1
 
-    # if method == 'jsn':
-    #     eps = epsilon(data, correction='gg')
-    #     W = eps * d
-    #     chi_sq = 0.5 * n * d ** 2 * (W - 1 / d)
+    if method == 'jns':
+        eps = epsilon(data, correction='gg')
+        W = eps * d
+        chi_sq = 0.5 * n * d ** 2 * (W - 1 / d)
 
-    # Population covariance
-    S_mean = S.mean().mean()
-    S_pop = pd.DataFrame()
-    S['mean'] = S.mean(1)
-    S.loc['mean', :] = S.mean(0)
+    elif method == 'mauchly':
+        # Population covariance
+        S_mean = S.mean().mean()
+        S_pop = pd.DataFrame()
+        S['mean'] = S.mean(1)
+        S.loc['mean', :] = S.mean(0)
 
-    for k in S.keys().drop('mean'):
-        for l in S.index.drop('mean'):
-            S_pop.loc[k, l] = S.loc[k, l] - S.loc[k, 'mean'] - \
-                S.loc['mean', l] + S_mean
+        for k in S.keys().drop('mean'):
+            for l in S.index.drop('mean'):
+                S_pop.loc[k, l] = S.loc[k, l] - S.loc[k, 'mean'] - \
+                    S.loc['mean', l] + S_mean
 
-    # Eigenvalues
-    eig = np.linalg.eigvals(S_pop)
-    # Remove very low eigenvalues
-    eig = eig[eig > 1e-4]
+        # Eigenvalues
+        eig = np.linalg.eigvals(S_pop)
+        # Remove very low eigenvalues
+        eig = eig[eig > 1e-4]
 
-    # Mauchly's statistic
-    W = np.product(eig) / (eig.sum() / d)**d
+        # Mauchly's statistic
+        W = np.product(eig) / (eig.sum() / d)**d
 
-    # Chi-square
-    f = (2 * d**2 + p + 1) / (6 * d * (n - 1))
-    chi_sq = (f - 1) * (n - 1) * np.log(W)
+        # Chi-square
+        f = (2 * d**2 + p + 1) / (6 * d * (n - 1))
+        chi_sq = (f - 1) * (n - 1) * np.log(W)
 
     # Compute dof and pval
     ddof = d * p / 2 - 1
+    # Ensure that dof is not zero
+    ddof = 1 if ddof == 0 else ddof
     pval = chi2.sf(chi_sq, ddof)
 
     # Second order approximation
@@ -613,11 +622,11 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     # Reshape and remove NAN for sphericity estimation and correction
     data_pivot = data.pivot(index=subject, columns=within, values=dv).dropna()
 
-    # Compute sphericity using Mauchly's test
+    # Compute sphericity using JNS test
     # Sphericity assumption only applies if there are more than 2 levels
     if correction == 'auto' or (correction is True and n_rm >= 3):
-        sphericity, W_mauchly, chi_sq_mauchly, ddof_mauchly, \
-            p_mauchly = test_sphericity(data_pivot, alpha=.05)
+        sphericity, W_spher, chi_sq_spher, ddof_spher, \
+            p_spher = test_sphericity(data_pivot, alpha=.05)
         if correction == 'auto':
             correction = True if not sphericity else False
     else:
@@ -644,13 +653,13 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
                             }, index=[0])
         if correction:
             aov['p-GG-corr'] = p_corr
-            aov['W-Mauchly'] = W_mauchly
-            aov['p-Mauchly'] = p_mauchly
+            aov['W-spher'] = W_spher
+            aov['p-spher'] = p_spher
             aov['sphericity'] = sphericity
 
         col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc',
-                     'p-GG-corr', 'np2', 'eps', 'sphericity', 'W-Mauchly',
-                     'p-Mauchly']
+                     'p-GG-corr', 'np2', 'eps', 'sphericity', 'W-spher',
+                     'p-spher']
     else:
         aov = pd.DataFrame({'Source': [within, 'Error'],
                             'SS': np.round([sstime, sserror], 3),
@@ -664,12 +673,12 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
                             })
         if correction:
             aov['p-GG-corr'] = [p_corr, np.nan]
-            aov['W-Mauchly'] = [W_mauchly, np.nan]
-            aov['p-Mauchly'] = [p_mauchly, np.nan]
+            aov['W-spher'] = [W_spher, np.nan]
+            aov['p-spher'] = [p_spher, np.nan]
             aov['sphericity'] = [sphericity, np.nan]
 
         col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'p-GG-corr',
-                     'np2', 'eps', 'sphericity', 'W-Mauchly', 'p-Mauchly']
+                     'np2', 'eps', 'sphericity', 'W-spher', 'p-spher']
 
     # Round
     aov[['F', 'eps', 'np2']] = aov[['F', 'eps', 'np2']].round(3)
@@ -1110,8 +1119,8 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
     aov['DF2'] = [dfeb, dfwg, dfwg]
     aov['eps'] = [np.nan, mtime.loc[0, 'eps'], np.nan]
     col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc',
-                 'p-GG-corr', 'np2', 'eps', 'sphericity', 'W-Mauchly',
-                 'p-Mauchly']
+                 'p-GG-corr', 'np2', 'eps', 'sphericity', 'W-spher',
+                 'p-spher']
 
     # Replace NaN
     aov = aov.fillna('-')

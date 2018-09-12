@@ -2,3 +2,12 @@
 include README.rst
 include LICENSE
 include requirements.txt
+
+# Add datasets .csv files
+include pingouin/datasets/berens2009.csv
+include pingouin/datasets/bland1995.csv
+include pingouin/datasets/datasets.csv
+include pingouin/datasets/datasets.md
+include pingouin/datasets/dolan2009.csv
+include pingouin/datasets/mcclave1991.csv
+include pingouin/datasets/ryan2013.csv

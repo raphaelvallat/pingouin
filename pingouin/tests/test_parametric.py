@@ -63,9 +63,11 @@ class TestParametric(_TestPingouin):
     #     """Test function test_sphericity."""
     #     df_pivot = df.pivot(index='Subject', columns='Time',
     #                         values='Scores').reset_index(drop=True)
-    #     _, W, _, _, p = test_sphericity(df_pivot)
+    #     _, W, _, _, p = test_sphericity(df_pivot, method='mauchly')
     #     # Compare with ezANOVA
     #     assert np.allclose([W, p], [0.9987493, 0.9643574])
+    #     # JNS (default method)
+    #     test_sphericity(df_pivot, method='jns')
 
     def test_test_dist(self):
         """Test function test_dist."""

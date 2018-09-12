@@ -57,6 +57,7 @@ if __name__ == "__main__":
           version=VERSION,
           download_url=DOWNLOAD_URL,
           install_requires=install_requires,
+          include_package_data=True,
           packages=['pingouin', 'pingouin.external', 'pingouin.datasets'],
           package_data=PACKAGE_DATA,
           classifiers=[
