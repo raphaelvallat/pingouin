@@ -222,6 +222,7 @@ def epsilon(data, correction='gg'):
     S = data.cov()
     n = data.shape[0]
     k = data.shape[1]
+
     mean_var = np.diag(S).mean()
     S_mean = S.mean().mean()
     ss_mat = (S**2).sum().sum()
@@ -237,7 +238,7 @@ def epsilon(data, correction='gg'):
         den = (k - 1) * (n - 1 - (k - 1) * eps)
         eps = np.min([num / den, 1])
 
-    return eps
+    return np.float32(eps)
 
 
 def test_sphericity(data, method='mauchly', alpha=.05):
@@ -254,10 +255,10 @@ def test_sphericity(data, method='mauchly', alpha=.05):
     method : str
         Method to compute sphericity ::
 
-        'jns' : John, Nagao and Sugiura s test.
-        'mauchly' : Mauchly s test, more widely-used than JSN but less robust.
+        'jns' : John, Nagao and Sugiura test.
+        'mauchly' : Mauchly test.
 
-    alpha : float, optional
+    alpha : float
         Significance level
 
     Returns
@@ -290,7 +291,7 @@ def test_sphericity(data, method='mauchly', alpha=.05):
         chi_sq = 0.5 * n * d ** 2 * (W - 1 / d)
 
     elif method == 'mauchly':
-        # Population covariance
+        # Estimate of the population covariance (= double-centered)
         S_mean = S.mean().mean()
         S_pop = pd.DataFrame()
         S['mean'] = S.mean(1)
@@ -303,8 +304,8 @@ def test_sphericity(data, method='mauchly', alpha=.05):
 
         # Eigenvalues
         eig = np.linalg.eigvals(S_pop)
-        # Remove very low eigenvalues
-        eig = eig[eig > 1e-4]
+        # Keep only p - 1 eigenvalues
+        eig = np.sort(eig)[1:]
 
         # Mauchly's statistic
         W = np.product(eig) / (eig.sum() / d)**d
@@ -314,7 +315,7 @@ def test_sphericity(data, method='mauchly', alpha=.05):
         chi_sq = (f - 1) * (n - 1) * np.log(W)
 
     # Compute dof and pval
-    ddof = d * p / 2 - 1
+    ddof = 0.5 * d * p - 1
     # Ensure that dof is not zero
     ddof = 1 if ddof == 0 else ddof
     pval = chi2.sf(chi_sq, ddof)
@@ -326,8 +327,7 @@ def test_sphericity(data, method='mauchly', alpha=.05):
     # pval += w2 * (pval2 - pval)
 
     sphericity = True if pval > alpha else False
-    return sphericity, W, chi_sq, ddof, pval
-
+    return sphericity, np.round(W, 3), np.round(chi_sq, 3), int(ddof), pval
 
 def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     """T-test.
