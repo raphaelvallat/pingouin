@@ -254,8 +254,8 @@ def test_sphericity(data, method='mauchly', alpha=.05):
     method : str
         Method to compute sphericity ::
 
-        'jns' : John, Nagao and Sugiura's test.
-        'mauchly' : Mauchly's test, more widely-used than JSN but less robust.
+        'jns' : John, Nagao and Sugiura s test.
+        'mauchly' : Mauchly s test, more widely-used than JSN but less robust.
 
     alpha : float, optional
         Significance level
