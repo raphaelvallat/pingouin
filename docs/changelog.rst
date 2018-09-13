@@ -3,20 +3,21 @@
 What's new
 ##########
 
-v0.1.6
-------
+v0.1.6 (September 2018)
+-----------------------
 
 **ANOVA**
 
-a. Added JNS test to compute sphericity (more powerful than Mauchly)
+a. Added JNS method to compute sphericity.
 
 **Bug**
 
 a. Added .csv datasets files to python site-packages folder
+b. Fixed error in test_sphericity when ddof == 0.
 
 
-v0.1.5
-------
+v0.1.5 (August 2018)
+--------------------
 
 **ANOVA**
 

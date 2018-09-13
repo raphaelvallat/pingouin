@@ -3,3 +3,4 @@ scipy
 pandas
 seaborn
 matplotlib
+pingouin
