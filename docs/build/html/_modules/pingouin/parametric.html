@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pingouin.parametric &#8212; pingouin 0.1.5 documentation</title>
+    <title>pingouin.parametric &#8212; pingouin 0.1.6 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
@@ -39,7 +39,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html"><span><img src="../../_static/pingouin_128x128.png"></span>
           pingouin</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.1.5</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.1.6</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -316,6 +316,7 @@
     <span class="n">S</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">cov</span><span class="p">()</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">k</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
     <span class="n">mean_var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">S</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
     <span class="n">S_mean</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
     <span class="n">ss_mat</span> <span class="o">=</span> <span class="p">(</span><span class="n">S</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
@@ -331,7 +332,7 @@
         <span class="n">den</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">eps</span><span class="p">)</span>
         <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">num</span> <span class="o">/</span> <span class="n">den</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
 
-    <span class="k">return</span> <span class="n">eps</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">eps</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="test_sphericity"><a class="viewcode-back" href="../../generated/pingouin.test_sphericity.html#pingouin.test_sphericity">[docs]</a><span class="k">def</span> <span class="nf">test_sphericity</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mauchly&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">):</span>
@@ -348,10 +349,10 @@
 <span class="sd">    method : str</span>
 <span class="sd">        Method to compute sphericity ::</span>
 
-<span class="sd">        &#39;jns&#39; : John, Nagao and Sugiura s test.</span>
-<span class="sd">        &#39;mauchly&#39; : Mauchly s test, more widely-used than JSN but less robust.</span>
+<span class="sd">        &#39;jns&#39; : John, Nagao and Sugiura test.</span>
+<span class="sd">        &#39;mauchly&#39; : Mauchly test.</span>
 
-<span class="sd">    alpha : float, optional</span>
+<span class="sd">    alpha : float</span>
 <span class="sd">        Significance level</span>
 
 <span class="sd">    Returns</span>
@@ -384,7 +385,7 @@
         <span class="n">chi_sq</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">n</span> <span class="o">*</span> <span class="n">d</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">W</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;mauchly&#39;</span><span class="p">:</span>
-        <span class="c1"># Population covariance</span>
+        <span class="c1"># Estimate of the population covariance (= double-centered)</span>
         <span class="n">S_mean</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="n">S_pop</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
         <span class="n">S</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -397,8 +398,8 @@
 
         <span class="c1"># Eigenvalues</span>
         <span class="n">eig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigvals</span><span class="p">(</span><span class="n">S_pop</span><span class="p">)</span>
-        <span class="c1"># Remove very low eigenvalues</span>
-        <span class="n">eig</span> <span class="o">=</span> <span class="n">eig</span><span class="p">[</span><span class="n">eig</span> <span class="o">&gt;</span> <span class="mf">1e-4</span><span class="p">]</span>
+        <span class="c1"># Keep only p - 1 eigenvalues</span>
+        <span class="n">eig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">eig</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
 
         <span class="c1"># Mauchly&#39;s statistic</span>
         <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">eig</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">eig</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span><span class="o">**</span><span class="n">d</span>
@@ -408,7 +409,7 @@
         <span class="n">chi_sq</span> <span class="o">=</span> <span class="p">(</span><span class="n">f</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">W</span><span class="p">)</span>
 
     <span class="c1"># Compute dof and pval</span>
-    <span class="n">ddof</span> <span class="o">=</span> <span class="n">d</span> <span class="o">*</span> <span class="n">p</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">ddof</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">p</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="c1"># Ensure that dof is not zero</span>
     <span class="n">ddof</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">ddof</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">ddof</span>
     <span class="n">pval</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">chi_sq</span><span class="p">,</span> <span class="n">ddof</span><span class="p">)</span>
@@ -420,8 +421,7 @@
     <span class="c1"># pval += w2 * (pval2 - pval)</span>
 
     <span class="n">sphericity</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">pval</span> <span class="o">&gt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="kc">False</span>
-    <span class="k">return</span> <span class="n">sphericity</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">chi_sq</span><span class="p">,</span> <span class="n">ddof</span><span class="p">,</span> <span class="n">pval</span></div>
-
+    <span class="k">return</span> <span class="n">sphericity</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">chi_sq</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">ddof</span><span class="p">),</span> <span class="n">pval</span></div>
 
 <div class="viewcode-block" id="ttest"><a class="viewcode-back" href="../../generated/pingouin.ttest.html#pingouin.ttest">[docs]</a><span class="k">def</span> <span class="nf">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">r</span><span class="o">=.</span><span class="mi">707</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;T-test.</span>
