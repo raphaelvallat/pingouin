@@ -18,7 +18,7 @@
     :target: https://codecov.io/gh/raphaelvallat/pingouin
 
 .. image:: https://mybinder.org/badge.svg
-    :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
+    :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/master
 
 
 .. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/pictures/logo_pingouin.png
