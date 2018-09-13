@@ -3,6 +3,18 @@
 What's new
 ##########
 
+v0.1.6
+------
+
+**ANOVA**
+
+a. Added JNS test to compute sphericity (more powerful than Mauchly)
+
+**Bug**
+
+a. Added .csv datasets files to python site-packages folder
+
+
 v0.1.5
 ------
 
