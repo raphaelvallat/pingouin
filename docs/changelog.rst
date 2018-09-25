@@ -3,6 +3,14 @@
 What's new
 ##########
 
+v0.1.7 (October 2018)
+-----------------------
+
+**Effect size**
+
+a. Fixed minor bug in Cohen d: now use unbiased standard deviation (np.std(ddof=1)) for paired and one-sample Cohen d.
+
+
 v0.1.6 (September 2018)
 -----------------------
 
