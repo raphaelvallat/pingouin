@@ -328,12 +328,11 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
 
         >>> import numpy as np
         >>> from pingouin import compute_effsize
-        >>> np.random.seed(123)
         >>> x = [1.62, 2.21, 3.79, 1.66, 1.86, 1.87, 4.51, 4.49, 3.3 , 2.69]
         >>> y = [0.91, 3., 2.28, 0.49, 1.42, 3.65, -0.43, 1.57, 3.27, 1.13]
         >>> g = compute_effsize(x=x, y=y, eftype='hedges', paired=True)
         >>> print(g)
-            0.88
+            0.84
 
     3. Compute Glass delta from two independant set of observations. The group
        with the lowest variance will automatically be selected as the control.
@@ -366,12 +365,12 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
 
     if ny == 1:
         # Case 1: One-sample Test
-        d = (np.mean(x) - y) / np.std(x)
+        d = (np.mean(x) - y) / np.std(x, ddof=1)
         return d
 
     if eftype.lower() == 'glass':
         # Find group with lowest variance
-        sd_control = np.min([np.std(x), np.std(y)])
+        sd_control = np.min([np.std(x, ddof=1), np.std(y, ddof=1)])
         d = (np.mean(x) - np.mean(y)) / sd_control
         return d
     elif eftype.lower() == 'r':
@@ -395,7 +394,8 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
             d = (np.mean(x) - np.mean(y)) / poolsd
         else:
             # Report Cohen d-avg (Cumming 2012; Lakens 2013)
-            d = (np.mean(x) - np.mean(y)) / (.5 * (np.std(x) + np.std(y)))
+            d = (np.mean(x) - np.mean(y)) / (.5 * (np.std(x, ddof=1) +
+                                                   np.std(y, ddof=1)))
         return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)
 
 

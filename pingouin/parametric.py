@@ -329,6 +329,7 @@ def test_sphericity(data, method='mauchly', alpha=.05):
     sphericity = True if pval > alpha else False
     return sphericity, np.round(W, 3), np.round(chi_sq, 3), int(ddof), pval
 
+
 def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     """T-test.
 
