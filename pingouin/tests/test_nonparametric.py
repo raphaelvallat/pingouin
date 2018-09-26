@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.nonparametric import (mad, madmedianrule, mwu, wilcoxon,
-                                    kruskal, friedman)
+                                    kruskal, friedman, cochran)
 
 np.random.seed(1234)
 x = np.random.normal(size=100)
@@ -66,3 +66,15 @@ class TestNonParametric(_TestPingouin):
         H, p = stats.kruskal(x, y, z, nan_policy='omit')
         assert np.allclose(np.round(H, 3), summary['H']['Kruskal'])
         assert np.allclose(p, summary['p-unc']['Kruskal'])
+
+    def test_cochran(self):
+        """Test function cochran"""
+        from pingouin.datasets import read_dataset
+        df = read_dataset('cochran')
+        st = cochran(dv='Energetic', within='Time', subject='Subject', data=df)
+        assert st.loc['cochran', 'Q'] == 6.706
+        cochran(dv='Energetic', within='Time', subject='Subject', data=df,
+                export_filename='test_export.csv')
+        # With a NaN value
+        df.loc[2, 'Energetic'] = np.nan
+        cochran(dv='Energetic', within='Time', subject='Subject', data=df)

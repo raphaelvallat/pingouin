@@ -3,6 +3,14 @@
 What's new
 ##########
 
+v0.1.8 (dev)
+------------
+
+**Non-parametric**
+
+a. Added cochran function (Cochran Q test)
+
+
 v0.1.7 (September 2018)
 -----------------------
 

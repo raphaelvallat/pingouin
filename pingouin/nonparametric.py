@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pd
 from pingouin import _remove_na, _remove_rm_na, _check_dataframe, _export_table
 
-__all__ = ["mad", "madmedianrule", "mwu", "wilcoxon", "kruskal", "friedman"]
+__all__ = ["mad", "madmedianrule", "mwu", "wilcoxon", "kruskal", "friedman",
+           "cochran"]
 
 
 def mad(a, normalize=True, axis=0):
@@ -324,7 +325,7 @@ def kruskal(dv=None, between=None, data=None, detailed=False,
     return stats
 
 
-def friedman(dv=None, within=None, subject=None, data=None, detailed=False,
+def friedman(dv=None, within=None, subject=None, data=None,
              export_filename=None):
     """Friedman test for repeated measurements.
 
@@ -435,6 +436,89 @@ def friedman(dv=None, within=None, subject=None, data=None, detailed=False,
 
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
+
+    # Export to .csv
+    if export_filename is not None:
+        _export_table(stats, export_filename)
+    return stats
+
+
+def cochran(dv=None, within=None, subject=None, data=None,
+            export_filename=None):
+    """Cochran Q test. Special case of the Friedman test when the dependant
+    variable is binary.
+
+    Parameters
+    ----------
+    dv : string
+        Name of column containing the binary dependant variable.
+    within : string
+        Name of column containing the within-subject factor.
+    subject : string
+        Name of column containing the subject identifier.
+    data : pandas DataFrame
+        DataFrame
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
+
+    Returns
+    -------
+    stats : DataFrame
+        Test summary ::
+
+        'Q' : The Cochran Q statistic
+        'p-unc' : Uncorrected p-value
+        'dof' : degrees of freedom
+
+    Notes
+    -----
+    The Cochran Q Test is a non-parametric test for ANOVA with repeated
+    measures where the dependent variable is binary.
+
+    Data are expected to be in long-format.
+
+    NaN are automatically removed from the data.
+
+    Examples
+    --------
+    Compute the Cochran Q test for repeated measurements.
+
+        >>> from pingouin.datasets import read_dataset
+        >>> from pingouin import cochran
+        >>> df = read_dataset('cochran')
+        >>> cochran(dv='Energetic', within='Time', subject='Subject', data=df)
+    """
+    from scipy.stats import chi2
+
+    # Check data
+    _check_dataframe(dv=dv, within=within, data=data, subject=subject,
+                     effects='within')
+
+    # Remove NaN
+    if data[dv].isnull().any():
+        data = _remove_rm_na(dv=dv, within=within, subject=subject, data=data)
+
+    # Groupby and extract size
+    grp = data.groupby(within)[dv]
+    grp_s = data.groupby(subject)[dv]
+    k = data[within].unique().size
+    dof = k - 1
+    # n = grp.count().unique()[0]
+
+    # Q statistic and p-value
+    q = (dof * (k * np.sum(grp.sum()**2) - grp.sum().sum()**2)) / \
+        (k * grp.sum().sum() - np.sum(grp_s.sum()**2))
+    p_unc = chi2.sf(q, dof)
+
+    # Create output dataframe
+    stats = pd.DataFrame({'Source': within,
+                          'dof': dof,
+                          'Q': np.round(q, 3),
+                          'p-unc': p_unc,
+                          }, index=['cochran'])
 
     # Export to .csv
     if export_filename is not None:
