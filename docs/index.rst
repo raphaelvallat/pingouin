@@ -30,13 +30,15 @@
 
 3. Robust correlations
 
-4. Bayes Factor
+4. Repeated measures correlations and intraclass correlation
 
-5. Tests for sphericity, normality and homoscedasticity
+5. Bayes Factor
 
-6. Effect sizes
+6. Tests for sphericity, normality and homoscedasticity
 
-7. Circular statistics
+7. Effect sizes
+
+8. Circular statistics
 
 Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
 
