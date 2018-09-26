@@ -8,7 +8,11 @@ v0.1.7 (October 2018)
 
 **ANOVA**
 
-a. Added rm_anova2 function (two-way repeated measures ANOVA)
+a. Added rm_anova2 function (two-way repeated measures ANOVA).
+
+**Correlations**
+
+a. Added intra-class correlation.
 
 **Effect size**
 

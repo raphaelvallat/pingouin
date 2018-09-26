@@ -58,6 +58,7 @@ Correlation
     corr
     rm_corr
     pairwise_corr
+    intraclass_corr
 
 
 Datasets
