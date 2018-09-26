@@ -1332,6 +1332,7 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
         _export_table(aov, export_filename)
     return aov
 
+
 def ancova(dv=None, covar=None, between=None, data=None,
            export_filename=None):
     """ANCOVA (Type II)
@@ -1378,11 +1379,13 @@ def ancova(dv=None, covar=None, between=None, data=None,
 
     Examples
     --------
-    ANCOVA
+    1. Evaluate the reading scores of students with different teaching method
+    and family income as a covariate.
 
         >>> from pingouin import read_dataset
         >>> from pingouin import ancova
         >>> df = read_dataset('ancova')
+        >>> ancova(data=df, dv='Scores', covar='Income', between='Method')
     """
     from scipy.stats import f, linregress
 
@@ -1407,7 +1410,7 @@ def ancova(dv=None, covar=None, between=None, data=None,
     ss_t_covar = aov_covar.loc[0, 'SS'] + aov_covar.loc[1, 'SS']
 
     # Sums of squares
-    ss_t =  ss_t_dv - bt**2 * ss_t_covar
+    ss_t = ss_t_dv - bt**2 * ss_t_covar
     ss_w = aov_dv.loc[1, 'SS'] - bw**2 * aov_covar.loc[1, 'SS']
     ss_b = ss_t - ss_w
     ss_c = ss_slopes.sum() * bw

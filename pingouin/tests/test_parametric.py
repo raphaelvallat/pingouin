@@ -4,7 +4,7 @@ import numpy as np
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.parametric import (gzscore, test_normality, ttest, anova, anova2,
                                  rm_anova, mixed_anova, test_dist, epsilon,
-                                 rm_anova2)
+                                 rm_anova2, ancova)
 from pingouin.datasets import read_dataset
 
 # Generate random data for ANOVA
@@ -148,3 +148,13 @@ class TestParametric(_TestPingouin):
         mixed_anova(dv='Scores', within='Time', subject='Subject',
                     between='Group', data=df_nan, correction=True,
                     remove_na=True, export_filename='test_export.csv')
+
+    def test_ancova(self):
+        """Test function ancova."""
+        df = read_dataset('ancova')
+        aov = ancova(data=df, dv='Scores', covar='Income', between='Method')
+        # Compare with statsmodels
+        assert np.allclose(aov.loc[0, 'F'].round(3), 3.336)
+        assert np.allclose(aov.loc[1, 'F'].round(3), 29.419)
+        aov = ancova(data=df, dv='Scores', covar='Income', between='Method',
+                     export_filename='test_export.csv')
