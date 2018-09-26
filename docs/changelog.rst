@@ -16,6 +16,10 @@ b. Added ancova function (Analysis of covariance)
 a. Added intraclass_corr function (intraclass correlation).
 b. The rm_corr function uses the new ancova function instead of statsmodels.
 
+**Datasets**
+
+a. Added ancova and icc datasets
+
 **Effect size**
 
 a. Fixed bug in Cohen d: now use unbiased standard deviation (np.std(ddof=1)) for paired and one-sample Cohen d.
