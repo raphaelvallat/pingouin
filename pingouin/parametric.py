@@ -6,8 +6,8 @@ from pingouin import (_check_dataframe, _remove_rm_na, _remove_na,
                       _export_table, bayesfactor_ttest)
 
 __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
-           "epsilon", "test_sphericity", "ttest", "rm_anova", "anova",
-           "anova2", "mixed_anova"]
+           "epsilon", "test_sphericity", "ttest", "rm_anova", "rm_anova2",
+           "anova", "anova2", "mixed_anova"]
 
 
 def gzscore(x):
@@ -689,6 +689,182 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
+    # Export to .csv
+    if export_filename is not None:
+        _export_table(aov, export_filename)
+    return aov
+
+
+def rm_anova2(dv=None, within=None, subject=None, data=None,
+              export_filename=None):
+    """Two-way repeated measures ANOVA.
+
+    Parameters
+    ----------
+    dv : string
+        Name of column containing the dependant variable.
+    within : list
+        Names of column containing the two within factor
+        (e.g. ['Time', 'Treatment'])
+    subject : string
+        Name of column containing the subject identifier.
+    data : pandas DataFrame
+        DataFrame
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
+
+    Returns
+    -------
+    aov : DataFrame
+        ANOVA summary ::
+
+        'Source' : Name of the within-group factors
+        'ddof1' : Degrees of freedom (numerator)
+        'ddof2' : Degrees of freedom (denominator)
+        'F' : F-value
+        'p-unc' : Uncorrected p-value
+        'np2' : Partial eta-square effect size
+        'eps' : Greenhouse-Geisser epsilon factor (= index of sphericity)
+        'p-GG-corr' : Greenhouse-Geisser corrected p-value
+        'W-spher' : Sphericity test statistic
+        'p-spher' : p-value of the sphericity test
+        'sphericity' : sphericity of the data (boolean)
+
+    Notes
+    -----
+    Data are expected to be in long-format and perfectly balanced.
+
+    See Also
+    --------
+    anova : One-way and two-way ANOVA
+    rm_anova : One-way repeated measures ANOVA
+    mixed_anova : Two way mixed ANOVA
+    friedman : Non-parametric one-way repeated measures ANOVA
+
+    Examples
+    --------
+    Compute a two-way repeated-measures ANOVA.
+
+        >>> import pandas as pd
+        >>> from pingouin import rm_anova2
+        >>> df = pd.read_csv('dataset.csv')
+        >>> aov = rm_anova2(dv='DV', within=['Time', 'Treatment'],
+                           subject='Subject', data=df)
+    """
+    from scipy.stats import f
+    a, b = within
+
+    # Remove subjects with NaN values (pivot to remove full rows)
+    piv = data.pivot_table(index=subject, columns=[a, b], values=dv).dropna()
+    data = piv.unstack().reset_index(drop=False)
+    data = data.rename(columns={0: dv})
+
+    # Group sizes and grandmean
+    n_a = data[a].unique().size
+    n_b = data[b].unique().size
+    n_s = data[subject].unique().size
+    mu = data[dv].mean()
+
+    # Groupby means
+    grp_s = data.groupby(subject)[dv].mean()
+    grp_a = data.groupby([a])[dv].mean()
+    grp_b = data.groupby([b])[dv].mean()
+    grp_ab = data.groupby([a, b])[dv].mean()
+    grp_as = data.groupby([a, subject])[dv].mean()
+    grp_bs = data.groupby([b, subject])[dv].mean()
+
+    # Sums of squares
+    ss_tot = np.sum((data[dv] - mu)**2)
+    ss_s = (n_a * n_b) * np.sum((grp_s - mu)**2)
+    ss_a = (n_b * n_s) * np.sum((grp_a - mu)**2)
+    ss_b = (n_a * n_s) * np.sum((grp_b - mu)**2)
+    ss_ab_er = n_s * np.sum((grp_ab - mu)**2)
+    ss_ab = ss_ab_er - ss_a - ss_b
+    ss_as_er = n_b * np.sum((grp_as - mu)**2)
+    ss_as = ss_as_er - ss_s - ss_a
+    ss_bs_er = n_a * np.sum((grp_bs - mu)**2)
+    ss_bs = ss_bs_er - ss_s - ss_b
+    ss_abs = ss_tot - ss_a - ss_b - ss_s - ss_ab - ss_as - ss_bs
+
+    # DOF
+    df_a = n_a - 1
+    df_b = n_b - 1
+    df_s = n_s - 1
+    df_ab_er = n_a * n_b - 1
+    df_ab = df_ab_er - df_a - df_b
+    df_as_er = n_a * n_s - 1
+    df_as = df_as_er - df_s - df_a
+    df_bs_er = n_b * n_s - 1
+    df_bs = df_bs_er - df_s - df_b
+    df_tot = n_a * n_b * n_s - 1
+    df_abs = df_tot - df_a - df_b - df_s - df_ab - df_as - df_bs
+
+    # Mean squares
+    ms_a = ss_a / df_a
+    ms_b = ss_b / df_b
+    ms_s = ss_s / df_s
+    ms_ab_er = ss_ab_er / df_ab_er
+    ms_ab = ss_ab / df_ab
+    ms_as = ss_as / df_as
+    ms_as_er = ss_as_er / df_as_er
+    ms_bs = ss_bs / df_bs
+    ms_bs_er = ss_bs_er / df_bs_er
+    ms_abs = ss_abs / df_abs
+
+    # F-values
+    f_a = ms_a / ms_as
+    f_b = ms_b / ms_bs
+    f_ab = ms_ab / ms_abs
+
+    # P-values
+    p_a = f(df_a, df_as).sf(f_a)
+    p_b = f(df_b, df_bs).sf(f_b)
+    p_ab = f(df_ab, df_abs).sf(f_ab)
+
+    # Partial eta-square
+    eta_a = (f_a * df_a) / (f_a * df_a + df_as)
+    eta_b = (f_b * df_b) / (f_b * df_b + df_bs)
+    eta_ab = (f_ab * df_ab) / (f_ab * df_ab + df_abs)
+
+    # Epsilon
+    piv_a = data.pivot_table(index=subject, columns=a, values=dv).dropna()
+    piv_b = data.pivot_table(index=subject, columns=b, values=dv).dropna()
+    eps_a = epsilon(piv_a, correction='gg')
+    eps_b = epsilon(piv_b, correction='gg')
+    eps_ab = epsilon(piv, correction='gg')
+
+    df_a_c, df_as_c = [np.maximum(d * eps_a, 1.) for d in (df_a, df_as)]
+    df_b_c, df_bs_c = [np.maximum(d * eps_b, 1.) for d in (df_b, df_bs)]
+    df_ab_c, df_abs_c = [np.maximum(d * eps_ab, 1.) for d in (df_ab,
+                                                              df_abs)]
+    p_a_corr = f(df_a_c, df_as_c).sf(f_a)
+    p_b_corr = f(df_b_c, df_bs_c).sf(f_b)
+    p_ab_corr = f(df_ab_c, df_abs_c).sf(f_ab)
+
+    # Create dataframe
+    aov = pd.DataFrame({'Source': [a, b, a + ' * ' + b],
+                        'SS': [ss_a, ss_b, ss_ab],
+                        'ddof1': [df_a, df_b, df_ab],
+                        'ddof2': [df_as, df_bs, df_abs],
+                        'MS': [ms_a, ms_b, ms_ab],
+                        'F': [f_a, f_b, f_ab],
+                        'p-unc': [p_a, p_b, p_ab],
+                        'p-GG-corr': [p_a_corr, p_b_corr, p_ab_corr],
+                        'np2': [eta_a, eta_b, eta_ab],
+                        'eps': [eps_a, eps_b, eps_ab],
+                        })
+
+    col_order = ['Source', 'SS', 'ddof1', 'ddof2', 'MS', 'F', 'p-unc',
+                 'p-GG-corr', 'np2', 'eps']
+
+    # Round
+    aov[['SS', 'MS', 'F', 'eps', 'np2']] = aov[['SS', 'MS', 'F', 'eps',
+                                                'np2']].round(3)
+
+    aov = aov.reindex(columns=col_order)
     # Export to .csv
     if export_filename is not None:
         _export_table(aov, export_filename)
