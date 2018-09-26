@@ -7,7 +7,7 @@ from scipy.stats import pearsonr, spearmanr, kendalltau
 from pingouin.utils import _remove_na
 from pingouin.nonparametric import mad, madmedianrule
 
-__all__ = ["corr", "rm_corr"]
+__all__ = ["corr", "rm_corr", "intraclass_corr"]
 
 
 def skipped(x, y):
@@ -513,3 +513,70 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     pval *= 0.5 if tail == 'one-sided' else 1
 
     return np.round(rm, 3), pval, dof
+
+
+def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
+    """Intra-class correlation coefficient.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Dataframe containing the variables
+    groups : string
+        Name of column in data containing the groups.
+    raters : string
+        Name of column in data containing the raters (scorers).
+    scores : string
+        Name of column in data containing the scores (ratings).
+    ci : float
+        Confidence interval
+
+    Returns
+    -------
+    icc : float
+        Intraclass correlation coefficient
+    ci : list
+        Lower and upper confidence intervals
+
+    Notes
+    -----
+    The intraclass correlation (ICC) assesses the reliability of ratings by
+    comparing the variability of different ratings of the same subject to the
+    total variation across all ratings and all subjects. The ratings are
+    quantitative (e.g. Likert scale).
+
+    Translated in Python from:
+    http://www.real-statistics.com/reliability/intraclass-correlation/
+
+    Examples
+    --------
+    1. ICC of wine quality assessed by 4 judges.
+
+        >>> from pingouin.datasets import read_dataset
+        >>> from pingouin import intraclass_corr
+        >>> data = read_dataset('icc')
+        >>> intraclass_corr(data, 'Wine', 'Judge', 'Scores')
+            (0.727525596259691, array([0.434, 0.927]))
+
+    """
+    from pingouin import anova
+    from scipy.stats import f
+
+    # Extract sizes
+    k = data[raters].unique().size
+    n = data[groups].unique().size
+
+    # ANOVA and ICC
+    aov = anova(dv=scores, data=data, between=groups, detailed=True)
+    icc = (aov.loc[0, 'MS'] - aov.loc[1, 'MS']) / \
+          (aov.loc[0, 'MS'] + (k - 1) * aov.loc[1, 'MS'])
+
+    # Confidence interval
+    alpha = 1 - ci
+    df_num, df_den = aov.loc[0, 'DF'], aov.loc[1, 'DF']
+    f_lower = aov.loc[0, 'F'] / f.isf(alpha / 2, df_num, df_den)
+    f_upper = aov.loc[0, 'F'] * f.isf(alpha / 2, df_den, df_num)
+    lower = (f_lower - 1) / (f_lower + k - 1)
+    upper = (f_upper - 1) / (f_upper + k - 1)
+
+    return icc, np.round([lower, upper], 3)
