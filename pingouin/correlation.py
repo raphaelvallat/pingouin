@@ -559,12 +559,25 @@ def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
             (0.727525596259691, array([0.434, 0.927]))
 
     """
+    from pandas.api.types import is_numeric_dtype
     from pingouin import anova
     from scipy.stats import f
 
+    # Check dataframe
+    if any(v is None for v in [data, groups, raters, scores]):
+        raise ValueError('Data, groups, raters and scores must be specified')
+    if not isinstance(data, pd.DataFrame):
+        raise ValueError('Data must be a pandas dataframe.')
+    # Check that scores is a numeric variable
+    if not is_numeric_dtype(data[scores]):
+        raise ValueError('Scores must be numeric.')
+    # Check that data are fully balanced
+    if data.groupby(raters)[scores].count().unique().size > 1:
+        raise ValueError('Data must be balanced.')
+
     # Extract sizes
     k = data[raters].unique().size
-    n = data[groups].unique().size
+    # n = data[groups].unique().size
 
     # ANOVA and ICC
     aov = anova(dv=scores, data=data, between=groups, detailed=True)

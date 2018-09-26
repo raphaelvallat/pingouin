@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.correlation import corr, rm_corr
+from pingouin.correlation import corr, rm_corr, intraclass_corr
 from pingouin.datasets import read_dataset
 
 
@@ -47,3 +47,20 @@ class TestCorrelation(_TestPingouin):
         assert r == -0.507
         assert dof == 38
         assert np.round(p, 3) == 0.001
+
+    def test_intraclass_corr(self):
+        """Test function intraclass_corr"""
+        df = read_dataset('icc')
+        intraclass_corr(df, 'Wine', 'Judge', 'Scores', ci=.68)
+        icc, ci = intraclass_corr(df, 'Wine', 'Judge', 'Scores')
+        assert np.round(icc, 3) == 0.728
+        assert ci[0] == .434
+        assert ci[1] == .927
+        with pytest.raises(ValueError):
+            intraclass_corr(df, None, 'Judge', 'Scores')
+        with pytest.raises(ValueError):
+            intraclass_corr(None, 'Wine', 'Judge', 'Scores')
+        with pytest.raises(ValueError):
+            intraclass_corr(df, 'Wine', 'Judge', 'Judge')
+        with pytest.raises(ValueError):
+            intraclass_corr(df.drop(index=0), 'Wine', 'Judge', 'Scores')
