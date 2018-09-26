@@ -1378,6 +1378,11 @@ def ancova(dv=None, covar=None, between=None, data=None,
 
     Examples
     --------
+    ANCOVA
+
+        >>> from pingouin import read_dataset
+        >>> from pingouin import ancova
+        >>> df = read_dataset('ancova')
     """
     from scipy.stats import f, linregress
 
