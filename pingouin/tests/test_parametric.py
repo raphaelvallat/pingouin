@@ -92,7 +92,7 @@ class TestParametric(_TestPingouin):
         # Pain dataset
         df_pain = read_dataset('mcclave1991')
         aov = anova(dv='Pain threshold', between='Hair color', data=df_pain,
-                    detailed=True)
+                    detailed=True, export_filename='test_export.csv')
         anova(dv='Pain threshold', between=['Hair color'], data=df_pain)
         # Compare with JASP
         assert np.allclose(aov.loc[0, 'F'], 6.791)
@@ -120,7 +120,7 @@ class TestParametric(_TestPingouin):
 
         rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
                  correction=True, detailed=True)
-        rm_anova(dv='Scores', within='Time', subject='Subject', data=df_nan,
+        rm_anova(dv='Scores', within=['Time'], subject='Subject', data=df_nan,
                  export_filename='test_export.csv')
 
     def test_rm_anova2(self):
@@ -131,7 +131,9 @@ class TestParametric(_TestPingouin):
                                       'C', 'A', 'B', 'C'],
                              'Scores': [3, 4, 5, 7, 2, 4, 5, 8, 5, 7, 3, 8]})
         rm_anova2(dv='Scores', within=['Time', 'Drug'], subject='Subject',
-                  data=data)
+                  data=data, export_filename='test_export.csv')
+        rm_anova(dv='Scores', within=['Time', 'Drug'], subject='Subject',
+                 data=data)
 
     def test_mixed_anova(self):
         """Test function anova."""

@@ -504,6 +504,9 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
         Name of column containing the dependant variable.
     within : string
         Name of column containing the within factor.
+        If within is a single string, then compute a one-way repeated
+        measures ANOVA, if within is a list with two strings, compute a two-way
+        repeated measures ANOVA using the rm_anova2 function.
     subject : string
         Name of column containing the subject identifier.
     data : pandas DataFrame
@@ -550,7 +553,8 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
 
     See Also
     --------
-    anova : One-way ANOVA
+    anova : One-way and two-way ANOVA
+    rm_anova2 : Two-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
     friedman : Non-parametric one-way repeated measures ANOVA
 
@@ -769,10 +773,13 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
     from scipy.stats import f
     a, b = within
 
-    # Remove subjects with NaN values (pivot to remove full rows)
-    piv = data.pivot_table(index=subject, columns=[a, b], values=dv).dropna()
-    data = piv.unstack().reset_index(drop=False)
-    data = data.rename(columns={0: dv})
+    # Validate the dataframe
+    _check_dataframe(dv=dv, within=within, data=data, subject=subject,
+                     effects='within')
+
+    # Remove NaN
+    if data[[a, b, subject, dv]].isnull().any().any():
+        data = _remove_rm_na(dv=dv, within=within, subject=subject, data=data)
 
     # Group sizes and grandmean
     n_a = data[a].unique().size
@@ -840,10 +847,12 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
     # Epsilon
     piv_a = data.pivot_table(index=subject, columns=a, values=dv)
     piv_b = data.pivot_table(index=subject, columns=b, values=dv)
+    piv_ab = data.pivot_table(index=subject, columns=[a, b], values=dv)
     eps_a = epsilon(piv_a, correction='gg')
     eps_b = epsilon(piv_b, correction='gg')
-    eps_ab = epsilon(piv, correction='gg')
+    eps_ab = epsilon(piv_ab, correction='gg')
 
+    # Greenhouse-Geisser correction
     df_a_c, df_as_c = [np.maximum(d * eps_a, 1.) for d in (df_a, df_as)]
     df_b_c, df_bs_c = [np.maximum(d * eps_b, 1.) for d in (df_b, df_bs)]
     df_ab_c, df_abs_c = [np.maximum(d * eps_ab, 1.) for d in (df_ab, df_abs)]
@@ -918,6 +927,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
     See Also
     --------
     rm_anova : One-way repeated measures ANOVA
+    rm_anova2 : Two-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
     kruskal : Non-parametric one-way ANOVA
 
@@ -1059,8 +1069,9 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
 
     See Also
     --------
-    anova : One-way ANOVA
+    anova : One-way and two way ANOVA
     rm_anova : One-way repeated measures ANOVA
+    rm_anova2 : Two-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
     kruskal : Non-parametric one-way ANOVA
 
@@ -1076,6 +1087,9 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
         >>> print_table(aov)
     """
     from scipy.stats import f
+
+    # Validate the dataframe
+    _check_dataframe(dv=dv, between=between, data=data, effects='between')
 
     # Assert that there are two factors
     if not isinstance(between, list):
@@ -1209,8 +1223,9 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
 
     See Also
     --------
-    anova : One-way ANOVA
+    anova : One-way and two-way ANOVA
     rm_anova : One-way repeated measures ANOVA
+    rm_anova2 : Two-way repeated measures ANOVA
 
     Examples
     --------

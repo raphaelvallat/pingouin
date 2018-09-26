@@ -46,6 +46,18 @@ def _export_table(table, fname):
 
 def _remove_na(x, y, paired=False):
     """Remove missing values in paired and independant measurements.
+
+    Parameters
+    ----------
+    x, y : 1D arrays
+        Data
+    paired : bool
+        Indicates if the measurements are paired or not.
+
+    Returns
+    -------
+    x, y : 1D arrays
+        Data without NaN
     """
     x_na = np.any(np.isnan(x))
     y_na = np.any(np.isnan(y))
@@ -62,13 +74,29 @@ def _remove_na(x, y, paired=False):
 def _remove_rm_na(dv=None, within=None, subject=None, data=None):
     """Remove subject(s) with one or more missing values in repeated
     measurements.
+
+    Parameters
+    ----------
+    dv : string
+        Dependant variable
+    within : string or list
+        Within-subject factor
+    subject : string
+        Subject identifier
+    data : dataframe
+        Dataframe
+
+    Returns
+    -------
+    data : dataframe
+        Dataframe without the subjects nan values
     """
     if subject is None:
         rm = list(data[within].dropna().unique())
         n_rm = len(rm)
         n_obs = int(data.groupby(within)[dv].count().max())
-        data['ID_Subj'] = np.tile(np.arange(n_obs), n_rm)
-        data = data.set_index('ID_Subj')
+        data['Subj'] = np.tile(np.arange(n_obs), n_rm)
+        data = data.set_index('Subj')
     else:
         data = data.set_index(subject)
 
@@ -92,25 +120,35 @@ def _check_eftype(eftype):
 def _check_dataframe(dv=None, between=None, within=None, subject=None,
                      effects=None, data=None):
     """Check dataframe"""
-    # Check input arguments
+    from pandas.api.types import is_numeric_dtype
+    # Check that data is a dataframe
     if not isinstance(data, pd.DataFrame):
-        raise ValueError('Data must be a pandas dataframe')
+        raise ValueError('Data must be a pandas dataframe.')
+    # Check that both dv and data are provided.
     if any(v is None for v in [dv, data]):
         raise ValueError('DV and data must be specified')
+    # Check that dv is a numeric variable
+    if not is_numeric_dtype(data[dv]):
+        raise ValueError('DV must be numeric.')
+    # Check that effects is provided
     if effects not in ['within', 'between', 'interaction', 'all']:
         raise ValueError('Effects must be: within, between, interaction, all')
-    if effects == 'within' and not isinstance(within, string_types):
-        raise ValueError('within must be specified when effects=within')
-    elif effects == 'between' and not isinstance(between, string_types):
-        raise ValueError('between must be specified when effects=between')
-    elif effects == 'interaction':
+    # Check that within is a string or a list (rm_anova2)
+    if effects == 'within' and not isinstance(within, (string_types, list)):
+        raise ValueError('within must be a string or a list.')
+    # Check that subject identifier is provided in rm_anova and friedman.
+    if effects == 'within' and subject is None:
+        raise ValueError('subject must be specified when effects=within')
+    # Check that between is a string or a list (anova2)
+    if effects == 'between' and not isinstance(between, (string_types,
+                                                         list)):
+        raise ValueError('between must be a string or a list.')
+    # Check that both between and within are present for interaction
+    if effects == 'interaction':
         for input in [within, between]:
             if not isinstance(input, string_types):
                 raise ValueError('within and between must be specified when \
                 effects=interaction')
-    # Check that subject identifier is provided in rm_anova and friedman.
-    if effects == 'within' and subject is None:
-        raise ValueError('subject must be specified when effects=within')
 
 
 def is_statsmodels_installed(raise_error=False):
