@@ -539,7 +539,7 @@
 
 <span class="sd">    https://www.frontiersin.org/articles/10.3389/fpsyg.2017.00456/full</span>
 
-<span class="sd">    Tested against the `rmcorr` R package. Requires statsmodels.</span>
+<span class="sd">    Tested against the `rmcorr` R package.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -579,31 +579,39 @@
 <span class="sd">        &gt;&gt;&gt; rm_corr(data=df, x=&#39;pH&#39;, y=&#39;PacO2&#39;, subject=&#39;Subject&#39;)</span>
 <span class="sd">            (-0.507, 0.0008, 38)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Check that statsmodels is installed</span>
-    <span class="kn">from</span> <span class="nn">pingouin.utils</span> <span class="k">import</span> <span class="n">is_statsmodels_installed</span>
-    <span class="n">is_statsmodels_installed</span><span class="p">(</span><span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="kn">from</span> <span class="nn">statsmodels.api</span> <span class="k">import</span> <span class="n">stats</span>
-    <span class="kn">from</span> <span class="nn">statsmodels.formula.api</span> <span class="k">import</span> <span class="n">ols</span>
-
     <span class="c1"># Remove Nans</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">subject</span><span class="p">]]</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="c1"># ANCOVA model</span>
-    <span class="n">formula</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="s1">&#39; ~ &#39;</span> <span class="o">+</span> <span class="s1">&#39;C(&#39;</span> <span class="o">+</span> <span class="n">subject</span> <span class="o">+</span> <span class="s1">&#39;) + &#39;</span> <span class="o">+</span> <span class="n">x</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">ols</span><span class="p">(</span><span class="n">formula</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-    <span class="n">table</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">anova_lm</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="c1"># Using STATSMODELS</span>
+    <span class="c1"># from pingouin.utils import is_statsmodels_installed</span>
+    <span class="c1"># is_statsmodels_installed(raise_error=True)</span>
+    <span class="c1"># from statsmodels.api import stats</span>
+    <span class="c1"># from statsmodels.formula.api import ols</span>
+    <span class="c1"># # ANCOVA model</span>
+    <span class="c1"># formula = y + &#39; ~ &#39; + &#39;C(&#39; + subject + &#39;) + &#39; + x</span>
+    <span class="c1"># model = ols(formula, data=data).fit()</span>
+    <span class="c1"># table = stats.anova_lm(model, typ=3)</span>
+    <span class="c1"># # Extract the sign of the correlation and dof</span>
+    <span class="c1"># sign = np.sign(model.params[x])</span>
+    <span class="c1"># dof = int(table.loc[&#39;Residual&#39;, &#39;df&#39;])</span>
+    <span class="c1"># # Extract correlation coefficient from sum of squares</span>
+    <span class="c1"># ssfactor = table.loc[x, &#39;sum_sq&#39;]</span>
+    <span class="c1"># sserror = table.loc[&#39;Residual&#39;, &#39;sum_sq&#39;]</span>
+    <span class="c1"># rm = sign * np.sqrt(ssfactor / (ssfactor + sserror))</span>
+    <span class="c1"># # Extract p-value</span>
+    <span class="c1"># pval = table.loc[x, &#39;PR(&gt;F)&#39;]</span>
+    <span class="c1"># pval *= 0.5 if tail == &#39;one-sided&#39; else 1</span>
 
-    <span class="c1"># Extract the sign of the correlation and dof</span>
-    <span class="n">sign</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">x</span><span class="p">])</span>
-    <span class="n">dof</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Residual&#39;</span><span class="p">,</span> <span class="s1">&#39;df&#39;</span><span class="p">])</span>
-
-    <span class="c1"># Extract correlation coefficient from sum of squares</span>
-    <span class="n">ssfactor</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;sum_sq&#39;</span><span class="p">]</span>
-    <span class="n">sserror</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Residual&#39;</span><span class="p">,</span> <span class="s1">&#39;sum_sq&#39;</span><span class="p">]</span>
+    <span class="c1"># Using PINGOUIN</span>
+    <span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ancova</span>
+    <span class="n">aov</span><span class="p">,</span> <span class="n">bw</span> <span class="o">=</span> <span class="n">ancova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                     <span class="n">return_bw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">bw</span><span class="p">)</span>
+    <span class="n">dof</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">])</span>
+    <span class="n">ssfactor</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;SS&#39;</span><span class="p">]</span>
+    <span class="n">sserror</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;SS&#39;</span><span class="p">]</span>
     <span class="n">rm</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ssfactor</span> <span class="o">/</span> <span class="p">(</span><span class="n">ssfactor</span> <span class="o">+</span> <span class="n">sserror</span><span class="p">))</span>
-
-    <span class="c1"># Extract p-value</span>
-    <span class="n">pval</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;PR(&gt;F)&#39;</span><span class="p">]</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">]</span>
     <span class="n">pval</span> <span class="o">*=</span> <span class="mf">0.5</span> <span class="k">if</span> <span class="n">tail</span> <span class="o">==</span> <span class="s1">&#39;one-sided&#39;</span> <span class="k">else</span> <span class="mi">1</span>
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">rm</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">pval</span><span class="p">,</span> <span class="n">dof</span></div>

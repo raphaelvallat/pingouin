@@ -18,6 +18,7 @@ ANOVA
     rm_anova2
     epsilon
     mixed_anova
+    ancova
     kruskal
     friedman
 
