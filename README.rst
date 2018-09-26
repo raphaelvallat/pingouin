@@ -29,7 +29,7 @@
 
 It provides easy-to-grasp functions for computing several statistical functions:
 
-1. ANOVAs: one- and two-ways, repeated measures, mixed
+1. ANOVAs: one- and two-ways, repeated measures, mixed, ancova
 
 2. Post-hocs tests and pairwise comparisons
 

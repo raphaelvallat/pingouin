@@ -9,10 +9,12 @@ v0.1.7 (dev)
 **ANOVA**
 
 a. Added rm_anova2 function (two-way repeated measures ANOVA).
+b. Added ancova function (Analysis of covariance)
 
 **Correlations**
 
 a. Added intraclass_corr function (intraclass correlation).
+b. The rm_corr function uses the new ancova function instead of statsmodels.
 
 **Effect size**
 

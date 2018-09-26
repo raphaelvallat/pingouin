@@ -24,7 +24,7 @@
 
 **Pingouin** is an open-source statistical package written in Python 3 and based on Pandas and NumPy.
 
-1. ANOVAs: one- and two-ways, repeated measures, mixed
+1. ANOVAs: one- and two-ways, repeated measures, mixed, ancova
 
 2. Post-hocs tests and pairwise comparisons
 
