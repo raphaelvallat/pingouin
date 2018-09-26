@@ -7,7 +7,7 @@ Doc
 Code
 ----
 - Better bootstrapping of confidence intervals (see Matlab `bootci` function)
-- Add ANCOVA
+- Add Hotelling test
 - Do not compute BF10 in too large datasets (scipy.integrate.quad crashes)
 - pingouin.plotting module (e.g. circular, repeated measures corr, covariance)?
 - Add more circular stats
