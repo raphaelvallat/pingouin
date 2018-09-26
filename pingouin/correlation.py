@@ -445,7 +445,7 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
 
     https://www.frontiersin.org/articles/10.3389/fpsyg.2017.00456/full
 
-    Tested against the `rmcorr` R package. Requires statsmodels.
+    Tested against the `rmcorr` R package.
 
     Parameters
     ----------
@@ -485,31 +485,39 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
         >>> rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
             (-0.507, 0.0008, 38)
     """
-    # Check that statsmodels is installed
-    from pingouin.utils import is_statsmodels_installed
-    is_statsmodels_installed(raise_error=True)
-    from statsmodels.api import stats
-    from statsmodels.formula.api import ols
-
     # Remove Nans
     data = data[[x, y, subject]].dropna(axis=0)
 
-    # ANCOVA model
-    formula = y + ' ~ ' + 'C(' + subject + ') + ' + x
-    model = ols(formula, data=data).fit()
-    table = stats.anova_lm(model, typ=3)
+    # Using STATSMODELS
+    # from pingouin.utils import is_statsmodels_installed
+    # is_statsmodels_installed(raise_error=True)
+    # from statsmodels.api import stats
+    # from statsmodels.formula.api import ols
+    # # ANCOVA model
+    # formula = y + ' ~ ' + 'C(' + subject + ') + ' + x
+    # model = ols(formula, data=data).fit()
+    # table = stats.anova_lm(model, typ=3)
+    # # Extract the sign of the correlation and dof
+    # sign = np.sign(model.params[x])
+    # dof = int(table.loc['Residual', 'df'])
+    # # Extract correlation coefficient from sum of squares
+    # ssfactor = table.loc[x, 'sum_sq']
+    # sserror = table.loc['Residual', 'sum_sq']
+    # rm = sign * np.sqrt(ssfactor / (ssfactor + sserror))
+    # # Extract p-value
+    # pval = table.loc[x, 'PR(>F)']
+    # pval *= 0.5 if tail == 'one-sided' else 1
 
-    # Extract the sign of the correlation and dof
-    sign = np.sign(model.params[x])
-    dof = int(table.loc['Residual', 'df'])
-
-    # Extract correlation coefficient from sum of squares
-    ssfactor = table.loc[x, 'sum_sq']
-    sserror = table.loc['Residual', 'sum_sq']
+    # Using PINGOUIN
+    from pingouin import ancova
+    aov, bw = ancova(dv=y, covar=x, between=subject, data=data,
+                     return_bw=True)
+    sign = np.sign(bw)
+    dof = int(aov.loc[2, 'DF'])
+    ssfactor = aov.loc[1, 'SS']
+    sserror = aov.loc[2, 'SS']
     rm = sign * np.sqrt(ssfactor / (ssfactor + sserror))
-
-    # Extract p-value
-    pval = table.loc[x, 'PR(>F)']
+    pval = aov.loc[1, 'p-unc']
     pval *= 0.5 if tail == 'one-sided' else 1
 
     return np.round(rm, 3), pval, dof

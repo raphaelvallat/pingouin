@@ -5,7 +5,7 @@ import pytest
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.utils import (print_table, _export_table, _remove_rm_na,
                             _check_eftype, _check_dataframe, _remove_na,
-                            is_sklearn_installed, is_statsmodels_installed)
+                            is_sklearn_installed)
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
@@ -86,9 +86,9 @@ class TestUtils(_TestPingouin):
             _check_dataframe(dv='Values', between='Group', within='Time',
                              effects='within', data=df)
 
-    def is_statsmodels_installed(self):
-        """Test function is_statsmodels_installed."""
-        assert isinstance(is_statsmodels_installed(), bool)
+    # def is_statsmodels_installed(self):
+    #     """Test function is_statsmodels_installed."""
+    #     assert isinstance(is_statsmodels_installed(), bool)
 
     def is_sklearn_installed(self):
         """Test function is_statsmodels_installed."""

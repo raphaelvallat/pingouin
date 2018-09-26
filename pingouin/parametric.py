@@ -1334,7 +1334,7 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
 
 
 def ancova(dv=None, covar=None, between=None, data=None,
-           export_filename=None):
+           export_filename=None, return_bw=False):
     """ANCOVA (Type II)
 
     Results have been tested against statsmodels.
@@ -1354,6 +1354,8 @@ def ancova(dv=None, covar=None, between=None, data=None,
         If None, do not export the table.
         By default, the file will be created in the current python console
         directory. To change that, specify the filename with full path.
+    return_bw : bool
+        If True, return beta within parameter (used for the rm_corr function)
 
     Returns
     -------
@@ -1387,19 +1389,22 @@ def ancova(dv=None, covar=None, between=None, data=None,
         >>> df = read_dataset('ancova')
         >>> ancova(data=df, dv='Scores', covar='Income', between='Method')
     """
-    from scipy.stats import f, linregress
+    from scipy.stats import f
+
+    def linreg(x, y):
+        return np.corrcoef(x, y)[0, 1] * np.std(y, ddof=1) / np.std(x, ddof=1)
 
     # Compute slopes
-    ss = data.groupby(between)[covar].apply(lambda x: np.sum((x -
-                                                              x.mean())**2))
     groups = data[between].unique()
-    slopes = np.zeros_like(groups)
+    slopes = np.zeros(shape=groups.shape)
+    ss = np.zeros(shape=groups.shape)
     for i, b in enumerate(groups):
-        slopes[i], _, _, _, _ = linregress(data[data[between] == b][covar],
-                                           data[data[between] == b][dv])
+        dt_covar = data[data[between] == b][covar].values
+        ss[i] = ((dt_covar - dt_covar.mean())**2).sum()
+        slopes[i] = linreg(dt_covar, data[data[between] == b][dv].values)
     ss_slopes = ss * slopes
     bw = ss_slopes.sum() / ss.sum()
-    bt, _, _, _, _ = linregress(data[covar], data[dv])
+    bt = linreg(data[covar], data[dv])
 
     # Run the ANOVA
     aov_dv = anova(data=data, dv=dv, between=between, detailed=True)
@@ -1408,34 +1413,29 @@ def ancova(dv=None, covar=None, between=None, data=None,
     # Create full ANCOVA
     ss_t_dv = aov_dv.loc[0, 'SS'] + aov_dv.loc[1, 'SS']
     ss_t_covar = aov_covar.loc[0, 'SS'] + aov_covar.loc[1, 'SS']
-
     # Sums of squares
     ss_t = ss_t_dv - bt**2 * ss_t_covar
     ss_w = aov_dv.loc[1, 'SS'] - bw**2 * aov_covar.loc[1, 'SS']
     ss_b = ss_t - ss_w
     ss_c = ss_slopes.sum() * bw
-
     # DOF
     df_c = 1
     df_b = aov_dv.loc[0, 'DF']
     df_w = aov_dv.loc[1, 'DF'] - 1
-
     # Mean squares
     ms_c = ss_c / df_c
     ms_b = ss_b / df_b
     ms_w = ss_w / df_w
-
     # F-values
     f_c = ms_c / ms_w
     f_b = ms_b / ms_w
-
     # P-values
     p_c = f(df_c, df_w).sf(f_c)
     p_b = f(df_b, df_w).sf(f_b)
 
     # Create dataframe
     aov = pd.DataFrame({'Source': [between, covar, 'Residual'],
-                        'SS': np.round([ss_b, ss_c, ss_w], 3),
+                        'SS': [ss_b, ss_c, ss_w],
                         'DF': [df_b, df_c, df_w],
                         'F': [f_b, f_c, np.nan],
                         'p-unc': [p_b, p_c, np.nan],
@@ -1444,4 +1444,8 @@ def ancova(dv=None, covar=None, between=None, data=None,
     # Export to .csv
     if export_filename is not None:
         _export_table(aov, export_filename)
-    return aov
+
+    if return_bw:
+        return aov, bw
+    else:
+        return aov

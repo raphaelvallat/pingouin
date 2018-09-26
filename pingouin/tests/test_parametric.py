@@ -156,5 +156,6 @@ class TestParametric(_TestPingouin):
         # Compare with statsmodels
         assert np.allclose(aov.loc[0, 'F'].round(3), 3.336)
         assert np.allclose(aov.loc[1, 'F'].round(3), 29.419)
-        aov = ancova(data=df, dv='Scores', covar='Income', between='Method',
-                     export_filename='test_export.csv')
+        aov, bw = ancova(data=df, dv='Scores', covar='Income',
+                         between='Method', export_filename='test_export.csv',
+                         return_bw=True)

@@ -7,7 +7,7 @@ import pandas as pd
 
 __all__ = ["print_table", "_export_table", "_check_eftype",
            "_remove_rm_na", "_remove_na", "_check_dataframe",
-           "is_statsmodels_installed", "is_sklearn_installed"]
+           "is_sklearn_installed"]
 
 
 def print_table(df, floatfmt=".3f", tablefmt='simple'):
@@ -151,16 +151,16 @@ def _check_dataframe(dv=None, between=None, within=None, subject=None,
                 effects=interaction')
 
 
-def is_statsmodels_installed(raise_error=False):
-    try:
-        import statsmodels  # noqa
-        is_installed = True
-    except IOError:
-        is_installed = False
-    # Raise error (if needed) :
-    if raise_error and not is_installed:
-        raise IOError("statsmodels is not installed.")
-    return is_installed
+# def is_statsmodels_installed(raise_error=False):
+#     try:
+#         import statsmodels  # noqa
+#         is_installed = True
+#     except IOError:
+#         is_installed = False
+#     # Raise error (if needed) :
+#     if raise_error and not is_installed:
+#         raise IOError("statsmodels is not installed.")
+#     return is_installed
 
 
 def is_sklearn_installed(raise_error=False):
