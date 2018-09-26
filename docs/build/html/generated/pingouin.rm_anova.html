@@ -21,7 +21,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pingouin.epsilon" href="pingouin.epsilon.html" />
+    <link rel="next" title="pingouin.rm_anova2" href="pingouin.rm_anova2.html" />
     <link rel="prev" title="pingouin.anova" href="pingouin.anova.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
@@ -109,7 +109,10 @@
 <dd><p class="first last">Name of column containing the dependant variable.</p>
 </dd>
 <dt><strong>within</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd><p class="first last">Name of column containing the within factor.</p>
+<dd><p class="first last">Name of column containing the within factor.
+If within is a single string, then compute a one-way repeated
+measures ANOVA, if within is a list with two strings, compute a two-way
+repeated measures ANOVA using the rm_anova2 function.</p>
 </dd>
 <dt><strong>subject</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd><p class="first last">Name of column containing the subject identifier.</p>
@@ -172,7 +175,9 @@ directory. To change that, specify the filename with full path.</p>
 <p class="first admonition-title">See also</p>
 <dl class="last docutils">
 <dt><a class="reference internal" href="pingouin.anova.html#pingouin.anova" title="pingouin.anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anova</span></code></a></dt>
-<dd>One-way ANOVA</dd>
+<dd>One-way and two-way ANOVA</dd>
+<dt><a class="reference internal" href="pingouin.rm_anova2.html#pingouin.rm_anova2" title="pingouin.rm_anova2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rm_anova2</span></code></a></dt>
+<dd>Two-way repeated measures ANOVA</dd>
 <dt><a class="reference internal" href="pingouin.mixed_anova.html#pingouin.mixed_anova" title="pingouin.mixed_anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mixed_anova</span></code></a></dt>
 <dd>Two way mixed ANOVA</dd>
 <dt><a class="reference internal" href="pingouin.friedman.html#pingouin.friedman" title="pingouin.friedman"><code class="xref py py-obj docutils literal notranslate"><span class="pre">friedman</span></code></a></dt>

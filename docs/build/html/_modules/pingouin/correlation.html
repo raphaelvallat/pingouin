@@ -101,7 +101,7 @@
 <span class="kn">from</span> <span class="nn">pingouin.utils</span> <span class="k">import</span> <span class="n">_remove_na</span>
 <span class="kn">from</span> <span class="nn">pingouin.nonparametric</span> <span class="k">import</span> <span class="n">mad</span><span class="p">,</span> <span class="n">madmedianrule</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;corr&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_corr&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;corr&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_corr&quot;</span><span class="p">,</span> <span class="s2">&quot;intraclass_corr&quot;</span><span class="p">]</span>
 
 
 <span class="k">def</span> <span class="nf">skipped</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
@@ -607,6 +607,86 @@
     <span class="n">pval</span> <span class="o">*=</span> <span class="mf">0.5</span> <span class="k">if</span> <span class="n">tail</span> <span class="o">==</span> <span class="s1">&#39;one-sided&#39;</span> <span class="k">else</span> <span class="mi">1</span>
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">rm</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">pval</span><span class="p">,</span> <span class="n">dof</span></div>
+
+
+<div class="viewcode-block" id="intraclass_corr"><a class="viewcode-back" href="../../generated/pingouin.intraclass_corr.html#pingouin.intraclass_corr">[docs]</a><span class="k">def</span> <span class="nf">intraclass_corr</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">raters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scores</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ci</span><span class="o">=.</span><span class="mi">95</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Intra-class correlation coefficient.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : pd.DataFrame</span>
+<span class="sd">        Dataframe containing the variables</span>
+<span class="sd">    groups : string</span>
+<span class="sd">        Name of column in data containing the groups.</span>
+<span class="sd">    raters : string</span>
+<span class="sd">        Name of column in data containing the raters (scorers).</span>
+<span class="sd">    scores : string</span>
+<span class="sd">        Name of column in data containing the scores (ratings).</span>
+<span class="sd">    ci : float</span>
+<span class="sd">        Confidence interval</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    icc : float</span>
+<span class="sd">        Intraclass correlation coefficient</span>
+<span class="sd">    ci : list</span>
+<span class="sd">        Lower and upper confidence intervals</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The intraclass correlation (ICC) assesses the reliability of ratings by</span>
+<span class="sd">    comparing the variability of different ratings of the same subject to the</span>
+<span class="sd">    total variation across all ratings and all subjects. The ratings are</span>
+<span class="sd">    quantitative (e.g. Likert scale).</span>
+
+<span class="sd">    Translated in Python from:</span>
+<span class="sd">    http://www.real-statistics.com/reliability/intraclass-correlation/</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    1. ICC of wine quality assessed by 4 judges.</span>
+
+<span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import intraclass_corr</span>
+<span class="sd">        &gt;&gt;&gt; data = read_dataset(&#39;icc&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; intraclass_corr(data, &#39;Wine&#39;, &#39;Judge&#39;, &#39;Scores&#39;)</span>
+<span class="sd">            (0.727525596259691, array([0.434, 0.927]))</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pandas.api.types</span> <span class="k">import</span> <span class="n">is_numeric_dtype</span>
+    <span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">anova</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">f</span>
+
+    <span class="c1"># Check dataframe</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="n">data</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">raters</span><span class="p">,</span> <span class="n">scores</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Data, groups, raters and scores must be specified&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Data must be a pandas dataframe.&#39;</span><span class="p">)</span>
+    <span class="c1"># Check that scores is a numeric variable</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">scores</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Scores must be numeric.&#39;</span><span class="p">)</span>
+    <span class="c1"># Check that data are fully balanced</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">raters</span><span class="p">)[</span><span class="n">scores</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Data must be balanced.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Extract sizes</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">raters</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span>
+    <span class="c1"># n = data[groups].unique().size</span>
+
+    <span class="c1"># ANOVA and ICC</span>
+    <span class="n">aov</span> <span class="o">=</span> <span class="n">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">scores</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">groups</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">icc</span> <span class="o">=</span> <span class="p">(</span><span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">])</span> <span class="o">/</span> \
+          <span class="p">(</span><span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Confidence interval</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">ci</span>
+    <span class="n">df_num</span><span class="p">,</span> <span class="n">df_den</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">],</span> <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">]</span>
+    <span class="n">f_lower</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">f</span><span class="o">.</span><span class="n">isf</span><span class="p">(</span><span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">df_num</span><span class="p">,</span> <span class="n">df_den</span><span class="p">)</span>
+    <span class="n">f_upper</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">f</span><span class="o">.</span><span class="n">isf</span><span class="p">(</span><span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">df_den</span><span class="p">,</span> <span class="n">df_num</span><span class="p">)</span>
+    <span class="n">lower</span> <span class="o">=</span> <span class="p">(</span><span class="n">f_lower</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">f_lower</span> <span class="o">+</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">upper</span> <span class="o">=</span> <span class="p">(</span><span class="n">f_upper</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">f_upper</span> <span class="o">+</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">icc</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">([</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span></div>
 </pre></div>
 
     </div>

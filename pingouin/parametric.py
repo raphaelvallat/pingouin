@@ -741,9 +741,6 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
         'np2' : Partial eta-square effect size
         'eps' : Greenhouse-Geisser epsilon factor (= index of sphericity)
         'p-GG-corr' : Greenhouse-Geisser corrected p-value
-        'W-spher' : Sphericity test statistic
-        'p-spher' : p-value of the sphericity test
-        'sphericity' : sphericity of the data (boolean)
 
     Notes
     -----

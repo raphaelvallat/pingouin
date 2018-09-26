@@ -140,6 +140,18 @@
 
 <span class="k">def</span> <span class="nf">_remove_na</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Remove missing values in paired and independant measurements.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x, y : 1D arrays</span>
+<span class="sd">        Data</span>
+<span class="sd">    paired : bool</span>
+<span class="sd">        Indicates if the measurements are paired or not.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    x, y : 1D arrays</span>
+<span class="sd">        Data without NaN</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">x_na</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
     <span class="n">y_na</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
@@ -156,13 +168,29 @@
 <span class="k">def</span> <span class="nf">_remove_rm_na</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Remove subject(s) with one or more missing values in repeated</span>
 <span class="sd">    measurements.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dv : string</span>
+<span class="sd">        Dependant variable</span>
+<span class="sd">    within : string or list</span>
+<span class="sd">        Within-subject factor</span>
+<span class="sd">    subject : string</span>
+<span class="sd">        Subject identifier</span>
+<span class="sd">    data : dataframe</span>
+<span class="sd">        Dataframe</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data : dataframe</span>
+<span class="sd">        Dataframe without the subjects nan values</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">subject</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">rm</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">within</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
         <span class="n">n_rm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rm</span><span class="p">)</span>
         <span class="n">n_obs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">within</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ID_Subj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_obs</span><span class="p">),</span> <span class="n">n_rm</span><span class="p">)</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;ID_Subj&#39;</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Subj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_obs</span><span class="p">),</span> <span class="n">n_rm</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;Subj&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span>
 
@@ -186,25 +214,35 @@
 <span class="k">def</span> <span class="nf">_check_dataframe</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">effects</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Check dataframe&quot;&quot;&quot;</span>
-    <span class="c1"># Check input arguments</span>
+    <span class="kn">from</span> <span class="nn">pandas.api.types</span> <span class="k">import</span> <span class="n">is_numeric_dtype</span>
+    <span class="c1"># Check that data is a dataframe</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Data must be a pandas dataframe&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Data must be a pandas dataframe.&#39;</span><span class="p">)</span>
+    <span class="c1"># Check that both dv and data are provided.</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dv</span><span class="p">,</span> <span class="n">data</span><span class="p">]):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;DV and data must be specified&#39;</span><span class="p">)</span>
+    <span class="c1"># Check that dv is a numeric variable</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;DV must be numeric.&#39;</span><span class="p">)</span>
+    <span class="c1"># Check that effects is provided</span>
     <span class="k">if</span> <span class="n">effects</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;within&#39;</span><span class="p">,</span> <span class="s1">&#39;between&#39;</span><span class="p">,</span> <span class="s1">&#39;interaction&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Effects must be: within, between, interaction, all&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;within&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">within</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;within must be specified when effects=within&#39;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;between&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">between</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;between must be specified when effects=between&#39;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;interaction&#39;</span><span class="p">:</span>
+    <span class="c1"># Check that within is a string or a list (rm_anova2)</span>
+    <span class="k">if</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;within&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">within</span><span class="p">,</span> <span class="p">(</span><span class="n">string_types</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;within must be a string or a list.&#39;</span><span class="p">)</span>
+    <span class="c1"># Check that subject identifier is provided in rm_anova and friedman.</span>
+    <span class="k">if</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;within&#39;</span> <span class="ow">and</span> <span class="n">subject</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;subject must be specified when effects=within&#39;</span><span class="p">)</span>
+    <span class="c1"># Check that between is a string or a list (anova2)</span>
+    <span class="k">if</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;between&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">between</span><span class="p">,</span> <span class="p">(</span><span class="n">string_types</span><span class="p">,</span>
+                                                         <span class="nb">list</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;between must be a string or a list.&#39;</span><span class="p">)</span>
+    <span class="c1"># Check that both between and within are present for interaction</span>
+    <span class="k">if</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;interaction&#39;</span><span class="p">:</span>
         <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="p">[</span><span class="n">within</span><span class="p">,</span> <span class="n">between</span><span class="p">]:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;within and between must be specified when </span><span class="se">\</span>
 <span class="s1">                effects=interaction&#39;</span><span class="p">)</span>
-    <span class="c1"># Check that subject identifier is provided in rm_anova and friedman.</span>
-    <span class="k">if</span> <span class="n">effects</span> <span class="o">==</span> <span class="s1">&#39;within&#39;</span> <span class="ow">and</span> <span class="n">subject</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;subject must be specified when effects=within&#39;</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">is_statsmodels_installed</span><span class="p">(</span><span class="n">raise_error</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>

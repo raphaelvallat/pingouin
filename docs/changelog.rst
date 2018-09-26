@@ -12,11 +12,12 @@ a. Added rm_anova2 function (two-way repeated measures ANOVA).
 
 **Correlations**
 
-a. Added intra-class correlation.
+a. Added intraclass_corr function (intraclass correlation).
 
 **Effect size**
 
-a. Fixed minor bug in Cohen d: now use unbiased standard deviation (np.std(ddof=1)) for paired and one-sample Cohen d.
+a. Fixed bug in Cohen d: now use unbiased standard deviation (np.std(ddof=1)) for paired and one-sample Cohen d.
+   Please make sure to use pingouin >= 0.1.7 to avoid any mistakes on the paired effect sizes.
 
 
 v0.1.6 (September 2018)

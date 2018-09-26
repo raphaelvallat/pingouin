@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pingouin.mixed_anova &#8212; pingouin 0.1.6 documentation</title>
+    <title>pingouin.rm_anova2 &#8212; pingouin 0.1.6 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/style.css" type="text/css" />
@@ -21,8 +21,8 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pingouin.kruskal" href="pingouin.kruskal.html" />
-    <link rel="prev" title="pingouin.epsilon" href="pingouin.epsilon.html" />
+    <link rel="next" title="pingouin.epsilon" href="pingouin.epsilon.html" />
+    <link rel="prev" title="pingouin.rm_anova" href="pingouin.rm_anova.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -93,13 +93,13 @@
   <div class="row">
     <div class="col-md-12 content">
       
-  <div class="section" id="pingouin-mixed-anova">
-<h1>pingouin.mixed_anova</h1>
+  <div class="section" id="pingouin-rm-anova2">
+<h1>pingouin.rm_anova2</h1>
 <dl class="function">
-<dt id="pingouin.mixed_anova">
-<code class="descclassname">pingouin.</code><code class="descname">mixed_anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>subject=None</em>, <em>between=None</em>, <em>data=None</em>, <em>correction='auto'</em>, <em>remove_na=True</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#mixed_anova"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Mixed-design (split-plot) type II ANOVA.</p>
-<p>Results have been tested against R and JASP.</p>
+<dt id="pingouin.rm_anova2">
+<code class="descclassname">pingouin.</code><code class="descname">rm_anova2</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>subject=None</em>, <em>data=None</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#rm_anova2"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Two-way repeated measures ANOVA.</p>
+<p>Tested against ezANOVA (R) and MNE.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -108,34 +108,15 @@
 <dt><strong>dv</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd><p class="first last">Name of column containing the dependant variable.</p>
 </dd>
-<dt><strong>within</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd><p class="first last">Name of column containing the within factor.</p>
+<dt><strong>within</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd><p class="first last">Names of column containing the two within factor
+(e.g. [‘Time’, ‘Treatment’])</p>
 </dd>
 <dt><strong>subject</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd><p class="first last">Name of column containing the subject identifier.</p>
 </dd>
-<dt><strong>between</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd><p class="first last">Name of column containing the between factor.</p>
-</dd>
 <dt><strong>data</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
 <dd><p class="first last">DataFrame</p>
-</dd>
-<dt><strong>correction</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string or boolean</span></dt>
-<dd><p class="first last">If True, return Greenhouse-Geisser corrected p-value.
-If ‘auto’ (default), compute Mauchly’s test of sphericity to determine
-whether the p-values needs to be corrected.</p>
-</dd>
-<dt><strong>remove_na</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
-<dd><p class="first">If True, automatically remove from the analysis subjects with one or
-more missing values:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Ss</span>    <span class="n">x1</span>       <span class="n">x2</span>       <span class="n">x3</span>
-<span class="mi">1</span>     <span class="mf">5.0</span>      <span class="mf">4.2</span>      <span class="n">nan</span>
-<span class="mi">2</span>     <span class="mf">4.6</span>      <span class="mf">3.6</span>      <span class="mf">3.9</span>
-</pre></div>
-</div>
-<p class="last">In this example, if remove_na == True, Ss 1 will be removed from the
-ANOVA because of the x3 missing value. If False, the two non-missing
-values will be included in the analysis.</p>
 </dd>
 <dt><strong>export_filename</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd><p class="first last">Filename (without extension) for the output file.
@@ -149,17 +130,14 @@ directory. To change that, specify the filename with full path.</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
 <dt><strong>aov</strong> <span class="classifier-delimiter">:</span> <span class="classifier">DataFrame</span></dt>
 <dd><p class="first">ANOVA summary</p>
-<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;Source&#39;</span> <span class="p">:</span> <span class="n">Names</span> <span class="n">of</span> <span class="n">the</span> <span class="n">factor</span> <span class="n">considered</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;Source&#39;</span> <span class="p">:</span> <span class="n">Name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">within</span><span class="o">-</span><span class="n">group</span> <span class="n">factors</span>
 <span class="s1">&#39;ddof1&#39;</span> <span class="p">:</span> <span class="n">Degrees</span> <span class="n">of</span> <span class="n">freedom</span> <span class="p">(</span><span class="n">numerator</span><span class="p">)</span>
 <span class="s1">&#39;ddof2&#39;</span> <span class="p">:</span> <span class="n">Degrees</span> <span class="n">of</span> <span class="n">freedom</span> <span class="p">(</span><span class="n">denominator</span><span class="p">)</span>
-<span class="s1">&#39;F&#39;</span> <span class="p">:</span> <span class="n">F</span><span class="o">-</span><span class="n">values</span>
-<span class="s1">&#39;p-unc&#39;</span> <span class="p">:</span> <span class="n">Uncorrected</span> <span class="n">p</span><span class="o">-</span><span class="n">values</span>
-<span class="s1">&#39;np2&#39;</span> <span class="p">:</span> <span class="n">Partial</span> <span class="n">eta</span><span class="o">-</span><span class="n">square</span> <span class="n">effect</span> <span class="n">sizes</span>
-<span class="s1">&#39;eps&#39;</span> <span class="p">:</span> <span class="n">Greenhouse</span><span class="o">-</span><span class="n">Geisser</span> <span class="n">epsilon</span> <span class="n">factor</span> <span class="p">(</span> <span class="o">=</span> <span class="n">index</span> <span class="n">of</span> <span class="n">sphericity</span><span class="p">)</span>
-<span class="s1">&#39;p-GG-corr&#39;</span> <span class="p">:</span> <span class="n">Greenhouse</span><span class="o">-</span><span class="n">Geisser</span> <span class="n">corrected</span> <span class="n">p</span><span class="o">-</span><span class="n">values</span>
-<span class="s1">&#39;W-spher&#39;</span> <span class="p">:</span> <span class="n">Sphericity</span> <span class="n">test</span> <span class="n">statistic</span>
-<span class="s1">&#39;p-spher&#39;</span> <span class="p">:</span> <span class="n">p</span><span class="o">-</span><span class="n">value</span> <span class="n">of</span> <span class="n">the</span> <span class="n">sphericity</span> <span class="n">test</span>
-<span class="s1">&#39;sphericity&#39;</span> <span class="p">:</span> <span class="n">sphericity</span> <span class="n">of</span> <span class="n">the</span> <span class="n">data</span> <span class="p">(</span><span class="n">boolean</span><span class="p">)</span>
+<span class="s1">&#39;F&#39;</span> <span class="p">:</span> <span class="n">F</span><span class="o">-</span><span class="n">value</span>
+<span class="s1">&#39;p-unc&#39;</span> <span class="p">:</span> <span class="n">Uncorrected</span> <span class="n">p</span><span class="o">-</span><span class="n">value</span>
+<span class="s1">&#39;np2&#39;</span> <span class="p">:</span> <span class="n">Partial</span> <span class="n">eta</span><span class="o">-</span><span class="n">square</span> <span class="n">effect</span> <span class="n">size</span>
+<span class="s1">&#39;eps&#39;</span> <span class="p">:</span> <span class="n">Greenhouse</span><span class="o">-</span><span class="n">Geisser</span> <span class="n">epsilon</span> <span class="n">factor</span> <span class="p">(</span><span class="o">=</span> <span class="n">index</span> <span class="n">of</span> <span class="n">sphericity</span><span class="p">)</span>
+<span class="s1">&#39;p-GG-corr&#39;</span> <span class="p">:</span> <span class="n">Greenhouse</span><span class="o">-</span><span class="n">Geisser</span> <span class="n">corrected</span> <span class="n">p</span><span class="o">-</span><span class="n">value</span>
 </pre></div>
 </div>
 </dd>
@@ -175,19 +153,24 @@ directory. To change that, specify the filename with full path.</p>
 <dd>One-way and two-way ANOVA</dd>
 <dt><a class="reference internal" href="pingouin.rm_anova.html#pingouin.rm_anova" title="pingouin.rm_anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rm_anova</span></code></a></dt>
 <dd>One-way repeated measures ANOVA</dd>
-<dt><a class="reference internal" href="pingouin.rm_anova2.html#pingouin.rm_anova2" title="pingouin.rm_anova2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rm_anova2</span></code></a></dt>
-<dd>Two-way repeated measures ANOVA</dd>
+<dt><a class="reference internal" href="pingouin.mixed_anova.html#pingouin.mixed_anova" title="pingouin.mixed_anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mixed_anova</span></code></a></dt>
+<dd>Two way mixed ANOVA</dd>
+<dt><a class="reference internal" href="pingouin.friedman.html#pingouin.friedman" title="pingouin.friedman"><code class="xref py py-obj docutils literal notranslate"><span class="pre">friedman</span></code></a></dt>
+<dd>Non-parametric one-way repeated measures ANOVA</dd>
 </dl>
 </div>
+<p class="rubric">Notes</p>
+<p>Data are expected to be in long-format and perfectly balanced.</p>
+<p>Note that the epsilon factor - and therefore the Greenhouse-Geisser
+corrected p-values - of the interaction are slightly different than those
+of the ezANOVA R package.</p>
 <p class="rubric">Examples</p>
-<p>Compute a two-way mixed model ANOVA.</p>
+<p>Compute a two-way repeated-measures ANOVA.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">mixed_anova</span><span class="p">,</span> <span class="n">print_table</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">rm_anova2</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;dataset.csv&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">aov</span> <span class="o">=</span> <span class="n">mixed_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span>
-<span class="go">                      subject=&#39;Ss&#39;, data=df, correction=&#39;auto&#39;,</span>
-<span class="go">                      remove_na=False)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">print_table</span><span class="p">(</span><span class="n">aov</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aov</span> <span class="o">=</span> <span class="n">rm_anova2</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="s1">&#39;Treatment&#39;</span><span class="p">],</span>
+<span class="go">                   subject=&#39;Subject&#39;, data=df)</span>
 </pre></div>
 </div>
 </dd></dl>

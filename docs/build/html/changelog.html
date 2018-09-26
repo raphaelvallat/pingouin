@@ -95,6 +95,22 @@
       
   <div class="section" id="what-s-new">
 <span id="changelog"></span><h1>What’s new</h1>
+<div class="section" id="v0-1-7-dev">
+<h2>v0.1.7 (dev)</h2>
+<p><strong>ANOVA</strong></p>
+<ol class="loweralpha simple">
+<li>Added rm_anova2 function (two-way repeated measures ANOVA).</li>
+</ol>
+<p><strong>Correlations</strong></p>
+<ol class="loweralpha simple">
+<li>Added intraclass_corr function (intraclass correlation).</li>
+</ol>
+<p><strong>Effect size</strong></p>
+<ol class="loweralpha simple">
+<li>Fixed bug in Cohen d: now use unbiased standard deviation (np.std(ddof=1)) for paired and one-sample Cohen d.
+Please make sure to use pingouin &gt;= 0.1.7 to avoid any mistakes on the paired effect sizes.</li>
+</ol>
+</div>
 <div class="section" id="v0-1-6-september-2018">
 <h2>v0.1.6 (September 2018)</h2>
 <p><strong>ANOVA</strong></p>
