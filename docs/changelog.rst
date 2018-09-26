@@ -6,6 +6,10 @@ What's new
 v0.1.7 (October 2018)
 -----------------------
 
+**ANOVA**
+
+a. Added rm_anova2 function (two-way repeated measures ANOVA)
+
 **Effect size**
 
 a. Fixed minor bug in Cohen d: now use unbiased standard deviation (np.std(ddof=1)) for paired and one-sample Cohen d.

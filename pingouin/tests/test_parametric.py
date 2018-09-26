@@ -3,7 +3,8 @@ import numpy as np
 
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.parametric import (gzscore, test_normality, ttest, anova, anova2,
-                                 rm_anova, mixed_anova, test_dist, epsilon)
+                                 rm_anova, mixed_anova, test_dist, epsilon,
+                                 rm_anova2)
 from pingouin.datasets import read_dataset
 
 # Generate random data for ANOVA
@@ -105,7 +106,7 @@ class TestParametric(_TestPingouin):
         anova2(dv='Scores', between='Group', data=df)
 
     def test_rm_anova(self):
-        """Test function anova."""
+        """Test function rm_anova."""
         rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
                  correction=False, detailed=False)
         rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
@@ -121,6 +122,16 @@ class TestParametric(_TestPingouin):
                  correction=True, detailed=True)
         rm_anova(dv='Scores', within='Time', subject='Subject', data=df_nan,
                  export_filename='test_export.csv')
+
+    def test_rm_anova2(self):
+        """Test function rm_anova2."""
+        data = pd.DataFrame({'Subject': [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+                             'Time': [0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1],
+                             'Drug': ['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B',
+                                      'C', 'A', 'B', 'C'],
+                             'Scores': [3, 4, 5, 7, 2, 4, 5, 8, 5, 7, 3, 8]})
+        rm_anova2(dv='Scores', within=['Time', 'Drug'], subject='Subject',
+                  data=data)
 
     def test_mixed_anova(self):
         """Test function anova."""

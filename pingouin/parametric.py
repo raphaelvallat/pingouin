@@ -581,6 +581,12 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
         >>> print_table(aov)
     """
     from scipy.stats import f
+    if isinstance(within, list):
+        if len(within) == 2:
+            return rm_anova2(dv=dv, within=within, data=data, subject=subject,
+                             export_filename=export_filename)
+        elif len(within) == 1:
+            within = within[0]
 
     # Check data
     _check_dataframe(dv=dv, within=within, data=data, subject=subject,
@@ -699,6 +705,8 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
               export_filename=None):
     """Two-way repeated measures ANOVA.
 
+    Tested against ezANOVA (R) and MNE.
+
     Parameters
     ----------
     dv : string
@@ -736,6 +744,10 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
     Notes
     -----
     Data are expected to be in long-format and perfectly balanced.
+
+    Note that the epsilon factor - and therefore the Greenhouse-Geisser
+    corrected p-values - of the interaction are slightly different than those
+    of the ezANOVA R package.
 
     See Also
     --------
@@ -805,13 +817,9 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
     # Mean squares
     ms_a = ss_a / df_a
     ms_b = ss_b / df_b
-    ms_s = ss_s / df_s
-    ms_ab_er = ss_ab_er / df_ab_er
     ms_ab = ss_ab / df_ab
     ms_as = ss_as / df_as
-    ms_as_er = ss_as_er / df_as_er
     ms_bs = ss_bs / df_bs
-    ms_bs_er = ss_bs_er / df_bs_er
     ms_abs = ss_abs / df_abs
 
     # F-values
@@ -830,16 +838,15 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
     eta_ab = (f_ab * df_ab) / (f_ab * df_ab + df_abs)
 
     # Epsilon
-    piv_a = data.pivot_table(index=subject, columns=a, values=dv).dropna()
-    piv_b = data.pivot_table(index=subject, columns=b, values=dv).dropna()
+    piv_a = data.pivot_table(index=subject, columns=a, values=dv)
+    piv_b = data.pivot_table(index=subject, columns=b, values=dv)
     eps_a = epsilon(piv_a, correction='gg')
     eps_b = epsilon(piv_b, correction='gg')
     eps_ab = epsilon(piv, correction='gg')
 
     df_a_c, df_as_c = [np.maximum(d * eps_a, 1.) for d in (df_a, df_as)]
     df_b_c, df_bs_c = [np.maximum(d * eps_b, 1.) for d in (df_b, df_bs)]
-    df_ab_c, df_abs_c = [np.maximum(d * eps_ab, 1.) for d in (df_ab,
-                                                              df_abs)]
+    df_ab_c, df_abs_c = [np.maximum(d * eps_ab, 1.) for d in (df_ab, df_abs)]
     p_a_corr = f(df_a_c, df_as_c).sf(f_a)
     p_b_corr = f(df_b_c, df_bs_c).sf(f_b)
     p_ab_corr = f(df_ab_c, df_abs_c).sf(f_ab)
