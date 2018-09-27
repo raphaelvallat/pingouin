@@ -7,7 +7,7 @@ import pandas as pd
 
 __all__ = ["print_table", "_export_table", "_check_eftype",
            "_remove_rm_na", "_remove_na", "_check_dataframe",
-           "is_sklearn_installed"]
+           "is_sklearn_installed", "is_statsmodels_installed"]
 
 
 def print_table(df, floatfmt=".3f", tablefmt='simple'):
@@ -147,20 +147,21 @@ def _check_dataframe(dv=None, between=None, within=None, subject=None,
     if effects == 'interaction':
         for input in [within, between]:
             if not isinstance(input, string_types):
-                raise ValueError('within and between must be specified when \
-                effects=interaction')
+                raise ValueError('within and between must be specified when '
+                                 'effects=interaction')
 
 
-# def is_statsmodels_installed(raise_error=False):
-#     try:
-#         import statsmodels  # noqa
-#         is_installed = True
-#     except IOError:
-#         is_installed = False
-#     # Raise error (if needed) :
-#     if raise_error and not is_installed:
-#         raise IOError("statsmodels is not installed.")
-#     return is_installed
+def is_statsmodels_installed(raise_error=False):
+    try:
+        import statsmodels  # noqa
+        is_installed = True
+    except IOError:
+        is_installed = False
+    # Raise error (if needed) :
+    if raise_error and not is_installed:
+        raise IOError("statsmodels needs to be installed. Please use `pip "
+                      "install statsmodels`.")
+    return is_installed
 
 
 def is_sklearn_installed(raise_error=False):
@@ -171,5 +172,6 @@ def is_sklearn_installed(raise_error=False):
         is_installed = False
     # Raise error (if needed) :
     if raise_error and not is_installed:
-        raise IOError("sklearn is not installed.")
+        raise IOError("sklearn needs to be installed. Please use `pip "
+                      "install scikit-learn`.")
     return is_installed

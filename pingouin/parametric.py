@@ -7,7 +7,7 @@ from pingouin import (_check_dataframe, _remove_rm_na, _remove_na,
 
 __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
            "epsilon", "test_sphericity", "ttest", "rm_anova", "rm_anova2",
-           "anova", "anova2", "mixed_anova", "ancova"]
+           "anova", "anova2", "mixed_anova", "ancova", "ancovan"]
 
 
 def gzscore(x):
@@ -1335,16 +1335,17 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
 
 def ancova(dv=None, covar=None, between=None, data=None,
            export_filename=None, return_bw=False):
-    """ANCOVA (Type II)
+    """ANCOVA with one or more covariate(s).
 
-    Results have been tested against statsmodels.
+    Results have been tested against statsmodels. Requires statsmodels if the
+    number of covariates is more than one.
 
     Parameters
     ----------
     dv : string
         Name of column containing the dependant variable.
-    covar : string
-        Name of column containing the covariate.
+    covar : string or list
+        Name(s) of column(s) containing the covariate.
     between : string
         Name of column containing the between factor.
     data : pandas DataFrame
@@ -1377,7 +1378,13 @@ def ancova(dv=None, covar=None, between=None, data=None,
     controlling for the effects of other continuous variables that are not
     of primary interest, known as covariates or nuisance variables (covar).
 
-    For now, Pingouin only supports one covariate.
+    Note that in the case of one covariate, Pingouin will use a built-in
+    function. However, if there are more than one covariate, Pingouin will
+    use the statsmodels package to compute the ANCOVA.
+
+    See Also
+    --------
+    anova : One-way and two-way ANOVA
 
     Examples
     --------
@@ -1388,7 +1395,23 @@ def ancova(dv=None, covar=None, between=None, data=None,
         >>> from pingouin import ancova
         >>> df = read_dataset('ancova')
         >>> ancova(data=df, dv='Scores', covar='Income', between='Method')
+
+    2. Evaluate the reading scores of students with different teaching method
+    and family income + BMI as a covariate.
+
+        >>> from pingouin import read_dataset
+        >>> from pingouin import ancova
+        >>> df = read_dataset('ancova')
+        >>> ancova(data=df, dv='Scores', covar=['Income', 'BMI'],
+            between='Method')
     """
+    if isinstance(covar, list):
+        if len(covar) > 1:
+            return ancovan(dv=dv, covar=covar, between=between, data=data,
+                           export_filename=export_filename)
+        else:
+            covar = covar[0]
+
     from scipy.stats import f
 
     def linreg(x, y):
@@ -1449,3 +1472,96 @@ def ancova(dv=None, covar=None, between=None, data=None,
         return aov, bw
     else:
         return aov
+
+
+def ancovan(dv=None, covar=None, between=None, data=None,
+            export_filename=None):
+    """ANCOVA with n covariates.
+
+    Requires statsmodels.
+
+    Parameters
+    ----------
+    dv : string
+        Name of column containing the dependant variable.
+    covar : string
+        Name(s) of columns containing the covariates.
+    between : string
+        Name of column containing the between factor.
+    data : pandas DataFrame
+        DataFrame
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
+
+    Returns
+    -------
+    aov : DataFrame
+        ANCOVA summary ::
+
+        'Source' : Names of the factor considered
+        'SS' : Sums of squares
+        'DF' : Degrees of freedom
+        'F' : F-values
+        'p-unc' : Uncorrected p-values
+
+    Notes
+    -----
+    Analysis of covariance (ANCOVA) is a general linear model which blends
+    ANOVA and regression. ANCOVA evaluates whether the means of a dependent
+    variable (dv) are equal across levels of a categorical independent
+    variable (between) often called a treatment, while statistically
+    controlling for the effects of other continuous variables that are not
+    of primary interest, known as covariates or nuisance variables (covar).
+
+    See Also
+    --------
+    ancova : ANCOVA with one covariate
+    anova : One-way and two-way ANOVA
+
+    Examples
+    --------
+    1. Evaluate the reading scores of students with different teaching method
+    and family income and BMI as covariates.
+
+        >>> from pingouin import read_dataset
+        >>> from pingouin import ancovan
+        >>> df = read_dataset('ancova')
+        >>> ancovan(data=df, dv='Scores', covar=['Income', 'BMI'],
+                    between='Method')
+    """
+    # Assert that there are at least two covariates
+    if not isinstance(covar, list):
+        return ancova(dv=dv, covar=covar, between=between, data=data,
+                      export_filename=export_filename)
+
+    if len(covar) == 1:
+        return ancova(dv=dv, covar=covar[0], between=between, data=data,
+                      export_filename=export_filename)
+
+    # Check that stasmodels is installed
+    from pingouin.utils import is_statsmodels_installed
+    is_statsmodels_installed(raise_error=True)
+    from statsmodels.api import stats
+    from statsmodels.formula.api import ols
+
+    # Fit ANCOVA model
+    formula = dv + ' ~ ' + between
+    for c in covar:
+        formula += ' + ' + c
+    model = ols(formula, data=data).fit()
+    aov = stats.anova_lm(model, typ=2).reset_index()
+
+    aov.rename(columns={'index': 'Source', 'sum_sq': 'SS',
+                        'df': 'DF', 'PR(>F)': 'p-unc'}, inplace=True)
+
+    aov['DF'] = aov['DF'].astype(int)
+    aov[['SS', 'F']] = aov[['SS', 'F']].round(3)
+
+    # Export to .csv
+    if export_filename is not None:
+        _export_table(aov, export_filename)
+
+    return aov

@@ -6,6 +6,10 @@ What's new
 v0.1.8 (dev)
 ------------
 
+**ANOVA**
+
+a. Added support for multiple covariates in ANCOVA function (requires statsmodels).
+
 **Non-parametric**
 
 a. Added cochran function (Cochran Q test)
