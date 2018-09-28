@@ -120,7 +120,6 @@ def _check_eftype(eftype):
 def _check_dataframe(dv=None, between=None, within=None, subject=None,
                      effects=None, data=None):
     """Check dataframe"""
-    from pandas.api.types import is_numeric_dtype
     # Check that data is a dataframe
     if not isinstance(data, pd.DataFrame):
         raise ValueError('Data must be a pandas dataframe.')
@@ -128,7 +127,7 @@ def _check_dataframe(dv=None, between=None, within=None, subject=None,
     if any(v is None for v in [dv, data]):
         raise ValueError('DV and data must be specified')
     # Check that dv is a numeric variable
-    if not is_numeric_dtype(data[dv]):
+    if data[dv].dtype.kind not in 'fi':
         raise ValueError('DV must be numeric.')
     # Check that effects is provided
     if effects not in ['within', 'between', 'interaction', 'all']:

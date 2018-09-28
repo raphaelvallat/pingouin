@@ -6,6 +6,7 @@ Doc
 
 Code
 ----
+- Add maths formula for effect size in doc
 - Better bootstrapping of confidence intervals (see Matlab `bootci` function)
 - Add Hotelling test
 - Do not compute BF10 in too large datasets (scipy.integrate.quad crashes)

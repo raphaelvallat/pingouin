@@ -1413,6 +1413,9 @@ def ancova(dv=None, covar=None, between=None, data=None,
         else:
             covar = covar[0]
 
+    # Assert that covariate is numeric
+    assert data[covar].dtype.kind in 'fi'
+
     from scipy.stats import f
 
     def linreg(x, y):
@@ -1527,7 +1530,7 @@ def ancovan(dv=None, covar=None, between=None, data=None,
     1. Evaluate the reading scores of students with different teaching method
     and family income and BMI as covariates.
 
-        >>> from pingouin import read_dataset
+        >>> from pingouin.datasets import read_dataset
         >>> from pingouin import ancovan
         >>> df = read_dataset('ancova')
         >>> ancovan(data=df, dv='Scores', covar=['Income', 'BMI'],
@@ -1548,8 +1551,11 @@ def ancovan(dv=None, covar=None, between=None, data=None,
     from statsmodels.api import stats
     from statsmodels.formula.api import ols
 
+    # Check that covariates are numeric ('float', 'int')
+    assert all([data[covar[i]].dtype.kind in 'fi' for i in range(len(covar))])
+
     # Fit ANCOVA model
-    formula = dv + ' ~ ' + between
+    formula = dv + ' ~ C(' + between + ')'
     for c in covar:
         formula += ' + ' + c
     model = ols(formula, data=data).fit()
@@ -1557,6 +1563,8 @@ def ancovan(dv=None, covar=None, between=None, data=None,
 
     aov.rename(columns={'index': 'Source', 'sum_sq': 'SS',
                         'df': 'DF', 'PR(>F)': 'p-unc'}, inplace=True)
+
+    aov.loc[0, 'Source'] = between
 
     aov['DF'] = aov['DF'].astype(int)
     aov[['SS', 'F']] = aov[['SS', 'F']].round(3)
