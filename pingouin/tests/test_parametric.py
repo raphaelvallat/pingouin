@@ -90,7 +90,7 @@ class TestParametric(_TestPingouin):
     def test_anova(self):
         """Test function anova."""
         # Pain dataset
-        df_pain = read_dataset('mcclave1991')
+        df_pain = read_dataset('anova')
         aov = anova(dv='Pain threshold', between='Hair color', data=df_pain,
                     detailed=True, export_filename='test_export.csv')
         anova(dv='Pain threshold', between=['Hair color'], data=df_pain)

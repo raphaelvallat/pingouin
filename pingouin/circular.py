@@ -41,7 +41,7 @@ def circ_axial(alpha, n):
         >>> import numpy as np
         >>> from pingouin.datasets import read_dataset
         >>> from pingouin.circular import circ_axial
-        >>> df = read_dataset('berens2009')
+        >>> df = read_dataset('circular')
         >>> alpha = df['Orientation'].values
         >>> alpha = circ_axial(np.deg2rad(alpha), 2)
     """

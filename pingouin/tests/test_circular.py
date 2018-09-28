@@ -11,7 +11,7 @@ class TestCircular(_TestPingouin):
 
     def test_circ_axial(self):
         """Test function circ_axial."""
-        df = read_dataset('berens2009')
+        df = read_dataset('circular')
         alpha = df['Orientation'].values
         alpha = circ_axial(np.deg2rad(alpha), 2)
         assert np.allclose(np.round(alpha, 4),

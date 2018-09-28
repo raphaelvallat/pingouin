@@ -23,10 +23,10 @@ def read_dataset(dname):
 
     Examples
     --------
-    Load the bland1995 dataset
+    Load the ANOVA dataset
 
         >>> from pingouin.datasets import read_dataset
-        >>> df = read_dataset('bland1995')
+        >>> df = read_dataset('anova')
     """
     # Check extension
     d, ext = op.splitext(dname)

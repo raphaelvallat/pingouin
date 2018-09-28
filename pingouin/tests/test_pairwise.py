@@ -61,7 +61,7 @@ class TestPairwise(_TestPingouin):
 
     def test_pairwise_tukey(self):
         """Test function pairwise_tukey"""
-        df = read_dataset('mcclave1991')
+        df = read_dataset('anova')
         stats = pairwise_tukey(dv='Pain threshold', between='Hair color',
                                data=df)
         assert np.allclose([0.074, 0.435, 0.415, 0.004, 0.789, 0.037],
@@ -70,7 +70,7 @@ class TestPairwise(_TestPingouin):
     def test_pairwise_corr(self):
         """Test function pairwise_corr"""
         # Load JASP Big 5 DataSets (remove subject column)
-        data = read_dataset('dolan2009').iloc[:, 1:]
+        data = read_dataset('pairwise_corr').iloc[:, 1:]
         stats = pairwise_corr(data=data, method='pearson', tail='two-sided')
         jasp_rval = [-0.350, -0.01, -.134, -.368, .267, .055, .065, .159,
                      -.013, .159]

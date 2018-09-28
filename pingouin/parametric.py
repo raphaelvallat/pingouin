@@ -574,15 +574,14 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
 
     Examples
     --------
-    Compute a one-way repeated-measures ANOVA.
+    One-way repeated-measures ANOVA (Ryan et al 2013 dataset).
 
-        >>> import pandas as pd
+        >>> from pingouin.datasets import read_dataset
         >>> from pingouin import rm_anova, print_table
-        >>> df = pd.read_csv('dataset.csv')
-        >>> aov = rm_anova(dv='DV', within='Time', subject='Subject',
-                           data=df, correction='auto', remove_na=True,
-                           detailed=True, export_filename='rm_anova.csv')
-        >>> print_table(aov)
+        >>> df = read_dataset('rm_anova')
+        >>> aov = rm_anova(dv='DesireToKill', within='Disgustingness',
+                           subject='Subject', data=df, detailed=True)
+        >>> print(aov)
     """
     from scipy.stats import f
     if isinstance(within, list):
@@ -601,7 +600,8 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
 
     # Remove NaN
     if remove_na and data[dv].isnull().any():
-        data = _remove_rm_na(dv=dv, within=within, subject=subject, data=data)
+        data = _remove_rm_na(dv=dv, within=within, subject=subject,
+                             data=data[[subject, within, dv]])
 
     # Groupby
     grp_with = data.groupby(within)[dv]
@@ -759,13 +759,15 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
 
     Examples
     --------
-    Compute a two-way repeated-measures ANOVA.
+    Two-way repeated-measures ANOVA.
 
-        >>> import pandas as pd
-        >>> from pingouin import rm_anova2
-        >>> df = pd.read_csv('dataset.csv')
-        >>> aov = rm_anova2(dv='DV', within=['Time', 'Treatment'],
+        >>> from pingouin.datasets import read_dataset
+        >>> from pingouin import rm_anova2, print_table
+        >>> df = read_dataset('rm_anova')
+        >>> aov = rm_anova2(dv='DesireToKill',
+                           within=['Disgustingness', 'Frighteningness'],
                            subject='Subject', data=df)
+        >>> print(aov)
     """
     from scipy.stats import f
     a, b = within
@@ -776,7 +778,8 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
 
     # Remove NaN
     if data[[a, b, subject, dv]].isnull().any().any():
-        data = _remove_rm_na(dv=dv, within=within, subject=subject, data=data)
+        data = _remove_rm_na(dv=dv, within=within, subject=subject,
+                             data=data[[a, b, subject, dv]])
 
     # Group sizes and grandmean
     n_a = data[a].unique().size
@@ -942,8 +945,8 @@ def anova(dv=None, between=None, data=None, detailed=False,
     1. One-way ANOVA on the pain threshold dataset.
 
         >>> from pingouin import anova, print_table
-        >>> from pingouin.dataset import read_dataset
-        >>> df = read_dataset('mcclave1991')
+        >>> from pingouin.datasets import read_dataset
+        >>> df = read_dataset('anova')
         >>> aov = anova(dv='Pain threshold', between='Hair color', data=df,
                         detailed=True, export_filename='pain_anova.csv')
         >>> print_table(aov)
@@ -1229,13 +1232,13 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
     --------
     Compute a two-way mixed model ANOVA.
 
-        >>> import pandas as pd
+        >>> from pingouin.datasets import read_dataset
         >>> from pingouin import mixed_anova, print_table
-        >>> df = pd.read_csv('dataset.csv')
-        >>> aov = mixed_anova(dv='DV', within='Time', between='Group',
-                              subject='Ss', data=df, correction='auto',
-                              remove_na=False)
-        >>> print_table(aov)
+        >>> df = read_dataset('rm_anova')
+        >>> aov = mixed_anova(dv='DesireToKill', between='Gender',
+                              within='Disgustingness',
+                              subject='Subject', data=df)
+        >>> print(aov)
     """
     from scipy.stats import f
 
@@ -1248,7 +1251,8 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
 
     # Remove NaN
     if remove_na and data[dv].isnull().any():
-        data = _remove_rm_na(dv=dv, within=within, subject=subject, data=data)
+        data = _remove_rm_na(dv=dv, within=within, subject=subject,
+                             data=data[[subject, between, within, dv]])
 
     # SUMS OF SQUARES
     grandmean = data[dv].mean()
@@ -1392,7 +1396,7 @@ def ancova(dv=None, covar=None, between=None, data=None,
     1. Evaluate the reading scores of students with different teaching method
     and family income as a covariate.
 
-        >>> from pingouin import read_dataset
+        >>> from pingouin.datasets import read_dataset
         >>> from pingouin import ancova
         >>> df = read_dataset('ancova')
         >>> ancova(data=df, dv='Scores', covar='Income', between='Method')
@@ -1400,7 +1404,7 @@ def ancova(dv=None, covar=None, between=None, data=None,
     2. Evaluate the reading scores of students with different teaching method
     and family income + BMI as a covariate.
 
-        >>> from pingouin import read_dataset
+        >>> from pingouin.datasets import read_dataset
         >>> from pingouin import ancova
         >>> df = read_dataset('ancova')
         >>> ancova(data=df, dv='Scores', covar=['Income', 'BMI'],

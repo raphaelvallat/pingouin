@@ -35,13 +35,13 @@ class TestCorrelation(_TestPingouin):
         with pytest.raises(ValueError):
             corr(x, y[:-10])
         # Compare with JASP
-        df = read_dataset('dolan2009')
+        df = read_dataset('pairwise_corr')
         stats = corr(df['Neuroticism'], df['Extraversion'])
         assert np.isclose(1 / stats['BF10'].values, 1.478e-13)
 
     def test_rmcorr(self):
         """Test function rm_corr"""
-        df = read_dataset('bland1995')
+        df = read_dataset('rm_corr')
         # Test again rmcorr R package.
         r, p, dof = rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
         assert r == -0.507

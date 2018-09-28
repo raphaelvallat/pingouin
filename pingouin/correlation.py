@@ -477,10 +477,11 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
 
     Examples
     --------
+    1. Repeated measures correlation
 
         >>> from pingouin import rm_corr
         >>> from pingouin.datasets import read_dataset
-        >>> df = read_dataset('bland1995')
+        >>> df = read_dataset('rm_corr')
         >>> # Compute the repeated measure correlation
         >>> rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
             (-0.507, 0.0008, 38)

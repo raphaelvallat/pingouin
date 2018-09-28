@@ -305,7 +305,7 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
 
         >>> from pingouin import pairwise_tukey
         >>> from pingouin.datasets import read_dataset
-        >>> df = read_dataset('mcclave1991')
+        >>> df = read_dataset('anova')
         >>> pairwise_tukey(dv='Pain threshold', between='Hair color', data=df)
     '''
     from itertools import combinations
@@ -448,7 +448,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
         >>> from pingouin.datasets import read_dataset
         >>> from pingouin import pairwise_corr, print_table
-        >>> data = read_dataset('dolan2009').iloc[:, 1:]
+        >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
         >>> stats = pairwise_corr(data, method='spearman', tail='two-sided',
         >>>                       padjust='bonf')
         >>> print_table(stats)
@@ -457,7 +457,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
         >>> from pingouin.datasets import read_dataset
         >>> from pingouin import pairwise_corr, print_table
-        >>> data = read_dataset('dolan2009').iloc[:, 1:]
+        >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
         >>> stats = pairwise_corr(data, columns=['Openness', 'Extraversion',
         >>>                       'Neuroticism'], method='percbend')
         >>> print_table(stats)
@@ -466,7 +466,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
         >>> from pingouin.datasets import read_dataset
         >>> from pingouin import pairwise_corr, print_table
-        >>> data = read_dataset('dolan2009').iloc[:, 1:]
+        >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
         >>> pairwise_corr(data, export_filename='pairwise_corr.csv')
     '''
     from pingouin.correlation import corr

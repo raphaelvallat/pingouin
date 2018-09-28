@@ -1,9 +1,9 @@
 dataset,description,useful,ref
-bland1995,Pain threshold per hair color,anova - pairwise_tukey,Bland et Altmann 1995
-mcclave1991,Repeated measurements of pH and PaCO2,rm_corr,McClave and Dietrich 1991
-dolan2009,Big 5 personality traits,corr - pairwise_corr,Dolan et al 2009
-berens2009,Orientation tuning properties of three neurons,circular statistics,Berens 2009
-ryan2013,Hostility towards insect,rm_anova - mixed_anova,Ryan et al 2013
-icc,Wine quality rating by 4 judges,intraclass_corr,www.real-statistics.com
+anova,Pain threshold per hair color,anova - pairwise_tukey,McClave and Dietrich 1991
+rm_anova,Hostility towards insect,rm_anova - mixed_anova,Ryan et al 2013
 ancova,Teaching method with family income as covariate,ANCOVA,www.real-statistics.com
+rm_corr,Repeated measurements of pH and PaCO2,rm_corr,Bland et Altmann 1995
+pairwise_corr,Big 5 personality traits,corr - pairwise_corr,Dolan et al 2009
+circular,Orientation tuning properties of three neurons,circular statistics,Berens 2009
+icc,Wine quality rating by 4 judges,intraclass_corr,www.real-statistics.com
 cochran,Energy level across three days,Cochran,www.real-statistics.com
