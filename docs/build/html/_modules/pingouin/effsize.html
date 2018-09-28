@@ -280,6 +280,49 @@
 <span class="sd">    compute_effsize : Calculate effect size between two set of observations.</span>
 <span class="sd">    compute_effsize_from_t : Convert a T-statistic to an effect size.</span>
 
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The formula to convert **r** to **d** is given in ref [1]:</span>
+
+<span class="sd">    .. math:: d = \dfrac{2r}{\sqrt{1 - r^2}}</span>
+
+<span class="sd">    The formula to convert **d** to **r** is given in ref [2]:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        r = \dfrac{d}{\sqrt{d^2 + \dfrac{(n_x + n_y)^2 - 2(n_x + n_y)}</span>
+<span class="sd">        {n_xn_y}}}</span>
+
+<span class="sd">    The formula to convert **d** to :math:`\eta^2` is given in ref [3]:</span>
+
+<span class="sd">    .. math:: \eta^2 = \dfrac{(0.5 * d)^2}{1 + (0.5 * d)^2}</span>
+
+<span class="sd">    The formula to convert **d** to an odds-ratio is given in ref [4]:</span>
+
+<span class="sd">    .. math:: or = e(\dfrac{d * \pi}{\sqrt{3}})</span>
+
+<span class="sd">    The formula to convert **d** to area under the curve is given in ref [5]:</span>
+
+<span class="sd">    .. math:: auc = \mathcal{N}_{cdf}(\dfrac{d}{\sqrt{2}})</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Rosenthal, Robert. &quot;Parametric measures of effect size.&quot;</span>
+<span class="sd">       The handbook of research synthesis 621 (1994): 231-244.</span>
+
+<span class="sd">    .. [2] McGrath, Robert E., and Gregory J. Meyer. &quot;When effect sizes</span>
+<span class="sd">       disagree: the case of r and d.&quot; Psychological methods 11.4 (2006): 386.</span>
+
+<span class="sd">    .. [3] Cohen, Jacob. &quot;Statistical power analysis for the behavioral</span>
+<span class="sd">       sciences. 2nd.&quot; (1988).</span>
+
+<span class="sd">    .. [4] Borenstein, Michael, et al. &quot;Effect sizes for continuous data.&quot;</span>
+<span class="sd">       The handbook of research synthesis and meta-analysis 2 (2009): 221-235.</span>
+
+<span class="sd">    .. [5] Ruscio, John. &quot;A probability-based measure of effect size:</span>
+<span class="sd">       Robustness to base rates and other factors.&quot; Psychological methods 1</span>
+<span class="sd">       3.1 (2008): 19.</span>
+
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    1. Convert from Cohen d to eta-square</span>
@@ -416,18 +459,23 @@
 <span class="sd">        {\sqrt{\dfrac{(n_{1} - 1)\sigma_{1}^{2} + (n_{2} - 1)</span>
 <span class="sd">        \sigma_{2}^{2}}{n1 + n2 - 2}}}</span>
 
-<span class="sd">    If x and y are paired, the Cohen d-avg is computed [1]_, [2]_:</span>
+<span class="sd">    If x and y are paired, the Cohen d-avg is computed:</span>
 
 <span class="sd">    .. math::</span>
 
 <span class="sd">        d_{avg} = \dfrac{\overline{X} - \overline{Y}}</span>
-<span class="sd">        {\dfrac{\sigma_1 + \sigma_2}{2}}</span>
+<span class="sd">        {0.5 * (\sigma_1 + \sigma_2)}</span>
 
 <span class="sd">    The Cohen’s d is a biased estimate of the population effect size,</span>
 <span class="sd">    especially for small samples (n &lt; 20). It is often preferable</span>
 <span class="sd">    to use the corrected effect size, or Hedges’g, instead:</span>
 
 <span class="sd">    .. math:: g = d * (1 - \dfrac{3}{4(n_1 + n_2) - 9})</span>
+
+<span class="sd">    If eftype = &#39;glass&#39;, the Glass :math:`\Delta` is reported, using the</span>
+<span class="sd">    group with the lowest variance as the control group:</span>
+
+<span class="sd">    .. math:: \Delta = \dfrac{\overline{X} - \overline{Y}}{\sigma_{control}}</span>
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
@@ -549,6 +597,17 @@
 <span class="sd">    --------</span>
 <span class="sd">    compute_effsize : Calculate effect size between two set of observations.</span>
 <span class="sd">    convert_effsize : Conversion between effect sizes.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+
+<span class="sd">    If both nx and ny are specified, the formula to convert from *t* to *d* is:</span>
+
+<span class="sd">    .. math:: d = t * \sqrt{\dfrac{1}{n_x} + \dfrac{1}{n_y}}</span>
+
+<span class="sd">    If only N (total sample size) is specified, the formula is:</span>
+
+<span class="sd">    .. math:: d = \dfrac{2t}{\sqrt{N}}</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>

@@ -148,6 +148,60 @@ nx and ny are required to convert to Hedges g</p>
 <dd>Convert a T-statistic to an effect size.</dd>
 </dl>
 </div>
+<p class="rubric">Notes</p>
+<p>The formula to convert <strong>r</strong> to <strong>d</strong> is given in ref [1]:</p>
+<div class="math notranslate nohighlight">
+\[d = \dfrac{2r}{\sqrt{1 - r^2}}\]</div>
+<p>The formula to convert <strong>d</strong> to <strong>r</strong> is given in ref [2]:</p>
+<div class="math notranslate nohighlight">
+\[r = \dfrac{d}{\sqrt{d^2 + \dfrac{(n_x + n_y)^2 - 2(n_x + n_y)}
+{n_xn_y}}}\]</div>
+<p>The formula to convert <strong>d</strong> to <span class="math notranslate nohighlight">\(\eta^2\)</span> is given in ref [3]:</p>
+<div class="math notranslate nohighlight">
+\[\eta^2 = \dfrac{(0.5 * d)^2}{1 + (0.5 * d)^2}\]</div>
+<p>The formula to convert <strong>d</strong> to an odds-ratio is given in ref [4]:</p>
+<div class="math notranslate nohighlight">
+\[or = e(\dfrac{d * \pi}{\sqrt{3}})\]</div>
+<p>The formula to convert <strong>d</strong> to area under the curve is given in ref [5]:</p>
+<div class="math notranslate nohighlight">
+\[auc = \mathcal{N}_{cdf}(\dfrac{d}{\sqrt{2}})\]</div>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="rbe4b7ffd8d54-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Rosenthal, Robert. “Parametric measures of effect size.”
+The handbook of research synthesis 621 (1994): 231-244.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="rbe4b7ffd8d54-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>McGrath, Robert E., and Gregory J. Meyer. “When effect sizes
+disagree: the case of r and d.” Psychological methods 11.4 (2006): 386.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="rbe4b7ffd8d54-3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>Cohen, Jacob. “Statistical power analysis for the behavioral
+sciences. 2nd.” (1988).</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="rbe4b7ffd8d54-4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td>Borenstein, Michael, et al. “Effect sizes for continuous data.”
+The handbook of research synthesis and meta-analysis 2 (2009): 221-235.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="rbe4b7ffd8d54-5" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td>Ruscio, John. “A probability-based measure of effect size:
+Robustness to base rates and other factors.” Psychological methods 1
+3.1 (2008): 19.</td></tr>
+</tbody>
+</table>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">Convert from Cohen d to eta-square</p>

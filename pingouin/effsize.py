@@ -186,6 +186,49 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     compute_effsize : Calculate effect size between two set of observations.
     compute_effsize_from_t : Convert a T-statistic to an effect size.
 
+    Notes
+    -----
+    The formula to convert **r** to **d** is given in ref [1]:
+
+    .. math:: d = \dfrac{2r}{\sqrt{1 - r^2}}
+
+    The formula to convert **d** to **r** is given in ref [2]:
+
+    .. math::
+
+        r = \dfrac{d}{\sqrt{d^2 + \dfrac{(n_x + n_y)^2 - 2(n_x + n_y)}
+        {n_xn_y}}}
+
+    The formula to convert **d** to :math:`\eta^2` is given in ref [3]:
+
+    .. math:: \eta^2 = \dfrac{(0.5 * d)^2}{1 + (0.5 * d)^2}
+
+    The formula to convert **d** to an odds-ratio is given in ref [4]:
+
+    .. math:: or = e(\dfrac{d * \pi}{\sqrt{3}})
+
+    The formula to convert **d** to area under the curve is given in ref [5]:
+
+    .. math:: auc = \mathcal{N}_{cdf}(\dfrac{d}{\sqrt{2}})
+
+    References
+    ----------
+    .. [1] Rosenthal, Robert. "Parametric measures of effect size."
+       The handbook of research synthesis 621 (1994): 231-244.
+
+    .. [2] McGrath, Robert E., and Gregory J. Meyer. "When effect sizes
+       disagree: the case of r and d." Psychological methods 11.4 (2006): 386.
+
+    .. [3] Cohen, Jacob. "Statistical power analysis for the behavioral
+       sciences. 2nd." (1988).
+
+    .. [4] Borenstein, Michael, et al. "Effect sizes for continuous data."
+       The handbook of research synthesis and meta-analysis 2 (2009): 221-235.
+
+    .. [5] Ruscio, John. "A probability-based measure of effect size:
+       Robustness to base rates and other factors." Psychological methods 1
+       3.1 (2008): 19.
+
     Examples
     --------
     1. Convert from Cohen d to eta-square
@@ -322,18 +365,23 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         {\sqrt{\dfrac{(n_{1} - 1)\sigma_{1}^{2} + (n_{2} - 1)
         \sigma_{2}^{2}}{n1 + n2 - 2}}}
 
-    If x and y are paired, the Cohen d-avg is computed [1]_, [2]_:
+    If x and y are paired, the Cohen d-avg is computed:
 
     .. math::
 
         d_{avg} = \dfrac{\overline{X} - \overline{Y}}
-        {\dfrac{\sigma_1 + \sigma_2}{2}}
+        {0.5 * (\sigma_1 + \sigma_2)}
 
     The Cohen’s d is a biased estimate of the population effect size,
     especially for small samples (n < 20). It is often preferable
     to use the corrected effect size, or Hedges’g, instead:
 
     .. math:: g = d * (1 - \dfrac{3}{4(n_1 + n_2) - 9})
+
+    If eftype = 'glass', the Glass :math:`\Delta` is reported, using the
+    group with the lowest variance as the control group:
+
+    .. math:: \Delta = \dfrac{\overline{X} - \overline{Y}}{\sigma_{control}}
 
     References
     ----------
@@ -455,6 +503,17 @@ def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype='cohen'):
     --------
     compute_effsize : Calculate effect size between two set of observations.
     convert_effsize : Conversion between effect sizes.
+
+    Notes
+    -----
+
+    If both nx and ny are specified, the formula to convert from *t* to *d* is:
+
+    .. math:: d = t * \sqrt{\dfrac{1}{n_x} + \dfrac{1}{n_y}}
+
+    If only N (total sample size) is specified, the formula is:
+
+    .. math:: d = \dfrac{2t}{\sqrt{N}}
 
     Examples
     --------

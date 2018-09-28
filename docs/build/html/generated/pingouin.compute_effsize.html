@@ -157,20 +157,24 @@ paired, the entire row is removed.</p>
 \[d = \dfrac{\overline{X} - \overline{Y}}
 {\sqrt{\dfrac{(n_{1} - 1)\sigma_{1}^{2} + (n_{2} - 1)
 \sigma_{2}^{2}}{n1 + n2 - 2}}}\]</div>
-<p>If x and y are paired, the Cohen d-avg is computed <a class="reference internal" href="#r45fc8293c1fd-1" id="id1">[1]</a>, <a class="reference internal" href="#r45fc8293c1fd-2" id="id2">[2]</a>:</p>
+<p>If x and y are paired, the Cohen d-avg is computed:</p>
 <div class="math notranslate nohighlight">
 \[d_{avg} = \dfrac{\overline{X} - \overline{Y}}
-{\dfrac{\sigma_1 + \sigma_2}{2}}\]</div>
+{0.5 * (\sigma_1 + \sigma_2)}\]</div>
 <p>The Cohen’s d is a biased estimate of the population effect size,
 especially for small samples (n &lt; 20). It is often preferable
 to use the corrected effect size, or Hedges’g, instead:</p>
 <div class="math notranslate nohighlight">
 \[g = d * (1 - \dfrac{3}{4(n_1 + n_2) - 9})\]</div>
+<p>If eftype = ‘glass’, the Glass <span class="math notranslate nohighlight">\(\Delta\)</span> is reported, using the
+group with the lowest variance as the control group:</p>
+<div class="math notranslate nohighlight">
+\[\Delta = \dfrac{\overline{X} - \overline{Y}}{\sigma_{control}}\]</div>
 <p class="rubric">References</p>
 <table class="docutils citation" frame="void" id="r45fc8293c1fd-1" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id3">2</a>)</em> Lakens, D., 2013. Calculating and reporting effect sizes to
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Lakens, D., 2013. Calculating and reporting effect sizes to
 facilitate cumulative science: a practical primer for t-tests and
 ANOVAs. Front. Psychol. 4, 863. <a class="reference external" href="https://doi.org/10.3389/fpsyg.2013.00863">https://doi.org/10.3389/fpsyg.2013.00863</a></td></tr>
 </tbody>
@@ -178,7 +182,7 @@ ANOVAs. Front. Psychol. 4, 863. <a class="reference external" href="https://doi.
 <table class="docutils citation" frame="void" id="r45fc8293c1fd-2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[2]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id4">2</a>)</em> Cumming, Geoff. Understanding the new statistics: Effect sizes,
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Cumming, Geoff. Understanding the new statistics: Effect sizes,
 confidence intervals, and meta-analysis. Routledge, 2013.</td></tr>
 </tbody>
 </table>

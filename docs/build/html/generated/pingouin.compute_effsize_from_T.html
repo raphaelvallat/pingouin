@@ -137,6 +137,13 @@
 <dd>Conversion between effect sizes.</dd>
 </dl>
 </div>
+<p class="rubric">Notes</p>
+<p>If both nx and ny are specified, the formula to convert from <em>t</em> to <em>d</em> is:</p>
+<div class="math notranslate nohighlight">
+\[d = t * \sqrt{\dfrac{1}{n_x} + \dfrac{1}{n_y}}\]</div>
+<p>If only N (total sample size) is specified, the formula is:</p>
+<div class="math notranslate nohighlight">
+\[d = \dfrac{2t}{\sqrt{N}}\]</div>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">Compute effect size from a T-value when both sample sizes are known.</p>
