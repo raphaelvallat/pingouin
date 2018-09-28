@@ -148,6 +148,22 @@ alternative hypothesis.</p>
 <a class="reference external" href="https://github.com/anne-urai/Tools/tree/master/stats/BayesFactors">https://github.com/anne-urai/Tools/tree/master/stats/BayesFactors</a></p>
 <p>If you would like to compute the Bayes Factor directly from the raw data
 instead of from the T-value, use the ttest function.</p>
+<p>The Bayes Factor is approximated using the formula described in ref <a class="reference internal" href="#r4dd33485f76a-1" id="id1">[1]</a>:</p>
+<div class="math notranslate nohighlight">
+\[BF_{10} = \dfrac{\int_{0}^{\infty}(1 + Ngr^2)^{-1/2}
+(1 + \dfrac{t^2}{v(1 + Ngr^2)})^{-(v+1) / 2}(2\pi)^{-1/2}g^
+{-3/2}e^{-1/2g}}{(1 + \dfrac{t^2}{v})^{-(v+1) / 2}}\]</div>
+<p>where <strong>t</strong> is the T-value, <strong>v</strong> the degrees of freedom, <strong>N</strong> the
+sample size and <strong>r</strong> the Cauchy scale factor (i.e. prior on effect size).</p>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r4dd33485f76a-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>)</em> Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,
+2009. Bayesian t tests for accepting and rejecting the null hypothesis.
+Psychon. Bull. Rev. 16, 225–237. <a class="reference external" href="https://doi.org/10.3758/PBR.16.2.225">https://doi.org/10.3758/PBR.16.2.225</a></td></tr>
+</tbody>
+</table>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">Bayes Factor of an independant two-sample T-test</p>

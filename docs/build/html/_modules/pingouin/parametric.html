@@ -468,6 +468,24 @@
 <span class="sd">    Missing values are automatically removed from the data. If x and y are</span>
 <span class="sd">    paired, the entire row is removed.</span>
 
+<span class="sd">    The Bayes Factor is approximated using the formula described in ref [1]_:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        BF_{10} = \dfrac{\int_{0}^{\infty}(1 + Ngr^2)^{-1/2}</span>
+<span class="sd">        (1 + \dfrac{t^2}{v(1 + Ngr^2)})^{-(v+1) / 2}(2\pi)^{-1/2}g^</span>
+<span class="sd">        {-3/2}e^{-1/2g}}{(1 + \dfrac{t^2}{v})^{-(v+1) / 2}}</span>
+
+<span class="sd">    where **t** is the T-value, **v** the degrees of freedom, **N** the</span>
+<span class="sd">    sample size and **r** the Cauchy scale factor (i.e. prior on effect size).</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    .. [1] Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,</span>
+<span class="sd">       2009. Bayesian t tests for accepting and rejecting the null hypothesis.</span>
+<span class="sd">       Psychon. Bull. Rev. 16, 225–237. https://doi.org/10.3758/PBR.16.2.225</span>
+
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    1. One-sample T-test.</span>
