@@ -47,6 +47,24 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     If you would like to compute the Bayes Factor directly from the raw data
     instead of from the T-value, use the ttest function.
 
+    The Bayes Factor is approximated using the formula described in ref [1]_:
+
+    .. math::
+
+        BF_{10} = \dfrac{\int_{0}^{\infty}(1 + Ngr^2)^{-1/2}
+        (1 + \dfrac{t^2}{v(1 + Ngr^2)})^{-(v+1) / 2}(2\pi)^{-1/2}g^
+        {-3/2}e^{-1/2g}}{(1 + \dfrac{t^2}{v})^{-(v+1) / 2}}
+
+    where **t** is the T-value, **v** the degrees of freedom, **N** the
+    sample size and **r** the Cauchy scale factor (i.e. prior on effect size).
+
+    References
+    ----------
+
+    .. [1] Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,
+       2009. Bayesian t tests for accepting and rejecting the null hypothesis.
+       Psychon. Bull. Rev. 16, 225–237. https://doi.org/10.3758/PBR.16.2.225
+
     Examples
     --------
     1. Bayes Factor of an independant two-sample T-test
