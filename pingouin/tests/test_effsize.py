@@ -33,6 +33,10 @@ class TestEffsize(_TestPingouin):
                          eftype='wrong', return_dist=True)
         with pytest.raises(ValueError):
             compute_esci()
+        # Compare with R
+        r, nx, ny = 0.5543563, 6, 6
+        ci = compute_esci(ef=r, nx=nx, ny=ny, eftype='r')
+        assert np.allclose(ci, [-0.47, 0.94])
 
     def test_convert_effsize(self):
         """Test function convert_effsize"""
@@ -50,6 +54,9 @@ class TestEffsize(_TestPingouin):
             convert_effsize(d, 'coucou', 'hibou')
         with pytest.raises(ValueError):
             convert_effsize(d, 'AUC', 'eta-square')
+        # Compare with R
+        assert np.allclose(convert_effsize(1.002549, 'cohen', 'r'), 0.4481248)
+        assert np.allclose(convert_effsize(0.4481248, 'r', 'cohen'), 1.002549)
 
     def test_compute_effsize(self):
         """Test function compute_effsize"""
@@ -69,6 +76,21 @@ class TestEffsize(_TestPingouin):
         # Unequal sample size with paired == True
         z = np.random.normal(2.5, 3, 20)
         compute_effsize(x=x, y=z, paired=True)
+        # Compare with the effsize R package
+        a = [3.2, 6.4, 1.8, 2.4, 5.8, 6.5]
+        b = [2.4, 3.2, 3.2, 1.4, 2.8, 3.5]
+        # na = len(a)
+        # nb = len(b)
+        d = compute_effsize(x=a, y=b, eftype='cohen', paired=False)
+        assert np.isclose(d, 1.002549)
+        # Note that ci are different than from R because we use a normal and
+        # not a T distribution to estimate the CI
+        # ci = compute_esci(ef=d, nx=na, ny=nb)
+        # assert ci[0] == -.2
+        # assert ci[1] == 2.2
+        # With Hedges correction
+        g = compute_effsize(x=a, y=b, eftype='hedges', paired=False)
+        assert np.isclose(g, 0.9254296)
 
     def test_compute_effsize_from_t(self):
         """Test function compute_effsize_from_t"""
@@ -85,3 +107,6 @@ class TestEffsize(_TestPingouin):
         # No sample size info
         with pytest.raises(ValueError):
             compute_effsize_from_t(tval)
+        # Compare with R
+        assert np.allclose(compute_effsize_from_t(1.736465, nx=6, ny=6),
+                           1.002549)

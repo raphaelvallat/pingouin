@@ -110,6 +110,9 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
 
     # Start computation
     if method == 'parametric':
+        # Note that we are using a normal dist and not a T dist:
+        # from scipy.stats import t
+        # crit = np.abs(t.ppf((1 - alpha) / 2), dof)
         from scipy.stats import norm
         crit = np.abs(norm.ppf((1 - alpha) / 2))
         if eftype == 'r':
