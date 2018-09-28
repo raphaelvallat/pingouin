@@ -7,13 +7,13 @@
     <title>pingouin.nonparametric &#8212; pingouin 0.1.7 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/style.css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../_static/copybutton.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -98,7 +98,8 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">_remove_na</span><span class="p">,</span> <span class="n">_remove_rm_na</span><span class="p">,</span> <span class="n">_check_dataframe</span><span class="p">,</span> <span class="n">_export_table</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mad&quot;</span><span class="p">,</span> <span class="s2">&quot;madmedianrule&quot;</span><span class="p">,</span> <span class="s2">&quot;mwu&quot;</span><span class="p">,</span> <span class="s2">&quot;wilcoxon&quot;</span><span class="p">,</span> <span class="s2">&quot;kruskal&quot;</span><span class="p">,</span> <span class="s2">&quot;friedman&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mad&quot;</span><span class="p">,</span> <span class="s2">&quot;madmedianrule&quot;</span><span class="p">,</span> <span class="s2">&quot;mwu&quot;</span><span class="p">,</span> <span class="s2">&quot;wilcoxon&quot;</span><span class="p">,</span> <span class="s2">&quot;kruskal&quot;</span><span class="p">,</span> <span class="s2">&quot;friedman&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;cochran&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="mad"><a class="viewcode-back" href="../../generated/pingouin.mad.html#pingouin.mad">[docs]</a><span class="k">def</span> <span class="nf">mad</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
@@ -418,7 +419,7 @@
     <span class="k">return</span> <span class="n">stats</span></div>
 
 
-<div class="viewcode-block" id="friedman"><a class="viewcode-back" href="../../generated/pingouin.friedman.html#pingouin.friedman">[docs]</a><span class="k">def</span> <span class="nf">friedman</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<div class="viewcode-block" id="friedman"><a class="viewcode-back" href="../../generated/pingouin.friedman.html#pingouin.friedman">[docs]</a><span class="k">def</span> <span class="nf">friedman</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
              <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Friedman test for repeated measurements.</span>
 
@@ -485,7 +486,8 @@
 
     <span class="c1"># Remove NaN</span>
     <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">_remove_rm_na</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">_remove_rm_na</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[[</span><span class="n">subject</span><span class="p">,</span> <span class="n">within</span><span class="p">,</span> <span class="n">dv</span><span class="p">]])</span>
 
     <span class="c1"># Extract number of groups and total sample size</span>
     <span class="n">grp</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">within</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
@@ -534,6 +536,90 @@
     <span class="k">if</span> <span class="n">export_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">_export_table</span><span class="p">(</span><span class="n">stats</span><span class="p">,</span> <span class="n">export_filename</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">stats</span></div>
+
+
+<div class="viewcode-block" id="cochran"><a class="viewcode-back" href="../../generated/pingouin.cochran.html#pingouin.cochran">[docs]</a><span class="k">def</span> <span class="nf">cochran</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cochran Q test. Special case of the Friedman test when the dependant</span>
+<span class="sd">    variable is binary.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dv : string</span>
+<span class="sd">        Name of column containing the binary dependant variable.</span>
+<span class="sd">    within : string</span>
+<span class="sd">        Name of column containing the within-subject factor.</span>
+<span class="sd">    subject : string</span>
+<span class="sd">        Name of column containing the subject identifier.</span>
+<span class="sd">    data : pandas DataFrame</span>
+<span class="sd">        DataFrame</span>
+<span class="sd">    export_filename : string</span>
+<span class="sd">        Filename (without extension) for the output file.</span>
+<span class="sd">        If None, do not export the table.</span>
+<span class="sd">        By default, the file will be created in the current python console</span>
+<span class="sd">        directory. To change that, specify the filename with full path.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    stats : DataFrame</span>
+<span class="sd">        Test summary ::</span>
+
+<span class="sd">        &#39;Q&#39; : The Cochran Q statistic</span>
+<span class="sd">        &#39;p-unc&#39; : Uncorrected p-value</span>
+<span class="sd">        &#39;dof&#39; : degrees of freedom</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The Cochran Q Test is a non-parametric test for ANOVA with repeated</span>
+<span class="sd">    measures where the dependent variable is binary.</span>
+
+<span class="sd">    Data are expected to be in long-format.</span>
+
+<span class="sd">    NaN are automatically removed from the data.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Compute the Cochran Q test for repeated measurements.</span>
+
+<span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import cochran</span>
+<span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;cochran&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; cochran(dv=&#39;Energetic&#39;, within=&#39;Time&#39;, subject=&#39;Subject&#39;, data=df)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">chi2</span>
+
+    <span class="c1"># Check data</span>
+    <span class="n">_check_dataframe</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                     <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;within&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Remove NaN</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">_remove_rm_na</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">within</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[[</span><span class="n">subject</span><span class="p">,</span> <span class="n">within</span><span class="p">,</span> <span class="n">dv</span><span class="p">]])</span>
+
+    <span class="c1"># Groupby and extract size</span>
+    <span class="n">grp</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">within</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
+    <span class="n">grp_s</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">subject</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">within</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">dof</span> <span class="o">=</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="c1"># n = grp.count().unique()[0]</span>
+
+    <span class="c1"># Q statistic and p-value</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="p">(</span><span class="n">dof</span> <span class="o">*</span> <span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grp</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">grp</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">/</span> \
+        <span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">grp</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grp_s</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">p_unc</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">dof</span><span class="p">)</span>
+
+    <span class="c1"># Create output dataframe</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Source&#39;</span><span class="p">:</span> <span class="n">within</span><span class="p">,</span>
+                          <span class="s1">&#39;dof&#39;</span><span class="p">:</span> <span class="n">dof</span><span class="p">,</span>
+                          <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                          <span class="s1">&#39;p-unc&#39;</span><span class="p">:</span> <span class="n">p_unc</span><span class="p">,</span>
+                          <span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;cochran&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Export to .csv</span>
+    <span class="k">if</span> <span class="n">export_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_export_table</span><span class="p">(</span><span class="n">stats</span><span class="p">,</span> <span class="n">export_filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">stats</span></div>
 </pre></div>
 
     </div>
@@ -551,7 +637,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.<br/>
     </p>
   </div>
 </footer>

@@ -304,15 +304,45 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
     ef : float
         Effect size
 
+    See Also
+    --------
+    convert_effsize : Conversion between effect sizes.
+    compute_effsize_from_t : Convert a T-statistic to an effect size.
+
     Notes
     -----
     Missing values are automatically removed from the data. If x and y are
     paired, the entire row is removed.
 
-    See Also
-    --------
-    convert_effsize : Conversion between effect sizes.
-    compute_effsize_from_t : Convert a T-statistic to an effect size.
+    If x and y are independant, the Cohen's is:
+
+    .. math::
+
+        d = \dfrac{\overline{X} - \overline{Y}}
+        {\sqrt{\dfrac{(n_{1} - 1)\sigma_{1}^{2} + (n_{2} - 1)
+        \sigma_{2}^{2}}{n1 + n2 - 2}}}
+
+    If x and y are paired, the Cohen d-avg is computed [1]_, [2]_:
+
+    .. math::
+
+        d_{avg} = \dfrac{\overline{X} - \overline{Y}}
+        {\dfrac{\sigma_1 + \sigma_2}{2}}
+
+    The Cohen’s d is a biased estimate of the population effect size,
+    especially for small samples (n < 20). It is often preferable
+    to use the corrected effect size, or Hedges’g, instead:
+
+    .. math:: g = d * (1 - \dfrac{3}{4(n_1 + n_2) - 9})
+
+    References
+    ----------
+    .. [1] Lakens, D., 2013. Calculating and reporting effect sizes to
+       facilitate cumulative science: a practical primer for t-tests and
+       ANOVAs. Front. Psychol. 4, 863. https://doi.org/10.3389/fpsyg.2013.00863
+
+    .. [2] Cumming, Geoff. Understanding the new statistics: Effect sizes,
+           confidence intervals, and meta-analysis. Routledge, 2013.
 
     Examples
     --------

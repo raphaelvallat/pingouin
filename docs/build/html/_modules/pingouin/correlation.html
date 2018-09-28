@@ -7,13 +7,13 @@
     <title>pingouin.correlation &#8212; pingouin 0.1.7 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/style.css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../_static/copybutton.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -571,10 +571,11 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
+<span class="sd">    1. Repeated measures correlation</span>
 
 <span class="sd">        &gt;&gt;&gt; from pingouin import rm_corr</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
-<span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;bland1995&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;rm_corr&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; # Compute the repeated measure correlation</span>
 <span class="sd">        &gt;&gt;&gt; rm_corr(data=df, x=&#39;pH&#39;, y=&#39;PacO2&#39;, subject=&#39;Subject&#39;)</span>
 <span class="sd">            (-0.507, 0.0008, 38)</span>
@@ -661,7 +662,6 @@
 <span class="sd">            (0.727525596259691, array([0.434, 0.927]))</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">pandas.api.types</span> <span class="k">import</span> <span class="n">is_numeric_dtype</span>
     <span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">anova</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">f</span>
 
@@ -671,7 +671,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Data must be a pandas dataframe.&#39;</span><span class="p">)</span>
     <span class="c1"># Check that scores is a numeric variable</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">scores</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">scores</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s1">&#39;fi&#39;</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Scores must be numeric.&#39;</span><span class="p">)</span>
     <span class="c1"># Check that data are fully balanced</span>
     <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">raters</span><span class="p">)[</span><span class="n">scores</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -712,7 +712,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.<br/>
     </p>
   </div>
 </footer>

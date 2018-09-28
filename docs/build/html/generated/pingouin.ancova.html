@@ -7,13 +7,13 @@
     <title>pingouin.ancova &#8212; pingouin 0.1.7 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/style.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="../_static/copybutton.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -98,8 +98,9 @@
 <dl class="function">
 <dt id="pingouin.ancova">
 <code class="descclassname">pingouin.</code><code class="descname">ancova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>covar=None</em>, <em>between=None</em>, <em>data=None</em>, <em>export_filename=None</em>, <em>return_bw=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#ancova"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>ANCOVA (Type II)</p>
-<p>Results have been tested against statsmodels.</p>
+<dd><p>ANCOVA with one or more covariate(s).</p>
+<p>Results have been tested against statsmodels. Requires statsmodels if the
+number of covariates is more than one.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -108,8 +109,8 @@
 <dt><strong>dv</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd><p class="first last">Name of column containing the dependant variable.</p>
 </dd>
-<dt><strong>covar</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd><p class="first last">Name of column containing the covariate.</p>
+<dt><strong>covar</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string or list</span></dt>
+<dd><p class="first last">Name(s) of column(s) containing the covariate.</p>
 </dd>
 <dt><strong>between</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd><p class="first last">Name of column containing the between factor.</p>
@@ -145,6 +146,13 @@ directory. To change that, specify the filename with full path.</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="pingouin.anova.html#pingouin.anova" title="pingouin.anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anova</span></code></a></dt>
+<dd>One-way and two-way ANOVA</dd>
+</dl>
+</div>
 <p class="rubric">Notes</p>
 <p>Analysis of covariance (ANCOVA) is a general linear model which blends
 ANOVA and regression. ANCOVA evaluates whether the means of a dependent
@@ -152,14 +160,25 @@ variable (dv) are equal across levels of a categorical independent
 variable (between) often called a treatment, while statistically
 controlling for the effects of other continuous variables that are not
 of primary interest, known as covariates or nuisance variables (covar).</p>
-<p>For now, Pingouin only supports one covariate.</p>
+<p>Note that in the case of one covariate, Pingouin will use a built-in
+function. However, if there are more than one covariate, Pingouin will
+use the statsmodels package to compute the ANCOVA.</p>
 <p class="rubric">Examples</p>
 <p>1. Evaluate the reading scores of students with different teaching method
 and family income as a covariate.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">read_dataset</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin.datasets</span> <span class="k">import</span> <span class="n">read_dataset</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ancova</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;ancova&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ancova</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="s1">&#39;Income&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Method&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>2. Evaluate the reading scores of students with different teaching method
+and family income + BMI as a covariate.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin.datasets</span> <span class="k">import</span> <span class="n">read_dataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ancova</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;ancova&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ancova</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Income&#39;</span><span class="p">,</span> <span class="s1">&#39;BMI&#39;</span><span class="p">],</span>
+<span class="go">    between=&#39;Method&#39;)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -182,7 +201,7 @@ and family income as a covariate.</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.<br/>
     </p>
   </div>
 </footer>

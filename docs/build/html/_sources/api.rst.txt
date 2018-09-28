@@ -21,6 +21,7 @@ ANOVA
     ancova
     kruskal
     friedman
+    cochran
 
 Bayesian
 --------

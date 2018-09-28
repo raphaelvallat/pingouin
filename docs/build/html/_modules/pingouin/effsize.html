@@ -7,13 +7,13 @@
     <title>pingouin.effsize &#8212; pingouin 0.1.7 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/style.css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../_static/copybutton.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -204,6 +204,9 @@
 
     <span class="c1"># Start computation</span>
     <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;parametric&#39;</span><span class="p">:</span>
+        <span class="c1"># Note that we are using a normal dist and not a T dist:</span>
+        <span class="c1"># from scipy.stats import t</span>
+        <span class="c1"># crit = np.abs(t.ppf((1 - alpha) / 2), dof)</span>
         <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">norm</span>
         <span class="n">crit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">eftype</span> <span class="o">==</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span>
@@ -395,15 +398,45 @@
 <span class="sd">    ef : float</span>
 <span class="sd">        Effect size</span>
 
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    convert_effsize : Conversion between effect sizes.</span>
+<span class="sd">    compute_effsize_from_t : Convert a T-statistic to an effect size.</span>
+
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    Missing values are automatically removed from the data. If x and y are</span>
 <span class="sd">    paired, the entire row is removed.</span>
 
-<span class="sd">    See Also</span>
-<span class="sd">    --------</span>
-<span class="sd">    convert_effsize : Conversion between effect sizes.</span>
-<span class="sd">    compute_effsize_from_t : Convert a T-statistic to an effect size.</span>
+<span class="sd">    If x and y are independant, the Cohen&#39;s is:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        d = \dfrac{\overline{X} - \overline{Y}}</span>
+<span class="sd">        {\sqrt{\dfrac{(n_{1} - 1)\sigma_{1}^{2} + (n_{2} - 1)</span>
+<span class="sd">        \sigma_{2}^{2}}{n1 + n2 - 2}}}</span>
+
+<span class="sd">    If x and y are paired, the Cohen d-avg is computed [1]_, [2]_:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        d_{avg} = \dfrac{\overline{X} - \overline{Y}}</span>
+<span class="sd">        {\dfrac{\sigma_1 + \sigma_2}{2}}</span>
+
+<span class="sd">    The Cohen’s d is a biased estimate of the population effect size,</span>
+<span class="sd">    especially for small samples (n &lt; 20). It is often preferable</span>
+<span class="sd">    to use the corrected effect size, or Hedges’g, instead:</span>
+
+<span class="sd">    .. math:: g = d * (1 - \dfrac{3}{4(n_1 + n_2) - 9})</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Lakens, D., 2013. Calculating and reporting effect sizes to</span>
+<span class="sd">       facilitate cumulative science: a practical primer for t-tests and</span>
+<span class="sd">       ANOVAs. Front. Psychol. 4, 863. https://doi.org/10.3389/fpsyg.2013.00863</span>
+
+<span class="sd">    .. [2] Cumming, Geoff. Understanding the new statistics: Effect sizes,</span>
+<span class="sd">           confidence intervals, and meta-analysis. Routledge, 2013.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -567,7 +600,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.<br/>
     </p>
   </div>
 </footer>

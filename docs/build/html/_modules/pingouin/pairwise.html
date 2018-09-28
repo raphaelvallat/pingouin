@@ -7,13 +7,13 @@
     <title>pingouin.pairwise &#8212; pingouin 0.1.7 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/style.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/style.css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../_static/copybutton.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -399,7 +399,7 @@
 
 <span class="sd">        &gt;&gt;&gt; from pingouin import pairwise_tukey</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
-<span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;mcclave1991&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;anova&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; pairwise_tukey(dv=&#39;Pain threshold&#39;, between=&#39;Hair color&#39;, data=df)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">combinations</span>
@@ -542,7 +542,7 @@
 
 <span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import pairwise_corr, print_table</span>
-<span class="sd">        &gt;&gt;&gt; data = read_dataset(&#39;dolan2009&#39;).iloc[:, 1:]</span>
+<span class="sd">        &gt;&gt;&gt; data = read_dataset(&#39;pairwise_corr&#39;).iloc[:, 1:]</span>
 <span class="sd">        &gt;&gt;&gt; stats = pairwise_corr(data, method=&#39;spearman&#39;, tail=&#39;two-sided&#39;,</span>
 <span class="sd">        &gt;&gt;&gt;                       padjust=&#39;bonf&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; print_table(stats)</span>
@@ -551,7 +551,7 @@
 
 <span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import pairwise_corr, print_table</span>
-<span class="sd">        &gt;&gt;&gt; data = read_dataset(&#39;dolan2009&#39;).iloc[:, 1:]</span>
+<span class="sd">        &gt;&gt;&gt; data = read_dataset(&#39;pairwise_corr&#39;).iloc[:, 1:]</span>
 <span class="sd">        &gt;&gt;&gt; stats = pairwise_corr(data, columns=[&#39;Openness&#39;, &#39;Extraversion&#39;,</span>
 <span class="sd">        &gt;&gt;&gt;                       &#39;Neuroticism&#39;], method=&#39;percbend&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; print_table(stats)</span>
@@ -560,7 +560,7 @@
 
 <span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
 <span class="sd">        &gt;&gt;&gt; from pingouin import pairwise_corr, print_table</span>
-<span class="sd">        &gt;&gt;&gt; data = read_dataset(&#39;dolan2009&#39;).iloc[:, 1:]</span>
+<span class="sd">        &gt;&gt;&gt; data = read_dataset(&#39;pairwise_corr&#39;).iloc[:, 1:]</span>
 <span class="sd">        &gt;&gt;&gt; pairwise_corr(data, export_filename=&#39;pairwise_corr.csv&#39;)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="kn">from</span> <span class="nn">pingouin.correlation</span> <span class="k">import</span> <span class="n">corr</span>
@@ -640,7 +640,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.<br/>
     </p>
   </div>
 </footer>

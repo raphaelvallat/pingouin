@@ -7,13 +7,13 @@
     <title>pingouin.compute_effsize &#8212; pingouin 0.1.7 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/style.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="../_static/copybutton.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -152,6 +152,36 @@ Available methods are</p>
 <p class="rubric">Notes</p>
 <p>Missing values are automatically removed from the data. If x and y are
 paired, the entire row is removed.</p>
+<p>If x and y are independant, the Cohen’s is:</p>
+<div class="math notranslate nohighlight">
+\[d = \dfrac{\overline{X} - \overline{Y}}
+{\sqrt{\dfrac{(n_{1} - 1)\sigma_{1}^{2} + (n_{2} - 1)
+\sigma_{2}^{2}}{n1 + n2 - 2}}}\]</div>
+<p>If x and y are paired, the Cohen d-avg is computed <a class="reference internal" href="#r45fc8293c1fd-1" id="id1">[1]</a>, <a class="reference internal" href="#r45fc8293c1fd-2" id="id2">[2]</a>:</p>
+<div class="math notranslate nohighlight">
+\[d_{avg} = \dfrac{\overline{X} - \overline{Y}}
+{\dfrac{\sigma_1 + \sigma_2}{2}}\]</div>
+<p>The Cohen’s d is a biased estimate of the population effect size,
+especially for small samples (n &lt; 20). It is often preferable
+to use the corrected effect size, or Hedges’g, instead:</p>
+<div class="math notranslate nohighlight">
+\[g = d * (1 - \dfrac{3}{4(n_1 + n_2) - 9})\]</div>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r45fc8293c1fd-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id3">2</a>)</em> Lakens, D., 2013. Calculating and reporting effect sizes to
+facilitate cumulative science: a practical primer for t-tests and
+ANOVAs. Front. Psychol. 4, 863. <a class="reference external" href="https://doi.org/10.3389/fpsyg.2013.00863">https://doi.org/10.3389/fpsyg.2013.00863</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r45fc8293c1fd-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[2]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id4">2</a>)</em> Cumming, Geoff. Understanding the new statistics: Effect sizes,
+confidence intervals, and meta-analysis. Routledge, 2013.</td></tr>
+</tbody>
+</table>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">Compute Cohen d from two independent set of observations.</p>
@@ -211,7 +241,7 @@ with the lowest variance will automatically be selected as the control.</p>
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.<br/>
     </p>
   </div>
 </footer>
