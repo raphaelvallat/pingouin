@@ -980,6 +980,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
     # Between effect
     ssbetween = ((grp.mean() - data[dv].mean())**2 * grp.count()).sum()
     # Within effect (= error between)
+    #  = (grp.var(ddof=0) * grp.count()).sum()
     sserror = grp.apply(lambda x: (x - x.mean())**2).sum()
 
     # Calculate DOF, MS, F and p-values
