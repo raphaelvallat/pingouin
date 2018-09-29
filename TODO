@@ -1,12 +1,9 @@
 Doc
 ---
 - Guidelines: when to use method X or Y
-- More relevant examples for circular statistics
 
 Code
 ----
-- Add maths formula for effect size in doc
-- Better bootstrapping of confidence intervals (see Matlab `bootci` function)
 - Add Hotelling test
 - Do not compute BF10 in too large datasets (scipy.integrate.quad crashes)
 - pingouin.plotting module (e.g. circular, repeated measures corr, covariance)?
