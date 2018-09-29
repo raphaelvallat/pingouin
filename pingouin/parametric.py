@@ -514,8 +514,6 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
              remove_na=True, detailed=False, export_filename=None):
     """One-way repeated measures ANOVA (type II).
 
-    Results have been tested against R and JASP.
-
     Parameters
     ----------
     dv : string
@@ -579,6 +577,8 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     Notes
     -----
     Data are expected to be in long-format.
+
+    Results have been tested against R and JASP.
 
     Note that if the dataset contains one or more other within subject
     factors, an automatic collapsing to the mean is applied on the dependant
@@ -727,8 +727,6 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
               export_filename=None):
     """Two-way repeated measures ANOVA.
 
-    Tested against ezANOVA (R) and MNE.
-
     Parameters
     ----------
     dv : string
@@ -764,9 +762,7 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
     -----
     Data are expected to be in long-format and perfectly balanced.
 
-    Note that the epsilon factor - and therefore the Greenhouse-Geisser
-    corrected p-values - of the interaction are slightly different than those
-    of the ezANOVA R package.
+    Results have been tested against ezANOVA (R) and MNE.
 
     See Also
     --------
@@ -909,8 +905,6 @@ def anova(dv=None, between=None, data=None, detailed=False,
           export_filename=None):
     """One-way and two-way ANOVA.
 
-    Results have been tested against R, Matlab and JASP.
-
     Parameters
     ----------
     dv : string
@@ -955,8 +949,9 @@ def anova(dv=None, between=None, data=None, detailed=False,
     The effect size reported in Pingouin is the partial eta-square.
     However, one should keep in mind that for one-way ANOVA
     partial eta-square is the same as eta-square and generalized eta-square.
-
     For more details, see Bakeman 2005; Richardson 2011.
+
+    Results have been tested against R, Matlab and JASP.
 
     Examples
     --------
@@ -1056,8 +1051,6 @@ def anova(dv=None, between=None, data=None, detailed=False,
 def anova2(dv=None, between=None, data=None, export_filename=None):
     """Two-way ANOVA.
 
-    Results have been tested against JASP.
-
     Parameters
     ----------
     dv : string
@@ -1093,6 +1086,10 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
     rm_anova2 : Two-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
     kruskal : Non-parametric one-way ANOVA
+
+    Notes
+    -----
+    Results have been tested against JASP.
 
     Examples
     --------
@@ -1188,8 +1185,6 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
                 correction='auto', remove_na=True, export_filename=None):
     """Mixed-design (split-plot) type II ANOVA.
 
-    Results have been tested against R and JASP.
-
     Parameters
     ----------
     dv : string
@@ -1245,6 +1240,10 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
     anova : One-way and two-way ANOVA
     rm_anova : One-way repeated measures ANOVA
     rm_anova2 : Two-way repeated measures ANOVA
+
+    Notes
+    -----
+    Results have been tested against R and JASP.
 
     Examples
     --------
@@ -1359,9 +1358,6 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
 def ancova(dv=None, covar=None, between=None, data=None,
            export_filename=None, return_bw=False):
     """ANCOVA with one or more covariate(s).
-
-    Results have been tested against statsmodels. Requires statsmodels if the
-    number of covariates is more than one.
 
     Parameters
     ----------

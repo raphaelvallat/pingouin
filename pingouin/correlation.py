@@ -486,7 +486,7 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     for determining the common within-individual association for paired
     measures assessed on two or more occasions for multiple individuals.
 
-    Tested against the `rmcorr` R package.
+    Results have been tested against the `rmcorr` R package.
 
     Please note that NaN are automatically removed from the dataframe.
 

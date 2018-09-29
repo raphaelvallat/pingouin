@@ -10,8 +10,6 @@ def ttest_power(d, nx, ny=None, paired=False, tail='two-sided',
     """Determine achieved power of a T test given effect size, sample size
     and alpha level.
 
-    Tested against GPower.
-
     Parameters
     ----------
     d : float
@@ -39,6 +37,8 @@ def ttest_power(d, nx, ny=None, paired=False, tail='two-sided',
     concluding that there is no effect when there is one.
     Statistical power is mainly affected by the effect size and the sample
     size.
+
+    Results have been tested against GPower.
 
     Examples
     --------
@@ -78,8 +78,6 @@ def anova_power(eta, ntot, ngroups, alpha=.05):
     """Determine achieved power of a one-way ANOVA given effect size,
     sample size, number of groups and alpha level.
 
-    Tested against GPower.
-
     Parameters
     ----------
     eta : float
@@ -101,6 +99,8 @@ def anova_power(eta, ntot, ngroups, alpha=.05):
     For one-way ANOVA, partial eta-square is the same as eta-square. It can be
     evaluated from the f-value and degrees of freedom of the ANOVA using
     the following formula: eta = (fval * dof1) / (fval * dof1 + dof2)
+
+    Results have been tested against GPower.
 
     Examples
     --------
