@@ -155,27 +155,62 @@ relationship.</p>
 <p>Kendall’s tau is a measure of the correspondence between two rankings.
 Values close to 1 indicate strong agreement, values close to -1 indicate
 strong disagreement.</p>
-<p>The percentage bend correlation (Wilcox 1994) is a robust method that
+<p>The percentage bend correlation <a class="reference internal" href="#rfd5a1c711630-1" id="id1">[1]</a> is a robust method that
 protects against univariate outliers.</p>
-<p>The Shepherd’s pi (Schwarzkopf et al. 2012) and skipped (Rousselet and
-Pernet 2012) correlations are both robust methods that returns the
-Spearman’s rho after outliers removal. Note that the skipped correlation
-requires that the scikit-learn package is installed (for computing the
-minimum covariance determinant).</p>
-<p>Please note that NaN are automatically removed from datasets.</p>
+<p>The Shepherd’s pi <a class="reference internal" href="#rfd5a1c711630-2" id="id2">[2]</a> and skipped <a class="reference internal" href="#rfd5a1c711630-3" id="id3">[3]</a>, <a class="reference internal" href="#rfd5a1c711630-4" id="id4">[4]</a> correlations are both robust
+methods that returns the Spearman’s rho after outliers removal.
+Note that the skipped correlation requires that the scikit-learn
+package is installed (for computing the minimum covariance determinant).</p>
+<p>Please note that rows with NaN are automatically removed.</p>
+<p>If method=’pearson’, The JZS Bayes Factor is approximated using the
+formula described in ref <a class="reference internal" href="#rfd5a1c711630-5" id="id5">[5]</a>:</p>
+<div class="math notranslate nohighlight">
+\[BF_{10} = \dfrac{\sqrt{n/2}}{\gamma(1/2)}*\int_{0}^{\infty}e((n-2)/2)*
+log(1+g)+(-(n-1)/2)log(1+(1-r^2)*g)+(-3/2)log(g)-n/2g\]</div>
+<p>where <strong>n</strong> is the sample size and <strong>r</strong> is the Pearson correlation
+coefficient.</p>
 <p class="rubric">References</p>
-<p>Wilcox, R.R., 1994. The percentage bend correlation coefficient.
-Psychometrika 59, 601–616. <a class="reference external" href="https://doi.org/10.1007/BF02294395">https://doi.org/10.1007/BF02294395</a></p>
-<p>Schwarzkopf, D.S., De Haas, B., Rees, G., 2012. Better ways to improve
-standards in brain-behavior correlation analysis. Front. Hum. Neurosci.
-6, 200. <a class="reference external" href="https://doi.org/10.3389/fnhum.2012.00200">https://doi.org/10.3389/fnhum.2012.00200</a></p>
-<p>Rousselet, G.A., Pernet, C.R., 2012. Improving standards in brain-behavior
-correlation analyses. Front. Hum. Neurosci. 6, 119.
-<a class="reference external" href="https://doi.org/10.3389/fnhum.2012.00119">https://doi.org/10.3389/fnhum.2012.00119</a></p>
-<p>Pernet, C.R., Wilcox, R., Rousselet, G.A., 2012. Robust correlation
+<table class="docutils citation" frame="void" id="rfd5a1c711630-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id6">2</a>)</em> Wilcox, R.R., 1994. The percentage bend correlation coefficient.
+Psychometrika 59, 601–616. <a class="reference external" href="https://doi.org/10.1007/BF02294395">https://doi.org/10.1007/BF02294395</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="rfd5a1c711630-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[2]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id7">2</a>)</em> Schwarzkopf, D.S., De Haas, B., Rees, G., 2012. Better ways to
+improve standards in brain-behavior correlation analysis. Front.
+Hum. Neurosci. 6, 200. <a class="reference external" href="https://doi.org/10.3389/fnhum.2012.00200">https://doi.org/10.3389/fnhum.2012.00200</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="rfd5a1c711630-3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[3]</td><td><em>(<a class="fn-backref" href="#id3">1</a>, <a class="fn-backref" href="#id8">2</a>)</em> Rousselet, G.A., Pernet, C.R., 2012. Improving standards in
+brain-behavior correlation analyses. Front. Hum. Neurosci. 6, 119.
+<a class="reference external" href="https://doi.org/10.3389/fnhum.2012.00119">https://doi.org/10.3389/fnhum.2012.00119</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="rfd5a1c711630-4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[4]</td><td><em>(<a class="fn-backref" href="#id4">1</a>, <a class="fn-backref" href="#id9">2</a>)</em> Pernet, C.R., Wilcox, R., Rousselet, G.A., 2012. Robust correlation
 analyses: false positive and power validation using a new open
 source matlab toolbox. Front. Psychol. 3, 606.
-<a class="reference external" href="https://doi.org/10.3389/fpsyg.2012.00606">https://doi.org/10.3389/fpsyg.2012.00606</a></p>
+<a class="reference external" href="https://doi.org/10.3389/fpsyg.2012.00606">https://doi.org/10.3389/fpsyg.2012.00606</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="rfd5a1c711630-5" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[5]</td><td><em>(<a class="fn-backref" href="#id5">1</a>, <a class="fn-backref" href="#id10">2</a>)</em> Wetzels, R., Wagenmakers, E.-J., 2012. A default Bayesian
+hypothesis test for correlations and partial correlations.
+Psychon. Bull. Rev. 19, 1057–1064.
+<a class="reference external" href="https://doi.org/10.3758/s13423-012-0295-x">https://doi.org/10.3758/s13423-012-0295-x</a></td></tr>
+</tbody>
+</table>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">Pearson correlation</p>

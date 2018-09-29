@@ -141,7 +141,8 @@
 <span class="sd">    If you would like to compute the Bayes Factor directly from the raw data</span>
 <span class="sd">    instead of from the T-value, use the ttest function.</span>
 
-<span class="sd">    The Bayes Factor is approximated using the formula described in ref [1]_:</span>
+<span class="sd">    The JZS Bayes Factor is approximated using the formula described</span>
+<span class="sd">    in ref [1]_:</span>
 
 <span class="sd">    .. math::</span>
 
@@ -235,6 +236,26 @@
 
 <span class="sd">    If you would like to compute the Bayes Factor directly from the raw data</span>
 <span class="sd">    instead of from the correlation coefficient, use the corr function.</span>
+
+<span class="sd">    The JZS Bayes Factor is approximated using the formula described in</span>
+<span class="sd">    ref [1]_:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        BF_{10} = \dfrac{\sqrt{n/2}}{\gamma(1/2)}*\int_{0}^{\infty}e((n-2)/2)*</span>
+<span class="sd">        log(1+g)+(-(n-1)/2)log(1+(1-r^2)*g)+(-3/2)log(g)-n/2g</span>
+
+<span class="sd">    where **n** is the sample size and **r** is the Pearson correlation</span>
+<span class="sd">    coefficient.</span>
+
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    .. [1] Wetzels, R., Wagenmakers, E.-J., 2012. A default Bayesian</span>
+<span class="sd">       hypothesis test for correlations and partial correlations.</span>
+<span class="sd">       Psychon. Bull. Rev. 19, 1057–1064.</span>
+<span class="sd">       https://doi.org/10.3758/s13423-012-0295-x</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>

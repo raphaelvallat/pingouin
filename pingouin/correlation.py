@@ -302,34 +302,51 @@ def corr(x, y, tail='two-sided', method='pearson'):
     Values close to 1 indicate strong agreement, values close to -1 indicate
     strong disagreement.
 
-    The percentage bend correlation (Wilcox 1994) is a robust method that
+    The percentage bend correlation [1]_ is a robust method that
     protects against univariate outliers.
 
-    The Shepherd's pi (Schwarzkopf et al. 2012) and skipped (Rousselet and
-    Pernet 2012) correlations are both robust methods that returns the
-    Spearman's rho after outliers removal. Note that the skipped correlation
-    requires that the scikit-learn package is installed (for computing the
-    minimum covariance determinant).
+    The Shepherd's pi [2]_ and skipped [3]_, [4]_ correlations are both robust
+    methods that returns the Spearman's rho after outliers removal.
+    Note that the skipped correlation requires that the scikit-learn
+    package is installed (for computing the minimum covariance determinant).
 
-    Please note that NaN are automatically removed from datasets.
+    Please note that rows with NaN are automatically removed.
+
+    If method='pearson', The JZS Bayes Factor is approximated using the
+    formula described in ref [5]_:
+
+    .. math::
+
+        BF_{10} = \dfrac{\sqrt{n/2}}{\gamma(1/2)}*\int_{0}^{\infty}e((n-2)/2)*
+        log(1+g)+(-(n-1)/2)log(1+(1-r^2)*g)+(-3/2)log(g)-n/2g
+
+    where **n** is the sample size and **r** is the Pearson correlation
+    coefficient.
+
 
     References
     ----------
-    Wilcox, R.R., 1994. The percentage bend correlation coefficient.
-    Psychometrika 59, 601–616. https://doi.org/10.1007/BF02294395
+    .. [1] Wilcox, R.R., 1994. The percentage bend correlation coefficient.
+       Psychometrika 59, 601–616. https://doi.org/10.1007/BF02294395
 
-    Schwarzkopf, D.S., De Haas, B., Rees, G., 2012. Better ways to improve
-    standards in brain-behavior correlation analysis. Front. Hum. Neurosci.
-    6, 200. https://doi.org/10.3389/fnhum.2012.00200
+    .. [2] Schwarzkopf, D.S., De Haas, B., Rees, G., 2012. Better ways to
+       improve standards in brain-behavior correlation analysis. Front.
+       Hum. Neurosci. 6, 200. https://doi.org/10.3389/fnhum.2012.00200
 
-    Rousselet, G.A., Pernet, C.R., 2012. Improving standards in brain-behavior
-    correlation analyses. Front. Hum. Neurosci. 6, 119.
-    https://doi.org/10.3389/fnhum.2012.00119
+    .. [3] Rousselet, G.A., Pernet, C.R., 2012. Improving standards in
+       brain-behavior correlation analyses. Front. Hum. Neurosci. 6, 119.
+       https://doi.org/10.3389/fnhum.2012.00119
 
-    Pernet, C.R., Wilcox, R., Rousselet, G.A., 2012. Robust correlation
-    analyses: false positive and power validation using a new open
-    source matlab toolbox. Front. Psychol. 3, 606.
-    https://doi.org/10.3389/fpsyg.2012.00606
+    .. [4] Pernet, C.R., Wilcox, R., Rousselet, G.A., 2012. Robust correlation
+       analyses: false positive and power validation using a new open
+       source matlab toolbox. Front. Psychol. 3, 606.
+       https://doi.org/10.3389/fpsyg.2012.00606
+
+    .. [5] Wetzels, R., Wagenmakers, E.-J., 2012. A default Bayesian
+       hypothesis test for correlations and partial correlations.
+       Psychon. Bull. Rev. 19, 1057–1064.
+       https://doi.org/10.3758/s13423-012-0295-x
+
 
     Examples
     --------

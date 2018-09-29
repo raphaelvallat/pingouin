@@ -396,34 +396,51 @@
 <span class="sd">    Values close to 1 indicate strong agreement, values close to -1 indicate</span>
 <span class="sd">    strong disagreement.</span>
 
-<span class="sd">    The percentage bend correlation (Wilcox 1994) is a robust method that</span>
+<span class="sd">    The percentage bend correlation [1]_ is a robust method that</span>
 <span class="sd">    protects against univariate outliers.</span>
 
-<span class="sd">    The Shepherd&#39;s pi (Schwarzkopf et al. 2012) and skipped (Rousselet and</span>
-<span class="sd">    Pernet 2012) correlations are both robust methods that returns the</span>
-<span class="sd">    Spearman&#39;s rho after outliers removal. Note that the skipped correlation</span>
-<span class="sd">    requires that the scikit-learn package is installed (for computing the</span>
-<span class="sd">    minimum covariance determinant).</span>
+<span class="sd">    The Shepherd&#39;s pi [2]_ and skipped [3]_, [4]_ correlations are both robust</span>
+<span class="sd">    methods that returns the Spearman&#39;s rho after outliers removal.</span>
+<span class="sd">    Note that the skipped correlation requires that the scikit-learn</span>
+<span class="sd">    package is installed (for computing the minimum covariance determinant).</span>
 
-<span class="sd">    Please note that NaN are automatically removed from datasets.</span>
+<span class="sd">    Please note that rows with NaN are automatically removed.</span>
+
+<span class="sd">    If method=&#39;pearson&#39;, The JZS Bayes Factor is approximated using the</span>
+<span class="sd">    formula described in ref [5]_:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        BF_{10} = \dfrac{\sqrt{n/2}}{\gamma(1/2)}*\int_{0}^{\infty}e((n-2)/2)*</span>
+<span class="sd">        log(1+g)+(-(n-1)/2)log(1+(1-r^2)*g)+(-3/2)log(g)-n/2g</span>
+
+<span class="sd">    where **n** is the sample size and **r** is the Pearson correlation</span>
+<span class="sd">    coefficient.</span>
+
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
-<span class="sd">    Wilcox, R.R., 1994. The percentage bend correlation coefficient.</span>
-<span class="sd">    Psychometrika 59, 601–616. https://doi.org/10.1007/BF02294395</span>
+<span class="sd">    .. [1] Wilcox, R.R., 1994. The percentage bend correlation coefficient.</span>
+<span class="sd">       Psychometrika 59, 601–616. https://doi.org/10.1007/BF02294395</span>
 
-<span class="sd">    Schwarzkopf, D.S., De Haas, B., Rees, G., 2012. Better ways to improve</span>
-<span class="sd">    standards in brain-behavior correlation analysis. Front. Hum. Neurosci.</span>
-<span class="sd">    6, 200. https://doi.org/10.3389/fnhum.2012.00200</span>
+<span class="sd">    .. [2] Schwarzkopf, D.S., De Haas, B., Rees, G., 2012. Better ways to</span>
+<span class="sd">       improve standards in brain-behavior correlation analysis. Front.</span>
+<span class="sd">       Hum. Neurosci. 6, 200. https://doi.org/10.3389/fnhum.2012.00200</span>
 
-<span class="sd">    Rousselet, G.A., Pernet, C.R., 2012. Improving standards in brain-behavior</span>
-<span class="sd">    correlation analyses. Front. Hum. Neurosci. 6, 119.</span>
-<span class="sd">    https://doi.org/10.3389/fnhum.2012.00119</span>
+<span class="sd">    .. [3] Rousselet, G.A., Pernet, C.R., 2012. Improving standards in</span>
+<span class="sd">       brain-behavior correlation analyses. Front. Hum. Neurosci. 6, 119.</span>
+<span class="sd">       https://doi.org/10.3389/fnhum.2012.00119</span>
 
-<span class="sd">    Pernet, C.R., Wilcox, R., Rousselet, G.A., 2012. Robust correlation</span>
-<span class="sd">    analyses: false positive and power validation using a new open</span>
-<span class="sd">    source matlab toolbox. Front. Psychol. 3, 606.</span>
-<span class="sd">    https://doi.org/10.3389/fpsyg.2012.00606</span>
+<span class="sd">    .. [4] Pernet, C.R., Wilcox, R., Rousselet, G.A., 2012. Robust correlation</span>
+<span class="sd">       analyses: false positive and power validation using a new open</span>
+<span class="sd">       source matlab toolbox. Front. Psychol. 3, 606.</span>
+<span class="sd">       https://doi.org/10.3389/fpsyg.2012.00606</span>
+
+<span class="sd">    .. [5] Wetzels, R., Wagenmakers, E.-J., 2012. A default Bayesian</span>
+<span class="sd">       hypothesis test for correlations and partial correlations.</span>
+<span class="sd">       Psychon. Bull. Rev. 19, 1057–1064.</span>
+<span class="sd">       https://doi.org/10.3758/s13423-012-0295-x</span>
+
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>

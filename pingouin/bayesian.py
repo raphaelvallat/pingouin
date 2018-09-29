@@ -47,7 +47,8 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     If you would like to compute the Bayes Factor directly from the raw data
     instead of from the T-value, use the ttest function.
 
-    The Bayes Factor is approximated using the formula described in ref [1]_:
+    The JZS Bayes Factor is approximated using the formula described
+    in ref [1]_:
 
     .. math::
 
@@ -141,6 +142,26 @@ def bayesfactor_pearson(r, n):
 
     If you would like to compute the Bayes Factor directly from the raw data
     instead of from the correlation coefficient, use the corr function.
+
+    The JZS Bayes Factor is approximated using the formula described in
+    ref [1]_:
+
+    .. math::
+
+        BF_{10} = \dfrac{\sqrt{n/2}}{\gamma(1/2)}*\int_{0}^{\infty}e((n-2)/2)*
+        log(1+g)+(-(n-1)/2)log(1+(1-r^2)*g)+(-3/2)log(g)-n/2g
+
+    where **n** is the sample size and **r** is the Pearson correlation
+    coefficient.
+
+
+    References
+    ----------
+
+    .. [1] Wetzels, R., Wagenmakers, E.-J., 2012. A default Bayesian
+       hypothesis test for correlations and partial correlations.
+       Psychon. Bull. Rev. 19, 1057–1064.
+       https://doi.org/10.3758/s13423-012-0295-x
 
     Examples
     --------
