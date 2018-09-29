@@ -606,9 +606,7 @@
 
 <div class="viewcode-block" id="rm_anova"><a class="viewcode-back" href="../../generated/pingouin.rm_anova.html#pingouin.rm_anova">[docs]</a><span class="k">def</span> <span class="nf">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>
              <span class="n">remove_na</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;One-way repeated measures ANOVA (type II).</span>
-
-<span class="sd">    Results have been tested against R and JASP.</span>
+    <span class="sd">&quot;&quot;&quot;One-way repeated measures ANOVA.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -673,6 +671,8 @@
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    Data are expected to be in long-format.</span>
+
+<span class="sd">    Results have been tested against R and JASP.</span>
 
 <span class="sd">    Note that if the dataset contains one or more other within subject</span>
 <span class="sd">    factors, an automatic collapsing to the mean is applied on the dependant</span>
@@ -821,8 +821,6 @@
               <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Two-way repeated measures ANOVA.</span>
 
-<span class="sd">    Tested against ezANOVA (R) and MNE.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    dv : string</span>
@@ -858,9 +856,7 @@
 <span class="sd">    -----</span>
 <span class="sd">    Data are expected to be in long-format and perfectly balanced.</span>
 
-<span class="sd">    Note that the epsilon factor - and therefore the Greenhouse-Geisser</span>
-<span class="sd">    corrected p-values - of the interaction are slightly different than those</span>
-<span class="sd">    of the ezANOVA R package.</span>
+<span class="sd">    Results have been tested against ezANOVA (R) and MNE.</span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
@@ -1003,8 +999,6 @@
           <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;One-way and two-way ANOVA.</span>
 
-<span class="sd">    Results have been tested against R, Matlab and JASP.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    dv : string</span>
@@ -1049,8 +1043,9 @@
 <span class="sd">    The effect size reported in Pingouin is the partial eta-square.</span>
 <span class="sd">    However, one should keep in mind that for one-way ANOVA</span>
 <span class="sd">    partial eta-square is the same as eta-square and generalized eta-square.</span>
-
 <span class="sd">    For more details, see Bakeman 2005; Richardson 2011.</span>
+
+<span class="sd">    Results have been tested against R, Matlab and JASP.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -1150,8 +1145,6 @@
 <span class="k">def</span> <span class="nf">anova2</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Two-way ANOVA.</span>
 
-<span class="sd">    Results have been tested against JASP.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    dv : string</span>
@@ -1187,6 +1180,10 @@
 <span class="sd">    rm_anova2 : Two-way repeated measures ANOVA</span>
 <span class="sd">    mixed_anova : Two way mixed ANOVA</span>
 <span class="sd">    kruskal : Non-parametric one-way ANOVA</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Results have been tested against JASP.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -1280,9 +1277,7 @@
 
 <div class="viewcode-block" id="mixed_anova"><a class="viewcode-back" href="../../generated/pingouin.mixed_anova.html#pingouin.mixed_anova">[docs]</a><span class="k">def</span> <span class="nf">mixed_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">remove_na</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Mixed-design (split-plot) type II ANOVA.</span>
-
-<span class="sd">    Results have been tested against R and JASP.</span>
+    <span class="sd">&quot;&quot;&quot;Mixed-design (split-plot) ANOVA.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1339,6 +1334,10 @@
 <span class="sd">    anova : One-way and two-way ANOVA</span>
 <span class="sd">    rm_anova : One-way repeated measures ANOVA</span>
 <span class="sd">    rm_anova2 : Two-way repeated measures ANOVA</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Results have been tested against R and JASP.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -1453,9 +1452,6 @@
 <div class="viewcode-block" id="ancova"><a class="viewcode-back" href="../../generated/pingouin.ancova.html#pingouin.ancova">[docs]</a><span class="k">def</span> <span class="nf">ancova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
            <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_bw</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;ANCOVA with one or more covariate(s).</span>
-
-<span class="sd">    Results have been tested against statsmodels. Requires statsmodels if the</span>
-<span class="sd">    number of covariates is more than one.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>

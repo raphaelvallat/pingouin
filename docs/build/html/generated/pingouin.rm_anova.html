@@ -98,8 +98,7 @@
 <dl class="function">
 <dt id="pingouin.rm_anova">
 <code class="descclassname">pingouin.</code><code class="descname">rm_anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>subject=None</em>, <em>data=None</em>, <em>correction='auto'</em>, <em>remove_na=True</em>, <em>detailed=False</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#rm_anova"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>One-way repeated measures ANOVA (type II).</p>
-<p>Results have been tested against R and JASP.</p>
+<dd><p>One-way repeated measures ANOVA.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -186,6 +185,7 @@ directory. To change that, specify the filename with full path.</p>
 </div>
 <p class="rubric">Notes</p>
 <p>Data are expected to be in long-format.</p>
+<p>Results have been tested against R and JASP.</p>
 <p>Note that if the dataset contains one or more other within subject
 factors, an automatic collapsing to the mean is applied on the dependant
 variable (same behavior as the ezANOVA R package). As such, results can

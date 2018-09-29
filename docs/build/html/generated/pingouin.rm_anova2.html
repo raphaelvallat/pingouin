@@ -99,7 +99,6 @@
 <dt id="pingouin.rm_anova2">
 <code class="descclassname">pingouin.</code><code class="descname">rm_anova2</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>subject=None</em>, <em>data=None</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#rm_anova2"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Two-way repeated measures ANOVA.</p>
-<p>Tested against ezANOVA (R) and MNE.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -161,9 +160,7 @@ directory. To change that, specify the filename with full path.</p>
 </div>
 <p class="rubric">Notes</p>
 <p>Data are expected to be in long-format and perfectly balanced.</p>
-<p>Note that the epsilon factor - and therefore the Greenhouse-Geisser
-corrected p-values - of the interaction are slightly different than those
-of the ezANOVA R package.</p>
+<p>Results have been tested against ezANOVA (R) and MNE.</p>
 <p class="rubric">Examples</p>
 <p>Two-way repeated-measures ANOVA.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin.datasets</span> <span class="k">import</span> <span class="n">read_dataset</span>

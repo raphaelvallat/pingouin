@@ -98,8 +98,7 @@
 <dl class="function">
 <dt id="pingouin.mixed_anova">
 <code class="descclassname">pingouin.</code><code class="descname">mixed_anova</code><span class="sig-paren">(</span><em>dv=None</em>, <em>within=None</em>, <em>subject=None</em>, <em>between=None</em>, <em>data=None</em>, <em>correction='auto'</em>, <em>remove_na=True</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#mixed_anova"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Mixed-design (split-plot) type II ANOVA.</p>
-<p>Results have been tested against R and JASP.</p>
+<dd><p>Mixed-design (split-plot) ANOVA.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -179,6 +178,8 @@ directory. To change that, specify the filename with full path.</p>
 <dd>Two-way repeated measures ANOVA</dd>
 </dl>
 </div>
+<p class="rubric">Notes</p>
+<p>Results have been tested against R and JASP.</p>
 <p class="rubric">Examples</p>
 <p>Compute a two-way mixed model ANOVA.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin.datasets</span> <span class="k">import</span> <span class="n">read_dataset</span>

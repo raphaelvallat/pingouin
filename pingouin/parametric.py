@@ -512,7 +512,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
 def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
              remove_na=True, detailed=False, export_filename=None):
-    """One-way repeated measures ANOVA (type II).
+    """One-way repeated measures ANOVA.
 
     Parameters
     ----------
@@ -1183,7 +1183,7 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
 
 def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
                 correction='auto', remove_na=True, export_filename=None):
-    """Mixed-design (split-plot) type II ANOVA.
+    """Mixed-design (split-plot) ANOVA.
 
     Parameters
     ----------
