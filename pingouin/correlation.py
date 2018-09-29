@@ -458,11 +458,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
 
 
 def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
-    """Repeated measures correlation (Bakdash and Marusich 2017).
-
-    https://www.frontiersin.org/articles/10.3389/fpsyg.2017.00456/full
-
-    Tested against the `rmcorr` R package.
+    """Repeated measures correlation.
 
     Parameters
     ----------
@@ -486,11 +482,19 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
 
     Notes
     -----
-    Repeated measures correlation (rmcorr) is a statistical technique
+    Repeated measures correlation [1]_ is a statistical technique
     for determining the common within-individual association for paired
     measures assessed on two or more occasions for multiple individuals.
 
+    Tested against the `rmcorr` R package.
+
     Please note that NaN are automatically removed from the dataframe.
+
+    References
+    ----------
+
+    .. [1] Bakdash, J.Z., Marusich, L.R., 2017. Repeated Measures Correlation.
+       Front. Psychol. 8, 456. https://doi.org/10.3389/fpsyg.2017.00456
 
     Examples
     --------

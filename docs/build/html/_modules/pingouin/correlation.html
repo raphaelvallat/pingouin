@@ -552,11 +552,7 @@
 
 
 <div class="viewcode-block" id="rm_corr"><a class="viewcode-back" href="../../generated/pingouin.rm_corr.html#pingouin.rm_corr">[docs]</a><span class="k">def</span> <span class="nf">rm_corr</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Repeated measures correlation (Bakdash and Marusich 2017).</span>
-
-<span class="sd">    https://www.frontiersin.org/articles/10.3389/fpsyg.2017.00456/full</span>
-
-<span class="sd">    Tested against the `rmcorr` R package.</span>
+    <span class="sd">&quot;&quot;&quot;Repeated measures correlation.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -580,11 +576,19 @@
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    Repeated measures correlation (rmcorr) is a statistical technique</span>
+<span class="sd">    Repeated measures correlation [1]_ is a statistical technique</span>
 <span class="sd">    for determining the common within-individual association for paired</span>
 <span class="sd">    measures assessed on two or more occasions for multiple individuals.</span>
 
+<span class="sd">    Tested against the `rmcorr` R package.</span>
+
 <span class="sd">    Please note that NaN are automatically removed from the dataframe.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    .. [1] Bakdash, J.Z., Marusich, L.R., 2017. Repeated Measures Correlation.</span>
+<span class="sd">       Front. Psychol. 8, 456. https://doi.org/10.3389/fpsyg.2017.00456</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
