@@ -101,10 +101,7 @@
 
 <div class="viewcode-block" id="bayesfactor_ttest"><a class="viewcode-back" href="../../generated/pingouin.bayesfactor_ttest.html#pingouin.bayesfactor_ttest">[docs]</a><span class="k">def</span> <span class="nf">bayesfactor_ttest</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">r</span><span class="o">=.</span><span class="mi">707</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor for a one or</span>
-<span class="sd">    two-sample T-test given t-value and sample size(s).</span>
-
-<span class="sd">    See Rouder et al. (2009) for details.</span>
+<span class="sd">    Bayes Factor of a T-test.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -129,7 +126,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    bf : float</span>
-<span class="sd">        Bayes Factor (BF10).</span>
+<span class="sd">        Scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor (BF10).</span>
 <span class="sd">        The Bayes Factor quantifies the evidence in favour of the</span>
 <span class="sd">        alternative hypothesis.</span>
 
@@ -210,10 +207,7 @@
 
 <div class="viewcode-block" id="bayesfactor_pearson"><a class="viewcode-back" href="../../generated/pingouin.bayesfactor_pearson.html#pingouin.bayesfactor_pearson">[docs]</a><span class="k">def</span> <span class="nf">bayesfactor_pearson</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the Jeffrey-Zellner-Siow (JZS) Bayes Factor for</span>
-<span class="sd">    correlation r and sample size n.</span>
-
-<span class="sd">    See Wetzels &amp; Wagemakers (2012) for details.</span>
+<span class="sd">    Bayes Factor of a Pearson correlation.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>

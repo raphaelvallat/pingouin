@@ -10,9 +10,7 @@ __all__ = ["mad", "madmedianrule", "mwu", "wilcoxon", "kruskal", "friedman",
 
 def mad(a, normalize=True, axis=0):
     """
-    Median Absolute Deviation along given axis of an array
-
-    See https://en.wikipedia.org/wiki/Median_absolute_deviation
+    Median Absolute Deviation along given axis of an array.
 
     Parameters
     ----------
@@ -28,10 +26,14 @@ def mad(a, normalize=True, axis=0):
     mad : float
         mad = median(abs(a - median(a))) / c
 
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Median_absolute_deviation
+
     Examples
     --------
 
-        >>>  a = [1.2, 5.4, 3.2, 7.8, 2.5]
+        >>> a = [1.2, 5.4, 3.2, 7.8, 2.5]
         >>> mad(a)
             2.965
         >>> mad(a, normalize=False)
@@ -43,8 +45,7 @@ def mad(a, normalize=True, axis=0):
 
 
 def madmedianrule(a):
-    """Outlier detection based on the MAD-median rule described in
-    Wilcox 2012.
+    """Outlier detection based on the MAD-median rule.
 
     Parameters
     ----------
@@ -56,6 +57,13 @@ def madmedianrule(a):
     outliers: boolean (same shape as a)
         Boolean array indicating whether each sample is an outlier (True) or
         not (False).
+
+    References
+    ----------
+
+    .. [1] Hall, P., Welsh, A.H., 1985. Limit theorems for the median
+       deviation. Ann. Inst. Stat. Math. 37, 27–36.
+       https://doi.org/10.1007/BF02481078
 
     Examples
     --------
@@ -482,6 +490,13 @@ def cochran(dv=None, within=None, subject=None, data=None,
     Data are expected to be in long-format.
 
     NaN are automatically removed from the data.
+
+    References
+    ----------
+
+    .. [1] Cochran, W.G., 1950. The comparison of percentages in matched
+       samples. Biometrika 37, 256–266.
+       https://doi.org/10.1093/biomet/37.3-4.256
 
     Examples
     --------

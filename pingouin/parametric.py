@@ -197,7 +197,7 @@ def test_dist(*args, dist='norm'):
 
 
 def epsilon(data, correction='gg'):
-    """Compute Epsilon adjustement factor for repeated measurements.
+    """Epsilon adjustement factor for repeated measurements.
 
     Parameters
     ----------

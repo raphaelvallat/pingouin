@@ -104,9 +104,7 @@
 
 <div class="viewcode-block" id="mad"><a class="viewcode-back" href="../../generated/pingouin.mad.html#pingouin.mad">[docs]</a><span class="k">def</span> <span class="nf">mad</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Median Absolute Deviation along given axis of an array</span>
-
-<span class="sd">    See https://en.wikipedia.org/wiki/Median_absolute_deviation</span>
+<span class="sd">    Median Absolute Deviation along given axis of an array.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -122,10 +120,14 @@
 <span class="sd">    mad : float</span>
 <span class="sd">        mad = median(abs(a - median(a))) / c</span>
 
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] https://en.wikipedia.org/wiki/Median_absolute_deviation</span>
+
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 
-<span class="sd">        &gt;&gt;&gt;  a = [1.2, 5.4, 3.2, 7.8, 2.5]</span>
+<span class="sd">        &gt;&gt;&gt; a = [1.2, 5.4, 3.2, 7.8, 2.5]</span>
 <span class="sd">        &gt;&gt;&gt; mad(a)</span>
 <span class="sd">            2.965</span>
 <span class="sd">        &gt;&gt;&gt; mad(a, normalize=False)</span>
@@ -137,8 +139,7 @@
 
 
 <div class="viewcode-block" id="madmedianrule"><a class="viewcode-back" href="../../generated/pingouin.madmedianrule.html#pingouin.madmedianrule">[docs]</a><span class="k">def</span> <span class="nf">madmedianrule</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Outlier detection based on the MAD-median rule described in</span>
-<span class="sd">    Wilcox 2012.</span>
+    <span class="sd">&quot;&quot;&quot;Outlier detection based on the MAD-median rule.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -150,6 +151,13 @@
 <span class="sd">    outliers: boolean (same shape as a)</span>
 <span class="sd">        Boolean array indicating whether each sample is an outlier (True) or</span>
 <span class="sd">        not (False).</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    .. [1] Hall, P., Welsh, A.H., 1985. Limit theorems for the median</span>
+<span class="sd">       deviation. Ann. Inst. Stat. Math. 37, 27–36.</span>
+<span class="sd">       https://doi.org/10.1007/BF02481078</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -576,6 +584,13 @@
 <span class="sd">    Data are expected to be in long-format.</span>
 
 <span class="sd">    NaN are automatically removed from the data.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    .. [1] Cochran, W.G., 1950. The comparison of percentages in matched</span>
+<span class="sd">       samples. Biometrika 37, 256–266.</span>
+<span class="sd">       https://doi.org/10.1093/biomet/37.3-4.256</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>

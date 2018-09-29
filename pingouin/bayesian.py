@@ -7,10 +7,7 @@ __all__ = ["bayesfactor_ttest", "bayesfactor_pearson"]
 
 def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     """
-    Calculates the scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor for a one or
-    two-sample T-test given t-value and sample size(s).
-
-    See Rouder et al. (2009) for details.
+    Bayes Factor of a T-test.
 
     Parameters
     ----------
@@ -35,7 +32,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     Returns
     -------
     bf : float
-        Bayes Factor (BF10).
+        Scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor (BF10).
         The Bayes Factor quantifies the evidence in favour of the
         alternative hypothesis.
 
@@ -116,10 +113,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
 
 def bayesfactor_pearson(r, n):
     """
-    Calculates the Jeffrey-Zellner-Siow (JZS) Bayes Factor for
-    correlation r and sample size n.
-
-    See Wetzels & Wagemakers (2012) for details.
+    Bayes Factor of a Pearson correlation.
 
     Parameters
     ----------

@@ -5,8 +5,8 @@
 API reference
 =============
 
-ANOVA
------
+ANOVA and T-test
+----------------
 
 .. _anova:
 
@@ -19,9 +19,9 @@ ANOVA
     epsilon
     mixed_anova
     ancova
-    kruskal
-    friedman
-    cochran
+    ttest
+    ttest_power
+    anova_power
 
 Bayesian
 --------
@@ -62,19 +62,6 @@ Correlation
     pairwise_corr
     intraclass_corr
 
-
-Datasets
---------
-
-.. _datasets:
-
-.. autosummary::
-   :toctree: generated/
-
-    pingouin.datasets.read_dataset
-    pingouin.datasets.list_dataset
-
-
 Distribution
 ------------
 
@@ -103,22 +90,8 @@ Effect sizes
     convert_effsize
     compute_esci
 
-
-Miscellaneous
--------------
-
-.. _utils:
-
-.. autosummary::
-     :toctree: generated/
-
-      print_table
-      mad
-      madmedianrule
-
-
-Multiple comparisons
---------------------
+Multiple comparisons and post-hoc tests
+---------------------------------------
 
 .. _multicomp:
 
@@ -132,27 +105,30 @@ Multiple comparisons
     holm
     fdr
 
+Non-parametric
+--------------
 
-Power
------
-
-.. _power:
-
-.. autosummary::
-   :toctree: generated/
-
-    ttest_power
-    anova_power
-
-
-T-tests
--------
-
-.. _ttests:
+.. _nonparametric:
 
 .. autosummary::
    :toctree: generated/
 
-    ttest
+    cochran
+    friedman
+    kruskal
+    mad
+    madmedianrule
     mwu
     wilcoxon
+
+Others
+------
+
+.. _utils:
+
+.. autosummary::
+     :toctree: generated/
+
+      print_table
+      pingouin.datasets.read_dataset
+      pingouin.datasets.list_dataset

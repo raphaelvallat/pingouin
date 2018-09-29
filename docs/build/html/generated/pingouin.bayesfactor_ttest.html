@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="pingouin.bayesfactor_pearson" href="pingouin.bayesfactor_pearson.html" />
-    <link rel="prev" title="pingouin.cochran" href="pingouin.cochran.html" />
+    <link rel="prev" title="pingouin.anova_power" href="pingouin.anova_power.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -98,9 +98,7 @@
 <dl class="function">
 <dt id="pingouin.bayesfactor_ttest">
 <code class="descclassname">pingouin.</code><code class="descname">bayesfactor_ttest</code><span class="sig-paren">(</span><em>t</em>, <em>nx</em>, <em>ny=None</em>, <em>paired=False</em>, <em>tail='two-sided'</em>, <em>r=0.707</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/bayesian.html#bayesfactor_ttest"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Calculates the scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor for a one or
-two-sample T-test given t-value and sample size(s).</p>
-<p>See Rouder et al. (2009) for details.</p>
+<dd><p>Bayes Factor of a T-test.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -134,7 +132,7 @@ The default is 0.707.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
 <dt><strong>bf</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">Bayes Factor (BF10).
+<dd><p class="first last">Scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor (BF10).
 The Bayes Factor quantifies the evidence in favour of the
 alternative hypothesis.</p>
 </dd>

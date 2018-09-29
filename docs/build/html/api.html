@@ -95,8 +95,8 @@
       
   <div class="section" id="api-reference">
 <span id="api-ref"></span><h1>API reference</h1>
-<div class="section" id="anova">
-<h2>ANOVA</h2>
+<div class="section" id="anova-and-t-test">
+<h2>ANOVA and T-test</h2>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
@@ -113,7 +113,7 @@
 <td>Two-way repeated measures ANOVA.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.epsilon.html#pingouin.epsilon" title="pingouin.epsilon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">epsilon</span></code></a>(data[,&nbsp;correction])</td>
-<td>Compute Epsilon adjustement factor for repeated measurements.</td>
+<td>Epsilon adjustement factor for repeated measurements.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.mixed_anova.html#pingouin.mixed_anova" title="pingouin.mixed_anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mixed_anova</span></code></a>([dv,&nbsp;within,&nbsp;subject,&nbsp;between,&nbsp;…])</td>
 <td>Mixed-design (split-plot) ANOVA.</td>
@@ -121,14 +121,14 @@
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.ancova.html#pingouin.ancova" title="pingouin.ancova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ancova</span></code></a>([dv,&nbsp;covar,&nbsp;between,&nbsp;data,&nbsp;…])</td>
 <td>ANCOVA with one or more covariate(s).</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.kruskal.html#pingouin.kruskal" title="pingouin.kruskal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kruskal</span></code></a>([dv,&nbsp;between,&nbsp;data,&nbsp;detailed,&nbsp;…])</td>
-<td>Kruskal-Wallis H-test for independent samples.</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.ttest.html#pingouin.ttest" title="pingouin.ttest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ttest</span></code></a>(x,&nbsp;y[,&nbsp;paired,&nbsp;tail,&nbsp;correction,&nbsp;r])</td>
+<td>T-test.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.friedman.html#pingouin.friedman" title="pingouin.friedman"><code class="xref py py-obj docutils literal notranslate"><span class="pre">friedman</span></code></a>([dv,&nbsp;within,&nbsp;subject,&nbsp;data,&nbsp;…])</td>
-<td>Friedman test for repeated measurements.</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.ttest_power.html#pingouin.ttest_power" title="pingouin.ttest_power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ttest_power</span></code></a>(d,&nbsp;nx[,&nbsp;ny,&nbsp;paired,&nbsp;tail,&nbsp;alpha])</td>
+<td>Determine achieved power of a T test given effect size, sample size and alpha level.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.cochran.html#pingouin.cochran" title="pingouin.cochran"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cochran</span></code></a>([dv,&nbsp;within,&nbsp;subject,&nbsp;data,&nbsp;…])</td>
-<td>Cochran Q test.</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.anova_power.html#pingouin.anova_power" title="pingouin.anova_power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anova_power</span></code></a>(eta,&nbsp;ntot,&nbsp;ngroups[,&nbsp;alpha])</td>
+<td>Determine achieved power of a one-way ANOVA given effect size, sample size, number of groups and alpha level.</td>
 </tr>
 </tbody>
 </table>
@@ -142,10 +142,10 @@
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.bayesfactor_ttest.html#pingouin.bayesfactor_ttest" title="pingouin.bayesfactor_ttest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bayesfactor_ttest</span></code></a>(t,&nbsp;nx[,&nbsp;ny,&nbsp;paired,&nbsp;tail,&nbsp;r])</td>
-<td>Calculates the scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor for a one or two-sample T-test given t-value and sample size(s).</td>
+<td>Bayes Factor of a T-test.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.bayesfactor_pearson.html#pingouin.bayesfactor_pearson" title="pingouin.bayesfactor_pearson"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bayesfactor_pearson</span></code></a>(r,&nbsp;n)</td>
-<td>Calculates the Jeffrey-Zellner-Siow (JZS) Bayes Factor for correlation r and sample size n.</td>
+<td>Bayes Factor of a Pearson correlation.</td>
 </tr>
 </tbody>
 </table>
@@ -202,23 +202,6 @@
 </tbody>
 </table>
 </div>
-<div class="section" id="datasets">
-<h2>Datasets</h2>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.datasets.read_dataset.html#pingouin.datasets.read_dataset" title="pingouin.datasets.read_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pingouin.datasets.read_dataset</span></code></a>(dname)</td>
-<td>Read example datasets.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.datasets.list_dataset.html#pingouin.datasets.list_dataset" title="pingouin.datasets.list_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pingouin.datasets.list_dataset</span></code></a>()</td>
-<td>List available example datasets.</td>
-</tr>
-</tbody>
-</table>
-</div>
 <div class="section" id="distribution">
 <h2>Distribution</h2>
 <table border="1" class="longtable docutils">
@@ -268,28 +251,8 @@
 </tbody>
 </table>
 </div>
-<div class="section" id="miscellaneous">
-<h2>Miscellaneous</h2>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.print_table.html#pingouin.print_table" title="pingouin.print_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_table</span></code></a>(df[,&nbsp;floatfmt,&nbsp;tablefmt])</td>
-<td>Pretty display of table.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.mad.html#pingouin.mad" title="pingouin.mad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mad</span></code></a>(a[,&nbsp;normalize,&nbsp;axis])</td>
-<td>Median Absolute Deviation along given axis of an array</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.madmedianrule.html#pingouin.madmedianrule" title="pingouin.madmedianrule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">madmedianrule</span></code></a>(a)</td>
-<td>Outlier detection based on the MAD-median rule described in Wilcox 2012.</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="multiple-comparisons">
-<h2>Multiple comparisons</h2>
+<div class="section" id="multiple-comparisons-and-post-hoc-tests">
+<h2>Multiple comparisons and post-hoc tests</h2>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
@@ -317,39 +280,54 @@
 </tbody>
 </table>
 </div>
-<div class="section" id="power">
-<h2>Power</h2>
+<div class="section" id="non-parametric">
+<h2>Non-parametric</h2>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.ttest_power.html#pingouin.ttest_power" title="pingouin.ttest_power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ttest_power</span></code></a>(d,&nbsp;nx[,&nbsp;ny,&nbsp;paired,&nbsp;tail,&nbsp;alpha])</td>
-<td>Determine achieved power of a T test given effect size, sample size and alpha level.</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.cochran.html#pingouin.cochran" title="pingouin.cochran"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cochran</span></code></a>([dv,&nbsp;within,&nbsp;subject,&nbsp;data,&nbsp;…])</td>
+<td>Cochran Q test.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.anova_power.html#pingouin.anova_power" title="pingouin.anova_power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anova_power</span></code></a>(eta,&nbsp;ntot,&nbsp;ngroups[,&nbsp;alpha])</td>
-<td>Determine achieved power of a one-way ANOVA given effect size, sample size, number of groups and alpha level.</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.friedman.html#pingouin.friedman" title="pingouin.friedman"><code class="xref py py-obj docutils literal notranslate"><span class="pre">friedman</span></code></a>([dv,&nbsp;within,&nbsp;subject,&nbsp;data,&nbsp;…])</td>
+<td>Friedman test for repeated measurements.</td>
 </tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="t-tests">
-<h2>T-tests</h2>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.ttest.html#pingouin.ttest" title="pingouin.ttest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ttest</span></code></a>(x,&nbsp;y[,&nbsp;paired,&nbsp;tail,&nbsp;correction,&nbsp;r])</td>
-<td>T-test.</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.kruskal.html#pingouin.kruskal" title="pingouin.kruskal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kruskal</span></code></a>([dv,&nbsp;between,&nbsp;data,&nbsp;detailed,&nbsp;…])</td>
+<td>Kruskal-Wallis H-test for independent samples.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.mad.html#pingouin.mad" title="pingouin.mad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mad</span></code></a>(a[,&nbsp;normalize,&nbsp;axis])</td>
+<td>Median Absolute Deviation along given axis of an array.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.madmedianrule.html#pingouin.madmedianrule" title="pingouin.madmedianrule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">madmedianrule</span></code></a>(a)</td>
+<td>Outlier detection based on the MAD-median rule.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/pingouin.mwu.html#pingouin.mwu" title="pingouin.mwu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mwu</span></code></a>(x,&nbsp;y[,&nbsp;tail])</td>
 <td>Mann-Whitney U Test (= Wilcoxon rank-sum test).</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.wilcoxon.html#pingouin.wilcoxon" title="pingouin.wilcoxon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wilcoxon</span></code></a>(x,&nbsp;y[,&nbsp;tail])</td>
 <td>Wilcoxon signed-rank test.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="others">
+<h2>Others</h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.print_table.html#pingouin.print_table" title="pingouin.print_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_table</span></code></a>(df[,&nbsp;floatfmt,&nbsp;tablefmt])</td>
+<td>Pretty display of table.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/pingouin.datasets.read_dataset.html#pingouin.datasets.read_dataset" title="pingouin.datasets.read_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pingouin.datasets.read_dataset</span></code></a>(dname)</td>
+<td>Read example datasets.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/pingouin.datasets.list_dataset.html#pingouin.datasets.list_dataset" title="pingouin.datasets.list_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pingouin.datasets.list_dataset</span></code></a>()</td>
+<td>List available example datasets.</td>
 </tr>
 </tbody>
 </table>
