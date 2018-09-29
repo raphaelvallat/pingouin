@@ -10,6 +10,11 @@ v0.1.8 (dev)
 
 a. Added support for multiple covariates in ANCOVA function (requires statsmodels).
 
+**Documentation**
+
+a. Major re-organization in API category
+b. Added equations and references for effect sizes and Bayesian functions.
+
 **Non-parametric**
 
 a. Added cochran function (Cochran Q test)
