@@ -397,6 +397,10 @@ def corr(x, y, tail='two-sided', method='pearson'):
         >>> corr(x, y, tail="one-sided", method='shepherd')
             method    r      CI95%         r2     adj_r2  p-val
             spearman  0.401  [0.05, 0.67]  0.161  0.099   0.014
+
+    8. Using columns of a pandas dataframe
+
+        >>> corr(data['x'], data['y'])
     """
     x = np.asarray(x)
     y = np.asarray(y)
