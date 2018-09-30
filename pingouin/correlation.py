@@ -552,7 +552,13 @@ def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
     assert isinstance(covar, (str, list))
     assert isinstance(data, pd.DataFrame)
     # Check that columns exist
-    col = list(x) + list(y) + list(covar)
+    if isinstance(covar, str):
+        col = [x] + [y] + [covar]
+        n_cvr = 1
+    if isinstance(covar, list):
+        col = [x] + [y] + covar
+        n_cvr = len(covar)
+        covar = covar[0] if n_cvr == 1 else covar
     assert all([c in data for c in col])
     # Check that columns are numeric
     assert all([data[c].dtype.kind in 'bfi' for c in col])
@@ -561,9 +567,7 @@ def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
     C = (data[col] - data[col].mean(axis=0)) / data[col].std(axis=0)
 
     # Covariates
-    cvar = C[covar].values
-    if len(list(covar)) == 1:
-        cvar = cvar[..., np.newaxis]
+    cvar = C[covar].values[..., np.newaxis] if n_cvr == 1 else C[covar].values
 
     # Compute beta
     beta_x = np.linalg.lstsq(cvar, C[y].values, rcond=None)[0]

@@ -51,6 +51,7 @@ class TestCorrelation(_TestPingouin):
         df['w'] = np.random.normal(size=30)
         df['v'] = np.random.normal(size=30)
         # Partial correlation of x and y controlling for z, w and v
+        partial_corr(data=df, x='x', y='y', covar=['z'])
         partial_corr(data=df, x='x', y='y', covar=['z', 'w', 'v'])
         partial_corr(data=df, x='x', y='y', covar=['z', 'w', 'v'],
                      method='spearman')
