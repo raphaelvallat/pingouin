@@ -93,7 +93,6 @@
       
   <h1>Source code for pingouin.correlation</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Author: Raphael Vallat &lt;raphaelvallat9@gmail.com&gt;</span>
-<span class="c1"># Date: May 2018</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">pearsonr</span><span class="p">,</span> <span class="n">spearmanr</span><span class="p">,</span> <span class="n">kendalltau</span>
@@ -101,7 +100,7 @@
 <span class="kn">from</span> <span class="nn">pingouin.utils</span> <span class="k">import</span> <span class="n">_remove_na</span>
 <span class="kn">from</span> <span class="nn">pingouin.nonparametric</span> <span class="k">import</span> <span class="n">mad</span><span class="p">,</span> <span class="n">madmedianrule</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;corr&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_corr&quot;</span><span class="p">,</span> <span class="s2">&quot;intraclass_corr&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;corr&quot;</span><span class="p">,</span> <span class="s2">&quot;partial_corr&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_corr&quot;</span><span class="p">,</span> <span class="s2">&quot;intraclass_corr&quot;</span><span class="p">]</span>
 
 
 <span class="k">def</span> <span class="nf">skipped</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
@@ -492,6 +491,10 @@
 <span class="sd">        &gt;&gt;&gt; corr(x, y, tail=&quot;one-sided&quot;, method=&#39;shepherd&#39;)</span>
 <span class="sd">            method    r      CI95%         r2     adj_r2  p-val</span>
 <span class="sd">            spearman  0.401  [0.05, 0.67]  0.161  0.099   0.014</span>
+
+<span class="sd">    8. Using columns of a pandas dataframe</span>
+
+<span class="sd">        &gt;&gt;&gt; corr(data[&#39;x&#39;], data[&#39;y&#39;])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -549,6 +552,127 @@
     <span class="n">stats</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
     <span class="n">stats</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">stats</span></div>
+
+
+<div class="viewcode-block" id="partial_corr"><a class="viewcode-back" href="../../generated/pingouin.partial_corr.html#pingouin.partial_corr">[docs]</a><span class="k">def</span> <span class="nf">partial_corr</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span>
+                 <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Partial correlation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : pd.DataFrame</span>
+<span class="sd">        Dataframe</span>
+<span class="sd">    x, y : string</span>
+<span class="sd">        x and y. Must be names of columns in data.</span>
+<span class="sd">    covar : string or list</span>
+<span class="sd">        Covariate(s). Must be a names of columns in data. Use a list if there</span>
+<span class="sd">        are more than one covariate.</span>
+<span class="sd">    tail : string</span>
+<span class="sd">        Specify whether to return &#39;one-sided&#39; or &#39;two-sided&#39; p-value.</span>
+<span class="sd">    method : string</span>
+<span class="sd">        Specify which method to use for the computation of the correlation</span>
+<span class="sd">        coefficient. Available methods are ::</span>
+
+<span class="sd">        &#39;pearson&#39; : Pearson product-moment correlation</span>
+<span class="sd">        &#39;spearman&#39; : Spearman rank-order correlation</span>
+<span class="sd">        &#39;kendall&#39; : Kendall’s tau (ordinal data)</span>
+<span class="sd">        &#39;percbend&#39; : percentage bend correlation (robust)</span>
+<span class="sd">        &#39;shepherd&#39; : Shepherd&#39;s pi correlation (robust Spearman)</span>
+<span class="sd">        &#39;skipped&#39; : skipped correlation (robust Spearman, requires sklearn)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    stats : pandas DataFrame</span>
+<span class="sd">        Test summary ::</span>
+
+<span class="sd">        &#39;r&#39; : Correlation coefficient</span>
+<span class="sd">        &#39;CI95&#39; : 95% parametric confidence intervals</span>
+<span class="sd">        &#39;r2&#39; : R-squared</span>
+<span class="sd">        &#39;adj_r2&#39; : Adjusted R-squared</span>
+<span class="sd">        &#39;p-val&#39; : one or two tailed p-value</span>
+<span class="sd">        &#39;BF10&#39; : Bayes Factor of the alternative hypothesis (Pearson only)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Partial correlation is a measure of the strength and direction of a</span>
+<span class="sd">    linear relationship between two continuous variables whilst controlling</span>
+<span class="sd">    for the effect of one or more other continuous variables</span>
+<span class="sd">    (also known as covariates or control variables).</span>
+
+<span class="sd">    Inspired from a code found at:</span>
+<span class="sd">    https://gist.github.com/fabianp/9396204419c7b638d38f</span>
+
+<span class="sd">    Results have been tested against the ppcor R package.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    .. [1] https://en.wikipedia.org/wiki/Partial_correlation</span>
+
+<span class="sd">    .. [2] https://cran.r-project.org/web/packages/ppcor/index.html</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    1. Partial correlation with one covariate</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import partial_corr</span>
+<span class="sd">        &gt;&gt;&gt; # Generate random correlated samples</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; mean, cov = [4, 6, 2], [(1, .5, .3), (.5, 1, .2), (.3, .2, 1)]</span>
+<span class="sd">        &gt;&gt;&gt; x, y, z = np.random.multivariate_normal(mean, cov, size=30).T</span>
+<span class="sd">        &gt;&gt;&gt; # Append in a dataframe</span>
+<span class="sd">        &gt;&gt;&gt; df = pd.DataFrame({&#39;x&#39;: x, &#39;y&#39;: y, &#39;z&#39;: z})</span>
+<span class="sd">        &gt;&gt;&gt; # Partial correlation of x and y controlling for z</span>
+<span class="sd">        &gt;&gt;&gt; partial_corr(data=df, x=&#39;x&#39;, y=&#39;y&#39;, covar=&#39;z&#39;)</span>
+<span class="sd">            method   r      CI95%         r2     adj_r2  p-val   BF10</span>
+<span class="sd">            pearson  0.568  [0.26, 0.77]  0.323  0.273   0.0010  28.695</span>
+
+<span class="sd">    2. Partial correlation with several covariates</span>
+
+<span class="sd">        &gt;&gt;&gt; # Add new random columns to the dataframe of the first example</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; df[&#39;w&#39;] = np.random.normal(size=30)</span>
+<span class="sd">        &gt;&gt;&gt; df[&#39;v&#39;] = np.random.normal(size=30)</span>
+<span class="sd">        &gt;&gt;&gt; # Partial correlation of x and y controlling for z, w and v</span>
+<span class="sd">        &gt;&gt;&gt; partial_corr(data=df, x=&#39;x&#39;, y=&#39;y&#39;, covar=[&#39;z&#39;, &#39;w&#39;, &#39;v&#39;])</span>
+<span class="sd">            method   r      CI95%         r2     adj_r2  p-val   BF10</span>
+<span class="sd">            pearson  0.493  [0.16, 0.72]  0.243  0.187   0.0056  6.258</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check arguments</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">covar</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
+    <span class="c1"># Check that columns exist</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">covar</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">y</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">covar</span><span class="p">]</span>
+        <span class="n">n_cvr</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">covar</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">y</span><span class="p">]</span> <span class="o">+</span> <span class="n">covar</span>
+        <span class="n">n_cvr</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">covar</span><span class="p">)</span>
+        <span class="n">covar</span> <span class="o">=</span> <span class="n">covar</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">n_cvr</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">covar</span>
+    <span class="k">assert</span> <span class="nb">all</span><span class="p">([</span><span class="n">c</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">col</span><span class="p">])</span>
+    <span class="c1"># Check that columns are numeric</span>
+    <span class="k">assert</span> <span class="nb">all</span><span class="p">([</span><span class="n">data</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">in</span> <span class="s1">&#39;bfi&#39;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">col</span><span class="p">])</span>
+
+    <span class="c1"># Standardize</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># Covariates</span>
+    <span class="n">cvar</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="n">covar</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="k">if</span> <span class="n">n_cvr</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">C</span><span class="p">[</span><span class="n">covar</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="c1"># Compute beta</span>
+    <span class="n">beta_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">cvar</span><span class="p">,</span> <span class="n">C</span><span class="p">[</span><span class="n">y</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">beta_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">cvar</span><span class="p">,</span> <span class="n">C</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Compute residuals</span>
+    <span class="n">res_x</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">cvar</span><span class="p">,</span> <span class="n">beta_y</span><span class="p">)</span>
+    <span class="n">res_y</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="n">y</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">cvar</span><span class="p">,</span> <span class="n">beta_x</span><span class="p">)</span>
+
+    <span class="c1"># Partial correlation = corr between these residuals</span>
+    <span class="k">return</span> <span class="n">corr</span><span class="p">(</span><span class="n">res_x</span><span class="p">,</span> <span class="n">res_y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="n">tail</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="rm_corr"><a class="viewcode-back" href="../../generated/pingouin.rm_corr.html#pingouin.rm_corr">[docs]</a><span class="k">def</span> <span class="nf">rm_corr</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">):</span>

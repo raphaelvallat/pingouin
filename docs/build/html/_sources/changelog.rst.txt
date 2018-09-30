@@ -3,6 +3,14 @@
 What's new
 ##########
 
+v0.1.9 (dev)
+------------
+
+**Correlation**
+
+a. Added partial_corr function (partial correlation)
+
+
 v0.1.8 (October 2018)
 ---------------------
 
