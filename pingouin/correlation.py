@@ -7,7 +7,7 @@ from scipy.stats import pearsonr, spearmanr, kendalltau
 from pingouin.utils import _remove_na
 from pingouin.nonparametric import mad, madmedianrule
 
-__all__ = ["corr", "rm_corr", "intraclass_corr"]
+__all__ = ["corr", "partial_corr", "rm_corr", "intraclass_corr"]
 
 
 def skipped(x, y):
@@ -455,6 +455,123 @@ def corr(x, y, tail='two-sided', method='pearson'):
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
     return stats
+
+
+def partial_corr(data=None, x=None, y=None, z=None, tail='two-sided',
+                 method='pearson'):
+    """Partial correlation.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Dataframe
+    x, y : string
+        x and y. Must be names of columns in data.
+    z : string or list
+        Covariate(s). Must be a names of columns in data. Use a list if there
+        are more than one covariate.
+    tail : string
+        Specify whether to return 'one-sided' or 'two-sided' p-value.
+    method : string
+        Specify which method to use for the computation of the correlation
+        coefficient. Available methods are ::
+
+        'pearson' : Pearson product-moment correlation
+        'spearman' : Spearman rank-order correlation
+        'kendall' : Kendall’s tau (ordinal data)
+        'percbend' : percentage bend correlation (robust)
+        'shepherd' : Shepherd's pi correlation (robust Spearman)
+        'skipped' : skipped correlation (robust Spearman, requires sklearn)
+
+    Returns
+    -------
+    stats : pandas DataFrame
+        Test summary ::
+
+        'r' : Correlation coefficient
+        'CI95' : 95% parametric confidence intervals
+        'r2' : R-squared
+        'adj_r2' : Adjusted R-squared
+        'p-val' : one or two tailed p-value
+        'BF10' : Bayes Factor of the alternative hypothesis (Pearson only)
+
+    Notes
+    -----
+    Partial correlation is a measure of the strength and direction of a
+    linear relationship between two continuous variables whilst controlling
+    for the effect of one or more other continuous variables
+    (also known as covariates or control variables).
+
+    Inspired from a code found at:
+    https://gist.github.com/fabianp/9396204419c7b638d38f
+
+    Results have been tested against the ppcor R package.
+
+    References
+    ----------
+
+    .. [1] https://en.wikipedia.org/wiki/Partial_correlation
+
+    .. [2] https://cran.r-project.org/web/packages/ppcor/index.html
+
+    Examples
+    --------
+    1. Partial correlation with one covariate
+
+        >>> import numpy as np
+        >>> import pandas as pd
+        >>> from pingouin import partial_corr
+        >>> # Generate random correlated samples
+        >>> np.random.seed(123)
+        >>> mean, cov = [4, 6, 2], [(1, .5, .3), (.5, 1, .2), (.3, .2, 1)]
+        >>> x, y, z = np.random.multivariate_normal(mean, cov, size=30).T
+        >>> # Append in a dataframe
+        >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
+        >>> # Partial correlation of x and y controlling for z
+        >>> partial_corr(data=df, x='x', y='y', z='z')
+            method   r      CI95%         r2     adj_r2  p-val   BF10
+            pearson  0.568  [0.26, 0.77]  0.323  0.273   0.0010  28.695
+
+    2. Partial correlation with several covariates
+
+        >>> # Add new random columns to the dataframe of the first example
+        >>> np.random.seed(123)
+        >>> df['w'] = np.random.normal(size=30)
+        >>> df['v'] = np.random.normal(size=30)
+        >>> # Partial correlation of x and y controlling for z, w and v
+        >>> partial_corr(data=df, x='x', y='y', z='z')
+            method   r      CI95%         r2     adj_r2  p-val   BF10
+            pearson  0.493  [0.16, 0.72]  0.243  0.187   0.0056  6.258
+    """
+    # Check arguments
+    assert isinstance(x, str)
+    assert isinstance(y, str)
+    assert isinstance(z, (str, list))
+    assert isinstance(data, pd.DataFrame)
+    # Check that columns exist
+    col = list(x) + list(y) + list(z)
+    assert all([c in data for c in col])
+    # Check that columns are numeric
+    assert all([data[c].dtype.kind in 'bfi' for c in col])
+
+    # Standardize
+    C = (data[col] - data[col].mean(axis=0)) / data[col].std(axis=0)
+
+    # Covariates
+    cvar = C.loc[:, z].values
+    if len(list(z)) == 1:
+        cvar = cvar[..., np.newaxis]
+
+    # Compute beta
+    beta_x = np.linalg.lstsq(cvar, C.loc[:, y].values, rcond=None)[0]
+    beta_y = np.linalg.lstsq(cvar, C.loc[:, x].values, rcond=None)[0]
+
+    # Compute residuals
+    res_y = C.loc[:, y].values - np.dot(cvar, beta_x)
+    res_x = C.loc[:, x].values - np.dot(cvar, beta_y)
+
+    # Partial correlation = corr between these residuals
+    return corr(res_x, res_y, method=method, tail=tail)
 
 
 def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):

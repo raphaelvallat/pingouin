@@ -1,7 +1,8 @@
 import pytest
 import numpy as np
+import pandas as pd
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.correlation import corr, rm_corr, intraclass_corr
+from pingouin.correlation import corr, rm_corr, intraclass_corr, partial_corr
 from pingouin.datasets import read_dataset
 
 
@@ -38,6 +39,21 @@ class TestCorrelation(_TestPingouin):
         df = read_dataset('pairwise_corr')
         stats = corr(df['Neuroticism'], df['Extraversion'])
         assert np.isclose(1 / stats['BF10'].values, 1.478e-13)
+
+    def test_partial_corr(self):
+        """Test function partial_corr"""
+        np.random.seed(123)
+        mean, cov = [4, 6, 2], [(1, .5, .3), (.5, 1, .2), (.3, .2, 1)]
+        x, y, z = np.random.multivariate_normal(mean, cov, size=30).T
+        df = pd.DataFrame({'x': x, 'y': y, 'z': z})
+        stats = partial_corr(data=df, x='x', y='y', z='z')
+        assert stats.loc['pearson', 'r'] == 0.568
+        df['w'] = np.random.normal(size=30)
+        df['v'] = np.random.normal(size=30)
+        # Partial correlation of x and y controlling for z, w and v
+        partial_corr(data=df, x='x', y='y', z=['z', 'w', 'v'])
+        partial_corr(data=df, x='x', y='y', z=['z', 'w', 'v'],
+                     method='spearman')
 
     def test_rmcorr(self):
         """Test function rm_corr"""

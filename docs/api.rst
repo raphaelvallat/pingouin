@@ -58,8 +58,9 @@ Correlation
    :toctree: generated/
 
     corr
-    rm_corr
     pairwise_corr
+    partial_corr
+    rm_corr
     intraclass_corr
 
 Distribution

@@ -30,7 +30,7 @@
 
 3. Robust correlations
 
-4. Repeated measures correlation and intraclass correlation
+4. Partial correlation, repeated measures correlation and intraclass correlation
 
 5. Bayes Factor
 
