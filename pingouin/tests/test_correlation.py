@@ -46,13 +46,13 @@ class TestCorrelation(_TestPingouin):
         mean, cov = [4, 6, 2], [(1, .5, .3), (.5, 1, .2), (.3, .2, 1)]
         x, y, z = np.random.multivariate_normal(mean, cov, size=30).T
         df = pd.DataFrame({'x': x, 'y': y, 'z': z})
-        stats = partial_corr(data=df, x='x', y='y', z='z')
+        stats = partial_corr(data=df, x='x', y='y', covar='z')
         assert stats.loc['pearson', 'r'] == 0.568
         df['w'] = np.random.normal(size=30)
         df['v'] = np.random.normal(size=30)
         # Partial correlation of x and y controlling for z, w and v
-        partial_corr(data=df, x='x', y='y', z=['z', 'w', 'v'])
-        partial_corr(data=df, x='x', y='y', z=['z', 'w', 'v'],
+        partial_corr(data=df, x='x', y='y', covar=['z', 'w', 'v'])
+        partial_corr(data=df, x='x', y='y', covar=['z', 'w', 'v'],
                      method='spearman')
 
     def test_rmcorr(self):

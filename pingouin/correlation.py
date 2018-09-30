@@ -1,5 +1,4 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
-# Date: May 2018
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr, spearmanr, kendalltau
@@ -457,7 +456,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     return stats
 
 
-def partial_corr(data=None, x=None, y=None, z=None, tail='two-sided',
+def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
                  method='pearson'):
     """Partial correlation.
 
@@ -467,7 +466,7 @@ def partial_corr(data=None, x=None, y=None, z=None, tail='two-sided',
         Dataframe
     x, y : string
         x and y. Must be names of columns in data.
-    z : string or list
+    covar : string or list
         Covariate(s). Must be a names of columns in data. Use a list if there
         are more than one covariate.
     tail : string
@@ -528,7 +527,7 @@ def partial_corr(data=None, x=None, y=None, z=None, tail='two-sided',
         >>> # Append in a dataframe
         >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
         >>> # Partial correlation of x and y controlling for z
-        >>> partial_corr(data=df, x='x', y='y', z='z')
+        >>> partial_corr(data=df, x='x', y='y', covar='z')
             method   r      CI95%         r2     adj_r2  p-val   BF10
             pearson  0.568  [0.26, 0.77]  0.323  0.273   0.0010  28.695
 
@@ -539,17 +538,17 @@ def partial_corr(data=None, x=None, y=None, z=None, tail='two-sided',
         >>> df['w'] = np.random.normal(size=30)
         >>> df['v'] = np.random.normal(size=30)
         >>> # Partial correlation of x and y controlling for z, w and v
-        >>> partial_corr(data=df, x='x', y='y', z='z')
+        >>> partial_corr(data=df, x='x', y='y', covar=['z', 'w', 'v'])
             method   r      CI95%         r2     adj_r2  p-val   BF10
             pearson  0.493  [0.16, 0.72]  0.243  0.187   0.0056  6.258
     """
     # Check arguments
     assert isinstance(x, str)
     assert isinstance(y, str)
-    assert isinstance(z, (str, list))
+    assert isinstance(covar, (str, list))
     assert isinstance(data, pd.DataFrame)
     # Check that columns exist
-    col = list(x) + list(y) + list(z)
+    col = list(x) + list(y) + list(covar)
     assert all([c in data for c in col])
     # Check that columns are numeric
     assert all([data[c].dtype.kind in 'bfi' for c in col])
@@ -558,17 +557,17 @@ def partial_corr(data=None, x=None, y=None, z=None, tail='two-sided',
     C = (data[col] - data[col].mean(axis=0)) / data[col].std(axis=0)
 
     # Covariates
-    cvar = C.loc[:, z].values
-    if len(list(z)) == 1:
+    cvar = C[covar].values
+    if len(list(covar)) == 1:
         cvar = cvar[..., np.newaxis]
 
     # Compute beta
-    beta_x = np.linalg.lstsq(cvar, C.loc[:, y].values, rcond=None)[0]
-    beta_y = np.linalg.lstsq(cvar, C.loc[:, x].values, rcond=None)[0]
+    beta_x = np.linalg.lstsq(cvar, C[y].values, rcond=None)[0]
+    beta_y = np.linalg.lstsq(cvar, C[x].values, rcond=None)[0]
 
     # Compute residuals
-    res_y = C.loc[:, y].values - np.dot(cvar, beta_x)
-    res_x = C.loc[:, x].values - np.dot(cvar, beta_y)
+    res_x = C[x].values - np.dot(cvar, beta_y)
+    res_y = C[y].values - np.dot(cvar, beta_x)
 
     # Partial correlation = corr between these residuals
     return corr(res_x, res_y, method=method, tail=tail)
