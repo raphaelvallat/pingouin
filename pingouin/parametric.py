@@ -13,12 +13,6 @@ __all__ = ["gzscore", "test_normality", "test_homoscedasticity", "test_dist",
 def gzscore(x):
     """Geometric standard (Z) score.
 
-    Geometric Z-scores are better measures of dispersion than arithmetic
-    z-scores when the sample data come from a log-normally distributed
-    population.
-
-    See https://en.wikipedia.org/wiki/Geometric_standard_deviation
-
     Parameters
     ----------
     x : array_like
@@ -28,6 +22,23 @@ def gzscore(x):
     -------
     gzscore : array_like
         Array of geometric z-scores (same shape as x)
+
+    Notes
+    -----
+    Geometric Z-scores are better measures of dispersion than arithmetic
+    z-scores when the sample data come from a log-normally distributed
+    population.
+
+    Given the raw scores :math:`x`, the geometric mean :math:`\mu_g` and
+    the geometric standard deviation :math:`\sigma_g`,
+    the standard score is given by the formula:
+
+    .. math:: z = \dfrac{log(x) - log(\mu_g)}{log(\sigma_g)}
+
+    References
+    ----------
+
+    .. [1] https://en.wikipedia.org/wiki/Geometric_standard_deviation
 
     Examples
     --------
@@ -202,26 +213,79 @@ def epsilon(data, correction='gg'):
     Parameters
     ----------
     data : pd.DataFrame
-        DataFrame containing the repeated measurements.
-
-        Note that data are NOT expected to be in long format but rather with
-        shape (n_subj, n_groups). If your data are in long format, use the
-        pandas pivot function first.
+        DataFrame containing the repeated measurements (n_subj, n_groups).
     correction : string
         Specify the epsilon version ::
 
             'gg' : Greenhouse-Geisser
             'hf' : Huynh-Feldt
+            'lb' : Lower bound
+
+    Notes
+    -----
+    Note that data are NOT expected to be in long format but rather with
+    shape (n_subj, n_groups). If your data are in long format, use the
+    pandas pivot function first.
+
+    The **lower bound** for epsilon is:
+
+    .. math:: lb = \dfrac{1}{k - 1}
+
+    where :math:`k` is the number of groups (= data.shape[1]).
+
+    The **Greenhouse-Geisser epsilon** is given by:
+
+    .. math::
+
+        \epsilon_{GG} = \dfrac{k^2(\overline{diag(S)} - \overline{S})^2}
+        {(k-1)(\sum_{i=1}^{k}\sum_{j=1}^{k}s_{ij}^2 - 2k\sum_{j=1}^{k}
+        \overline{s_i}^2 + k^2\overline{S}^2)}
+
+    where :math:`S` is the covariance matrix, :math:`\overline{S}` the
+    grandmean of S and :math:`\overline{diag(S)}` the mean of all the elements
+    on the diagonal of S (i.e. mean of the variances).
+
+    The **Huynh-Feldt epsilon** is given by:
+
+    .. math::
+
+        \epsilon_{HF} = \dfrac{n(k-1)\epsilon_{GG}-2}{(k-1)
+        (n-1-(k-1)\epsilon_{GG})}
+
+    where :math:`n` is the number of subjects.
+
+    Inspired from
+    http://www.real-statistics.com/anova-repeated-measures/sphericity/
 
     Returns
     -------
     eps : float
         Epsilon adjustement factor.
+
+    Examples
+    --------
+
+        >>> import pandas as pd
+        >>> from pingouin import epsilon
+        >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
+        >>>                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
+        >>>                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
+        >>> epsilon(data, correction='gg')
+            0.558
+
+        >>> epsilon(data, correction='hf')
+            0.622
+
+        >>> epsilon(data, correction='lb')
+            0.50
     """
     # Covariance matrix
     S = data.cov()
     n = data.shape[0]
     k = data.shape[1]
+
+    if correction == 'lb':
+        return 1 / (k - 1)
 
     mean_var = np.diag(S).mean()
     S_mean = S.mean().mean()
@@ -238,7 +302,7 @@ def epsilon(data, correction='gg'):
         den = (k - 1) * (n - 1 - (k - 1) * eps)
         eps = np.min([num / den, 1])
 
-    return np.float32(eps)
+    return eps
 
 
 def test_sphericity(data, method='mauchly', alpha=.05):

@@ -99,10 +99,6 @@
 <dt id="pingouin.gzscore">
 <code class="descclassname">pingouin.</code><code class="descname">gzscore</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#gzscore"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Geometric standard (Z) score.</p>
-<p>Geometric Z-scores are better measures of dispersion than arithmetic
-z-scores when the sample data come from a log-normally distributed
-population.</p>
-<p>See <a class="reference external" href="https://en.wikipedia.org/wiki/Geometric_standard_deviation">https://en.wikipedia.org/wiki/Geometric_standard_deviation</a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -121,6 +117,22 @@ population.</p>
 </dl>
 </td>
 </tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Geometric Z-scores are better measures of dispersion than arithmetic
+z-scores when the sample data come from a log-normally distributed
+population.</p>
+<p>Given the raw scores <span class="math notranslate nohighlight">\(x\)</span>, the geometric mean <span class="math notranslate nohighlight">\(\mu_g\)</span> and
+the geometric standard deviation <span class="math notranslate nohighlight">\(\sigma_g\)</span>,
+the standard score is given by the formula:</p>
+<div class="math notranslate nohighlight">
+\[z = \dfrac{log(x) - log(\mu_g)}{log(\sigma_g)}\]</div>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r81b9e33bcb92-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td><a class="reference external" href="https://en.wikipedia.org/wiki/Geometric_standard_deviation">https://en.wikipedia.org/wiki/Geometric_standard_deviation</a></td></tr>
 </tbody>
 </table>
 <p class="rubric">Examples</p>

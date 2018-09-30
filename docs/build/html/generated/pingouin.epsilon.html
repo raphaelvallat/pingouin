@@ -105,15 +105,13 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
 <dt><strong>data</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd><p class="first">DataFrame containing the repeated measurements.</p>
-<p class="last">Note that data are NOT expected to be in long format but rather with
-shape (n_subj, n_groups). If your data are in long format, use the
-pandas pivot function first.</p>
+<dd><p class="first last">DataFrame containing the repeated measurements (n_subj, n_groups).</p>
 </dd>
 <dt><strong>correction</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd><p class="first">Specify the epsilon version</p>
 <div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;gg&#39;</span> <span class="p">:</span> <span class="n">Greenhouse</span><span class="o">-</span><span class="n">Geisser</span>
 <span class="s1">&#39;hf&#39;</span> <span class="p">:</span> <span class="n">Huynh</span><span class="o">-</span><span class="n">Feldt</span>
+<span class="s1">&#39;lb&#39;</span> <span class="p">:</span> <span class="n">Lower</span> <span class="n">bound</span>
 </pre></div>
 </div>
 </dd>
@@ -129,6 +127,47 @@ pandas pivot function first.</p>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>Note that data are NOT expected to be in long format but rather with
+shape (n_subj, n_groups). If your data are in long format, use the
+pandas pivot function first.</p>
+<p>The <strong>lower bound</strong> for epsilon is:</p>
+<div class="math notranslate nohighlight">
+\[lb = \dfrac{1}{k - 1}\]</div>
+<p>where <span class="math notranslate nohighlight">\(k\)</span> is the number of groups (= data.shape[1]).</p>
+<p>The <strong>Greenhouse-Geisser epsilon</strong> is given by:</p>
+<div class="math notranslate nohighlight">
+\[\epsilon_{GG} = \dfrac{k^2(\overline{diag(S)} - \overline{S})^2}
+{(k-1)(\sum_{i=1}^{k}\sum_{j=1}^{k}s_{ij}^2 - 2k\sum_{j=1}^{k}
+\overline{s_i}^2 + k^2\overline{S}^2)}\]</div>
+<p>where <span class="math notranslate nohighlight">\(S\)</span> is the covariance matrix, <span class="math notranslate nohighlight">\(\overline{S}\)</span> the
+grandmean of S and <span class="math notranslate nohighlight">\(\overline{diag(S)}\)</span> the mean of all the elements
+on the diagonal of S (i.e. mean of the variances).</p>
+<p>The <strong>Huynh-Feldt epsilon</strong> is given by:</p>
+<div class="math notranslate nohighlight">
+\[\epsilon_{HF} = \dfrac{n(k-1)\epsilon_{GG}-2}{(k-1)
+(n-1-(k-1)\epsilon_{GG})}\]</div>
+<p>where <span class="math notranslate nohighlight">\(n\)</span> is the number of subjects.</p>
+<p>Inspired from
+<a class="reference external" href="http://www.real-statistics.com/anova-repeated-measures/sphericity/">http://www.real-statistics.com/anova-repeated-measures/sphericity/</a></p>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">epsilon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.1</span><span class="p">,</span> <span class="mf">4.3</span><span class="p">,</span> <span class="mf">4.1</span><span class="p">,</span> <span class="mf">7.2</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span>                     <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mf">4.1</span><span class="p">,</span> <span class="mf">5.2</span><span class="p">,</span> <span class="mf">6.4</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span>                     <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">8.2</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">,</span> <span class="mf">6.2</span><span class="p">,</span> <span class="mf">7.2</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">epsilon</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;gg&#39;</span><span class="p">)</span>
+<span class="go">    0.558</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">epsilon</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;hf&#39;</span><span class="p">)</span>
+<span class="go">    0.622</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">epsilon</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;lb&#39;</span><span class="p">)</span>
+<span class="go">    0.50</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>
