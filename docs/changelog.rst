@@ -3,12 +3,16 @@
 What's new
 ##########
 
-v0.1.9 (dev)
-------------
+v0.1.9 (October 2018)
+---------------------
 
 **Correlation**
 
 a. Added partial_corr function (partial correlation)
+
+**Doc**
+
+a. Minor improvements in docs and binder notebooks
 
 
 v0.1.8 (October 2018)
