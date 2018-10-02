@@ -108,7 +108,7 @@ def anova_power(eta, ntot, ngroups, alpha=.05):
 
         >>> ntot, ngroups = 60, 3
         >>> eta = .2
-        >>> power = anova_power(d, ntot, ngroups)
+        >>> power = anova_power(eta, ntot, ngroups)
         >>> print(power)
             0.932
     """
