@@ -3,7 +3,7 @@ import numpy as np
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.datasets import read_dataset
 from pingouin.circular import (circ_axial, circ_corrcc, circ_corrcl, circ_mean,
-                               circ_r, circ_rayleigh)
+                               circ_r, circ_rayleigh, circ_vtest)
 
 
 class TestCircular(_TestPingouin):
@@ -79,3 +79,17 @@ class TestCircular(_TestPingouin):
         # Wrong argument
         with pytest.raises(ValueError):
             circ_rayleigh(x, w=[0.1, 0.2, 0.3])
+
+    def test_circ_vtest(self):
+        """Test function circ_vtest."""
+        x = [0.785, 1.570, 3.141, 0.839, 5.934]
+        v, pval = circ_vtest(x, dir=1)
+        # Compare with the CircStats MATLAB toolbox
+        assert v == 2.486
+        assert np.round(pval, 4) == 0.0579
+        v, pval = circ_vtest(x, dir=0.5, w=[.1, .2, .3, .4, .5], d=0.2)
+        assert v == 0.637
+        assert np.round(pval, 4) == 0.2309
+        # Wrong argument
+        with pytest.raises(ValueError):
+            circ_vtest(x, w=[0.1, 0.2, 0.3])

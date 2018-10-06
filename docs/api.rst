@@ -48,6 +48,7 @@ Circular
     circ_mean
     circ_r
     circ_rayleigh
+    circ_vtest
 
 Correlation
 -----------

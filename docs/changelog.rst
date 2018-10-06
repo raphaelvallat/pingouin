@@ -3,6 +3,14 @@
 What's new
 ##########
 
+v0.2.0 (dev)
+------------
+
+**Circular**
+
+a. Added circ_vtest function
+
+
 v0.1.9 (October 2018)
 ---------------------
 
