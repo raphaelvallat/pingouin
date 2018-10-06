@@ -62,7 +62,7 @@ def _remove_na(x, y, paired=False):
     x_na = np.any(np.isnan(x))
     y_na = np.any(np.isnan(y))
     if (x_na or y_na) and paired:
-        ar = np.c_[x, y]
+        ar = np.column_stack((x, y))
         ar = ar[~np.isnan(ar).any(axis=1)]
         x, y = ar[:, 0], ar[:, 1]
     elif (x_na or y_na) and not paired:

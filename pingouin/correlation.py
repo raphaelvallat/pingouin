@@ -11,15 +11,7 @@ __all__ = ["corr", "partial_corr", "rm_corr", "intraclass_corr"]
 
 def skipped(x, y):
     """
-    Compute the skipped correlation (Rousselet and Pernet 2012).
-
-    Code inspired by Matlab code from Cyril Pernet and Guillaume Rousselet:
-
-    Pernet CR, Wilcox R, Rousselet GA. Robust Correlation Analyses:
-    False Positive and Power Validation Using a New Open Source Matlab Toolbox.
-    Frontiers in Psychology. 2012;3:606. doi:10.3389/fpsyg.2012.00606.
-
-    Requires scikit-learn.
+    Skipped correlation (Rousselet and Pernet 2012).
 
     Parameters
     ----------
@@ -45,13 +37,26 @@ def skipped(x, y):
     Finally, Spearman correlations are computed on the remaining data points
     and calculations are adjusted by taking into account the dependency among
     the remaining data points.
+
+    Code inspired by Matlab code from Cyril Pernet and Guillaume
+    Rousselet [1]_.
+
+    Requires scikit-learn.
+
+    References
+    ----------
+
+    .. [1] Pernet CR, Wilcox R, Rousselet GA. Robust Correlation Analyses:
+       False Positive and Power Validation Using a New Open Source Matlab
+       Toolbox. Frontiers in Psychology. 2012;3:606.
+       doi:10.3389/fpsyg.2012.00606.
     """
     # Check that sklearn is installed
     from pingouin.utils import is_sklearn_installed
     is_sklearn_installed(raise_error=True)
     from scipy.stats import chi2
     from sklearn.covariance import MinCovDet
-    X = np.vstack([x, y]).T
+    X = np.column_stack((x, y))
     center = MinCovDet().fit(X).location_
 
     # Detect outliers based on robust covariance
@@ -103,10 +108,10 @@ def mahal(Y, X):
     rx, cx = X.shape
     ry, cy = Y.shape
 
-    m = np.mean(X, 0)
+    m = X.mean(0)
     M = np.tile(m, ry).reshape(ry, 2)
     C = X - np.tile(m, rx).reshape(rx, 2)
-    Q, R = np.linalg.qr(C)
+    _, R = np.linalg.qr(C)
     ri = np.linalg.solve(R.T, (Y - M).T)
     return np.sum(ri**2, 0) * (rx - 1)
 
@@ -133,18 +138,17 @@ def bsmahal(a, b, n_boot=2000):
     n = b.shape[0]
     MD = np.zeros((n, n_boot))
     nr = np.arange(n)
+    xB = np.random.choice(nr, size=(n_boot, n), replace=True)
 
     # Bootstrap the MD
     for i in np.arange(n_boot):
-        x = np.random.choice(nr, size=n, replace=True)
-        s1 = b[x, 0]
-        s2 = b[x, 1]
-        Y = np.vstack([s1, s2]).T
-        m = mahal(a, Y)
-        MD[:, i] = m
+        s1 = b[xB[i, :], 0]
+        s2 = b[xB[i, :], 1]
+        Y = np.column_stack((s1, s2))
+        MD[:, i] = mahal(a, Y)
 
     # Average across all bootstraps
-    return np.mean(MD, 1)
+    return MD.mean(1)
 
 
 def shepherd(x, y, n_boot=2000):
@@ -175,7 +179,7 @@ def shepherd(x, y, n_boot=2000):
     """
     from scipy.stats import spearmanr
 
-    X = np.vstack([x, y]).T
+    X = np.column_stack((x, y))
 
     # Bootstrapping on Mahalanobis distance
     m = bsmahal(X, X, n_boot)
@@ -195,13 +199,7 @@ def shepherd(x, y, n_boot=2000):
 
 def percbend(x, y, beta=.2):
     """
-    Compute the percentage bend correlation (Wilcox 1994).
-
-    Code inspired by Matlab code from Cyril Pernet and Guillaume Rousselet:
-
-    Pernet CR, Wilcox R, Rousselet GA. Robust Correlation Analyses:
-    False Positive and Power Validation Using a New Open Source Matlab Toolbox.
-    Frontiers in Psychology. 2012;3:606. doi:10.3389/fpsyg.2012.00606.
+    Percentage bend correlation (Wilcox 1994).
 
     Parameters
     ----------
@@ -216,9 +214,24 @@ def percbend(x, y, beta=.2):
         Percentage bend correlation coefficient.
     pval : float
         Two-tailed p-value.
+
+    Notes
+    -----
+    Code inspired by Matlab code from Cyril Pernet and Guillaume Rousselet.
+
+    References
+    ----------
+
+    .. [1] Wilcox, R.R., 1994. The percentage bend correlation coefficient.
+       Psychometrika 59, 601–616. https://doi.org/10.1007/BF02294395
+
+    .. [2] Pernet CR, Wilcox R, Rousselet GA. Robust Correlation Analyses:
+       False Positive and Power Validation Using a New Open Source Matlab
+       Toolbox. Frontiers in Psychology. 2012;3:606.
+       doi:10.3389/fpsyg.2012.00606.
     """
     from scipy.stats import t
-    X = np.c_[x, y]
+    X = np.column_stack((x, y))
     nx = X.shape[0]
     M = np.tile(np.median(X, axis=0), nx).reshape(X.shape)
     W = np.sort(np.abs(X - M), axis=0)
@@ -305,7 +318,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     protects against univariate outliers.
 
     The Shepherd's pi [2]_ and skipped [3]_, [4]_ correlations are both robust
-    methods that returns the Spearman's rho after outliers removal.
+    methods that returns the Spearman's rho after bivariate outliers removal.
     Note that the skipped correlation requires that the scikit-learn
     package is installed (for computing the minimum covariance determinant).
 
