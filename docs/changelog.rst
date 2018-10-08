@@ -13,6 +13,8 @@ a. Added circ_vtest function
 **Distribution**
 
 a. Added multivariate_normality function (Henze-Zirkler's Multivariate Normality Test)
+b. Renamed functions test_normality, test_sphericity and test_homoscedasticity to normality, sphericity and homoscedasticity to avoid bugs with pytest.
+c. Moved distribution tests from parametric.py to distribution.py
 
 
 v0.1.9 (October 2018)

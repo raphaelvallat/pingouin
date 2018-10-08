@@ -157,9 +157,9 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: ipython3
 
-   from pingouin import test_normality
+   from pingouin import normality
    # Return a boolean (true if normal) and the associated p-value
-   test_normality(x, y)
+   normality(x, y)
 
 .. parsed-literal::
 

@@ -72,13 +72,12 @@ Distribution
 .. autosummary::
    :toctree: generated/
 
+    anderson
     gzscore
+    homoscedasticity
+    normality
     multivariate_normality
-    test_normality
-    test_homoscedasticity
-    test_sphericity
-    test_dist
-
+    sphericity
 
 Effect sizes
 ------------

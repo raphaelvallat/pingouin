@@ -2,7 +2,6 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr, spearmanr, kendalltau
-# from pingouin import test_normality
 from pingouin.utils import _remove_na
 from pingouin.nonparametric import mad, madmedianrule
 
@@ -428,12 +427,6 @@ def corr(x, y, tail='two-sided', method='pearson'):
 
     # Compute correlation coefficient
     if method == 'pearson':
-        # Test normality of the data
-        # normal, pnorm = test_normality(x, y)
-        # if not normal.all():
-        #     print('Warning: data are not normaly distributed (x = %.3f, y ='
-        #           % pnorm[0], '%.3f). Consider using alternative methods.' %
-        #           pnorm[1])
         r, pval = pearsonr(x, y)
     elif method == 'spearman':
         r, pval = spearmanr(x, y)

@@ -139,7 +139,7 @@ the following formula: eta = (fval * dof1) / (fval * dof1 + dof2)</p>
 <li><p class="first">Achieved power of a one-way ANOVA.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ntot</span><span class="p">,</span> <span class="n">ngroups</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">3</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">eta</span> <span class="o">=</span> <span class="o">.</span><span class="mi">2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">power</span> <span class="o">=</span> <span class="n">anova_power</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">ntot</span><span class="p">,</span> <span class="n">ngroups</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">power</span> <span class="o">=</span> <span class="n">anova_power</span><span class="p">(</span><span class="n">eta</span><span class="p">,</span> <span class="n">ntot</span><span class="p">,</span> <span class="n">ngroups</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">power</span><span class="p">)</span>
 <span class="go">    0.932</span>
 </pre></div>

@@ -1,6 +1,6 @@
-pingouin.test\_dist
+pingouin.sphericity
 ===================
 
 .. currentmodule:: pingouin
 
-.. autofunction:: test_dist
+.. autofunction:: sphericity

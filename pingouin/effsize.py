@@ -2,7 +2,7 @@
 # Date: April 2018
 import numpy as np
 from pingouin.utils import _check_eftype, _remove_na
-from pingouin.parametric import test_homoscedasticity
+from pingouin.distribution import homoscedasticity
 
 
 __all__ = ["compute_esci", "convert_effsize", "compute_effsize",
@@ -461,7 +461,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         return r
     else:
         # Test equality of variance of data with a stringent threshold
-        equal_var, p = test_homoscedasticity(x, y, alpha=.001)
+        equal_var, p = homoscedasticity(x, y, alpha=.001)
         if not equal_var:
             print('Unequal variances (p<.001). You should consider reporting',
                   'Glass delta instead.')
