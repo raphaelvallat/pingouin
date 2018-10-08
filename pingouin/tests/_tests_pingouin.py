@@ -6,7 +6,6 @@ class _TestPingouin(object):
     """Pingouin testing utility methods."""
 
     OBJ = None
-    NEEDED_FILES = {}
 
     def assert_and_test(self, attr, to_set, to_test='NoAttr'):
         """Assert to obj and test."""

@@ -681,7 +681,6 @@ def _qsturng(p, r, v):
             raise ValueError('v must be > 1 when p >= .9')
 
     # The easy case. A tabled value is requested.
-
     #numpy 1.4.1: TypeError: unhashable type: 'numpy.ndarray' :
     p = float(p)
     if isinstance(v, np.ndarray):
@@ -723,7 +722,7 @@ def _qsturng(p, r, v):
         y = _interpolate_p(p, r, v)
 
     return math.sqrt(2) * -y * \
-           scipy.stats.t.isf((1.+p)/2., (v,1e38)[v>1e38])
+           scipy.stats.t.isf((1. + p) / 2., (v, 1e38)[v > 1e38])
 
 # make a qsturng functinon that will accept list-like objects
 _vqsturng = np.vectorize(_qsturng)

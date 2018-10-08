@@ -4,7 +4,8 @@ import numpy as np
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.parametric import (gzscore, test_normality, ttest, anova, anova2,
                                  rm_anova, mixed_anova, test_dist, epsilon,
-                                 rm_anova2, ancova, ancovan)
+                                 rm_anova2, ancova, ancovan,
+                                 multivariate_normality)
 from pingouin.datasets import read_dataset
 
 # Generate random data for ANOVA
@@ -45,6 +46,21 @@ class TestParametric(_TestPingouin):
         """Test function test_normality."""
         test_normality(x, alpha=.05)
         test_normality(x, y, alpha=.05)
+
+    def test_multivariate_normality(self):
+        """Test function multivariate_normality."""
+        np.random.seed(123)
+        # With 2 variables
+        mean, cov, n = [4, 6], [[1, .5], [.5, 1]], 30
+        X = np.random.multivariate_normal(mean, cov, n)
+        normal, p = multivariate_normality(X, alpha=.05)
+        # Compare with the Matlab Robust Corr toolbox
+        assert normal
+        assert np.round(p, 3) == 0.752
+        # With 3 variables
+        mean, cov = [4, 6, 5], [[1., .5, .2], [.5, 1., .1], [.2, .1, 1.]]
+        X = np.random.multivariate_normal(mean, cov, 50)
+        normal, p = multivariate_normality(X, alpha=.01)
 
     # def test_test_homoscedasticity(self):
     #     """Test function test_homoscedasticity."""

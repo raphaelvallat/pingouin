@@ -10,6 +10,10 @@ v0.2.0 (dev)
 
 a. Added circ_vtest function
 
+**Distribution**
+
+a. Added multivariate_normality function (Henze-Zirkler's Multivariate Normality Test)
+
 
 v0.1.9 (October 2018)
 ---------------------

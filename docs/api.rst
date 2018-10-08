@@ -73,6 +73,7 @@ Distribution
    :toctree: generated/
 
     gzscore
+    multivariate_normality
     test_normality
     test_homoscedasticity
     test_sphericity
