@@ -22,8 +22,4 @@ Python is currently the fastest growing programming language in the world, thank
 
 In this paper, we present ``Pingouin``, an open-source Python package aimed at partially filling this gap by providing easy-to-use functions for computing some of the main statistical tests that scientists use on an every day basis. This includes basics functions such as ANOVAs, ANCOVAs, post-hoc tests, non-parametric tests, effect sizes, as well as more advanced functions such as Bayesian T-tests [@Rouder2009], repeated measures correlations [@Bakdash2017], robust correlations [@Pernet2012] and circular statistics [@Berens2009], to cite but a few. ``Pingouin`` is written in Python 3 and is mostly built on top of the Pandas [@Pandas] library, therefore allowing a fluid integration within a data analysis pipeline. ``Pingouin`` comes with an extensive documentation and API as well as with several Jupyter notebook examples.
 
-# Citations
-
-Citations to entries in paper.bib should be in [rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html) format.
-
 # References
