@@ -147,6 +147,8 @@ def multivariate_normality(X, alpha=.05):
 
     Translated to Python from a Matlab code by Antonio Trujillo-Ortiz.
 
+    Tested against the R package MVN.
+
     References
     ----------
     .. [1] Henze, N., & Zirkler, B. (1990). A class of invariant consistent

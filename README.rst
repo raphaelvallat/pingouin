@@ -84,6 +84,12 @@ Develop mode
   pip install -r requirements.txt
   python setup.py develop
 
+New releases are frequent so always make sure that you have the latest version:
+
+.. code-block:: shell
+
+  pip install --upgrade pingouin
+
 Quick start
 ============
 
