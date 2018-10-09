@@ -4,10 +4,12 @@ include LICENSE
 include requirements.txt
 
 # Add datasets .csv files
-include pingouin/datasets/berens2009.csv
-include pingouin/datasets/bland1995.csv
+include pingouin/datasets/ancova.csv
+include pingouin/datasets/anova.csv
+include pingouin/datasets/circular.csv
+include pingouin/datasets/cochran.csv
 include pingouin/datasets/datasets.csv
-include pingouin/datasets/datasets.md
-include pingouin/datasets/dolan2009.csv
-include pingouin/datasets/mcclave1991.csv
-include pingouin/datasets/ryan2013.csv
+include pingouin/datasets/icc.csv
+include pingouin/datasets/pairwise_corr.csv
+include pingouin/datasets/rm_anova.csv
+include pingouin/datasets/rm_corr.csv
