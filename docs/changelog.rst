@@ -3,8 +3,12 @@
 What's new
 ##########
 
-v0.2.0 (dev)
-------------
+v0.1.10 (October 2018)
+----------------------
+
+**Bug**
+
+a. Fixed dataset names in MANIFEST.in (.csv files were not copy-pasted with pip)
 
 **Circular**
 

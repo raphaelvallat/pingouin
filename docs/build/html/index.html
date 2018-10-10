@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Installation &#8212; pingouin 0.1.9 documentation</title>
+    <title>Installation &#8212; pingouin 0.1.10 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/style.css" />
@@ -40,7 +40,7 @@
         </button>
         <a class="navbar-brand" href="#"><span><img src="_static/pingouin_128x128.png"></span>
           pingouin</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.1.9</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.1.10</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -139,6 +139,10 @@ the <code class="code docutils literal notranslate"><span class="pre">ttest</spa
 <span class="nb">cd</span> pingouin/
 pip install -r requirements.txt
 python setup.py develop
+</pre></div>
+</div>
+<p>New releases are frequent so always make sure that you have the latest version:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install --upgrade pingouin
 </pre></div>
 </div>
 </div>
@@ -247,12 +251,14 @@ python setup.py develop
 <hr class="docutils" />
 <div class="section" id="test-the-normality-of-the-data">
 <h3>4. Test the normality of the data</h3>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">normality</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="kn">import</span> <span class="n">normality</span><span class="p">,</span> <span class="n">multivariate_normality</span>
 <span class="c1"># Return a boolean (true if normal) and the associated p-value</span>
-<span class="n">normality</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">normality</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>                                 <span class="c1"># Univariate normality</span>
+<span class="k">print</span><span class="p">(</span><span class="n">multivariate_normality</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))))</span> <span class="c1"># Multivariate normality</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="kc">False</span><span class="p">,</span>  <span class="kc">True</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.71e-04</span><span class="p">,</span> <span class="mf">0.552</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">array</span><span class="p">([</span><span class="kc">False</span><span class="p">,</span>  <span class="kc">True</span><span class="p">]),</span> <span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.552</span><span class="p">]))</span>
+<span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="mf">0.00018</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

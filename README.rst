@@ -172,13 +172,15 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: python
 
-   from pingouin import normality
+   from pingouin import normality, multivariate_normality
    # Return a boolean (true if normal) and the associated p-value
-   normality(x, y)
+   print(normality(x, y))                                 # Univariate normality
+   print(multivariate_normality(np.column_stack((x, y)))) # Multivariate normality
 
 .. parsed-literal::
 
-   [False,  True], [2.71e-04, 0.552]
+   (array([False,  True]), array([0., 0.552]))
+   (False, 0.00018)
 
 ------------
 

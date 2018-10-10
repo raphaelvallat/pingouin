@@ -12,7 +12,7 @@ MAINTAINER_EMAIL = 'raphaelvallat9@gmail.com'
 URL = 'https://raphaelvallat.github.io/pingouin/build/html/index.html'
 LICENSE = 'BSD (3-clause)'
 DOWNLOAD_URL = 'https://github.com/raphaelvallat/pingouin/'
-VERSION = '0.1.9'
+VERSION = '0.1.10'
 PACKAGE_DATA = {'pingouin.data.icons': ['*.svg']}
 
 try:
