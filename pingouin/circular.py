@@ -10,7 +10,7 @@ from scipy.stats import circmean
 from pingouin import _remove_na
 
 __all__ = ["circ_axial", "circ_corrcc", "circ_corrcl", "circ_mean", "circ_r",
-           "circ_rayleigh"]
+           "circ_rayleigh", "circ_vtest"]
 
 
 def circ_axial(alpha, n):
@@ -330,3 +330,81 @@ def circ_rayleigh(alpha, w=None, d=None):
     pval = np.exp(np.sqrt(1 + 4 * n + 4 * (n**2 - R**2)) - (1 + 2 * n))
 
     return np.round(z, 3), pval
+
+
+def circ_vtest(alpha, dir=0., w=None, d=None):
+    """V test for non-uniformity of circular data with a specified
+    mean direction.
+
+    Parameters
+    ----------
+    alpha : np.array
+        Sample of angles in radians.
+    dir : float
+        Suspected mean direction (angle in radians).
+    w : np.array
+        Number of incidences in case of binned angle data.
+    d : float
+        Spacing (in radians) of bin centers for binned data. If supplied,
+        a correction factor is used to correct for bias in the estimation
+        of r.
+
+    Returns
+    -------
+    V : float
+        V-statistic
+    pval : float
+        P-value
+
+    Notes
+    -----
+    H0: the population is uniformly distributed around the circle.
+    HA: the population is not distributed uniformly around the circle but
+    has a mean of dir.
+
+    Note: Not rejecting H0 may mean that the population is uniformly
+    distributed around the circle OR that it has a mode but that this mode
+    is not centered at dir.
+
+    The V test has more power than the Rayleigh test and is preferred if
+    there is reason to believe in a specific mean direction.
+
+    Translated from the Matlab Circular Statistics Toolbox.
+
+    Examples
+    --------
+    1. V-test for non-uniformity of circular data.
+
+        >>> from pingouin import circ_vtest
+        >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
+        >>> v, pval = circ_vtest(x, dir=1)
+        >>> print(v, pval)
+            2.486 0.0579
+
+    2. Specifying w and d
+
+        >>> circ_vtest(x, dir=0.5, w=[.1, .2, .3, .4, .5], d=0.2)
+            0.637, 0.2309
+    """
+    from scipy.stats import norm
+    alpha = np.array(alpha)
+    if w is None:
+        r = circ_r(alpha)
+        mu = circ_mean(alpha)
+        n = len(alpha)
+    else:
+        if len(alpha) is not len(w):
+            raise ValueError("Input dimensions do not match")
+        r = circ_r(alpha, w, d)
+        mu = circ_mean(alpha, w)
+        n = np.sum(w)
+
+    # Compute Rayleigh and V statistics
+    R = n * r
+    v = R * np.cos(mu - dir)
+
+    # Compute p value
+    u = v * np.sqrt(2 / n)
+    pval = 1 - norm.cdf(u)
+
+    return np.round(v, 3), pval

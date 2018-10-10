@@ -2,7 +2,7 @@
 # Date: April 2018
 import numpy as np
 from pingouin.utils import _check_eftype, _remove_na
-from pingouin.parametric import test_homoscedasticity
+from pingouin.distribution import homoscedasticity
 
 
 __all__ = ["compute_esci", "convert_effsize", "compute_effsize",
@@ -446,13 +446,13 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
 
     if ny == 1:
         # Case 1: One-sample Test
-        d = (np.mean(x) - y) / np.std(x, ddof=1)
+        d = (x.mean() - y) / x.std(ddof=1)
         return d
 
     if eftype.lower() == 'glass':
         # Find group with lowest variance
-        sd_control = np.min([np.std(x, ddof=1), np.std(y, ddof=1)])
-        d = (np.mean(x) - np.mean(y)) / sd_control
+        sd_control = np.min([x.std(ddof=1), y.std(ddof=1)])
+        d = (x.mean() - y.mean()) / sd_control
         return d
     elif eftype.lower() == 'r':
         # Return correlation coefficient (useful for CI bootstrapping)
@@ -461,7 +461,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         return r
     else:
         # Test equality of variance of data with a stringent threshold
-        equal_var, p = test_homoscedasticity(x, y, alpha=.001)
+        equal_var, p = homoscedasticity(x, y, alpha=.001)
         if not equal_var:
             print('Unequal variances (p<.001). You should consider reporting',
                   'Glass delta instead.')
@@ -470,13 +470,13 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         if not paired:
             # https://en.wikipedia.org/wiki/Effect_size
             dof = nx + ny - 2
-            poolsd = np.sqrt(((nx - 1) * np.std(x, ddof=1)**2 +
-                              (ny - 1) * np.std(y, ddof=1)**2) / dof)
-            d = (np.mean(x) - np.mean(y)) / poolsd
+            poolsd = np.sqrt(((nx - 1) * x.var(ddof=1) +
+                              (ny - 1) * y.var(ddof=1)) / dof)
+            d = (x.mean() - y.mean()) / poolsd
         else:
             # Report Cohen d-avg (Cumming 2012; Lakens 2013)
-            d = (np.mean(x) - np.mean(y)) / (.5 * (np.std(x, ddof=1) +
-                                                   np.std(y, ddof=1)))
+            d = (x.mean() - y.mean()) / (.5 * (x.std(ddof=1) +
+                                               y.std(ddof=1)))
         return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)
 
 

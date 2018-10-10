@@ -247,9 +247,9 @@ python setup.py develop
 <hr class="docutils" />
 <div class="section" id="test-the-normality-of-the-data">
 <h3>4. Test the normality of the data</h3>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">test_normality</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">normality</span>
 <span class="c1"># Return a boolean (true if normal) and the associated p-value</span>
-<span class="n">test_normality</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">normality</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="kc">False</span><span class="p">,</span>  <span class="kc">True</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.71e-04</span><span class="p">,</span> <span class="mf">0.552</span><span class="p">]</span>

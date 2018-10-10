@@ -104,7 +104,7 @@
 <span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">_remove_na</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;circ_axial&quot;</span><span class="p">,</span> <span class="s2">&quot;circ_corrcc&quot;</span><span class="p">,</span> <span class="s2">&quot;circ_corrcl&quot;</span><span class="p">,</span> <span class="s2">&quot;circ_mean&quot;</span><span class="p">,</span> <span class="s2">&quot;circ_r&quot;</span><span class="p">,</span>
-           <span class="s2">&quot;circ_rayleigh&quot;</span><span class="p">]</span>
+           <span class="s2">&quot;circ_rayleigh&quot;</span><span class="p">,</span> <span class="s2">&quot;circ_vtest&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="circ_axial"><a class="viewcode-back" href="../../generated/pingouin.circ_axial.html#pingouin.circ_axial">[docs]</a><span class="k">def</span> <span class="nf">circ_axial</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
@@ -424,6 +424,84 @@
     <span class="n">pval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">R</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">pval</span></div>
+
+
+<div class="viewcode-block" id="circ_vtest"><a class="viewcode-back" href="../../generated/pingouin.circ_vtest.html#pingouin.circ_vtest">[docs]</a><span class="k">def</span> <span class="nf">circ_vtest</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;V test for non-uniformity of circular data with a specified</span>
+<span class="sd">    mean direction.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    alpha : np.array</span>
+<span class="sd">        Sample of angles in radians.</span>
+<span class="sd">    dir : float</span>
+<span class="sd">        Suspected mean direction (angle in radians).</span>
+<span class="sd">    w : np.array</span>
+<span class="sd">        Number of incidences in case of binned angle data.</span>
+<span class="sd">    d : float</span>
+<span class="sd">        Spacing (in radians) of bin centers for binned data. If supplied,</span>
+<span class="sd">        a correction factor is used to correct for bias in the estimation</span>
+<span class="sd">        of r.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    V : float</span>
+<span class="sd">        V-statistic</span>
+<span class="sd">    pval : float</span>
+<span class="sd">        P-value</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    H0: the population is uniformly distributed around the circle.</span>
+<span class="sd">    HA: the population is not distributed uniformly around the circle but</span>
+<span class="sd">    has a mean of dir.</span>
+
+<span class="sd">    Note: Not rejecting H0 may mean that the population is uniformly</span>
+<span class="sd">    distributed around the circle OR that it has a mode but that this mode</span>
+<span class="sd">    is not centered at dir.</span>
+
+<span class="sd">    The V test has more power than the Rayleigh test and is preferred if</span>
+<span class="sd">    there is reason to believe in a specific mean direction.</span>
+
+<span class="sd">    Translated from the Matlab Circular Statistics Toolbox.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    1. V-test for non-uniformity of circular data.</span>
+
+<span class="sd">        &gt;&gt;&gt; from pingouin import circ_vtest</span>
+<span class="sd">        &gt;&gt;&gt; x = [0.785, 1.570, 3.141, 0.839, 5.934]</span>
+<span class="sd">        &gt;&gt;&gt; v, pval = circ_vtest(x, dir=1)</span>
+<span class="sd">        &gt;&gt;&gt; print(v, pval)</span>
+<span class="sd">            2.486 0.0579</span>
+
+<span class="sd">    2. Specifying w and d</span>
+
+<span class="sd">        &gt;&gt;&gt; circ_vtest(x, dir=0.5, w=[.1, .2, .3, .4, .5], d=0.2)</span>
+<span class="sd">            0.637, 0.2309</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">norm</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">circ_r</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="n">circ_mean</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input dimensions do not match&quot;</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">circ_r</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="n">circ_mean</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+
+    <span class="c1"># Compute Rayleigh and V statistics</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="n">r</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">R</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">mu</span> <span class="o">-</span> <span class="nb">dir</span><span class="p">)</span>
+
+    <span class="c1"># Compute p value</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">v</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">pval</span></div>
 </pre></div>
 
     </div>

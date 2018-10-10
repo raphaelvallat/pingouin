@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pingouin.test_normality &#8212; pingouin 0.1.9 documentation</title>
+    <title>pingouin.normality &#8212; pingouin 0.1.9 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/style.css" />
@@ -21,8 +21,8 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pingouin.test_homoscedasticity" href="pingouin.test_homoscedasticity.html" />
-    <link rel="prev" title="pingouin.gzscore" href="pingouin.gzscore.html" />
+    <link rel="next" title="pingouin.multivariate_normality" href="pingouin.multivariate_normality.html" />
+    <link rel="prev" title="pingouin.homoscedasticity" href="pingouin.homoscedasticity.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -93,12 +93,12 @@
   <div class="row">
     <div class="col-md-12 content">
       
-  <div class="section" id="pingouin-test-normality">
-<h1>pingouin.test_normality</h1>
+  <div class="section" id="pingouin-normality">
+<h1>pingouin.normality</h1>
 <dl class="function">
-<dt id="pingouin.test_normality">
-<code class="descclassname">pingouin.</code><code class="descname">test_normality</code><span class="sig-paren">(</span><em>*args</em>, <em>alpha=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/parametric.html#test_normality"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Test the normality of one or more array.</p>
+<dt id="pingouin.normality">
+<code class="descclassname">pingouin.</code><code class="descname">normality</code><span class="sig-paren">(</span><em>*args</em>, <em>alpha=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/distribution.html#normality"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Shapiro-Wilk univariate normality test.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -125,9 +125,9 @@
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <dl class="last docutils">
-<dt><a class="reference internal" href="pingouin.test_homoscedasticity.html#pingouin.test_homoscedasticity" title="pingouin.test_homoscedasticity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_homoscedasticity</span></code></a></dt>
+<dt><a class="reference internal" href="pingouin.homoscedasticity.html#pingouin.homoscedasticity" title="pingouin.homoscedasticity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">homoscedasticity</span></code></a></dt>
 <dd>Test equality of variance.</dd>
-<dt><a class="reference internal" href="pingouin.test_sphericity.html#pingouin.test_sphericity" title="pingouin.test_sphericity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_sphericity</span></code></a></dt>
+<dt><a class="reference internal" href="pingouin.sphericity.html#pingouin.sphericity" title="pingouin.sphericity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sphericity</span></code></a></dt>
 <dd>Mauchly’s test for sphericity.</dd>
 </dl>
 </div>
@@ -135,10 +135,10 @@
 <ol class="arabic">
 <li><p class="first">Test the normality of one array.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">test_normality</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">normality</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">normal</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">test_normality</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">normal</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">normality</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
 <span class="go">True 0.27</span>
 </pre></div>
@@ -146,11 +146,11 @@
 </li>
 <li><p class="first">Test the normality of two arrays.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">test_normality</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">normality</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">normal</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">test_normality</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">normal</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">normality</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
 <span class="go">[True   False] [0.27   0.0005]</span>
 </pre></div>

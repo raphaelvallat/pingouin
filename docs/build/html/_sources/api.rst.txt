@@ -48,6 +48,7 @@ Circular
     circ_mean
     circ_r
     circ_rayleigh
+    circ_vtest
 
 Correlation
 -----------
@@ -71,12 +72,12 @@ Distribution
 .. autosummary::
    :toctree: generated/
 
+    anderson
     gzscore
-    test_normality
-    test_homoscedasticity
-    test_sphericity
-    test_dist
-
+    homoscedasticity
+    normality
+    multivariate_normality
+    sphericity
 
 Effect sizes
 ------------
