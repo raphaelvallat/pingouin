@@ -7,3 +7,4 @@ pairwise_corr,Big 5 personality traits,corr - pairwise_corr,Dolan et al 2009
 circular,Orientation tuning properties of three neurons,circular statistics,Berens 2009
 icc,Wine quality rating by 4 judges,intraclass_corr,www.real-statistics.com
 cochran,Energy level across three days,Cochran,www.real-statistics.com
+mediation,Mediation analysis,linear_regression - mediation,https://data.library.virginia.edu/introduction-to-mediation-analysis/
