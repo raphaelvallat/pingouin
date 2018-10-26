@@ -577,9 +577,9 @@ def _interpolate_p(p, r, v):
     else:
         # linear interpolation in q and p
         q0 = math.sqrt(2) * -y0 * \
-             scipy.stats.t.isf((1.+p0)/2., (v,1e38)[v>1e38])
+             scipy.stats.t.isf((1.+p0)/2., max(v, 1e38))
         q1 = math.sqrt(2) * -y1 * \
-             scipy.stats.t.isf((1.+p1)/2., (v,1e38)[v>1e38])
+             scipy.stats.t.isf((1.+p1)/2., max(v, 1e38))
 
         d1 = (q1-q0)/(p1-p0)
         d0 = q0
@@ -589,7 +589,7 @@ def _interpolate_p(p, r, v):
 
         # transform back to y
         y = -q / (math.sqrt(2) * \
-                  scipy.stats.t.isf((1.+p)/2., (v,1e38)[v>1e38]))
+                  scipy.stats.t.isf((1.+p)/2., max(v, 1e38)))
 
     return y
 
@@ -722,7 +722,7 @@ def _qsturng(p, r, v):
         y = _interpolate_p(p, r, v)
 
     return math.sqrt(2) * -y * \
-           scipy.stats.t.isf((1. + p) / 2., (v, 1e38)[v > 1e38])
+           scipy.stats.t.isf((1. + p) / 2., max(v, 1e38))
 
 # make a qsturng functinon that will accept list-like objects
 _vqsturng = np.vectorize(_qsturng)
