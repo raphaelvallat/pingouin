@@ -3,7 +3,7 @@ import numpy as np
 
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.parametric import (ttest, anova, anova2, rm_anova, mixed_anova,
-                                 rm_anova2, ancova, ancovan)
+                                 rm_anova2, ancova)
 from pingouin.datasets import read_dataset
 
 # Generate random data for ANOVA
@@ -120,17 +120,18 @@ class TestParametric(_TestPingouin):
                          between='Method', export_filename='test_export.csv',
                          return_bw=True)
         ancova(data=df, dv='Scores', covar=['Income'], between='Method')
-        ancova(data=df, dv='Scores', covar=['Income', 'BMI'], between='Method')
+        # ancova(data=df, dv='Scores', covar=['Income', 'BMI'],
+        #        between='Method')
 
-    def test_ancovan(self):
-        """Test function ancovan."""
-        df = read_dataset('ancova')
-        aov = ancovan(data=df, dv='Scores', covar=['Income', 'BMI'],
-                      between='Method')
-        # Compare with statsmodels
-        assert np.allclose(aov.loc[0, 'F'], 3.233)
-        assert np.allclose(aov.loc[1, 'F'], 27.637)
-        ancovan(data=df, dv='Scores', covar=['Income', 'BMI'],
-                between='Method', export_filename='test_export.csv')
-        ancovan(data=df, dv='Scores', covar=['Income'], between='Method')
-        ancovan(data=df, dv='Scores', covar='Income', between='Method')
+    # def test_ancovan(self):
+    #     """Test function ancovan."""
+    #     df = read_dataset('ancova')
+    #     aov = ancovan(data=df, dv='Scores', covar=['Income', 'BMI'],
+    #                   between='Method')
+    #     # Compare with statsmodels
+    #     assert np.allclose(aov.loc[0, 'F'], 3.233)
+    #     assert np.allclose(aov.loc[1, 'F'], 27.637)
+    #     ancovan(data=df, dv='Scores', covar=['Income', 'BMI'],
+    #             between='Method', export_filename='test_export.csv')
+    #     ancovan(data=df, dv='Scores', covar=['Income'], between='Method')
+    #     ancovan(data=df, dv='Scores', covar='Income', between='Method')
