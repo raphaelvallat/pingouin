@@ -50,8 +50,8 @@ Circular
     circ_rayleigh
     circ_vtest
 
-Correlation
------------
+Correlation and regression
+--------------------------
 
 .. _correlations:
 
@@ -63,6 +63,9 @@ Correlation
     partial_corr
     rm_corr
     intraclass_corr
+    linear_regression
+    mediation_analysis
+
 
 Distribution
 ------------

@@ -1,12 +1,11 @@
 import numpy as np
 from numpy.testing import assert_almost_equal
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.regression import linear_regression
+from pingouin.regression import linear_regression, mediation_analysis
 from pingouin.datasets import read_dataset
 
 from scipy.stats import linregress
 from sklearn.linear_model import LinearRegression
-
 
 df = read_dataset('mediation')
 
@@ -45,3 +44,16 @@ class TestRegression(_TestPingouin):
         linear_regression(df[['X', 'M']], df['Y'], coef_only=True)
         linear_regression(df[['X', 'M']], df['Y'], alpha=0.01)
         linear_regression(df[['X', 'M']], df['Y'], alpha=0.10)
+
+    def test_mediation_analysis(self):
+        """Test function mediation_analysis."""
+        ma = mediation_analysis(data=df, x='X', m='M', y='Y', n_boot=500)
+        assert ma['Beta'][0] == 0.5610
+        assert ma['Beta'][2] == 0.3961
+        assert ma['Beta'][3] == 0.0396
+        assert ma['Beta'][4] == 0.3565
+
+        _, dist = mediation_analysis(data=df, x='X', m='M', y='Y', n_boot=1000,
+                                     return_dist=True)
+        assert dist.size == 1000
+        mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.01)

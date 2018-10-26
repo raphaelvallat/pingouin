@@ -3,6 +3,15 @@
 What's new
 ##########
 
+v0.2.0 (November 2018)
+----------------------
+
+**Regression**
+
+a. Added linear_regression function.
+b. Added mediation_analysis function.
+
+
 v0.1.10 (October 2018)
 ----------------------
 
