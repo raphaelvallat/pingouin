@@ -247,8 +247,8 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     indirect['ci'] = _bias_corrected_interval(ab_estimates, indirect['coef'],
                                               alpha=alpha, n_boot=n_boot)
     # Significance of the mediation effect
-    indirect['sig'] = 'Yes' if (np.sign(indirect['ci'][0]) ==
-                                np.sign(indirect['ci'][1])) else 'No'
+    indirect['sig'] = 'Yes' if (np.sign(indirect['ci'][0])
+                                == np.sign(indirect['ci'][1])) else 'No'
 
     # Compute linear regressions
     sxm = linear_regression(data[x], data[m], add_intercept=True, alpha=alpha)

@@ -206,22 +206,22 @@ def multivariate_normality(X, alpha=.05):
         (n**(1 / (p + 4)))
 
     if np.linalg.matrix_rank(S) == p:
-        hz = n * (1 / (n**2) * np.sum(np.sum(np.exp(-(b**2) / 2 * Djk))) - 2 *
-                  ((1 + (b**2))**(-p / 2)) * (1 / n) *
-                  (np.sum(np.exp(-((b**2) / (2 * (1 + (b**2)))) * Dj))) +
-                  ((1 + (2 * (b**2)))**(-p / 2)))
+        hz = n * (1 / (n**2) * np.sum(np.sum(np.exp(-(b**2) / 2 * Djk))) - 2
+                  * ((1 + (b**2))**(-p / 2)) * (1 / n)
+                  * (np.sum(np.exp(-((b**2) / (2 * (1 + (b**2)))) * Dj)))
+                  + ((1 + (2 * (b**2)))**(-p / 2)))
     else:
         hz = n * 4
 
     wb = (1 + b**2) * (1 + 3 * b**2)
     a = 1 + 2 * b**2
     # Mean and variance
-    mu = 1 - a**(-p / 2) * (1 + p * b**2 / a + (p * (p + 2) *
-                                                (b**4)) / (2 * a**2))
+    mu = 1 - a**(-p / 2) * (1 + p * b**2 / a + (p * (p + 2)
+                                                * (b**4)) / (2 * a**2))
     si2 = 2 * (1 + 4 * b**2)**(-p / 2) + 2 * a**(-p) * \
         (1 + (2 * p * b**4) / a**2 + (3 * p * (p + 2) * b**8) / (4 * a**4)) \
-        - 4 * wb**(-p / 2) * (1 + (3 * p * b**4) / (2 * wb) +
-                              (p * (p + 2) * b**8) / (2 * wb**2))
+        - 4 * wb**(-p / 2) * (1 + (3 * p * b**4) / (2 * wb)
+                              + (p * (p + 2) * b**8) / (2 * wb**2))
 
     # Lognormal mean and variance
     pmu = np.log(np.sqrt(mu**4 / (si2 + mu**2)))

@@ -158,8 +158,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
             # dof are approximated using Welch–Satterthwaite equation
             vx = x.var(ddof=1)
             vy = y.var(ddof=1)
-            dof_corr = (vx / nx + vy / ny)**2 / ((vx / nx)**2 / (nx - 1) +
-                                                 (vy / ny)**2 / (ny - 1))
+            dof_corr = (vx / nx + vy / ny)**2 / ((vx / nx)**2 / (nx - 1)
+                                                 + (vy / ny)**2 / (ny - 1))
             stats['dof-corr'] = dof_corr
         else:
             tval, pval = ttest_ind(x, y, equal_var=True)
@@ -814,8 +814,8 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
     df_fac1 = aov_fac1.loc[0, 'DF']
     df_fac2 = aov_fac2.loc[0, 'DF']
     df_inter = (data[fac1].unique().size - 1) * (data[fac2].unique().size - 1)
-    df_resid = data[dv].size - (data[fac1].unique().size *
-                                data[fac2].unique().size)
+    df_resid = data[dv].size - (data[fac1].unique().size
+                                * data[fac2].unique().size)
 
     # Mean squares
     ms_fac1 = aov_fac1.loc[0, 'MS']

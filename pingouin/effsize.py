@@ -470,13 +470,13 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         if not paired:
             # https://en.wikipedia.org/wiki/Effect_size
             dof = nx + ny - 2
-            poolsd = np.sqrt(((nx - 1) * x.var(ddof=1) +
-                              (ny - 1) * y.var(ddof=1)) / dof)
+            poolsd = np.sqrt(((nx - 1) * x.var(ddof=1)
+                              + (ny - 1) * y.var(ddof=1)) / dof)
             d = (x.mean() - y.mean()) / poolsd
         else:
             # Report Cohen d-avg (Cumming 2012; Lakens 2013)
-            d = (x.mean() - y.mean()) / (.5 * (x.std(ddof=1) +
-                                               y.std(ddof=1)))
+            d = (x.mean() - y.mean()) / (.5 * (x.std(ddof=1)
+                                               + y.std(ddof=1)))
         return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)
 
 

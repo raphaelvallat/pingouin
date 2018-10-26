@@ -88,8 +88,8 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
 
     # Function to be integrated
     def fun(g, t, n, r, df):
-        return (1 + n * g * r**2)**(-.5) * (1 + t**2 / ((1 + n * g * r**2) *
-                                            df))**(-(df + 1) / 2) *  \
+        return (1 + n * g * r**2)**(-.5) * (1 + t**2 / ((1 + n * g * r**2)
+                                            * df))**(-(df + 1) / 2) *  \
                (2 * np.pi)**(-.5) * g**(-3. / 2) * np.exp(-1 / (2 * g))
 
     # Define n and degrees of freedom
@@ -170,9 +170,9 @@ def bayesfactor_pearson(r, n):
 
     # Function to be integrated
     def fun(g, r, n):
-        return np.exp(((n - 2) / 2) * np.log(1 + g) + (-(n - 1) / 2) *
-                      np.log(1 + (1 - r**2) * g) + (-3 / 2) *
-                      np.log(g) + - n / (2 * g))
+        return np.exp(((n - 2) / 2) * np.log(1 + g) + (-(n - 1) / 2)
+                      * np.log(1 + (1 - r**2) * g) + (-3 / 2)
+                      * np.log(g) + - n / (2 * g))
 
     # JZS Bayes factor calculation
     integr = quad(fun, 0, np.inf, args=(r, n))[0]

@@ -105,8 +105,8 @@ def circ_corrcc(x, y, tail='two-sided'):
     r = np.sum(x_sin * y_sin) / np.sqrt(np.sum(x_sin**2) * np.sum(y_sin**2))
 
     # Compute T- and p-values
-    tval = np.sqrt((n * (x_sin**2).mean() * (y_sin**2).mean()) /
-                   np.mean(x_sin**2 * y_sin**2)) * r
+    tval = np.sqrt((n * (x_sin**2).mean() * (y_sin**2).mean())
+                   / np.mean(x_sin**2 * y_sin**2)) * r
     # Approximately distributed as a standard normal
     pval = 2 * norm.sf(abs(tval))
     pval = pval / 2 if tail == 'one-sided' else pval
