@@ -331,16 +331,32 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
 
     Notes
     -----
-    The current implementation only works with continuous variables.
+    Mediation analysis (MA) is a "statistical procedure to test
+    whether the effect of an independent variable X on a dependent variable
+    Y (i.e., X → Y) is at least partly explained by a chain of effects of the
+    independent variable on an intervening mediator variable M and of the
+    intervening variable on the dependent variable (i.e., X → M → Y)"
+    (from Fiedler et al. 2011)
+
+    Note that the current implementation only works with continuous variables.
+    The indirect effect is considered significant if the specified confidence
+    interval does not include 0.
+
+    Results have been tested against the R mediation package and this tutorial
+    https://data.library.virginia.edu/introduction-to-mediation-analysis/
 
     Adapted from a code found at https://github.com/rmill040/pymediation
 
-    Results have been tested against the R mediation
-    package and this tutorial
-    https://data.library.virginia.edu/introduction-to-mediation-analysis/
+    References
+    ----------
+    .. [1] Baron, Reuben M., and David A. Kenny. "The moderator–mediator
+           variable distinction in social psychological research: Conceptual,
+           strategic, and statistical considerations." Journal of personality
+           and social psychology 51.6 (1986): 1173.
 
-    The indirect effect is considered significant if the specified confidence
-    interval does not include 0.
+    .. [2] Fiedler, Klaus, Malte Schott, and Thorsten Meiser.
+           "What mediation analysis can (not) do." Journal of Experimental
+           Social Psychology 47.6 (2011): 1231-1236.
 
     Examples
     --------

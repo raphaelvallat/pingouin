@@ -141,13 +141,36 @@ seaborn.distplot() or seaborn.kdeplot() functions.</p>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>The current implementation only works with continuous variables.</p>
-<p>Adapted from a code found at <a class="reference external" href="https://github.com/rmill040/pymediation">https://github.com/rmill040/pymediation</a></p>
-<p>Results have been tested against the R mediation
-package and this tutorial
-<a class="reference external" href="https://data.library.virginia.edu/introduction-to-mediation-analysis/">https://data.library.virginia.edu/introduction-to-mediation-analysis/</a></p>
-<p>The indirect effect is considered significant if the specified confidence
+<p>Mediation analysis (MA) is a “statistical procedure to test
+whether the effect of an independent variable X on a dependent variable
+Y (i.e., X → Y) is at least partly explained by a chain of effects of the
+independent variable on an intervening mediator variable M and of the
+intervening variable on the dependent variable (i.e., X → M → Y)”
+(from Fiedler et al. 2011)</p>
+<p>Note that the current implementation only works with continuous variables.
+The indirect effect is considered significant if the specified confidence
 interval does not include 0.</p>
+<p>Results have been tested against the R mediation package and this tutorial
+<a class="reference external" href="https://data.library.virginia.edu/introduction-to-mediation-analysis/">https://data.library.virginia.edu/introduction-to-mediation-analysis/</a></p>
+<p>Adapted from a code found at <a class="reference external" href="https://github.com/rmill040/pymediation">https://github.com/rmill040/pymediation</a></p>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="ree2a7b711245-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Baron, Reuben M., and David A. Kenny. “The moderator–mediator
+variable distinction in social psychological research: Conceptual,
+strategic, and statistical considerations.” Journal of personality
+and social psychology 51.6 (1986): 1173.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="ree2a7b711245-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Fiedler, Klaus, Malte Schott, and Thorsten Meiser.
+“What mediation analysis can (not) do.” Journal of Experimental
+Social Psychology 47.6 (2011): 1231-1236.</td></tr>
+</tbody>
+</table>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">Simple mediation analysis</p>

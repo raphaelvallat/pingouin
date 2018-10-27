@@ -425,16 +425,32 @@
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    The current implementation only works with continuous variables.</span>
+<span class="sd">    Mediation analysis (MA) is a &quot;statistical procedure to test</span>
+<span class="sd">    whether the effect of an independent variable X on a dependent variable</span>
+<span class="sd">    Y (i.e., X → Y) is at least partly explained by a chain of effects of the</span>
+<span class="sd">    independent variable on an intervening mediator variable M and of the</span>
+<span class="sd">    intervening variable on the dependent variable (i.e., X → M → Y)&quot;</span>
+<span class="sd">    (from Fiedler et al. 2011)</span>
+
+<span class="sd">    Note that the current implementation only works with continuous variables.</span>
+<span class="sd">    The indirect effect is considered significant if the specified confidence</span>
+<span class="sd">    interval does not include 0.</span>
+
+<span class="sd">    Results have been tested against the R mediation package and this tutorial</span>
+<span class="sd">    https://data.library.virginia.edu/introduction-to-mediation-analysis/</span>
 
 <span class="sd">    Adapted from a code found at https://github.com/rmill040/pymediation</span>
 
-<span class="sd">    Results have been tested against the R mediation</span>
-<span class="sd">    package and this tutorial</span>
-<span class="sd">    https://data.library.virginia.edu/introduction-to-mediation-analysis/</span>
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Baron, Reuben M., and David A. Kenny. &quot;The moderator–mediator</span>
+<span class="sd">           variable distinction in social psychological research: Conceptual,</span>
+<span class="sd">           strategic, and statistical considerations.&quot; Journal of personality</span>
+<span class="sd">           and social psychology 51.6 (1986): 1173.</span>
 
-<span class="sd">    The indirect effect is considered significant if the specified confidence</span>
-<span class="sd">    interval does not include 0.</span>
+<span class="sd">    .. [2] Fiedler, Klaus, Malte Schott, and Thorsten Meiser.</span>
+<span class="sd">           &quot;What mediation analysis can (not) do.&quot; Journal of Experimental</span>
+<span class="sd">           Social Psychology 47.6 (2011): 1231-1236.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
