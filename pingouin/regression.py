@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import t, norm
 
-__all__ = ['linear_regression', 'mediation_analysis']
+__all__ = ['linear_regression', 'logistic_regression', 'mediation_analysis']
 
 
 def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
@@ -27,7 +27,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
     Returns
     -------
     stats : dict
-        Linear regression output::
+        Linear regression summary::
 
         'coef' : regression coefficients
         'se' : standard error of the estimate
@@ -35,12 +35,14 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
         'pvals' : p-values
         'rsquared' : coefficient of determination (R2)
         'adj_rsquared' : adjusted R2
+        'll' : lower confidence interval
+        'ul' : upper confidence interval
 
     Notes
     -----
     Results have been compared against the sklearn library.
 
-    The coefficient of determination (R2) is defined as:
+    The coefficient of determination (:math:`R^2`) is defined as:
 
     .. math:: R^2 = 1 - (\dfrac{SS_{resid}}{SS_{total}})
 
@@ -62,12 +64,12 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
 
     2. Multiple linear regression
 
-        >>> np.random.seed(123)
+        >>> np.random.seed(42)
         >>> z = np.random.normal(size=n)
         >>> X = np.column_stack((x, z))
         >>> lm = linear_regression(X, y)
         >>> print(lm['coef'])
-            [ 4.45443375  0.37561055 -0.22153521]
+            [4.54123324 0.36628301 0.17709451]
 
     3. Using a Pandas DataFrame
 
@@ -75,13 +77,13 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
         >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
         >>> lm = linear_regression(df[['x', 'z']], df['y'])
         >>> print(lm['coef'])
-            [ 4.45443375  0.37561055 -0.22153521]
+            [4.54123324 0.36628301 0.17709451]
 
     4. No intercept and return coef only
 
         >>> linear_regression(df[['x', 'z']], df['y'], add_intercept=False,
         >>>                   coef_only=True)
-            array([ 1.41420086, -0.11302849])
+            array([ 1.40935593, -0.2916508 ])
     """
     X = np.asarray(X)
     y = np.asarray(y)
@@ -126,6 +128,131 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
     # Create dict
     stats = {'coef': coef, 'se': beta_se, 'tvals': tvals, 'pvals': pvals,
              'rsquared': rsquared, 'adj_rsquared': adj_rsquared,
+             'll': ll, 'ul': ul}
+    return stats
+
+
+def logistic_regression(X, y, coef_only=False, alpha=0.05):
+    """Binary logistic regression.
+
+    Parameters
+    ----------
+    X : np.array or list
+        Predictor(s). Shape = (n_samples, n_features) or (n_samples,).
+    y : np.array or list
+        Dependent variable. Shape = (n_samples).
+        Must be binary.
+    coef_only : bool
+        If True, return only the regression coefficients.
+    alpha : float
+        Alpha value used for the confidence intervals.
+        CI = [alpha / 2 ; 1 - alpha / 2]
+
+    Returns
+    -------
+    stats : dict
+        Logistic regression summary::
+
+        'coef' : regression coefficients
+        'se' : standard error
+        'z' : z-scores
+        'pvals' : two-tailed p-values
+        'll' : lower confidence interval
+        'ul' : upper confidence interval
+
+    Notes
+    -----
+    This is a wrapper around the sklearn.linear_model.LogisticRegression class.
+
+    Results have been tested against statsmodels.
+
+    Note that the first coefficient is always the intercept of the model.
+
+    Adapted from a code found at
+    https://gist.github.com/rspeare/77061e6e317896be29c6de9a85db301d
+
+    Examples
+    --------
+    1. Simple binary logistic regression
+
+        >>> import numpy as np
+        >>> from pingouin import logistic_regression
+        >>> np.random.seed(123)
+        >>> x = np.random.normal(size=30)
+        >>> y = np.random.randint(0, 2, size=30)
+        >>> lom = logistic_regression(x, y)
+        >>> print(lom['coef'])
+            [-0.27122371  0.05927182]
+
+    2. Multiple binary logistic regression
+
+        >>> np.random.seed(42)
+        >>> z = np.random.normal(size=30)
+        >>> X = np.column_stack((x, z))
+        >>> lom = logistic_regression(X, y)
+        >>> print(lom['coef'])
+            [-0.34933805 -0.0226106  -0.39453532]
+
+    3. Using a Pandas DataFrame
+
+        >>> import pandas as pd
+        >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
+        >>> lom = logistic_regression(df[['x', 'z']], df['y'])
+        >>> print(lom['coef'])
+            [-0.34933805 -0.0226106  -0.39453532]
+
+    4. Return only the coefficients
+
+        >>> logistic_regression(df[['x', 'z']], df['y'], coef_only=True)
+            array([-0.34933805, -0.0226106 , -0.39453532])
+    """
+    # Check that sklearn is installed
+    from pingouin.utils import is_sklearn_installed
+    is_sklearn_installed(raise_error=True)
+    from sklearn.linear_model import LogisticRegression
+
+    # Convert to numpy array
+    X = np.asarray(X)
+    y = np.asarray(y)
+
+    if np.unique(y).size != 2:
+        raise ValueError('Dependent variable must be binary.')
+
+    # Add axis if only one-dimensional array
+    if X.ndim == 1:
+        X = X[..., np.newaxis]
+
+    # Initialize and fit
+    lom = LogisticRegression(solver='lbfgs', multi_class='auto')
+    lom.fit(X, y)
+    coef = np.append(lom.intercept_, lom.coef_)
+    if coef_only:
+        return coef
+
+    # Design matrix -- add intercept
+    X_design = np.column_stack((np.ones(X.shape[0]), X))
+    n, p = X_design.shape
+
+    # Fisher Information Matrix
+    denom = (2 * (1 + np.cosh(lom.decision_function(X))))
+    denom = np.tile(denom, (p, 1)).T
+    fim = np.dot((X_design / denom).T, X_design)
+    crao = np.linalg.inv(fim)
+
+    # Standard error and Z-scores
+    se = np.sqrt(np.diag(crao))
+    z_scores = coef / se
+
+    # Two-tailed p-values
+    pvals = [2 * norm.sf(abs(z)) for z in z_scores]
+
+    # Confidence intervals
+    crit = norm.ppf(1 - alpha / 2)
+    ll = coef - crit * se
+    ul = coef + crit * se
+
+    # Create dict
+    stats = {'coef': coef, 'se': se, 'z': z_scores, 'pvals': pvals,
              'll': ll, 'ul': ul}
     return stats
 
@@ -204,7 +331,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
 
     Notes
     -----
-    The current implementation only works with continuous linear variables.
+    The current implementation only works with continuous variables.
 
     Adapted from a code found at https://github.com/rmill040/pymediation
 

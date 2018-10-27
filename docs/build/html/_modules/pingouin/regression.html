@@ -96,7 +96,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">t</span><span class="p">,</span> <span class="n">norm</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;linear_regression&#39;</span><span class="p">,</span> <span class="s1">&#39;mediation_analysis&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;linear_regression&#39;</span><span class="p">,</span> <span class="s1">&#39;logistic_regression&#39;</span><span class="p">,</span> <span class="s1">&#39;mediation_analysis&#39;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="linear_regression"><a class="viewcode-back" href="../../generated/pingouin.linear_regression.html#pingouin.linear_regression">[docs]</a><span class="k">def</span> <span class="nf">linear_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coef_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
@@ -121,7 +121,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    stats : dict</span>
-<span class="sd">        Linear regression output::</span>
+<span class="sd">        Linear regression summary::</span>
 
 <span class="sd">        &#39;coef&#39; : regression coefficients</span>
 <span class="sd">        &#39;se&#39; : standard error of the estimate</span>
@@ -129,12 +129,14 @@
 <span class="sd">        &#39;pvals&#39; : p-values</span>
 <span class="sd">        &#39;rsquared&#39; : coefficient of determination (R2)</span>
 <span class="sd">        &#39;adj_rsquared&#39; : adjusted R2</span>
+<span class="sd">        &#39;ll&#39; : lower confidence interval</span>
+<span class="sd">        &#39;ul&#39; : upper confidence interval</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    Results have been compared against the sklearn library.</span>
 
-<span class="sd">    The coefficient of determination (R2) is defined as:</span>
+<span class="sd">    The coefficient of determination (:math:`R^2`) is defined as:</span>
 
 <span class="sd">    .. math:: R^2 = 1 - (\dfrac{SS_{resid}}{SS_{total}})</span>
 
@@ -156,12 +158,12 @@
 
 <span class="sd">    2. Multiple linear regression</span>
 
-<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(42)</span>
 <span class="sd">        &gt;&gt;&gt; z = np.random.normal(size=n)</span>
 <span class="sd">        &gt;&gt;&gt; X = np.column_stack((x, z))</span>
 <span class="sd">        &gt;&gt;&gt; lm = linear_regression(X, y)</span>
 <span class="sd">        &gt;&gt;&gt; print(lm[&#39;coef&#39;])</span>
-<span class="sd">            [ 4.45443375  0.37561055 -0.22153521]</span>
+<span class="sd">            [4.54123324 0.36628301 0.17709451]</span>
 
 <span class="sd">    3. Using a Pandas DataFrame</span>
 
@@ -169,13 +171,13 @@
 <span class="sd">        &gt;&gt;&gt; df = pd.DataFrame({&#39;x&#39;: x, &#39;y&#39;: y, &#39;z&#39;: z})</span>
 <span class="sd">        &gt;&gt;&gt; lm = linear_regression(df[[&#39;x&#39;, &#39;z&#39;]], df[&#39;y&#39;])</span>
 <span class="sd">        &gt;&gt;&gt; print(lm[&#39;coef&#39;])</span>
-<span class="sd">            [ 4.45443375  0.37561055 -0.22153521]</span>
+<span class="sd">            [4.54123324 0.36628301 0.17709451]</span>
 
 <span class="sd">    4. No intercept and return coef only</span>
 
 <span class="sd">        &gt;&gt;&gt; linear_regression(df[[&#39;x&#39;, &#39;z&#39;]], df[&#39;y&#39;], add_intercept=False,</span>
 <span class="sd">        &gt;&gt;&gt;                   coef_only=True)</span>
-<span class="sd">            array([ 1.41420086, -0.11302849])</span>
+<span class="sd">            array([ 1.40935593, -0.2916508 ])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -220,6 +222,131 @@
     <span class="c1"># Create dict</span>
     <span class="n">stats</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;coef&#39;</span><span class="p">:</span> <span class="n">coef</span><span class="p">,</span> <span class="s1">&#39;se&#39;</span><span class="p">:</span> <span class="n">beta_se</span><span class="p">,</span> <span class="s1">&#39;tvals&#39;</span><span class="p">:</span> <span class="n">tvals</span><span class="p">,</span> <span class="s1">&#39;pvals&#39;</span><span class="p">:</span> <span class="n">pvals</span><span class="p">,</span>
              <span class="s1">&#39;rsquared&#39;</span><span class="p">:</span> <span class="n">rsquared</span><span class="p">,</span> <span class="s1">&#39;adj_rsquared&#39;</span><span class="p">:</span> <span class="n">adj_rsquared</span><span class="p">,</span>
+             <span class="s1">&#39;ll&#39;</span><span class="p">:</span> <span class="n">ll</span><span class="p">,</span> <span class="s1">&#39;ul&#39;</span><span class="p">:</span> <span class="n">ul</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">stats</span></div>
+
+
+<div class="viewcode-block" id="logistic_regression"><a class="viewcode-back" href="../../generated/pingouin.logistic_regression.html#pingouin.logistic_regression">[docs]</a><span class="k">def</span> <span class="nf">logistic_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">coef_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Binary logistic regression.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X : np.array or list</span>
+<span class="sd">        Predictor(s). Shape = (n_samples, n_features) or (n_samples,).</span>
+<span class="sd">    y : np.array or list</span>
+<span class="sd">        Dependent variable. Shape = (n_samples).</span>
+<span class="sd">        Must be binary.</span>
+<span class="sd">    coef_only : bool</span>
+<span class="sd">        If True, return only the regression coefficients.</span>
+<span class="sd">    alpha : float</span>
+<span class="sd">        Alpha value used for the confidence intervals.</span>
+<span class="sd">        CI = [alpha / 2 ; 1 - alpha / 2]</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    stats : dict</span>
+<span class="sd">        Logistic regression summary::</span>
+
+<span class="sd">        &#39;coef&#39; : regression coefficients</span>
+<span class="sd">        &#39;se&#39; : standard error</span>
+<span class="sd">        &#39;z&#39; : z-scores</span>
+<span class="sd">        &#39;pvals&#39; : two-tailed p-values</span>
+<span class="sd">        &#39;ll&#39; : lower confidence interval</span>
+<span class="sd">        &#39;ul&#39; : upper confidence interval</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This is a wrapper around the sklearn.linear_model.LogisticRegression class.</span>
+
+<span class="sd">    Results have been tested against statsmodels.</span>
+
+<span class="sd">    Note that the first coefficient is always the intercept of the model.</span>
+
+<span class="sd">    Adapted from a code found at</span>
+<span class="sd">    https://gist.github.com/rspeare/77061e6e317896be29c6de9a85db301d</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    1. Simple binary logistic regression</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import logistic_regression</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; x = np.random.normal(size=30)</span>
+<span class="sd">        &gt;&gt;&gt; y = np.random.randint(0, 2, size=30)</span>
+<span class="sd">        &gt;&gt;&gt; lom = logistic_regression(x, y)</span>
+<span class="sd">        &gt;&gt;&gt; print(lom[&#39;coef&#39;])</span>
+<span class="sd">            [-0.27122371  0.05927182]</span>
+
+<span class="sd">    2. Multiple binary logistic regression</span>
+
+<span class="sd">        &gt;&gt;&gt; np.random.seed(42)</span>
+<span class="sd">        &gt;&gt;&gt; z = np.random.normal(size=30)</span>
+<span class="sd">        &gt;&gt;&gt; X = np.column_stack((x, z))</span>
+<span class="sd">        &gt;&gt;&gt; lom = logistic_regression(X, y)</span>
+<span class="sd">        &gt;&gt;&gt; print(lom[&#39;coef&#39;])</span>
+<span class="sd">            [-0.34933805 -0.0226106  -0.39453532]</span>
+
+<span class="sd">    3. Using a Pandas DataFrame</span>
+
+<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">        &gt;&gt;&gt; df = pd.DataFrame({&#39;x&#39;: x, &#39;y&#39;: y, &#39;z&#39;: z})</span>
+<span class="sd">        &gt;&gt;&gt; lom = logistic_regression(df[[&#39;x&#39;, &#39;z&#39;]], df[&#39;y&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; print(lom[&#39;coef&#39;])</span>
+<span class="sd">            [-0.34933805 -0.0226106  -0.39453532]</span>
+
+<span class="sd">    4. Return only the coefficients</span>
+
+<span class="sd">        &gt;&gt;&gt; logistic_regression(df[[&#39;x&#39;, &#39;z&#39;]], df[&#39;y&#39;], coef_only=True)</span>
+<span class="sd">            array([-0.34933805, -0.0226106 , -0.39453532])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check that sklearn is installed</span>
+    <span class="kn">from</span> <span class="nn">pingouin.utils</span> <span class="k">import</span> <span class="n">is_sklearn_installed</span>
+    <span class="n">is_sklearn_installed</span><span class="p">(</span><span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="k">import</span> <span class="n">LogisticRegression</span>
+
+    <span class="c1"># Convert to numpy array</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Dependent variable must be binary.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Add axis if only one-dimensional array</span>
+    <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+    <span class="c1"># Initialize and fit</span>
+    <span class="n">lom</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="s1">&#39;lbfgs&#39;</span><span class="p">,</span> <span class="n">multi_class</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+    <span class="n">lom</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lom</span><span class="o">.</span><span class="n">intercept_</span><span class="p">,</span> <span class="n">lom</span><span class="o">.</span><span class="n">coef_</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">coef_only</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">coef</span>
+
+    <span class="c1"># Design matrix -- add intercept</span>
+    <span class="n">X_design</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">X</span><span class="p">))</span>
+    <span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">X_design</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="c1"># Fisher Information Matrix</span>
+    <span class="n">denom</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">lom</span><span class="o">.</span><span class="n">decision_function</span><span class="p">(</span><span class="n">X</span><span class="p">))))</span>
+    <span class="n">denom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">denom</span><span class="p">,</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">fim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">((</span><span class="n">X_design</span> <span class="o">/</span> <span class="n">denom</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">X_design</span><span class="p">)</span>
+    <span class="n">crao</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">fim</span><span class="p">)</span>
+
+    <span class="c1"># Standard error and Z-scores</span>
+    <span class="n">se</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">crao</span><span class="p">))</span>
+    <span class="n">z_scores</span> <span class="o">=</span> <span class="n">coef</span> <span class="o">/</span> <span class="n">se</span>
+
+    <span class="c1"># Two-tailed p-values</span>
+    <span class="n">pvals</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">))</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">z_scores</span><span class="p">]</span>
+
+    <span class="c1"># Confidence intervals</span>
+    <span class="n">crit</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="n">coef</span> <span class="o">-</span> <span class="n">crit</span> <span class="o">*</span> <span class="n">se</span>
+    <span class="n">ul</span> <span class="o">=</span> <span class="n">coef</span> <span class="o">+</span> <span class="n">crit</span> <span class="o">*</span> <span class="n">se</span>
+
+    <span class="c1"># Create dict</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;coef&#39;</span><span class="p">:</span> <span class="n">coef</span><span class="p">,</span> <span class="s1">&#39;se&#39;</span><span class="p">:</span> <span class="n">se</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="n">z_scores</span><span class="p">,</span> <span class="s1">&#39;pvals&#39;</span><span class="p">:</span> <span class="n">pvals</span><span class="p">,</span>
              <span class="s1">&#39;ll&#39;</span><span class="p">:</span> <span class="n">ll</span><span class="p">,</span> <span class="s1">&#39;ul&#39;</span><span class="p">:</span> <span class="n">ul</span><span class="p">}</span>
     <span class="k">return</span> <span class="n">stats</span></div>
 
@@ -298,7 +425,7 @@
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    The current implementation only works with continuous linear variables.</span>
+<span class="sd">    The current implementation only works with continuous variables.</span>
 
 <span class="sd">    Adapted from a code found at https://github.com/rmill040/pymediation</span>
 
@@ -341,8 +468,8 @@
     <span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;ci&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_bias_corrected_interval</span><span class="p">(</span><span class="n">ab_estimates</span><span class="p">,</span> <span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;coef&#39;</span><span class="p">],</span>
                                               <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="n">n_boot</span><span class="p">)</span>
     <span class="c1"># Significance of the mediation effect</span>
-    <span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;sig&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Yes&#39;</span> <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;ci&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span>
-                                <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;ci&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span> <span class="k">else</span> <span class="s1">&#39;No&#39;</span>
+    <span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;sig&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Yes&#39;</span> <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;ci&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                                <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;ci&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span> <span class="k">else</span> <span class="s1">&#39;No&#39;</span>
 
     <span class="c1"># Compute linear regressions</span>
     <span class="n">sxm</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>

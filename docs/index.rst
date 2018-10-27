@@ -40,6 +40,8 @@
 
 8. Circular statistics
 
+9. Linear/logistic regression and mediation analysis
+
 Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
 
 For example, the :code:`ttest_ind` function of SciPy returns only the T-value and the p-value. By contrast,
@@ -52,11 +54,17 @@ Installation
 Dependencies
 ------------
 
-Pingouin requires :
+The main dependencies of Pingouin are :
 
 - NumPy
 - SciPy
 - Pandas
+
+In addition, some functions require :
+
+* Statsmodels
+* Scikit-learn
+
 
 User installation
 -----------------

@@ -1,13 +1,19 @@
+import pytest
 import numpy as np
 from numpy.testing import assert_almost_equal
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.regression import linear_regression, mediation_analysis
+from pingouin.regression import (linear_regression, logistic_regression,
+                                 mediation_analysis)
 from pingouin.datasets import read_dataset
 
 from scipy.stats import linregress
 from sklearn.linear_model import LinearRegression
 
 df = read_dataset('mediation')
+
+# For logistic regression test
+np.random.seed(123)
+df['Ybin'] = np.random.randint(0, 2, size=df.shape[0])
 
 
 class TestRegression(_TestPingouin):
@@ -44,6 +50,38 @@ class TestRegression(_TestPingouin):
         linear_regression(df[['X', 'M']], df['Y'], coef_only=True)
         linear_regression(df[['X', 'M']], df['Y'], alpha=0.01)
         linear_regression(df[['X', 'M']], df['Y'], alpha=0.10)
+
+    def test_logistic_regression(self):
+        """Test function logistic_regression."""
+
+        # Simple regression
+        lom = logistic_regression(df['X'], df['Ybin'])  # Pingouin
+        # Compare to statsmodels
+        assert_almost_equal(lom['coef'], [-0.0761, -0.0208], decimal=2)
+        assert_almost_equal(lom['se'], [0.722, 0.116], decimal=2)
+        assert_almost_equal(lom['z'], [-0.105, -0.180], decimal=2)
+        assert_almost_equal(lom['pvals'], [0.916, 0.858], decimal=2)
+        assert_almost_equal(lom['ll'], [-1.491, -0.248], decimal=2)
+        assert_almost_equal(lom['ul'], [1.339, 0.206], decimal=2)
+
+        # Multiple predictors
+        X = df[['X', 'M']].values
+        y = df['Ybin'].values
+        lom = logistic_regression(X, y)  # Pingouin
+        assert_almost_equal(lom['coef'], [-0.0339, -0.0051, -0.0281],
+                            decimal=2)
+        assert_almost_equal(lom['se'], [0.746, 0.135, 0.124], decimal=2)
+        assert_almost_equal(lom['z'], [-0.045, -0.037, -0.227], decimal=2)
+        assert_almost_equal(lom['pvals'], [0.964, 0.970, 0.821], decimal=2)
+        assert_almost_equal(lom['ll'], [-1.496, -0.270, -0.271], decimal=2)
+        assert_almost_equal(lom['ul'], [1.428, 0.260, 0.215], decimal=2)
+
+        # Test other arguments
+        logistic_regression(df[['X', 'M']], df['Ybin'], coef_only=True)
+
+        with pytest.raises(ValueError):
+            y[3] = 2
+            logistic_regression(X, y)
 
     def test_mediation_analysis(self):
         """Test function mediation_analysis."""

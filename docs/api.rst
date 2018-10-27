@@ -64,6 +64,7 @@ Correlation and regression
     rm_corr
     intraclass_corr
     linear_regression
+    logistic_regression
     mediation_analysis
 
 

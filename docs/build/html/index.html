@@ -114,6 +114,7 @@
 <li>Tests for sphericity, normality and homoscedasticity</li>
 <li>Effect sizes</li>
 <li>Circular statistics</li>
+<li>Linear/logistic regression and mediation analysis</li>
 </ol>
 <p>Pingouin is designed for users who want <strong>simple yet exhaustive statistical functions</strong>.</p>
 <p>For example, the <code class="code docutils literal notranslate"><span class="pre">ttest_ind</span></code> function of SciPy returns only the T-value and the p-value. By contrast,
@@ -122,11 +123,16 @@ the <code class="code docutils literal notranslate"><span class="pre">ttest</spa
 <h1>Installation</h1>
 <div class="section" id="dependencies">
 <h2>Dependencies</h2>
-<p>Pingouin requires :</p>
+<p>The main dependencies of Pingouin are :</p>
 <ul class="simple">
 <li>NumPy</li>
 <li>SciPy</li>
 <li>Pandas</li>
+</ul>
+<p>In addition, some functions require :</p>
+<ul class="simple">
+<li>Statsmodels</li>
+<li>Scikit-learn</li>
 </ul>
 </div>
 <div class="section" id="user-installation">
