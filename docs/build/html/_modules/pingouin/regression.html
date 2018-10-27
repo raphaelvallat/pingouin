@@ -351,11 +351,15 @@
     <span class="k">return</span> <span class="n">stats</span></div>
 
 
-<span class="k">def</span> <span class="nf">_point_estimate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_point_estimate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">mtype</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Point estimate of indirect effect based on bootstrap sample.&quot;&quot;&quot;</span>
     <span class="c1"># Mediator model (M ~ X)</span>
-    <span class="n">beta_m</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
-                               <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coef_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mtype</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+        <span class="n">beta_m</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+                                   <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coef_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">beta_m</span> <span class="o">=</span> <span class="n">logistic_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+                                     <span class="n">coef_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="c1"># Full model (Y ~ X + M)</span>
     <span class="n">beta_y</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[[</span><span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="p">]]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">y</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
                                <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coef_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -404,10 +408,13 @@
 <span class="sd">        Dataframe.</span>
 <span class="sd">    x : str</span>
 <span class="sd">        Column in data containing the predictor variable.</span>
+<span class="sd">        Must be continuous.</span>
 <span class="sd">    m : str</span>
 <span class="sd">        Column in data containing the mediator variable.</span>
+<span class="sd">        Can be continuous or binary (e.g. 0 or 1).</span>
 <span class="sd">    y : str</span>
 <span class="sd">        Column in data containing the outcome variable.</span>
+<span class="sd">        Must be continuous.</span>
 <span class="sd">    alpha : float</span>
 <span class="sd">        Significance threshold. Used to determine the confidence interval,</span>
 <span class="sd">        CI = [ alpha / 2 ; 1 -  alpha / 2]</span>
@@ -430,9 +437,11 @@
 <span class="sd">    Y (i.e., X → Y) is at least partly explained by a chain of effects of the</span>
 <span class="sd">    independent variable on an intervening mediator variable M and of the</span>
 <span class="sd">    intervening variable on the dependent variable (i.e., X → M → Y)&quot;</span>
-<span class="sd">    (from Fiedler et al. 2011)</span>
+<span class="sd">    (from Fiedler et al. 2011).</span>
 
-<span class="sd">    Note that the current implementation only works with continuous variables.</span>
+<span class="sd">    A linear regression is used if the mediator variable is continuous and a</span>
+<span class="sd">    logistic regression if the mediator variable is dichotomous (binary).</span>
+
 <span class="sd">    The indirect effect is considered significant if the specified confidence</span>
 <span class="sd">    interval does not include 0.</span>
 
@@ -467,6 +476,16 @@
 <span class="sd">        &gt;&gt;&gt;                                  return_dist=True)</span>
 <span class="sd">        &gt;&gt;&gt; print(dist.shape)</span>
 <span class="sd">            (500,)</span>
+
+<span class="sd">    3. Mediation analysis with a binary mediator variable</span>
+
+<span class="sd">        &gt;&gt;&gt; from pingouin import mediation_analysis</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;mediation&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; df[&#39;M&#39;] = np.random.randint(0, 2, df.shape[0])</span>
+<span class="sd">        &gt;&gt;&gt; mediation_analysis(data=df, x=&#39;X&#39;, m=&#39;M&#39;, y=&#39;Y&#39;, alpha=0.05)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -474,13 +493,18 @@
     <span class="n">ab_estimates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_boot</span><span class="p">)</span>
     <span class="n">indirect</span> <span class="o">=</span> <span class="p">{}</span>
 
+    <span class="c1"># Check if mediator is binary</span>
+    <span class="n">mtype</span> <span class="o">=</span> <span class="s1">&#39;logistic&#39;</span> <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="s1">&#39;linear&#39;</span>
+
     <span class="c1"># Bootstrap</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_boot</span><span class="p">):</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
-        <span class="n">ab_estimates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_point_estimate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">ab_estimates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_point_estimate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span>
+                                          <span class="n">mtype</span><span class="o">=</span><span class="n">mtype</span><span class="p">)</span>
 
     <span class="c1"># Bootstrap point estimate and confidence interval</span>
-    <span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;coef&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_point_estimate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+    <span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;coef&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_point_estimate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">),</span>
+                                       <span class="n">mtype</span><span class="o">=</span><span class="n">mtype</span><span class="p">)</span>
     <span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;ci&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_bias_corrected_interval</span><span class="p">(</span><span class="n">ab_estimates</span><span class="p">,</span> <span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;coef&#39;</span><span class="p">],</span>
                                               <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="n">n_boot</span><span class="p">)</span>
     <span class="c1"># Significance of the mediation effect</span>
@@ -488,7 +512,12 @@
                                 <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;ci&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span> <span class="k">else</span> <span class="s1">&#39;No&#39;</span>
 
     <span class="c1"># Compute linear regressions</span>
-    <span class="n">sxm</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mtype</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+        <span class="n">sxm</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sxm</span> <span class="o">=</span> <span class="n">logistic_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+
     <span class="n">smy</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
     <span class="c1"># sxy = Average Total Effects</span>
     <span class="n">sxy</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>

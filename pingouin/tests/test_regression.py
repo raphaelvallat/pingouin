@@ -84,7 +84,9 @@ class TestRegression(_TestPingouin):
             logistic_regression(X, y)
 
     def test_mediation_analysis(self):
-        """Test function mediation_analysis."""
+        """Test function mediation_analysis.
+        TODO: compare logistic mediator to R package mediation.
+        """
         ma = mediation_analysis(data=df, x='X', m='M', y='Y', n_boot=500)
         assert ma['Beta'][0] == 0.5610
         assert ma['Beta'][2] == 0.3961
@@ -95,3 +97,15 @@ class TestRegression(_TestPingouin):
                                      return_dist=True)
         assert dist.size == 1000
         mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.01)
+
+        # Check with a binary mediator
+        np.random.seed(123)
+        df['M1'] = np.random.randint(0, 2, df.shape[0])
+        ma = mediation_analysis(data=df, x='X', m='M1', y='Y', n_boot=500)
+        assert_almost_equal(ma['Beta'][0], -0.0208, decimal=2)
+        assert_almost_equal(ma['Beta'][4], 0.0027, decimal=2)
+        # Check significance
+        assert ma['Sig'][0] == 'No'
+        assert ma['Sig'][1] == 'No'
+        assert ma['Sig'][3] == 'Yes'
+        assert ma['Sig'][4] == 'No'

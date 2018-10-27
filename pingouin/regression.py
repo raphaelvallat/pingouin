@@ -257,11 +257,15 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05):
     return stats
 
 
-def _point_estimate(data, x, m, y, idx):
+def _point_estimate(data, x, m, y, idx, mtype='linear'):
     """Point estimate of indirect effect based on bootstrap sample."""
     # Mediator model (M ~ X)
-    beta_m = linear_regression(data[x].iloc[idx], data[m].iloc[idx],
-                               add_intercept=True, coef_only=True)
+    if mtype == 'linear':
+        beta_m = linear_regression(data[x].iloc[idx], data[m].iloc[idx],
+                                   add_intercept=True, coef_only=True)
+    else:
+        beta_m = logistic_regression(data[x].iloc[idx], data[m].iloc[idx],
+                                     coef_only=True)
     # Full model (Y ~ X + M)
     beta_y = linear_regression(data[[x, m]].iloc[idx], data[y].iloc[idx],
                                add_intercept=True, coef_only=True)
@@ -310,10 +314,13 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
         Dataframe.
     x : str
         Column in data containing the predictor variable.
+        Must be continuous.
     m : str
         Column in data containing the mediator variable.
+        Can be continuous or binary (e.g. 0 or 1).
     y : str
         Column in data containing the outcome variable.
+        Must be continuous.
     alpha : float
         Significance threshold. Used to determine the confidence interval,
         CI = [ alpha / 2 ; 1 -  alpha / 2]
@@ -336,9 +343,11 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     Y (i.e., X → Y) is at least partly explained by a chain of effects of the
     independent variable on an intervening mediator variable M and of the
     intervening variable on the dependent variable (i.e., X → M → Y)"
-    (from Fiedler et al. 2011)
+    (from Fiedler et al. 2011).
 
-    Note that the current implementation only works with continuous variables.
+    A linear regression is used if the mediator variable is continuous and a
+    logistic regression if the mediator variable is dichotomous (binary).
+
     The indirect effect is considered significant if the specified confidence
     interval does not include 0.
 
@@ -373,6 +382,16 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
         >>>                                  return_dist=True)
         >>> print(dist.shape)
             (500,)
+
+    3. Mediation analysis with a binary mediator variable
+
+        >>> from pingouin import mediation_analysis
+        >>> from pingouin.datasets import read_dataset
+        >>> import numpy as np
+        >>> np.random.seed(123)
+        >>> df = read_dataset('mediation')
+        >>> df['M'] = np.random.randint(0, 2, df.shape[0])
+        >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05)
     """
     n = data.shape[0]
 
@@ -380,13 +399,18 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     ab_estimates = np.zeros(n_boot)
     indirect = {}
 
+    # Check if mediator is binary
+    mtype = 'logistic' if data[m].unique().size == 2 else 'linear'
+
     # Bootstrap
     for i in range(n_boot):
         idx = np.random.choice(np.arange(n), replace=True, p=None, size=n)
-        ab_estimates[i] = _point_estimate(data, x=x, m=m, y=y, idx=idx)
+        ab_estimates[i] = _point_estimate(data, x=x, m=m, y=y, idx=idx,
+                                          mtype=mtype)
 
     # Bootstrap point estimate and confidence interval
-    indirect['coef'] = _point_estimate(data, x=x, m=m, y=y, idx=np.arange(n))
+    indirect['coef'] = _point_estimate(data, x=x, m=m, y=y, idx=np.arange(n),
+                                       mtype=mtype)
     indirect['ci'] = _bias_corrected_interval(ab_estimates, indirect['coef'],
                                               alpha=alpha, n_boot=n_boot)
     # Significance of the mediation effect
@@ -394,7 +418,12 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
                                 == np.sign(indirect['ci'][1])) else 'No'
 
     # Compute linear regressions
-    sxm = linear_regression(data[x], data[m], add_intercept=True, alpha=alpha)
+    if mtype == 'linear':
+        sxm = linear_regression(data[x], data[m], add_intercept=True,
+                                alpha=alpha)
+    else:
+        sxm = logistic_regression(data[x], data[m], alpha=alpha)
+
     smy = linear_regression(data[m], data[y], add_intercept=True, alpha=alpha)
     # sxy = Average Total Effects
     sxy = linear_regression(data[x], data[y], add_intercept=True, alpha=alpha)
