@@ -227,6 +227,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
 
+    <span class="c1"># Convert input to numpy array</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 
@@ -248,18 +249,18 @@
         <span class="k">return</span> <span class="n">coef</span>
     <span class="n">pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">coef</span><span class="p">)</span>
     <span class="n">resid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">pred</span><span class="p">)</span>
+    <span class="n">ss_res</span> <span class="o">=</span> <span class="n">resid</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
     <span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="c1"># Degrees of freedom should not include the intercept</span>
     <span class="n">dof</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="n">p</span> <span class="k">if</span> <span class="n">add_intercept</span> <span class="k">else</span> <span class="n">n</span> <span class="o">-</span> <span class="n">p</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="c1"># Compute mean squared error, variance and SE</span>
-    <span class="n">MSE</span> <span class="o">=</span> <span class="n">resid</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">dof</span>
+    <span class="n">MSE</span> <span class="o">=</span> <span class="n">ss_res</span> <span class="o">/</span> <span class="n">dof</span>
     <span class="n">beta_var</span> <span class="o">=</span> <span class="n">MSE</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">X</span><span class="p">))</span><span class="o">.</span><span class="n">diagonal</span><span class="p">())</span>
     <span class="n">beta_se</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">beta_var</span><span class="p">)</span>
 
     <span class="c1"># Compute R2, adjusted R2 and RMSE</span>
     <span class="n">ss_tot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    <span class="n">ss_res</span> <span class="o">=</span> <span class="n">resid</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="c1"># ss_exp = np.square(pred - y.mean()).sum()</span>
     <span class="n">r2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">ss_res</span> <span class="o">/</span> <span class="n">ss_tot</span><span class="p">)</span>
     <span class="n">adj_r2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">dof</span>

@@ -133,6 +133,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
     else:
         names = []
 
+    # Convert input to numpy array
     X = np.asarray(X)
     y = np.asarray(y)
 
@@ -154,18 +155,18 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
         return coef
     pred = np.dot(X, coef)
     resid = np.square(y - pred)
+    ss_res = resid.sum()
 
     n, p = X.shape[0], X.shape[1]
     # Degrees of freedom should not include the intercept
     dof = n - p if add_intercept else n - p - 1
     # Compute mean squared error, variance and SE
-    MSE = resid.sum() / dof
+    MSE = ss_res / dof
     beta_var = MSE * (np.linalg.inv(np.dot(X.T, X)).diagonal())
     beta_se = np.sqrt(beta_var)
 
     # Compute R2, adjusted R2 and RMSE
     ss_tot = np.square(y - y.mean()).sum()
-    ss_res = resid.sum()
     # ss_exp = np.square(pred - y.mean()).sum()
     r2 = 1 - (ss_res / ss_tot)
     adj_r2 = 1 - (1 - r2) * (n - 1) / dof
