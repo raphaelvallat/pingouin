@@ -625,12 +625,55 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
     Notes
     -----
+    The ANOVA is very powerful when the groups are normally distributed
+    and have equal variances. However, when the groups have unequal variances,
+    it is best to use the Welch ANOVA (`welch_anova`) that better controls for
+    type I error (Liu 2015). The homogeneity of variances can be measured with
+    the `homoscedasticity` function.
+
+    The main idea of ANOVA is to partition the variance (sums of squares)
+    into several components. For example, in one-way ANOVA:
+
+    .. math:: SS_{total} = SS_{treatment} + SS_{error}
+    .. math:: SS_{total} = \sum_i \sum_j (Y_{ij} - \overline{Y})^2
+    .. math:: SS_{treatment} = \sum_i n_i (\overline{Y_i} - \overline{Y})^2
+    .. math:: SS_{error} = \sum_i \sum_j (Y_{ij} - \overline{Y}_i)^2
+
+    where :math:`i=1,...,r; j=1,...,n_i`, :math:`r` is the number of groups,
+    and :math:`n_i` the number of observations for the :math:`i` th group.
+
+    The F-statistics is then defined as:
+
+    .. math::
+
+        F^* = \dfrac{MS_{treatment}}{MS_{error}} = \dfrac{SS_{treatment}
+        / (r - 1)}{SS_{error} / (n_t - r)}
+
+    and the p-value can be calculated using a F-distribution with
+    :math:`r-1, n_t-1` degrees of freedom.
+
+    When the groups are balanced and have equal variances, the optimal post-hoc
+    test is the Tukey-HSD test (`pairwise_tukey`). If the groups have unequal
+    variances, the Games-Howell test is more adequate.
+
     The effect size reported in Pingouin is the partial eta-square.
     However, one should keep in mind that for one-way ANOVA
     partial eta-square is the same as eta-square and generalized eta-square.
     For more details, see Bakeman 2005; Richardson 2011.
 
     Results have been tested against R, Matlab and JASP.
+
+    References
+    ----------
+    .. [1] Liu, Hangcheng. "Comparing Welch's ANOVA, a Kruskal-Wallis test and
+           traditional ANOVA in case of Heterogeneity of Variance." (2015).
+
+    .. [2] Bakeman, Roger. "Recommended effect size statistics for repeated
+           measures designs." Behavior research methods 37.3 (2005): 379-384.
+
+    .. [3] Richardson, John TE. "Eta squared and partial eta squared as
+           measures of effect size in educational research." Educational
+           Research Review 6.2 (2011): 135-147.
 
     Examples
     --------
@@ -646,12 +689,10 @@ def anova(dv=None, between=None, data=None, detailed=False,
     2. Two-way ANOVA.
 
         >>> import pandas as pd
-        >>> from pingouin import anova, print_table
+        >>> from pingouin import anova
         >>> df = pd.read_csv('dataset.csv')
-        >>> aov = anova(dv='DV', between=['factor1, 'factor2'], data=df,
-                        export_filename='anova.csv')
-        >>> print_table(aov)
-
+        >>> anova(dv='DV', between=['factor1, 'factor2'], data=df,
+                  export_filename='anova.csv')
     """
     if isinstance(between, list):
         if len(between) == 2:

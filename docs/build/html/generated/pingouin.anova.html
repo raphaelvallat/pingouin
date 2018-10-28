@@ -159,11 +159,60 @@ directory. To change that, specify the filename with full path.</p>
 </dl>
 </div>
 <p class="rubric">Notes</p>
+<p>The ANOVA is very powerful when the groups are normally distributed
+and have equal variances. However, when the groups have unequal variances,
+it is best to use the Welch ANOVA (<cite>welch_anova</cite>) that better controls for
+type I error (Liu 2015). The homogeneity of variances can be measured with
+the <cite>homoscedasticity</cite> function.</p>
+<p>The main idea of ANOVA is to partition the variance (sums of squares)
+into several components. For example, in one-way ANOVA:</p>
+<div class="math notranslate nohighlight">
+\[SS_{total} = SS_{treatment} + SS_{error}\]</div>
+<div class="math notranslate nohighlight">
+\[SS_{total} = \sum_i \sum_j (Y_{ij} - \overline{Y})^2\]</div>
+<div class="math notranslate nohighlight">
+\[SS_{treatment} = \sum_i n_i (\overline{Y_i} - \overline{Y})^2\]</div>
+<div class="math notranslate nohighlight">
+\[SS_{error} = \sum_i \sum_j (Y_{ij} - \overline{Y}_i)^2\]</div>
+<p>where <span class="math notranslate nohighlight">\(i=1,...,r; j=1,...,n_i\)</span>, <span class="math notranslate nohighlight">\(r\)</span> is the number of groups,
+and <span class="math notranslate nohighlight">\(n_i\)</span> the number of observations for the <span class="math notranslate nohighlight">\(i\)</span> th group.</p>
+<p>The F-statistics is then defined as:</p>
+<div class="math notranslate nohighlight">
+\[F^* = \dfrac{MS_{treatment}}{MS_{error}} = \dfrac{SS_{treatment}
+/ (r - 1)}{SS_{error} / (n_t - r)}\]</div>
+<p>and the p-value can be calculated using a F-distribution with
+<span class="math notranslate nohighlight">\(r-1, n_t-1\)</span> degrees of freedom.</p>
+<p>When the groups are balanced and have equal variances, the optimal post-hoc
+test is the Tukey-HSD test (<cite>pairwise_tukey</cite>). If the groups have unequal
+variances, the Games-Howell test is more adequate.</p>
 <p>The effect size reported in Pingouin is the partial eta-square.
 However, one should keep in mind that for one-way ANOVA
 partial eta-square is the same as eta-square and generalized eta-square.
 For more details, see Bakeman 2005; Richardson 2011.</p>
 <p>Results have been tested against R, Matlab and JASP.</p>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="rce233659a6ae-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Liu, Hangcheng. “Comparing Welch’s ANOVA, a Kruskal-Wallis test and
+traditional ANOVA in case of Heterogeneity of Variance.” (2015).</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="rce233659a6ae-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Bakeman, Roger. “Recommended effect size statistics for repeated
+measures designs.” Behavior research methods 37.3 (2005): 379-384.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="rce233659a6ae-3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>Richardson, John TE. “Eta squared and partial eta squared as
+measures of effect size in educational research.” Educational
+Research Review 6.2 (2011): 135-147.</td></tr>
+</tbody>
+</table>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">One-way ANOVA on the pain threshold dataset.</p>
@@ -178,11 +227,10 @@ For more details, see Bakeman 2005; Richardson 2011.</p>
 </li>
 <li><p class="first">Two-way ANOVA.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">anova</span><span class="p">,</span> <span class="n">print_table</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">anova</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;dataset.csv&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">aov</span> <span class="o">=</span> <span class="n">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;factor1, &#39;</span><span class="n">factor2</span><span class="s1">&#39;], data=df,</span>
-<span class="go">                export_filename=&#39;anova.csv&#39;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">print_table</span><span class="p">(</span><span class="n">aov</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;factor1, &#39;</span><span class="n">factor2</span><span class="s1">&#39;], data=df,</span>
+<span class="go">          export_filename=&#39;anova.csv&#39;)</span>
 </pre></div>
 </div>
 </li>

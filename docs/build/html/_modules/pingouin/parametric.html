@@ -719,12 +719,55 @@
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
+<span class="sd">    The ANOVA is very powerful when the groups are normally distributed</span>
+<span class="sd">    and have equal variances. However, when the groups have unequal variances,</span>
+<span class="sd">    it is best to use the Welch ANOVA (`welch_anova`) that better controls for</span>
+<span class="sd">    type I error (Liu 2015). The homogeneity of variances can be measured with</span>
+<span class="sd">    the `homoscedasticity` function.</span>
+
+<span class="sd">    The main idea of ANOVA is to partition the variance (sums of squares)</span>
+<span class="sd">    into several components. For example, in one-way ANOVA:</span>
+
+<span class="sd">    .. math:: SS_{total} = SS_{treatment} + SS_{error}</span>
+<span class="sd">    .. math:: SS_{total} = \sum_i \sum_j (Y_{ij} - \overline{Y})^2</span>
+<span class="sd">    .. math:: SS_{treatment} = \sum_i n_i (\overline{Y_i} - \overline{Y})^2</span>
+<span class="sd">    .. math:: SS_{error} = \sum_i \sum_j (Y_{ij} - \overline{Y}_i)^2</span>
+
+<span class="sd">    where :math:`i=1,...,r; j=1,...,n_i`, :math:`r` is the number of groups,</span>
+<span class="sd">    and :math:`n_i` the number of observations for the :math:`i` th group.</span>
+
+<span class="sd">    The F-statistics is then defined as:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        F^* = \dfrac{MS_{treatment}}{MS_{error}} = \dfrac{SS_{treatment}</span>
+<span class="sd">        / (r - 1)}{SS_{error} / (n_t - r)}</span>
+
+<span class="sd">    and the p-value can be calculated using a F-distribution with</span>
+<span class="sd">    :math:`r-1, n_t-1` degrees of freedom.</span>
+
+<span class="sd">    When the groups are balanced and have equal variances, the optimal post-hoc</span>
+<span class="sd">    test is the Tukey-HSD test (`pairwise_tukey`). If the groups have unequal</span>
+<span class="sd">    variances, the Games-Howell test is more adequate.</span>
+
 <span class="sd">    The effect size reported in Pingouin is the partial eta-square.</span>
 <span class="sd">    However, one should keep in mind that for one-way ANOVA</span>
 <span class="sd">    partial eta-square is the same as eta-square and generalized eta-square.</span>
 <span class="sd">    For more details, see Bakeman 2005; Richardson 2011.</span>
 
 <span class="sd">    Results have been tested against R, Matlab and JASP.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Liu, Hangcheng. &quot;Comparing Welch&#39;s ANOVA, a Kruskal-Wallis test and</span>
+<span class="sd">           traditional ANOVA in case of Heterogeneity of Variance.&quot; (2015).</span>
+
+<span class="sd">    .. [2] Bakeman, Roger. &quot;Recommended effect size statistics for repeated</span>
+<span class="sd">           measures designs.&quot; Behavior research methods 37.3 (2005): 379-384.</span>
+
+<span class="sd">    .. [3] Richardson, John TE. &quot;Eta squared and partial eta squared as</span>
+<span class="sd">           measures of effect size in educational research.&quot; Educational</span>
+<span class="sd">           Research Review 6.2 (2011): 135-147.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -740,12 +783,10 @@
 <span class="sd">    2. Two-way ANOVA.</span>
 
 <span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
-<span class="sd">        &gt;&gt;&gt; from pingouin import anova, print_table</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import anova</span>
 <span class="sd">        &gt;&gt;&gt; df = pd.read_csv(&#39;dataset.csv&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; aov = anova(dv=&#39;DV&#39;, between=[&#39;factor1, &#39;factor2&#39;], data=df,</span>
-<span class="sd">                        export_filename=&#39;anova.csv&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; print_table(aov)</span>
-
+<span class="sd">        &gt;&gt;&gt; anova(dv=&#39;DV&#39;, between=[&#39;factor1, &#39;factor2&#39;], data=df,</span>
+<span class="sd">                  export_filename=&#39;anova.csv&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">between</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">between</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
