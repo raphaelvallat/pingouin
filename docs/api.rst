@@ -14,6 +14,7 @@ ANOVA and T-test
    :toctree: generated/
 
     anova
+    welch_anova
     rm_anova
     rm_anova2
     epsilon
@@ -106,6 +107,7 @@ Multiple comparisons and post-hoc tests
 
     pairwise_ttests
     pairwise_tukey
+    pairwise_gameshowell
     multicomp
     bonf
     holm

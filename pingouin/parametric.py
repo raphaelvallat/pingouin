@@ -5,7 +5,7 @@ import pandas as pd
 from pingouin import (_check_dataframe, _remove_rm_na, _remove_na,
                       _export_table, bayesfactor_ttest, epsilon, sphericity)
 
-__all__ = ["ttest", "rm_anova", "rm_anova2", "anova", "anova2",
+__all__ = ["ttest", "rm_anova", "rm_anova2", "anova", "anova2", "welch_anova",
            "mixed_anova", "ancova", "ancovan"]
 
 
@@ -608,7 +608,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
         ANOVA summary ::
 
         'Source' : Factor names
-        'SS' :Sums of squares
+        'SS' : Sums of squares
         'DF' : Degrees of freedom
         'MS' : Mean squares
         'F' : F-values
@@ -620,12 +620,12 @@ def anova(dv=None, between=None, data=None, detailed=False,
     rm_anova : One-way repeated measures ANOVA
     rm_anova2 : Two-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
+    welch_anova : One-way Welch ANOVA
     kruskal : Non-parametric one-way ANOVA
-
 
     Notes
     -----
-    The ANOVA is very powerful when the groups are normally distributed
+    The classic ANOVA is very powerful when the groups are normally distributed
     and have equal variances. However, when the groups have unequal variances,
     it is best to use the Welch ANOVA (`welch_anova`) that better controls for
     type I error (Liu 2015). The homogeneity of variances can be measured with
@@ -792,7 +792,7 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
         ANOVA summary ::
 
         'Source' : Factor names
-        'SS' :Sums of squares
+        'SS' : Sums of squares
         'DF' : Degrees of freedom
         'MS' : Mean squares
         'F' : F-values
@@ -895,6 +895,161 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
+    # Export to .csv
+    if export_filename is not None:
+        _export_table(aov, export_filename)
+    return aov
+
+
+def welch_anova(dv=None, between=None, data=None, export_filename=None):
+    """One-way Welch ANOVA.
+
+    Parameters
+    ----------
+    dv : string
+        Name of column containing the dependant variable.
+    between : string
+        Name of column containing the between factor.
+    data : pandas DataFrame
+        DataFrame
+    export_filename : string
+        Filename (without extension) for the output file.
+        If None, do not export the table.
+        By default, the file will be created in the current python console
+        directory. To change that, specify the filename with full path.
+
+    Returns
+    -------
+    aov : DataFrame
+        ANOVA summary ::
+
+        'Source' : Factor names
+        'SS' : Sums of squares
+        'DF' : Degrees of freedom
+        'MS' : Mean squares
+        'F' : F-values
+        'p-unc' : uncorrected p-values
+        'np2' : Partial eta-square effect sizes
+
+    See Also
+    --------
+    anova : One-way ANOVA
+    rm_anova : One-way repeated measures ANOVA
+    rm_anova2 : Two-way repeated measures ANOVA
+    mixed_anova : Two way mixed ANOVA
+    kruskal : Non-parametric one-way ANOVA
+
+    Notes
+    -----
+    The classic ANOVA is very powerful when the groups are normally distributed
+    and have equal variances. However, when the groups have unequal variances,
+    it is best to use the Welch ANOVA that better controls for
+    type I error (Liu 2015). The homogeneity of variances can be measured with
+    the `homoscedasticity` function. The two other assumptions of
+    normality and independance remain.
+
+    The main idea of Welch ANOVA is to use a weight :math:`w_i` to reduce
+    the effect of unequal variances. This weight is calculated using the sample
+    size :math:`n_i` and variance :math:`s_i^2` of each group
+    :math:`i=1,...,r`:
+
+    .. math:: w_i = \dfrac{n_i}{s_i^2}
+
+    Using these weights, the adjusted grand mean of the data is:
+
+    .. math::
+
+        \overline{Y}_{welch} = \dfrac{\sum_{i=1}^r w_i\overline{Y}_i}
+        {\sum w}
+
+    where :math:`\overline{Y}_i` is the mean of the :math:`i` group.
+
+    The treatment sums of squares is defined as:
+
+    .. math::
+
+        SS_{treatment} = \sum_{i=1}^r w_i
+        (\overline{Y}_i - \overline{Y}_{welch})^2
+
+    We then need to calculate a term lambda:
+
+    .. math::
+
+        \Lambda = \dfrac{3\sum_{i=1}^r(\dfrac{1}{n_i-1})
+        (1 - \dfrac{w_i}{\sum w})^2}{r^2 - 1}
+
+    from which the F-value can be calculated:
+
+    .. math::
+
+        F_{welch} = \dfrac{SS_{treatment} / (r-1)}
+        {1 + \dfrac{2\Lambda(r-2)}{3}}
+
+    and the p-value approximated using a F-distribution with
+    :math:`(r-1, 1 / \Lambda)` degrees of freedom.
+
+    When the groups are balanced and have equal variances, the optimal post-hoc
+    test is the Tukey-HSD test (`pairwise_tukey`). If the groups have unequal
+    variances, the Games-Howell test is more adequate.
+
+    Results have been tested against R.
+
+    References
+    ----------
+    .. [1] Liu, Hangcheng. "Comparing Welch's ANOVA, a Kruskal-Wallis test and
+           traditional ANOVA in case of Heterogeneity of Variance." (2015).
+
+    Examples
+    --------
+    1. One-way Welch ANOVA on the pain threshold dataset.
+
+        >>> from pingouin import welch_anova
+        >>> from pingouin.datasets import read_dataset
+        >>> df = read_dataset('anova')
+        >>> aov = welch_anova(dv='Pain threshold', between='Hair color',
+        >>>                   data=df, export_filename='pain_anova.csv')
+        >>> aov
+            Source      ddof1   ddof2   F     p-unc
+            Hair color  3       8.33    5.89  0.018813
+    """
+    from scipy.stats import f
+    # Check data
+    _check_dataframe(dv=dv, between=between, data=data, effects='between')
+
+    # Reset index (avoid duplicate axis error)
+    data = data.reset_index(drop=True)
+
+    # Number of groups
+    r = data[between].unique().size
+    ddof1 = r - 1
+
+    # Compute weights and ajusted means
+    grp = data.groupby(between)[dv]
+    weights = grp.count() / grp.var()
+    adj_grandmean = (weights * grp.mean()).sum() / weights.sum()
+
+    # Treatment sum of squares
+    ss_tr = np.sum(weights * np.square(grp.mean() - adj_grandmean))
+    ms_tr = ss_tr / ddof1
+
+    # Calculate lambda, F-value and p-value
+    lamb = (3 * np.sum((1 / (grp.count() - 1)) *
+                       (1 - (weights / weights.sum()))**2)) / (r**2 - 1)
+    fval = ms_tr / (1 + (2 * lamb * (r - 2)) / 3)
+    pval = f.sf(fval, ddof1, 1 / lamb)
+
+    # Create output dataframe
+    aov = pd.DataFrame({'Source': between,
+                        'ddof1': ddof1,
+                        'ddof2': 1 / lamb,
+                        'F': fval,
+                        'p-unc': pval,
+                        }, index=[0])
+
+    col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc']
+    aov = aov.reindex(columns=col_order)
+    aov[['F', 'ddof2']] = aov[['F', 'ddof2']].round(3)
+
     # Export to .csv
     if export_filename is not None:
         _export_table(aov, export_filename)

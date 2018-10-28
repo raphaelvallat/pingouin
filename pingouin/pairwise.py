@@ -5,10 +5,11 @@ import pandas as pd
 from itertools import combinations
 from pingouin.parametric import anova
 from pingouin.multicomp import multicomp
-from pingouin.effsize import compute_effsize
+from pingouin.effsize import compute_effsize, convert_effsize
 from pingouin.utils import _remove_rm_na, _export_table, _check_dataframe
 
-__all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_corr"]
+__all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
+           "pairwise_corr"]
 
 
 def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, alpha,
@@ -308,8 +309,6 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
         >>> df = read_dataset('anova')
         >>> pairwise_tukey(dv='Pain threshold', between='Hair color', data=df)
     '''
-    from itertools import combinations
-    from pingouin.effsize import convert_effsize
     from pingouin.external.qsturng import psturng
 
     # First compute the ANOVA
@@ -359,6 +358,152 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
                          'efsize': np.round(ef, 3),
                          'eftype': effsize,
                          })
+    return stats
+
+
+def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
+                         tail='two-sided', effsize='hedges'):
+    '''Pairwise Games-Howell post-hoc tests.
+
+    Parameters
+    ----------
+    dv : string
+        Name of column containing the dependant variable.
+    between: string
+        Name of column containing the between factor.
+    data : pandas DataFrame
+        DataFrame
+    alpha : float
+        Significance level
+    tail : string
+        Indicates whether to return the 'two-sided' or 'one-sided' p-values
+    effsize : string or None
+        Effect size type. Available methods are ::
+
+        'none' : no effect size
+        'cohen' : Unbiased Cohen d
+        'hedges' : Hedges g
+        'glass': Glass delta
+        'eta-square' : Eta-square
+        'odds-ratio' : Odds ratio
+        'AUC' : Area Under the Curve
+
+    Returns
+    -------
+    stats : DataFrame
+        Stats summary ::
+
+        'A' : Name of first measurement
+        'B' : Name of second measurement
+        'mean(A)' : Mean of first measurement
+        'mean(B)' : Mean of second measurement
+        'diff' : Mean difference
+        'SE' : Standard error
+        'tail' : indicate whether the p-values are one-sided or two-sided
+        'T-val' : T-values
+        'df' : adjusted degrees of freedom
+        'pval' : Games-Howell corrected p-values
+        'efsize' : effect sizes
+        'eftype' : type of effect size
+
+    Notes
+    -----
+    Games-Howell is very similar to the Tukey HSD post-hoc test but is much
+    more robust to heterogeneity of variances. While the
+    Tukey-HSD post-hoc is optimal after a classic one-way ANOVA, the
+    Games-Howell is optimal after a Welch ANOVA.
+    Games-Howell is not valid for repeated measures ANOVA.
+
+    Compared to the Tukey-HSD test, the Games-Howell test uses different pooled
+    variances for each pair of variables instead of the same pooled variance.
+
+    The T-values are defined as:
+
+    .. math::
+
+        T = \dfrac{\overline{x}_i - \overline{x}_j}{\sqrt{(\dfrac{s_i^2}{n_i}
+        + \dfrac{s_j^2}{n_j})}}
+
+    and the corrected degrees of freedom are:
+
+    .. math::
+
+        \mathtt{df} = \dfrac{(\dfrac{s_i^2}{n_i} + \dfrac{s_j^2}{n_j})^2}
+        {\dfrac{(\dfrac{s_i^2}{n_i})^2}{n_i-1} +
+        \dfrac{(\dfrac{s_j^2}{n_j})^2}{n_j-1}}
+
+    where :math:`\overline{x}_i`, :math:`s_i^2`, and :math:`n_i`
+    are the mean, variance and sample size of the first group and
+    :math:`\overline{x}_j`, :math:`s_j^2`, and :math:`n_j` the mean, variance
+    and sample size of the second group.
+
+    The p-values are then approximated using the Studentized range distribution
+    :math:`Q(\sqrt2*t_i, r, df_i)`.
+
+    Examples
+    --------
+    Pairwise Games-Howell post-hocs on the pain threshold dataset.
+
+        >>> from pingouin import pairwise_gameshowell
+        >>> from pingouin.datasets import read_dataset
+        >>> df = read_dataset('anova')
+        >>> pairwise_gameshowell(dv='Pain threshold', between='Hair color',
+        >>>                      data=df)
+    '''
+    from pingouin.external.qsturng import psturng
+
+    # Check the dataframe
+    _check_dataframe(dv=dv, between=between, effects='between', data=data)
+
+    # Reset index (avoid duplicate axis error)
+    data = data.reset_index(drop=True)
+
+    # Extract infos
+    ng = data[between].unique().size
+    grp = data.groupby(between)[dv]
+    n = grp.count().values
+    gmeans = grp.mean().values
+    gvars = grp.var().values
+
+    # Pairwise combinations
+    g1, g2 = np.array(list(combinations(np.arange(ng), 2))).T
+    mn = gmeans[g1] - gmeans[g2]
+    se = np.sqrt(0.5 * (gvars[g1] / n[g1] + gvars[g2] / n[g2]))
+    tval = mn / np.sqrt(gvars[g1] / n[g1] + gvars[g2] / n[g2])
+    df = (gvars[g1] / n[g1] + gvars[g2] / n[g2])**2 / \
+         ((((gvars[g1] / n[g1])**2) / (n[g1] - 1)) +
+          (((gvars[g2] / n[g2])**2) / (n[g2] - 1)))
+
+    # Compute corrected p-values
+    pval = psturng(np.sqrt(2) * np.abs(tval), ng, df)
+    pval *= 0.5 if tail == 'one-sided' else 1
+
+    # Uncorrected p-values
+    # from scipy.stats import t
+    # punc = t.sf(np.abs(tval), n[g1].size + n[g2].size - 2) * 2
+
+    # Effect size
+    d = tval * np.sqrt(1 / n[g1] + 1 / n[g2])
+    ef = convert_effsize(d, 'cohen', effsize, n[g1], n[g2])
+
+    # Create dataframe
+    # Careful: pd.unique does NOT sort whereas numpy does
+    stats = pd.DataFrame({
+                         'A': np.unique(data[between])[g1],
+                         'B': np.unique(data[between])[g2],
+                         'mean(A)': gmeans[g1],
+                         'mean(B)': gmeans[g2],
+                         'diff': mn,
+                         'SE': se,
+                         'tail': tail,
+                         'T-val': tval,
+                         'df': df,
+                         'pval': pval,
+                         'efsize': ef,
+                         'eftype': effsize,
+                         })
+    col_round = ['mean(A)', 'mean(B)', 'diff', 'SE', 'T-val', 'df', 'efsize']
+    stats[col_round] = stats[col_round].round(3)
     return stats
 
 

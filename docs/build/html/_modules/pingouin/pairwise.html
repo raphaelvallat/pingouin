@@ -99,10 +99,11 @@
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">combinations</span>
 <span class="kn">from</span> <span class="nn">pingouin.parametric</span> <span class="k">import</span> <span class="n">anova</span>
 <span class="kn">from</span> <span class="nn">pingouin.multicomp</span> <span class="k">import</span> <span class="n">multicomp</span>
-<span class="kn">from</span> <span class="nn">pingouin.effsize</span> <span class="k">import</span> <span class="n">compute_effsize</span>
+<span class="kn">from</span> <span class="nn">pingouin.effsize</span> <span class="k">import</span> <span class="n">compute_effsize</span><span class="p">,</span> <span class="n">convert_effsize</span>
 <span class="kn">from</span> <span class="nn">pingouin.utils</span> <span class="k">import</span> <span class="n">_remove_rm_na</span><span class="p">,</span> <span class="n">_export_table</span><span class="p">,</span> <span class="n">_check_dataframe</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;pairwise_ttests&quot;</span><span class="p">,</span> <span class="s2">&quot;pairwise_tukey&quot;</span><span class="p">,</span> <span class="s2">&quot;pairwise_corr&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;pairwise_ttests&quot;</span><span class="p">,</span> <span class="s2">&quot;pairwise_tukey&quot;</span><span class="p">,</span> <span class="s2">&quot;pairwise_gameshowell&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;pairwise_corr&quot;</span><span class="p">]</span>
 
 
 <span class="k">def</span> <span class="nf">_append_stats_dataframe</span><span class="p">(</span><span class="n">stats</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xlabel</span><span class="p">,</span> <span class="n">ylabel</span><span class="p">,</span> <span class="n">effects</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span>
@@ -402,8 +403,6 @@
 <span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;anova&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; pairwise_tukey(dv=&#39;Pain threshold&#39;, between=&#39;Hair color&#39;, data=df)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">combinations</span>
-    <span class="kn">from</span> <span class="nn">pingouin.effsize</span> <span class="k">import</span> <span class="n">convert_effsize</span>
     <span class="kn">from</span> <span class="nn">pingouin.external.qsturng</span> <span class="k">import</span> <span class="n">psturng</span>
 
     <span class="c1"># First compute the ANOVA</span>
@@ -453,6 +452,152 @@
                          <span class="s1">&#39;efsize&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ef</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
                          <span class="s1">&#39;eftype&#39;</span><span class="p">:</span> <span class="n">effsize</span><span class="p">,</span>
                          <span class="p">})</span>
+    <span class="k">return</span> <span class="n">stats</span></div>
+
+
+<div class="viewcode-block" id="pairwise_gameshowell"><a class="viewcode-back" href="../../generated/pingouin.pairwise_gameshowell.html#pingouin.pairwise_gameshowell">[docs]</a><span class="k">def</span> <span class="nf">pairwise_gameshowell</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">,</span>
+                         <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Pairwise Games-Howell post-hoc tests.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dv : string</span>
+<span class="sd">        Name of column containing the dependant variable.</span>
+<span class="sd">    between: string</span>
+<span class="sd">        Name of column containing the between factor.</span>
+<span class="sd">    data : pandas DataFrame</span>
+<span class="sd">        DataFrame</span>
+<span class="sd">    alpha : float</span>
+<span class="sd">        Significance level</span>
+<span class="sd">    tail : string</span>
+<span class="sd">        Indicates whether to return the &#39;two-sided&#39; or &#39;one-sided&#39; p-values</span>
+<span class="sd">    effsize : string or None</span>
+<span class="sd">        Effect size type. Available methods are ::</span>
+
+<span class="sd">        &#39;none&#39; : no effect size</span>
+<span class="sd">        &#39;cohen&#39; : Unbiased Cohen d</span>
+<span class="sd">        &#39;hedges&#39; : Hedges g</span>
+<span class="sd">        &#39;glass&#39;: Glass delta</span>
+<span class="sd">        &#39;eta-square&#39; : Eta-square</span>
+<span class="sd">        &#39;odds-ratio&#39; : Odds ratio</span>
+<span class="sd">        &#39;AUC&#39; : Area Under the Curve</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    stats : DataFrame</span>
+<span class="sd">        Stats summary ::</span>
+
+<span class="sd">        &#39;A&#39; : Name of first measurement</span>
+<span class="sd">        &#39;B&#39; : Name of second measurement</span>
+<span class="sd">        &#39;mean(A)&#39; : Mean of first measurement</span>
+<span class="sd">        &#39;mean(B)&#39; : Mean of second measurement</span>
+<span class="sd">        &#39;diff&#39; : Mean difference</span>
+<span class="sd">        &#39;SE&#39; : Standard error</span>
+<span class="sd">        &#39;tail&#39; : indicate whether the p-values are one-sided or two-sided</span>
+<span class="sd">        &#39;T-val&#39; : T-values</span>
+<span class="sd">        &#39;df&#39; : adjusted degrees of freedom</span>
+<span class="sd">        &#39;pval&#39; : Games-Howell corrected p-values</span>
+<span class="sd">        &#39;efsize&#39; : effect sizes</span>
+<span class="sd">        &#39;eftype&#39; : type of effect size</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Games-Howell is very similar to the Tukey HSD post-hoc test but is much</span>
+<span class="sd">    more robust to heterogeneity of variances. While the</span>
+<span class="sd">    Tukey-HSD post-hoc is optimal after a classic one-way ANOVA, the</span>
+<span class="sd">    Games-Howell is optimal after a Welch ANOVA.</span>
+<span class="sd">    Games-Howell is not valid for repeated measures ANOVA.</span>
+
+<span class="sd">    Compared to the Tukey-HSD test, the Games-Howell test uses different pooled</span>
+<span class="sd">    variances for each pair of variables instead of the same pooled variance.</span>
+
+<span class="sd">    The T-values are defined as:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        T = \dfrac{\overline{x}_i - \overline{x}_j}{\sqrt{(\dfrac{s_i^2}{n_i}</span>
+<span class="sd">        + \dfrac{s_j^2}{n_j})}}</span>
+
+<span class="sd">    and the corrected degrees of freedom are:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \mathtt{df} = \dfrac{(\dfrac{s_i^2}{n_i} + \dfrac{s_j^2}{n_j})^2}</span>
+<span class="sd">        {\dfrac{(\dfrac{s_i^2}{n_i})^2}{n_i-1} +</span>
+<span class="sd">        \dfrac{(\dfrac{s_j^2}{n_j})^2}{n_j-1}}</span>
+
+<span class="sd">    where :math:`\overline{x}_i`, :math:`s_i^2`, and :math:`n_i`</span>
+<span class="sd">    are the mean, variance and sample size of the first group and</span>
+<span class="sd">    :math:`\overline{x}_j`, :math:`s_j^2`, and :math:`n_j` the mean, variance</span>
+<span class="sd">    and sample size of the second group.</span>
+
+<span class="sd">    The p-values are then approximated using the Studentized range distribution</span>
+<span class="sd">    :math:`Q(\sqrt2*t_i, r, df_i)`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Pairwise Games-Howell post-hocs on the pain threshold dataset.</span>
+
+<span class="sd">        &gt;&gt;&gt; from pingouin import pairwise_gameshowell</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
+<span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;anova&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; pairwise_gameshowell(dv=&#39;Pain threshold&#39;, between=&#39;Hair color&#39;,</span>
+<span class="sd">        &gt;&gt;&gt;                      data=df)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="kn">from</span> <span class="nn">pingouin.external.qsturng</span> <span class="k">import</span> <span class="n">psturng</span>
+
+    <span class="c1"># Check the dataframe</span>
+    <span class="n">_check_dataframe</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;between&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1"># Reset index (avoid duplicate axis error)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Extract infos</span>
+    <span class="n">ng</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">between</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">grp</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">between</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">gmeans</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">gvars</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="c1"># Pairwise combinations</span>
+    <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ng</span><span class="p">),</span> <span class="mi">2</span><span class="p">)))</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">mn</span> <span class="o">=</span> <span class="n">gmeans</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span> <span class="o">-</span> <span class="n">gmeans</span><span class="p">[</span><span class="n">g2</span><span class="p">]</span>
+    <span class="n">se</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">gvars</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span> <span class="o">+</span> <span class="n">gvars</span><span class="p">[</span><span class="n">g2</span><span class="p">]</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">g2</span><span class="p">]))</span>
+    <span class="n">tval</span> <span class="o">=</span> <span class="n">mn</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">gvars</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span> <span class="o">+</span> <span class="n">gvars</span><span class="p">[</span><span class="n">g2</span><span class="p">]</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">g2</span><span class="p">])</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="p">(</span><span class="n">gvars</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span> <span class="o">+</span> <span class="n">gvars</span><span class="p">[</span><span class="n">g2</span><span class="p">]</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">g2</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> \
+         <span class="p">((((</span><span class="n">gvars</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">g1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">+</span>
+          <span class="p">(((</span><span class="n">gvars</span><span class="p">[</span><span class="n">g2</span><span class="p">]</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">g2</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="n">g2</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+
+    <span class="c1"># Compute corrected p-values</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="n">psturng</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">tval</span><span class="p">),</span> <span class="n">ng</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+    <span class="n">pval</span> <span class="o">*=</span> <span class="mf">0.5</span> <span class="k">if</span> <span class="n">tail</span> <span class="o">==</span> <span class="s1">&#39;one-sided&#39;</span> <span class="k">else</span> <span class="mi">1</span>
+
+    <span class="c1"># Uncorrected p-values</span>
+    <span class="c1"># from scipy.stats import t</span>
+    <span class="c1"># punc = t.sf(np.abs(tval), n[g1].size + n[g2].size - 2) * 2</span>
+
+    <span class="c1"># Effect size</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">tval</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">n</span><span class="p">[</span><span class="n">g2</span><span class="p">])</span>
+    <span class="n">ef</span> <span class="o">=</span> <span class="n">convert_effsize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="p">,</span> <span class="n">n</span><span class="p">[</span><span class="n">g1</span><span class="p">],</span> <span class="n">n</span><span class="p">[</span><span class="n">g2</span><span class="p">])</span>
+
+    <span class="c1"># Create dataframe</span>
+    <span class="c1"># Careful: pd.unique does NOT sort whereas numpy does</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+                         <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">between</span><span class="p">])[</span><span class="n">g1</span><span class="p">],</span>
+                         <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">between</span><span class="p">])[</span><span class="n">g2</span><span class="p">],</span>
+                         <span class="s1">&#39;mean(A)&#39;</span><span class="p">:</span> <span class="n">gmeans</span><span class="p">[</span><span class="n">g1</span><span class="p">],</span>
+                         <span class="s1">&#39;mean(B)&#39;</span><span class="p">:</span> <span class="n">gmeans</span><span class="p">[</span><span class="n">g2</span><span class="p">],</span>
+                         <span class="s1">&#39;diff&#39;</span><span class="p">:</span> <span class="n">mn</span><span class="p">,</span>
+                         <span class="s1">&#39;SE&#39;</span><span class="p">:</span> <span class="n">se</span><span class="p">,</span>
+                         <span class="s1">&#39;tail&#39;</span><span class="p">:</span> <span class="n">tail</span><span class="p">,</span>
+                         <span class="s1">&#39;T-val&#39;</span><span class="p">:</span> <span class="n">tval</span><span class="p">,</span>
+                         <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="n">df</span><span class="p">,</span>
+                         <span class="s1">&#39;pval&#39;</span><span class="p">:</span> <span class="n">pval</span><span class="p">,</span>
+                         <span class="s1">&#39;efsize&#39;</span><span class="p">:</span> <span class="n">ef</span><span class="p">,</span>
+                         <span class="s1">&#39;eftype&#39;</span><span class="p">:</span> <span class="n">effsize</span><span class="p">,</span>
+                         <span class="p">})</span>
+    <span class="n">col_round</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mean(A)&#39;</span><span class="p">,</span> <span class="s1">&#39;mean(B)&#39;</span><span class="p">,</span> <span class="s1">&#39;diff&#39;</span><span class="p">,</span> <span class="s1">&#39;SE&#39;</span><span class="p">,</span> <span class="s1">&#39;T-val&#39;</span><span class="p">,</span> <span class="s1">&#39;df&#39;</span><span class="p">,</span> <span class="s1">&#39;efsize&#39;</span><span class="p">]</span>
+    <span class="n">stats</span><span class="p">[</span><span class="n">col_round</span><span class="p">]</span> <span class="o">=</span> <span class="n">stats</span><span class="p">[</span><span class="n">col_round</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">stats</span></div>
 
 

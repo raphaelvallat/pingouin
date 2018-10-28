@@ -99,7 +99,7 @@
 <span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="p">(</span><span class="n">_check_dataframe</span><span class="p">,</span> <span class="n">_remove_rm_na</span><span class="p">,</span> <span class="n">_remove_na</span><span class="p">,</span>
                       <span class="n">_export_table</span><span class="p">,</span> <span class="n">bayesfactor_ttest</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">sphericity</span><span class="p">)</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ttest&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_anova&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_anova2&quot;</span><span class="p">,</span> <span class="s2">&quot;anova&quot;</span><span class="p">,</span> <span class="s2">&quot;anova2&quot;</span><span class="p">,</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ttest&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_anova&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_anova2&quot;</span><span class="p">,</span> <span class="s2">&quot;anova&quot;</span><span class="p">,</span> <span class="s2">&quot;anova2&quot;</span><span class="p">,</span> <span class="s2">&quot;welch_anova&quot;</span><span class="p">,</span>
            <span class="s2">&quot;mixed_anova&quot;</span><span class="p">,</span> <span class="s2">&quot;ancova&quot;</span><span class="p">,</span> <span class="s2">&quot;ancovan&quot;</span><span class="p">]</span>
 
 
@@ -702,7 +702,7 @@
 <span class="sd">        ANOVA summary ::</span>
 
 <span class="sd">        &#39;Source&#39; : Factor names</span>
-<span class="sd">        &#39;SS&#39; :Sums of squares</span>
+<span class="sd">        &#39;SS&#39; : Sums of squares</span>
 <span class="sd">        &#39;DF&#39; : Degrees of freedom</span>
 <span class="sd">        &#39;MS&#39; : Mean squares</span>
 <span class="sd">        &#39;F&#39; : F-values</span>
@@ -714,12 +714,12 @@
 <span class="sd">    rm_anova : One-way repeated measures ANOVA</span>
 <span class="sd">    rm_anova2 : Two-way repeated measures ANOVA</span>
 <span class="sd">    mixed_anova : Two way mixed ANOVA</span>
+<span class="sd">    welch_anova : One-way Welch ANOVA</span>
 <span class="sd">    kruskal : Non-parametric one-way ANOVA</span>
-
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    The ANOVA is very powerful when the groups are normally distributed</span>
+<span class="sd">    The classic ANOVA is very powerful when the groups are normally distributed</span>
 <span class="sd">    and have equal variances. However, when the groups have unequal variances,</span>
 <span class="sd">    it is best to use the Welch ANOVA (`welch_anova`) that better controls for</span>
 <span class="sd">    type I error (Liu 2015). The homogeneity of variances can be measured with</span>
@@ -886,7 +886,7 @@
 <span class="sd">        ANOVA summary ::</span>
 
 <span class="sd">        &#39;Source&#39; : Factor names</span>
-<span class="sd">        &#39;SS&#39; :Sums of squares</span>
+<span class="sd">        &#39;SS&#39; : Sums of squares</span>
 <span class="sd">        &#39;DF&#39; : Degrees of freedom</span>
 <span class="sd">        &#39;MS&#39; : Mean squares</span>
 <span class="sd">        &#39;F&#39; : F-values</span>
@@ -993,6 +993,161 @@
     <span class="k">if</span> <span class="n">export_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">_export_table</span><span class="p">(</span><span class="n">aov</span><span class="p">,</span> <span class="n">export_filename</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">aov</span>
+
+
+<div class="viewcode-block" id="welch_anova"><a class="viewcode-back" href="../../generated/pingouin.welch_anova.html#pingouin.welch_anova">[docs]</a><span class="k">def</span> <span class="nf">welch_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;One-way Welch ANOVA.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dv : string</span>
+<span class="sd">        Name of column containing the dependant variable.</span>
+<span class="sd">    between : string</span>
+<span class="sd">        Name of column containing the between factor.</span>
+<span class="sd">    data : pandas DataFrame</span>
+<span class="sd">        DataFrame</span>
+<span class="sd">    export_filename : string</span>
+<span class="sd">        Filename (without extension) for the output file.</span>
+<span class="sd">        If None, do not export the table.</span>
+<span class="sd">        By default, the file will be created in the current python console</span>
+<span class="sd">        directory. To change that, specify the filename with full path.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    aov : DataFrame</span>
+<span class="sd">        ANOVA summary ::</span>
+
+<span class="sd">        &#39;Source&#39; : Factor names</span>
+<span class="sd">        &#39;SS&#39; : Sums of squares</span>
+<span class="sd">        &#39;DF&#39; : Degrees of freedom</span>
+<span class="sd">        &#39;MS&#39; : Mean squares</span>
+<span class="sd">        &#39;F&#39; : F-values</span>
+<span class="sd">        &#39;p-unc&#39; : uncorrected p-values</span>
+<span class="sd">        &#39;np2&#39; : Partial eta-square effect sizes</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    anova : One-way ANOVA</span>
+<span class="sd">    rm_anova : One-way repeated measures ANOVA</span>
+<span class="sd">    rm_anova2 : Two-way repeated measures ANOVA</span>
+<span class="sd">    mixed_anova : Two way mixed ANOVA</span>
+<span class="sd">    kruskal : Non-parametric one-way ANOVA</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The classic ANOVA is very powerful when the groups are normally distributed</span>
+<span class="sd">    and have equal variances. However, when the groups have unequal variances,</span>
+<span class="sd">    it is best to use the Welch ANOVA that better controls for</span>
+<span class="sd">    type I error (Liu 2015). The homogeneity of variances can be measured with</span>
+<span class="sd">    the `homoscedasticity` function. The two other assumptions of</span>
+<span class="sd">    normality and independance remain.</span>
+
+<span class="sd">    The main idea of Welch ANOVA is to use a weight :math:`w_i` to reduce</span>
+<span class="sd">    the effect of unequal variances. This weight is calculated using the sample</span>
+<span class="sd">    size :math:`n_i` and variance :math:`s_i^2` of each group</span>
+<span class="sd">    :math:`i=1,...,r`:</span>
+
+<span class="sd">    .. math:: w_i = \dfrac{n_i}{s_i^2}</span>
+
+<span class="sd">    Using these weights, the adjusted grand mean of the data is:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \overline{Y}_{welch} = \dfrac{\sum_{i=1}^r w_i\overline{Y}_i}</span>
+<span class="sd">        {\sum w}</span>
+
+<span class="sd">    where :math:`\overline{Y}_i` is the mean of the :math:`i` group.</span>
+
+<span class="sd">    The treatment sums of squares is defined as:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        SS_{treatment} = \sum_{i=1}^r w_i</span>
+<span class="sd">        (\overline{Y}_i - \overline{Y}_{welch})^2</span>
+
+<span class="sd">    We then need to calculate a term lambda:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \Lambda = \dfrac{3\sum_{i=1}^r(\dfrac{1}{n_i-1})</span>
+<span class="sd">        (1 - \dfrac{w_i}{\sum w})^2}{r^2 - 1}</span>
+
+<span class="sd">    from which the F-value can be calculated:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        F_{welch} = \dfrac{SS_{treatment} / (r-1)}</span>
+<span class="sd">        {1 + \dfrac{2\Lambda(r-2)}{3}}</span>
+
+<span class="sd">    and the p-value approximated using a F-distribution with</span>
+<span class="sd">    :math:`(r-1, 1 / \Lambda)` degrees of freedom.</span>
+
+<span class="sd">    When the groups are balanced and have equal variances, the optimal post-hoc</span>
+<span class="sd">    test is the Tukey-HSD test (`pairwise_tukey`). If the groups have unequal</span>
+<span class="sd">    variances, the Games-Howell test is more adequate.</span>
+
+<span class="sd">    Results have been tested against R.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Liu, Hangcheng. &quot;Comparing Welch&#39;s ANOVA, a Kruskal-Wallis test and</span>
+<span class="sd">           traditional ANOVA in case of Heterogeneity of Variance.&quot; (2015).</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    1. One-way Welch ANOVA on the pain threshold dataset.</span>
+
+<span class="sd">        &gt;&gt;&gt; from pingouin import welch_anova</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
+<span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;anova&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; aov = welch_anova(dv=&#39;Pain threshold&#39;, between=&#39;Hair color&#39;,</span>
+<span class="sd">        &gt;&gt;&gt;                   data=df, export_filename=&#39;pain_anova.csv&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; aov</span>
+<span class="sd">            Source      ddof1   ddof2   F     p-unc</span>
+<span class="sd">            Hair color  3       8.33    5.89  0.018813</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">f</span>
+    <span class="c1"># Check data</span>
+    <span class="n">_check_dataframe</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;between&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Reset index (avoid duplicate axis error)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Number of groups</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">between</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">ddof1</span> <span class="o">=</span> <span class="n">r</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="c1"># Compute weights and ajusted means</span>
+    <span class="n">grp</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">between</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">/</span> <span class="n">grp</span><span class="o">.</span><span class="n">var</span><span class="p">()</span>
+    <span class="n">adj_grandmean</span> <span class="o">=</span> <span class="p">(</span><span class="n">weights</span> <span class="o">*</span> <span class="n">grp</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="c1"># Treatment sum of squares</span>
+    <span class="n">ss_tr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">grp</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">adj_grandmean</span><span class="p">))</span>
+    <span class="n">ms_tr</span> <span class="o">=</span> <span class="n">ss_tr</span> <span class="o">/</span> <span class="n">ddof1</span>
+
+    <span class="c1"># Calculate lambda, F-value and p-value</span>
+    <span class="n">lamb</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">grp</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span>
+                       <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">weights</span> <span class="o">/</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">fval</span> <span class="o">=</span> <span class="n">ms_tr</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lamb</span> <span class="o">*</span> <span class="p">(</span><span class="n">r</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">fval</span><span class="p">,</span> <span class="n">ddof1</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">lamb</span><span class="p">)</span>
+
+    <span class="c1"># Create output dataframe</span>
+    <span class="n">aov</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Source&#39;</span><span class="p">:</span> <span class="n">between</span><span class="p">,</span>
+                        <span class="s1">&#39;ddof1&#39;</span><span class="p">:</span> <span class="n">ddof1</span><span class="p">,</span>
+                        <span class="s1">&#39;ddof2&#39;</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">lamb</span><span class="p">,</span>
+                        <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="n">fval</span><span class="p">,</span>
+                        <span class="s1">&#39;p-unc&#39;</span><span class="p">:</span> <span class="n">pval</span><span class="p">,</span>
+                        <span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Source&#39;</span><span class="p">,</span> <span class="s1">&#39;ddof1&#39;</span><span class="p">,</span> <span class="s1">&#39;ddof2&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">]</span>
+    <span class="n">aov</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
+    <span class="n">aov</span><span class="p">[[</span><span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;ddof2&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">aov</span><span class="p">[[</span><span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;ddof2&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="c1"># Export to .csv</span>
+    <span class="k">if</span> <span class="n">export_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_export_table</span><span class="p">(</span><span class="n">aov</span><span class="p">,</span> <span class="n">export_filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">aov</span></div>
 
 
 <div class="viewcode-block" id="mixed_anova"><a class="viewcode-back" href="../../generated/pingouin.mixed_anova.html#pingouin.mixed_anova">[docs]</a><span class="k">def</span> <span class="nf">mixed_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>

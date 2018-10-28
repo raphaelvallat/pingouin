@@ -3,7 +3,8 @@ import numpy as np
 import pytest
 
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.pairwise import pairwise_ttests, pairwise_corr, pairwise_tukey
+from pingouin.pairwise import (pairwise_ttests, pairwise_corr, pairwise_tukey,
+                               pairwise_gameshowell)
 from pingouin.datasets import read_dataset
 
 # Dataset for pairwise_ttests
@@ -66,6 +67,20 @@ class TestPairwise(_TestPingouin):
                                data=df)
         assert np.allclose([0.074, 0.435, 0.415, 0.004, 0.789, 0.037],
                            stats.loc[:, 'p-tukey'].values.round(3), atol=0.05)
+
+    def test_pairwise_gameshowell(self):
+        """Test function pairwise_gameshowell"""
+        df = read_dataset('anova')
+        stats = pairwise_gameshowell(dv='Pain threshold', between='Hair color',
+                                     data=df)
+        # Compare with R package `userfriendlyscience`
+        np.testing.assert_array_equal(np.abs(stats['T-val'].round(2)),
+                                      [2.48, 1.42, 1.75, 4.09, 1.11, 3.56])
+        np.testing.assert_array_equal(stats['df'].round(2),
+                                      [7.91, 7.94, 6.56, 8.0, 6.82, 6.77])
+        sig = stats['pval'].apply(lambda x: 'Yes' if x < 0.05 else 'No').values
+        np.testing.assert_array_equal(sig, ['No', 'No', 'No', 'Yes', 'No',
+                                            'Yes'])
 
     def test_pairwise_corr(self):
         """Test function pairwise_corr"""

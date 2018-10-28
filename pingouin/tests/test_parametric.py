@@ -3,7 +3,7 @@ import numpy as np
 
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.parametric import (ttest, anova, anova2, rm_anova, mixed_anova,
-                                 rm_anova2, ancova)
+                                 rm_anova2, ancova, welch_anova)
 from pingouin.datasets import read_dataset
 
 # Generate random data for ANOVA
@@ -64,6 +64,18 @@ class TestParametric(_TestPingouin):
         anova2(dv='Scores', between=['Group', 'Time'], data=df)
         anova2(dv='Scores', between=['Group'], data=df)
         anova2(dv='Scores', between='Group', data=df)
+
+    def test_welch_anova(self):
+        """Test function welch_anova."""
+        # Pain dataset
+        df_pain = read_dataset('anova')
+        aov = welch_anova(dv='Pain threshold', between='Hair color',
+                          data=df_pain, export_filename='test_export.csv')
+        # Compare with R oneway.test function
+        assert aov.loc[0, 'ddof1'] == 3
+        assert np.allclose(aov.loc[0, 'ddof2'], 8.330)
+        assert np.allclose(aov.loc[0, 'F'], 5.890)
+        assert np.allclose(np.round(aov.loc[0, 'p-unc'], 4), .0188)
 
     def test_rm_anova(self):
         """Test function rm_anova."""
