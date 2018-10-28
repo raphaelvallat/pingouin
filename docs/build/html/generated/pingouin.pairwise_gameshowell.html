@@ -167,7 +167,7 @@ Games-Howell is not valid for repeated measures ANOVA.</p>
 variances for each pair of variables instead of the same pooled variance.</p>
 <p>The T-values are defined as:</p>
 <div class="math notranslate nohighlight">
-\[T = \dfrac{\overline{x}_i - \overline{x}_j}{\sqrt{(\dfrac{s_i^2}{n_i}
+\[t = \dfrac{\overline{x}_i - \overline{x}_j}{\sqrt{(\dfrac{s_i^2}{n_i}
 + \dfrac{s_j^2}{n_j})}}\]</div>
 <p>and the corrected degrees of freedom are:</p>
 <div class="math notranslate nohighlight">
@@ -179,7 +179,7 @@ are the mean, variance and sample size of the first group and
 <span class="math notranslate nohighlight">\(\overline{x}_j\)</span>, <span class="math notranslate nohighlight">\(s_j^2\)</span>, and <span class="math notranslate nohighlight">\(n_j\)</span> the mean, variance
 and sample size of the second group.</p>
 <p>The p-values are then approximated using the Studentized range distribution
-<span class="math notranslate nohighlight">\(Q(\sqrt2*t_i, r, df_i)\)</span>.</p>
+<span class="math notranslate nohighlight">\(Q(\sqrt2*|t_i|, r, df_i)\)</span>.</p>
 <p class="rubric">Examples</p>
 <p>Pairwise Games-Howell post-hocs on the pain threshold dataset.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_gameshowell</span>

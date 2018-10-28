@@ -157,9 +157,20 @@
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>Tukey HSD procedure is best for balanced one-way ANOVA.
+<p>Tukey HSD post-hoc is best for balanced one-way ANOVA.
 It has been proven to be conservative for one-way ANOVA with unequal
-sample sizes. Tukey HSD is not valid in repeated measures ANOVA.</p>
+sample sizes. However, it is not robust if the groups have unequal
+variances, in which case the Games-Howell test is more adequate.
+Tukey HSD is not valid for repeated measures ANOVA.</p>
+<p>The T-values are defined as:</p>
+<div class="math notranslate nohighlight">
+\[t = \dfrac{\overline{x}_i - \overline{x}_j}{\sqrt{2 \cdot MS_w / n}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\overline{x}_i\)</span> and <span class="math notranslate nohighlight">\(\overline{x}_j\)</span> are the means of
+the first and second group, respectively, <span class="math notranslate nohighlight">\(MS_w\)</span> the mean squares of
+the error (computed using ANOVA) and <span class="math notranslate nohighlight">\(n\)</span> the sample size.</p>
+<p>The p-values are then approximated using the Studentized range distribution
+<span class="math notranslate nohighlight">\(Q(\sqrt2*|t_i|, r, N - r)\)</span> where <span class="math notranslate nohighlight">\(r\)</span> is the total number of
+groups and <span class="math notranslate nohighlight">\(N\)</span> is the total sample size.</p>
 <p class="rubric">Examples</p>
 <p>Pairwise Tukey post-hocs on the pain threshold dataset.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_tukey</span>

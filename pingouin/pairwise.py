@@ -296,9 +296,25 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
 
     Notes
     -----
-    Tukey HSD procedure is best for balanced one-way ANOVA.
+    Tukey HSD post-hoc is best for balanced one-way ANOVA.
     It has been proven to be conservative for one-way ANOVA with unequal
-    sample sizes. Tukey HSD is not valid in repeated measures ANOVA.
+    sample sizes. However, it is not robust if the groups have unequal
+    variances, in which case the Games-Howell test is more adequate.
+    Tukey HSD is not valid for repeated measures ANOVA.
+
+    The T-values are defined as:
+
+    .. math::
+
+        t = \dfrac{\overline{x}_i - \overline{x}_j}{\sqrt{2 \cdot MS_w / n}}
+
+    where :math:`\overline{x}_i` and :math:`\overline{x}_j` are the means of
+    the first and second group, respectively, :math:`MS_w` the mean squares of
+    the error (computed using ANOVA) and :math:`n` the sample size.
+
+    The p-values are then approximated using the Studentized range distribution
+    :math:`Q(\sqrt2*|t_i|, r, N - r)` where :math:`r` is the total number of
+    groups and :math:`N` is the total sample size.
 
     Examples
     --------
@@ -421,7 +437,7 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
 
     .. math::
 
-        T = \dfrac{\overline{x}_i - \overline{x}_j}{\sqrt{(\dfrac{s_i^2}{n_i}
+        t = \dfrac{\overline{x}_i - \overline{x}_j}{\sqrt{(\dfrac{s_i^2}{n_i}
         + \dfrac{s_j^2}{n_j})}}
 
     and the corrected degrees of freedom are:
@@ -438,7 +454,7 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
     and sample size of the second group.
 
     The p-values are then approximated using the Studentized range distribution
-    :math:`Q(\sqrt2*t_i, r, df_i)`.
+    :math:`Q(\sqrt2*|t_i|, r, df_i)`.
 
     Examples
     --------
