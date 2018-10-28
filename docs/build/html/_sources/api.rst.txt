@@ -2,8 +2,8 @@
 
 .. currentmodule:: pingouin
 
-API reference
-=============
+Functions
+=========
 
 ANOVA and T-test
 ----------------

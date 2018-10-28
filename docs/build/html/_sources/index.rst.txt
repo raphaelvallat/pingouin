@@ -327,6 +327,45 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
     0.384
 
+11. Multiple linear regression
+##############################
+
+.. code-block:: ipython3
+
+    lm_dict = linear_regression(df[['X', 'Z']], df['Y'])
+    pd.DataFrame.from_dict(lm_dict)
+
+.. table:: Linear regression summary
+  :widths: auto
+
+  =========  ======  =====  =======  =======  =====  ========  ======  =====
+  names        coef     se    tvals    pvals     r2    adj_r2      ll     ul
+  =========  ======  =====  =======  =======  =====  ========  ======  =====
+  Intercept   3.855  1.417    2.720    0.030  0.510     0.370   0.504  7.205
+  X           0.673  0.252    2.669    0.032  0.510     0.370   0.077  1.269
+  Z          -0.124  0.331   -0.375    0.719  0.510     0.370  -0.906  0.658
+  =========  ======  =====  =======  =======  =====  ========  ======  =====
+
+12. Mediation analysis
+######################
+
+.. code-block:: ipython3
+
+    mediation_analysis(data=df, x='X', m='Z', y='Y', n_boot=500)
+
+.. table:: Mediation summary
+  :widths: auto
+
+  ========  ======  ==========  ===========  =====
+  Path        Beta    CI[2.5%]    CI[97.5%]  Sig
+  ========  ======  ==========  ===========  =====
+  X -> M     0.216      -0.380        0.812  No
+  M -> Y     0.126      -0.846        1.099  No
+  X -> Y     0.646       0.119        1.173  Yes
+  Direct     0.673       0.077        1.270  Yes
+  Indirect  -0.027      -0.485        0.153  No
+  ========  ======  ==========  ===========  =====
+
 Contents
 ========
 
@@ -334,6 +373,7 @@ Contents
    :maxdepth: 1
 
    api
+   guidelines
    changelog
    examples
 
@@ -357,3 +397,6 @@ Several functions of Pingouin were translated to Python from the original R or M
 - `circular statistics (Matlab) <https://www.mathworks.com/matlabcentral/fileexchange/10676-circular-statistics-toolbox-directional-statistics>`_ (Berens 2009)
 - `robust correlations (Matlab) <https://sourceforge.net/projects/robustcorrtool/>`_ (Pernet, Wilcox & Rousselet, 2012)
 - `repeated-measure correlation (R) <https://cran.r-project.org/web/packages/rmcorr/index.html>`_ (Bakdash & Marusich, 2017)
+
+I am also grateful to Charles Zaiontz and his website `www.real-statistics.com <https://www.real-statistics.com/>`_ which has been useful to
+understand the practical implementation of several functions.

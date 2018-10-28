@@ -1,0 +1,45 @@
+.. _Guidelines:
+
+Guidelines
+##########
+
+In this page, you will find a collection of flowcharts designed to help you choose
+which functions of `Pingouin` are adequate for your analysis. Click on
+the desired flowchart to view a full scale image.
+
+.. contents:: Table of Contents
+   :depth: 2
+
+One-way ANOVA
+-------------
+
+.. figure::  /pictures/flowchart/flowchart_one_way_ANOVA.png
+  :align: center
+  :scale: 50
+  :alt: One-way ANOVA flowchart
+
+Example code
+~~~~~~~~~~~~
+
+.. code:: python
+
+  import pingouin as pg
+  from pingouin.datasets import read_dataset
+
+  # Load an example dataset comparing pain threshold as a function of hair color
+  df = read_dataset('anova')
+
+  # 1. This is a between subject design, so the first step is to test for equality of variances
+  groups = df['Hair color'].unique()
+  a, b, c, d = [df.groupby('Hair color')['Pain threshold'].get_group(g).values for g in groups]
+  equal_var, pval = pg.homoscedasticity(a, b, c, d)
+
+  # 2. If the groups have equal variances, we can use a regular one-way ANOVA
+  pg.anova(data=df, dv='Pain threshold', between='Hair color')
+
+  # 3. If there is a main effect, we can proceed to post-hoc Tukey test
+  pg.pairwise_tukey(data=df, dv='Pain threshold', between='Hair color')
+
+
+Correlation
+-----------
