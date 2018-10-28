@@ -111,8 +111,8 @@
 <dd><p class="first last">Dependent variable. Shape = (n_samples).</p>
 </dd>
 <dt><strong>add_intercept</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd><p class="first last">If False, assume that the data are already centered. If True, add an
-intercept to the model. In this case, the first value in the
+<dd><p class="first last">If False, assume that the data are already centered. If True, add a
+constant term to the model. In this case, the first value in the
 output dict is the intercept of the model.</p>
 </dd>
 <dt><strong>coef_only</strong> <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
@@ -128,12 +128,13 @@ CI = [alpha / 2 ; 1 - alpha / 2]</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
 <dt><strong>stats</strong> <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
 <dd><p class="first">Linear regression summary:</p>
-<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;coef&#39;</span> <span class="p">:</span> <span class="n">regression</span> <span class="n">coefficients</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;names&#39;</span> <span class="p">:</span> <span class="n">name</span> <span class="n">of</span> <span class="n">variable</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">model</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="o">...</span><span class="p">)</span>
+<span class="s1">&#39;coef&#39;</span> <span class="p">:</span> <span class="n">regression</span> <span class="n">coefficients</span>
 <span class="s1">&#39;se&#39;</span> <span class="p">:</span> <span class="n">standard</span> <span class="n">error</span> <span class="n">of</span> <span class="n">the</span> <span class="n">estimate</span>
 <span class="s1">&#39;tvals&#39;</span> <span class="p">:</span> <span class="n">T</span><span class="o">-</span><span class="n">values</span>
 <span class="s1">&#39;pvals&#39;</span> <span class="p">:</span> <span class="n">p</span><span class="o">-</span><span class="n">values</span>
-<span class="s1">&#39;rsquared&#39;</span> <span class="p">:</span> <span class="n">coefficient</span> <span class="n">of</span> <span class="n">determination</span> <span class="p">(</span><span class="n">R2</span><span class="p">)</span>
-<span class="s1">&#39;adj_rsquared&#39;</span> <span class="p">:</span> <span class="n">adjusted</span> <span class="n">R2</span>
+<span class="s1">&#39;r2&#39;</span> <span class="p">:</span> <span class="n">coefficient</span> <span class="n">of</span> <span class="n">determination</span> <span class="p">(</span><span class="n">R2</span><span class="p">)</span>
+<span class="s1">&#39;adj_r2&#39;</span> <span class="p">:</span> <span class="n">adjusted</span> <span class="n">R2</span>
 <span class="s1">&#39;ll&#39;</span> <span class="p">:</span> <span class="n">lower</span> <span class="n">confidence</span> <span class="n">interval</span>
 <span class="s1">&#39;ul&#39;</span> <span class="p">:</span> <span class="n">upper</span> <span class="n">confidence</span> <span class="n">interval</span>
 </pre></div>
@@ -145,12 +146,33 @@ CI = [alpha / 2 ; 1 - alpha / 2]</p>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>Results have been compared against the sklearn library.</p>
+<p>The beta coefficients of the regression are estimated using the
+np.linalg.lstsq function.</p>
+<p>It is generally recommanded to include a constant term (intercept) to the
+model to limit the bias and force the residual mean to equal zero.
+Note that intercept coefficient and p-values are however rarely meaningful.</p>
+<p>The standard error of the estimates is a measure of the accuracy of the
+prediction defined as:</p>
+<div class="math notranslate nohighlight">
+\[se = \sqrt{MSE \cdot (X^TX)^{-1}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(MSE\)</span> is the mean squared error,</p>
+<div class="math notranslate nohighlight">
+\[MSE = \dfrac{\sum{(true - pred)^2}}{n - p - 1}\]</div>
+<p><span class="math notranslate nohighlight">\(p\)</span> is the total number of explanatory variables in the model
+(excluding the intercept) and <span class="math notranslate nohighlight">\(n\)</span> is the sample size.</p>
+<p>Using the coefficients and the standard errors, the T-values can be
+obtained:</p>
+<div class="math notranslate nohighlight">
+\[T = \dfrac{coef}{se}\]</div>
+<p>and the p-values can then be approximated using a T-distribution
+with <span class="math notranslate nohighlight">\(n - p - 1\)</span> degrees of freedom.</p>
 <p>The coefficient of determination (<span class="math notranslate nohighlight">\(R^2\)</span>) is defined as:</p>
 <div class="math notranslate nohighlight">
 \[R^2 = 1 - (\dfrac{SS_{resid}}{SS_{total}})\]</div>
-<p>Unlike most other scores, <span class="math notranslate nohighlight">\(R^2\)</span> score may be negative (it need not
-actually be the square of a quantity R).</p>
+<p>The adjusted <span class="math notranslate nohighlight">\(R^2\)</span> is defined as:</p>
+<div class="math notranslate nohighlight">
+\[\overline{R}^2 = 1 - (1 - R^2) \dfrac{n - 1}{n - p - 1}\]</div>
+<p>Results have been compared against sklearn, statsmodels and JASP.</p>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">Simple linear regression</p>
@@ -172,6 +194,20 @@ actually be the square of a quantity R).</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">lm</span><span class="p">[</span><span class="s1">&#39;coef&#39;</span><span class="p">])</span>
 <span class="go">    [4.54123324 0.36628301 0.17709451]</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<ol class="arabic" start="2">
+<li><p class="first">Convert the output dictionnary to a pandas DataFrame</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df_lm</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">linear_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Round to 3 decimals</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df_lm</span> <span class="o">=</span> <span class="n">df_lm</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Print column names</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">df_lm</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="go">    Index([&#39;names&#39;, &#39;coef&#39;, &#39;se&#39;, &#39;tvals&#39;, &#39;pvals&#39;, &#39;r2&#39;, &#39;adj_r2&#39;,</span>
+<span class="go">           &#39;ll&#39;, &#39;ul&#39;], dtype=&#39;object&#39;)</span>
 </pre></div>
 </div>
 </li>

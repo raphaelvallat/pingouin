@@ -98,7 +98,7 @@
 <dl class="function">
 <dt id="pingouin.logistic_regression">
 <code class="descclassname">pingouin.</code><code class="descname">logistic_regression</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>coef_only=False</em>, <em>alpha=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/regression.html#logistic_regression"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Binary logistic regression.</p>
+<dd><p>(Multiple) Binary logistic regression.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -124,7 +124,8 @@ CI = [alpha / 2 ; 1 - alpha / 2]</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
 <dt><strong>stats</strong> <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
 <dd><p class="first">Logistic regression summary:</p>
-<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;coef&#39;</span> <span class="p">:</span> <span class="n">regression</span> <span class="n">coefficients</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;names&#39;</span> <span class="p">:</span> <span class="n">name</span> <span class="n">of</span> <span class="n">variable</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">model</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="o">...</span><span class="p">)</span>
+<span class="s1">&#39;coef&#39;</span> <span class="p">:</span> <span class="n">regression</span> <span class="n">coefficients</span>
 <span class="s1">&#39;se&#39;</span> <span class="p">:</span> <span class="n">standard</span> <span class="n">error</span>
 <span class="s1">&#39;z&#39;</span> <span class="p">:</span> <span class="n">z</span><span class="o">-</span><span class="n">scores</span>
 <span class="s1">&#39;pvals&#39;</span> <span class="p">:</span> <span class="n">two</span><span class="o">-</span><span class="n">tailed</span> <span class="n">p</span><span class="o">-</span><span class="n">values</span>
@@ -140,8 +141,9 @@ CI = [alpha / 2 ; 1 - alpha / 2]</p>
 </table>
 <p class="rubric">Notes</p>
 <p>This is a wrapper around the sklearn.linear_model.LogisticRegression class.</p>
-<p>Results have been tested against statsmodels.</p>
-<p>Note that the first coefficient is always the intercept of the model.</p>
+<p>Results have been compared against statsmodels and JASP.</p>
+<p>Note that the first coefficient is always the constant term (intercept) of
+the model.</p>
 <p>Adapted from a code found at
 <a class="reference external" href="https://gist.github.com/rspeare/77061e6e317896be29c6de9a85db301d">https://gist.github.com/rspeare/77061e6e317896be29c6de9a85db301d</a></p>
 <p class="rubric">Examples</p>
@@ -168,6 +170,20 @@ CI = [alpha / 2 ; 1 - alpha / 2]</p>
 </pre></div>
 </div>
 </li>
+<li><p class="first">Convert the output dictionnary to a pandas DataFrame</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df_lom</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">logistic_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Round to 3 decimals</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df_lom</span> <span class="o">=</span> <span class="n">df_lom</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Print column names</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">df_lom</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="go">    Index([&#39;names&#39;, &#39;coef&#39;, &#39;se&#39;, &#39;z&#39;, &#39;pvals&#39;, &#39;ll&#39;, &#39;ul&#39;],</span>
+<span class="go">          dtype=&#39;object&#39;)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<ol class="arabic" start="3">
 <li><p class="first">Using a Pandas DataFrame</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="n">z</span><span class="p">})</span>

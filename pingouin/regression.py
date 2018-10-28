@@ -15,8 +15,8 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
     y : np.array or list
         Dependent variable. Shape = (n_samples).
     add_intercept : bool
-        If False, assume that the data are already centered. If True, add an
-        intercept to the model. In this case, the first value in the
+        If False, assume that the data are already centered. If True, add a
+        constant term to the model. In this case, the first value in the
         output dict is the intercept of the model.
     coef_only : bool
         If True, return only the regression coefficients.
@@ -29,25 +29,54 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
     stats : dict
         Linear regression summary::
 
+        'names' : name of variable(s) in the model (e.g. x1, x2...)
         'coef' : regression coefficients
         'se' : standard error of the estimate
         'tvals' : T-values
         'pvals' : p-values
-        'rsquared' : coefficient of determination (R2)
-        'adj_rsquared' : adjusted R2
+        'r2' : coefficient of determination (R2)
+        'adj_r2' : adjusted R2
         'll' : lower confidence interval
         'ul' : upper confidence interval
 
     Notes
     -----
-    Results have been compared against the sklearn library.
+    The beta coefficients of the regression are estimated using the
+    np.linalg.lstsq function.
+
+    It is generally recommanded to include a constant term (intercept) to the
+    model to limit the bias and force the residual mean to equal zero.
+    Note that intercept coefficient and p-values are however rarely meaningful.
+
+    The standard error of the estimates is a measure of the accuracy of the
+    prediction defined as:
+
+    .. math:: se = \sqrt{MSE \cdot (X^TX)^{-1}}
+
+    where :math:`MSE` is the mean squared error,
+
+    .. math:: MSE = \dfrac{\sum{(true - pred)^2}}{n - p - 1}
+
+    :math:`p` is the total number of explanatory variables in the model
+    (excluding the intercept) and :math:`n` is the sample size.
+
+    Using the coefficients and the standard errors, the T-values can be
+    obtained:
+
+    .. math:: T = \dfrac{coef}{se}
+
+    and the p-values can then be approximated using a T-distribution
+    with :math:`n - p - 1` degrees of freedom.
 
     The coefficient of determination (:math:`R^2`) is defined as:
 
     .. math:: R^2 = 1 - (\dfrac{SS_{resid}}{SS_{total}})
 
-    Unlike most other scores, :math:`R^2` score may be negative (it need not
-    actually be the square of a quantity R).
+    The adjusted :math:`R^2` is defined as:
+
+    .. math:: \overline{R}^2 = 1 - (1 - R^2) \dfrac{n - 1}{n - p - 1}
+
+    Results have been compared against sklearn, statsmodels and JASP.
 
     Examples
     --------
@@ -71,6 +100,17 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
         >>> print(lm['coef'])
             [4.54123324 0.36628301 0.17709451]
 
+    2. Convert the output dictionnary to a pandas DataFrame
+
+        >>> import pandas as pd
+        >>> df_lm = pd.DataFrame.from_dict(linear_regression(X, y))
+        >>> # Round to 3 decimals
+        >>> df_lm = df_lm.round(3)
+        >>> # Print column names
+        >>> print(df_lm.keys())
+            Index(['names', 'coef', 'se', 'tvals', 'pvals', 'r2', 'adj_r2',
+                   'll', 'ul'], dtype='object')
+
     3. Using a Pandas DataFrame
 
         >>> import pandas as pd
@@ -85,6 +125,14 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
         >>>                   coef_only=True)
             array([ 1.40935593, -0.2916508 ])
     """
+    # Extract names if X is a Dataframe or Series
+    if isinstance(X, pd.DataFrame):
+        names = X.keys().tolist()
+    elif isinstance(X, pd.Series):
+        names = [X.name]
+    else:
+        names = []
+
     X = np.asarray(X)
     y = np.asarray(y)
 
@@ -92,48 +140,54 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
         # Convert to (n_samples, n_features) shape
         X = X[..., np.newaxis]
 
+    if not names:
+        names = ['x' + str(i + 1) for i in range(X.shape[1])]
+
     if add_intercept:
         # Add intercept
         X = np.column_stack((np.ones(X.shape[0]), X))
+        names.insert(0, "Intercept")
 
     # Compute beta coefficient and predictions
     coef = np.linalg.lstsq(X, y, rcond=None)[0]
     if coef_only:
         return coef
     pred = np.dot(X, coef)
+    resid = np.square(y - pred)
 
-    # Compute mean squared error, variance and SE
     n, p = X.shape[0], X.shape[1]
-    MSE = ((y - pred)**2).sum() / (n - p)
+    # Degrees of freedom should not include the intercept
+    dof = n - p if add_intercept else n - p - 1
+    # Compute mean squared error, variance and SE
+    MSE = resid.sum() / dof
     beta_var = MSE * (np.linalg.inv(np.dot(X.T, X)).diagonal())
     beta_se = np.sqrt(beta_var)
 
-    # Compute R2 and adjusted r-squared
+    # Compute R2, adjusted R2 and RMSE
     ss_tot = np.square(y - y.mean()).sum()
-    ss_res = np.square(y - pred).sum()
+    ss_res = resid.sum()
     # ss_exp = np.square(pred - y.mean()).sum()
-    rsquared = 1 - (ss_res / ss_tot)
-    adj_rsquared = 1 - (1 - rsquared) * (n - 1) / (n - p - 1)
+    r2 = 1 - (ss_res / ss_tot)
+    adj_r2 = 1 - (1 - r2) * (n - 1) / dof
 
     # Compute T and p-values
     tvals = coef / beta_se
-    pvals = [2 * t.sf(np.abs(i), (n - 1)) for i in tvals]
+    pvals = np.array([2 * t.sf(np.abs(i), dof) for i in tvals])
 
     # Compute confidence intervals
-    crit = t.ppf(1 - alpha / 2, n - p - 1)
+    crit = t.ppf(1 - alpha / 2, dof)
     marg_error = crit * beta_se
     ll = coef - marg_error
     ul = coef + marg_error
 
     # Create dict
-    stats = {'coef': coef, 'se': beta_se, 'tvals': tvals, 'pvals': pvals,
-             'rsquared': rsquared, 'adj_rsquared': adj_rsquared,
-             'll': ll, 'ul': ul}
+    stats = {'names': names, 'coef': coef, 'se': beta_se, 'tvals': tvals,
+             'pvals': pvals, 'r2': r2, 'adj_r2': adj_r2, 'll': ll, 'ul': ul}
     return stats
 
 
 def logistic_regression(X, y, coef_only=False, alpha=0.05):
-    """Binary logistic regression.
+    """(Multiple) Binary logistic regression.
 
     Parameters
     ----------
@@ -153,6 +207,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05):
     stats : dict
         Logistic regression summary::
 
+        'names' : name of variable(s) in the model (e.g. x1, x2...)
         'coef' : regression coefficients
         'se' : standard error
         'z' : z-scores
@@ -164,9 +219,10 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05):
     -----
     This is a wrapper around the sklearn.linear_model.LogisticRegression class.
 
-    Results have been tested against statsmodels.
+    Results have been compared against statsmodels and JASP.
 
-    Note that the first coefficient is always the intercept of the model.
+    Note that the first coefficient is always the constant term (intercept) of
+    the model.
 
     Adapted from a code found at
     https://gist.github.com/rspeare/77061e6e317896be29c6de9a85db301d
@@ -193,6 +249,17 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05):
         >>> print(lom['coef'])
             [-0.34933805 -0.0226106  -0.39453532]
 
+    3. Convert the output dictionnary to a pandas DataFrame
+
+        >>> import pandas as pd
+        >>> df_lom = pd.DataFrame.from_dict(logistic_regression(X, y))
+        >>> # Round to 3 decimals
+        >>> df_lom = df_lom.round(3)
+        >>> # Print column names
+        >>> print(df_lom.keys())
+            Index(['names', 'coef', 'se', 'z', 'pvals', 'll', 'ul'],
+                  dtype='object')
+
     3. Using a Pandas DataFrame
 
         >>> import pandas as pd
@@ -211,6 +278,14 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05):
     is_sklearn_installed(raise_error=True)
     from sklearn.linear_model import LogisticRegression
 
+    # Extract names if X is a Dataframe or Series
+    if isinstance(X, pd.DataFrame):
+        names = X.keys().tolist()
+    elif isinstance(X, pd.Series):
+        names = [X.name]
+    else:
+        names = []
+
     # Convert to numpy array
     X = np.asarray(X)
     y = np.asarray(y)
@@ -221,6 +296,12 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05):
     # Add axis if only one-dimensional array
     if X.ndim == 1:
         X = X[..., np.newaxis]
+
+    if not names:
+        names = ['x' + str(i + 1) for i in range(X.shape[1])]
+
+    # Add intercept in names
+    names.insert(0, "Intercept")
 
     # Initialize and fit
     lom = LogisticRegression(solver='lbfgs', multi_class='auto')
@@ -244,7 +325,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05):
     z_scores = coef / se
 
     # Two-tailed p-values
-    pvals = [2 * norm.sf(abs(z)) for z in z_scores]
+    pvals = np.array([2 * norm.sf(abs(z)) for z in z_scores])
 
     # Confidence intervals
     crit = norm.ppf(1 - alpha / 2)
@@ -252,8 +333,8 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05):
     ul = coef + crit * se
 
     # Create dict
-    stats = {'coef': coef, 'se': se, 'z': z_scores, 'pvals': pvals,
-             'll': ll, 'ul': ul}
+    stats = {'names': names, 'coef': coef, 'se': se, 'z': z_scores,
+             'pvals': pvals, 'll': ll, 'ul': ul}
     return stats
 
 
@@ -313,14 +394,14 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     data : pd.DataFrame
         Dataframe.
     x : str
-        Column in data containing the predictor variable.
-        Must be continuous.
+        Column name in data containing the predictor variable.
+        The predictor variable must be continuous.
     m : str
-        Column in data containing the mediator variable.
-        Can be continuous or binary (e.g. 0 or 1).
+        Column name in data containing the mediator variable.
+        The mediator can be continuous or binary (e.g. 0 or 1).
     y : str
-        Column in data containing the outcome variable.
-        Must be continuous.
+        Column name in data containing the outcome variable.
+        The outcome variable must be continuous.
     alpha : float
         Significance threshold. Used to determine the confidence interval,
         CI = [ alpha / 2 ; 1 -  alpha / 2]
@@ -334,7 +415,13 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     Returns
     -------
     stats : pd.DataFrame
-        Mediation summary.
+        Mediation summary::
+
+        'Path' : regression model
+        'Beta' : regression estimates
+        'CI[2.5%]' : lower confidence interval
+        'CI[97.5%]' : upper confidence interval
+        'Sig' : regression statistical significance
 
     Notes
     -----
@@ -348,8 +435,10 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     A linear regression is used if the mediator variable is continuous and a
     logistic regression if the mediator variable is dichotomous (binary).
 
-    The indirect effect is considered significant if the specified confidence
-    interval does not include 0.
+    The indirect effect (also referred to as average causal mediation effect
+    or ACME) is considered significant if the specified confidence
+    interval does not include 0. The path 'X --> Y' is the sum of both the
+    indirect and direct effect. It is sometimes referred to as total effect.
 
     Results have been tested against the R mediation package and this tutorial
     https://data.library.virginia.edu/introduction-to-mediation-analysis/
@@ -387,11 +476,8 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
 
         >>> from pingouin import mediation_analysis
         >>> from pingouin.datasets import read_dataset
-        >>> import numpy as np
-        >>> np.random.seed(123)
         >>> df = read_dataset('mediation')
-        >>> df['M'] = np.random.randint(0, 2, df.shape[0])
-        >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05)
+        >>> mediation_analysis(data=df, x='X', m='Mbin', y='Y', alpha=0.05)
     """
     n = data.shape[0]
 

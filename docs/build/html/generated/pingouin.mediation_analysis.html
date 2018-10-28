@@ -108,16 +108,16 @@
 <dd><p class="first last">Dataframe.</p>
 </dd>
 <dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Column in data containing the predictor variable.
-Must be continuous.</p>
+<dd><p class="first last">Column name in data containing the predictor variable.
+The predictor variable must be continuous.</p>
 </dd>
 <dt><strong>m</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Column in data containing the mediator variable.
-Can be continuous or binary (e.g. 0 or 1).</p>
+<dd><p class="first last">Column name in data containing the mediator variable.
+The mediator can be continuous or binary (e.g. 0 or 1).</p>
 </dd>
 <dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Column in data containing the outcome variable.
-Must be continuous.</p>
+<dd><p class="first last">Column name in data containing the outcome variable.
+The outcome variable must be continuous.</p>
 </dd>
 <dt><strong>alpha</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
 <dd><p class="first last">Significance threshold. Used to determine the confidence interval,
@@ -136,7 +136,14 @@ seaborn.distplot() or seaborn.kdeplot() functions.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
 <dt><strong>stats</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd><p class="first last">Mediation summary.</p>
+<dd><p class="first">Mediation summary:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;Path&#39;</span> <span class="p">:</span> <span class="n">regression</span> <span class="n">model</span>
+<span class="s1">&#39;Beta&#39;</span> <span class="p">:</span> <span class="n">regression</span> <span class="n">estimates</span>
+<span class="s1">&#39;CI[2.5%]&#39;</span> <span class="p">:</span> <span class="n">lower</span> <span class="n">confidence</span> <span class="n">interval</span>
+<span class="s1">&#39;CI[97.5%]&#39;</span> <span class="p">:</span> <span class="n">upper</span> <span class="n">confidence</span> <span class="n">interval</span>
+<span class="s1">&#39;Sig&#39;</span> <span class="p">:</span> <span class="n">regression</span> <span class="n">statistical</span> <span class="n">significance</span>
+</pre></div>
+</div>
 </dd>
 </dl>
 </td>
@@ -152,8 +159,10 @@ intervening variable on the dependent variable (i.e., X → M → Y)”
 (from Fiedler et al. 2011).</p>
 <p>A linear regression is used if the mediator variable is continuous and a
 logistic regression if the mediator variable is dichotomous (binary).</p>
-<p>The indirect effect is considered significant if the specified confidence
-interval does not include 0.</p>
+<p>The indirect effect (also referred to as average causal mediation effect
+or ACME) is considered significant if the specified confidence
+interval does not include 0. The path ‘X –&gt; Y’ is the sum of both the
+indirect and direct effect. It is sometimes referred to as total effect.</p>
 <p>Results have been tested against the R mediation package and this tutorial
 <a class="reference external" href="https://data.library.virginia.edu/introduction-to-mediation-analysis/">https://data.library.virginia.edu/introduction-to-mediation-analysis/</a></p>
 <p>Adapted from a code found at <a class="reference external" href="https://github.com/rmill040/pymediation">https://github.com/rmill040/pymediation</a></p>
@@ -196,11 +205,8 @@ Social Psychology 47.6 (2011): 1231-1236.</td></tr>
 <li><p class="first">Mediation analysis with a binary mediator variable</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">mediation_analysis</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin.datasets</span> <span class="k">import</span> <span class="n">read_dataset</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;mediation&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mediation_analysis</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mediation_analysis</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="s1">&#39;Mbin&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
 </pre></div>
 </div>
 </li>
