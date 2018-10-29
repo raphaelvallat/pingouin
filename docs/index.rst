@@ -332,6 +332,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: ipython3
 
+    from pingouin import linear_regression
     lm_dict = linear_regression(df[['X', 'Z']], df['Y'])
     pd.DataFrame.from_dict(lm_dict)
 
@@ -351,6 +352,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: ipython3
 
+    from pingouin import mediation_analysis
     mediation_analysis(data=df, x='X', m='Z', y='Y', n_boot=500)
 
 .. table:: Mediation summary
