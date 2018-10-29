@@ -999,6 +999,9 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
     .. [1] Liu, Hangcheng. "Comparing Welch's ANOVA, a Kruskal-Wallis test and
            traditional ANOVA in case of Heterogeneity of Variance." (2015).
 
+    .. [2] Welch, Bernard Lewis. "On the comparison of several mean values:
+           an alternative approach." Biometrika 38.3/4 (1951): 330-336.
+
     Examples
     --------
     1. One-way Welch ANOVA on the pain threshold dataset.

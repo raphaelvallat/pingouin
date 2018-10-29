@@ -62,7 +62,7 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../guidelines.html">Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
@@ -173,6 +173,14 @@ the error (computed using ANOVA) and <span class="math notranslate nohighlight">
 <p>The p-values are then approximated using the Studentized range distribution
 <span class="math notranslate nohighlight">\(Q(\sqrt2*|t_i|, r, N - r)\)</span> where <span class="math notranslate nohighlight">\(r\)</span> is the total number of
 groups and <span class="math notranslate nohighlight">\(N\)</span> is the total sample size.</p>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r35871136b470-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Tukey, John W. “Comparing individual means in the analysis of
+variance.” Biometrics (1949): 99-114.</td></tr>
+</tbody>
+</table>
 <p class="rubric">Examples</p>
 <p>Pairwise Tukey post-hocs on the pain threshold dataset.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_tukey</span>

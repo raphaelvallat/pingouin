@@ -3,6 +3,10 @@
 What's new
 ##########
 
+.. contents:: Table of Contents
+   :depth: 2
+
+
 v0.2.0 (November 2018)
 ----------------------
 

@@ -1,8 +1,3 @@
-Doc
----
-- Guidelines: when to use method X or Y
-- Add partial correlation and intraclass correlation examples
-
 Code
 ----
 - pairwise_ttests should accept two within or two between factors

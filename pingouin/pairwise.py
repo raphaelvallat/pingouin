@@ -316,6 +316,11 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
     :math:`Q(\sqrt2*|t_i|, r, N - r)` where :math:`r` is the total number of
     groups and :math:`N` is the total sample size.
 
+    References
+    ----------
+    .. [1] Tukey, John W. "Comparing individual means in the analysis of
+           variance." Biometrics (1949): 99-114.
+
     Examples
     --------
     Pairwise Tukey post-hocs on the pain threshold dataset.
@@ -455,6 +460,12 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
 
     The p-values are then approximated using the Studentized range distribution
     :math:`Q(\sqrt2*|t_i|, r, df_i)`.
+
+    References
+    ----------
+    .. [1] Games, Paul A., and John F. Howell. "Pairwise multiple comparison
+           procedures with unequal n’s and/or variances: a Monte Carlo study."
+           Journal of Educational Statistics 1.2 (1976): 113-125.
 
     Examples
     --------
