@@ -38,6 +38,29 @@ def ttest_power(d, nx, ny=None, paired=False, tail='two-sided',
     Statistical power is mainly affected by the effect size and the sample
     size.
 
+    The first step is to use the Cohen's d to calculate the non-centrality
+    parameter and degrees of freedom. In case of paired groups, this is:
+
+    .. math:: \delta = d * \sqrt n
+    .. math:: \mathtt{df} = n - 1
+
+    and in case of independent groups:
+
+    .. math:: \delta = d * \sqrt{\dfrac{n_i * n_j}{n_i + n_j}}
+    .. math:: \mathtt{df} = n_i + n_j - 2
+
+    where :math:`d` is the Cohen d, :math:`n` the sample size,
+    :math:`n_i` the sample size of the first group and
+    :math:`n_j` the sample size of the second group,
+
+    The critical value is then found using the percent point function of the T
+    distribution with :math:`q = 1 - alpha` and :math:`\mathtt{df}`
+    degrees of freedom.
+
+    Finally, the power of the test is given by the survival function of the
+    non-central distribution using the previously calculated critical value,
+    degrees of freedom and non-centrality parameter.
+
     Results have been tested against GPower.
 
     Examples

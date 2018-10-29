@@ -134,6 +134,29 @@
 <span class="sd">    Statistical power is mainly affected by the effect size and the sample</span>
 <span class="sd">    size.</span>
 
+<span class="sd">    The first step is to use the Cohen&#39;s d to calculate the non-centrality</span>
+<span class="sd">    parameter and degrees of freedom. In case of paired groups, this is:</span>
+
+<span class="sd">    .. math:: \delta = d * \sqrt n</span>
+<span class="sd">    .. math:: \mathtt{df} = n - 1</span>
+
+<span class="sd">    and in case of independent groups:</span>
+
+<span class="sd">    .. math:: \delta = d * \sqrt{\dfrac{n_i * n_j}{n_i + n_j}}</span>
+<span class="sd">    .. math:: \mathtt{df} = n_i + n_j - 2</span>
+
+<span class="sd">    where :math:`d` is the Cohen d, :math:`n` the sample size,</span>
+<span class="sd">    :math:`n_i` the sample size of the first group and</span>
+<span class="sd">    :math:`n_j` the sample size of the second group,</span>
+
+<span class="sd">    The critical value is then found using the percent point function of the T</span>
+<span class="sd">    distribution with :math:`q = 1 - alpha` and :math:`\mathtt{df}`</span>
+<span class="sd">    degrees of freedom.</span>
+
+<span class="sd">    Finally, the power of the test is given by the survival function of the</span>
+<span class="sd">    non-central distribution using the previously calculated critical value,</span>
+<span class="sd">    degrees of freedom and non-centrality parameter.</span>
+
 <span class="sd">    Results have been tested against GPower.</span>
 
 <span class="sd">    Examples</span>
