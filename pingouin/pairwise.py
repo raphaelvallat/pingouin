@@ -252,7 +252,7 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
 
 def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
                    tail='two-sided', effsize='hedges'):
-    '''Pairwise Tukey-HSD post-hoc tests.
+    '''Pairwise Tukey-HSD post-hoc test.
 
     Parameters
     ----------
@@ -302,6 +302,9 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
     variances, in which case the Games-Howell test is more adequate.
     Tukey HSD is not valid for repeated measures ANOVA.
 
+    Note that when the sample sizes are unequal, this function actually
+    performs the Tukey-Kramer test (which allows for unequal sample sizes).
+
     The T-values are defined as:
 
     .. math::
@@ -312,14 +315,34 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
     the first and second group, respectively, :math:`MS_w` the mean squares of
     the error (computed using ANOVA) and :math:`n` the sample size.
 
+    If the sample sizes are unequal, the Tukey-Kramer procedure is
+    automatically used:
+
+    .. math::
+
+        t = \dfrac{\overline{x}_i - \overline{x}_j}{\sqrt{\dfrac{MS_w}{n_i}
+        + \dfrac{MS_w}{n_j}}}
+
+    where :math:`n_i` and :math:`n_j` are the sample sizes of the first and
+    second group, respectively.
+
     The p-values are then approximated using the Studentized range distribution
     :math:`Q(\sqrt2*|t_i|, r, N - r)` where :math:`r` is the total number of
     groups and :math:`N` is the total sample size.
+
+    Note that the p-values might be slightly different than those obtained
+    using R or Matlab since the studentized range approximation is done using
+    the Gleason (1999) algorithm, which is more efficient and accurate than
+    the algorithms used in Matlab or R.
 
     References
     ----------
     .. [1] Tukey, John W. "Comparing individual means in the analysis of
            variance." Biometrics (1949): 99-114.
+
+    .. [2] Gleason, John R. "An accurate, non-iterative approximation for
+           studentized range quantiles." Computational statistics & data
+           analysis 31.2 (1999): 147-158.
 
     Examples
     --------
@@ -336,16 +359,15 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
     aov = anova(dv=dv, data=data, between=between, detailed=True)
     df = aov.loc[1, 'DF']
     ng = aov.loc[0, 'DF'] + 1
-    n = data.groupby(between)[dv].count().values
-    group_means = data.groupby(between)[dv].mean().values
-    gcov = np.diag(aov.loc[1, 'MS'] / n)
+    grp = data.groupby(between)[dv]
+    n = grp.count().values
+    gmeans = grp.mean().values
+    gvar = aov.loc[1, 'MS'] / n
 
     # Pairwise combinations
     g1, g2 = np.array(list(combinations(np.arange(ng), 2))).T
-    mn = group_means[g1] - group_means[g2]
-    idx = g2 + g1 * np.shape(gcov)[0]
-    gvar = np.diag(gcov)
-    se = np.sqrt(gvar[g1] + gvar[g2] - 2 * gcov.flatten()[idx])
+    mn = gmeans[g1] - gmeans[g2]
+    se = np.sqrt(gvar[g1] + gvar[g2])
     tval = mn / se
 
     # Critical values and p-values
@@ -367,8 +389,8 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
     stats = pd.DataFrame({
                          'A': np.unique(data[between])[g1],
                          'B': np.unique(data[between])[g2],
-                         'mean(A)': group_means[g1],
-                         'mean(B)': group_means[g2],
+                         'mean(A)': gmeans[g1],
+                         'mean(B)': gmeans[g2],
                          'diff': mn,
                          'SE': np.round(se, 3),
                          'tail': tail,
@@ -384,7 +406,7 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
 
 def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
                          tail='two-sided', effsize='hedges'):
-    '''Pairwise Games-Howell post-hoc tests.
+    '''Pairwise Games-Howell post-hoc test.
 
     Parameters
     ----------
@@ -461,11 +483,20 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
     The p-values are then approximated using the Studentized range distribution
     :math:`Q(\sqrt2*|t_i|, r, df_i)`.
 
+    Note that the p-values might be slightly different than those obtained
+    using R or Matlab since the studentized range approximation is done using
+    the Gleason (1999) algorithm, which is more efficient and accurate than
+    the algorithms used in Matlab or R.
+
     References
     ----------
     .. [1] Games, Paul A., and John F. Howell. "Pairwise multiple comparison
            procedures with unequal n’s and/or variances: a Monte Carlo study."
            Journal of Educational Statistics 1.2 (1976): 113-125.
+
+    .. [2] Gleason, John R. "An accurate, non-iterative approximation for
+           studentized range quantiles." Computational statistics & data
+           analysis 31.2 (1999): 147-158.
 
     Examples
     --------

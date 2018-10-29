@@ -100,7 +100,7 @@
 <dl class="function">
 <dt id="pingouin.pairwise_tukey">
 <code class="descclassname">pingouin.</code><code class="descname">pairwise_tukey</code><span class="sig-paren">(</span><em>dv=None</em>, <em>between=None</em>, <em>data=None</em>, <em>alpha=0.05</em>, <em>tail='two-sided'</em>, <em>effsize='hedges'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/pairwise.html#pairwise_tukey"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Pairwise Tukey-HSD post-hoc tests.</p>
+<dd><p>Pairwise Tukey-HSD post-hoc test.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -164,21 +164,42 @@ It has been proven to be conservative for one-way ANOVA with unequal
 sample sizes. However, it is not robust if the groups have unequal
 variances, in which case the Games-Howell test is more adequate.
 Tukey HSD is not valid for repeated measures ANOVA.</p>
+<p>Note that when the sample sizes are unequal, this function actually
+performs the Tukey-Kramer test (which allows for unequal sample sizes).</p>
 <p>The T-values are defined as:</p>
 <div class="math notranslate nohighlight">
 \[t = \dfrac{\overline{x}_i - \overline{x}_j}{\sqrt{2 \cdot MS_w / n}}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\overline{x}_i\)</span> and <span class="math notranslate nohighlight">\(\overline{x}_j\)</span> are the means of
 the first and second group, respectively, <span class="math notranslate nohighlight">\(MS_w\)</span> the mean squares of
 the error (computed using ANOVA) and <span class="math notranslate nohighlight">\(n\)</span> the sample size.</p>
+<p>If the sample sizes are unequal, the Tukey-Kramer procedure is
+automatically used:</p>
+<div class="math notranslate nohighlight">
+\[t = \dfrac{\overline{x}_i - \overline{x}_j}{\sqrt{\dfrac{MS_w}{n_i}
++ \dfrac{MS_w}{n_j}}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(n_i\)</span> and <span class="math notranslate nohighlight">\(n_j\)</span> are the sample sizes of the first and
+second group, respectively.</p>
 <p>The p-values are then approximated using the Studentized range distribution
 <span class="math notranslate nohighlight">\(Q(\sqrt2*|t_i|, r, N - r)\)</span> where <span class="math notranslate nohighlight">\(r\)</span> is the total number of
 groups and <span class="math notranslate nohighlight">\(N\)</span> is the total sample size.</p>
+<p>Note that the p-values might be slightly different than those obtained
+using R or Matlab since the studentized range approximation is done using
+the Gleason (1999) algorithm, which is more efficient and accurate than
+the algorithms used in Matlab or R.</p>
 <p class="rubric">References</p>
 <table class="docutils citation" frame="void" id="r35871136b470-1" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Tukey, John W. “Comparing individual means in the analysis of
 variance.” Biometrics (1949): 99-114.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r35871136b470-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Gleason, John R. “An accurate, non-iterative approximation for
+studentized range quantiles.” Computational statistics &amp; data
+analysis 31.2 (1999): 147-158.</td></tr>
 </tbody>
 </table>
 <p class="rubric">Examples</p>

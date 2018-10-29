@@ -348,7 +348,7 @@
 
 <div class="viewcode-block" id="pairwise_tukey"><a class="viewcode-back" href="../../generated/pingouin.pairwise_tukey.html#pingouin.pairwise_tukey">[docs]</a><span class="k">def</span> <span class="nf">pairwise_tukey</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">,</span>
                    <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Pairwise Tukey-HSD post-hoc tests.</span>
+    <span class="sd">&#39;&#39;&#39;Pairwise Tukey-HSD post-hoc test.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -398,6 +398,9 @@
 <span class="sd">    variances, in which case the Games-Howell test is more adequate.</span>
 <span class="sd">    Tukey HSD is not valid for repeated measures ANOVA.</span>
 
+<span class="sd">    Note that when the sample sizes are unequal, this function actually</span>
+<span class="sd">    performs the Tukey-Kramer test (which allows for unequal sample sizes).</span>
+
 <span class="sd">    The T-values are defined as:</span>
 
 <span class="sd">    .. math::</span>
@@ -408,14 +411,34 @@
 <span class="sd">    the first and second group, respectively, :math:`MS_w` the mean squares of</span>
 <span class="sd">    the error (computed using ANOVA) and :math:`n` the sample size.</span>
 
+<span class="sd">    If the sample sizes are unequal, the Tukey-Kramer procedure is</span>
+<span class="sd">    automatically used:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        t = \dfrac{\overline{x}_i - \overline{x}_j}{\sqrt{\dfrac{MS_w}{n_i}</span>
+<span class="sd">        + \dfrac{MS_w}{n_j}}}</span>
+
+<span class="sd">    where :math:`n_i` and :math:`n_j` are the sample sizes of the first and</span>
+<span class="sd">    second group, respectively.</span>
+
 <span class="sd">    The p-values are then approximated using the Studentized range distribution</span>
 <span class="sd">    :math:`Q(\sqrt2*|t_i|, r, N - r)` where :math:`r` is the total number of</span>
 <span class="sd">    groups and :math:`N` is the total sample size.</span>
+
+<span class="sd">    Note that the p-values might be slightly different than those obtained</span>
+<span class="sd">    using R or Matlab since the studentized range approximation is done using</span>
+<span class="sd">    the Gleason (1999) algorithm, which is more efficient and accurate than</span>
+<span class="sd">    the algorithms used in Matlab or R.</span>
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
 <span class="sd">    .. [1] Tukey, John W. &quot;Comparing individual means in the analysis of</span>
 <span class="sd">           variance.&quot; Biometrics (1949): 99-114.</span>
+
+<span class="sd">    .. [2] Gleason, John R. &quot;An accurate, non-iterative approximation for</span>
+<span class="sd">           studentized range quantiles.&quot; Computational statistics &amp; data</span>
+<span class="sd">           analysis 31.2 (1999): 147-158.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -432,16 +455,15 @@
     <span class="n">aov</span> <span class="o">=</span> <span class="n">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">between</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">]</span>
     <span class="n">ng</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">between</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
-    <span class="n">group_means</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">between</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
-    <span class="n">gcov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">grp</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">between</span><span class="p">)[</span><span class="n">dv</span><span class="p">]</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">gmeans</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">gvar</span> <span class="o">=</span> <span class="n">aov</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">n</span>
 
     <span class="c1"># Pairwise combinations</span>
     <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ng</span><span class="p">),</span> <span class="mi">2</span><span class="p">)))</span><span class="o">.</span><span class="n">T</span>
-    <span class="n">mn</span> <span class="o">=</span> <span class="n">group_means</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span> <span class="o">-</span> <span class="n">group_means</span><span class="p">[</span><span class="n">g2</span><span class="p">]</span>
-    <span class="n">idx</span> <span class="o">=</span> <span class="n">g2</span> <span class="o">+</span> <span class="n">g1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">gcov</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">gvar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">gcov</span><span class="p">)</span>
-    <span class="n">se</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">gvar</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span> <span class="o">+</span> <span class="n">gvar</span><span class="p">[</span><span class="n">g2</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">gcov</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="n">idx</span><span class="p">])</span>
+    <span class="n">mn</span> <span class="o">=</span> <span class="n">gmeans</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span> <span class="o">-</span> <span class="n">gmeans</span><span class="p">[</span><span class="n">g2</span><span class="p">]</span>
+    <span class="n">se</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">gvar</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span> <span class="o">+</span> <span class="n">gvar</span><span class="p">[</span><span class="n">g2</span><span class="p">])</span>
     <span class="n">tval</span> <span class="o">=</span> <span class="n">mn</span> <span class="o">/</span> <span class="n">se</span>
 
     <span class="c1"># Critical values and p-values</span>
@@ -463,8 +485,8 @@
     <span class="n">stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
                          <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">between</span><span class="p">])[</span><span class="n">g1</span><span class="p">],</span>
                          <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">between</span><span class="p">])[</span><span class="n">g2</span><span class="p">],</span>
-                         <span class="s1">&#39;mean(A)&#39;</span><span class="p">:</span> <span class="n">group_means</span><span class="p">[</span><span class="n">g1</span><span class="p">],</span>
-                         <span class="s1">&#39;mean(B)&#39;</span><span class="p">:</span> <span class="n">group_means</span><span class="p">[</span><span class="n">g2</span><span class="p">],</span>
+                         <span class="s1">&#39;mean(A)&#39;</span><span class="p">:</span> <span class="n">gmeans</span><span class="p">[</span><span class="n">g1</span><span class="p">],</span>
+                         <span class="s1">&#39;mean(B)&#39;</span><span class="p">:</span> <span class="n">gmeans</span><span class="p">[</span><span class="n">g2</span><span class="p">],</span>
                          <span class="s1">&#39;diff&#39;</span><span class="p">:</span> <span class="n">mn</span><span class="p">,</span>
                          <span class="s1">&#39;SE&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">se</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
                          <span class="s1">&#39;tail&#39;</span><span class="p">:</span> <span class="n">tail</span><span class="p">,</span>
@@ -480,7 +502,7 @@
 
 <div class="viewcode-block" id="pairwise_gameshowell"><a class="viewcode-back" href="../../generated/pingouin.pairwise_gameshowell.html#pingouin.pairwise_gameshowell">[docs]</a><span class="k">def</span> <span class="nf">pairwise_gameshowell</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">05</span><span class="p">,</span>
                          <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Pairwise Games-Howell post-hoc tests.</span>
+    <span class="sd">&#39;&#39;&#39;Pairwise Games-Howell post-hoc test.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -557,11 +579,20 @@
 <span class="sd">    The p-values are then approximated using the Studentized range distribution</span>
 <span class="sd">    :math:`Q(\sqrt2*|t_i|, r, df_i)`.</span>
 
+<span class="sd">    Note that the p-values might be slightly different than those obtained</span>
+<span class="sd">    using R or Matlab since the studentized range approximation is done using</span>
+<span class="sd">    the Gleason (1999) algorithm, which is more efficient and accurate than</span>
+<span class="sd">    the algorithms used in Matlab or R.</span>
+
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
 <span class="sd">    .. [1] Games, Paul A., and John F. Howell. &quot;Pairwise multiple comparison</span>
 <span class="sd">           procedures with unequal n’s and/or variances: a Monte Carlo study.&quot;</span>
 <span class="sd">           Journal of Educational Statistics 1.2 (1976): 113-125.</span>
+
+<span class="sd">    .. [2] Gleason, John R. &quot;An accurate, non-iterative approximation for</span>
+<span class="sd">           studentized range quantiles.&quot; Computational statistics &amp; data</span>
+<span class="sd">           analysis 31.2 (1999): 147-158.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
