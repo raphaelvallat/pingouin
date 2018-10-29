@@ -217,7 +217,29 @@
 <span class="sd">    -----</span>
 <span class="sd">    For one-way ANOVA, partial eta-square is the same as eta-square. It can be</span>
 <span class="sd">    evaluated from the f-value and degrees of freedom of the ANOVA using</span>
-<span class="sd">    the following formula: eta = (fval * dof1) / (fval * dof1 + dof2)</span>
+<span class="sd">    the following formula:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \eta^2 = \dfrac{F^* * \mathtt{df_1}}{F^* * \mathtt{df_1} +</span>
+<span class="sd">        \mathtt{df_2}}</span>
+
+<span class="sd">    Using :math:`\eta^2` and the total sample size :math:`N`, the</span>
+<span class="sd">    non-centrality parameter is defined by:</span>
+
+<span class="sd">    .. math:: \delta = N * \dfrac{\eta^2}{1 - \eta^2}</span>
+
+<span class="sd">    Then the critical value of the non-central F-distribution is computed using</span>
+<span class="sd">    the percentile point function of the F-distribution with:</span>
+
+<span class="sd">    .. math:: q = 1 - alpha</span>
+<span class="sd">    .. math:: \mathtt{df_1} = r - 1</span>
+<span class="sd">    .. math:: \mathtt{df_2} = N - r</span>
+
+<span class="sd">    where :math:`r` is the number of groups.</span>
+
+<span class="sd">    Finally, the power of the ANOVA is calculated using the survival function</span>
+<span class="sd">    of the non-central F-distribution using the previously computed critical</span>
+<span class="sd">    value, non-centrality parameter, and degrees of freedom.</span>
 
 <span class="sd">    Results have been tested against GPower.</span>
 

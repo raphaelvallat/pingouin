@@ -121,7 +121,29 @@ def anova_power(eta, ntot, ngroups, alpha=.05):
     -----
     For one-way ANOVA, partial eta-square is the same as eta-square. It can be
     evaluated from the f-value and degrees of freedom of the ANOVA using
-    the following formula: eta = (fval * dof1) / (fval * dof1 + dof2)
+    the following formula:
+
+    .. math::
+        \eta^2 = \dfrac{F^* * \mathtt{df_1}}{F^* * \mathtt{df_1} +
+        \mathtt{df_2}}
+
+    Using :math:`\eta^2` and the total sample size :math:`N`, the
+    non-centrality parameter is defined by:
+
+    .. math:: \delta = N * \dfrac{\eta^2}{1 - \eta^2}
+
+    Then the critical value of the non-central F-distribution is computed using
+    the percentile point function of the F-distribution with:
+
+    .. math:: q = 1 - alpha
+    .. math:: \mathtt{df_1} = r - 1
+    .. math:: \mathtt{df_2} = N - r
+
+    where :math:`r` is the number of groups.
+
+    Finally, the power of the ANOVA is calculated using the survival function
+    of the non-central F-distribution using the previously computed critical
+    value, non-centrality parameter, and degrees of freedom.
 
     Results have been tested against GPower.
 
