@@ -62,7 +62,7 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Functions</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
@@ -96,24 +96,24 @@
     <div class="col-md-12 content">
       
   <div class="section" id="guidelines">
-<span id="id1"></span><h1><a class="toc-backref" href="#id2">Guidelines</a></h1>
+<span id="id1"></span><h1><a class="toc-backref" href="#id3">Guidelines</a></h1>
 <p>In this page, you will find a collection of flowcharts designed to help you choose
 which functions of <cite>Pingouin</cite> are adequate for your analysis. Click on
 the desired flowchart to view a full scale image.</p>
 <div class="contents topic" id="table-of-contents">
 <p class="topic-title first">Table of Contents</p>
 <ul class="simple">
-<li><a class="reference internal" href="#guidelines" id="id2">Guidelines</a><ul>
-<li><a class="reference internal" href="#one-way-anova" id="id3">One-way ANOVA</a></li>
-<li><a class="reference internal" href="#correlation" id="id4">Correlation</a></li>
+<li><a class="reference internal" href="#guidelines" id="id3">Guidelines</a><ul>
+<li><a class="reference internal" href="#one-way-anova" id="id4">One-way ANOVA</a></li>
+<li><a class="reference internal" href="#correlation" id="id5">Correlation</a></li>
 </ul>
 </li>
 </ul>
 </div>
 <div class="section" id="one-way-anova">
-<h2><a class="toc-backref" href="#id3">One-way ANOVA</a></h2>
+<h2><a class="toc-backref" href="#id4">One-way ANOVA</a></h2>
 <div class="figure align-center">
-<a class="reference internal image-reference" href="_images/flowchart_one_way_ANOVA.png"><img alt="One-way ANOVA flowchart" src="_images/flowchart_one_way_ANOVA.png" style="width: 1012.5px; height: 642.0px;" /></a>
+<a class="reference internal image-reference" href="_images/flowchart_one_way_ANOVA.png"><img alt="One-way ANOVA" src="_images/flowchart_one_way_ANOVA.png" style="width: 1012.5px; height: 642.0px;" /></a>
 </div>
 <div class="section" id="example-code">
 <h3>Example code</h3>
@@ -135,10 +135,36 @@ the desired flowchart to view a full scale image.</p>
 <span class="n">pg</span><span class="o">.</span><span class="n">pairwise_tukey</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Pain threshold&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Hair color&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
 </div>
 </div>
 <div class="section" id="correlation">
-<h2><a class="toc-backref" href="#id4">Correlation</a></h2>
+<h2><a class="toc-backref" href="#id5">Correlation</a></h2>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/flowchart_correlations.png"><img alt="Correlations" src="_images/flowchart_correlations.png" style="width: 1031.5px; height: 818.5px;" /></a>
+</div>
+<div class="section" id="id2">
+<h3>Example code</h3>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">from</span> <span class="nn">pingouin.datasets</span> <span class="k">import</span> <span class="n">read_dataset</span>
+
+<span class="c1"># Load an example dataset with the personality scores of 500 participants</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;pairwise_corr&#39;</span><span class="p">)</span>
+
+<span class="c1"># 1.Test for bivariate normality</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">multivariate_normality</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;Neuroticism&#39;</span><span class="p">,</span> <span class="s1">&#39;Openness&#39;</span><span class="p">]]))</span>
+
+<span class="c1"># 1bis. Visual inspection with a histogram + scatter plot</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">jointplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;Neuroticism&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;Openness&#39;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;reg&#39;</span><span class="p">)</span>
+
+<span class="c1"># 2. If the data have a bivariate normal distribution and no clear outlier(s), we can use a regular Pearson correlation</span>
+<span class="n">pg</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Neuroticism&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Openness&#39;</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 

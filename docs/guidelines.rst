@@ -16,7 +16,7 @@ One-way ANOVA
 .. figure::  /pictures/flowchart/flowchart_one_way_ANOVA.png
   :align: center
   :scale: 50
-  :alt: One-way ANOVA flowchart
+  :alt: One-way ANOVA
 
 Example code
 ~~~~~~~~~~~~
@@ -41,5 +41,33 @@ Example code
   pg.pairwise_tukey(data=df, dv='Pain threshold', between='Hair color')
 
 
+|
+
 Correlation
 -----------
+
+.. figure::  /pictures/flowchart/flowchart_correlations.png
+  :align: center
+  :scale: 50
+  :alt: Correlations
+
+Example code
+~~~~~~~~~~~~
+
+.. code:: python
+
+  import pingouin as pg
+  import seaborn as sns
+  from pingouin.datasets import read_dataset
+
+  # Load an example dataset with the personality scores of 500 participants
+  df = read_dataset('pairwise_corr')
+
+  # 1.Test for bivariate normality
+  print(multivariate_normality(df[['Neuroticism', 'Openness']]))
+
+  # 1bis. Visual inspection with a histogram + scatter plot
+  sns.jointplot(data=df, x='Neuroticism', y='Openness', kind='reg')
+
+  # 2. If the data have a bivariate normal distribution and no clear outlier(s), we can use a regular Pearson correlation
+  pg.corr(df['Neuroticism'], df['Openness'], method='pearson')
