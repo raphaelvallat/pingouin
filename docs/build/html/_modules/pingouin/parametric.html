@@ -353,17 +353,58 @@
 <span class="sd">    -----</span>
 <span class="sd">    Data are expected to be in long-format.</span>
 
-<span class="sd">    Results have been tested against R and JASP.</span>
+<span class="sd">    In one-way repeated-measures ANOVA, the total variance (sums of squares)</span>
+<span class="sd">    is divided into three components</span>
 
-<span class="sd">    Note that if the dataset contains one or more other within subject</span>
-<span class="sd">    factors, an automatic collapsing to the mean is applied on the dependant</span>
-<span class="sd">    variable (same behavior as the ezANOVA R package). As such, results can</span>
-<span class="sd">    differ from those of JASP. If you can, always double-check the results.</span>
+<span class="sd">    .. math:: SS_{total} = SS_{treatment} + (SS_{subjects} + SS_{error})</span>
+
+<span class="sd">    with</span>
+
+<span class="sd">    .. math:: SS_{total} = \sum_i^r \sum_j^n (Y_{ij} - \overline{Y})^2</span>
+<span class="sd">    .. math:: SS_{treatment} = \sum_i^r n_i (\overline{Y_i} - \overline{Y})^2</span>
+<span class="sd">    .. math:: SS_{subjects} = r\sum (\overline{Y}_s - \overline{Y})^2</span>
+<span class="sd">    .. math:: SS_{error} = SS_{total} - SS_{treatment} - SS_{subjects}</span>
+
+<span class="sd">    where :math:`i=1,...,r; j=1,...,n_i`, :math:`r` is the number of</span>
+<span class="sd">    conditions, :math:`n_i` the number of observations for each condition,</span>
+<span class="sd">    :math:`\overline{Y}` the grand mean of the data, :math:`\overline{Y_i}`</span>
+<span class="sd">    the mean of the :math:`i^{th}` condition and :math:`\overline{Y}_{subj}`</span>
+<span class="sd">    the mean of the :math:`s^{th}` subject.</span>
+
+<span class="sd">    The F-statistics is then defined as:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        F^* = \dfrac{MS_{treatment}}{MS_{error}}\dfrac{\dfrac{SS_{treatment}}</span>
+<span class="sd">        {r-1}}{\dfrac{SS_{error}}{(n - 1)(r - 1)}}</span>
+
+<span class="sd">    and the p-value can be calculated using a F-distribution with</span>
+<span class="sd">    :math:`\mathtt{df}_{treatment} = r - 1` and</span>
+<span class="sd">    :math:`\mathtt{df}_{error} = (n - 1)(r - 1)` degrees of freedom.</span>
 
 <span class="sd">    The effect size reported in Pingouin is the partial eta-square.</span>
 <span class="sd">    However, one should keep in mind that for one-way repeated-measures ANOVA,</span>
 <span class="sd">    partial eta-square is the same as eta-square</span>
-<span class="sd">    (Bakeman 2005; Richardson 2011).</span>
+<span class="sd">    (Bakeman 2005; Richardson 2011):</span>
+
+<span class="sd">    .. math:: \eta_p^2 = \dfrac{SS_{treatment}}{SS_{treatment} + SS_{error}}</span>
+
+<span class="sd">    Results have been tested against R and JASP. Note however that if the</span>
+<span class="sd">    dataset contains one or more other within subject factors, an automatic</span>
+<span class="sd">    collapsing to the mean is applied on the dependant variable (same behavior</span>
+<span class="sd">    as the ezANOVA R package). As such, results can differ from those of JASP.</span>
+<span class="sd">    If you can, always double-check the results.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Bakeman, R. (2005). Recommended effect size statistics for</span>
+<span class="sd">           repeated measures designs. Behavior research methods, 37(3),</span>
+<span class="sd">           379-384.</span>
+
+<span class="sd">    .. [2] Richardson, J. T. (2011). Eta squared and partial eta squared as</span>
+<span class="sd">           measures of effect size in educational research. Educational</span>
+<span class="sd">           Research Review, 6(2), 135-147.</span>
+
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -756,6 +797,8 @@
 <span class="sd">    However, one should keep in mind that for one-way ANOVA</span>
 <span class="sd">    partial eta-square is the same as eta-square and generalized eta-square.</span>
 <span class="sd">    For more details, see Bakeman 2005; Richardson 2011.</span>
+
+<span class="sd">    .. math:: \eta_p^2 = \dfrac{SS_{treatment}}{SS_{treatment} + SS_{error}}</span>
 
 <span class="sd">    Results have been tested against R, Matlab and JASP.</span>
 

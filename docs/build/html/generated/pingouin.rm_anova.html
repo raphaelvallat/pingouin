@@ -187,15 +187,59 @@ directory. To change that, specify the filename with full path.</p>
 </div>
 <p class="rubric">Notes</p>
 <p>Data are expected to be in long-format.</p>
-<p>Results have been tested against R and JASP.</p>
-<p>Note that if the dataset contains one or more other within subject
-factors, an automatic collapsing to the mean is applied on the dependant
-variable (same behavior as the ezANOVA R package). As such, results can
-differ from those of JASP. If you can, always double-check the results.</p>
+<p>In one-way repeated-measures ANOVA, the total variance (sums of squares)
+is divided into three components</p>
+<div class="math notranslate nohighlight">
+\[SS_{total} = SS_{treatment} + (SS_{subjects} + SS_{error})\]</div>
+<p>with</p>
+<div class="math notranslate nohighlight">
+\[SS_{total} = \sum_i^r \sum_j^n (Y_{ij} - \overline{Y})^2\]</div>
+<div class="math notranslate nohighlight">
+\[SS_{treatment} = \sum_i^r n_i (\overline{Y_i} - \overline{Y})^2\]</div>
+<div class="math notranslate nohighlight">
+\[SS_{subjects} = r\sum (\overline{Y}_s - \overline{Y})^2\]</div>
+<div class="math notranslate nohighlight">
+\[SS_{error} = SS_{total} - SS_{treatment} - SS_{subjects}\]</div>
+<p>where <span class="math notranslate nohighlight">\(i=1,...,r; j=1,...,n_i\)</span>, <span class="math notranslate nohighlight">\(r\)</span> is the number of
+conditions, <span class="math notranslate nohighlight">\(n_i\)</span> the number of observations for each condition,
+<span class="math notranslate nohighlight">\(\overline{Y}\)</span> the grand mean of the data, <span class="math notranslate nohighlight">\(\overline{Y_i}\)</span>
+the mean of the <span class="math notranslate nohighlight">\(i^{th}\)</span> condition and <span class="math notranslate nohighlight">\(\overline{Y}_{subj}\)</span>
+the mean of the <span class="math notranslate nohighlight">\(s^{th}\)</span> subject.</p>
+<p>The F-statistics is then defined as:</p>
+<div class="math notranslate nohighlight">
+\[F^* = \dfrac{MS_{treatment}}{MS_{error}}\dfrac{\dfrac{SS_{treatment}}
+{r-1}}{\dfrac{SS_{error}}{(n - 1)(r - 1)}}\]</div>
+<p>and the p-value can be calculated using a F-distribution with
+<span class="math notranslate nohighlight">\(\mathtt{df}_{treatment} = r - 1\)</span> and
+<span class="math notranslate nohighlight">\(\mathtt{df}_{error} = (n - 1)(r - 1)\)</span> degrees of freedom.</p>
 <p>The effect size reported in Pingouin is the partial eta-square.
 However, one should keep in mind that for one-way repeated-measures ANOVA,
 partial eta-square is the same as eta-square
-(Bakeman 2005; Richardson 2011).</p>
+(Bakeman 2005; Richardson 2011):</p>
+<div class="math notranslate nohighlight">
+\[\eta_p^2 = \dfrac{SS_{treatment}}{SS_{treatment} + SS_{error}}\]</div>
+<p>Results have been tested against R and JASP. Note however that if the
+dataset contains one or more other within subject factors, an automatic
+collapsing to the mean is applied on the dependant variable (same behavior
+as the ezANOVA R package). As such, results can differ from those of JASP.
+If you can, always double-check the results.</p>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="rc685210599cf-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Bakeman, R. (2005). Recommended effect size statistics for
+repeated measures designs. Behavior research methods, 37(3),
+379-384.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="rc685210599cf-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Richardson, J. T. (2011). Eta squared and partial eta squared as
+measures of effect size in educational research. Educational
+Research Review, 6(2), 135-147.</td></tr>
+</tbody>
+</table>
 <p class="rubric">Examples</p>
 <p>One-way repeated-measures ANOVA (Ryan et al 2013 dataset).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin.datasets</span> <span class="k">import</span> <span class="n">read_dataset</span>

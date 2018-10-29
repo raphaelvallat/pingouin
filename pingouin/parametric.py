@@ -257,17 +257,58 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     -----
     Data are expected to be in long-format.
 
-    Results have been tested against R and JASP.
+    In one-way repeated-measures ANOVA, the total variance (sums of squares)
+    is divided into three components
 
-    Note that if the dataset contains one or more other within subject
-    factors, an automatic collapsing to the mean is applied on the dependant
-    variable (same behavior as the ezANOVA R package). As such, results can
-    differ from those of JASP. If you can, always double-check the results.
+    .. math:: SS_{total} = SS_{treatment} + (SS_{subjects} + SS_{error})
+
+    with
+
+    .. math:: SS_{total} = \sum_i^r \sum_j^n (Y_{ij} - \overline{Y})^2
+    .. math:: SS_{treatment} = \sum_i^r n_i (\overline{Y_i} - \overline{Y})^2
+    .. math:: SS_{subjects} = r\sum (\overline{Y}_s - \overline{Y})^2
+    .. math:: SS_{error} = SS_{total} - SS_{treatment} - SS_{subjects}
+
+    where :math:`i=1,...,r; j=1,...,n_i`, :math:`r` is the number of
+    conditions, :math:`n_i` the number of observations for each condition,
+    :math:`\overline{Y}` the grand mean of the data, :math:`\overline{Y_i}`
+    the mean of the :math:`i^{th}` condition and :math:`\overline{Y}_{subj}`
+    the mean of the :math:`s^{th}` subject.
+
+    The F-statistics is then defined as:
+
+    .. math::
+
+        F^* = \dfrac{MS_{treatment}}{MS_{error}}\dfrac{\dfrac{SS_{treatment}}
+        {r-1}}{\dfrac{SS_{error}}{(n - 1)(r - 1)}}
+
+    and the p-value can be calculated using a F-distribution with
+    :math:`\mathtt{df}_{treatment} = r - 1` and
+    :math:`\mathtt{df}_{error} = (n - 1)(r - 1)` degrees of freedom.
 
     The effect size reported in Pingouin is the partial eta-square.
     However, one should keep in mind that for one-way repeated-measures ANOVA,
     partial eta-square is the same as eta-square
-    (Bakeman 2005; Richardson 2011).
+    (Bakeman 2005; Richardson 2011):
+
+    .. math:: \eta_p^2 = \dfrac{SS_{treatment}}{SS_{treatment} + SS_{error}}
+
+    Results have been tested against R and JASP. Note however that if the
+    dataset contains one or more other within subject factors, an automatic
+    collapsing to the mean is applied on the dependant variable (same behavior
+    as the ezANOVA R package). As such, results can differ from those of JASP.
+    If you can, always double-check the results.
+
+    References
+    ----------
+    .. [1] Bakeman, R. (2005). Recommended effect size statistics for
+           repeated measures designs. Behavior research methods, 37(3),
+           379-384.
+
+    .. [2] Richardson, J. T. (2011). Eta squared and partial eta squared as
+           measures of effect size in educational research. Educational
+           Research Review, 6(2), 135-147.
+
 
     Examples
     --------
@@ -660,6 +701,8 @@ def anova(dv=None, between=None, data=None, detailed=False,
     However, one should keep in mind that for one-way ANOVA
     partial eta-square is the same as eta-square and generalized eta-square.
     For more details, see Bakeman 2005; Richardson 2011.
+
+    .. math:: \eta_p^2 = \dfrac{SS_{treatment}}{SS_{treatment} + SS_{error}}
 
     Results have been tested against R, Matlab and JASP.
 
