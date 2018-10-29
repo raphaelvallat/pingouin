@@ -487,9 +487,21 @@ def cochran(dv=None, within=None, subject=None, data=None,
     The Cochran Q Test is a non-parametric test for ANOVA with repeated
     measures where the dependent variable is binary.
 
-    Data are expected to be in long-format.
+    Data are expected to be in long-format. NaN are automatically removed
+    from the data.
 
-    NaN are automatically removed from the data.
+    The Q statistics is defined as:
+
+    .. math:: Q = \dfrac{(r-1)(r\sum_j^rx_j^2-N^2)}{rN-\sum_i^nx_i^2}
+
+    where :math:`N` is the total sum of all observations, :math:`j=1,...,r`
+    where :math:`r` is the number of repeated measures, :math:`i=1,...,n` where
+    :math:`n` is the number of observations per condition.
+
+    The p-value is then approximated using a chi-square distribution with
+    :math:`r-1` degrees of freedom:
+
+    .. math:: Q \sim \chi^2(r-1)
 
     References
     ----------
