@@ -11,6 +11,11 @@ v0.2.0 (November 2018)
 a. Added Welch ANOVA
 b. Added Games-Howell post-hoc test for one-way ANOVA with unequal variances
 
+**Documentation**
+
+a. Added Guidelines section with flow charts
+b. Renamed API section to Functions
+
 **Regression**
 
 a. Added linear_regression function.
