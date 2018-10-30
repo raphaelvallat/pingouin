@@ -7,8 +7,8 @@ What's new
    :depth: 2
 
 
-v0.2.0 (November 2018)
-----------------------
+v0.2.0 (dev)
+------------
 
 **ANOVA**
 
@@ -19,6 +19,7 @@ b. Added Games-Howell post-hoc test for one-way ANOVA with unequal variances
 
 a. Added Guidelines section with flow charts
 b. Renamed API section to Functions
+c. Major improvements to the documentation of several functions
 
 **Regression**
 
