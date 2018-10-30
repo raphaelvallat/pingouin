@@ -350,8 +350,61 @@
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    If data are normally distributed, uses Bartlett (1937).</span>
-<span class="sd">    If data are not-normally distributed, uses Levene (1960).</span>
+<span class="sd">    This function first tests if the data are normally distributed using the</span>
+<span class="sd">    Shapiro-Wilk test. If yes, then the homogeneity of variances is measured</span>
+<span class="sd">    using the Bartlett test. If the data are not normally distributed, the</span>
+<span class="sd">    Levene (1960) test, which is less sensitive to departure from</span>
+<span class="sd">    normality, is used.</span>
+
+<span class="sd">    The **Bartlett** :math:`T` statistic is defined as:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        T = \dfrac{(N-k) \ln{s^{2}_{p}} - \sum_{i=1}^{k}(N_{i} - 1)</span>
+<span class="sd">        \ln{s^{2}_{i}}}{1 + (1/(3(k-1)))((\sum_{i=1}^{k}{1/(N_{i} - 1))}</span>
+<span class="sd">        - 1/(N-k))}</span>
+
+<span class="sd">    where :math:`s_i^2` is the variance of the :math:`i^{th}` group,</span>
+<span class="sd">    :math:`N` is the total sample size, :math:`N_i` is the sample size of the</span>
+<span class="sd">    :math:`i^{th}` group, :math:`k` is the number of groups,</span>
+<span class="sd">    and :math:`s_p^2` is the pooled variance.</span>
+
+<span class="sd">    The pooled variance is a weighted average of the group variances and is</span>
+<span class="sd">    defined as:</span>
+
+<span class="sd">    .. math:: s^{2}_{p} = \sum_{i=1}^{k}(N_{i} - 1)s^{2}_{i}/(N-k)</span>
+
+<span class="sd">    The p-value is then computed using a chi-square distribution:</span>
+
+<span class="sd">    .. math:: T \sim \chi^2(k-1)</span>
+
+<span class="sd">    The **Levene** :math:`W` statistic is defined as:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        W = \dfrac{(N-k)} {(k-1)}</span>
+<span class="sd">        \dfrac{\sum_{i=1}^{k}N_{i}(\overline{Z}_{i.}-\overline{Z})^{2} }</span>
+<span class="sd">        {\sum_{i=1}^{k}\sum_{j=1}^{N_i}(Z_{ij}-\overline{Z}_{i.})^{2} }</span>
+
+<span class="sd">    where :math:`Z_{ij} = |Y_{ij} - median({Y}_{i.})|`,</span>
+<span class="sd">    :math:`\overline{Z}_{i.}` are the group means of :math:`Z_{ij}` and</span>
+<span class="sd">    :math:`\overline{Z}` is the grand mean of :math:`Z_{ij}`.</span>
+
+<span class="sd">    The p-value is then computed using a F-distribution:</span>
+
+<span class="sd">    .. math:: W \sim F(k-1, N-k)</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Bartlett, M. S. (1937). Properties of sufficiency and statistical</span>
+<span class="sd">           tests. Proc. R. Soc. Lond. A, 160(901), 268-282.</span>
+
+<span class="sd">    .. [2] Brown, M. B., &amp; Forsythe, A. B. (1974). Robust tests for the</span>
+<span class="sd">           equality of variances. Journal of the American Statistical</span>
+<span class="sd">           Association, 69(346), 364-367.</span>
+
+<span class="sd">    .. [3] NIST/SEMATECH e-Handbook of Statistical Methods,</span>
+<span class="sd">           http://www.itl.nist.gov/div898/handbook/</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>

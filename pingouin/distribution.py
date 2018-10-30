@@ -254,8 +254,61 @@ def homoscedasticity(*args, alpha=.05):
 
     Notes
     -----
-    If data are normally distributed, uses Bartlett (1937).
-    If data are not-normally distributed, uses Levene (1960).
+    This function first tests if the data are normally distributed using the
+    Shapiro-Wilk test. If yes, then the homogeneity of variances is measured
+    using the Bartlett test. If the data are not normally distributed, the
+    Levene (1960) test, which is less sensitive to departure from
+    normality, is used.
+
+    The **Bartlett** :math:`T` statistic is defined as:
+
+    .. math::
+
+        T = \dfrac{(N-k) \ln{s^{2}_{p}} - \sum_{i=1}^{k}(N_{i} - 1)
+        \ln{s^{2}_{i}}}{1 + (1/(3(k-1)))((\sum_{i=1}^{k}{1/(N_{i} - 1))}
+        - 1/(N-k))}
+
+    where :math:`s_i^2` is the variance of the :math:`i^{th}` group,
+    :math:`N` is the total sample size, :math:`N_i` is the sample size of the
+    :math:`i^{th}` group, :math:`k` is the number of groups,
+    and :math:`s_p^2` is the pooled variance.
+
+    The pooled variance is a weighted average of the group variances and is
+    defined as:
+
+    .. math:: s^{2}_{p} = \sum_{i=1}^{k}(N_{i} - 1)s^{2}_{i}/(N-k)
+
+    The p-value is then computed using a chi-square distribution:
+
+    .. math:: T \sim \chi^2(k-1)
+
+    The **Levene** :math:`W` statistic is defined as:
+
+    .. math::
+
+        W = \dfrac{(N-k)} {(k-1)}
+        \dfrac{\sum_{i=1}^{k}N_{i}(\overline{Z}_{i.}-\overline{Z})^{2} }
+        {\sum_{i=1}^{k}\sum_{j=1}^{N_i}(Z_{ij}-\overline{Z}_{i.})^{2} }
+
+    where :math:`Z_{ij} = |Y_{ij} - median({Y}_{i.})|`,
+    :math:`\overline{Z}_{i.}` are the group means of :math:`Z_{ij}` and
+    :math:`\overline{Z}` is the grand mean of :math:`Z_{ij}`.
+
+    The p-value is then computed using a F-distribution:
+
+    .. math:: W \sim F(k-1, N-k)
+
+    References
+    ----------
+    .. [1] Bartlett, M. S. (1937). Properties of sufficiency and statistical
+           tests. Proc. R. Soc. Lond. A, 160(901), 268-282.
+
+    .. [2] Brown, M. B., & Forsythe, A. B. (1974). Robust tests for the
+           equality of variances. Journal of the American Statistical
+           Association, 69(346), 364-367.
+
+    .. [3] NIST/SEMATECH e-Handbook of Statistical Methods,
+           http://www.itl.nist.gov/div898/handbook/
 
     Examples
     --------

@@ -134,8 +134,61 @@
 </dl>
 </div>
 <p class="rubric">Notes</p>
-<p>If data are normally distributed, uses Bartlett (1937).
-If data are not-normally distributed, uses Levene (1960).</p>
+<p>This function first tests if the data are normally distributed using the
+Shapiro-Wilk test. If yes, then the homogeneity of variances is measured
+using the Bartlett test. If the data are not normally distributed, the
+Levene (1960) test, which is less sensitive to departure from
+normality, is used.</p>
+<p>The <strong>Bartlett</strong> <span class="math notranslate nohighlight">\(T\)</span> statistic is defined as:</p>
+<div class="math notranslate nohighlight">
+\[T = \dfrac{(N-k) \ln{s^{2}_{p}} - \sum_{i=1}^{k}(N_{i} - 1)
+\ln{s^{2}_{i}}}{1 + (1/(3(k-1)))((\sum_{i=1}^{k}{1/(N_{i} - 1))}
+- 1/(N-k))}\]</div>
+<p>where <span class="math notranslate nohighlight">\(s_i^2\)</span> is the variance of the <span class="math notranslate nohighlight">\(i^{th}\)</span> group,
+<span class="math notranslate nohighlight">\(N\)</span> is the total sample size, <span class="math notranslate nohighlight">\(N_i\)</span> is the sample size of the
+<span class="math notranslate nohighlight">\(i^{th}\)</span> group, <span class="math notranslate nohighlight">\(k\)</span> is the number of groups,
+and <span class="math notranslate nohighlight">\(s_p^2\)</span> is the pooled variance.</p>
+<p>The pooled variance is a weighted average of the group variances and is
+defined as:</p>
+<div class="math notranslate nohighlight">
+\[s^{2}_{p} = \sum_{i=1}^{k}(N_{i} - 1)s^{2}_{i}/(N-k)\]</div>
+<p>The p-value is then computed using a chi-square distribution:</p>
+<div class="math notranslate nohighlight">
+\[T \sim \chi^2(k-1)\]</div>
+<p>The <strong>Levene</strong> <span class="math notranslate nohighlight">\(W\)</span> statistic is defined as:</p>
+<div class="math notranslate nohighlight">
+\[W = \dfrac{(N-k)} {(k-1)}
+\dfrac{\sum_{i=1}^{k}N_{i}(\overline{Z}_{i.}-\overline{Z})^{2} }
+{\sum_{i=1}^{k}\sum_{j=1}^{N_i}(Z_{ij}-\overline{Z}_{i.})^{2} }\]</div>
+<p>where <span class="math notranslate nohighlight">\(Z_{ij} = |Y_{ij} - median({Y}_{i.})|\)</span>,
+<span class="math notranslate nohighlight">\(\overline{Z}_{i.}\)</span> are the group means of <span class="math notranslate nohighlight">\(Z_{ij}\)</span> and
+<span class="math notranslate nohighlight">\(\overline{Z}\)</span> is the grand mean of <span class="math notranslate nohighlight">\(Z_{ij}\)</span>.</p>
+<p>The p-value is then computed using a F-distribution:</p>
+<div class="math notranslate nohighlight">
+\[W \sim F(k-1, N-k)\]</div>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r9319403e2d06-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Bartlett, M. S. (1937). Properties of sufficiency and statistical
+tests. Proc. R. Soc. Lond. A, 160(901), 268-282.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r9319403e2d06-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Brown, M. B., &amp; Forsythe, A. B. (1974). Robust tests for the
+equality of variances. Journal of the American Statistical
+Association, 69(346), 364-367.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r9319403e2d06-3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>NIST/SEMATECH e-Handbook of Statistical Methods,
+<a class="reference external" href="http://www.itl.nist.gov/div898/handbook/">http://www.itl.nist.gov/div898/handbook/</a></td></tr>
+</tbody>
+</table>
 <p class="rubric">Examples</p>
 <p>Test the homoscedasticity of two arrays.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
