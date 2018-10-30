@@ -113,12 +113,12 @@
 <dd><p class="first last">Sample size of first group</p>
 </dd>
 <dt><strong>ny</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first last">Sample size of second group (only needed in case of an independant
+<dd><p class="first last">Sample size of second group (only needed in case of an independent
 two-sample T-test)</p>
 </dd>
 <dt><strong>paired</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
 <dd><p class="first last">Specify whether the two observations are related (i.e. repeated
-measures) or independant.</p>
+measures) or independent.</p>
 </dd>
 <dt><strong>tail</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd><p class="first last">Specify whether the test is ‘one-sided’ or ‘two-sided’</p>
@@ -167,10 +167,10 @@ Psychon. Bull. Rev. 16, 225–237. <a class="reference external" href="https://d
 </table>
 <p class="rubric">Examples</p>
 <ol class="arabic">
-<li><p class="first">Bayes Factor of an independant two-sample T-test</p>
+<li><p class="first">Bayes Factor of an independent two-sample T-test</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">bayesfactor_ttest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">bf</span> <span class="o">=</span> <span class="n">bayesfactor_ttest</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bayes Factor: </span><span class="si">%.2f</span><span class="s2"> (two-sample independant)&quot;</span> <span class="o">%</span> <span class="n">bf</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bayes Factor: </span><span class="si">%.2f</span><span class="s2"> (two-sample independent)&quot;</span> <span class="o">%</span> <span class="n">bf</span><span class="p">)</span>
 </pre></div>
 </div>
 </li>

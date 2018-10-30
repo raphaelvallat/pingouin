@@ -18,7 +18,7 @@ def ttest_power(d, nx, ny=None, paired=False, tail='two-sided',
         Sample sizes of the two groups. Must be equal when paired is True.
         If only nx is specified, assumes that the test is a one-sample T-test.
     paired : boolean
-        Specify the two groups are independant or related (i.e. repeated).
+        Specify the two groups are independent or related (i.e. repeated).
     tail : string
         Specify whether the test is 'one-sided' or 'two-sided'.
     alpha : float

@@ -117,7 +117,7 @@
 <span class="sd">        is computed.</span>
 <span class="sd">    paired : boolean</span>
 <span class="sd">        Specify whether the two observations are related (i.e. repeated</span>
-<span class="sd">        measures) or independant.</span>
+<span class="sd">        measures) or independent.</span>
 <span class="sd">    tail : string</span>
 <span class="sd">        Specify whether to return two-sided or one-sided p-value.</span>
 <span class="sd">    correction : string or boolean</span>
@@ -130,7 +130,7 @@
 <span class="sd">        Smaller values of r (e.g. 0.5), may be appropriate when small effect</span>
 <span class="sd">        sizes are expected a priori; larger values of r are appropriate when</span>
 <span class="sd">        large effect sizes are expected (Rouder et al 2009).</span>
-<span class="sd">        The default is 0.707 (= np.sqrt(2) / 2).</span>
+<span class="sd">        The default is 0.707 (= sqrt(2) / 2).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -144,12 +144,62 @@
 <span class="sd">        &#39;power&#39; : achieved power of the test ( = 1 - type II error)</span>
 <span class="sd">        &#39;BF10&#39; : Bayes Factor of the alternative hypothesis</span>
 
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    mwu : non-parametric independent T-test</span>
+<span class="sd">    wilcoxon : non-parametric paired T-test</span>
+<span class="sd">    anova : One-way and two-way ANOVA</span>
+<span class="sd">    rm_anova : One-way and two-way repeated measures ANOVA</span>
+<span class="sd">    compute_effsize : Effect sizes</span>
+
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    Missing values are automatically removed from the data. If x and y are</span>
 <span class="sd">    paired, the entire row is removed.</span>
 
-<span class="sd">    The Bayes Factor is approximated using the formula described in ref [1]_:</span>
+<span class="sd">    The **two-sample T-test for unpaired data** is defined as:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        t = \dfrac{\overline{x} - \overline{y}}</span>
+<span class="sd">        {\sqrt{\dfrac{s^{2}_{x}}{n_{x}} + \dfrac{s^{2}_{y}}{n_{y}}}}</span>
+
+<span class="sd">    where :math:`\overline{x}` and :math:`\overline{y}` are the sample means,</span>
+<span class="sd">    :math:`n_{x}` and :math:`n_{y}` are the sample sizes, and</span>
+<span class="sd">    :math:`s^{2}_{x}` and :math:`s^{2}_{y}` are the sample variances.</span>
+<span class="sd">    The degrees of freedom :math:`v` are :math:`n_x + n_y - 2` when the sample</span>
+<span class="sd">    sizes are equal. When the sample sizes are unequal or when</span>
+<span class="sd">    :code:`correction=True`, the Welch–Satterthwaite equation is used to</span>
+<span class="sd">    approximate the adjusted degrees of freedom:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        v = \dfrac{(\dfrac{s^{2}_{x}}{n_{x}} + \dfrac{s^{2}_{y}}{n_{y}})^{2}}</span>
+<span class="sd">        {\dfrac{(\dfrac{s^{2}_{x}}{n_{x}})^{2}}{(n_{x}-1)} +</span>
+<span class="sd">        \dfrac{(\dfrac{s^{2}_{y}}{n_{y}})^{2}}{(n_{y}-1)}}</span>
+
+<span class="sd">    The p-value is then calculated using a T distribution with :math:`v`</span>
+<span class="sd">    degrees of freedom.</span>
+
+<span class="sd">    The T-value for **paired samples** is defined by:</span>
+
+<span class="sd">    .. math:: t = \dfrac{\overline{x}_{diff}}{s_{\overline{x}}}</span>
+
+<span class="sd">    where</span>
+
+<span class="sd">    .. math:: s_{\overline{x}} = \dfrac{s_{diff}}{\sqrt n}</span>
+
+<span class="sd">    where :math:`\overline{x}_{diff}` is the sample mean of the differences</span>
+<span class="sd">    between the two paired samples, :math:`n` is the number of observations</span>
+<span class="sd">    (sample size), :math:`s_{diff}` is the sample standard deviation of the</span>
+<span class="sd">    differences and :math:`s_{\overline{x}}` is the estimated standard error</span>
+<span class="sd">    of the mean of the differences.</span>
+
+<span class="sd">    The p-value is then calculated using a T-distribution with :math:`n-1`</span>
+<span class="sd">    degrees of freedom.</span>
+
+<span class="sd">    The Bayes Factor is approximated using the formula described in Rouder</span>
+<span class="sd">    et al 2009:</span>
 
 <span class="sd">    .. math::</span>
 
@@ -162,10 +212,20 @@
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
+<span class="sd">    .. [1] https://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm</span>
 
-<span class="sd">    .. [1] Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,</span>
-<span class="sd">       2009. Bayesian t tests for accepting and rejecting the null hypothesis.</span>
-<span class="sd">       Psychon. Bull. Rev. 16, 225–237. https://doi.org/10.3758/PBR.16.2.225</span>
+<span class="sd">    .. [2] Delacre, M., Lakens, D., &amp; Leys, C. (2017). Why psychologists should</span>
+<span class="sd">           by default use Welch’s t-test instead of Student’s t-test.</span>
+<span class="sd">           International Review of Social Psychology, 30(1).</span>
+
+<span class="sd">    .. [3] Zimmerman, D. W. (2004). A note on preliminary tests of equality of</span>
+<span class="sd">           variances. British Journal of Mathematical and Statistical</span>
+<span class="sd">           Psychology, 57(1), 173-181.</span>
+
+<span class="sd">    .. [4] Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,</span>
+<span class="sd">           2009. Bayesian t tests for accepting and rejecting the null</span>
+<span class="sd">           hypothesis. Psychon. Bull. Rev. 16, 225–237.</span>
+<span class="sd">           https://doi.org/10.3758/PBR.16.2.225</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -196,7 +256,7 @@
 <span class="sd">            T-val    p-val  dof  cohen-d  power    BF10</span>
 <span class="sd">            -5.902  0.0097    3   0.306   0.065   7.169</span>
 
-<span class="sd">    4. Independant two-sample T-test (equal sample size).</span>
+<span class="sd">    4. Independent two-sample T-test (equal sample size).</span>
 
 <span class="sd">        &gt;&gt;&gt; from pingouin import ttest</span>
 <span class="sd">        &gt;&gt;&gt; import numpy as np</span>
@@ -207,7 +267,7 @@
 <span class="sd">            T-val     p-val  dof  cohen-d  power   BF10</span>
 <span class="sd">            9.106  4.30e-11   38     2.88    1.0  1.4e8</span>
 
-<span class="sd">    5. Independant two-sample T-test (unequal sample size).</span>
+<span class="sd">    5. Independent two-sample T-test (unequal sample size).</span>
 
 <span class="sd">        &gt;&gt;&gt; from pingouin import ttest</span>
 <span class="sd">        &gt;&gt;&gt; import numpy as np</span>

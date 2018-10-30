@@ -45,7 +45,7 @@ def _export_table(table, fname):
 
 
 def _remove_na(x, y, paired=False):
-    """Remove missing values in paired and independant measurements.
+    """Remove missing values in paired and independent measurements.
 
     Parameters
     ----------

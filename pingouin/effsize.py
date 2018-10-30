@@ -357,7 +357,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
     Missing values are automatically removed from the data. If x and y are
     paired, the entire row is removed.
 
-    If x and y are independant, the Cohen's is:
+    If x and y are independent, the Cohen's is:
 
     .. math::
 
@@ -415,7 +415,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         >>> print(g)
             0.84
 
-    3. Compute Glass delta from two independant set of observations. The group
+    3. Compute Glass delta from two independent set of observations. The group
        with the lowest variance will automatically be selected as the control.
 
         >>> import numpy as np

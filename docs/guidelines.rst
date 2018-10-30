@@ -94,5 +94,5 @@ Example code
   # Load an example dataset comparing pain threshold as a function of hair color
   df = read_dataset('anova')
 
-  # There are 4 independant groups in our dataset, we'll therefore use the Kruskal-Wallis test:
+  # There are 4 independent groups in our dataset, we'll therefore use the Kruskal-Wallis test:
   pg.kruskal(data=df, dv='Pain threshold', between='Hair color')

@@ -16,11 +16,11 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     nx : int
         Sample size of first group
     ny : int
-        Sample size of second group (only needed in case of an independant
+        Sample size of second group (only needed in case of an independent
         two-sample T-test)
     paired : boolean
         Specify whether the two observations are related (i.e. repeated
-        measures) or independant.
+        measures) or independent.
     tail : string
         Specify whether the test is 'one-sided' or 'two-sided'
     r : float
@@ -65,11 +65,11 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
 
     Examples
     --------
-    1. Bayes Factor of an independant two-sample T-test
+    1. Bayes Factor of an independent two-sample T-test
 
         >>> from pingouin import bayesfactor_ttest
         >>> bf = bayesfactor_ttest(3.5, 20, 20)
-        >>> print("Bayes Factor: %.2f (two-sample independant)" % bf)
+        >>> print("Bayes Factor: %.2f (two-sample independent)" % bf)
 
     2. Bayes Factor of a paired two-sample T-test
 

@@ -21,7 +21,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         is computed.
     paired : boolean
         Specify whether the two observations are related (i.e. repeated
-        measures) or independant.
+        measures) or independent.
     tail : string
         Specify whether to return two-sided or one-sided p-value.
     correction : string or boolean
@@ -34,7 +34,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         Smaller values of r (e.g. 0.5), may be appropriate when small effect
         sizes are expected a priori; larger values of r are appropriate when
         large effect sizes are expected (Rouder et al 2009).
-        The default is 0.707 (= np.sqrt(2) / 2).
+        The default is 0.707 (= sqrt(2) / 2).
 
     Returns
     -------
@@ -48,12 +48,62 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         'power' : achieved power of the test ( = 1 - type II error)
         'BF10' : Bayes Factor of the alternative hypothesis
 
+    See also
+    --------
+    mwu : non-parametric independent T-test
+    wilcoxon : non-parametric paired T-test
+    anova : One-way and two-way ANOVA
+    rm_anova : One-way and two-way repeated measures ANOVA
+    compute_effsize : Effect sizes
+
     Notes
     -----
     Missing values are automatically removed from the data. If x and y are
     paired, the entire row is removed.
 
-    The Bayes Factor is approximated using the formula described in ref [1]_:
+    The **two-sample T-test for unpaired data** is defined as:
+
+    .. math::
+
+        t = \dfrac{\overline{x} - \overline{y}}
+        {\sqrt{\dfrac{s^{2}_{x}}{n_{x}} + \dfrac{s^{2}_{y}}{n_{y}}}}
+
+    where :math:`\overline{x}` and :math:`\overline{y}` are the sample means,
+    :math:`n_{x}` and :math:`n_{y}` are the sample sizes, and
+    :math:`s^{2}_{x}` and :math:`s^{2}_{y}` are the sample variances.
+    The degrees of freedom :math:`v` are :math:`n_x + n_y - 2` when the sample
+    sizes are equal. When the sample sizes are unequal or when
+    :code:`correction=True`, the Welch–Satterthwaite equation is used to
+    approximate the adjusted degrees of freedom:
+
+    .. math::
+
+        v = \dfrac{(\dfrac{s^{2}_{x}}{n_{x}} + \dfrac{s^{2}_{y}}{n_{y}})^{2}}
+        {\dfrac{(\dfrac{s^{2}_{x}}{n_{x}})^{2}}{(n_{x}-1)} +
+        \dfrac{(\dfrac{s^{2}_{y}}{n_{y}})^{2}}{(n_{y}-1)}}
+
+    The p-value is then calculated using a T distribution with :math:`v`
+    degrees of freedom.
+
+    The T-value for **paired samples** is defined by:
+
+    .. math:: t = \dfrac{\overline{x}_{diff}}{s_{\overline{x}}}
+
+    where
+
+    .. math:: s_{\overline{x}} = \dfrac{s_{diff}}{\sqrt n}
+
+    where :math:`\overline{x}_{diff}` is the sample mean of the differences
+    between the two paired samples, :math:`n` is the number of observations
+    (sample size), :math:`s_{diff}` is the sample standard deviation of the
+    differences and :math:`s_{\overline{x}}` is the estimated standard error
+    of the mean of the differences.
+
+    The p-value is then calculated using a T-distribution with :math:`n-1`
+    degrees of freedom.
+
+    The Bayes Factor is approximated using the formula described in Rouder
+    et al 2009:
 
     .. math::
 
@@ -66,10 +116,20 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     References
     ----------
+    .. [1] https://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm
 
-    .. [1] Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,
-       2009. Bayesian t tests for accepting and rejecting the null hypothesis.
-       Psychon. Bull. Rev. 16, 225–237. https://doi.org/10.3758/PBR.16.2.225
+    .. [2] Delacre, M., Lakens, D., & Leys, C. (2017). Why psychologists should
+           by default use Welch’s t-test instead of Student’s t-test.
+           International Review of Social Psychology, 30(1).
+
+    .. [3] Zimmerman, D. W. (2004). A note on preliminary tests of equality of
+           variances. British Journal of Mathematical and Statistical
+           Psychology, 57(1), 173-181.
+
+    .. [4] Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,
+           2009. Bayesian t tests for accepting and rejecting the null
+           hypothesis. Psychon. Bull. Rev. 16, 225–237.
+           https://doi.org/10.3758/PBR.16.2.225
 
     Examples
     --------
@@ -100,7 +160,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
             T-val    p-val  dof  cohen-d  power    BF10
             -5.902  0.0097    3   0.306   0.065   7.169
 
-    4. Independant two-sample T-test (equal sample size).
+    4. Independent two-sample T-test (equal sample size).
 
         >>> from pingouin import ttest
         >>> import numpy as np
@@ -111,7 +171,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
             T-val     p-val  dof  cohen-d  power   BF10
             9.106  4.30e-11   38     2.88    1.0  1.4e8
 
-    5. Independant two-sample T-test (unequal sample size).
+    5. Independent two-sample T-test (unequal sample size).
 
         >>> from pingouin import ttest
         >>> import numpy as np

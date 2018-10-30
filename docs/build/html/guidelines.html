@@ -183,7 +183,7 @@ the desired flowchart to view a full scale image.</p>
 <span class="c1"># Load an example dataset comparing pain threshold as a function of hair color</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;anova&#39;</span><span class="p">)</span>
 
-<span class="c1"># There are 4 independant groups in our dataset, we&#39;ll therefore use the Kruskal-Wallis test:</span>
+<span class="c1"># There are 4 independent groups in our dataset, we&#39;ll therefore use the Kruskal-Wallis test:</span>
 <span class="n">pg</span><span class="o">.</span><span class="n">kruskal</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Pain threshold&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Hair color&#39;</span><span class="p">)</span>
 </pre></div>
 </div>

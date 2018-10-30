@@ -115,7 +115,7 @@ is computed.</p>
 </dd>
 <dt><strong>paired</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
 <dd><p class="first last">Specify whether the two observations are related (i.e. repeated
-measures) or independant.</p>
+measures) or independent.</p>
 </dd>
 <dt><strong>tail</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd><p class="first last">Specify whether to return two-sided or one-sided p-value.</p>
@@ -131,7 +131,7 @@ as recommended by Zimmerman 2004.</p>
 Smaller values of r (e.g. 0.5), may be appropriate when small effect
 sizes are expected a priori; larger values of r are appropriate when
 large effect sizes are expected (Rouder et al 2009).
-The default is 0.707 (= np.sqrt(2) / 2).</p>
+The default is 0.707 (= sqrt(2) / 2).</p>
 </dd>
 </dl>
 </td>
@@ -153,10 +153,56 @@ The default is 0.707 (= np.sqrt(2) / 2).</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="pingouin.mwu.html#pingouin.mwu" title="pingouin.mwu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mwu</span></code></a></dt>
+<dd>non-parametric independent T-test</dd>
+<dt><a class="reference internal" href="pingouin.wilcoxon.html#pingouin.wilcoxon" title="pingouin.wilcoxon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wilcoxon</span></code></a></dt>
+<dd>non-parametric paired T-test</dd>
+<dt><a class="reference internal" href="pingouin.anova.html#pingouin.anova" title="pingouin.anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anova</span></code></a></dt>
+<dd>One-way and two-way ANOVA</dd>
+<dt><a class="reference internal" href="pingouin.rm_anova.html#pingouin.rm_anova" title="pingouin.rm_anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rm_anova</span></code></a></dt>
+<dd>One-way and two-way repeated measures ANOVA</dd>
+<dt><a class="reference internal" href="pingouin.compute_effsize.html#pingouin.compute_effsize" title="pingouin.compute_effsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_effsize</span></code></a></dt>
+<dd>Effect sizes</dd>
+</dl>
+</div>
 <p class="rubric">Notes</p>
 <p>Missing values are automatically removed from the data. If x and y are
 paired, the entire row is removed.</p>
-<p>The Bayes Factor is approximated using the formula described in ref <a class="reference internal" href="#r4a2d64a438fa-1" id="id1">[1]</a>:</p>
+<p>The <strong>two-sample T-test for unpaired data</strong> is defined as:</p>
+<div class="math notranslate nohighlight">
+\[t = \dfrac{\overline{x} - \overline{y}}
+{\sqrt{\dfrac{s^{2}_{x}}{n_{x}} + \dfrac{s^{2}_{y}}{n_{y}}}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\overline{x}\)</span> and <span class="math notranslate nohighlight">\(\overline{y}\)</span> are the sample means,
+<span class="math notranslate nohighlight">\(n_{x}\)</span> and <span class="math notranslate nohighlight">\(n_{y}\)</span> are the sample sizes, and
+<span class="math notranslate nohighlight">\(s^{2}_{x}\)</span> and <span class="math notranslate nohighlight">\(s^{2}_{y}\)</span> are the sample variances.
+The degrees of freedom <span class="math notranslate nohighlight">\(v\)</span> are <span class="math notranslate nohighlight">\(n_x + n_y - 2\)</span> when the sample
+sizes are equal. When the sample sizes are unequal or when
+<code class="code docutils literal notranslate"><span class="pre">correction=True</span></code>, the Welch–Satterthwaite equation is used to
+approximate the adjusted degrees of freedom:</p>
+<div class="math notranslate nohighlight">
+\[v = \dfrac{(\dfrac{s^{2}_{x}}{n_{x}} + \dfrac{s^{2}_{y}}{n_{y}})^{2}}
+{\dfrac{(\dfrac{s^{2}_{x}}{n_{x}})^{2}}{(n_{x}-1)} +
+\dfrac{(\dfrac{s^{2}_{y}}{n_{y}})^{2}}{(n_{y}-1)}}\]</div>
+<p>The p-value is then calculated using a T distribution with <span class="math notranslate nohighlight">\(v\)</span>
+degrees of freedom.</p>
+<p>The T-value for <strong>paired samples</strong> is defined by:</p>
+<div class="math notranslate nohighlight">
+\[t = \dfrac{\overline{x}_{diff}}{s_{\overline{x}}}\]</div>
+<p>where</p>
+<div class="math notranslate nohighlight">
+\[s_{\overline{x}} = \dfrac{s_{diff}}{\sqrt n}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\overline{x}_{diff}\)</span> is the sample mean of the differences
+between the two paired samples, <span class="math notranslate nohighlight">\(n\)</span> is the number of observations
+(sample size), <span class="math notranslate nohighlight">\(s_{diff}\)</span> is the sample standard deviation of the
+differences and <span class="math notranslate nohighlight">\(s_{\overline{x}}\)</span> is the estimated standard error
+of the mean of the differences.</p>
+<p>The p-value is then calculated using a T-distribution with <span class="math notranslate nohighlight">\(n-1\)</span>
+degrees of freedom.</p>
+<p>The Bayes Factor is approximated using the formula described in Rouder
+et al 2009:</p>
 <div class="math notranslate nohighlight">
 \[BF_{10} = \dfrac{\int_{0}^{\infty}(1 + Ngr^2)^{-1/2}
 (1 + \dfrac{t^2}{v(1 + Ngr^2)})^{-(v+1) / 2}(2\pi)^{-1/2}g^
@@ -167,9 +213,32 @@ sample size and <strong>r</strong> the Cauchy scale factor (i.e. prior on effect
 <table class="docutils citation" frame="void" id="r4a2d64a438fa-1" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>)</em> Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,
-2009. Bayesian t tests for accepting and rejecting the null hypothesis.
-Psychon. Bull. Rev. 16, 225–237. <a class="reference external" href="https://doi.org/10.3758/PBR.16.2.225">https://doi.org/10.3758/PBR.16.2.225</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td><a class="reference external" href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm">https://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r4a2d64a438fa-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Delacre, M., Lakens, D., &amp; Leys, C. (2017). Why psychologists should
+by default use Welch’s t-test instead of Student’s t-test.
+International Review of Social Psychology, 30(1).</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r4a2d64a438fa-3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>Zimmerman, D. W. (2004). A note on preliminary tests of equality of
+variances. British Journal of Mathematical and Statistical
+Psychology, 57(1), 173-181.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r4a2d64a438fa-4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td>Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,
+2009. Bayesian t tests for accepting and rejecting the null
+hypothesis. Psychon. Bull. Rev. 16, 225–237.
+<a class="reference external" href="https://doi.org/10.3758/PBR.16.2.225">https://doi.org/10.3758/PBR.16.2.225</a></td></tr>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
@@ -204,7 +273,7 @@ Psychon. Bull. Rev. 16, 225–237. <a class="reference external" href="https://d
 </pre></div>
 </div>
 </li>
-<li><p class="first">Independant two-sample T-test (equal sample size).</p>
+<li><p class="first">Independent two-sample T-test (equal sample size).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
@@ -216,7 +285,7 @@ Psychon. Bull. Rev. 16, 225–237. <a class="reference external" href="https://d
 </pre></div>
 </div>
 </li>
-<li><p class="first">Independant two-sample T-test (unequal sample size).</p>
+<li><p class="first">Independent two-sample T-test (unequal sample size).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">ttest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
