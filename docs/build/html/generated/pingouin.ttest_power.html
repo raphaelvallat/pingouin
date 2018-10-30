@@ -143,21 +143,22 @@ concluding that there is no effect when there is one.
 Statistical power is mainly affected by the effect size and the sample
 size.</p>
 <p>The first step is to use the Cohen’s d to calculate the non-centrality
-parameter and degrees of freedom. In case of paired groups, this is:</p>
+parameter <span class="math notranslate nohighlight">\(\delta\)</span> and degrees of freedom <span class="math notranslate nohighlight">\(v\)</span>.
+In case of paired groups, this is:</p>
 <div class="math notranslate nohighlight">
 \[\delta = d * \sqrt n\]</div>
 <div class="math notranslate nohighlight">
-\[\mathtt{df} = n - 1\]</div>
+\[v = n - 1\]</div>
 <p>and in case of independent groups:</p>
 <div class="math notranslate nohighlight">
 \[\delta = d * \sqrt{\dfrac{n_i * n_j}{n_i + n_j}}\]</div>
 <div class="math notranslate nohighlight">
-\[\mathtt{df} = n_i + n_j - 2\]</div>
+\[v = n_i + n_j - 2\]</div>
 <p>where <span class="math notranslate nohighlight">\(d\)</span> is the Cohen d, <span class="math notranslate nohighlight">\(n\)</span> the sample size,
 <span class="math notranslate nohighlight">\(n_i\)</span> the sample size of the first group and
 <span class="math notranslate nohighlight">\(n_j\)</span> the sample size of the second group,</p>
 <p>The critical value is then found using the percent point function of the T
-distribution with <span class="math notranslate nohighlight">\(q = 1 - alpha\)</span> and <span class="math notranslate nohighlight">\(\mathtt{df}\)</span>
+distribution with <span class="math notranslate nohighlight">\(q = 1 - alpha\)</span> and <span class="math notranslate nohighlight">\(v\)</span>
 degrees of freedom.</p>
 <p>Finally, the power of the test is given by the survival function of the
 non-central distribution using the previously calculated critical value,

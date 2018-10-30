@@ -343,8 +343,8 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
         {r-1}}{\dfrac{SS_{error}}{(n - 1)(r - 1)}}
 
     and the p-value can be calculated using a F-distribution with
-    :math:`\mathtt{df}_{treatment} = r - 1` and
-    :math:`\mathtt{df}_{error} = (n - 1)(r - 1)` degrees of freedom.
+    :math:`v_{treatment} = r - 1` and
+    :math:`v_{error} = (n - 1)(r - 1)` degrees of freedom.
 
     The effect size reported in Pingouin is the partial eta-square.
     However, one should keep in mind that for one-way repeated-measures ANOVA,

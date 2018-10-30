@@ -471,7 +471,7 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
 
     .. math::
 
-        \mathtt{df} = \dfrac{(\dfrac{s_i^2}{n_i} + \dfrac{s_j^2}{n_j})^2}
+        v = \dfrac{(\dfrac{s_i^2}{n_i} + \dfrac{s_j^2}{n_j})^2}
         {\dfrac{(\dfrac{s_i^2}{n_i})^2}{n_i-1} +
         \dfrac{(\dfrac{s_j^2}{n_j})^2}{n_j-1}}
 
@@ -481,7 +481,7 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
     and sample size of the second group.
 
     The p-values are then approximated using the Studentized range distribution
-    :math:`Q(\sqrt2*|t_i|, r, df_i)`.
+    :math:`Q(\sqrt2*|t_i|, r, v_i)`.
 
     Note that the p-values might be slightly different than those obtained
     using R or Matlab since the studentized range approximation is done using

@@ -173,7 +173,7 @@ variances for each pair of variables instead of the same pooled variance.</p>
 + \dfrac{s_j^2}{n_j})}}\]</div>
 <p>and the corrected degrees of freedom are:</p>
 <div class="math notranslate nohighlight">
-\[\mathtt{df} = \dfrac{(\dfrac{s_i^2}{n_i} + \dfrac{s_j^2}{n_j})^2}
+\[v = \dfrac{(\dfrac{s_i^2}{n_i} + \dfrac{s_j^2}{n_j})^2}
 {\dfrac{(\dfrac{s_i^2}{n_i})^2}{n_i-1} +
 \dfrac{(\dfrac{s_j^2}{n_j})^2}{n_j-1}}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\overline{x}_i\)</span>, <span class="math notranslate nohighlight">\(s_i^2\)</span>, and <span class="math notranslate nohighlight">\(n_i\)</span>
@@ -181,7 +181,7 @@ are the mean, variance and sample size of the first group and
 <span class="math notranslate nohighlight">\(\overline{x}_j\)</span>, <span class="math notranslate nohighlight">\(s_j^2\)</span>, and <span class="math notranslate nohighlight">\(n_j\)</span> the mean, variance
 and sample size of the second group.</p>
 <p>The p-values are then approximated using the Studentized range distribution
-<span class="math notranslate nohighlight">\(Q(\sqrt2*|t_i|, r, df_i)\)</span>.</p>
+<span class="math notranslate nohighlight">\(Q(\sqrt2*|t_i|, r, v_i)\)</span>.</p>
 <p>Note that the p-values might be slightly different than those obtained
 using R or Matlab since the studentized range approximation is done using
 the Gleason (1999) algorithm, which is more efficient and accurate than
