@@ -155,6 +155,68 @@ pandas pivot function first.</p>
 <dd>Test the univariate normality of one or more array(s).</dd>
 </dl>
 </div>
+<p class="rubric">Notes</p>
+<p>The <strong>Mauchly</strong> <span class="math notranslate nohighlight">\(W\)</span> statistic is defined by:</p>
+<div class="math notranslate nohighlight">
+\[W = \dfrac{\prod \lambda_j}{(\dfrac{1}{r-1}
+\cdot \sum \lambda_j)^{r-1}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\lambda_j\)</span> are the eigenvalues of the population
+covariance matrix (= double-centered sample covariance matrix) and
+<span class="math notranslate nohighlight">\(r\)</span> is the number of conditions.</p>
+<p>From then, the <span class="math notranslate nohighlight">\(W\)</span> statistic is transformed into a chi-square
+score using the number of observations per condition <span class="math notranslate nohighlight">\(n\)</span></p>
+<div class="math notranslate nohighlight">
+\[f = \dfrac{2(r-1)^2+r+1}{6(r-1)(n-1)}\]</div>
+<div class="math notranslate nohighlight">
+\[\chi_w^2 = (f-1)(n-1) log(W)\]</div>
+<p>The p-value is then approximated using a chi-square distribution:</p>
+<div class="math notranslate nohighlight">
+\[\chi_w^2 \sim \chi^2(\dfrac{r(r-1)}{2}-1)\]</div>
+<p>The <strong>JNS</strong> <span class="math notranslate nohighlight">\(V\)</span> statistic is defined by:</p>
+<div class="math notranslate nohighlight">
+\[V = \dfrac{(\sum_j^{r-1} \lambda_j)^2}{\sum_j^{r-1} \lambda_j^2}\]</div>
+<div class="math notranslate nohighlight">
+\[\chi_v^2 = \dfrac{n}{2}  (r-1)^2 (V - \dfrac{1}{r-1})\]</div>
+<p>and the p-value approximated using a chi-square distribution</p>
+<div class="math notranslate nohighlight">
+\[\chi_v^2 \sim \chi^2(\dfrac{r(r-1)}{2}-1)\]</div>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r5b1fac2e46ff-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Mauchly, J. W. (1940). Significance test for sphericity of a normal
+n-variate distribution. The Annals of Mathematical Statistics,
+11(2), 204-209.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r5b1fac2e46ff-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Nagao, H. (1973). On some test criteria for covariance matrix.
+The Annals of Statistics, 700-709.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r5b1fac2e46ff-3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>Sugiura, N. (1972). Locally best invariant test for sphericity and
+the limiting distributions. The Annals of Mathematical Statistics,
+1312-1316.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r5b1fac2e46ff-4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td>John, S. (1972). The distribution of a statistic used for testing
+sphericity of normal distributions. Biometrika, 59(1), 169-173.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r5b1fac2e46ff-5" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td><a class="reference external" href="http://www.real-statistics.com/anova-repeated-measures/sphericity/">http://www.real-statistics.com/anova-repeated-measures/sphericity/</a></td></tr>
+</tbody>
+</table>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">Mauchly test for sphericity</p>

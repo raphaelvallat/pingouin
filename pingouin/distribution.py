@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 __all__ = ["gzscore", "normality", "multivariate_normality",
            "homoscedasticity", "anderson", "epsilon", "sphericity"]
@@ -474,6 +473,60 @@ def sphericity(data, method='mauchly', alpha=.05):
     homoscedasticity : Test equality of variance.
     normality : Test the univariate normality of one or more array(s).
 
+    Notes
+    -----
+    The **Mauchly** :math:`W` statistic is defined by:
+
+    .. math::
+
+        W = \dfrac{\prod \lambda_j}{(\dfrac{1}{r-1}
+        \cdot \sum \lambda_j)^{r-1}}
+
+    where :math:`\lambda_j` are the eigenvalues of the population
+    covariance matrix (= double-centered sample covariance matrix) and
+    :math:`r` is the number of conditions.
+
+    From then, the :math:`W` statistic is transformed into a chi-square
+    score using the number of observations per condition :math:`n`
+
+    .. math:: f = \dfrac{2(r-1)^2+r+1}{6(r-1)(n-1)}
+    .. math:: \chi_w^2 = (f-1)(n-1) log(W)
+
+    The p-value is then approximated using a chi-square distribution:
+
+    .. math:: \chi_w^2 \sim \chi^2(\dfrac{r(r-1)}{2}-1)
+
+    The **JNS** :math:`V` statistic is defined by:
+
+    .. math::
+
+        V = \dfrac{(\sum_j^{r-1} \lambda_j)^2}{\sum_j^{r-1} \lambda_j^2}
+
+    .. math:: \chi_v^2 = \dfrac{n}{2}  (r-1)^2 (V - \dfrac{1}{r-1})
+
+    and the p-value approximated using a chi-square distribution
+
+    .. math:: \chi_v^2 \sim \chi^2(\dfrac{r(r-1)}{2}-1)
+
+
+    References
+    ----------
+    .. [1] Mauchly, J. W. (1940). Significance test for sphericity of a normal
+           n-variate distribution. The Annals of Mathematical Statistics,
+           11(2), 204-209.
+
+    .. [2] Nagao, H. (1973). On some test criteria for covariance matrix.
+           The Annals of Statistics, 700-709.
+
+    .. [3] Sugiura, N. (1972). Locally best invariant test for sphericity and
+           the limiting distributions. The Annals of Mathematical Statistics,
+           1312-1316.
+
+    .. [4] John, S. (1972). The distribution of a statistic used for testing
+           sphericity of normal distributions. Biometrika, 59(1), 169-173.
+
+    .. [5] http://www.real-statistics.com/anova-repeated-measures/sphericity/
+
     Examples
     --------
     1. Mauchly test for sphericity
@@ -492,36 +545,29 @@ def sphericity(data, method='mauchly', alpha=.05):
             (False, 1.118, 6.176, 2, 0.0456042403075201)
     """
     from scipy.stats import chi2
-    S = data.cov()
+    S = data.cov().values
     n = data.shape[0]
     p = data.shape[1]
     d = p - 1
 
+    # Estimate of the population covariance (= double-centered)
+    S_pop = S - S.mean(0)[:, np.newaxis] - S.mean(1)[np.newaxis, :] + S.mean()
+
+    # Eigenvalues
+    eig = np.linalg.eigvals(S_pop)
+
+    # Keep only p - 1 eigenvalues
+    eig = np.sort(eig)[1:]
+
     if method == 'jns':
-        eps = epsilon(data, correction='gg')
-        W = eps * d
+        # eps = epsilon(data, correction='gg')
+        # W = eps * d
+        W = eig.sum()**2 / np.square(eig).sum()
         chi_sq = 0.5 * n * d ** 2 * (W - 1 / d)
 
     if method == 'mauchly':
-        # Estimate of the population covariance (= double-centered)
-        S_mean = S.mean().mean()
-        S_pop = pd.DataFrame()
-        S['mean'] = S.mean(1)
-        S.loc['mean', :] = S.mean(0)
-
-        for k in S.keys().drop('mean'):
-            for l in S.index.drop('mean'):
-                S_pop.loc[k, l] = S.loc[k, l] - S.loc[k, 'mean'] - \
-                    S.loc['mean', l] + S_mean
-
-        # Eigenvalues
-        eig = np.linalg.eigvals(S_pop)
-        # Keep only p - 1 eigenvalues
-        eig = np.sort(eig)[1:]
-
         # Mauchly's statistic
         W = np.product(eig) / (eig.sum() / d)**d
-
         # Chi-square
         f = (2 * d**2 + p + 1) / (6 * d * (n - 1))
         chi_sq = (f - 1) * (n - 1) * np.log(W)
