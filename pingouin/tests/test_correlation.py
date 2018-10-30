@@ -47,6 +47,7 @@ class TestCorrelation(_TestPingouin):
         x, y, z = np.random.multivariate_normal(mean, cov, size=30).T
         df = pd.DataFrame({'x': x, 'y': y, 'z': z})
         stats = partial_corr(data=df, x='x', y='y', covar='z')
+        # Compare with R ppcorr
         assert stats.loc['pearson', 'r'] == 0.568
         df['w'] = np.random.normal(size=30)
         df['v'] = np.random.normal(size=30)

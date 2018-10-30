@@ -532,8 +532,8 @@ def sphericity(data, method='mauchly', alpha=.05):
 
     .. math::
 
-        W = \dfrac{\prod \lambda_j}{(\dfrac{1}{r-1}
-        \cdot \sum \lambda_j)^{r-1}}
+        W = \dfrac{\prod_{j=1}^{r-1} \lambda_j}{(\dfrac{1}{r-1}
+        \cdot \sum_{j=1}^{^{r-1}} \lambda_j)^{r-1}}
 
     where :math:`\lambda_j` are the eigenvalues of the population
     covariance matrix (= double-centered sample covariance matrix) and
@@ -606,11 +606,8 @@ def sphericity(data, method='mauchly', alpha=.05):
     # Estimate of the population covariance (= double-centered)
     S_pop = S - S.mean(0)[:, np.newaxis] - S.mean(1)[np.newaxis, :] + S.mean()
 
-    # Eigenvalues
-    eig = np.linalg.eigvals(S_pop)
-
-    # Keep only p - 1 eigenvalues
-    eig = np.sort(eig)[1:]
+    # p - 1 eigenvalues (sorted by ascending importance)
+    eig = np.linalg.eigvalsh(S_pop)[1:]
 
     if method == 'jns':
         # eps = epsilon(data, correction='gg')

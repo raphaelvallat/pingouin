@@ -628,8 +628,8 @@
 
 <span class="sd">    .. math::</span>
 
-<span class="sd">        W = \dfrac{\prod \lambda_j}{(\dfrac{1}{r-1}</span>
-<span class="sd">        \cdot \sum \lambda_j)^{r-1}}</span>
+<span class="sd">        W = \dfrac{\prod_{j=1}^{r-1} \lambda_j}{(\dfrac{1}{r-1}</span>
+<span class="sd">        \cdot \sum_{j=1}^{^{r-1}} \lambda_j)^{r-1}}</span>
 
 <span class="sd">    where :math:`\lambda_j` are the eigenvalues of the population</span>
 <span class="sd">    covariance matrix (= double-centered sample covariance matrix) and</span>
@@ -702,11 +702,8 @@
     <span class="c1"># Estimate of the population covariance (= double-centered)</span>
     <span class="n">S_pop</span> <span class="o">=</span> <span class="n">S</span> <span class="o">-</span> <span class="n">S</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">-</span> <span class="n">S</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">S</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 
-    <span class="c1"># Eigenvalues</span>
-    <span class="n">eig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigvals</span><span class="p">(</span><span class="n">S_pop</span><span class="p">)</span>
-
-    <span class="c1"># Keep only p - 1 eigenvalues</span>
-    <span class="n">eig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">eig</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="c1"># p - 1 eigenvalues</span>
+    <span class="n">eig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigvalsh</span><span class="p">(</span><span class="n">S_pop</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
 
     <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;jns&#39;</span><span class="p">:</span>
         <span class="c1"># eps = epsilon(data, correction=&#39;gg&#39;)</span>
