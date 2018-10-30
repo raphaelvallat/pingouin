@@ -63,7 +63,7 @@ def normality(*args, alpha=.05):
     Parameters
     ----------
     sample1, sample2,... : array_like
-        Array of sample data. May be different lengths.
+        Array of sample data. May be of different lengths.
 
     Returns
     -------
@@ -76,6 +76,55 @@ def normality(*args, alpha=.05):
     --------
     homoscedasticity : Test equality of variance.
     sphericity : Mauchly's test for sphericity.
+
+    Notes
+    -----
+    The Shapiro-Wilk test calculates a :math:`W` statistic that tests whether a
+    random sample :math:`x_1, x_2, ..., x_n` comes from a normal distribution.
+
+    The :math:`W` statistic is calculated as follows:
+
+    .. math::
+
+        W = \dfrac{(\sum_{i=1}^n a_i x_{i})^2}
+        {\sum_{i=1}^n (x_i - \overline{x})^2}
+
+    where the :math:`x_i` are the ordered sample values (in ascending
+    order) and the :math:`a_i` are constants generated from the means,
+    variances and covariances of the order statistics of a sample of size
+    :math:`n` from a standard normal distribution. Specifically:
+
+    .. math:: (a_1, ..., a_n) = \dfrac{m^TV^{-1}}{(m^TV^{-1}V^{-1}m)^{1/2}}
+
+    with :math:`m = (m_1, ..., m_n)^T` and :math:`(m_1, ..., m_n)` are the
+    expected values of the order statistics of independent and identically
+    distributed random variables sampled from the standard normal distribution,
+    and :math:`V` is the covariance matrix of those order statistics.
+
+    The null-hypothesis of this test is that the population is normally
+    distributed. Thus, if the p-value is less than the
+    chosen alpha level (typically set at 0.05), then the null hypothesis is
+    rejected and there is evidence that the data tested are not normally
+    distributed.
+
+    The result of the Shapiro-Wilk test should be interpreted with caution in
+    the case of large sample sizes. Indeed, quoting from Wikipedia:
+
+    *"Like most statistical significance tests, if the sample size is
+    sufficiently large this test may detect even trivial departures from the
+    null hypothesis (i.e., although there may be some statistically significant
+    effect, it may be too small to be of any practical significance); thus,
+    additional investigation of the effect size is typically advisable,
+    e.g., a Q–Q plot in this case."*
+
+    References
+    ----------
+    .. [1] Shapiro, S. S., & Wilk, M. B. (1965). An analysis of variance test
+           for normality (complete samples). Biometrika, 52(3/4), 591-611.
+
+    .. [2] https://www.itl.nist.gov/div898/handbook/prc/section2/prc213.htm
+
+    .. [3] https://en.wikipedia.org/wiki/Shapiro%E2%80%93Wilk_test
 
     Examples
     --------

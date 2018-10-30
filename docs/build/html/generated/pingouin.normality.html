@@ -107,7 +107,7 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
 <dt><strong>sample1, sample2,…</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array_like</span></dt>
-<dd><p class="first last">Array of sample data. May be different lengths.</p>
+<dd><p class="first last">Array of sample data. May be of different lengths.</p>
 </dd>
 </dl>
 </td>
@@ -133,6 +133,56 @@
 <dd>Mauchly’s test for sphericity.</dd>
 </dl>
 </div>
+<p class="rubric">Notes</p>
+<p>The Shapiro-Wilk test calculates a <span class="math notranslate nohighlight">\(W\)</span> statistic that tests whether a
+random sample <span class="math notranslate nohighlight">\(x_1, x_2, ..., x_n\)</span> comes from a normal distribution.</p>
+<p>The <span class="math notranslate nohighlight">\(W\)</span> statistic is calculated as follows:</p>
+<div class="math notranslate nohighlight">
+\[W = \dfrac{(\sum_{i=1}^n a_i x_{i})^2}
+{\sum_{i=1}^n (x_i - \overline{x})^2}\]</div>
+<p>where the <span class="math notranslate nohighlight">\(x_i\)</span> are the ordered sample values (in ascending
+order) and the <span class="math notranslate nohighlight">\(a_i\)</span> are constants generated from the means,
+variances and covariances of the order statistics of a sample of size
+<span class="math notranslate nohighlight">\(n\)</span> from a standard normal distribution. Specifically:</p>
+<div class="math notranslate nohighlight">
+\[(a_1, ..., a_n) = \dfrac{m^TV^{-1}}{(m^TV^{-1}V^{-1}m)^{1/2}}\]</div>
+<p>with <span class="math notranslate nohighlight">\(m = (m_1, ..., m_n)^T\)</span> and <span class="math notranslate nohighlight">\((m_1, ..., m_n)\)</span> are the
+expected values of the order statistics of independent and identically
+distributed random variables sampled from the standard normal distribution,
+and <span class="math notranslate nohighlight">\(V\)</span> is the covariance matrix of those order statistics.</p>
+<p>The null-hypothesis of this test is that the population is normally
+distributed. Thus, if the p-value is less than the
+chosen alpha level (typically set at 0.05), then the null hypothesis is
+rejected and there is evidence that the data tested are not normally
+distributed.</p>
+<p>The result of the Shapiro-Wilk test should be interpreted with caution in
+the case of large sample sizes. Indeed, quoting from Wikipedia:</p>
+<p><em>“Like most statistical significance tests, if the sample size is
+sufficiently large this test may detect even trivial departures from the
+null hypothesis (i.e., although there may be some statistically significant
+effect, it may be too small to be of any practical significance); thus,
+additional investigation of the effect size is typically advisable,
+e.g., a Q–Q plot in this case.”</em></p>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r2f7f8dec130e-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Shapiro, S. S., &amp; Wilk, M. B. (1965). An analysis of variance test
+for normality (complete samples). Biometrika, 52(3/4), 591-611.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r2f7f8dec130e-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td><a class="reference external" href="https://www.itl.nist.gov/div898/handbook/prc/section2/prc213.htm">https://www.itl.nist.gov/div898/handbook/prc/section2/prc213.htm</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r2f7f8dec130e-3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td><a class="reference external" href="https://en.wikipedia.org/wiki/Shapiro%E2%80%93Wilk_test">https://en.wikipedia.org/wiki/Shapiro%E2%80%93Wilk_test</a></td></tr>
+</tbody>
+</table>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">Test the normality of one array.</p>
