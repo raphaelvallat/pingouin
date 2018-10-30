@@ -154,11 +154,13 @@ repeated measurements.</p>
 <p>NaN values are automatically removed.</p>
 <p class="rubric">Examples</p>
 <p>Compute the Friedman test for repeated measurements.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">friedman</span><span class="p">,</span> <span class="n">print_table</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;dataset.csv&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span> <span class="o">=</span> <span class="n">friedman</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Ss&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">print_table</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin.datasets</span> <span class="k">import</span> <span class="n">read_dataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">friedman</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;rm_anova&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">friedman</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DesireToKill&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Disgustingness&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>         <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="go">    Source           ddof1   Q       p-unc</span>
+<span class="go">    Disgustingness   1       9.228   0.002384</span>
 </pre></div>
 </div>
 </dd></dl>

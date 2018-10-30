@@ -149,11 +149,12 @@ sample must have at least 5 measurements.</p>
 <p>NaN values are automatically removed.</p>
 <p class="rubric">Examples</p>
 <p>Compute the Kruskal-Wallis H-test for independent samples.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">kruskal</span><span class="p">,</span> <span class="n">print_table</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;dataset.csv&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span> <span class="o">=</span> <span class="n">kruskal</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">print_table</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin.datasets</span> <span class="k">import</span> <span class="n">read_dataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">kruskal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;anova&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kruskal</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Pain threshold&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Hair color&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="go">    Source       ddof1   H        p-unc</span>
+<span class="go">    Hair color   3       10.589   0.014172</span>
 </pre></div>
 </div>
 </dd></dl>

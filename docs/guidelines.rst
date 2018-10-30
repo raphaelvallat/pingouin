@@ -71,3 +71,28 @@ Example code
 
   # 2. If the data have a bivariate normal distribution and no clear outlier(s), we can use a regular Pearson correlation
   pg.corr(df['Neuroticism'], df['Openness'], method='pearson')
+
+
+|
+
+Non-parametric
+--------------
+
+.. figure::  /pictures/flowchart/flowchart_nonparametric.png
+  :align: center
+  :scale: 50
+  :alt: Non-parametric tests
+
+Example code
+~~~~~~~~~~~~
+
+.. code:: python
+
+  import pingouin as pg
+  from pingouin.datasets import read_dataset
+
+  # Load an example dataset comparing pain threshold as a function of hair color
+  df = read_dataset('anova')
+
+  # There are 4 independant groups in our dataset, we'll therefore use the Kruskal-Wallis test:
+  pg.kruskal(data=df, dv='Pain threshold', between='Hair color')

@@ -274,11 +274,12 @@ def kruskal(dv=None, between=None, data=None, detailed=False,
     --------
     Compute the Kruskal-Wallis H-test for independent samples.
 
-        >>> import pandas as pd
-        >>> from pingouin import kruskal, print_table
-        >>> df = pd.read_csv('dataset.csv')
-        >>> stats = kruskal(dv='DV', between='Group', data=df)
-        >>> print_table(stats)
+        >>> from pingouin.datasets import read_dataset
+        >>> from pingouin import kruskal
+        >>> df = read_dataset('anova')
+        >>> kruskal(dv='Pain threshold', between='Hair color', data=df)
+            Source       ddof1   H        p-unc
+            Hair color   3       10.589   0.014172
     """
     from scipy.stats import chi2, rankdata, tiecorrect
 
@@ -298,7 +299,7 @@ def kruskal(dv=None, between=None, data=None, detailed=False,
     n = data[dv].size
 
     # Rank data, dealing with ties appropriately
-    data['rank'] = rankdata(data['DV'])
+    data['rank'] = rankdata(data[dv])
 
     # Find the total of rank per groups
     grp = data.groupby(between)['rank']
@@ -383,11 +384,13 @@ def friedman(dv=None, within=None, subject=None, data=None,
     --------
     Compute the Friedman test for repeated measurements.
 
-        >>> import pandas as pd
-        >>> from pingouin import friedman, print_table
-        >>> df = pd.read_csv('dataset.csv')
-        >>> stats = friedman(dv='DV', within='Time', subject='Ss', data=df)
-        >>> print_table(stats)
+        >>> from pingouin.datasets import read_dataset
+        >>> from pingouin import friedman
+        >>> df = read_dataset('rm_anova')
+        >>> friedman(dv='DesireToKill', within='Disgustingness',
+        >>>          subject='Subject', data=df)
+            Source           ddof1   Q       p-unc
+            Disgustingness   1       9.228   0.002384
     """
     from scipy.stats import rankdata, chi2, find_repeats
 

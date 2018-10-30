@@ -370,11 +370,12 @@
 <span class="sd">    --------</span>
 <span class="sd">    Compute the Kruskal-Wallis H-test for independent samples.</span>
 
-<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
-<span class="sd">        &gt;&gt;&gt; from pingouin import kruskal, print_table</span>
-<span class="sd">        &gt;&gt;&gt; df = pd.read_csv(&#39;dataset.csv&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; stats = kruskal(dv=&#39;DV&#39;, between=&#39;Group&#39;, data=df)</span>
-<span class="sd">        &gt;&gt;&gt; print_table(stats)</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import kruskal</span>
+<span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;anova&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; kruskal(dv=&#39;Pain threshold&#39;, between=&#39;Hair color&#39;, data=df)</span>
+<span class="sd">            Source       ddof1   H        p-unc</span>
+<span class="sd">            Hair color   3       10.589   0.014172</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">chi2</span><span class="p">,</span> <span class="n">rankdata</span><span class="p">,</span> <span class="n">tiecorrect</span>
 
@@ -394,7 +395,7 @@
     <span class="n">n</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
 
     <span class="c1"># Rank data, dealing with ties appropriately</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rank&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rankdata</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;DV&#39;</span><span class="p">])</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rank&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rankdata</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">dv</span><span class="p">])</span>
 
     <span class="c1"># Find the total of rank per groups</span>
     <span class="n">grp</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">between</span><span class="p">)[</span><span class="s1">&#39;rank&#39;</span><span class="p">]</span>
@@ -479,11 +480,13 @@
 <span class="sd">    --------</span>
 <span class="sd">    Compute the Friedman test for repeated measurements.</span>
 
-<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
-<span class="sd">        &gt;&gt;&gt; from pingouin import friedman, print_table</span>
-<span class="sd">        &gt;&gt;&gt; df = pd.read_csv(&#39;dataset.csv&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; stats = friedman(dv=&#39;DV&#39;, within=&#39;Time&#39;, subject=&#39;Ss&#39;, data=df)</span>
-<span class="sd">        &gt;&gt;&gt; print_table(stats)</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import friedman</span>
+<span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;rm_anova&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; friedman(dv=&#39;DesireToKill&#39;, within=&#39;Disgustingness&#39;,</span>
+<span class="sd">        &gt;&gt;&gt;          subject=&#39;Subject&#39;, data=df)</span>
+<span class="sd">            Source           ddof1   Q       p-unc</span>
+<span class="sd">            Disgustingness   1       9.228   0.002384</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">rankdata</span><span class="p">,</span> <span class="n">chi2</span><span class="p">,</span> <span class="n">find_repeats</span>
 
