@@ -99,7 +99,7 @@
 <h1>pingouin.logistic_regression</h1>
 <dl class="function">
 <dt id="pingouin.logistic_regression">
-<code class="descclassname">pingouin.</code><code class="descname">logistic_regression</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>coef_only=False</em>, <em>alpha=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/regression.html#logistic_regression"><span class="viewcode-link">[source]</span></a></dt>
+<code class="descclassname">pingouin.</code><code class="descname">logistic_regression</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>coef_only=False</em>, <em>alpha=0.05</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/regression.html#logistic_regression"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>(Multiple) Binary logistic regression.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -119,6 +119,9 @@ Must be binary.</p>
 <dt><strong>alpha</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
 <dd><p class="first last">Alpha value used for the confidence intervals.
 CI = [alpha / 2 ; 1 - alpha / 2]</p>
+</dd>
+<dt><strong>**kwargs</strong> <span class="classifier-delimiter">:</span> <span class="classifier">optional</span></dt>
+<dd><p class="first last">Optional arguments passed to sklearn.linear_model.LogisticRegression</p>
 </dd>
 </dl>
 </td>
@@ -198,6 +201,15 @@ the model.</p>
 <li><p class="first">Return only the coefficients</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">logistic_regression</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">]],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="n">coef_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="go">    array([-0.34933805, -0.0226106 , -0.39453532])</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<ol class="arabic" start="4">
+<li><p class="first">Passing custom parameters to sklearn</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lom</span> <span class="o">=</span> <span class="n">logistic_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;sag&#39;</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">lom</span><span class="p">[</span><span class="s1">&#39;coef&#39;</span><span class="p">])</span>
+<span class="go">    [-0.34941889 -0.02261911 -0.39451064]</span>
 </pre></div>
 </div>
 </li>

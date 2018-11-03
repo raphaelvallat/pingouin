@@ -283,7 +283,7 @@
     <span class="k">return</span> <span class="n">stats</span></div>
 
 
-<div class="viewcode-block" id="logistic_regression"><a class="viewcode-back" href="../../generated/pingouin.logistic_regression.html#pingouin.logistic_regression">[docs]</a><span class="k">def</span> <span class="nf">logistic_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">coef_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+<div class="viewcode-block" id="logistic_regression"><a class="viewcode-back" href="../../generated/pingouin.logistic_regression.html#pingouin.logistic_regression">[docs]</a><span class="k">def</span> <span class="nf">logistic_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">coef_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;(Multiple) Binary logistic regression.</span>
 
 <span class="sd">    Parameters</span>
@@ -298,6 +298,8 @@
 <span class="sd">    alpha : float</span>
 <span class="sd">        Alpha value used for the confidence intervals.</span>
 <span class="sd">        CI = [alpha / 2 ; 1 - alpha / 2]</span>
+<span class="sd">    **kwargs : optional</span>
+<span class="sd">        Optional arguments passed to sklearn.linear_model.LogisticRegression</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -369,6 +371,12 @@
 
 <span class="sd">        &gt;&gt;&gt; logistic_regression(df[[&#39;x&#39;, &#39;z&#39;]], df[&#39;y&#39;], coef_only=True)</span>
 <span class="sd">            array([-0.34933805, -0.0226106 , -0.39453532])</span>
+
+<span class="sd">    4. Passing custom parameters to sklearn</span>
+
+<span class="sd">        &gt;&gt;&gt; lom = logistic_regression(X, y, solver=&#39;sag&#39;, max_iter=10000)</span>
+<span class="sd">        &gt;&gt;&gt; print(lom[&#39;coef&#39;])</span>
+<span class="sd">            [-0.34941889 -0.02261911 -0.39451064]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check that sklearn is installed</span>
     <span class="kn">from</span> <span class="nn">pingouin.utils</span> <span class="k">import</span> <span class="n">is_sklearn_installed</span>
@@ -401,7 +409,11 @@
     <span class="n">names</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Intercept&quot;</span><span class="p">)</span>
 
     <span class="c1"># Initialize and fit</span>
-    <span class="n">lom</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="s1">&#39;lbfgs&#39;</span><span class="p">,</span> <span class="n">multi_class</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;solver&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;solver&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;lbfgs&#39;</span>
+    <span class="k">if</span> <span class="s1">&#39;multi_class&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;multi_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span>
+    <span class="n">lom</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="n">lom</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
     <span class="n">coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lom</span><span class="o">.</span><span class="n">intercept_</span><span class="p">,</span> <span class="n">lom</span><span class="o">.</span><span class="n">coef_</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">coef_only</span><span class="p">:</span>
