@@ -104,8 +104,19 @@ class TestPairwise(_TestPingouin):
         # Check with non-numeric columns
         data['test'] = 'test'
         pairwise_corr(data=data, method='pearson')
-        # Check one-versus-all
-        pairwise_corr(data, columns=['Neuroticism', 'test'])
-        pairwise_corr(data, columns=['Neuroticism', 'Extraversion', 'test'])
+        # Check different variation of product / combination
+        n = data.shape[0]
+        data['Age'] = np.random.randint(18, 65, n)
+        data['IQ'] = np.random.normal(105, 1, n)
+        data['Gender'] = np.repeat(['M', 'F'], int(n / 2))
+        pairwise_corr(data, columns=['Neuroticism', 'Gender'])
+        pairwise_corr(data, columns=['Neuroticism', 'Extraversion', 'Gender'])
         pairwise_corr(data, columns=['Neuroticism'])
         pairwise_corr(data, columns='Neuroticism')
+        pairwise_corr(data, columns=[['Neuroticism']])
+        pairwise_corr(data, columns=[['Neuroticism'], None])
+        pairwise_corr(data, columns=[['Neuroticism', 'Gender'], ['Age']])
+        pairwise_corr(data, columns=[['Neuroticism'], ['Age', 'IQ']])
+        pairwise_corr(data, columns=[['Age', 'IQ'], []])
+        pairwise_corr(data, columns=['Age', 'Gender', 'IQ', 'Wrong'])
+        pairwise_corr(data, columns=['Age', 'Gender', 'Wrong'])
