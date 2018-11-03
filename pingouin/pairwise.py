@@ -2,7 +2,7 @@
 # Date: April 2018
 import numpy as np
 import pandas as pd
-from itertools import combinations
+from itertools import combinations, product
 from pingouin.parametric import anova
 from pingouin.multicomp import multicomp
 from pingouin.effsize import compute_effsize, convert_effsize
@@ -573,9 +573,11 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     ----------
     data : pandas DataFrame
         DataFrame
-    columns : list
+    columns : list or str
         Names of columns in data containing the all the dependant variables.
-        If columns is None, compute the pairwise correlations on all columns.
+        If columns is None, compute the pairwise correlations on all numeric
+        columns. If columns has a single element, compute the correlations
+        between this element and all the other numeric columns.
     tail : string
         Indicates whether to return the 'two-sided' or 'one-sided' p-values
     method : string
@@ -650,7 +652,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     1. One-tailed spearman correlation corrected for multiple comparisons
 
         >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import pairwise_corr, print_table
+        >>> from pingouin import pairwise_corr
         >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
         >>> stats = pairwise_corr(data, method='spearman', tail='two-sided',
         >>>                       padjust='bonf')
@@ -661,16 +663,22 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         >>> from pingouin.datasets import read_dataset
         >>> from pingouin import pairwise_corr, print_table
         >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
-        >>> stats = pairwise_corr(data, columns=['Openness', 'Extraversion',
-        >>>                       'Neuroticism'], method='percbend')
-        >>> print_table(stats)
+        >>> pairwise_corr(data, columns=['Openness', 'Extraversion',
+        >>>                              'Neuroticism'], method='percbend')
 
     3. Export the results to a .csv file
 
         >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import pairwise_corr, print_table
+        >>> from pingouin import pairwise_corr
         >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
         >>> pairwise_corr(data, export_filename='pairwise_corr.csv')
+
+    4. One-versus-all pairwise correlations
+
+        >>> from pingouin.datasets import read_dataset
+        >>> from pingouin import pairwise_corr
+        >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
+        >>> pairwise_corr(data, columns=['Neuroticism'])
     '''
     from pingouin.correlation import corr
 
@@ -679,18 +687,40 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
     # Keep only numeric columns
     data = data._get_numeric_data()
+    keys = data.keys().tolist()
 
     # Initialize empty DataFrame
     stats = pd.DataFrame()
 
-    # Combinations between columns
+    # First convert columns to list
+    if isinstance(columns, str):
+        columns = [columns]
+
+    # Then define combinations / products
     if columns is None:
-        columns = data.keys().values
-    combs = list(combinations(columns, 2))
+        # Combinations between all numeric columns
+        combs = list(combinations(keys, 2))
+    else:
+        if len(columns) == 1:
+            # Combination between one column and all the others
+            keys.remove(columns[0])
+            combs = list(product(columns, keys))
+        else:
+            # Combinations between all specified columns
+            # Ensure that columns only contains numeric data
+            columns = np.intersect1d(keys, columns)
+            if len(columns) == 1:
+                keys.remove(columns[0])
+                combs = list(product(columns, keys))
+            else:
+                combs = list(combinations(columns, 2))
+
+    keys = data.keys().tolist()
 
     # Initialize vectors
     for comb in combs:
         col1, col2 = comb
+        assert col1 in keys and col2 in keys
         x = data[col1].values
         y = data[col2].values
         cor_st = corr(x, y, tail=tail, method=method).reset_index(drop=True)

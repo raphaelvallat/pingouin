@@ -47,10 +47,11 @@ class TestPairwise(_TestPingouin):
                         export_filename='test_export.csv')
         # Wrong tail argument
         with pytest.raises(ValueError):
-            pairwise_ttests(dv='Scores', within='Time', data=df, tail='wrong')
+            pairwise_ttests(dv='Scores', between='Group', data=df,
+                            tail='wrong')
         # Wrong alpha argument
         with pytest.raises(ValueError):
-            pairwise_ttests(dv='Scores', within='Time', data=df, alpha='.05')
+            pairwise_ttests(dv='Scores', between='Group', data=df, alpha='.05')
         # Missing values
         df.iloc[[10, 15], 0] = np.nan
         pairwise_ttests(dv='Scores', within='Time', effects='within',
@@ -100,3 +101,11 @@ class TestPairwise(_TestPingouin):
         pairwise_corr(data=data, columns=['Neuroticism', 'Extraversion'])
         with pytest.raises(ValueError):
             pairwise_corr(data=data, tail='wrong')
+        # Check with non-numeric columns
+        data['test'] = 'test'
+        pairwise_corr(data=data, method='pearson')
+        # Check one-versus-all
+        pairwise_corr(data, columns=['Neuroticism', 'test'])
+        pairwise_corr(data, columns=['Neuroticism', 'Extraversion', 'test'])
+        pairwise_corr(data, columns=['Neuroticism'])
+        pairwise_corr(data, columns='Neuroticism')

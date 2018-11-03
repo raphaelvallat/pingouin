@@ -77,7 +77,7 @@ class TestCorrelation(_TestPingouin):
         with pytest.raises(ValueError):
             intraclass_corr(df, None, 'Judge', 'Scores')
         with pytest.raises(ValueError):
-            intraclass_corr(None, 'Wine', 'Judge', 'Scores')
+            intraclass_corr('error', 'Wine', 'Judge', 'Scores')
         with pytest.raises(ValueError):
             intraclass_corr(df, 'Wine', 'Judge', 'Judge')
         with pytest.raises(ValueError):
