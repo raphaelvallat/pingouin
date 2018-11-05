@@ -75,7 +75,7 @@ class TestPairwise(_TestPingouin):
         stats = pairwise_gameshowell(dv='Pain threshold', between='Hair color',
                                      data=df)
         # Compare with R package `userfriendlyscience`
-        np.testing.assert_array_equal(np.abs(stats['T-val'].round(2)),
+        np.testing.assert_array_equal(np.abs(stats['T'].round(2)),
                                       [2.48, 1.42, 1.75, 4.09, 1.11, 3.56])
         np.testing.assert_array_equal(stats['df'].round(2),
                                       [7.91, 7.94, 6.56, 8.0, 6.82, 6.77])

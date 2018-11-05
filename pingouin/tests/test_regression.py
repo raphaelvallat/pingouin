@@ -21,17 +21,17 @@ class TestRegression(_TestPingouin):
         # Simple regression
         lm = linear_regression(df['X'], df['Y'])  # Pingouin
         sc = linregress(df['X'].values, df['Y'].values)  # SciPy
-        assert_equal(lm['names'], ['Intercept', 'X'])
+        assert_equal(lm['names'].values, ['Intercept', 'X'])
         assert_almost_equal(lm['coef'][1], sc.slope)
         assert_almost_equal(lm['coef'][0], sc.intercept)
         assert_almost_equal(lm['se'][1], sc.stderr)
-        assert_almost_equal(lm['pvals'][1], sc.pvalue)
-        assert_almost_equal(np.sqrt(lm['r2']), sc.rvalue)
+        assert_almost_equal(lm['pval'][1], sc.pvalue)
+        assert_almost_equal(np.sqrt(lm['r2'][0]), sc.rvalue)
 
         # Multiple regression with intercept
         X = df[['X', 'M']].values
         y = df['Y'].values
-        lm = linear_regression(X, y)  # Pingouin
+        lm = linear_regression(X, y, as_dataframe=False)  # Pingouin
         sk = LinearRegression(fit_intercept=True).fit(X, y)  # SkLearn
         assert_equal(lm['names'], ['Intercept', 'x1', 'x2'])
         assert_almost_equal(lm['coef'][1:], sk.coef_)
@@ -39,13 +39,13 @@ class TestRegression(_TestPingouin):
         assert_almost_equal(sk.score(X, y), lm['r2'])
         # Compare values to JASP
         assert_equal([.605, .110, .101], np.round(lm['se'], 3))
-        assert_equal([3.145, 0.361, 6.321], np.round(lm['tvals'], 3))
-        assert_equal([0.002, 0.719, 0.000], np.round(lm['pvals'], 3))
-        assert_equal([.703, -.178, .436], np.round(lm['ll'], 3))
-        assert_equal([3.106, .257, .835], np.round(lm['ul'], 3))
+        assert_equal([3.145, 0.361, 6.321], np.round(lm['T'], 3))
+        assert_equal([0.002, 0.719, 0.000], np.round(lm['pval'], 3))
+        assert_equal([.703, -.178, .436], np.round(lm['CI[2.5%]'], 3))
+        assert_equal([3.106, .257, .835], np.round(lm['CI[97.5%]'], 3))
 
         # No intercept
-        lm = linear_regression(X, y, add_intercept=False)
+        lm = linear_regression(X, y, add_intercept=False, as_dataframe=False)
         sk = LinearRegression(fit_intercept=False).fit(X, y)
         assert_almost_equal(lm['coef'], sk.coef_)
         assert_almost_equal(sk.score(X, y), lm['r2'])
@@ -59,26 +59,26 @@ class TestRegression(_TestPingouin):
         """Test function logistic_regression."""
 
         # Simple regression
-        lom = logistic_regression(df['X'], df['Ybin'])  # Pingouin
+        lom = logistic_regression(df['X'], df['Ybin'], as_dataframe=False)
         # Compare to JASP
         assert_equal(np.round(lom['coef'], 1), [1.3, -0.2])
         assert_equal(np.round(lom['se'], 2), [0.76, 0.12])
         assert_equal(np.round(lom['z'], 1), [1.7, -1.6])
-        assert_equal(np.round(lom['pvals'], 1), [0.1, 0.1])
-        assert_equal(np.round(lom['ll'], 1), [-.2, -.4])
-        assert_equal(np.round(lom['ul'], 1), [2.8, 0.0])
+        assert_equal(np.round(lom['pval'], 1), [0.1, 0.1])
+        assert_equal(np.round(lom['CI[2.5%]'], 1), [-.2, -.4])
+        assert_equal(np.round(lom['CI[97.5%]'], 1), [2.8, 0.0])
 
         # Multiple predictors
         X = df[['X', 'M']].values
         y = df['Ybin'].values
         lom = logistic_regression(X, y)  # Pingouin
         # Compare against JASP
-        assert_equal(np.round(lom['coef'], 1), [1.3, -0.2, -0.0])
-        assert_equal(np.round(lom['se'], 2), [0.78, 0.14, 0.13])
-        assert_equal(np.round(lom['z'], 1), [1.7, -1.4, -0.1])
-        assert_equal(np.round(lom['pvals'], 1), [0.1, 0.2, 1.])
-        assert_equal(np.round(lom['ll'], 1), [-.2, -.5, -.3])
-        assert_equal(np.round(lom['ul'], 1), [2.8, 0.1, 0.2])
+        assert_equal(np.round(lom['coef'].values, 1), [1.3, -0.2, -0.0])
+        assert_equal(np.round(lom['se'].values, 2), [0.78, 0.14, 0.13])
+        assert_equal(np.round(lom['z'].values, 1), [1.7, -1.4, -0.1])
+        assert_equal(np.round(lom['pval'].values, 1), [0.1, 0.2, 1.])
+        assert_equal(np.round(lom['CI[2.5%]'].values, 1), [-.2, -.5, -.3])
+        assert_equal(np.round(lom['CI[97.5%]'].values, 1), [2.8, 0.1, 0.2])
 
         # Test other arguments
         c = logistic_regression(df[['X', 'M']], df['Ybin'], coef_only=True)

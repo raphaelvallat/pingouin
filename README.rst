@@ -139,7 +139,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
    :widths: auto
 
    =======  =======  =====  =========  =========  =======  ======
-     T-val    p-val    dof  tail         cohen-d    power    BF10
+         T    p-val    dof  tail         cohen-d    power    BF10
    =======  =======  =====  =========  =========  =======  ======
     -3.401    0.001     58  two-sided      0.878    0.917  26.155
    =======  =======  =====  =========  =========  =======  ======
@@ -274,7 +274,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
   :widths: auto
 
   =======  ===  ===  ========  =======  =========  =======  ========  ==========  ======  ========  ========
-  Type     A    B    Paired      T-val  tail         p-unc    p-corr  p-adjust      BF10    efsize  eftype
+  Type     A    B    Paired          T  tail         p-unc    p-corr  p-adjust      BF10    efsize  eftype
   =======  ===  ===  ========  =======  =========  =======  ========  ==========  ======  ========  ========
   between  A    B    False      -3.472  two-sided    0.003     0.004  fdr_bh      13.734    -1.487  hedges
   between  A    C    False      -0.096  two-sided    0.925     0.925  fdr_bh       0.399    -0.041  hedges
@@ -354,19 +354,18 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 .. code-block:: ipython3
 
     from pingouin import linear_regression
-    lm_dict = linear_regression(df[['X', 'Z']], df['Y'])
-    pd.DataFrame.from_dict(lm_dict)
+    linear_regression(df[['X', 'Z']], df['Y'])
 
 .. table:: Linear regression summary
   :widths: auto
 
-  =========  ======  =====  =======  =======  =====  ========  ======  =====
-  names        coef     se    tvals    pvals     r2    adj_r2      ll     ul
-  =========  ======  =====  =======  =======  =====  ========  ======  =====
-  Intercept   3.855  1.417    2.720    0.030  0.510     0.370   0.504  7.205
-  X           0.673  0.252    2.669    0.032  0.510     0.370   0.077  1.269
-  Z          -0.124  0.331   -0.375    0.719  0.510     0.370  -0.906  0.658
-  =========  ======  =====  =======  =======  =====  ========  ======  =====
+  =========  ======  =====  ======  ======  =====  ========  =========  ==========
+  names        coef     se       T    pval     r2    adj_r2   CI[2.5%]   CI[97.5%]
+  =========  ======  =====  ======  ======  =====  ========  =========  ==========
+  Intercept   3.855  1.417   2.720   0.030  0.510     0.370      0.504       7.205
+  X           0.673  0.252   2.669   0.032  0.510     0.370      0.077       1.269
+  Z          -0.124  0.331  -0.375   0.719  0.510     0.370     -0.906       0.658
+  =========  ======  =====  ======  ======  =====  ========  =========  ==========
 
 12. Mediation analysis
 ######################

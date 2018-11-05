@@ -184,7 +184,7 @@ python setup.py develop
 <table border="1" class="colwidths-auto docutils" id="id1">
 <caption><span class="caption-text">Output</span></caption>
 <thead valign="bottom">
-<tr class="row-odd"><th class="head">T-val</th>
+<tr class="row-odd"><th class="head">T</th>
 <th class="head">p-val</th>
 <th class="head">dof</th>
 <th class="head">tail</th>
@@ -375,7 +375,7 @@ python setup.py develop
 <th class="head">A</th>
 <th class="head">B</th>
 <th class="head">Paired</th>
-<th class="head">T-val</th>
+<th class="head">T</th>
 <th class="head">tail</th>
 <th class="head">p-unc</th>
 <th class="head">p-corr</th>
@@ -571,8 +571,7 @@ python setup.py develop
 <div class="section" id="multiple-linear-regression">
 <h3>11. Multiple linear regression</h3>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">linear_regression</span>
-<span class="n">lm_dict</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">]],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">])</span>
-<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">lm_dict</span><span class="p">)</span>
+<span class="n">linear_regression</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">]],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <table border="1" class="colwidths-auto docutils" id="id9">
@@ -581,12 +580,12 @@ python setup.py develop
 <tr class="row-odd"><th class="head">names</th>
 <th class="head">coef</th>
 <th class="head">se</th>
-<th class="head">tvals</th>
-<th class="head">pvals</th>
+<th class="head">T</th>
+<th class="head">pval</th>
 <th class="head">r2</th>
 <th class="head">adj_r2</th>
-<th class="head">ll</th>
-<th class="head">ul</th>
+<th class="head">CI[2.5%]</th>
+<th class="head">CI[97.5%]</th>
 </tr>
 </thead>
 <tbody valign="top">

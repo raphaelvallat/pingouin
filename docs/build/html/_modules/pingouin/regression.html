@@ -101,7 +101,8 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;linear_regression&#39;</span><span class="p">,</span> <span class="s1">&#39;logistic_regression&#39;</span><span class="p">,</span> <span class="s1">&#39;mediation_analysis&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="linear_regression"><a class="viewcode-back" href="../../generated/pingouin.linear_regression.html#pingouin.linear_regression">[docs]</a><span class="k">def</span> <span class="nf">linear_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coef_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+<div class="viewcode-block" id="linear_regression"><a class="viewcode-back" href="../../generated/pingouin.linear_regression.html#pingouin.linear_regression">[docs]</a><span class="k">def</span> <span class="nf">linear_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coef_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                      <span class="n">as_dataframe</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;(Multiple) Linear regression.</span>
 
 <span class="sd">    Parameters</span>
@@ -119,21 +120,23 @@
 <span class="sd">    alpha : float</span>
 <span class="sd">        Alpha value used for the confidence intervals.</span>
 <span class="sd">        CI = [alpha / 2 ; 1 - alpha / 2]</span>
+<span class="sd">    as_dataframe : bool</span>
+<span class="sd">        If True, returns a pandas DataFrame. If False, returns a dictionnary.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    stats : dict</span>
+<span class="sd">    stats : dataframe or dict</span>
 <span class="sd">        Linear regression summary::</span>
 
 <span class="sd">        &#39;names&#39; : name of variable(s) in the model (e.g. x1, x2...)</span>
 <span class="sd">        &#39;coef&#39; : regression coefficients</span>
 <span class="sd">        &#39;se&#39; : standard error of the estimate</span>
-<span class="sd">        &#39;tvals&#39; : T-values</span>
-<span class="sd">        &#39;pvals&#39; : p-values</span>
+<span class="sd">        &#39;T&#39; : T-values</span>
+<span class="sd">        &#39;pval&#39; : p-values</span>
 <span class="sd">        &#39;r2&#39; : coefficient of determination (R2)</span>
 <span class="sd">        &#39;adj_r2&#39; : adjusted R2</span>
-<span class="sd">        &#39;ll&#39; : lower confidence interval</span>
-<span class="sd">        &#39;ul&#39; : upper confidence interval</span>
+<span class="sd">        &#39;CI[2.5%]&#39; : lower confidence interval</span>
+<span class="sd">        &#39;CI[97.5%]&#39; : upper confidence interval</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
@@ -184,7 +187,7 @@
 <span class="sd">        &gt;&gt;&gt; mean, cov, n = [4, 6], [[1, 0.5], [0.5, 1]], 30</span>
 <span class="sd">        &gt;&gt;&gt; x, y = np.random.multivariate_normal(mean, cov, n).T</span>
 <span class="sd">        &gt;&gt;&gt; lm = linear_regression(x, y)</span>
-<span class="sd">        &gt;&gt;&gt; print(lm[&#39;coef&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; print(lm[&#39;coef&#39;].values)</span>
 <span class="sd">            [4.39720706 0.39495526]</span>
 
 <span class="sd">    2. Multiple linear regression</span>
@@ -193,33 +196,25 @@
 <span class="sd">        &gt;&gt;&gt; z = np.random.normal(size=n)</span>
 <span class="sd">        &gt;&gt;&gt; X = np.column_stack((x, z))</span>
 <span class="sd">        &gt;&gt;&gt; lm = linear_regression(X, y)</span>
-<span class="sd">        &gt;&gt;&gt; print(lm[&#39;coef&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; print(lm[&#39;coef&#39;].values)</span>
 <span class="sd">            [4.54123324 0.36628301 0.17709451]</span>
-
-<span class="sd">    2. Convert the output dictionnary to a pandas DataFrame</span>
-
-<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
-<span class="sd">        &gt;&gt;&gt; df_lm = pd.DataFrame.from_dict(linear_regression(X, y))</span>
-<span class="sd">        &gt;&gt;&gt; # Round to 3 decimals</span>
-<span class="sd">        &gt;&gt;&gt; df_lm = df_lm.round(3)</span>
-<span class="sd">        &gt;&gt;&gt; # Print column names</span>
-<span class="sd">        &gt;&gt;&gt; print(df_lm.keys())</span>
-<span class="sd">            Index([&#39;names&#39;, &#39;coef&#39;, &#39;se&#39;, &#39;tvals&#39;, &#39;pvals&#39;, &#39;r2&#39;, &#39;adj_r2&#39;,</span>
-<span class="sd">                   &#39;ll&#39;, &#39;ul&#39;], dtype=&#39;object&#39;)</span>
 
 <span class="sd">    3. Using a Pandas DataFrame</span>
 
 <span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">        &gt;&gt;&gt; df = pd.DataFrame({&#39;x&#39;: x, &#39;y&#39;: y, &#39;z&#39;: z})</span>
 <span class="sd">        &gt;&gt;&gt; lm = linear_regression(df[[&#39;x&#39;, &#39;z&#39;]], df[&#39;y&#39;])</span>
-<span class="sd">        &gt;&gt;&gt; print(lm[&#39;coef&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; print(lm[&#39;coef&#39;].values)</span>
 <span class="sd">            [4.54123324 0.36628301 0.17709451]</span>
 
 <span class="sd">    4. No intercept and return coef only</span>
 
-<span class="sd">        &gt;&gt;&gt; linear_regression(df[[&#39;x&#39;, &#39;z&#39;]], df[&#39;y&#39;], add_intercept=False,</span>
-<span class="sd">        &gt;&gt;&gt;                   coef_only=True)</span>
+<span class="sd">        &gt;&gt;&gt; linear_regression(X, y, add_intercept=False, coef_only=True)</span>
 <span class="sd">            array([ 1.40935593, -0.2916508 ])</span>
+
+<span class="sd">    5. Return a dictionnary instead of a DataFrame</span>
+
+<span class="sd">        &gt;&gt;&gt; linear_regression(X, y, as_dataframe=False)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Extract names if X is a Dataframe or Series</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
@@ -228,6 +223,8 @@
         <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">1</span>
 
     <span class="c1"># Convert input to numpy array</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
@@ -268,8 +265,8 @@
     <span class="n">adj_r2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">dof</span>
 
     <span class="c1"># Compute T and p-values</span>
-    <span class="n">tvals</span> <span class="o">=</span> <span class="n">coef</span> <span class="o">/</span> <span class="n">beta_se</span>
-    <span class="n">pvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="n">t</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">dof</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tvals</span><span class="p">])</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">coef</span> <span class="o">/</span> <span class="n">beta_se</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="n">t</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">dof</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">T</span><span class="p">])</span>
 
     <span class="c1"># Compute confidence intervals</span>
     <span class="n">crit</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dof</span><span class="p">)</span>
@@ -277,13 +274,23 @@
     <span class="n">ll</span> <span class="o">=</span> <span class="n">coef</span> <span class="o">-</span> <span class="n">marg_error</span>
     <span class="n">ul</span> <span class="o">=</span> <span class="n">coef</span> <span class="o">+</span> <span class="n">marg_error</span>
 
+    <span class="c1"># Rename CI</span>
+    <span class="n">ll_name</span> <span class="o">=</span> <span class="s1">&#39;CI[</span><span class="si">%.1f%%</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">ul_name</span> <span class="o">=</span> <span class="s1">&#39;CI[</span><span class="si">%.1f%%</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
     <span class="c1"># Create dict</span>
-    <span class="n">stats</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;names&#39;</span><span class="p">:</span> <span class="n">names</span><span class="p">,</span> <span class="s1">&#39;coef&#39;</span><span class="p">:</span> <span class="n">coef</span><span class="p">,</span> <span class="s1">&#39;se&#39;</span><span class="p">:</span> <span class="n">beta_se</span><span class="p">,</span> <span class="s1">&#39;tvals&#39;</span><span class="p">:</span> <span class="n">tvals</span><span class="p">,</span>
-             <span class="s1">&#39;pvals&#39;</span><span class="p">:</span> <span class="n">pvals</span><span class="p">,</span> <span class="s1">&#39;r2&#39;</span><span class="p">:</span> <span class="n">r2</span><span class="p">,</span> <span class="s1">&#39;adj_r2&#39;</span><span class="p">:</span> <span class="n">adj_r2</span><span class="p">,</span> <span class="s1">&#39;ll&#39;</span><span class="p">:</span> <span class="n">ll</span><span class="p">,</span> <span class="s1">&#39;ul&#39;</span><span class="p">:</span> <span class="n">ul</span><span class="p">}</span>
-    <span class="k">return</span> <span class="n">stats</span></div>
+    <span class="n">stats</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;names&#39;</span><span class="p">:</span> <span class="n">names</span><span class="p">,</span> <span class="s1">&#39;coef&#39;</span><span class="p">:</span> <span class="n">coef</span><span class="p">,</span> <span class="s1">&#39;se&#39;</span><span class="p">:</span> <span class="n">beta_se</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span>
+             <span class="s1">&#39;pval&#39;</span><span class="p">:</span> <span class="n">pval</span><span class="p">,</span> <span class="s1">&#39;r2&#39;</span><span class="p">:</span> <span class="n">r2</span><span class="p">,</span> <span class="s1">&#39;adj_r2&#39;</span><span class="p">:</span> <span class="n">adj_r2</span><span class="p">,</span> <span class="n">ll_name</span><span class="p">:</span> <span class="n">ll</span><span class="p">,</span>
+             <span class="n">ul_name</span><span class="p">:</span> <span class="n">ul</span><span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">as_dataframe</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stats</span></div>
 
 
-<div class="viewcode-block" id="logistic_regression"><a class="viewcode-back" href="../../generated/pingouin.logistic_regression.html#pingouin.logistic_regression">[docs]</a><span class="k">def</span> <span class="nf">logistic_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">coef_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="logistic_regression"><a class="viewcode-back" href="../../generated/pingouin.logistic_regression.html#pingouin.logistic_regression">[docs]</a><span class="k">def</span> <span class="nf">logistic_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">coef_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                        <span class="n">as_dataframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;(Multiple) Binary logistic regression.</span>
 
 <span class="sd">    Parameters</span>
@@ -298,21 +305,23 @@
 <span class="sd">    alpha : float</span>
 <span class="sd">        Alpha value used for the confidence intervals.</span>
 <span class="sd">        CI = [alpha / 2 ; 1 - alpha / 2]</span>
+<span class="sd">    as_dataframe : bool</span>
+<span class="sd">        If True, returns a pandas DataFrame. If False, returns a dictionnary.</span>
 <span class="sd">    **kwargs : optional</span>
 <span class="sd">        Optional arguments passed to sklearn.linear_model.LogisticRegression</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    stats : dict</span>
+<span class="sd">    stats : dataframe or dict</span>
 <span class="sd">        Logistic regression summary::</span>
 
 <span class="sd">        &#39;names&#39; : name of variable(s) in the model (e.g. x1, x2...)</span>
 <span class="sd">        &#39;coef&#39; : regression coefficients</span>
 <span class="sd">        &#39;se&#39; : standard error</span>
 <span class="sd">        &#39;z&#39; : z-scores</span>
-<span class="sd">        &#39;pvals&#39; : two-tailed p-values</span>
-<span class="sd">        &#39;ll&#39; : lower confidence interval</span>
-<span class="sd">        &#39;ul&#39; : upper confidence interval</span>
+<span class="sd">        &#39;pval&#39; : two-tailed p-values</span>
+<span class="sd">        &#39;CI[2.5%]&#39; : lower confidence interval</span>
+<span class="sd">        &#39;CI[97.5%]&#39; : upper confidence interval</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
@@ -336,7 +345,7 @@
 <span class="sd">        &gt;&gt;&gt; x = np.random.normal(size=30)</span>
 <span class="sd">        &gt;&gt;&gt; y = np.random.randint(0, 2, size=30)</span>
 <span class="sd">        &gt;&gt;&gt; lom = logistic_regression(x, y)</span>
-<span class="sd">        &gt;&gt;&gt; print(lom[&#39;coef&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; print(lom[&#39;coef&#39;].values)</span>
 <span class="sd">            [-0.27122371  0.05927182]</span>
 
 <span class="sd">    2. Multiple binary logistic regression</span>
@@ -345,37 +354,26 @@
 <span class="sd">        &gt;&gt;&gt; z = np.random.normal(size=30)</span>
 <span class="sd">        &gt;&gt;&gt; X = np.column_stack((x, z))</span>
 <span class="sd">        &gt;&gt;&gt; lom = logistic_regression(X, y)</span>
-<span class="sd">        &gt;&gt;&gt; print(lom[&#39;coef&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; print(lom[&#39;coef&#39;].values)</span>
 <span class="sd">            [-0.34933805 -0.0226106  -0.39453532]</span>
-
-<span class="sd">    3. Convert the output dictionnary to a pandas DataFrame</span>
-
-<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
-<span class="sd">        &gt;&gt;&gt; df_lom = pd.DataFrame.from_dict(logistic_regression(X, y))</span>
-<span class="sd">        &gt;&gt;&gt; # Round to 3 decimals</span>
-<span class="sd">        &gt;&gt;&gt; df_lom = df_lom.round(3)</span>
-<span class="sd">        &gt;&gt;&gt; # Print column names</span>
-<span class="sd">        &gt;&gt;&gt; print(df_lom.keys())</span>
-<span class="sd">            Index([&#39;names&#39;, &#39;coef&#39;, &#39;se&#39;, &#39;z&#39;, &#39;pvals&#39;, &#39;ll&#39;, &#39;ul&#39;],</span>
-<span class="sd">                  dtype=&#39;object&#39;)</span>
 
 <span class="sd">    3. Using a Pandas DataFrame</span>
 
 <span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">        &gt;&gt;&gt; df = pd.DataFrame({&#39;x&#39;: x, &#39;y&#39;: y, &#39;z&#39;: z})</span>
 <span class="sd">        &gt;&gt;&gt; lom = logistic_regression(df[[&#39;x&#39;, &#39;z&#39;]], df[&#39;y&#39;])</span>
-<span class="sd">        &gt;&gt;&gt; print(lom[&#39;coef&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; print(lom[&#39;coef&#39;].values)</span>
 <span class="sd">            [-0.34933805 -0.0226106  -0.39453532]</span>
 
 <span class="sd">    4. Return only the coefficients</span>
 
-<span class="sd">        &gt;&gt;&gt; logistic_regression(df[[&#39;x&#39;, &#39;z&#39;]], df[&#39;y&#39;], coef_only=True)</span>
+<span class="sd">        &gt;&gt;&gt; logistic_regression(X, y, coef_only=True)</span>
 <span class="sd">            array([-0.34933805, -0.0226106 , -0.39453532])</span>
 
 <span class="sd">    4. Passing custom parameters to sklearn</span>
 
 <span class="sd">        &gt;&gt;&gt; lom = logistic_regression(X, y, solver=&#39;sag&#39;, max_iter=10000)</span>
-<span class="sd">        &gt;&gt;&gt; print(lom[&#39;coef&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; print(lom[&#39;coef&#39;].values)</span>
 <span class="sd">            [-0.34941889 -0.02261911 -0.39451064]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check that sklearn is installed</span>
@@ -390,6 +388,8 @@
         <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">1</span>
 
     <span class="c1"># Convert to numpy array</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
@@ -434,17 +434,24 @@
     <span class="n">z_scores</span> <span class="o">=</span> <span class="n">coef</span> <span class="o">/</span> <span class="n">se</span>
 
     <span class="c1"># Two-tailed p-values</span>
-    <span class="n">pvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">))</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">z_scores</span><span class="p">])</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">))</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">z_scores</span><span class="p">])</span>
 
     <span class="c1"># Confidence intervals</span>
     <span class="n">crit</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">ll</span> <span class="o">=</span> <span class="n">coef</span> <span class="o">-</span> <span class="n">crit</span> <span class="o">*</span> <span class="n">se</span>
     <span class="n">ul</span> <span class="o">=</span> <span class="n">coef</span> <span class="o">+</span> <span class="n">crit</span> <span class="o">*</span> <span class="n">se</span>
 
+    <span class="c1"># Rename CI</span>
+    <span class="n">ll_name</span> <span class="o">=</span> <span class="s1">&#39;CI[</span><span class="si">%.1f%%</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">ul_name</span> <span class="o">=</span> <span class="s1">&#39;CI[</span><span class="si">%.1f%%</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
     <span class="c1"># Create dict</span>
     <span class="n">stats</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;names&#39;</span><span class="p">:</span> <span class="n">names</span><span class="p">,</span> <span class="s1">&#39;coef&#39;</span><span class="p">:</span> <span class="n">coef</span><span class="p">,</span> <span class="s1">&#39;se&#39;</span><span class="p">:</span> <span class="n">se</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="n">z_scores</span><span class="p">,</span>
-             <span class="s1">&#39;pvals&#39;</span><span class="p">:</span> <span class="n">pvals</span><span class="p">,</span> <span class="s1">&#39;ll&#39;</span><span class="p">:</span> <span class="n">ll</span><span class="p">,</span> <span class="s1">&#39;ul&#39;</span><span class="p">:</span> <span class="n">ul</span><span class="p">}</span>
-    <span class="k">return</span> <span class="n">stats</span></div>
+             <span class="s1">&#39;pval&#39;</span><span class="p">:</span> <span class="n">pval</span><span class="p">,</span> <span class="n">ll_name</span><span class="p">:</span> <span class="n">ll</span><span class="p">,</span> <span class="n">ul_name</span><span class="p">:</span> <span class="n">ul</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">as_dataframe</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stats</span></div>
 
 
 <span class="k">def</span> <span class="nf">_point_estimate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">mtype</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
@@ -615,22 +622,29 @@
     <span class="c1"># Compute linear regressions</span>
     <span class="k">if</span> <span class="n">mtype</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
         <span class="n">sxm</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+                                <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">as_dataframe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">sxm</span> <span class="o">=</span> <span class="n">logistic_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="n">sxm</span> <span class="o">=</span> <span class="n">logistic_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+                                  <span class="n">as_dataframe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-    <span class="n">smy</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="n">smy</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+                            <span class="n">as_dataframe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="c1"># sxy = Average Total Effects</span>
-    <span class="n">sxy</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="n">sxy</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+                            <span class="n">as_dataframe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="c1"># Average Direct Effects</span>
     <span class="n">direct</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[[</span><span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="p">]],</span> <span class="n">data</span><span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">add_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                               <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+                               <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">as_dataframe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="c1"># Significance</span>
-    <span class="n">sig_sxy</span> <span class="o">=</span> <span class="s1">&#39;Yes&#39;</span> <span class="k">if</span> <span class="n">sxy</span><span class="p">[</span><span class="s1">&#39;pvals&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="s1">&#39;No&#39;</span>
-    <span class="n">sig_sxm</span> <span class="o">=</span> <span class="s1">&#39;Yes&#39;</span> <span class="k">if</span> <span class="n">sxm</span><span class="p">[</span><span class="s1">&#39;pvals&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="s1">&#39;No&#39;</span>
-    <span class="n">sig_smy</span> <span class="o">=</span> <span class="s1">&#39;Yes&#39;</span> <span class="k">if</span> <span class="n">smy</span><span class="p">[</span><span class="s1">&#39;pvals&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="s1">&#39;No&#39;</span>
-    <span class="n">sig_direct</span> <span class="o">=</span> <span class="s1">&#39;Yes&#39;</span> <span class="k">if</span> <span class="n">direct</span><span class="p">[</span><span class="s1">&#39;pvals&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="s1">&#39;No&#39;</span>
+    <span class="n">sig_sxy</span> <span class="o">=</span> <span class="s1">&#39;Yes&#39;</span> <span class="k">if</span> <span class="n">sxy</span><span class="p">[</span><span class="s1">&#39;pval&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="s1">&#39;No&#39;</span>
+    <span class="n">sig_sxm</span> <span class="o">=</span> <span class="s1">&#39;Yes&#39;</span> <span class="k">if</span> <span class="n">sxm</span><span class="p">[</span><span class="s1">&#39;pval&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="s1">&#39;No&#39;</span>
+    <span class="n">sig_smy</span> <span class="o">=</span> <span class="s1">&#39;Yes&#39;</span> <span class="k">if</span> <span class="n">smy</span><span class="p">[</span><span class="s1">&#39;pval&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="s1">&#39;No&#39;</span>
+    <span class="n">sig_direct</span> <span class="o">=</span> <span class="s1">&#39;Yes&#39;</span> <span class="k">if</span> <span class="n">direct</span><span class="p">[</span><span class="s1">&#39;pval&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="s1">&#39;No&#39;</span>
+
+    <span class="c1"># Name of CI</span>
+    <span class="n">ll_name</span> <span class="o">=</span> <span class="s1">&#39;CI[</span><span class="si">%.1f%%</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">ul_name</span> <span class="o">=</span> <span class="s1">&#39;CI[</span><span class="si">%.1f%%</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
 
     <span class="c1"># Create output dataframe</span>
     <span class="n">stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Path&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;X -&gt; M&#39;</span><span class="p">,</span> <span class="s1">&#39;M -&gt; Y&#39;</span><span class="p">,</span> <span class="s1">&#39;X -&gt; Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Direct&#39;</span><span class="p">,</span>
@@ -640,19 +654,17 @@
                                    <span class="n">sxy</span><span class="p">[</span><span class="s1">&#39;coef&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">direct</span><span class="p">[</span><span class="s1">&#39;coef&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
                                    <span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;coef&#39;</span><span class="p">]],</span>
                           <span class="c1"># Lower CI</span>
-                          <span class="s1">&#39;ll&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">sxm</span><span class="p">[</span><span class="s1">&#39;ll&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">smy</span><span class="p">[</span><span class="s1">&#39;ll&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">sxy</span><span class="p">[</span><span class="s1">&#39;ll&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
-                                 <span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ll&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="nb">min</span><span class="p">(</span><span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;ci&#39;</span><span class="p">])],</span>
+                          <span class="n">ll_name</span><span class="p">:</span> <span class="p">[</span><span class="n">sxm</span><span class="p">[</span><span class="n">ll_name</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">smy</span><span class="p">[</span><span class="n">ll_name</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                                    <span class="n">sxy</span><span class="p">[</span><span class="n">ll_name</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">direct</span><span class="p">[</span><span class="n">ll_name</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                                    <span class="nb">min</span><span class="p">(</span><span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;ci&#39;</span><span class="p">])],</span>
                           <span class="c1"># Upper CI</span>
-                          <span class="s1">&#39;ul&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">sxm</span><span class="p">[</span><span class="s1">&#39;ul&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">smy</span><span class="p">[</span><span class="s1">&#39;ul&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">sxy</span><span class="p">[</span><span class="s1">&#39;ul&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
-                                 <span class="n">direct</span><span class="p">[</span><span class="s1">&#39;ul&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="nb">max</span><span class="p">(</span><span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;ci&#39;</span><span class="p">])],</span>
+                          <span class="n">ul_name</span><span class="p">:</span> <span class="p">[</span><span class="n">sxm</span><span class="p">[</span><span class="n">ul_name</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">smy</span><span class="p">[</span><span class="n">ul_name</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                                    <span class="n">sxy</span><span class="p">[</span><span class="n">ul_name</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">direct</span><span class="p">[</span><span class="n">ul_name</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                                    <span class="nb">max</span><span class="p">(</span><span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;ci&#39;</span><span class="p">])],</span>
                           <span class="c1"># Significance level</span>
                           <span class="s1">&#39;Sig&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">sig_sxm</span><span class="p">,</span> <span class="n">sig_smy</span><span class="p">,</span> <span class="n">sig_sxy</span><span class="p">,</span> <span class="n">sig_direct</span><span class="p">,</span>
                                   <span class="n">indirect</span><span class="p">[</span><span class="s1">&#39;sig&#39;</span><span class="p">]],</span>
                           <span class="p">})</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
-    <span class="c1"># Rename CI</span>
-    <span class="n">stats</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;ll&#39;</span><span class="p">:</span> <span class="s1">&#39;CI[</span><span class="si">%.1f%%</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
-                          <span class="s1">&#39;ul&#39;</span><span class="p">:</span> <span class="s1">&#39;CI[</span><span class="si">%.1f%%</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))},</span>
-                 <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">return_dist</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">stats</span><span class="p">,</span> <span class="n">ab_estimates</span>

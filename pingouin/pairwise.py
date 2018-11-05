@@ -26,7 +26,7 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, alpha,
         'Paired': paired,
         'tail': df_ttest.loc['T-test', 'tail'],
         # 'Alpha': alpha,
-        'T-val': df_ttest.loc['T-test', 'T-val'],
+        'T': df_ttest.loc['T-test', 'T'],
         'p-unc': df_ttest.loc['T-test', 'p-val'],
         'BF10': df_ttest.loc['T-test', 'BF10'],
         'efsize': ef,
@@ -94,7 +94,7 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         'B' : Name of second measurement
         'Paired' : indicates whether the two measurements are paired or not
         'Tail' : indicate whether the p-values are one-sided or two-sided
-        'T-val' : T-values
+        'T' : T-values
         'p-unc' : Uncorrected p-values
         'p-corr' : Corrected p-values
         'p-adjust' : p-values correction method
@@ -236,7 +236,7 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
 
     # Reorganize column order
     col_order = ['Type', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
-                 'std(B)', 'Paired', 'T-val', 'tail', 'p-unc',
+                 'std(B)', 'Paired', 'T', 'tail', 'p-unc',
                  'p-corr', 'p-adjust', 'BF10', 'efsize', 'eftype']
 
     if not return_desc and effects.lower() != 'all':
@@ -289,7 +289,7 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
         'diff' : Mean difference
         'SE' : Standard error
         'tail' : indicate whether the p-values are one-sided or two-sided
-        'T-val' : T-values
+        'T' : T-values
         'p-tukey' : Tukey-HSD corrected p-values
         'efsize' : effect sizes
         'eftype' : type of effect size
@@ -394,7 +394,7 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
                          'diff': mn,
                          'SE': np.round(se, 3),
                          'tail': tail,
-                         'T-val': np.round(tval, 3),
+                         'T': np.round(tval, 3),
                          # 'alpha': alpha,
                          # 'crit': np.round(crit, 3),
                          'p-tukey': pval,
@@ -443,7 +443,7 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
         'diff' : Mean difference
         'SE' : Standard error
         'tail' : indicate whether the p-values are one-sided or two-sided
-        'T-val' : T-values
+        'T' : T-values
         'df' : adjusted degrees of freedom
         'pval' : Games-Howell corrected p-values
         'efsize' : effect sizes
@@ -554,13 +554,13 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
                          'diff': mn,
                          'SE': se,
                          'tail': tail,
-                         'T-val': tval,
+                         'T': tval,
                          'df': df,
                          'pval': pval,
                          'efsize': ef,
                          'eftype': effsize,
                          })
-    col_round = ['mean(A)', 'mean(B)', 'diff', 'SE', 'T-val', 'df', 'efsize']
+    col_round = ['mean(A)', 'mean(B)', 'diff', 'SE', 'T', 'df', 'efsize']
     stats[col_round] = stats[col_round].round(3)
     return stats
 

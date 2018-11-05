@@ -40,7 +40,7 @@ class TestParametric(_TestPingouin):
         ttest(x, 0.5)
         stats = ttest(x, y, paired=True, tail='one-sided')
         # Compare with JASP
-        assert np.allclose(stats.loc['T-test', 'T-val'], 0.616)
+        assert np.allclose(stats.loc['T-test', 'T'], 0.616)
         assert np.allclose(stats.loc['T-test', 'p-val'].round(3), .270)
         ttest(x, y, paired=False, correction='auto')
         ttest(x, y, paired=False, correction=True)

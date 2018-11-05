@@ -137,7 +137,7 @@
 <span class="sd">    stats : pandas DataFrame</span>
 <span class="sd">        T-test summary ::</span>
 
-<span class="sd">        &#39;T-val&#39; : T-value</span>
+<span class="sd">        &#39;T&#39; : T-value</span>
 <span class="sd">        &#39;p-val&#39; : p-value</span>
 <span class="sd">        &#39;dof&#39; : degrees of freedom</span>
 <span class="sd">        &#39;cohen-d&#39; : Cohen d effect size</span>
@@ -234,7 +234,7 @@
 <span class="sd">        &gt;&gt;&gt; from pingouin import ttest</span>
 <span class="sd">        &gt;&gt;&gt; x = [5.5, 2.4, 6.8, 9.6, 4.2]</span>
 <span class="sd">        &gt;&gt;&gt; ttest(x, 4)</span>
-<span class="sd">            T-val   p-val  dof  cohen-d  power   BF10</span>
+<span class="sd">            T      p-val  dof  cohen-d  power   BF10</span>
 <span class="sd">            1.397  0.2348    4    0.625  0.919  0.766</span>
 
 <span class="sd">    2. Paired two-sample T-test (one-tailed).</span>
@@ -243,7 +243,7 @@
 <span class="sd">        &gt;&gt;&gt; pre = [5.5, 2.4, 6.8, 9.6, 4.2]</span>
 <span class="sd">        &gt;&gt;&gt; post = [6.4, 3.4, 6.4, 11., 4.8]</span>
 <span class="sd">        &gt;&gt;&gt; ttest(pre, post, paired=True, tail=&#39;one-sided&#39;)</span>
-<span class="sd">            T-val   p-val  dof  cohen-d  power   BF10</span>
+<span class="sd">            T       p-val  dof  cohen-d  power   BF10</span>
 <span class="sd">            -2.308   0.04    4     0.25  0.121  3.122</span>
 
 <span class="sd">    3. Paired two-sample T-test with missing values.</span>
@@ -253,7 +253,7 @@
 <span class="sd">        &gt;&gt;&gt; pre = [5.5, 2.4, nan, 9.6, 4.2]</span>
 <span class="sd">        &gt;&gt;&gt; post = [6.4, 3.4, 6.4, 11., 4.8]</span>
 <span class="sd">        &gt;&gt;&gt; ttest(pre, post, paired=True)</span>
-<span class="sd">            T-val    p-val  dof  cohen-d  power    BF10</span>
+<span class="sd">            T        p-val  dof  cohen-d  power    BF10</span>
 <span class="sd">            -5.902  0.0097    3   0.306   0.065   7.169</span>
 
 <span class="sd">    4. Independent two-sample T-test (equal sample size).</span>
@@ -264,7 +264,7 @@
 <span class="sd">        &gt;&gt;&gt; x = np.random.normal(loc=7, size=20)</span>
 <span class="sd">        &gt;&gt;&gt; y = np.random.normal(loc=4, size=20)</span>
 <span class="sd">        &gt;&gt;&gt; ttest(x, y, correction=&#39;auto&#39;)</span>
-<span class="sd">            T-val     p-val  dof  cohen-d  power   BF10</span>
+<span class="sd">            T         p-val  dof  cohen-d  power   BF10</span>
 <span class="sd">            9.106  4.30e-11   38     2.88    1.0  1.4e8</span>
 
 <span class="sd">    5. Independent two-sample T-test (unequal sample size).</span>
@@ -275,7 +275,7 @@
 <span class="sd">        &gt;&gt;&gt; x = np.random.normal(loc=7, size=20)</span>
 <span class="sd">        &gt;&gt;&gt; y = np.random.normal(loc=6.5, size=15)</span>
 <span class="sd">        &gt;&gt;&gt; ttest(x, y, correction=&#39;auto&#39;)</span>
-<span class="sd">            T-val     p-val  dof   dof-corr  cohen-d  power   BF10</span>
+<span class="sd">            T         p-val  dof   dof-corr  cohen-d  power   BF10</span>
 <span class="sd">            2.327     0.027   33      30.75    0.792  0.614  2.454</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">ttest_rel</span><span class="p">,</span> <span class="n">ttest_ind</span><span class="p">,</span> <span class="n">ttest_1samp</span>
@@ -331,14 +331,14 @@
 
     <span class="c1"># Fill output DataFrame</span>
     <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;dof&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dof</span>
-    <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;T-val&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tval</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tval</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
     <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-val&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pval</span>
     <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;tail&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tail</span>
     <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;cohen-d&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
     <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;power&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">power</span>
     <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;BF10&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bf</span>
 
-    <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;T-val&#39;</span><span class="p">,</span> <span class="s1">&#39;p-val&#39;</span><span class="p">,</span> <span class="s1">&#39;dof&#39;</span><span class="p">,</span> <span class="s1">&#39;dof-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;tail&#39;</span><span class="p">,</span> <span class="s1">&#39;cohen-d&#39;</span><span class="p">,</span>
+    <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;p-val&#39;</span><span class="p">,</span> <span class="s1">&#39;dof&#39;</span><span class="p">,</span> <span class="s1">&#39;dof-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;tail&#39;</span><span class="p">,</span> <span class="s1">&#39;cohen-d&#39;</span><span class="p">,</span>
                  <span class="s1">&#39;power&#39;</span><span class="p">,</span> <span class="s1">&#39;BF10&#39;</span><span class="p">]</span>
     <span class="n">stats</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">col_order</span><span class="p">)</span>
     <span class="n">stats</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

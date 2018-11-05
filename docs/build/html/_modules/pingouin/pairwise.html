@@ -122,7 +122,7 @@
         <span class="s1">&#39;Paired&#39;</span><span class="p">:</span> <span class="n">paired</span><span class="p">,</span>
         <span class="s1">&#39;tail&#39;</span><span class="p">:</span> <span class="n">df_ttest</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;T-test&#39;</span><span class="p">,</span> <span class="s1">&#39;tail&#39;</span><span class="p">],</span>
         <span class="c1"># &#39;Alpha&#39;: alpha,</span>
-        <span class="s1">&#39;T-val&#39;</span><span class="p">:</span> <span class="n">df_ttest</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;T-test&#39;</span><span class="p">,</span> <span class="s1">&#39;T-val&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="n">df_ttest</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;T-test&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">],</span>
         <span class="s1">&#39;p-unc&#39;</span><span class="p">:</span> <span class="n">df_ttest</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;T-test&#39;</span><span class="p">,</span> <span class="s1">&#39;p-val&#39;</span><span class="p">],</span>
         <span class="s1">&#39;BF10&#39;</span><span class="p">:</span> <span class="n">df_ttest</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;T-test&#39;</span><span class="p">,</span> <span class="s1">&#39;BF10&#39;</span><span class="p">],</span>
         <span class="s1">&#39;efsize&#39;</span><span class="p">:</span> <span class="n">ef</span><span class="p">,</span>
@@ -190,7 +190,7 @@
 <span class="sd">        &#39;B&#39; : Name of second measurement</span>
 <span class="sd">        &#39;Paired&#39; : indicates whether the two measurements are paired or not</span>
 <span class="sd">        &#39;Tail&#39; : indicate whether the p-values are one-sided or two-sided</span>
-<span class="sd">        &#39;T-val&#39; : T-values</span>
+<span class="sd">        &#39;T&#39; : T-values</span>
 <span class="sd">        &#39;p-unc&#39; : Uncorrected p-values</span>
 <span class="sd">        &#39;p-corr&#39; : Corrected p-values</span>
 <span class="sd">        &#39;p-adjust&#39; : p-values correction method</span>
@@ -332,7 +332,7 @@
 
     <span class="c1"># Reorganize column order</span>
     <span class="n">col_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;mean(A)&#39;</span><span class="p">,</span> <span class="s1">&#39;std(A)&#39;</span><span class="p">,</span> <span class="s1">&#39;mean(B)&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;std(B)&#39;</span><span class="p">,</span> <span class="s1">&#39;Paired&#39;</span><span class="p">,</span> <span class="s1">&#39;T-val&#39;</span><span class="p">,</span> <span class="s1">&#39;tail&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;std(B)&#39;</span><span class="p">,</span> <span class="s1">&#39;Paired&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;tail&#39;</span><span class="p">,</span> <span class="s1">&#39;p-unc&#39;</span><span class="p">,</span>
                  <span class="s1">&#39;p-corr&#39;</span><span class="p">,</span> <span class="s1">&#39;p-adjust&#39;</span><span class="p">,</span> <span class="s1">&#39;BF10&#39;</span><span class="p">,</span> <span class="s1">&#39;efsize&#39;</span><span class="p">,</span> <span class="s1">&#39;eftype&#39;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">return_desc</span> <span class="ow">and</span> <span class="n">effects</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
@@ -385,7 +385,7 @@
 <span class="sd">        &#39;diff&#39; : Mean difference</span>
 <span class="sd">        &#39;SE&#39; : Standard error</span>
 <span class="sd">        &#39;tail&#39; : indicate whether the p-values are one-sided or two-sided</span>
-<span class="sd">        &#39;T-val&#39; : T-values</span>
+<span class="sd">        &#39;T&#39; : T-values</span>
 <span class="sd">        &#39;p-tukey&#39; : Tukey-HSD corrected p-values</span>
 <span class="sd">        &#39;efsize&#39; : effect sizes</span>
 <span class="sd">        &#39;eftype&#39; : type of effect size</span>
@@ -490,7 +490,7 @@
                          <span class="s1">&#39;diff&#39;</span><span class="p">:</span> <span class="n">mn</span><span class="p">,</span>
                          <span class="s1">&#39;SE&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">se</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
                          <span class="s1">&#39;tail&#39;</span><span class="p">:</span> <span class="n">tail</span><span class="p">,</span>
-                         <span class="s1">&#39;T-val&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">tval</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                         <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">tval</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
                          <span class="c1"># &#39;alpha&#39;: alpha,</span>
                          <span class="c1"># &#39;crit&#39;: np.round(crit, 3),</span>
                          <span class="s1">&#39;p-tukey&#39;</span><span class="p">:</span> <span class="n">pval</span><span class="p">,</span>
@@ -539,7 +539,7 @@
 <span class="sd">        &#39;diff&#39; : Mean difference</span>
 <span class="sd">        &#39;SE&#39; : Standard error</span>
 <span class="sd">        &#39;tail&#39; : indicate whether the p-values are one-sided or two-sided</span>
-<span class="sd">        &#39;T-val&#39; : T-values</span>
+<span class="sd">        &#39;T&#39; : T-values</span>
 <span class="sd">        &#39;df&#39; : adjusted degrees of freedom</span>
 <span class="sd">        &#39;pval&#39; : Games-Howell corrected p-values</span>
 <span class="sd">        &#39;efsize&#39; : effect sizes</span>
@@ -650,13 +650,13 @@
                          <span class="s1">&#39;diff&#39;</span><span class="p">:</span> <span class="n">mn</span><span class="p">,</span>
                          <span class="s1">&#39;SE&#39;</span><span class="p">:</span> <span class="n">se</span><span class="p">,</span>
                          <span class="s1">&#39;tail&#39;</span><span class="p">:</span> <span class="n">tail</span><span class="p">,</span>
-                         <span class="s1">&#39;T-val&#39;</span><span class="p">:</span> <span class="n">tval</span><span class="p">,</span>
+                         <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="n">tval</span><span class="p">,</span>
                          <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="n">df</span><span class="p">,</span>
                          <span class="s1">&#39;pval&#39;</span><span class="p">:</span> <span class="n">pval</span><span class="p">,</span>
                          <span class="s1">&#39;efsize&#39;</span><span class="p">:</span> <span class="n">ef</span><span class="p">,</span>
                          <span class="s1">&#39;eftype&#39;</span><span class="p">:</span> <span class="n">effsize</span><span class="p">,</span>
                          <span class="p">})</span>
-    <span class="n">col_round</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mean(A)&#39;</span><span class="p">,</span> <span class="s1">&#39;mean(B)&#39;</span><span class="p">,</span> <span class="s1">&#39;diff&#39;</span><span class="p">,</span> <span class="s1">&#39;SE&#39;</span><span class="p">,</span> <span class="s1">&#39;T-val&#39;</span><span class="p">,</span> <span class="s1">&#39;df&#39;</span><span class="p">,</span> <span class="s1">&#39;efsize&#39;</span><span class="p">]</span>
+    <span class="n">col_round</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mean(A)&#39;</span><span class="p">,</span> <span class="s1">&#39;mean(B)&#39;</span><span class="p">,</span> <span class="s1">&#39;diff&#39;</span><span class="p">,</span> <span class="s1">&#39;SE&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;df&#39;</span><span class="p">,</span> <span class="s1">&#39;efsize&#39;</span><span class="p">]</span>
     <span class="n">stats</span><span class="p">[</span><span class="n">col_round</span><span class="p">]</span> <span class="o">=</span> <span class="n">stats</span><span class="p">[</span><span class="n">col_round</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">stats</span></div>
 

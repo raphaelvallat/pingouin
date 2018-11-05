@@ -5,7 +5,8 @@ from scipy.stats import t, norm
 __all__ = ['linear_regression', 'logistic_regression', 'mediation_analysis']
 
 
-def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
+def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
+                      as_dataframe=True):
     """(Multiple) Linear regression.
 
     Parameters
@@ -23,21 +24,23 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
     alpha : float
         Alpha value used for the confidence intervals.
         CI = [alpha / 2 ; 1 - alpha / 2]
+    as_dataframe : bool
+        If True, returns a pandas DataFrame. If False, returns a dictionnary.
 
     Returns
     -------
-    stats : dict
+    stats : dataframe or dict
         Linear regression summary::
 
         'names' : name of variable(s) in the model (e.g. x1, x2...)
         'coef' : regression coefficients
         'se' : standard error of the estimate
-        'tvals' : T-values
-        'pvals' : p-values
+        'T' : T-values
+        'pval' : p-values
         'r2' : coefficient of determination (R2)
         'adj_r2' : adjusted R2
-        'll' : lower confidence interval
-        'ul' : upper confidence interval
+        'CI[2.5%]' : lower confidence interval
+        'CI[97.5%]' : upper confidence interval
 
     Notes
     -----
@@ -88,7 +91,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
         >>> mean, cov, n = [4, 6], [[1, 0.5], [0.5, 1]], 30
         >>> x, y = np.random.multivariate_normal(mean, cov, n).T
         >>> lm = linear_regression(x, y)
-        >>> print(lm['coef'])
+        >>> print(lm['coef'].values)
             [4.39720706 0.39495526]
 
     2. Multiple linear regression
@@ -97,33 +100,25 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
         >>> z = np.random.normal(size=n)
         >>> X = np.column_stack((x, z))
         >>> lm = linear_regression(X, y)
-        >>> print(lm['coef'])
+        >>> print(lm['coef'].values)
             [4.54123324 0.36628301 0.17709451]
-
-    2. Convert the output dictionnary to a pandas DataFrame
-
-        >>> import pandas as pd
-        >>> df_lm = pd.DataFrame.from_dict(linear_regression(X, y))
-        >>> # Round to 3 decimals
-        >>> df_lm = df_lm.round(3)
-        >>> # Print column names
-        >>> print(df_lm.keys())
-            Index(['names', 'coef', 'se', 'tvals', 'pvals', 'r2', 'adj_r2',
-                   'll', 'ul'], dtype='object')
 
     3. Using a Pandas DataFrame
 
         >>> import pandas as pd
         >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
         >>> lm = linear_regression(df[['x', 'z']], df['y'])
-        >>> print(lm['coef'])
+        >>> print(lm['coef'].values)
             [4.54123324 0.36628301 0.17709451]
 
     4. No intercept and return coef only
 
-        >>> linear_regression(df[['x', 'z']], df['y'], add_intercept=False,
-        >>>                   coef_only=True)
+        >>> linear_regression(X, y, add_intercept=False, coef_only=True)
             array([ 1.40935593, -0.2916508 ])
+
+    5. Return a dictionnary instead of a DataFrame
+
+        >>> linear_regression(X, y, as_dataframe=False)
     """
     # Extract names if X is a Dataframe or Series
     if isinstance(X, pd.DataFrame):
@@ -132,6 +127,8 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
         names = [X.name]
     else:
         names = []
+
+    assert 0 < alpha < 1
 
     # Convert input to numpy array
     X = np.asarray(X)
@@ -172,8 +169,8 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
     adj_r2 = 1 - (1 - r2) * (n - 1) / dof
 
     # Compute T and p-values
-    tvals = coef / beta_se
-    pvals = np.array([2 * t.sf(np.abs(i), dof) for i in tvals])
+    T = coef / beta_se
+    pval = np.array([2 * t.sf(np.abs(i), dof) for i in T])
 
     # Compute confidence intervals
     crit = t.ppf(1 - alpha / 2, dof)
@@ -181,13 +178,23 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
     ll = coef - marg_error
     ul = coef + marg_error
 
+    # Rename CI
+    ll_name = 'CI[%.1f%%]' % (100 * alpha / 2)
+    ul_name = 'CI[%.1f%%]' % (100 * (1 - alpha / 2))
+
     # Create dict
-    stats = {'names': names, 'coef': coef, 'se': beta_se, 'tvals': tvals,
-             'pvals': pvals, 'r2': r2, 'adj_r2': adj_r2, 'll': ll, 'ul': ul}
-    return stats
+    stats = {'names': names, 'coef': coef, 'se': beta_se, 'T': T,
+             'pval': pval, 'r2': r2, 'adj_r2': adj_r2, ll_name: ll,
+             ul_name: ul}
+
+    if as_dataframe:
+        return pd.DataFrame.from_dict(stats)
+    else:
+        return stats
 
 
-def logistic_regression(X, y, coef_only=False, alpha=0.05, **kwargs):
+def logistic_regression(X, y, coef_only=False, alpha=0.05,
+                        as_dataframe=True, **kwargs):
     """(Multiple) Binary logistic regression.
 
     Parameters
@@ -202,21 +209,23 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05, **kwargs):
     alpha : float
         Alpha value used for the confidence intervals.
         CI = [alpha / 2 ; 1 - alpha / 2]
+    as_dataframe : bool
+        If True, returns a pandas DataFrame. If False, returns a dictionnary.
     **kwargs : optional
         Optional arguments passed to sklearn.linear_model.LogisticRegression
 
     Returns
     -------
-    stats : dict
+    stats : dataframe or dict
         Logistic regression summary::
 
         'names' : name of variable(s) in the model (e.g. x1, x2...)
         'coef' : regression coefficients
         'se' : standard error
         'z' : z-scores
-        'pvals' : two-tailed p-values
-        'll' : lower confidence interval
-        'ul' : upper confidence interval
+        'pval' : two-tailed p-values
+        'CI[2.5%]' : lower confidence interval
+        'CI[97.5%]' : upper confidence interval
 
     Notes
     -----
@@ -240,7 +249,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05, **kwargs):
         >>> x = np.random.normal(size=30)
         >>> y = np.random.randint(0, 2, size=30)
         >>> lom = logistic_regression(x, y)
-        >>> print(lom['coef'])
+        >>> print(lom['coef'].values)
             [-0.27122371  0.05927182]
 
     2. Multiple binary logistic regression
@@ -249,37 +258,26 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05, **kwargs):
         >>> z = np.random.normal(size=30)
         >>> X = np.column_stack((x, z))
         >>> lom = logistic_regression(X, y)
-        >>> print(lom['coef'])
+        >>> print(lom['coef'].values)
             [-0.34933805 -0.0226106  -0.39453532]
-
-    3. Convert the output dictionnary to a pandas DataFrame
-
-        >>> import pandas as pd
-        >>> df_lom = pd.DataFrame.from_dict(logistic_regression(X, y))
-        >>> # Round to 3 decimals
-        >>> df_lom = df_lom.round(3)
-        >>> # Print column names
-        >>> print(df_lom.keys())
-            Index(['names', 'coef', 'se', 'z', 'pvals', 'll', 'ul'],
-                  dtype='object')
 
     3. Using a Pandas DataFrame
 
         >>> import pandas as pd
         >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
         >>> lom = logistic_regression(df[['x', 'z']], df['y'])
-        >>> print(lom['coef'])
+        >>> print(lom['coef'].values)
             [-0.34933805 -0.0226106  -0.39453532]
 
     4. Return only the coefficients
 
-        >>> logistic_regression(df[['x', 'z']], df['y'], coef_only=True)
+        >>> logistic_regression(X, y, coef_only=True)
             array([-0.34933805, -0.0226106 , -0.39453532])
 
     4. Passing custom parameters to sklearn
 
         >>> lom = logistic_regression(X, y, solver='sag', max_iter=10000)
-        >>> print(lom['coef'])
+        >>> print(lom['coef'].values)
             [-0.34941889 -0.02261911 -0.39451064]
     """
     # Check that sklearn is installed
@@ -294,6 +292,8 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05, **kwargs):
         names = [X.name]
     else:
         names = []
+
+    assert 0 < alpha < 1
 
     # Convert to numpy array
     X = np.asarray(X)
@@ -338,17 +338,24 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05, **kwargs):
     z_scores = coef / se
 
     # Two-tailed p-values
-    pvals = np.array([2 * norm.sf(abs(z)) for z in z_scores])
+    pval = np.array([2 * norm.sf(abs(z)) for z in z_scores])
 
     # Confidence intervals
     crit = norm.ppf(1 - alpha / 2)
     ll = coef - crit * se
     ul = coef + crit * se
 
+    # Rename CI
+    ll_name = 'CI[%.1f%%]' % (100 * alpha / 2)
+    ul_name = 'CI[%.1f%%]' % (100 * (1 - alpha / 2))
+
     # Create dict
     stats = {'names': names, 'coef': coef, 'se': se, 'z': z_scores,
-             'pvals': pvals, 'll': ll, 'ul': ul}
-    return stats
+             'pval': pval, ll_name: ll, ul_name: ul}
+    if as_dataframe:
+        return pd.DataFrame.from_dict(stats)
+    else:
+        return stats
 
 
 def _point_estimate(data, x, m, y, idx, mtype='linear'):
@@ -519,22 +526,29 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     # Compute linear regressions
     if mtype == 'linear':
         sxm = linear_regression(data[x], data[m], add_intercept=True,
-                                alpha=alpha)
+                                alpha=alpha, as_dataframe=False)
     else:
-        sxm = logistic_regression(data[x], data[m], alpha=alpha)
+        sxm = logistic_regression(data[x], data[m], alpha=alpha,
+                                  as_dataframe=False)
 
-    smy = linear_regression(data[m], data[y], add_intercept=True, alpha=alpha)
+    smy = linear_regression(data[m], data[y], add_intercept=True, alpha=alpha,
+                            as_dataframe=False)
     # sxy = Average Total Effects
-    sxy = linear_regression(data[x], data[y], add_intercept=True, alpha=alpha)
+    sxy = linear_regression(data[x], data[y], add_intercept=True, alpha=alpha,
+                            as_dataframe=False)
     # Average Direct Effects
     direct = linear_regression(data[[x, m]], data[y], add_intercept=True,
-                               alpha=alpha)
+                               alpha=alpha, as_dataframe=False)
 
     # Significance
-    sig_sxy = 'Yes' if sxy['pvals'][1] < alpha else 'No'
-    sig_sxm = 'Yes' if sxm['pvals'][1] < alpha else 'No'
-    sig_smy = 'Yes' if smy['pvals'][1] < alpha else 'No'
-    sig_direct = 'Yes' if direct['pvals'][1] < alpha else 'No'
+    sig_sxy = 'Yes' if sxy['pval'][1] < alpha else 'No'
+    sig_sxm = 'Yes' if sxm['pval'][1] < alpha else 'No'
+    sig_smy = 'Yes' if smy['pval'][1] < alpha else 'No'
+    sig_direct = 'Yes' if direct['pval'][1] < alpha else 'No'
+
+    # Name of CI
+    ll_name = 'CI[%.1f%%]' % (100 * alpha / 2)
+    ul_name = 'CI[%.1f%%]' % (100 * (1 - alpha / 2))
 
     # Create output dataframe
     stats = pd.DataFrame({'Path': ['X -> M', 'M -> Y', 'X -> Y', 'Direct',
@@ -544,19 +558,17 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
                                    sxy['coef'][1], direct['coef'][1],
                                    indirect['coef']],
                           # Lower CI
-                          'll': [sxm['ll'][1], smy['ll'][1], sxy['ll'][1],
-                                 direct['ll'][1], min(indirect['ci'])],
+                          ll_name: [sxm[ll_name][1], smy[ll_name][1],
+                                    sxy[ll_name][1], direct[ll_name][1],
+                                    min(indirect['ci'])],
                           # Upper CI
-                          'ul': [sxm['ul'][1], smy['ul'][1], sxy['ul'][1],
-                                 direct['ul'][1], max(indirect['ci'])],
+                          ul_name: [sxm[ul_name][1], smy[ul_name][1],
+                                    sxy[ul_name][1], direct[ul_name][1],
+                                    max(indirect['ci'])],
                           # Significance level
                           'Sig': [sig_sxm, sig_smy, sig_sxy, sig_direct,
                                   indirect['sig']],
                           }).round(4)
-    # Rename CI
-    stats.rename(columns={'ll': 'CI[%.1f%%]' % (100 * alpha / 2),
-                          'ul': 'CI[%.1f%%]' % (100 * (1 - alpha / 2))},
-                 inplace=True)
 
     if return_dist:
         return stats, ab_estimates
