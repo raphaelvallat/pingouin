@@ -84,6 +84,9 @@ class TestRegression(_TestPingouin):
         c = logistic_regression(df[['X', 'M']], df['Ybin'], coef_only=True)
         assert_equal(np.round(c, 1), [1.3, -0.2, -0.0])
 
+        # Test **kwargs
+        logistic_regression(X, y, solver='sag', C=10, max_iter=10000)
+
         with pytest.raises(ValueError):
             y[3] = 2
             logistic_regression(X, y)

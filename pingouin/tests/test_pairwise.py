@@ -47,10 +47,11 @@ class TestPairwise(_TestPingouin):
                         export_filename='test_export.csv')
         # Wrong tail argument
         with pytest.raises(ValueError):
-            pairwise_ttests(dv='Scores', within='Time', data=df, tail='wrong')
+            pairwise_ttests(dv='Scores', between='Group', data=df,
+                            tail='wrong')
         # Wrong alpha argument
         with pytest.raises(ValueError):
-            pairwise_ttests(dv='Scores', within='Time', data=df, alpha='.05')
+            pairwise_ttests(dv='Scores', between='Group', data=df, alpha='.05')
         # Missing values
         df.iloc[[10, 15], 0] = np.nan
         pairwise_ttests(dv='Scores', within='Time', effects='within',
@@ -100,3 +101,22 @@ class TestPairwise(_TestPingouin):
         pairwise_corr(data=data, columns=['Neuroticism', 'Extraversion'])
         with pytest.raises(ValueError):
             pairwise_corr(data=data, tail='wrong')
+        # Check with non-numeric columns
+        data['test'] = 'test'
+        pairwise_corr(data=data, method='pearson')
+        # Check different variation of product / combination
+        n = data.shape[0]
+        data['Age'] = np.random.randint(18, 65, n)
+        data['IQ'] = np.random.normal(105, 1, n)
+        data['Gender'] = np.repeat(['M', 'F'], int(n / 2))
+        pairwise_corr(data, columns=['Neuroticism', 'Gender'])
+        pairwise_corr(data, columns=['Neuroticism', 'Extraversion', 'Gender'])
+        pairwise_corr(data, columns=['Neuroticism'])
+        pairwise_corr(data, columns='Neuroticism')
+        pairwise_corr(data, columns=[['Neuroticism']])
+        pairwise_corr(data, columns=[['Neuroticism'], None])
+        pairwise_corr(data, columns=[['Neuroticism', 'Gender'], ['Age']])
+        pairwise_corr(data, columns=[['Neuroticism'], ['Age', 'IQ']])
+        pairwise_corr(data, columns=[['Age', 'IQ'], []])
+        pairwise_corr(data, columns=['Age', 'Gender', 'IQ', 'Wrong'])
+        pairwise_corr(data, columns=['Age', 'Gender', 'Wrong'])

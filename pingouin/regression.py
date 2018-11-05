@@ -187,7 +187,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05):
     return stats
 
 
-def logistic_regression(X, y, coef_only=False, alpha=0.05):
+def logistic_regression(X, y, coef_only=False, alpha=0.05, **kwargs):
     """(Multiple) Binary logistic regression.
 
     Parameters
@@ -202,6 +202,8 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05):
     alpha : float
         Alpha value used for the confidence intervals.
         CI = [alpha / 2 ; 1 - alpha / 2]
+    **kwargs : optional
+        Optional arguments passed to sklearn.linear_model.LogisticRegression
 
     Returns
     -------
@@ -273,6 +275,12 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05):
 
         >>> logistic_regression(df[['x', 'z']], df['y'], coef_only=True)
             array([-0.34933805, -0.0226106 , -0.39453532])
+
+    4. Passing custom parameters to sklearn
+
+        >>> lom = logistic_regression(X, y, solver='sag', max_iter=10000)
+        >>> print(lom['coef'])
+            [-0.34941889 -0.02261911 -0.39451064]
     """
     # Check that sklearn is installed
     from pingouin.utils import is_sklearn_installed
@@ -305,7 +313,11 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05):
     names.insert(0, "Intercept")
 
     # Initialize and fit
-    lom = LogisticRegression(solver='lbfgs', multi_class='auto')
+    if 'solver' not in kwargs:
+        kwargs['solver'] = 'lbfgs'
+    if 'multi_class' not in kwargs:
+        kwargs['multi_class'] = 'auto'
+    lom = LogisticRegression(**kwargs)
     lom.fit(X, y)
     coef = np.append(lom.intercept_, lom.coef_)
     if coef_only:

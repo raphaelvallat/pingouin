@@ -99,6 +99,9 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">pearsonr</span><span class="p">,</span> <span class="n">spearmanr</span><span class="p">,</span> <span class="n">kendalltau</span>
 <span class="kn">from</span> <span class="nn">pingouin.utils</span> <span class="k">import</span> <span class="n">_remove_na</span>
+<span class="kn">from</span> <span class="nn">pingouin.effsize</span> <span class="k">import</span> <span class="n">compute_esci</span>
+<span class="kn">from</span> <span class="nn">pingouin.bayesian</span> <span class="k">import</span> <span class="n">bayesfactor_pearson</span>
+
 <span class="kn">from</span> <span class="nn">pingouin.nonparametric</span> <span class="k">import</span> <span class="n">mad</span><span class="p">,</span> <span class="n">madmedianrule</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;corr&quot;</span><span class="p">,</span> <span class="s2">&quot;partial_corr&quot;</span><span class="p">,</span> <span class="s2">&quot;rm_corr&quot;</span><span class="p">,</span> <span class="s2">&quot;intraclass_corr&quot;</span><span class="p">]</span>
@@ -541,7 +544,6 @@
     <span class="n">adj_r2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">nx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">nx</span> <span class="o">-</span> <span class="mi">3</span><span class="p">))</span>
 
     <span class="c1"># Compute the parametric 95% confidence interval</span>
-    <span class="kn">from</span> <span class="nn">pingouin.effsize</span> <span class="k">import</span> <span class="n">compute_esci</span>
     <span class="n">ci</span> <span class="o">=</span> <span class="n">compute_esci</span><span class="p">(</span><span class="n">ef</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
 
     <span class="n">stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">method</span><span class="p">])</span>
@@ -552,7 +554,6 @@
     <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;p-val&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pval</span> <span class="k">if</span> <span class="n">tail</span> <span class="o">==</span> <span class="s1">&#39;two-sided&#39;</span> <span class="k">else</span> <span class="o">.</span><span class="mi">5</span> <span class="o">*</span> <span class="n">pval</span>
 
     <span class="c1"># Compute the BF10 for Pearson correlation only</span>
-    <span class="kn">from</span> <span class="nn">pingouin.bayesian</span> <span class="k">import</span> <span class="n">bayesfactor_pearson</span>
     <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;pearson&#39;</span><span class="p">:</span>
         <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;BF10&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bayesfactor_pearson</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">nx</span><span class="p">)</span>
 

@@ -2,7 +2,7 @@
 # Date: April 2018
 import numpy as np
 import pandas as pd
-from itertools import combinations
+from itertools import combinations, product
 from pingouin.parametric import anova
 from pingouin.multicomp import multicomp
 from pingouin.effsize import compute_effsize, convert_effsize
@@ -573,9 +573,18 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     ----------
     data : pandas DataFrame
         DataFrame
-    columns : list
-        Names of columns in data containing the all the dependant variables.
-        If columns is None, compute the pairwise correlations on all columns.
+    columns : list or str
+        Column names in data ::
+
+        '["a", "b", "c"]' : combination between columns a, b, and c
+        '["a"]' : product between a and all the other numeric columns
+        '[["a"], ["b", "c"]]' : product between ["a"] and ["b", "c"]
+        '[["a", "d"], ["b", "c"]]' : product between ["a", "d"] and ["b", "c"]
+        '[["a", "d"], None]' : product between ["a", "d"] and all other columns
+
+        Note that if column is not specified, then the function will return the
+        pairwise correlation between the combination of all the numeric columns
+        in data. See the examples section for more details on this.
     tail : string
         Indicates whether to return the 'two-sided' or 'one-sided' p-values
     method : string
@@ -622,35 +631,22 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
     Notes
     -----
-    The Pearson correlation coefficient measures the linear relationship
-    between two datasets. Strictly speaking, Pearson's correlation requires
-    that each dataset be normally distributed. Correlations of -1 or +1 imply
-    an exact linear relationship.
+    Please refer to the `pingouin.corr()` function for a description of the
+    different method. NaN are automatically removed from datasets.
 
-    The Spearman correlation is a nonparametric measure of the monotonicity of
-    the relationship between two datasets. Unlike the Pearson correlation,
-    the Spearman correlation does not assume that both datasets are normally
-    distributed. Correlations of -1 or +1 imply an exact monotonic
-    relationship.
-
-    Kendall’s tau is a measure of the correspondence between two rankings.
-    Values close to 1 indicate strong agreement, values close to -1 indicate
-    strong disagreement.
-
-    The percentage bend correlation (Wilcox 1994) is a robust method that
-    protects against univariate outliers.
-
-    The Shepherd's pi correlation (Schwarzkopf et al. 2012) is a robust method
-    that returns the equivalent of the Spearman's rho after outliers removal.
-
-    Please note that NaN are automatically removed from datasets.
+    This function is more flexible and gives a much more detailed
+    output than the `pandas.DataFrame.corr()` method (i.e. p-values,
+    confidence interval, Bayes Factor..). This comes however at
+    an increased computational cost. While this should not be discernible for
+    dataframe with less than 10,000 rows and/or less than 20 columns, this
+    function can be extremely slow for very large dataset.
 
     Examples
     --------
     1. One-tailed spearman correlation corrected for multiple comparisons
 
         >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import pairwise_corr, print_table
+        >>> from pingouin import pairwise_corr
         >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
         >>> stats = pairwise_corr(data, method='spearman', tail='two-sided',
         >>>                       padjust='bonf')
@@ -658,19 +654,21 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
     2. Robust two-sided correlation with uncorrected p-values
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import pairwise_corr, print_table
-        >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
-        >>> stats = pairwise_corr(data, columns=['Openness', 'Extraversion',
-        >>>                       'Neuroticism'], method='percbend')
-        >>> print_table(stats)
+        >>> pairwise_corr(data, columns=['Openness', 'Extraversion',
+        >>>                              'Neuroticism'], method='percbend')
 
     3. Export the results to a .csv file
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import pairwise_corr, print_table
-        >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
         >>> pairwise_corr(data, export_filename='pairwise_corr.csv')
+
+    4. One-versus-others pairwise correlations
+
+        >>> pairwise_corr(data, columns=['Neuroticism'])
+
+    5. Pairwise correlations between two lists of columns (cartesian product)
+
+        >>> pairwise_corr(data, columns=[['Neuroticism', 'Extraversion'],
+        >>>                              ['Openness', 'Agreeableness'])
     '''
     from pingouin.correlation import corr
 
@@ -679,21 +677,63 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
     # Keep only numeric columns
     data = data._get_numeric_data()
+    keys = data.keys().tolist()
 
     # Initialize empty DataFrame
     stats = pd.DataFrame()
 
-    # Combinations between columns
+    # First ensure that columns is a list
+    if isinstance(columns, str):
+        columns = [columns]
+
+    # Then define combinations / products between columns
     if columns is None:
-        columns = data.keys().values
-    combs = list(combinations(columns, 2))
+        # Case A: column is not defined --> corr between all numeric columns
+        combs = list(combinations(keys, 2))
+    else:
+        # Case B: column is specified
+        if isinstance(columns[0], list):
+            group1 = [e for e in columns[0] if e in keys]
+            # Assert that column is two-dimensional
+            if len(columns) == 1:
+                columns.append(None)
+            if isinstance(columns[1], list) and len(columns[1]):
+                # B1: [['a', 'b'], ['c', 'd']]
+                group2 = [e for e in columns[1] if e in keys]
+            else:
+                # B2: [['a', 'b']], [['a', 'b'], None] or [['a', 'b'], 'all']
+                group2 = [e for e in keys if e not in group1]
+            combs = list(product(group1, group2))
+        else:
+            # Column is a simple list
+            if len(columns) == 1:
+                # Case B3: one-versus-all, e.g. ['a'] or 'a'
+                others = [e for e in keys if e != columns[0]]
+                combs = list(product(columns, others))
+            else:
+                # Combinations between all specified columns ['a', 'b', 'c']
+                # Make sure that we keep numeric columns
+                columns = np.intersect1d(keys, columns)
+                if len(columns) == 1:
+                    # If only one-column is left, equivalent to ['a']
+                    others = [e for e in keys if e != columns[0]]
+                    combs = list(product(columns, others))
+                else:
+                    # combinations between ['a', 'b', 'c']
+                    combs = list(combinations(columns, 2))
+
+    # Assert that all columns do exist in DataFrame
+    # If you see this error, check for column name errors in `columns=[]`
+    for comb in combs:
+        assert comb[0] in keys
+        assert comb[1] in keys
 
     # Initialize vectors
     for comb in combs:
         col1, col2 = comb
-        x = data[col1].values
-        y = data[col2].values
-        cor_st = corr(x, y, tail=tail, method=method).reset_index(drop=True)
+        cor_st = corr(data[col1].values,
+                      data[col2].values,
+                      tail=tail, method=method).reset_index(drop=True)
         stats = stats.append({
             'X': col1,
             'Y': col2,

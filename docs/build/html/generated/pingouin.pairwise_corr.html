@@ -109,9 +109,18 @@
 <dt><strong>data</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
 <dd><p class="first last">DataFrame</p>
 </dd>
-<dt><strong>columns</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
-<dd><p class="first last">Names of columns in data containing the all the dependant variables.
-If columns is None, compute the pairwise correlations on all columns.</p>
+<dt><strong>columns</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list or str</span></dt>
+<dd><p class="first">Column names in data</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]&#39;</span> <span class="p">:</span> <span class="n">combination</span> <span class="n">between</span> <span class="n">columns</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="ow">and</span> <span class="n">c</span>
+<span class="s1">&#39;[&quot;a&quot;]&#39;</span> <span class="p">:</span> <span class="n">product</span> <span class="n">between</span> <span class="n">a</span> <span class="ow">and</span> <span class="nb">all</span> <span class="n">the</span> <span class="n">other</span> <span class="n">numeric</span> <span class="n">columns</span>
+<span class="s1">&#39;[[&quot;a&quot;], [&quot;b&quot;, &quot;c&quot;]]&#39;</span> <span class="p">:</span> <span class="n">product</span> <span class="n">between</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">]</span>
+<span class="s1">&#39;[[&quot;a&quot;, &quot;d&quot;], [&quot;b&quot;, &quot;c&quot;]]&#39;</span> <span class="p">:</span> <span class="n">product</span> <span class="n">between</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">]</span>
+<span class="s1">&#39;[[&quot;a&quot;, &quot;d&quot;], None]&#39;</span> <span class="p">:</span> <span class="n">product</span> <span class="n">between</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">all</span> <span class="n">other</span> <span class="n">columns</span>
+</pre></div>
+</div>
+<p class="last">Note that if column is not specified, then the function will return the
+pairwise correlation between the combination of all the numeric columns
+in data. See the examples section for more details on this.</p>
 </dd>
 <dt><strong>tail</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd><p class="first last">Indicates whether to return the ‘two-sided’ or ‘one-sided’ p-values</p>
@@ -171,28 +180,19 @@ directory. To change that, specify the filename with full path.</p>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>The Pearson correlation coefficient measures the linear relationship
-between two datasets. Strictly speaking, Pearson’s correlation requires
-that each dataset be normally distributed. Correlations of -1 or +1 imply
-an exact linear relationship.</p>
-<p>The Spearman correlation is a nonparametric measure of the monotonicity of
-the relationship between two datasets. Unlike the Pearson correlation,
-the Spearman correlation does not assume that both datasets are normally
-distributed. Correlations of -1 or +1 imply an exact monotonic
-relationship.</p>
-<p>Kendall’s tau is a measure of the correspondence between two rankings.
-Values close to 1 indicate strong agreement, values close to -1 indicate
-strong disagreement.</p>
-<p>The percentage bend correlation (Wilcox 1994) is a robust method that
-protects against univariate outliers.</p>
-<p>The Shepherd’s pi correlation (Schwarzkopf et al. 2012) is a robust method
-that returns the equivalent of the Spearman’s rho after outliers removal.</p>
-<p>Please note that NaN are automatically removed from datasets.</p>
+<p>Please refer to the <cite>pingouin.corr()</cite> function for a description of the
+different method. NaN are automatically removed from datasets.</p>
+<p>This function is more flexible and gives a much more detailed
+output than the <cite>pandas.DataFrame.corr()</cite> method (i.e. p-values,
+confidence interval, Bayes Factor..). This comes however at
+an increased computational cost. While this should not be discernible for
+dataframe with less than 10,000 rows and/or less than 20 columns, this
+function can be extremely slow for very large dataset.</p>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">One-tailed spearman correlation corrected for multiple comparisons</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin.datasets</span> <span class="k">import</span> <span class="n">read_dataset</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_corr</span><span class="p">,</span> <span class="n">print_table</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_corr</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;pairwise_corr&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span> <span class="o">=</span> <span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;spearman&#39;</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>                      <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;bonf&#39;</span><span class="p">)</span>
@@ -201,20 +201,24 @@ that returns the equivalent of the Spearman’s rho after outliers removal.</p>
 </div>
 </li>
 <li><p class="first">Robust two-sided correlation with uncorrected p-values</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin.datasets</span> <span class="k">import</span> <span class="n">read_dataset</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_corr</span><span class="p">,</span> <span class="n">print_table</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;pairwise_corr&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span> <span class="o">=</span> <span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Openness&#39;</span><span class="p">,</span> <span class="s1">&#39;Extraversion&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>                      <span class="s1">&#39;Neuroticism&#39;</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;percbend&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">print_table</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Openness&#39;</span><span class="p">,</span> <span class="s1">&#39;Extraversion&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                             <span class="s1">&#39;Neuroticism&#39;</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;percbend&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">Export the results to a .csv file</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin.datasets</span> <span class="k">import</span> <span class="n">read_dataset</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_corr</span><span class="p">,</span> <span class="n">print_table</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;pairwise_corr&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="s1">&#39;pairwise_corr.csv&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">export_filename</span><span class="o">=</span><span class="s1">&#39;pairwise_corr.csv&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">One-versus-others pairwise correlations</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Neuroticism&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Pairwise correlations between two lists of columns (cartesian product)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[[</span><span class="s1">&#39;Neuroticism&#39;</span><span class="p">,</span> <span class="s1">&#39;Extraversion&#39;</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span>                             <span class="p">[</span><span class="s1">&#39;Openness&#39;</span><span class="p">,</span> <span class="s1">&#39;Agreeableness&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </li>

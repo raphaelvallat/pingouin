@@ -3,6 +3,9 @@ import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr, spearmanr, kendalltau
 from pingouin.utils import _remove_na
+from pingouin.effsize import compute_esci
+from pingouin.bayesian import bayesfactor_pearson
+
 from pingouin.nonparametric import mad, madmedianrule
 
 __all__ = ["corr", "partial_corr", "rm_corr", "intraclass_corr"]
@@ -445,7 +448,6 @@ def corr(x, y, tail='two-sided', method='pearson'):
     adj_r2 = 1 - (((1 - r**2) * (nx - 1)) / (nx - 3))
 
     # Compute the parametric 95% confidence interval
-    from pingouin.effsize import compute_esci
     ci = compute_esci(ef=r, nx=nx, ny=nx, eftype='r')
 
     stats = pd.DataFrame({}, index=[method])
@@ -456,7 +458,6 @@ def corr(x, y, tail='two-sided', method='pearson'):
     stats['p-val'] = pval if tail == 'two-sided' else .5 * pval
 
     # Compute the BF10 for Pearson correlation only
-    from pingouin.bayesian import bayesfactor_pearson
     if method == 'pearson':
         stats['BF10'] = bayesfactor_pearson(r, nx)
 

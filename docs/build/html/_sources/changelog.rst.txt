@@ -15,18 +15,19 @@ v0.2.0 (dev)
 a. Added Welch ANOVA
 b. Added Games-Howell post-hoc test for one-way ANOVA with unequal variances
 
+**Correlation/Regression**
+
+a. Added linear_regression function.
+b. Added logistic_regression function.
+c. Added mediation_analysis function.
+d. Support for advanced indexing (product / combination) in pairwise_corr function.
+
 **Documentation**
 
 a. Added Guidelines section with flow charts
 b. Renamed API section to Functions
 c. Major improvements to the documentation of several functions
-
-**Regression**
-
-a. Added linear_regression function.
-b. Added logistic_regression function.
-c. Added mediation_analysis function.
-
+d. Added Gitter channel
 
 v0.1.10 (October 2018)
 ----------------------
