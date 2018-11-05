@@ -27,6 +27,7 @@ d. Support for advanced indexing (product / combination) in pairwise_corr functi
 a. Added Guidelines section with flow charts
 b. Renamed API section to Functions
 c. Major improvements to the documentation of several functions
+d. Added Gitter channel
 
 v0.1.10 (October 2018)
 ----------------------

@@ -20,6 +20,12 @@
 .. image:: https://mybinder.org/badge.svg
     :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/master
 
+.. image:: http://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244/status.svg
+    :target: http://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244
+
+.. image:: https://badges.gitter.im/owner/repo.png
+    :target: https://gitter.im/pingouin-stats/Lobby
+
 
 .. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/pictures/logo_pingouin.png
    :align:   center
@@ -57,6 +63,11 @@ Documentation
 =============
 
 - `Link to documentation <https://raphaelvallat.github.io/pingouin/build/html/index.html>`_
+
+Chat
+====
+
+If you have questions, please ask them in the public `Gitter chat <https://gitter.im/pingouin-stats/Lobby>`_
 
 Installation
 ============

@@ -580,6 +580,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         '["a"]' : product between a and all the other numeric columns
         '[["a"], ["b", "c"]]' : product between ["a"] and ["b", "c"]
         '[["a", "d"], ["b", "c"]]' : product between ["a", "d"] and ["b", "c"]
+        '[["a", "d"], None]' : product between ["a", "d"] and all other columns
 
         Note that if column is not specified, then the function will return the
         pairwise correlation between the combination of all the numeric columns
