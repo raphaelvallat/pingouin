@@ -37,7 +37,7 @@ install:
     - source activate testenv
     # Install dependencies :
     - if [ "${TEST}" == "standard" ]; then
-        pip install codecov pytest pytest-cov pytest-sugar pytest-travis-fold openpyxl;
+        pip install codecov pytest==3.9.2 pytest-cov pytest-sugar pytest-travis-fold openpyxl;
         pip install pandas statsmodels scikit-learn;
       fi;
     - if [ "${TEST}" == "flake" ]; then
