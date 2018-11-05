@@ -1,7 +1,9 @@
 Code
 ----
+- Homogenize column names in output dataframe
+- CI95% in a single column for linear/logistic regression
 - pairwise_ttests should accept two within or two between factors
-- Add Hotelling test
 - Do not compute BF10 in too large datasets (scipy.integrate.quad crashes)
+- Add Hotelling test
 - pingouin.plotting module (e.g. circular, repeated measures corr, covariance)?
 - Add more circular stats
