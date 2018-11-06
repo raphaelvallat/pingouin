@@ -1,3 +1,3 @@
-numpy
+numpy>=1.15
 scipy
 pandas

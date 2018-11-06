@@ -733,7 +733,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         assert comb[1] in keys
 
     # Initialize vectors
-    for idx, comb in enumerate(combs):
+    for comb in combs:
         col1, col2 = comb
         cor_st = corr(data[col1].values,
                       data[col2].values,
