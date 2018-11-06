@@ -733,7 +733,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         assert comb[1] in keys
 
     # Initialize vectors
-    for comb in combs:
+    for idx, comb in enumerate(combs):
         col1, col2 = comb
         cor_st = corr(data[col1].values,
                       data[col2].values,
@@ -749,7 +749,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
             'r2': cor_st['r2'][0],
             'adj_r2': cor_st['adj_r2'][0],
             'p-unc': cor_st['p-val'][0],
-            'BF10': cor_st['BF10'][0] if method == 'pearson' else np.nan},
+            'BF10': cor_st['BF10'][0] if 'BF10' in cor_st.keys() else np.nan},
             ignore_index=True)
 
     # Multiple comparisons
