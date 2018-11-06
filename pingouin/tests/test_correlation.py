@@ -22,6 +22,7 @@ class TestCorrelation(_TestPingouin):
         # Compare with robust corr toolbox
         stats = corr(x, y, method='skipped')
         assert np.round(stats['r'].values, 3) == 0.512
+        assert stats['n'].values == 30
         stats = corr(x, y, method='percbend')
         assert np.round(stats['r'].values, 3) == 0.484
         # Not normally distributed

@@ -620,6 +620,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         'Y' : Name(s) of second columns
         'method' : method used to compute the correlation
         'tail' : indicates whether the p-values are one-sided or two-sided
+        'n' : Sample size (after NaN removal)
         'r' : Correlation coefficients
         'CI95' : 95% parametric confidence intervals
         'r2' : R-squared values
@@ -632,14 +633,17 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     Notes
     -----
     Please refer to the `pingouin.corr()` function for a description of the
-    different method. NaN are automatically removed from datasets.
+    different methods. NaN are automatically removed from the data.
 
     This function is more flexible and gives a much more detailed
     output than the `pandas.DataFrame.corr()` method (i.e. p-values,
     confidence interval, Bayes Factor..). This comes however at
     an increased computational cost. While this should not be discernible for
     dataframe with less than 10,000 rows and/or less than 20 columns, this
-    function can be extremely slow for very large dataset.
+    function can be slow for very large dataset.
+
+    For speed purpose, the Bayes Factor is only computed when the sample size
+    is less than 1000 (and method='pearson').
 
     Examples
     --------
@@ -739,6 +743,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
             'Y': col2,
             'method': method,
             'tail': tail,
+            'n': cor_st['n'][0],
             'r': cor_st['r'][0],
             'CI95%': cor_st['CI95%'][0],
             'r2': cor_st['r2'][0],
@@ -765,8 +770,11 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     for c in ['r', 'r2', 'adj_r2', 'z']:
         stats[c] = stats[c].round(3)
 
-    col_order = ['X', 'Y', 'method', 'tail', 'r', 'CI95%', 'r2', 'adj_r2',
+    col_order = ['X', 'Y', 'method', 'tail', 'n', 'r', 'CI95%', 'r2', 'adj_r2',
                  'z', 'p-unc', 'p-corr', 'p-adjust', 'BF10']
+
+    # Convert n to int
+    stats['n'] = stats['n'].astype(int)
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
     if export_filename is not None:

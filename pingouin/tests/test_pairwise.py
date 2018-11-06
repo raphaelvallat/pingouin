@@ -91,6 +91,7 @@ class TestPairwise(_TestPingouin):
         jasp_rval = [-0.350, -0.01, -.134, -.368, .267, .055, .065, .159,
                      -.013, .159]
         assert np.allclose(stats['r'].values, jasp_rval)
+        assert stats['n'].values[0] == 500
         # Correct for multiple comparisons
         pairwise_corr(data=data, method='spearman', tail='one-sided',
                       padjust='bonf')

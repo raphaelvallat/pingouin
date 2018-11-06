@@ -292,6 +292,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     stats : pandas DataFrame
         Test summary ::
 
+        'n' : Sample size (after NaN removal)
         'r' : Correlation coefficient
         'CI95' : 95% parametric confidence intervals
         'r2' : R-squared
@@ -373,49 +374,53 @@ def corr(x, y, tail='two-sided', method='pearson'):
         >>> # Compute Pearson correlation
         >>> from pingouin import corr
         >>> corr(x, y)
-            method   r      CI95%         r2     adj_r2  p-val   BF10
-            pearson  0.491  [0.16, 0.72]  0.242  0.185   0.0058  6.135
+            method   n   r      CI95%         r2     adj_r2  p-val   BF10
+            pearson  30  0.491  [0.16, 0.72]  0.242  0.185   0.0058  6.135
 
     2. Pearson correlation with two outliers
 
         >>> x[3], y[5] = 12, -8
         >>> corr(x, y)
-            method   r      CI95%          r2     adj_r2  p-val  BF10
-            pearson  0.147  [-0.23, 0.48]  0.022  -0.051  0.439  0.19
+            method   n    r      CI95%          r2     adj_r2  p-val  BF10
+            pearson  30   0.147  [-0.23, 0.48]  0.022  -0.051  0.439  0.19
 
     3. Spearman correlation
 
         >>> corr(x, y, method="spearman")
-            method    r      CI95%         r2     adj_r2  p-val
-            spearman  0.401  [0.05, 0.67]  0.161  0.099   0.028
+            method    n   r      CI95%         r2     adj_r2  p-val
+            spearman  30  0.401  [0.05, 0.67]  0.161  0.099   0.028
 
     4. Percentage bend correlation (robust)
 
         >>> corr(x, y, method='percbend')
-            method    r      CI95%         r2     adj_r2  p-val
-            percbend  0.389  [0.03, 0.66]  0.151  0.089   0.034
+            method    n   r      CI95%         r2     adj_r2  p-val
+            percbend  30  0.389  [0.03, 0.66]  0.151  0.089   0.034
 
     5. Shepherd's pi correlation (robust)
 
         >>> corr(x, y, method='shepherd')
-            method    r      CI95%         r2     adj_r2  p-val
-            percbend  0.437  [0.09, 0.69]  0.191  0.131   0.020
+            method    n   r      CI95%         r2     adj_r2  p-val
+            percbend  30  0.437  [0.09, 0.69]  0.191  0.131   0.020
 
     6. Skipped spearman correlation (robust)
 
         >>> corr(x, y, method='skipped')
-            method    r      CI95%         r2     adj_r2  p-val
-            percbend  0.437  [0.09, 0.69]  0.191  0.131   0.020
+            method    n   r      CI95%         r2     adj_r2  p-val
+            percbend  30  0.437  [0.09, 0.69]  0.191  0.131   0.020
 
     7. One-tailed Spearman correlation
 
         >>> corr(x, y, tail="one-sided", method='shepherd')
-            method    r      CI95%         r2     adj_r2  p-val
-            spearman  0.401  [0.05, 0.67]  0.161  0.099   0.014
+            method    n   r      CI95%         r2     adj_r2  p-val
+            spearman  30  0.401  [0.05, 0.67]  0.161  0.099   0.014
 
     8. Using columns of a pandas dataframe
 
+        >>> import pandas as pd
+        >>> data = pd.DataFrame({'x': x, 'y': y})
         >>> corr(data['x'], data['y'])
+            method   n    r      CI95%          r2     adj_r2  p-val  BF10
+            pearson  30   0.147  [-0.23, 0.48]  0.022  -0.051  0.439  0.19
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -451,6 +456,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     ci = compute_esci(ef=r, nx=nx, ny=nx, eftype='r')
 
     stats = pd.DataFrame({}, index=[method])
+    stats['n'] = nx
     stats['r'] = np.round(r, 3)
     stats['CI95%'] = [ci]
     stats['r2'] = np.round(r**2, 3)
@@ -458,10 +464,10 @@ def corr(x, y, tail='two-sided', method='pearson'):
     stats['p-val'] = pval if tail == 'two-sided' else .5 * pval
 
     # Compute the BF10 for Pearson correlation only
-    if method == 'pearson':
+    if method == 'pearson' and nx < 1000:
         stats['BF10'] = bayesfactor_pearson(r, nx)
 
-    col_order = ['r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'BF10']
+    col_order = ['n', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'BF10']
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
     return stats
