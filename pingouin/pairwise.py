@@ -147,18 +147,13 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         col = within if effects == 'within' else between
 
         # Extract effects
-        labels = list(data[col].unique())
+        labels = data[col].unique().tolist()
         for l in labels:
-            ddic[l] = data[data[col] == l][dv]
-
-        dt_array = pd.DataFrame.from_dict(ddic)
-
-        # Extract column names
-        col_names = list(dt_array.columns.values)
+            ddic[l] = data.loc[data[col] == l, dv].values
 
         # Number and labels of possible comparisons
-        if len(col_names) >= 2:
-            combs = list(combinations(col_names, 2))
+        if len(labels) >= 2:
+            combs = list(combinations(labels, 2))
             # ntests = len(combs)
         else:
             raise ValueError('Data must have at least two columns')
@@ -166,8 +161,8 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         # Initialize vectors
         for comb in combs:
             col1, col2 = comb
-            x = dt_array[col1].dropna().values
-            y = dt_array[col2].dropna().values
+            x = ddic.get(col1)
+            y = ddic.get(col2)
             df_ttest = ttest(x, y, paired=paired, tail=tail)
             ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
             stats = _append_stats_dataframe(stats, x, y, col1, col2, effects,
@@ -178,19 +173,19 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     if effects.lower() == 'interaction':
         paired = False
         # Extract data
-        labels_with = list(data[within].unique())
-        labels_betw = list(data[between].unique())
+        labels_with = data[within].unique().tolist()
+        labels_betw = data[between].unique().tolist()
         for lw in labels_with:
             for l in labels_betw:
-                tmp = data[data[within] == lw]
-                ddic[lw, l] = tmp[tmp[between] == l][dv]
-        dt_array = pd.DataFrame.from_dict(ddic)
+                tmp = data.loc[data[within] == lw]
+                ddic[lw, l] = tmp.loc[tmp[between] == l, dv].values
 
         # Pairwise comparisons
-        for time, sub_dt in dt_array.groupby(level=0, axis=1):
-            col1, col2 = sub_dt.columns.get_level_values(1)
-            x = sub_dt[(time, col1)].dropna().values
-            y = sub_dt[(time, col2)].dropna().values
+        combs = list(product(labels_with, combinations(labels_betw, 2)))
+        for comb in combs:
+            time, (col1, col2) = comb
+            x = ddic.get((time, col1))
+            y = ddic.get((time, col2))
             df_ttest = ttest(x, y, paired=paired, tail=tail)
             ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
             stats = _append_stats_dataframe(stats, x, y, col1, col2, effects,
@@ -245,6 +240,10 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
 
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
+
+    # Replace remaining NaN
+    stats.fillna('-', inplace=True)
+
     if export_filename is not None:
         _export_table(stats, export_filename)
     return stats
