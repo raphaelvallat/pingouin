@@ -8,21 +8,7 @@ from pingouin.pairwise import (pairwise_ttests, pairwise_corr, pairwise_tukey,
 from pingouin.datasets import read_dataset
 
 # Dataset for pairwise_ttests
-n = 30
-months = ['August', 'January', 'June']
-# Generate random data
-np.random.seed(1234)
-control = np.random.normal(5.5, size=len(months) * n)
-meditation = np.r_[np.random.normal(5.5, size=n),
-                   np.random.normal(5.8, size=n),
-                   np.random.normal(6.4, size=n)]
-
-df = pd.DataFrame({'Scores': np.r_[control, meditation],
-                   'Time': np.r_[np.repeat(months, n), np.repeat(months, n)],
-                   'Group': np.repeat(['Control', 'Meditation'],
-                                      len(months) * n),
-                   'Subject': np.r_[np.tile(np.arange(n), 3),
-                                    np.tile(np.arange(n, n + n), 3)]})
+df = read_dataset('mixed_anova.csv')
 
 
 class TestPairwise(_TestPingouin):
@@ -30,21 +16,28 @@ class TestPairwise(_TestPingouin):
 
     def test_pairwise_ttests(self):
         """Test function pairwise_ttests"""
+        # Within + Between + Within * Between
         pairwise_ttests(dv='Scores', within='Time', between='Group',
-                        subject='Subject', effects='interaction', data=df,
-                        padjust='holm', alpha=.01)
-        pairwise_ttests(dv='Scores', within='Time', between='Group',
-                        subject='Subject', effects='all', data=df,
-                        padjust='fdr_bh')
+                        subject='Subject', data=df, alpha=.01)
+        pairwise_ttests(dv='Scores', within=['Time'], between=['Group'],
+                        subject='Subject', data=df, padjust='fdr_bh',
+                        return_desc=True)
+        # Simple within
         pairwise_ttests(dv='Scores', within='Time', subject='Subject',
-                        effects='within', data=df, padjust='none',
-                        return_desc=False)
-        pairwise_ttests(dv='Scores', within=None, between='Group',
-                        effects='between', data=df, padjust='bonf',
-                        tail='one-sided', effsize='cohen')
-        pairwise_ttests(dv='Scores', within=None, between='Group',
-                        effects='between', data=df,
-                        export_filename='test_export.csv')
+                        data=df, return_desc=True)
+        # Simple between
+        pairwise_ttests(dv='Scores', between='Group',
+                        data=df, padjust='bonf', tail='one-sided',
+                        effsize='cohen', export_filename='test_export.csv')
+
+        # Two between factors
+        pairwise_ttests(dv='Scores', between=['Time', 'Group'], data=df,
+                        padjust='holm')
+
+        # Two within subject factors
+        pairwise_ttests(dv='Scores', within=['Group', 'Time'],
+                        subject='Subject', data=df, padjust='bonf')
+
         # Wrong tail argument
         with pytest.raises(ValueError):
             pairwise_ttests(dv='Scores', between='Group', data=df,
@@ -52,14 +45,26 @@ class TestPairwise(_TestPingouin):
         # Wrong alpha argument
         with pytest.raises(ValueError):
             pairwise_ttests(dv='Scores', between='Group', data=df, alpha='.05')
+
+        # Both multiple between and multiple within
+        with pytest.raises(ValueError):
+            pairwise_ttests(dv='Scores', between=['Time', 'Group'],
+                            within=['Time', 'Group'], subject='Subject',
+                            data=df)
+
         # Missing values
         df.iloc[[10, 15], 0] = np.nan
-        pairwise_ttests(dv='Scores', within='Time', effects='within',
-                        subject='Subject', data=df)
+        pairwise_ttests(dv='Scores', within='Time', subject='Subject', data=df)
         # Wrong input argument
         df['Group'] = 'Control'
         with pytest.raises(ValueError):
             pairwise_ttests(dv='Scores', between='Group', data=df)
+
+        # Two within factors from other datasets and with NaN values
+        df2 = read_dataset('rm_anova')
+        pairwise_ttests(dv='DesireToKill',
+                        within=['Disgustingness', 'Frighteningness'],
+                        subject='Subject', padjust='holm', data=df2)
 
     def test_pairwise_tukey(self):
         """Test function pairwise_tukey"""

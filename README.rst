@@ -125,15 +125,15 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: python
 
-  # Generate two correlated random variables
   import numpy as np
+  import pingouin as pg
+
   np.random.seed(123)
   mean, cov, n = [4, 5], [(1, .6), (.6, 1)], 30
   x, y = np.random.multivariate_normal(mean, cov, n).T
 
   # T-test
-  from pingouin import ttest
-  ttest(x, y)
+  pg.ttest(x, y)
 
 .. table:: Output
    :widths: auto
@@ -151,8 +151,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: python
 
-  from pingouin import corr
-  corr(x, y)
+  pg.corr(x, y)
 
 .. table:: Output
    :widths: auto
@@ -173,7 +172,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
   # Introduce an outlier
   x[5] = 18
   # Use the robust Shepherd's pi correlation
-  corr(x, y, method="shepherd")
+  pg.corr(x, y, method="shepherd")
 
 .. table:: Output
    :widths: auto
@@ -191,10 +190,9 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: python
 
-   from pingouin import normality, multivariate_normality
    # Return a boolean (true if normal) and the associated p-value
-   print(normality(x, y))                                 # Univariate normality
-   print(multivariate_normality(np.column_stack((x, y)))) # Multivariate normality
+   print(pg.normality(x, y))                                 # Univariate normality
+   print(pg.multivariate_normality(np.column_stack((x, y)))) # Multivariate normality
 
 .. parsed-literal::
 
@@ -208,51 +206,42 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: python
 
-  # Generate a pandas DataFrame
-  import pandas as pd
-  np.random.seed(123)
-  mean, cov, n = [4, 6], [(1, .6), (.6, 1)], 10
-  x, y = np.random.multivariate_normal(mean, cov, n).T
-  z = np.random.normal(4, size=n)
+  # Read an example dataset
+  from pingouin.datasets import read_dataset
+  df = read_dataset('mixed_anova')
 
-  # DV = dependant variable / Group = between-subject factor
-  df = pd.DataFrame({'Group': np.repeat(['A', 'B', 'C'], 10),
-                     'DV': np.hstack([x, y, z])})
-
-  # One-way ANOVA
-  from pingouin import anova
-  stats = anova(data=df, dv='DV', between='Group', detailed=True)
-  print(stats)
+  # Run the ANOVA
+  aov = pg.anova(data=df, dv='Scores', between='Group', detailed=True)
+  print(aov)
 
 .. table:: Output
   :widths: auto
 
-  ========  ======  ====  ======  =======  =======  =======
-  Source        SS    DF      MS        F    p-unc      np2
-  ========  ======  ====  ======  =======  =======  =======
-  Group     28.995     2  14.498    8.929    0.001    0.398
-  Within    43.837    27   1.624
-  ========  ======  ====  ======  =======  =======  =======
+  ========  =======  ====  =====  =====  =======  =====
+  Source         SS    DF     MS  F      p-unc    np2
+  ========  =======  ====  =====  =====  =======  =====
+  Group       5.460     1  5.460  5.244  0.02320  0.029
+  Within    185.343   178  1.041  -      -        -
+  ========  =======  ====  =====  =====  =======  =====
 
 ------------
 
-6. One-way non-parametric ANOVA (Kruskal-Wallis)
-################################################
+6. Repeated measures ANOVA
+##########################
 
 .. code-block:: python
 
-  from pingouin import kruskal
-  stats = kruskal(data=df, dv='DV', between='Group')
-  print(stats)
+  pg.rm_anova(data=df, dv='Scores', within='Time', subject='Subject', detailed=True)
 
 .. table:: Output
   :widths: auto
 
-  ========  =======  ======  =======
-  Source      ddof1       H    p-unc
-  ========  =======  ======  =======
-  Group           2  10.622    0.005
-  ========  =======  ======  =======
+  ========  =======  ====  =====  =====  ========  =====  =====
+  Source         SS    DF     MS  F      p-unc     np2    eps
+  ========  =======  ====  =====  =====  ========  =====  =====
+  Time        7.628     2  3.814  3.913  0.022629  0.062  0.999
+  Error     115.027   118  0.975  -      -         -      -
+  ========  =======  ====  =====  =====  ========  =====  =====
 
 ------------
 
@@ -261,25 +250,23 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: python
 
-  from pingouin import pairwise_ttests, print_table
-
   # FDR-corrected post hocs with Hedges'g effect size
-  posthoc = pairwise_ttests(data=df, dv='DV', between='Group', padjust='fdr_bh',
-                            effsize='hedges')
+  posthoc = pg.pairwise_ttests(data=df, dv='Scores', within='Time', subject='Subject',
+                               padjust='fdr_bh', effsize='hedges')
 
   # Pretty printing of table
-  print_table(posthoc)
+  pg.print_table(posthoc, floatfmt='.3f')
 
 .. table:: Output
   :widths: auto
 
-  =======  ===  ===  ========  =======  =========  =======  ========  ==========  ======  ========  ========
-  Type     A    B    Paired          T  tail         p-unc    p-corr  p-adjust      BF10    efsize  eftype
-  =======  ===  ===  ========  =======  =========  =======  ========  ==========  ======  ========  ========
-  between  A    B    False      -3.472  two-sided    0.003     0.004  fdr_bh      13.734    -1.487  hedges
-  between  A    C    False      -0.096  two-sided    0.925     0.925  fdr_bh       0.399    -0.041  hedges
-  between  B    C    False       3.851  two-sided    0.001     0.004  fdr_bh      26.509     1.650  hedges
-  =======  ===  ===  ========  =======  =========  =======  ========  ==========  ======  ========  ========
+  ==========  =======  =======  ========  ======  =========  =======  ========  ==========  ======  ========  ========
+  Contrast    A        B        Paired         T  tail         p-unc    p-corr  p-adjust      BF10    efsize  eftype
+  ==========  =======  =======  ========  ======  =========  =======  ========  ==========  ======  ========  ========
+  Time        August   January  True      -1.740  two-sided    0.087     0.131  fdr_bh       0.582    -0.328  hedges
+  Time        August   June     True      -2.743  two-sided    0.008     0.024  fdr_bh       4.232    -0.485  hedges
+  Time        January  June     True      -1.024  two-sided    0.310     0.310  fdr_bh       0.232    -0.170  hedges
+  ==========  =======  =======  ========  ======  =========  =======  ========  ==========  ======  ========  ========
 
 ------------
 
@@ -288,29 +275,22 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: python
 
-  # Add a "Time" column in the DataFrame
-  df['Time'] = np.tile(np.repeat(['Pre', 'Post'], 5), 3)
-  # Create a subject identifier column
-  df['Subject'] = np.r_[np.tile(np.arange(5), 2), np.tile(np.arange(5, 10), 2),
-                        np.tile(np.arange(10, 15), 2)]
-
   # Compute the two-way mixed ANOVA and export to a .csv file
-  from pingouin import mixed_anova
-  stats = mixed_anova(data=df, dv='DV', between='Group', within='Time',
-                      subject='Subject', correction=False,
-                      export_filename='mixed_anova.csv')
-  print_table(stats)
+  aov = pg.mixed_anova(data=df, dv='Scores', between='Group', within='Time',
+                       subject='Subject', correction=False,
+                       export_filename='mixed_anova.csv')
+  pg.print_table(aov)
 
 .. table:: Output
   :widths: auto
 
-  ===========  ======  =====  =====  ======  =====  =======  =====  ===
-  Source           SS    DF1    DF2      MS      F    p-unc    np2  eps
-  ===========  ======  =====  =====  ======  =====  =======  =====  ===
-  Group        28.995      2     12  14.498  8.622    0.005  0.590
-  Time          6.839      1     12   6.839  4.995    0.045  0.294  1.0
-  Interaction   0.391      2     12   0.195  0.143    0.868  0.023
-  ===========  ======  =====  =====  ======  =====  =======  =====  ===
+  ===========  =====  =====  =====  =====  =====  =======  =====  =====
+  Source          SS    DF1    DF2     MS      F    p-unc    np2  eps
+  ===========  =====  =====  =====  =====  =====  =======  =====  =====
+  Group        5.460      1     58  5.460  5.052    0.028  0.080  -
+  Time         7.628      2    116  3.814  4.027    0.020  0.065  0.999
+  Interaction  5.168      2    116  2.584  2.728    0.070  0.045  -
+  ===========  =====  =====  =====  =====  =====  =======  =====  =====
 
 ------------
 
@@ -319,9 +299,10 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: python
 
-    df = pd.DataFrame({'X': x, 'Y': y, 'Z': z})
-    from pingouin import pairwise_corr
-    pairwise_corr(df, columns=['X', 'Y', 'Z'])
+  np.random.seed(123)
+  z = np.random.normal(5, 1, 30)
+  data = pd.DataFrame({'X': x, 'Y': y, 'Z': z})
+  pg.pairwise_corr(data, columns=['X', 'Y', 'Z'])
 
 .. table:: Output
   :widths: auto
@@ -329,9 +310,9 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
   ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======
   X    Y    method    tail         n      r  CI95%             r2    adj_r2      z    p-unc    BF10
   ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======
-  X    Y    pearson   two-sided   10  0.707  [0.14 0.92]    0.500     0.357  0.881    0.022   3.227
-  X    Z    pearson   two-sided   10  0.283  [-0.42  0.77]  0.080    -0.183  0.291    0.428   0.321
-  Y    Z    pearson   two-sided   10  0.105  [-0.56  0.69]  0.011    -0.271  0.105    0.772   0.243
+  X    Y    pearson   two-sided   30  0.366  [0.01 0.64]    0.134     0.070  0.384    0.047   1.006
+  X    Z    pearson   two-sided   30  0.251  [-0.12  0.56]  0.063    -0.006  0.256    0.181   0.344
+  Y    Z    pearson   two-sided   30  0.020  [-0.34  0.38]  0.000    -0.074  0.020    0.916   0.142
   ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======
 
 10. Convert between effect sizes
@@ -339,9 +320,8 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: python
 
-    from pingouin import convert_effsize
     # Convert from Cohen's d to Hedges' g
-    convert_effsize(0.4, 'cohen', 'hedges', nx=10, ny=12)
+    pg.convert_effsize(0.4, 'cohen', 'hedges', nx=10, ny=12)
 
 .. parsed-literal::
 
@@ -352,27 +332,25 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: ipython3
 
-    from pingouin import linear_regression
-    linear_regression(df[['X', 'Z']], df['Y'])
+    pg.linear_regression(data[['X', 'Z']], data['Y'])
 
 .. table:: Linear regression summary
   :widths: auto
 
-  =========  ======  =====  ======  ======  =====  ========  =========  ==========
-  names        coef     se       T    pval     r2    adj_r2   CI[2.5%]   CI[97.5%]
-  =========  ======  =====  ======  ======  =====  ========  =========  ==========
-  Intercept   3.855  1.417   2.720   0.030  0.510     0.370      0.504       7.205
-  X           0.673  0.252   2.669   0.032  0.510     0.370      0.077       1.269
-  Z          -0.124  0.331  -0.375   0.719  0.510     0.370     -0.906       0.658
-  =========  ======  =====  ======  ======  =====  ========  =========  ==========
+  =========  ======  =====  ======  ======  =====  ========  ==========  ===========
+  names        coef     se       T    pval     r2    adj_r2    CI[2.5%]    CI[97.5%]
+  =========  ======  =====  ======  ======  =====  ========  ==========  ===========
+  Intercept   4.650  0.841   5.530   0.000  0.139     0.076       2.925        6.376
+  X           0.143  0.068   2.089   0.046  0.139     0.076       0.003        0.283
+  Z          -0.069  0.167  -0.416   0.681  0.139     0.076      -0.412        0.273
+  =========  ======  =====  ======  ======  =====  ========  ==========  ===========
 
 12. Mediation analysis
 ######################
 
 .. code-block:: ipython3
 
-    from pingouin import mediation_analysis
-    mediation_analysis(data=df, x='X', m='Z', y='Y', n_boot=500)
+  pg.mediation_analysis(data=data, x='X', m='Z', y='Y', n_boot=500)
 
 .. table:: Mediation summary
   :widths: auto
@@ -380,11 +358,11 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
   ========  ======  ==========  ===========  =====
   Path        Beta    CI[2.5%]    CI[97.5%]  Sig
   ========  ======  ==========  ===========  =====
-  X -> M     0.216      -0.380        0.812  No
-  M -> Y     0.126      -0.846        1.099  No
-  X -> Y     0.646       0.119        1.173  Yes
-  Direct     0.673       0.077        1.270  Yes
-  Indirect  -0.027      -0.485        0.153  No
+  X -> M     0.103      -0.051        0.256  No
+  M -> Y     0.018      -0.332        0.369  No
+  X -> Y     0.136       0.002        0.269  Yes
+  Direct     0.143       0.003        0.283  Yes
+  Indirect  -0.007      -0.050        0.027  No
   ========  ======  ==========  ===========  =====
 
 Development

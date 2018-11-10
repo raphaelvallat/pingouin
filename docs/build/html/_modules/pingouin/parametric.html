@@ -471,7 +471,7 @@
 <span class="sd">    One-way repeated-measures ANOVA (Ryan et al 2013 dataset).</span>
 
 <span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
-<span class="sd">        &gt;&gt;&gt; from pingouin import rm_anova, print_table</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import rm_anova</span>
 <span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;rm_anova&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; aov = rm_anova(dv=&#39;DesireToKill&#39;, within=&#39;Disgustingness&#39;,</span>
 <span class="sd">                           subject=&#39;Subject&#39;, data=df, detailed=True)</span>
@@ -652,11 +652,11 @@
 <span class="sd">    Two-way repeated-measures ANOVA.</span>
 
 <span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
-<span class="sd">        &gt;&gt;&gt; from pingouin import rm_anova2, print_table</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import rm_anova2</span>
 <span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;rm_anova&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; aov = rm_anova2(dv=&#39;DesireToKill&#39;,</span>
-<span class="sd">                           within=[&#39;Disgustingness&#39;, &#39;Frighteningness&#39;],</span>
-<span class="sd">                           subject=&#39;Subject&#39;, data=df)</span>
+<span class="sd">        &gt;&gt;&gt;                 within=[&#39;Disgustingness&#39;, &#39;Frighteningness&#39;],</span>
+<span class="sd">        &gt;&gt;&gt;                 subject=&#39;Subject&#39;, data=df)</span>
 <span class="sd">        &gt;&gt;&gt; print(aov)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">f</span>
@@ -785,10 +785,11 @@
 <span class="sd">    ----------</span>
 <span class="sd">    dv : string</span>
 <span class="sd">        Name of column containing the dependant variable.</span>
-<span class="sd">    between : string or list</span>
+<span class="sd">    between : string or list with two elements</span>
 <span class="sd">        Name(s) of column containing the between factor.</span>
 <span class="sd">        If between is a single string, then compute a one-way ANOVA, if between</span>
-<span class="sd">        is a list with two strings, compute a two-way ANOVA.</span>
+<span class="sd">        is a list with two elements (e.g. [&#39;Factor1&#39;, &#39;Factor2&#39;]),</span>
+<span class="sd">        compute a two-way ANOVA.</span>
 <span class="sd">    data : pandas DataFrame</span>
 <span class="sd">        DataFrame</span>
 <span class="sd">    detailed : boolean</span>
@@ -884,14 +885,6 @@
 <span class="sd">        &gt;&gt;&gt; aov = anova(dv=&#39;Pain threshold&#39;, between=&#39;Hair color&#39;, data=df,</span>
 <span class="sd">                        detailed=True, export_filename=&#39;pain_anova.csv&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; print_table(aov)</span>
-
-<span class="sd">    2. Two-way ANOVA.</span>
-
-<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
-<span class="sd">        &gt;&gt;&gt; from pingouin import anova</span>
-<span class="sd">        &gt;&gt;&gt; df = pd.read_csv(&#39;dataset.csv&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; anova(dv=&#39;DV&#39;, between=[&#39;factor1, &#39;factor2&#39;], data=df,</span>
-<span class="sd">                  export_filename=&#39;anova.csv&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">between</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">between</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
@@ -1327,11 +1320,10 @@
 <span class="sd">    Compute a two-way mixed model ANOVA.</span>
 
 <span class="sd">        &gt;&gt;&gt; from pingouin.datasets import read_dataset</span>
-<span class="sd">        &gt;&gt;&gt; from pingouin import mixed_anova, print_table</span>
-<span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;rm_anova&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; aov = mixed_anova(dv=&#39;DesireToKill&#39;, between=&#39;Gender&#39;,</span>
-<span class="sd">                              within=&#39;Disgustingness&#39;,</span>
-<span class="sd">                              subject=&#39;Subject&#39;, data=df)</span>
+<span class="sd">        &gt;&gt;&gt; from pingouin import mixed_anova</span>
+<span class="sd">        &gt;&gt;&gt; df = read_dataset(&#39;mixed_anova&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; aov = mixed_anova(dv=&#39;Scores&#39;, between=&#39;Group&#39;,</span>
+<span class="sd">                              within=&#39;Time&#39;, subject=&#39;Subject&#39;, data=df)</span>
 <span class="sd">        &gt;&gt;&gt; print(aov)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">f</span>

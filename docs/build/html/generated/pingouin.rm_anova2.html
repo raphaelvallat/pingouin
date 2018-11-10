@@ -166,11 +166,11 @@ directory. To change that, specify the filename with full path.</p>
 <p class="rubric">Examples</p>
 <p>Two-way repeated-measures ANOVA.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin.datasets</span> <span class="k">import</span> <span class="n">read_dataset</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">rm_anova2</span><span class="p">,</span> <span class="n">print_table</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">rm_anova2</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;rm_anova&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aov</span> <span class="o">=</span> <span class="n">rm_anova2</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DesireToKill&#39;</span><span class="p">,</span>
-<span class="go">                   within=[&#39;Disgustingness&#39;, &#39;Frighteningness&#39;],</span>
-<span class="go">                   subject=&#39;Subject&#39;, data=df)</span>
+<span class="gp">&gt;&gt;&gt; </span>                <span class="n">within</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Disgustingness&#39;</span><span class="p">,</span> <span class="s1">&#39;Frighteningness&#39;</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span>                <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">aov</span><span class="p">)</span>
 </pre></div>
 </div>

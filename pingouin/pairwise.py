@@ -35,22 +35,21 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, alpha, paired,
 
 
 def pairwise_ttests(dv=None, between=None, within=None, subject=None,
-                    effects='all', data=None, alpha=.05, tail='two-sided',
-                    padjust='none', effsize='hedges', return_desc=False,
-                    export_filename=None):
+                    data=None, alpha=.05, tail='two-sided', padjust='none',
+                    effsize='hedges', return_desc=False, export_filename=None):
     '''Pairwise T-tests.
 
     Parameters
     ----------
     dv : string
         Name of column containing the dependant variable.
-    between: string
-        Name of column containing the between factor.
-    within : string
-        Name of column containing the within factor.
+    between : string or list with 2 elements
+        Name of column(s) containing the between factor(s).
+    within : string or list with 2 elements
+        Name of column(s) containing the within factor(s).
     subject : string
-        Name of column containing the subject identifier. Only useful when
-        effects == 'within' or effects == 'interaction'.
+        Name of column containing the subject identifier. Compulsory for
+        contrast including a within-subject factor.
     data : pandas DataFrame
         DataFrame
     alpha : float
@@ -77,7 +76,7 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         'odds-ratio' : Odds ratio
         'AUC' : Area Under the Curve
     return_desc : boolean
-        If True, return group means and std
+        If True, append group means and std to the output dataframe
     export_filename : string
         Filename (without extension) for the output file.
         If None, do not export the table.
@@ -101,29 +100,56 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         'efsize' : effect sizes
         'eftype' : type of effect size
 
+    Notes
+    -----
+    If between or within is a list (e.g. ['col1', 'col2']), the function
+    returns 1) the pairwise T-tests between each values of the first column,
+    2) the pairwise T-tests between each values of the second column and
+    3) the interaction between col1 and col2. The interaction is dependent
+    of the order of the list, so ['col1', 'col2'] will not yield the same
+    results as ['col2', 'col1'].
+
+    In other words, if between is a list with two elements, the output model is
+    between1 + between2 + between1 * between2.
+
+    Similarly, if within is a list with two elements, the output model is
+    within1 + within2 + within1 * within2.
+
+    If both between and within are specified, the function return within +
+    between + within * between.
+
     Examples
     --------
-    Compute Bonferroni-corrected pairwise post-hocs T-tests from a mixed model
-    design.
+    1. One between-factor
 
-        >>> import pandas as pd
-        >>> from pingouin import pairwise_ttests, print_table
-        >>> df = pd.read_csv('dataset.csv')
-        >>> post_hocs = pairwise_ttests(dv='DV', within='Time', subject='Ss',
-        >>>                             between='Group', data=df,
-        >>>                             effects='all',
-        >>>                             padjust='bonf', effsize='hedges')
-        >>> # Print the table with 3 decimals
-        >>> print_table(post_hocs, floatfmt=".3f")
+        >>> from pingouin import pairwise_ttests
+        >>> from pingouin.datasets import read_dataset
+        >>> df = read_dataset('mixed_anova.csv')
+        >>> post_hocs = pairwise_ttests(dv='Scores', between='Group', data=df)
+        >>> print(post_hocs)
+
+    2. One within-factor
+
+        >>> post_hocs = pairwise_ttests(dv='Scores', within='Time',
+        >>>                             subject='Subject', data=df)
+        >>> print(post_hocs)
+
+    3. Within + Between + Within * Between with corrected p-values
+
+        >>> post_hocs = pairwise_ttests(dv='Scores', within='Time',
+        >>>                             subject='Subject', between='Group',
+        >>>                             padjust='bonf', data=df)
+        >>> print(post_hocs)
+
+    3. Between1 + Between2 + Between1 * Between2
+
+        >>> pairwise_ttests(dv='Scores', between=['Group', 'Time'], data=df)
     '''
     from pingouin.parametric import ttest
 
     # Safety checks
-    effects_orig = '%s' % effects  # For later use (ensure deep copy)
-    effects = 'within' if between is None else effects
-    effects = 'between' if within is None else effects
     _check_dataframe(dv=dv, between=between, within=within, subject=subject,
-                     effects=effects, data=data)
+                     effects='all', data=data)
 
     if tail not in ['one-sided', 'two-sided']:
         raise ValueError('Tail not recognized')
@@ -134,51 +160,60 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     # Check if we have multiple between or within factors
     multiple_between = False
     multiple_within = False
+    contrast = None
+
     if isinstance(between, list):
         if len(between) > 1:
             multiple_between = True
+            contrast = 'multiple_between'
+            assert all([b in data.keys() for b in between])
         else:
             between = between[0]
 
     if isinstance(within, list):
         if len(within) > 1:
             multiple_within = True
+            contrast = 'multiple_within'
+            assert all([w in data.keys() for w in within])
         else:
             within = within[0]
 
-    if multiple_within is True and multiple_between is True:
+    if all([multiple_within, multiple_between]):
         raise ValueError("Multiple between and within factors are",
                          "currently not supported. Please select only one.")
 
-    multiple = any([multiple_within, multiple_between])
-    effects = 'all' if multiple is True else effects
+    # Check the other cases
+    if isinstance(between, str) and within is None:
+        contrast = 'simple_between'
+        assert between in data.keys()
+    if isinstance(within, str) and between is None:
+        contrast = 'simple_within'
+        assert within in data.keys()
+    if isinstance(between, str) and isinstance(within, str):
+        contrast = 'within_between'
+        assert all([between in data.keys(), within in data.keys()])
 
     # Initialize empty variables
     stats = pd.DataFrame([])
     ddic = {}
 
-    # OPTION A: SIMPLE MAIN EFFECTS, WITHIN OR BETWEEN
-    if effects.lower() in ['within', 'between']:
-        # Compute T-tests
-        paired = True if effects == 'within' else False
-        col = within if effects == 'within' else between
-
+    if contrast in ['simple_within', 'simple_between']:
+        # OPTION A: SIMPLE MAIN EFFECTS, WITHIN OR BETWEEN
+        paired = True if contrast == 'simple_within' else False
+        col = within if contrast == 'simple_within' else between
         # Remove NAN in repeated measurements
-        if within is not None and data[dv].isnull().values.any():
+        if contrast == 'simple_within' and data[dv].isnull().values.any():
             data = _remove_rm_na(dv=dv, within=within, subject=subject,
                                  data=data)
-
         # Extract effects
         labels = data[col].unique().tolist()
         for l in labels:
             ddic[l] = data.loc[data[col] == l, dv].values
-
         # Number and labels of possible comparisons
         if len(labels) >= 2:
             combs = list(combinations(labels, 2))
         else:
-            raise ValueError('Data must have at least two columns')
-
+            raise ValueError('Columns must have at least two unique values.')
         # Initialize vectors
         for comb in combs:
             col1, col2 = comb
@@ -194,62 +229,58 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         padjust = None if stats['p-unc'].size <= 1 else padjust
         if padjust is not None:
             if padjust.lower() != 'none':
-                reject, stats['p-corr'] = multicomp(stats['p-unc'].values,
-                                                    alpha=alpha,
-                                                    method=padjust)
+                _, stats['p-corr'] = multicomp(stats['p-unc'].values,
+                                               alpha=alpha, method=padjust)
                 stats['p-adjust'] = padjust
         else:
             stats['p-corr'] = None
             stats['p-adjust'] = None
-
-    # OPTION B: TWO BETWEEN OR WITHIN FACTORS AND/OR WITHIN + BETWEEN + INTER
-    # B1: BETWEEN1 + BETWEEN2 + BETWEEN1 * BETWEEN2
-    # B2: WITHIN1 + WITHIN2 + WITHIN1 * WITHIN2
-    # B3: WITHIN + BETWEEN + WITHIN * BETWEEN
-    if effects.lower() in ['all', 'interaction']:
-        # Define cases
-        if multiple_between is True:
-            # Interaction between1 * between2
+    else:
+        # B1: BETWEEN1 + BETWEEN2 + BETWEEN1 * BETWEEN2
+        # B2: WITHIN1 + WITHIN2 + WITHIN1 * WITHIN2
+        # B3: WITHIN + BETWEEN + WITHIN * BETWEEN
+        if contrast == 'multiple_between':
+            # B1
             factors = between
             fbt = factors
             fwt = [None, None]
-            eft = ['between', 'between']
+            # eft = ['between', 'between']
             paired = False
-        elif multiple_within is True:
-            # Interaction within1 * within2
+        elif contrast == 'multiple_within':
+            # B2
             factors = within
             fbt = [None, None]
             fwt = factors
-            eft = ['within', 'within']
+            # eft = ['within', 'within']
             paired = True
         else:
-            # Interaction within * between
+            # B3
             factors = [within, between]
             fbt = [None, between]
             fwt = [within, None]
-            eft = ['within', 'between']
+            # eft = ['within', 'between']
             paired = False
 
-        if effects == 'all' and effects_orig != 'interaction':
-            for i, f in enumerate(factors):
-                stats = stats.append(pairwise_ttests(dv=dv,
-                                                     between=fbt[i],
-                                                     within=fwt[i],
-                                                     subject=subject,
-                                                     effects=eft[i],
-                                                     data=data,
-                                                     alpha=alpha,
-                                                     tail=tail,
-                                                     padjust=padjust,
-                                                     effsize=effsize,
-                                                     return_desc=return_desc),
-                                     ignore_index=True, sort=False)
+        for i, f in enumerate(factors):
+            stats = stats.append(pairwise_ttests(dv=dv,
+                                                 between=fbt[i],
+                                                 within=fwt[i],
+                                                 subject=subject,
+                                                 data=data,
+                                                 alpha=alpha,
+                                                 tail=tail,
+                                                 padjust=padjust,
+                                                 effsize=effsize,
+                                                 return_desc=return_desc),
+                                 ignore_index=True, sort=False)
 
         # Then compute the interaction between the factors
         labels_fac1 = data[factors[0]].unique().tolist()
         labels_fac2 = data[factors[1]].unique().tolist()
         comb_fac1 = list(combinations(labels_fac1, 2))
         comb_fac2 = list(combinations(labels_fac2, 2))
+        lc_fac1 = len(comb_fac1)
+        lc_fac2 = len(comb_fac2)
 
         for lw in labels_fac1:
             for l in labels_fac2:
@@ -268,17 +299,12 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
                                             alpha, paired, df_ttest, ef,
                                             effsize, fac1)
 
-        # Finally update the Contrast and the p-adjust columns
+        # Update the Contrast columns
         txt_inter = factors[0] + ' * ' + factors[1]
-        if effects == 'all' and effects_orig != 'interaction':
-            lc_fac1 = len(comb_fac1)
-            lc_fac2 = len(comb_fac2)
-            idxitr = np.arange(lc_fac1 + lc_fac2, stats.shape[0]).tolist()
-            stats.loc[idxitr, 'Contrast'] = txt_inter
-        else:
-            stats['Contrast'] = txt_inter
-            idxitr = np.arange(stats.shape[0]).tolist()
+        idxitr = np.arange(lc_fac1 + lc_fac2, stats.shape[0]).tolist()
+        stats.loc[idxitr, 'Contrast'] = txt_inter
 
+        # Multi-comparison columns
         if padjust is not None and padjust.lower() != 'none':
             _, pcor = multicomp(stats.loc[idxitr, 'p-unc'].values,
                                 alpha=alpha, method=padjust)
@@ -300,13 +326,10 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
 
-    # Rename if multiple == True
-    if multiple is True:
+    # Rename Time columns
+    if contrast in ['multiple_within', 'multiple_between', 'within_between']:
         stats['Time'].fillna('-', inplace=True)
         stats.rename(columns={'Time': factors[0]}, inplace=True)
-
-    if 'Time' in stats.keys().tolist():
-        stats['Time'].fillna('-', inplace=True)
 
     if export_filename is not None:
         _export_table(stats, export_filename)

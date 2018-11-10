@@ -375,7 +375,7 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     One-way repeated-measures ANOVA (Ryan et al 2013 dataset).
 
         >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import rm_anova, print_table
+        >>> from pingouin import rm_anova
         >>> df = read_dataset('rm_anova')
         >>> aov = rm_anova(dv='DesireToKill', within='Disgustingness',
                            subject='Subject', data=df, detailed=True)
@@ -556,11 +556,11 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
     Two-way repeated-measures ANOVA.
 
         >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import rm_anova2, print_table
+        >>> from pingouin import rm_anova2
         >>> df = read_dataset('rm_anova')
         >>> aov = rm_anova2(dv='DesireToKill',
-                           within=['Disgustingness', 'Frighteningness'],
-                           subject='Subject', data=df)
+        >>>                 within=['Disgustingness', 'Frighteningness'],
+        >>>                 subject='Subject', data=df)
         >>> print(aov)
     """
     from scipy.stats import f
@@ -689,10 +689,11 @@ def anova(dv=None, between=None, data=None, detailed=False,
     ----------
     dv : string
         Name of column containing the dependant variable.
-    between : string or list
+    between : string or list with two elements
         Name(s) of column containing the between factor.
         If between is a single string, then compute a one-way ANOVA, if between
-        is a list with two strings, compute a two-way ANOVA.
+        is a list with two elements (e.g. ['Factor1', 'Factor2']),
+        compute a two-way ANOVA.
     data : pandas DataFrame
         DataFrame
     detailed : boolean
@@ -788,14 +789,6 @@ def anova(dv=None, between=None, data=None, detailed=False,
         >>> aov = anova(dv='Pain threshold', between='Hair color', data=df,
                         detailed=True, export_filename='pain_anova.csv')
         >>> print_table(aov)
-
-    2. Two-way ANOVA.
-
-        >>> import pandas as pd
-        >>> from pingouin import anova
-        >>> df = pd.read_csv('dataset.csv')
-        >>> anova(dv='DV', between=['factor1, 'factor2'], data=df,
-                  export_filename='anova.csv')
     """
     if isinstance(between, list):
         if len(between) == 2:
@@ -1231,11 +1224,10 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
     Compute a two-way mixed model ANOVA.
 
         >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import mixed_anova, print_table
-        >>> df = read_dataset('rm_anova')
-        >>> aov = mixed_anova(dv='DesireToKill', between='Gender',
-                              within='Disgustingness',
-                              subject='Subject', data=df)
+        >>> from pingouin import mixed_anova
+        >>> df = read_dataset('mixed_anova')
+        >>> aov = mixed_anova(dv='Scores', between='Group',
+                              within='Time', subject='Subject', data=df)
         >>> print(aov)
     """
     from scipy.stats import f

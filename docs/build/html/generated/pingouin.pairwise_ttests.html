@@ -99,7 +99,7 @@
 <h1>pingouin.pairwise_ttests</h1>
 <dl class="function">
 <dt id="pingouin.pairwise_ttests">
-<code class="descclassname">pingouin.</code><code class="descname">pairwise_ttests</code><span class="sig-paren">(</span><em>dv=None</em>, <em>between=None</em>, <em>within=None</em>, <em>subject=None</em>, <em>effects='all'</em>, <em>data=None</em>, <em>alpha=0.05</em>, <em>tail='two-sided'</em>, <em>padjust='none'</em>, <em>effsize='hedges'</em>, <em>return_desc=False</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/pairwise.html#pairwise_ttests"><span class="viewcode-link">[source]</span></a></dt>
+<code class="descclassname">pingouin.</code><code class="descname">pairwise_ttests</code><span class="sig-paren">(</span><em>dv=None</em>, <em>between=None</em>, <em>within=None</em>, <em>subject=None</em>, <em>data=None</em>, <em>alpha=0.05</em>, <em>tail='two-sided'</em>, <em>padjust='none'</em>, <em>effsize='hedges'</em>, <em>return_desc=False</em>, <em>export_filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pingouin/pairwise.html#pairwise_ttests"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Pairwise T-tests.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -109,15 +109,15 @@
 <dt><strong>dv</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd><p class="first last">Name of column containing the dependant variable.</p>
 </dd>
-<dt><strong>between: string</strong></dt>
-<dd><p class="first last">Name of column containing the between factor.</p>
+<dt><strong>between</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string or list with 2 elements</span></dt>
+<dd><p class="first last">Name of column(s) containing the between factor(s).</p>
 </dd>
-<dt><strong>within</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd><p class="first last">Name of column containing the within factor.</p>
+<dt><strong>within</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string or list with 2 elements</span></dt>
+<dd><p class="first last">Name of column(s) containing the within factor(s).</p>
 </dd>
 <dt><strong>subject</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd><p class="first last">Name of column containing the subject identifier. Only useful when
-effects == ‘within’ or effects == ‘interaction’.</p>
+<dd><p class="first last">Name of column containing the subject identifier. Compulsory for
+contrast including a within-subject factor.</p>
 </dd>
 <dt><strong>data</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
 <dd><p class="first last">DataFrame</p>
@@ -152,7 +152,7 @@ Available methods are</p>
 </div>
 </dd>
 <dt><strong>return_desc</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
-<dd><p class="first last">If True, return group means and std</p>
+<dd><p class="first last">If True, append group means and std to the output dataframe</p>
 </dd>
 <dt><strong>export_filename</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
 <dd><p class="first last">Filename (without extension) for the output file.
@@ -185,20 +185,53 @@ directory. To change that, specify the filename with full path.</p>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>If between or within is a list (e.g. [‘col1’, ‘col2’]), the function
+returns 1) the pairwise T-tests between each values of the first column,
+2) the pairwise T-tests between each values of the second column and
+3) the interaction between col1 and col2. The interaction is dependent
+of the order of the list, so [‘col1’, ‘col2’] will not yield the same
+results as [‘col2’, ‘col1’].</p>
+<p>In other words, if between is a list with two elements, the output model is
+between1 + between2 + between1 * between2.</p>
+<p>Similarly, if within is a list with two elements, the output model is
+within1 + within2 + within1 * within2.</p>
+<p>If both between and within are specified, the function return within +
+between + within * between.</p>
 <p class="rubric">Examples</p>
-<p>Compute Bonferroni-corrected pairwise post-hocs T-tests from a mixed model
-design.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_ttests</span><span class="p">,</span> <span class="n">print_table</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;dataset.csv&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">post_hocs</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DV&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Ss&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>                            <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>                            <span class="n">effects</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>                            <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;bonf&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Print the table with 3 decimals</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">print_table</span><span class="p">(</span><span class="n">post_hocs</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;.3f&quot;</span><span class="p">)</span>
+<ol class="arabic">
+<li><p class="first">One between-factor</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">pairwise_ttests</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin.datasets</span> <span class="k">import</span> <span class="n">read_dataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;mixed_anova.csv&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">post_hocs</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">post_hocs</span><span class="p">)</span>
 </pre></div>
 </div>
+</li>
+<li><p class="first">One within-factor</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">post_hocs</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                            <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">post_hocs</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Within + Between + Within * Between with corrected p-values</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">post_hocs</span> <span class="o">=</span> <span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                            <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                            <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;bonf&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">post_hocs</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<ol class="arabic" start="3">
+<li><p class="first">Between1 + Between2 + Between1 * Between2</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pairwise_ttests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="s1">&#39;Time&#39;</span><span class="p">],</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
 </dd></dl>
 
 </div>

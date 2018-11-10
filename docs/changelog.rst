@@ -14,6 +14,8 @@ v0.2.0 (dev)
 
 a. Added Welch ANOVA
 b. Added Games-Howell post-hoc test for one-way ANOVA with unequal variances
+c. Pairwise T-tests now accepts two within or two between factors
+d. Fixed error in padjust correction in the pairwise_ttests function: correction was applied on all p-values at the same time.
 
 **Correlation/Regression**
 

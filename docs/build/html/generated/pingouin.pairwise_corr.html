@@ -163,6 +163,7 @@ directory. To change that, specify the filename with full path.</p>
 <span class="s1">&#39;Y&#39;</span> <span class="p">:</span> <span class="n">Name</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">of</span> <span class="n">second</span> <span class="n">columns</span>
 <span class="s1">&#39;method&#39;</span> <span class="p">:</span> <span class="n">method</span> <span class="n">used</span> <span class="n">to</span> <span class="n">compute</span> <span class="n">the</span> <span class="n">correlation</span>
 <span class="s1">&#39;tail&#39;</span> <span class="p">:</span> <span class="n">indicates</span> <span class="n">whether</span> <span class="n">the</span> <span class="n">p</span><span class="o">-</span><span class="n">values</span> <span class="n">are</span> <span class="n">one</span><span class="o">-</span><span class="n">sided</span> <span class="ow">or</span> <span class="n">two</span><span class="o">-</span><span class="n">sided</span>
+<span class="s1">&#39;n&#39;</span> <span class="p">:</span> <span class="n">Sample</span> <span class="n">size</span> <span class="p">(</span><span class="n">after</span> <span class="n">NaN</span> <span class="n">removal</span><span class="p">)</span>
 <span class="s1">&#39;r&#39;</span> <span class="p">:</span> <span class="n">Correlation</span> <span class="n">coefficients</span>
 <span class="s1">&#39;CI95&#39;</span> <span class="p">:</span> <span class="mi">95</span><span class="o">%</span> <span class="n">parametric</span> <span class="n">confidence</span> <span class="n">intervals</span>
 <span class="s1">&#39;r2&#39;</span> <span class="p">:</span> <span class="n">R</span><span class="o">-</span><span class="n">squared</span> <span class="n">values</span>
@@ -181,13 +182,15 @@ directory. To change that, specify the filename with full path.</p>
 </table>
 <p class="rubric">Notes</p>
 <p>Please refer to the <cite>pingouin.corr()</cite> function for a description of the
-different method. NaN are automatically removed from datasets.</p>
+different methods. NaN are automatically removed from the data.</p>
 <p>This function is more flexible and gives a much more detailed
 output than the <cite>pandas.DataFrame.corr()</cite> method (i.e. p-values,
 confidence interval, Bayes Factor..). This comes however at
 an increased computational cost. While this should not be discernible for
 dataframe with less than 10,000 rows and/or less than 20 columns, this
-function can be extremely slow for very large dataset.</p>
+function can be slow for very large dataset.</p>
+<p>For speed purpose, the Bayes Factor is only computed when the sample size
+is less than 1000 (and method=’pearson’).</p>
 <p class="rubric">Examples</p>
 <ol class="arabic">
 <li><p class="first">One-tailed spearman correlation corrected for multiple comparisons</p>

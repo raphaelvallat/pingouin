@@ -130,7 +130,8 @@ coefficient. Available methods are</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
 <dt><strong>stats</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pandas DataFrame</span></dt>
 <dd><p class="first">Test summary</p>
-<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;r&#39;</span> <span class="p">:</span> <span class="n">Correlation</span> <span class="n">coefficient</span>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;n&#39;</span> <span class="p">:</span> <span class="n">Sample</span> <span class="n">size</span> <span class="p">(</span><span class="n">after</span> <span class="n">NaN</span> <span class="n">removal</span><span class="p">)</span>
+<span class="s1">&#39;r&#39;</span> <span class="p">:</span> <span class="n">Correlation</span> <span class="n">coefficient</span>
 <span class="s1">&#39;CI95&#39;</span> <span class="p">:</span> <span class="mi">95</span><span class="o">%</span> <span class="n">parametric</span> <span class="n">confidence</span> <span class="n">intervals</span>
 <span class="s1">&#39;r2&#39;</span> <span class="p">:</span> <span class="n">R</span><span class="o">-</span><span class="n">squared</span>
 <span class="s1">&#39;adj_r2&#39;</span> <span class="p">:</span> <span class="n">Adjusted</span> <span class="n">R</span><span class="o">-</span><span class="n">squared</span>
@@ -223,56 +224,60 @@ Psychon. Bull. Rev. 19, 1057–1064.
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Compute Pearson correlation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="k">import</span> <span class="n">corr</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="go">    method   r      CI95%         r2     adj_r2  p-val   BF10</span>
-<span class="go">    pearson  0.491  [0.16, 0.72]  0.242  0.185   0.0058  6.135</span>
+<span class="go">    method   n   r      CI95%         r2     adj_r2  p-val   BF10</span>
+<span class="go">    pearson  30  0.491  [0.16, 0.72]  0.242  0.185   0.0058  6.135</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">Pearson correlation with two outliers</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span> <span class="o">-</span><span class="mi">8</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="go">    method   r      CI95%          r2     adj_r2  p-val  BF10</span>
-<span class="go">    pearson  0.147  [-0.23, 0.48]  0.022  -0.051  0.439  0.19</span>
+<span class="go">    method   n    r      CI95%          r2     adj_r2  p-val  BF10</span>
+<span class="go">    pearson  30   0.147  [-0.23, 0.48]  0.022  -0.051  0.439  0.19</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">Spearman correlation</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;spearman&quot;</span><span class="p">)</span>
-<span class="go">    method    r      CI95%         r2     adj_r2  p-val</span>
-<span class="go">    spearman  0.401  [0.05, 0.67]  0.161  0.099   0.028</span>
+<span class="go">    method    n   r      CI95%         r2     adj_r2  p-val</span>
+<span class="go">    spearman  30  0.401  [0.05, 0.67]  0.161  0.099   0.028</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">Percentage bend correlation (robust)</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;percbend&#39;</span><span class="p">)</span>
-<span class="go">    method    r      CI95%         r2     adj_r2  p-val</span>
-<span class="go">    percbend  0.389  [0.03, 0.66]  0.151  0.089   0.034</span>
+<span class="go">    method    n   r      CI95%         r2     adj_r2  p-val</span>
+<span class="go">    percbend  30  0.389  [0.03, 0.66]  0.151  0.089   0.034</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">Shepherd’s pi correlation (robust)</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;shepherd&#39;</span><span class="p">)</span>
-<span class="go">    method    r      CI95%         r2     adj_r2  p-val</span>
-<span class="go">    percbend  0.437  [0.09, 0.69]  0.191  0.131   0.020</span>
+<span class="go">    method    n   r      CI95%         r2     adj_r2  p-val</span>
+<span class="go">    percbend  30  0.437  [0.09, 0.69]  0.191  0.131   0.020</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">Skipped spearman correlation (robust)</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;skipped&#39;</span><span class="p">)</span>
-<span class="go">    method    r      CI95%         r2     adj_r2  p-val</span>
-<span class="go">    percbend  0.437  [0.09, 0.69]  0.191  0.131   0.020</span>
+<span class="go">    method    n   r      CI95%         r2     adj_r2  p-val</span>
+<span class="go">    percbend  30  0.437  [0.09, 0.69]  0.191  0.131   0.020</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">One-tailed Spearman correlation</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s2">&quot;one-sided&quot;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;shepherd&#39;</span><span class="p">)</span>
-<span class="go">    method    r      CI95%         r2     adj_r2  p-val</span>
-<span class="go">    spearman  0.401  [0.05, 0.67]  0.161  0.099   0.014</span>
+<span class="go">    method    n   r      CI95%         r2     adj_r2  p-val</span>
+<span class="go">    spearman  30  0.401  [0.05, 0.67]  0.161  0.099   0.014</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">Using columns of a pandas dataframe</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
+<span class="go">    method   n    r      CI95%          r2     adj_r2  p-val  BF10</span>
+<span class="go">    pearson  30   0.147  [-0.23, 0.48]  0.022  -0.051  0.439  0.19</span>
 </pre></div>
 </div>
 </li>

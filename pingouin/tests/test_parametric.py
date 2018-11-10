@@ -7,20 +7,7 @@ from pingouin.parametric import (ttest, anova, anova2, rm_anova, mixed_anova,
 from pingouin.datasets import read_dataset
 
 # Generate random data for ANOVA
-n = 30
-months = ['August', 'January', 'June']
-np.random.seed(1234)
-control = np.random.normal(5.5, size=len(months) * n)
-meditation = np.r_[np.random.normal(5.5, size=n),
-                   np.random.normal(5.8, size=n),
-                   np.random.normal(6.4, size=n)]
-# Create a dataframe
-df = pd.DataFrame({'Scores': np.r_[control, meditation],
-                   'Time': np.r_[np.repeat(months, n), np.repeat(months, n)],
-                   'Group': np.repeat(['Control', 'Meditation'],
-                                      len(months) * n),
-                   'Subject': np.r_[np.tile(np.arange(n), 3),
-                                    np.tile(np.arange(n, n + n), 3)]})
+df = read_dataset('mixed_anova.csv')
 
 df_nan = df.copy()
 df_nan.iloc[[4, 15], 0] = np.nan

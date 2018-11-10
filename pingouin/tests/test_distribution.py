@@ -1,4 +1,3 @@
-import pandas as pd
 import numpy as np
 import pytest
 
@@ -6,23 +5,10 @@ from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.distribution import (gzscore, normality, anderson, epsilon,
                                    multivariate_normality, homoscedasticity,
                                    sphericity)
+from pingouin.datasets import read_dataset
 
 # Generate random dataframe
-n = 30
-months = ['August', 'January', 'June']
-np.random.seed(1234)
-control = np.random.normal(5.5, size=len(months) * n)
-meditation = np.r_[np.random.normal(5.5, size=n),
-                   np.random.normal(5.8, size=n),
-                   np.random.normal(6.4, size=n)]
-# Create a dataframe
-df = pd.DataFrame({'Scores': np.r_[control, meditation],
-                   'Time': np.r_[np.repeat(months, n), np.repeat(months, n)],
-                   'Group': np.repeat(['Control', 'Meditation'],
-                                      len(months) * n),
-                   'Subject': np.r_[np.tile(np.arange(n), 3),
-                                    np.tile(np.arange(n, n + n), 3)]})
-
+df = read_dataset('mixed_anova.csv')
 df_nan = df.copy()
 df_nan.iloc[[4, 15], 0] = np.nan
 
