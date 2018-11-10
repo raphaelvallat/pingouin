@@ -12,8 +12,8 @@ __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
            "pairwise_corr"]
 
 
-def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, alpha,
-                            paired, df_ttest, ef, eftype, time=np.nan):
+def _append_stats_dataframe(stats, x, y, xlabel, ylabel, alpha, paired,
+                            df_ttest, ef, eftype, time=np.nan):
     stats = stats.append({
         'A': xlabel,
         'B': ylabel,
@@ -22,7 +22,6 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, alpha,
         # Use ddof=1 for unibiased estimator (pandas default)
         'std(A)': np.round(x.std(ddof=1), 3),
         'std(B)': np.round(y.std(ddof=1), 3),
-        'Type': effects,
         'Paired': paired,
         'tail': df_ttest.loc['T-test', 'tail'],
         # 'Alpha': alpha,
@@ -31,7 +30,7 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, effects, alpha,
         'BF10': df_ttest.loc['T-test', 'BF10'],
         'efsize': ef,
         'eftype': eftype,
-        'Time': time}, ignore_index=True)
+        'Time': time}, ignore_index=True, sort=False)
     return stats
 
 
@@ -120,9 +119,9 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     from pingouin.parametric import ttest
 
     # Safety checks
+    effects_orig = '%s' % effects  # For later use (ensure deep copy)
     effects = 'within' if between is None else effects
     effects = 'between' if within is None else effects
-
     _check_dataframe(dv=dv, between=between, within=within, subject=subject,
                      effects=effects, data=data)
 
@@ -132,19 +131,42 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     if not isinstance(alpha, float):
         raise ValueError('Alpha must be float')
 
-    # Remove NAN in repeated measurements
-    if within is not None and data[dv].isnull().values.any():
-        data = _remove_rm_na(dv=dv, within=within, subject=subject, data=data)
+    # Check if we have multiple between or within factors
+    multiple_between = False
+    multiple_within = False
+    if isinstance(between, list):
+        if len(between) > 1:
+            multiple_between = True
+        else:
+            between = between[0]
+
+    if isinstance(within, list):
+        if len(within) > 1:
+            multiple_within = True
+        else:
+            within = within[0]
+
+    if multiple_within is True and multiple_between is True:
+        raise ValueError("Multiple between and within factors are",
+                         "currently not supported. Please select only one.")
+
+    multiple = any([multiple_within, multiple_between])
+    effects = 'all' if multiple is True else effects
 
     # Initialize empty variables
     stats = pd.DataFrame([])
     ddic = {}
 
-    # OPTION A: simple main effects
+    # OPTION A: SIMPLE MAIN EFFECTS, WITHIN OR BETWEEN
     if effects.lower() in ['within', 'between']:
         # Compute T-tests
         paired = True if effects == 'within' else False
         col = within if effects == 'within' else between
+
+        # Remove NAN in repeated measurements
+        if within is not None and data[dv].isnull().values.any():
+            data = _remove_rm_na(dv=dv, within=within, subject=subject,
+                                 data=data)
 
         # Extract effects
         labels = data[col].unique().tolist()
@@ -154,7 +176,6 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         # Number and labels of possible comparisons
         if len(labels) >= 2:
             combs = list(combinations(labels, 2))
-            # ntests = len(combs)
         else:
             raise ValueError('Data must have at least two columns')
 
@@ -165,84 +186,127 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
             y = ddic.get(col2)
             df_ttest = ttest(x, y, paired=paired, tail=tail)
             ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
-            stats = _append_stats_dataframe(stats, x, y, col1, col2, effects,
-                                            alpha, paired, df_ttest, ef,
-                                            effsize)
+            stats = _append_stats_dataframe(stats, x, y, col1, col2, alpha,
+                                            paired, df_ttest, ef, effsize)
+            stats['Contrast'] = col
 
-    # OPTION B: interaction
-    if effects.lower() == 'interaction':
-        paired = False
-        # Extract data
-        labels_with = data[within].unique().tolist()
-        labels_betw = data[between].unique().tolist()
-        for lw in labels_with:
-            for l in labels_betw:
-                tmp = data.loc[data[within] == lw]
-                ddic[lw, l] = tmp.loc[tmp[between] == l, dv].values
+        # Multiple comparisons
+        padjust = None if stats['p-unc'].size <= 1 else padjust
+        if padjust is not None:
+            if padjust.lower() != 'none':
+                reject, stats['p-corr'] = multicomp(stats['p-unc'].values,
+                                                    alpha=alpha,
+                                                    method=padjust)
+                stats['p-adjust'] = padjust
+        else:
+            stats['p-corr'] = None
+            stats['p-adjust'] = None
+
+    # OPTION B: TWO BETWEEN OR WITHIN FACTORS AND/OR WITHIN + BETWEEN + INTER
+    # B1: BETWEEN1 + BETWEEN2 + BETWEEN1 * BETWEEN2
+    # B2: WITHIN1 + WITHIN2 + WITHIN1 * WITHIN2
+    # B3: WITHIN + BETWEEN + WITHIN * BETWEEN
+    if effects.lower() in ['all', 'interaction']:
+        # Define cases
+        if multiple_between is True:
+            # Interaction between1 * between2
+            factors = between
+            fbt = factors
+            fwt = [None, None]
+            eft = ['between', 'between']
+            paired = False
+        elif multiple_within is True:
+            # Interaction within1 * within2
+            factors = within
+            fbt = [None, None]
+            fwt = factors
+            eft = ['within', 'within']
+            paired = True
+        else:
+            # Interaction within * between
+            factors = [within, between]
+            fbt = [None, between]
+            fwt = [within, None]
+            eft = ['within', 'between']
+            paired = False
+
+        if effects == 'all' and effects_orig != 'interaction':
+            for i, f in enumerate(factors):
+                stats = stats.append(pairwise_ttests(dv=dv,
+                                                     between=fbt[i],
+                                                     within=fwt[i],
+                                                     subject=subject,
+                                                     effects=eft[i],
+                                                     data=data,
+                                                     alpha=alpha,
+                                                     tail=tail,
+                                                     padjust=padjust,
+                                                     effsize=effsize,
+                                                     return_desc=return_desc),
+                                     ignore_index=True, sort=False)
+
+        # Then compute the interaction between the factors
+        labels_fac1 = data[factors[0]].unique().tolist()
+        labels_fac2 = data[factors[1]].unique().tolist()
+        comb_fac1 = list(combinations(labels_fac1, 2))
+        comb_fac2 = list(combinations(labels_fac2, 2))
+
+        for lw in labels_fac1:
+            for l in labels_fac2:
+                tmp = data.loc[data[factors[0]] == lw]
+                ddic[lw, l] = tmp.loc[tmp[factors[1]] == l, dv].values
 
         # Pairwise comparisons
-        combs = list(product(labels_with, combinations(labels_betw, 2)))
+        combs = list(product(labels_fac1, comb_fac2))
         for comb in combs:
-            time, (col1, col2) = comb
-            x = ddic.get((time, col1))
-            y = ddic.get((time, col2))
+            fac1, (col1, col2) = comb
+            x = ddic.get((fac1, col1))
+            y = ddic.get((fac1, col2))
             df_ttest = ttest(x, y, paired=paired, tail=tail)
             ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
-            stats = _append_stats_dataframe(stats, x, y, col1, col2, effects,
+            stats = _append_stats_dataframe(stats, x, y, col1, col2,
                                             alpha, paired, df_ttest, ef,
-                                            effsize, time)
+                                            effsize, fac1)
 
-    if effects.lower() == 'all':
-        stats_within = pairwise_ttests(dv=dv, within=within, effects='within',
-                                       subject=subject, data=data, alpha=alpha,
-                                       tail=tail, padjust=padjust,
-                                       effsize=effsize,
-                                       return_desc=return_desc)
-        stats_between = pairwise_ttests(dv=dv, between=between,
-                                        effects='between', data=data,
-                                        alpha=alpha, tail=tail,
-                                        padjust=padjust, effsize=effsize,
-                                        return_desc=return_desc)
+        # Finally update the Contrast and the p-adjust columns
+        txt_inter = factors[0] + ' * ' + factors[1]
+        if effects == 'all' and effects_orig != 'interaction':
+            lc_fac1 = len(comb_fac1)
+            lc_fac2 = len(comb_fac2)
+            idxitr = np.arange(lc_fac1 + lc_fac2, stats.shape[0]).tolist()
+            stats.loc[idxitr, 'Contrast'] = txt_inter
+        else:
+            stats['Contrast'] = txt_inter
+            idxitr = np.arange(stats.shape[0]).tolist()
 
-        stats_interaction = pairwise_ttests(dv=dv, within=within,
-                                            between=between, subject=subject,
-                                            effects='interaction',
-                                            data=data, alpha=alpha, tail=tail,
-                                            padjust=padjust, effsize=effsize,
-                                            return_desc=return_desc)
-        stats = pd.concat([stats_within, stats_between,
-                           stats_interaction], sort=False).reset_index()
+        if padjust is not None and padjust.lower() != 'none':
+            _, pcor = multicomp(stats.loc[idxitr, 'p-unc'].values,
+                                alpha=alpha, method=padjust)
+            stats.loc[idxitr, 'p-corr'] = pcor
+            stats.loc[idxitr, 'p-adjust'] = padjust
 
-    # Multiple comparisons
-    padjust = None if stats['p-unc'].size <= 1 else padjust
-    if padjust is not None:
-        if padjust.lower() != 'none':
-            reject, stats['p-corr'] = multicomp(stats['p-unc'].values,
-                                                alpha=alpha, method=padjust)
-            stats['p-adjust'] = padjust
-            # stats['reject'] = reject
-    else:
-        stats['p-corr'] = None
-        stats['p-adjust'] = None
-        # stats['reject'] = stats['p-unc'] < alpha
-
-    # stats['reject'] = stats['reject'].astype(bool)
+    # ---------------------------------------------------------------------
     stats['Paired'] = stats['Paired'].astype(bool)
 
     # Reorganize column order
-    col_order = ['Type', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
+    col_order = ['Contrast', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
                  'std(B)', 'Paired', 'T', 'tail', 'p-unc',
                  'p-corr', 'p-adjust', 'BF10', 'efsize', 'eftype']
 
-    if not return_desc and effects.lower() != 'all':
+    if return_desc is False:
         stats.drop(columns=['mean(A)', 'mean(B)', 'std(A)', 'std(B)'],
                    inplace=True)
 
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
 
-    # Replace remaining NaN
-    stats.fillna('-', inplace=True)
+    # Rename if multiple == True
+    if multiple is True:
+        stats['Time'].fillna('-', inplace=True)
+        stats.rename(columns={'Time': factors[0]}, inplace=True)
+
+    if 'Time' in stats.keys().tolist():
+        stats['Time'].fillna('-', inplace=True)
 
     if export_filename is not None:
         _export_table(stats, export_filename)

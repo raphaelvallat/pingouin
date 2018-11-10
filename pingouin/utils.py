@@ -1,7 +1,6 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 import numpy as np
-from six import string_types
 from pingouin.external.tabulate import tabulate
 import pandas as pd
 
@@ -133,19 +132,19 @@ def _check_dataframe(dv=None, between=None, within=None, subject=None,
     if effects not in ['within', 'between', 'interaction', 'all']:
         raise ValueError('Effects must be: within, between, interaction, all')
     # Check that within is a string or a list (rm_anova2)
-    if effects == 'within' and not isinstance(within, (string_types, list)):
+    if effects == 'within' and not isinstance(within, (str, list)):
         raise ValueError('within must be a string or a list.')
     # Check that subject identifier is provided in rm_anova and friedman.
     if effects == 'within' and subject is None:
         raise ValueError('subject must be specified when effects=within')
     # Check that between is a string or a list (anova2)
-    if effects == 'between' and not isinstance(between, (string_types,
+    if effects == 'between' and not isinstance(between, (str,
                                                          list)):
         raise ValueError('between must be a string or a list.')
     # Check that both between and within are present for interaction
     if effects == 'interaction':
         for input in [within, between]:
-            if not isinstance(input, string_types):
+            if not isinstance(input, (str, list)):
                 raise ValueError('within and between must be specified when '
                                  'effects=interaction')
 
