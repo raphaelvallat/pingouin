@@ -78,14 +78,16 @@ Dependencies
 
 The main dependencies of Pingouin are :
 
-* NumPy
-* SciPy
-* Pandas
+* NumPy (>= 1.15)
+* SciPy (>= 1.1.0)
+* Pandas (>= 0.23)
 
 In addition, some functions require :
 
 * Statsmodels
 * Scikit-learn
+
+Pingouin is a Python 3 package. While most of the functions should work with Python 2.7, we strongly recommend using Python >= 3.6.
 
 User installation
 -----------------
