@@ -136,6 +136,7 @@ html_theme_options = {
                      ("Functions", "api"),
                      ("Guidelines", "guidelines"),
                      ("Examples", "examples"),
+                     ("FAQ", "faq"),
                      ("What's new", "changelog")
                      ],
 

@@ -366,6 +366,7 @@ Contents
 
    api
    guidelines
+   faq
    changelog
    examples
 
