@@ -94,6 +94,12 @@ New releases are frequent so always make sure that you have the latest version:
   pip install --upgrade pingouin
 
 
+GitHub repository
+-----------------
+
+* Link to the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
+
+
 Chat
 ====
 

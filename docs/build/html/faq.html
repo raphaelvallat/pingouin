@@ -99,16 +99,17 @@
       
   <div class="section" id="faq">
 <h1>FAQ</h1>
+<div class="section" id="python">
+<h2>Python</h2>
 <div class="panel-group">
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h4 class="panel-title">
-        <a data-toggle="collapse" href="#collapse_python">How can I start with Python and Pingouin?</a>
-      </h4>
+      <h5 class="panel-title">
+        <a data-toggle="collapse" href="#collapse_python">I am new to Python, how can I install Python and Pingouin on my computer?</a>
+      </h5>
     </div>
     <div id="collapse_python" class="panel-collapse collapse">
-      <div class="panel-body"><p>If you are completely new to Python, this section is for you.
-To install Python  on your computer, you should use <a class="reference external" href="https://conda.io/docs/index.html">Anaconda</a>, a Python distribution which natively includes all the most important packages. Then, open the newly installed Anaconda prompt and type:</p>
+      <div class="panel-body"><p>To install Python  on your computer, you should use <a class="reference external" href="https://conda.io/docs/index.html">Anaconda</a>, a Python distribution which natively includes all the most important packages. Then, open the newly installed Anaconda prompt and type:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install pip
 </pre></div>
 </div>
@@ -135,16 +136,18 @@ To install Python  on your computer, you should use <a class="reference external
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h4 class="panel-title">
+    <h5 class="panel-title">
       <a data-toggle="collapse" href="#collapse_import">How to import and use Pingouin?</a>
-    </h4>
+    </h5>
   </div>
   <div id="collapse_import" class="panel-collapse collapse">
     <div class="panel-body"><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1) Import the full package</span>
+<span class="c1"># --&gt; Best if you are planning to use several Pingouin functions.</span>
 <span class="kn">import</span> <span class="nn">pingouin</span> <span class="kn">as</span> <span class="nn">pg</span>
 <span class="n">pg</span><span class="o">.</span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
 <span class="c1"># 2) Import specific functions</span>
+<span class="c1"># --&gt; Best if you are planning to use only this specific function.</span>
 <span class="kn">from</span> <span class="nn">pingouin</span> <span class="kn">import</span> <span class="n">ttest</span>
 <span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 </pre></div>
@@ -155,12 +158,46 @@ To install Python  on your computer, you should use <a class="reference external
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h4 class="panel-title">
-      <a data-toggle="collapse" href="#collapse_data">I want to analyze a spreadsheet (.csv or .xlsx file), how should I format my data?</a>
-    </h4>
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_sm">What are the differences between statsmodels and Pingouin?</a>
+    </h5>
+  </div>
+  <div id="collapse_sm" class="panel-collapse collapse">
+    <div class="panel-body"><p><a class="reference external" href="https://www.statsmodels.org/stable/index.html">Statsmodels</a> is a great statistical Python package that provides several advanced functions (regression, GLM, time-series analysis) as well as an R-like syntax for fitting models. However, statsmodels can be quite hard to grasp and use for Python beginners and/or users who just want to perform simple statistical tests. The goal of Pingouin is not to replace statsmodels but rather to provide some easy-to-use functions to perform the most widely-used statistical tests. The two packages are therefore complementary, for instance one can use Pingouin first to do some exploratory data analysis in a few lines of code and then switch to statsmodels if a more exhaustive output is needed.</p>
+      </div>
+    </div>
+  </div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_scp">What are the differences between scipy.stats and Pingouin?</a>
+    </h5>
+  </div>
+  <div id="collapse_scp" class="panel-collapse collapse">
+    <div class="panel-body"><p>The <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/stats.html">scipy.stats</a> module provides several low-level statistical functions. However, most of these functions do not return a very detailed output (e.g. only the T- and p-values for a T-test). Most of Pingouin function are using the low-level SciPy funtions to provide a richer, more exhaustive, output. See for yourself!:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="kn">as</span> <span class="nn">pg</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">ttest_ind</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>   <span class="c1"># Pingouin: returns a DataFrame with T-value, p-value, degrees of freedom, tail, Cohen d, power and Bayes Factor</span>
+<span class="k">print</span><span class="p">(</span><span class="n">ttest_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>  <span class="c1"># SciPy: returns only the T- and p-values</span>
+</pre></div>
+</div>
+  </div>
+</div></div>
+<div class="section" id="data">
+<h2>Data</h2>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_data">I want to analyze a spreadsheet in Pingouin, how should I organize my data?</a>
+    </h5>
   </div>
   <div id="collapse_data" class="panel-collapse collapse">
-    <div class="panel-body"><p>Most Pingouin functions assume that your data is in tidy or long format, that is, each variable should be in one column and each observation should be in a different row. This is true for all the ANOVA / post-hocs function as well as the linear/logistic regression, mediation analysis, etc…</p>
+    <div class="panel-body"><p>Most Pingouin functions assume that your data is in tidy or long format, that is, each variable should be in one column and each observation should be in a different row. This is true for all the ANOVA / post-hocs function as well as the linear/logistic regression, pairwise correlations, partial correlation, mediation analysis, etc…</p>
 <p>An example of data in long-format is shown below. Note that <em>Scores</em> is the dependant variable, <em>Subject</em> is the subject identifier, <em>Time</em> is a within-subject factor (two time points per subject), and <em>Age</em> and <em>Gender</em> are meta-data:</p>
 <table border="1" class="docutils">
 <colgroup>
@@ -221,7 +258,40 @@ To install Python  on your computer, you should use <a class="reference external
       </div>
     </div>
   </div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_read">How can I load a .csv or .xlsx file in Python?</a>
+    </h5>
+  </div>
+  <div id="collapse_read" class="panel-collapse collapse">
+    <div class="panel-body"><p>You need to use the <a class="reference external" href="https://pandas.pydata.org/">Pandas</a> package:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;myfile.csv&#39;</span><span class="p">)</span>     <span class="c1"># Load a .csv file</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="s1">&#39;myfile.xlsx&#39;</span><span class="p">)</span>  <span class="c1"># Load an Excel file</span>
+</pre></div>
+</div>
+      </div>
+    </div>
+  </div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_desc">Can I compute descriptive statistics with Pingouin?</a>
+    </h5>
+  </div>
+  <div id="collapse_desc" class="panel-collapse collapse">
+    <div class="panel-body"><p>No, the central idea behind Pingouin is that all data manipulations and descriptive statistics should be first performed in Pandas (or NumPy). For example, to compute the mean, standard deviation, and quartiles of all the numeric columns of a pandas DataFrame, one can easily use the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.describe.html">pandas.DataFrame.describe()</a> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+      </div>
+    </div>
+  </div>
 </div></div>
+</div>
 
 
     </div>
