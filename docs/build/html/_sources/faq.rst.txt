@@ -93,7 +93,7 @@ Now, let's do a simple paired T-test using Pingouin:
       <div id="collapse_sm" class="panel-collapse collapse">
         <div class="panel-body">
 
-`Statsmodels <https://www.statsmodels.org/stable/index.html>`_ is a great statistical Python package that provides several advanced functions (regression, GLM, time-series analysis) as well as an R-like syntax for fitting models. However, statsmodels can be quite hard to grasp and use for Python beginners and/or users who just want to perform simple statistical tests. The goal of Pingouin is not to replace statsmodels but rather to provide some easy-to-use functions to perform the most widely-used statistical tests. The two packages are therefore complementary, for instance one can use Pingouin first to do some exploratory data analysis in a few lines of code and then switch to statsmodels if a more exhaustive output is needed.
+`Statsmodels <https://www.statsmodels.org/stable/index.html>`_ is a great statistical Python package that provides several advanced functions (regression, GLM, time-series analysis) as well as an R-like syntax for fitting models. However, statsmodels can be quite hard to grasp and use for Python beginners and/or users who just want to perform simple statistical tests. The goal of Pingouin is not to replace statsmodels but rather to provide some easy-to-use functions to perform the most widely-used statistical tests. In addition, Pingouin also provides some novel functions (to cite but a few: effect sizes, pairwise T-tests and correlations, ICC, repeated measures correlation, circular statistics...).
 
 .. ----------------------------- SCIPY -----------------------------
 .. raw:: html

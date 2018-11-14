@@ -453,7 +453,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     adj_r2 = 1 - (((1 - r**2) * (nx - 1)) / (nx - 3))
 
     # Compute the parametric 95% confidence interval
-    ci = compute_esci(ef=r, nx=nx, ny=nx, eftype='r')
+    ci = compute_esci(stat=r, nx=nx, ny=nx, eftype='r')
 
     stats = pd.DataFrame({}, index=[method])
     stats['n'] = nx

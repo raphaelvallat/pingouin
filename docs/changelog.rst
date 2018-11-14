@@ -7,6 +7,15 @@ What's new
    :depth: 2
 
 
+v0.2.1 (dev)
+------------
+
+**Effect size**
+
+a. Separated compute_esci and compute_boot_esci
+b. Added corrected percentile method and normal approximation to bootstrap
+c. Fixed bootstrapping method
+
 v0.2.0 (November 2018)
 ----------------------
 

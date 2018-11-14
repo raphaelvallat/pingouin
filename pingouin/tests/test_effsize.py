@@ -4,7 +4,7 @@ import pytest
 
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.effsize import (compute_esci, convert_effsize, compute_effsize,
-                              compute_effsize_from_t)
+                              compute_effsize_from_t, compute_boot_esci)
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
@@ -20,23 +20,29 @@ class TestEffsize(_TestPingouin):
 
     def test_compute_esci(self):
         """Test function compute_esci"""
-        compute_esci(x=x, y=y, alpha=.95, method='bootstrap', n_boot=2000,
-                     eftype='hedges', return_dist=True)
-        compute_esci(x=x, y=y, alpha=.99, method='bootstrap', n_boot=1000,
-                     eftype='r', return_dist=False)
-        compute_esci(ef=.6, nx=30, ny=30, eftype='r')
-        compute_esci(ef=.4, nx=len(x), ny=len(y), alpha=.95)
-        # Wrong input
-        compute_esci(ef=.4, nx=len(x), ny=len(y), method='bootstrap')
-        with pytest.raises(ValueError):
-            compute_esci(x=x, y=y, alpha=.95, method='bootstrap', n_boot=2000,
-                         eftype='wrong', return_dist=True)
-        with pytest.raises(ValueError):
-            compute_esci()
+        compute_esci(stat=.6, nx=30, ny=30, eftype='r')
+        compute_esci(stat=.4, nx=len(x), ny=len(y), confidence=.99, decimals=4)
+        compute_esci(stat=.6, nx=30, ny=30, eftype='cohen')
         # Compare with R
         r, nx, ny = 0.5543563, 6, 6
-        ci = compute_esci(ef=r, nx=nx, ny=ny, eftype='r')
+        ci = compute_esci(stat=r, nx=nx, ny=ny, eftype='r')
         assert np.allclose(ci, [-0.47, 0.94])
+
+    def test_compute_boot_esci(self):
+        """Test function compute_boot_esci"""
+        from itertools import product
+        methods = ['norm', 'per', 'cper']
+        funcs = ['spearman', 'pearson', 'cohen', 'hedges']
+        paired = [True, False]
+        pr = list(product(methods, funcs, paired))
+        for m, f, p in pr:
+            compute_boot_esci(x, y, func=f, method=m, seed=123)
+        with pytest.raises(ValueError):
+            compute_boot_esci(x, y, func='wrong')
+        # Using a custom function
+        compute_boot_esci(x, y,
+                          func=lambda x, y: np.sum(np.exp(x) / np.exp(y)),
+                          n_boot=10000, decimals=4, confidence=.68, seed=None)
 
     def test_convert_effsize(self):
         """Test function convert_effsize"""

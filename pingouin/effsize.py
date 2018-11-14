@@ -2,43 +2,32 @@
 # Date: April 2018
 import numpy as np
 from pingouin.utils import _check_eftype, _remove_na
-from pingouin.distribution import homoscedasticity
+# from pingouin.distribution import homoscedasticity
 
 
-__all__ = ["compute_esci", "convert_effsize", "compute_effsize",
-           "compute_effsize_from_t"]
+__all__ = ["compute_esci", "compute_boot_esci", "convert_effsize",
+           "compute_effsize", "compute_effsize_from_t"]
 
 
-def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
-                 method='parametric', n_boot=2000, eftype='cohen',
-                 return_dist=False):
-    """Bootstrapped or parametric confidence intervals of an effect size.
+def compute_esci(stat=None, nx=None, ny=None, eftype='d', confidence=.95,
+                 decimals=2):
+    """Parametric confidence intervals around an effect size or a
+    correlation coefficient.
 
     Parameters
     ----------
-    x, y : int
-        Data vectors (required for bootstrapping only)
-    ef : float
+    stat : float
         Original effect size. Must be either a correlation coefficient or a
         Cohen-type effect size (Cohen d or Hedges g).
-        Required for parametric method only.
     nx, ny : int
         Length of vector x and y.
-    alpha : float, optional
-        Confidence interval (0.95 = 95%)
-    method : string
-        Computation method
-        Available methods are ::
-
-        'parametric' : uses standard deviation of effect sizes.
-        'bootstrap' : uses a bootstrapping procedure (pivotal CI).
-    n_boot : int
-        Number of permutations for the bootstrap procedure
     eftype : string
-        Effect size type for the bootstrapping procedure.
-    return_dist : boolean
-        If True, return the distribution of permutations (e.g. useful for a
-        posteriori plotting)
+        Effect size type. Must be 'r' (correlation) or 'cohen'
+        (Cohen d or Hedges g).
+    confidence : float
+        Confidence level (0.95 = 95%)
+    decimals : int
+        Number of rounded decimals.
 
     Returns
     -------
@@ -106,110 +95,210 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
 
     Examples
     --------
-    1. Compute the 95% **parametric** confidence interval of an effect size
-       given the two sample sizes.
+    1. Confidence interval of a Pearson correlation coefficient
+
+        >>> import pingouin as pg
+        >>> x = [3, 4, 6, 7, 5, 6, 7, 3, 5, 4, 2]
+        >>> y = [4, 6, 6, 7, 6, 5, 5, 2, 3, 4, 1]
+        >>> nx, ny = len(x), len(y)
+        >>> stat = np.corrcoef(x, y)[0][1]
+        >>> ci = pg.compute_esci(stat=stat, nx=nx, ny=ny, eftype='r')
+        >>> print(stat, ci)
+            0.7468280049029223 [0.27 0.93]
+
+    2. Confidence interval of a Cohen d
+
+        >>> import pingouin as pg
+        >>> x = [3, 4, 6, 7, 5, 6, 7, 3, 5, 4, 2]
+        >>> y = [4, 6, 6, 7, 6, 5, 5, 2, 3, 4, 1]
+        >>> nx, ny = len(x), len(y)
+        >>> stat = pg.compute_effsize(x, y, eftype='cohen')
+        >>> ci = pg.compute_esci(stat=stat, nx=nx, ny=ny, eftype='cohen')
+        >>> print(stat, ci)
+            0.1537753990658328 [-0.68  0.99]
+    """
+    # Safety check
+    assert eftype.lower() in['r', 'pearson', 'spearman', 'cohen',
+                             'd', 'g', 'hedges']
+    assert stat is not None and nx is not None and ny is not None
+    assert isinstance(confidence, float)
+    assert 0 < confidence < 1
+
+    # Note that we are using a normal dist and not a T dist:
+    # from scipy.stats import t
+    # crit = np.abs(t.ppf((1 - confidence) / 2), dof)
+    from scipy.stats import norm
+    crit = np.abs(norm.ppf((1 - confidence) / 2))
+
+    if eftype.lower() in ['r', 'pearson', 'spearman']:
+        # Standardize correlation coefficient
+        z = np.arctanh(stat)
+        se = 1 / np.sqrt(nx - 3)
+        ci_z = np.array([z - crit * se, z + crit * se])
+        # Transform back to r
+        ci = np.tanh(ci_z)
+    else:
+        se = np.sqrt(((nx + ny) / (nx * ny)) + (stat**2) / (2 * (nx + ny)))
+        ci = np.array([stat - crit * se, stat + crit * se])
+    return np.round(ci, decimals)
+
+
+def compute_boot_esci(x, y, func='pearson', method='cper', paired=False,
+                      confidence=.95, n_boot=2000, decimals=2, seed=None):
+    """Bootstrapped confidence intervals.
+
+    Parameters
+    ----------
+    x, y : 1D-arrays  or lists
+        Samples.
+    func : str or custom function
+        Function to compute the bootstrapped statistic.
+        Accepted string values are::
+
+        'pearson': Pearson correlation coefficient
+        'spearman': Spearman correlation coefficient
+        'cohen': Cohen d effect size
+        'hedges': Hedges g effect size
+    method : str
+        Method to compute the confidence intervals::
+
+        'norm': Normal approximation with bootstrapped bias and standard error
+        'per': basic percentile method
+        'cper': Bias corrected percentile method (default)
+    paired : boolean
+        Indicates whether x and y are paired or not. Only useful when computing
+        Cohen d or Hedges g bootstrapped confidence intervals.
+    confidence : float
+        Confidence level (0.95 = 95%)
+    n_boot : int
+        Number of bootstrap iterations.
+    decimals : int
+        Number of rounded decimals.
+    seed : int or None
+        Random seed for generating bootstrap samples.
+
+    Returns
+    -------
+    ci : array
+        Desired converted effect size
+
+    Notes
+    -----
+    Results have been tested against the *bootci* Matlab function.
+
+    References
+    ----------
+    .. [1] https://www.mathworks.com/help/stats/bootci.html
+
+    Examples
+    --------
+    1. Bootstrapped 95% confidence interval of a Pearson correlation
+
+        >>> import pingouin as pg
+        >>> x = [3, 4, 6, 7, 5, 6, 7, 3, 5, 4, 2]
+        >>> y = [4, 6, 6, 7, 6, 5, 5, 2, 3, 4, 1]
+        >>> stat = np.corrcoef(x, y)[0][1]
+        >>> ci = pg.compute_boot_esci(x, y, func='pearson', seed=42)
+        >>> print(stat, ci)
+            0.7468280049029223 [0.27 0.93]
+
+    2. Bootstrapped 95% confidence interval of a Cohen d
+
+        >>> import pingouin as pg
+        >>> x = [3, 4, 6, 7, 5, 6, 7, 3, 5, 4, 2]
+        >>> y = [4, 6, 6, 7, 6, 5, 5, 2, 3, 4, 1]
+        >>> stat = pg.compute_effsize(x, y, eftype='cohen')
+        >>> ci = pg.compute_boot_esci(x, y, func='cohen', decimals=3)
+        >>> print(stat, ci)
+            0.1537753990658328 [-0.335  0.612]
+
+    3. Bootstrapped confidence interval using a custom function
 
         >>> import numpy as np
-        >>> from pingouin import compute_esci, compute_effsize
-        >>> np.random.seed(123)
-        >>> x = np.random.normal(loc=3, size=60)
-        >>> y = np.random.normal(loc=2, size=50)
-        >>> ef = compute_effsize(x=x, y=y, eftype='cohen')
-        >>> print(ef)
-        >>> print(compute_esci(ef=ef, nx=len(x), ny=len(y)))
-            1.01
-            [0.61  1.41]
-
-    2. Compute the 95% **bootstrapped** confidence interval of an effect size.
-       In that case, we need to pass directly the original x and y arrays.
-
-        >>> print(compute_esci(x=x, y=y, method='bootstrap'))
-            [0.93 1.17]
-
-    3. Plot the bootstrapped distribution using Seaborn.
-
-        >>> import seaborn as sns
-        >>> ci, dist = compute_esci(x=x, y=y, method='bootstrap',
-        >>>                         return_dist=True, n_boot=5000)
-        >>> sns.distplot(dist)
-
-    4. Get the 68% confidence interval
-
-        >>> ci68 = compute_esci(x=x, y=y, method='bootstrap', alpha=.68)
-        >>> print(ci68)
-            [0.99 1.12]
-
-    5. Compute the confidence interval of a correlation coefficient
-
-        >>> # Generate random correlated samples
-        >>> np.random.seed(123)
-        >>> mean, cov = [4, 6], [(1, .5), (.5, 1)]
-        >>> n = 30
-        >>> x, y = np.random.multivariate_normal(mean, cov, 30).T
-        >>> # Compute correlation
-        >>> from pingouin import corr
-        >>> r = corr(x, y)['r'][0]
-        >>> # Compute parametric 95%CI
-        >>> ci_pm = compute_esci(ef=r, nx=n, ny=n, eftype='r')
-        >>> # Compute bootstrapped 95% CI
-        >>> ci_bt = compute_esci(x=x, y=y, method='bootstrap', eftype='r')
-        >>> print(r, ci_pm, ci_bt)
-            0.491 [0.11 0.7 ] [0.42 0.83]
+        >>> import pingouin as pg
+        >>> x = [3, 4, 6, 7, 5, 6, 7, 3, 5, 4, 2]
+        >>> y = [4, 6, 6, 7, 6, 5, 5, 2, 3, 4, 1]
+        >>> stat = np.sum(np.exp(x) / np.exp(y))
+        >>> ci = pg.compute_boot_esci(x, y, func=lambda x, y: np.sum(np.exp(x)
+        >>>                           / np.exp(y)), n_boot=10000, seed=123)
+        >>> print(stat, ci)
+            26.80405184881793 [12.76 45.15]
     """
-    # Check arguments
-    if not _check_eftype(eftype):
-        err = "Could not interpret input '{}'".format(eftype)
-        raise ValueError(err)
-    if all(v is None for v in [x, y, nx, ny]):
-        raise ValueError("You must either specify x and y or nx and ny")
-    if x is None and y is None and method == 'bootstrap':
-        method = 'parametric'
-    if nx is None and ny is None and x is not None and y is not None:
-        nx = len(x)
-        ny = len(y)
+    from inspect import isfunction
+    from scipy.stats import norm
 
-    # Start computation
-    if method == 'parametric':
-        # Note that we are using a normal dist and not a T dist:
-        # from scipy.stats import t
-        # crit = np.abs(t.ppf((1 - alpha) / 2), dof)
-        from scipy.stats import norm
-        crit = np.abs(norm.ppf((1 - alpha) / 2))
-        if eftype == 'r':
-            # Standardize correlation coefficient
-            z = np.arctanh(ef)
-            se = 1 / np.sqrt(nx - 3)
-            ci_z = np.array([z - crit * se, z + crit * se])
-            # Transform back to r
-            return np.round(np.tanh(ci_z), 2)
+    x = np.asarray(x)
+    y = np.asarray(y)
+    nx, ny = x.size, y.size
+    n = min(nx, ny)
+
+    assert x.ndim == 1 and y.ndim == 1
+    assert isinstance(confidence, float)
+    assert 0 < confidence < 1
+    assert method in ['norm', 'normal', 'percentile', 'per', 'cpercentile',
+                      'cper']
+    assert isfunction(func) or isinstance(func, str)
+
+    if isinstance(func, str):
+        func_str = '%s' % func
+        if func == 'pearson':
+
+            def func(x, y):
+                return np.corrcoef(x, y)[0][1]
+
+        elif func == 'spearman':
+            from scipy.stats import spearmanr
+
+            def func(x, y):
+                spr, _ = spearmanr(x, y)
+                return spr
+
+        elif func in ['cohen', 'hedges']:
+            from pingouin.effsize import compute_effsize
+
+            def func(x, y):
+                return compute_effsize(x, y, paired=paired, eftype=func_str)
         else:
-            se = np.sqrt(((nx + ny) / (nx * ny)) + (ef**2) / (2 * (nx + ny)))
-            ci = np.round(np.array([ef - crit * se, ef + crit * se]), 2)
-            return ci
+            raise ValueError('Function string not recognized.')
 
-    elif method == 'bootstrap':
-        ef = compute_effsize(x=x, y=y, eftype=eftype)
-        rd_x = np.random.choice(nx, size=n_boot)
-        rd_y = np.random.choice(ny, size=n_boot)
-        effsizes = np.zeros(n_boot)
+    # Bootstrap
+    reference = func(x, y)  # Point estimate
+    rng = np.random.RandomState(seed)  # Random seed
+    bootsam = rng.choice(np.arange(n), size=(n, n_boot), replace=True)
+    bootstat = np.empty(n_boot)
+    for i in range(n_boot):
+        bootstat[i] = func(x[bootsam[:, i]], y[bootsam[:, i]])
 
-        for i in np.arange(n_boot):
-            x_new = x.copy()
-            y_new = y.copy()
-            x_new[rd_x[i]] = y[rd_y[i]]
-            y_new[rd_y[i]] = x[rd_x[i]]
-            effsizes[i] = compute_effsize(x=x_new, y=y_new, eftype=eftype)
+    # CONFIDENCE INTERVALS
+    alpha = 1 - confidence
+    dist_sorted = np.sort(bootstat)
 
-        ef_sorted = np.sort(effsizes)
-        lower = int(n_boot * ((1 - alpha) / 2))
-        upper = int(n_boot * (alpha + (1 - alpha) / 2))
-        ci = np.array([ef_sorted[lower], ef_sorted[upper]])
-        # Pivot confidence intervals
-        ci = np.round(np.sort(2 * ef - ci), 2)
-        if return_dist:
-            return ci, effsizes
-        else:
-            return ci
+    if method in ['norm', 'normal']:
+        # Normal approximation
+        za = norm.ppf(alpha / 2)
+        se = np.std(bootstat, ddof=1)
+
+        bias = np.mean(bootstat - reference)
+        ll = reference - bias + se * za
+        ul = reference - bias - se * za
+        ci = [ll, ul]
+    elif method in ['percentile', 'per']:
+        # Uncorrected percentile
+        pct_ll = int(n_boot * (alpha / 2))
+        pct_ul = int(n_boot * (1 - alpha / 2))
+        ci = [dist_sorted[pct_ll], dist_sorted[pct_ul]]
+    else:
+        # Corrected percentile bootstrap
+        # Compute bias-correction constant z0
+        z_0 = norm.ppf(np.mean(bootstat < reference) +
+                       np.mean(bootstat == reference) / 2)
+        z_alpha = norm.ppf(alpha / 2)
+        pct_ul = 100 * norm.cdf(2 * z_0 - z_alpha)
+        pct_ll = 100 * norm.cdf(2 * z_0 + z_alpha)
+        ll = np.percentile(bootstat, pct_ll)
+        ul = np.percentile(bootstat, pct_ul)
+        ci = [ll, ul]
+    return np.round(ci, decimals)
 
 
 def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
@@ -335,11 +424,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     if it == ot:
         return ef
 
-    if it == 'r':
-        # Rosenthal 1994
-        d = (2 * ef) / np.sqrt(1 - ef**2)
-    elif it == 'cohen':
-        d = ef
+    d = (2 * ef) / np.sqrt(1 - ef**2) if it == 'r' else ef  # Rosenthal 1994
 
     # Then convert to the desired output type
     if ot == 'cohen':
@@ -373,7 +458,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
         # Ruscio 2008
         from scipy.stats import norm
         return norm.cdf(d / np.sqrt(2))
-    elif ot == 'none':
+    else:
         return None
 
 
@@ -521,10 +606,10 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         return r
     else:
         # Test equality of variance of data with a stringent threshold
-        equal_var, p = homoscedasticity(x, y, alpha=.001)
-        if not equal_var:
-            print('Unequal variances (p<.001). You should consider reporting',
-                  'Glass delta instead.')
+        # equal_var, p = homoscedasticity(x, y, alpha=.001)
+        # if not equal_var:
+        #     print('Unequal variances (p<.001). You should report',
+        #           'Glass delta instead.')
 
         # Compute unbiased Cohen's d effect size
         if not paired:

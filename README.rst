@@ -45,16 +45,18 @@ It provides easy-to-grasp functions for computing several statistical functions:
 
 6. Tests for sphericity, normality and homoscedasticity
 
-7. Effect sizes
+7. Effect sizes (Cohen's d, Hedges'g, AUC, Glass delta, eta-square...)
 
-8. Circular statistics
+8. Parametric/bootstrapped confidence intervals around an effect size or a correlation coefficient
 
-9. Linear/logistic regression and mediation analysis
+9. Circular statistics
+
+10. Linear/logistic regression and mediation analysis
 
 Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
 
 For example, the :code:`ttest_ind` function of SciPy returns only the T-value and the p-value. By contrast,
-the :code:`ttest` function of Pingouin returns the t-value, p-value, degrees of freedom, effect size (Cohen's d), statistical power and Bayes Factor (BF10) of the test.
+the :code:`ttest` function of Pingouin returns the T-value, p-value, degrees of freedom, effect size (Cohen's d), statistical power and Bayes Factor (BF10) of the test.
 
 
 Documentation
