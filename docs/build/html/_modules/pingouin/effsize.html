@@ -117,7 +117,8 @@
 <span class="sd">    x, y : int</span>
 <span class="sd">        Data vectors (required for bootstrapping only)</span>
 <span class="sd">    ef : float</span>
-<span class="sd">        Original effect size (must be Cohen d or Hedges g).</span>
+<span class="sd">        Original effect size. Must be either a correlation coefficient or a</span>
+<span class="sd">        Cohen-type effect size (Cohen d or Hedges g).</span>
 <span class="sd">        Required for parametric method only.</span>
 <span class="sd">    nx, ny : int</span>
 <span class="sd">        Length of vector x and y.</span>
@@ -141,6 +142,64 @@
 <span class="sd">    -------</span>
 <span class="sd">    ci : array</span>
 <span class="sd">        Desired converted effect size</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    To compute the parametric confidence interval around a</span>
+<span class="sd">    **Pearson r correlation** coefficient, one must first apply a</span>
+<span class="sd">    Fisher&#39;s r-to-z transformation:</span>
+
+<span class="sd">    .. math:: z = 0.5 \cdot \ln \dfrac{1 + r}{1 - r} = \mathtt{arctanh}(r)</span>
+
+<span class="sd">    and compute the standard deviation:</span>
+
+<span class="sd">    .. math:: se = \dfrac{1}{\sqrt{n - 3}}</span>
+
+<span class="sd">    where :math:`n` is the sample size.</span>
+
+<span class="sd">    The lower and upper confidence intervals - *in z-space* - are then given by:</span>
+
+<span class="sd">    .. math:: ci_z = z \pm crit \cdot se</span>
+
+<span class="sd">    where :math:`crit` is the critical value of the nomal distribution</span>
+<span class="sd">    corresponding to the desired confidence level (e.g. 1.96 in case of a 95%</span>
+<span class="sd">    confidence interval).</span>
+
+<span class="sd">    These confidence intervals can then be easily converted back to *r-space*:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        ci_r = \dfrac{\exp(2 \cdot ci_z) - 1}{\exp(2 \cdot ci_z) + 1} =</span>
+<span class="sd">        \mathtt{tanh}(ci_z)</span>
+
+<span class="sd">    A formula for calculating the confidence interval for a</span>
+<span class="sd">    **Cohen d effect size** is given by Hedges and Olkin (1985, p86).</span>
+<span class="sd">    If the effect size estimate from the sample is :math:`d`, then it is</span>
+<span class="sd">    normally distributed, with standard deviation:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        se = \sqrt{\dfrac{n_x + n_y}{n_x \cdot n_y} +</span>
+<span class="sd">        \dfrac{d^2}{2 (n_x + n_y)}}</span>
+
+<span class="sd">    where :math:`n_x` and :math:`n_y` are the sample sizes of the two groups.</span>
+
+<span class="sd">    The lower and upper confidence intervals are then given by:</span>
+
+<span class="sd">    .. math:: ci_d = d \pm crit \cdot se</span>
+
+<span class="sd">    where :math:`crit` is the critical value of the nomal distribution</span>
+<span class="sd">    corresponding to the desired confidence level (e.g. 1.96 in case of a 95%</span>
+<span class="sd">    confidence interval).</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] https://en.wikipedia.org/wiki/Fisher_transformation</span>
+
+<span class="sd">    .. [2] Hedges, L., and Ingram Olkin. &quot;Statistical models for</span>
+<span class="sd">           meta-analysis.&quot; (1985).</span>
+
+<span class="sd">    .. [3] http://www.leeds.ac.uk/educol/documents/00002182.htm</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>

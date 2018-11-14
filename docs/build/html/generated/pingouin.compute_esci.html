@@ -112,7 +112,8 @@
 <dd><p class="first last">Data vectors (required for bootstrapping only)</p>
 </dd>
 <dt><strong>ef</strong> <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">Original effect size (must be Cohen d or Hedges g).
+<dd><p class="first last">Original effect size. Must be either a correlation coefficient or a
+Cohen-type effect size (Cohen d or Hedges g).
 Required for parametric method only.</p>
 </dd>
 <dt><strong>nx, ny</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
@@ -149,6 +150,60 @@ posteriori plotting)</p>
 </dl>
 </td>
 </tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>To compute the parametric confidence interval around a
+<strong>Pearson r correlation</strong> coefficient, one must first apply a
+Fisher’s r-to-z transformation:</p>
+<div class="math notranslate nohighlight">
+\[z = 0.5 \cdot \ln \dfrac{1 + r}{1 - r} = \mathtt{arctanh}(r)\]</div>
+<p>and compute the standard deviation:</p>
+<div class="math notranslate nohighlight">
+\[se = \dfrac{1}{\sqrt{n - 3}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(n\)</span> is the sample size.</p>
+<p>The lower and upper confidence intervals - <em>in z-space</em> - are then given by:</p>
+<div class="math notranslate nohighlight">
+\[ci_z = z \pm crit \cdot se\]</div>
+<p>where <span class="math notranslate nohighlight">\(crit\)</span> is the critical value of the nomal distribution
+corresponding to the desired confidence level (e.g. 1.96 in case of a 95%
+confidence interval).</p>
+<p>These confidence intervals can then be easily converted back to <em>r-space</em>:</p>
+<div class="math notranslate nohighlight">
+\[ci_r = \dfrac{\exp(2 \cdot ci_z) - 1}{\exp(2 \cdot ci_z) + 1} =
+\mathtt{tanh}(ci_z)\]</div>
+<p>A formula for calculating the confidence interval for a
+<strong>Cohen d effect size</strong> is given by Hedges and Olkin (1985, p86).
+If the effect size estimate from the sample is <span class="math notranslate nohighlight">\(d\)</span>, then it is
+normally distributed, with standard deviation:</p>
+<div class="math notranslate nohighlight">
+\[se = \sqrt{\dfrac{n_x + n_y}{n_x \cdot n_y} +
+\dfrac{d^2}{2 (n_x + n_y)}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(n_x\)</span> and <span class="math notranslate nohighlight">\(n_y\)</span> are the sample sizes of the two groups.</p>
+<p>The lower and upper confidence intervals are then given by:</p>
+<div class="math notranslate nohighlight">
+\[ci_d = d \pm crit \cdot se\]</div>
+<p>where <span class="math notranslate nohighlight">\(crit\)</span> is the critical value of the nomal distribution
+corresponding to the desired confidence level (e.g. 1.96 in case of a 95%
+confidence interval).</p>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="rfd888423515c-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td><a class="reference external" href="https://en.wikipedia.org/wiki/Fisher_transformation">https://en.wikipedia.org/wiki/Fisher_transformation</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="rfd888423515c-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Hedges, L., and Ingram Olkin. “Statistical models for
+meta-analysis.” (1985).</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="rfd888423515c-3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td><a class="reference external" href="http://www.leeds.ac.uk/educol/documents/00002182.htm">http://www.leeds.ac.uk/educol/documents/00002182.htm</a></td></tr>
 </tbody>
 </table>
 <p class="rubric">Examples</p>

@@ -19,7 +19,8 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
     x, y : int
         Data vectors (required for bootstrapping only)
     ef : float
-        Original effect size (must be Cohen d or Hedges g).
+        Original effect size. Must be either a correlation coefficient or a
+        Cohen-type effect size (Cohen d or Hedges g).
         Required for parametric method only.
     nx, ny : int
         Length of vector x and y.
@@ -43,6 +44,65 @@ def compute_esci(x=None, y=None, ef=None, nx=None, ny=None, alpha=.95,
     -------
     ci : array
         Desired converted effect size
+
+    Notes
+    -----
+    To compute the parametric confidence interval around a
+    **Pearson r correlation** coefficient, one must first apply a
+    Fisher's r-to-z transformation:
+
+    .. math:: z = 0.5 \cdot \ln \dfrac{1 + r}{1 - r} = \mathtt{arctanh}(r)
+
+    and compute the standard deviation:
+
+    .. math:: se = \dfrac{1}{\sqrt{n - 3}}
+
+    where :math:`n` is the sample size.
+
+    The lower and upper confidence intervals - *in z-space* - are then
+    given by:
+
+    .. math:: ci_z = z \pm crit \cdot se
+
+    where :math:`crit` is the critical value of the nomal distribution
+    corresponding to the desired confidence level (e.g. 1.96 in case of a 95%
+    confidence interval).
+
+    These confidence intervals can then be easily converted back to *r-space*:
+
+    .. math::
+
+        ci_r = \dfrac{\exp(2 \cdot ci_z) - 1}{\exp(2 \cdot ci_z) + 1} =
+        \mathtt{tanh}(ci_z)
+
+    A formula for calculating the confidence interval for a
+    **Cohen d effect size** is given by Hedges and Olkin (1985, p86).
+    If the effect size estimate from the sample is :math:`d`, then it is
+    normally distributed, with standard deviation:
+
+    .. math::
+
+        se = \sqrt{\dfrac{n_x + n_y}{n_x \cdot n_y} +
+        \dfrac{d^2}{2 (n_x + n_y)}}
+
+    where :math:`n_x` and :math:`n_y` are the sample sizes of the two groups.
+
+    The lower and upper confidence intervals are then given by:
+
+    .. math:: ci_d = d \pm crit \cdot se
+
+    where :math:`crit` is the critical value of the nomal distribution
+    corresponding to the desired confidence level (e.g. 1.96 in case of a 95%
+    confidence interval).
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Fisher_transformation
+
+    .. [2] Hedges, L., and Ingram Olkin. "Statistical models for
+           meta-analysis." (1985).
+
+    .. [3] http://www.leeds.ac.uk/educol/documents/00002182.htm
 
     Examples
     --------
