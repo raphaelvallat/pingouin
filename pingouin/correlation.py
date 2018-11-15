@@ -11,7 +11,7 @@ from pingouin.nonparametric import mad, madmedianrule
 __all__ = ["corr", "partial_corr", "rm_corr", "intraclass_corr"]
 
 
-def skipped(x, y):
+def skipped(x, y, method='spearman'):
     """
     Skipped correlation (Rousselet and Pernet 2012).
 
@@ -19,6 +19,9 @@ def skipped(x, y):
     ----------
     x, y : array_like
         First and second set of observations. x and y must be independent.
+    method : str
+        Method used to compute the correlation after outlier removal. Can be
+        either 'spearman' (default) or 'pearson'.
 
     Returns
     -------
@@ -26,6 +29,8 @@ def skipped(x, y):
         Skipped correlation coefficient.
     pval : float
         Two-tailed p-value.
+    outliers : array of bool
+        Indicate if value is an outlier or not
 
     Notes
     -----
@@ -84,9 +89,11 @@ def skipped(x, y):
     outliers = np.sum(record, axis=0) >= 1
 
     # Compute correlation on remaining data
-    x, y = X[~outliers, 0], X[~outliers, 1]
-    r, pval = spearmanr(x, y)
-    return r, pval
+    if method == 'spearman':
+        r, pval = spearmanr(X[~outliers, 0], X[~outliers, 1])
+    else:
+        r, pval = pearsonr(X[~outliers, 0], X[~outliers, 1])
+    return r, pval, outliers
 
 
 def mahal(Y, X):
@@ -445,7 +452,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     elif method == 'shepherd':
         r, pval = shepherd(x, y)
     elif method == 'skipped':
-        r, pval = skipped(x, y)
+        r, pval, _ = skipped(x, y, method='spearman')
     else:
         raise ValueError('Method not recognized.')
 

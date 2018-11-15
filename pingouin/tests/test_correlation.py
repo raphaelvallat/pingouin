@@ -2,7 +2,8 @@ import pytest
 import numpy as np
 import pandas as pd
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.correlation import corr, rm_corr, intraclass_corr, partial_corr
+from pingouin.correlation import (corr, rm_corr, intraclass_corr, partial_corr,
+                                  skipped)
 from pingouin.datasets import read_dataset
 
 
@@ -22,6 +23,8 @@ class TestCorrelation(_TestPingouin):
         # Compare with robust corr toolbox
         stats = corr(x, y, method='skipped')
         assert np.round(stats['r'].values, 3) == 0.512
+        _, _, outliers = skipped(x, y, method='pearson')
+        assert outliers.size == x.size
         assert stats['n'].values == 30
         stats = corr(x, y, method='percbend')
         assert np.round(stats['r'].values, 3) == 0.484
