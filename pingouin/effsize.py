@@ -5,13 +5,13 @@ from pingouin.utils import _check_eftype, _remove_na
 # from pingouin.distribution import homoscedasticity
 
 
-__all__ = ["compute_esci", "compute_boot_esci", "convert_effsize",
+__all__ = ["compute_esci", "compute_bootci", "convert_effsize",
            "compute_effsize", "compute_effsize_from_t"]
 
 
-def compute_esci(stat=None, nx=None, ny=None, eftype='d', confidence=.95,
+def compute_esci(stat=None, nx=None, ny=None, eftype='cohen', confidence=.95,
                  decimals=2):
-    """Parametric confidence intervals around an effect size or a
+    """Parametric confidence intervals around a Cohen d or a
     correlation coefficient.
 
     Parameters
@@ -143,22 +143,28 @@ def compute_esci(stat=None, nx=None, ny=None, eftype='d', confidence=.95,
     return np.round(ci, decimals)
 
 
-def compute_boot_esci(x, y, func='pearson', method='cper', paired=False,
-                      confidence=.95, n_boot=2000, decimals=2, seed=None):
-    """Bootstrapped confidence intervals.
+def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
+                   confidence=.95, n_boot=2000, decimals=2, seed=None,
+                   return_dist=False):
+    """Bootstrapped confidence intervals of univariate and bivariate functions.
 
     Parameters
     ----------
-    x, y : 1D-arrays  or lists
-        Samples.
+    x : 1D-array or list
+        First sample. Required for both bivariate and univariate functions.
+    y : 1D-array, list, or None
+        Second sample. Required only for bivariate functions.
     func : str or custom function
         Function to compute the bootstrapped statistic.
         Accepted string values are::
 
-        'pearson': Pearson correlation coefficient
-        'spearman': Spearman correlation coefficient
-        'cohen': Cohen d effect size
-        'hedges': Hedges g effect size
+        'pearson': Pearson correlation (bivariate, requires x and y)
+        'spearman': Spearman correlation (bivariate)
+        'cohen': Cohen d effect size (bivariate)
+        'hedges': Hedges g effect size (bivariate)
+        'mean': Mean (univariate, requires only x)
+        'std': Standard deviation (univariate)
+        'var': Variance (univariate)
     method : str
         Method to compute the confidence intervals::
 
@@ -167,15 +173,18 @@ def compute_boot_esci(x, y, func='pearson', method='cper', paired=False,
         'cper': Bias corrected percentile method (default)
     paired : boolean
         Indicates whether x and y are paired or not. Only useful when computing
-        Cohen d or Hedges g bootstrapped confidence intervals.
+        bivariate Cohen d or Hedges g bootstrapped confidence intervals.
     confidence : float
         Confidence level (0.95 = 95%)
     n_boot : int
-        Number of bootstrap iterations.
+        Number of bootstrap iterations. The higher, the better, the slower.
     decimals : int
         Number of rounded decimals.
     seed : int or None
         Random seed for generating bootstrap samples.
+    return_dist : boolean
+        If True, return the confidence intervals and the bootstrapped
+        distribution  (e.g. for plotting purposes).
 
     Returns
     -------
@@ -190,6 +199,12 @@ def compute_boot_esci(x, y, func='pearson', method='cper', paired=False,
     ----------
     .. [1] https://www.mathworks.com/help/stats/bootci.html
 
+    .. [2] DiCiccio, T. J., & Efron, B. (1996). Bootstrap confidence intervals.
+           Statistical science, 189-212.
+
+    .. [3] Davison, A. C., & Hinkley, D. V. (1997). Bootstrap methods and their
+           application (Vol. 1). Cambridge university press.
+
     Examples
     --------
     1. Bootstrapped 95% confidence interval of a Pearson correlation
@@ -198,41 +213,54 @@ def compute_boot_esci(x, y, func='pearson', method='cper', paired=False,
         >>> x = [3, 4, 6, 7, 5, 6, 7, 3, 5, 4, 2]
         >>> y = [4, 6, 6, 7, 6, 5, 5, 2, 3, 4, 1]
         >>> stat = np.corrcoef(x, y)[0][1]
-        >>> ci = pg.compute_boot_esci(x, y, func='pearson', seed=42)
+        >>> ci = pg.compute_bootci(x, y, func='pearson', seed=42)
         >>> print(stat, ci)
             0.7468280049029223 [0.27 0.93]
 
     2. Bootstrapped 95% confidence interval of a Cohen d
 
-        >>> import pingouin as pg
-        >>> x = [3, 4, 6, 7, 5, 6, 7, 3, 5, 4, 2]
-        >>> y = [4, 6, 6, 7, 6, 5, 5, 2, 3, 4, 1]
         >>> stat = pg.compute_effsize(x, y, eftype='cohen')
-        >>> ci = pg.compute_boot_esci(x, y, func='cohen', decimals=3)
+        >>> ci = pg.compute_bootci(x, y, func='cohen', decimals=3)
         >>> print(stat, ci)
             0.1537753990658328 [-0.335  0.612]
 
-    3. Bootstrapped confidence interval using a custom function
+    3. Bootstrapped confidence interval of a standard deviation (univariate)
 
         >>> import numpy as np
-        >>> import pingouin as pg
-        >>> x = [3, 4, 6, 7, 5, 6, 7, 3, 5, 4, 2]
-        >>> y = [4, 6, 6, 7, 6, 5, 5, 2, 3, 4, 1]
+        >>> stat = np.std(x, ddof=1)
+        >>> ci = pg.compute_bootci(x, func='std', seed=123)
+        >>> print(stat, ci)
+            1.6787441193290351 [1.21 2.16]
+
+    4. Bootstrapped confidence interval using a custom function
+
         >>> stat = np.sum(np.exp(x) / np.exp(y))
-        >>> ci = pg.compute_boot_esci(x, y, func=lambda x, y: np.sum(np.exp(x)
+        >>> ci = pg.compute_bootci(x, y, func=lambda x, y: np.sum(np.exp(x)
         >>>                           / np.exp(y)), n_boot=10000, seed=123)
         >>> print(stat, ci)
             26.80405184881793 [12.76 45.15]
+
+    5. Get the bootstrapped distribution around a Pearson correlation
+
+        >>> ci, bstat = pg.compute_bootci(x, y, return_dist=True)
+        >>> print(bstat.size)
+            2000
     """
     from inspect import isfunction
     from scipy.stats import norm
 
     x = np.asarray(x)
-    y = np.asarray(y)
-    nx, ny = x.size, y.size
-    n = min(nx, ny)
+    n = x.size
+    assert x.ndim == 1
+    assert n > 1
 
-    assert x.ndim == 1 and y.ndim == 1
+    if y is not None:
+        y = np.asarray(y)
+        ny = y.size
+        assert y.ndim == 1
+        assert ny > 1
+        n = min(n, ny)
+
     assert isinstance(confidence, float)
     assert 0 < confidence < 1
     assert method in ['norm', 'normal', 'percentile', 'per', 'cpercentile',
@@ -258,16 +286,37 @@ def compute_boot_esci(x, y, func='pearson', method='cper', paired=False,
 
             def func(x, y):
                 return compute_effsize(x, y, paired=paired, eftype=func_str)
+
+        elif func == 'mean':
+
+            def func(x):
+                return np.mean(x)
+
+        elif func == 'std':
+
+            def func(x):
+                return np.std(x, ddof=1)
+
+        elif func == 'var':
+
+            def func(x):
+                return np.var(x, ddof=1)
         else:
             raise ValueError('Function string not recognized.')
 
     # Bootstrap
-    reference = func(x, y)  # Point estimate
     rng = np.random.RandomState(seed)  # Random seed
     bootsam = rng.choice(np.arange(n), size=(n, n_boot), replace=True)
     bootstat = np.empty(n_boot)
-    for i in range(n_boot):
-        bootstat[i] = func(x[bootsam[:, i]], y[bootsam[:, i]])
+
+    if y is not None:
+        reference = func(x, y)
+        for i in range(n_boot):
+            bootstat[i] = func(x[bootsam[:, i]], y[bootsam[:, i]])
+    else:
+        reference = func(x)
+        for i in range(n_boot):
+            bootstat[i] = func(x[bootsam[:, i]])
 
     # CONFIDENCE INTERVALS
     alpha = 1 - confidence
@@ -298,7 +347,12 @@ def compute_boot_esci(x, y, func='pearson', method='cper', paired=False,
         ll = np.percentile(bootstat, pct_ll)
         ul = np.percentile(bootstat, pct_ul)
         ci = [ll, ul]
-    return np.round(ci, decimals)
+
+    ci = np.round(ci, decimals)
+    if return_dist:
+        return ci, bootstat
+    else:
+        return ci
 
 
 def convert_effsize(ef, input_type, output_type, nx=None, ny=None):

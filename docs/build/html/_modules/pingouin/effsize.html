@@ -103,13 +103,13 @@
 <span class="c1"># from pingouin.distribution import homoscedasticity</span>
 
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;compute_esci&quot;</span><span class="p">,</span> <span class="s2">&quot;compute_boot_esci&quot;</span><span class="p">,</span> <span class="s2">&quot;convert_effsize&quot;</span><span class="p">,</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;compute_esci&quot;</span><span class="p">,</span> <span class="s2">&quot;compute_bootci&quot;</span><span class="p">,</span> <span class="s2">&quot;convert_effsize&quot;</span><span class="p">,</span>
            <span class="s2">&quot;compute_effsize&quot;</span><span class="p">,</span> <span class="s2">&quot;compute_effsize_from_t&quot;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="compute_esci"><a class="viewcode-back" href="../../generated/pingouin.compute_esci.html#pingouin.compute_esci">[docs]</a><span class="k">def</span> <span class="nf">compute_esci</span><span class="p">(</span><span class="n">stat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=.</span><span class="mi">95</span><span class="p">,</span>
+<div class="viewcode-block" id="compute_esci"><a class="viewcode-back" href="../../generated/pingouin.compute_esci.html#pingouin.compute_esci">[docs]</a><span class="k">def</span> <span class="nf">compute_esci</span><span class="p">(</span><span class="n">stat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=.</span><span class="mi">95</span><span class="p">,</span>
                  <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Parametric confidence intervals around an effect size or a</span>
+    <span class="sd">&quot;&quot;&quot;Parametric confidence intervals around a Cohen d or a</span>
 <span class="sd">    correlation coefficient.</span>
 
 <span class="sd">    Parameters</span>
@@ -241,22 +241,28 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ci</span><span class="p">,</span> <span class="n">decimals</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="compute_boot_esci"><a class="viewcode-back" href="../../generated/pingouin.compute_boot_esci.html#pingouin.compute_boot_esci">[docs]</a><span class="k">def</span> <span class="nf">compute_boot_esci</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;cper&#39;</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                      <span class="n">confidence</span><span class="o">=.</span><span class="mi">95</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Bootstrapped confidence intervals.</span>
+<div class="viewcode-block" id="compute_bootci"><a class="viewcode-back" href="../../generated/pingouin.compute_bootci.html#pingouin.compute_bootci">[docs]</a><span class="k">def</span> <span class="nf">compute_bootci</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;cper&#39;</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                   <span class="n">confidence</span><span class="o">=.</span><span class="mi">95</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">return_dist</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Bootstrapped confidence intervals of univariate and bivariate functions.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    x, y : 1D-arrays  or lists</span>
-<span class="sd">        Samples.</span>
+<span class="sd">    x : 1D-array or list</span>
+<span class="sd">        First sample. Required for both bivariate and univariate functions.</span>
+<span class="sd">    y : 1D-array, list, or None</span>
+<span class="sd">        Second sample. Required only for bivariate functions.</span>
 <span class="sd">    func : str or custom function</span>
 <span class="sd">        Function to compute the bootstrapped statistic.</span>
 <span class="sd">        Accepted string values are::</span>
 
-<span class="sd">        &#39;pearson&#39;: Pearson correlation coefficient</span>
-<span class="sd">        &#39;spearman&#39;: Spearman correlation coefficient</span>
-<span class="sd">        &#39;cohen&#39;: Cohen d effect size</span>
-<span class="sd">        &#39;hedges&#39;: Hedges g effect size</span>
+<span class="sd">        &#39;pearson&#39;: Pearson correlation (bivariate, requires x and y)</span>
+<span class="sd">        &#39;spearman&#39;: Spearman correlation (bivariate)</span>
+<span class="sd">        &#39;cohen&#39;: Cohen d effect size (bivariate)</span>
+<span class="sd">        &#39;hedges&#39;: Hedges g effect size (bivariate)</span>
+<span class="sd">        &#39;mean&#39;: Mean (univariate, requires only x)</span>
+<span class="sd">        &#39;std&#39;: Standard deviation (univariate)</span>
+<span class="sd">        &#39;var&#39;: Variance (univariate)</span>
 <span class="sd">    method : str</span>
 <span class="sd">        Method to compute the confidence intervals::</span>
 
@@ -265,15 +271,18 @@
 <span class="sd">        &#39;cper&#39;: Bias corrected percentile method (default)</span>
 <span class="sd">    paired : boolean</span>
 <span class="sd">        Indicates whether x and y are paired or not. Only useful when computing</span>
-<span class="sd">        Cohen d or Hedges g bootstrapped confidence intervals.</span>
+<span class="sd">        bivariate Cohen d or Hedges g bootstrapped confidence intervals.</span>
 <span class="sd">    confidence : float</span>
 <span class="sd">        Confidence level (0.95 = 95%)</span>
 <span class="sd">    n_boot : int</span>
-<span class="sd">        Number of bootstrap iterations.</span>
+<span class="sd">        Number of bootstrap iterations. The higher, the better, the slower.</span>
 <span class="sd">    decimals : int</span>
 <span class="sd">        Number of rounded decimals.</span>
 <span class="sd">    seed : int or None</span>
 <span class="sd">        Random seed for generating bootstrap samples.</span>
+<span class="sd">    return_dist : boolean</span>
+<span class="sd">        If True, return the confidence intervals and the bootstrapped</span>
+<span class="sd">        distribution  (e.g. for plotting purposes).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -288,6 +297,12 @@
 <span class="sd">    ----------</span>
 <span class="sd">    .. [1] https://www.mathworks.com/help/stats/bootci.html</span>
 
+<span class="sd">    .. [2] DiCiccio, T. J., &amp; Efron, B. (1996). Bootstrap confidence intervals.</span>
+<span class="sd">           Statistical science, 189-212.</span>
+
+<span class="sd">    .. [3] Davison, A. C., &amp; Hinkley, D. V. (1997). Bootstrap methods and their</span>
+<span class="sd">           application (Vol. 1). Cambridge university press.</span>
+
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    1. Bootstrapped 95% confidence interval of a Pearson correlation</span>
@@ -296,41 +311,54 @@
 <span class="sd">        &gt;&gt;&gt; x = [3, 4, 6, 7, 5, 6, 7, 3, 5, 4, 2]</span>
 <span class="sd">        &gt;&gt;&gt; y = [4, 6, 6, 7, 6, 5, 5, 2, 3, 4, 1]</span>
 <span class="sd">        &gt;&gt;&gt; stat = np.corrcoef(x, y)[0][1]</span>
-<span class="sd">        &gt;&gt;&gt; ci = pg.compute_boot_esci(x, y, func=&#39;pearson&#39;, seed=42)</span>
+<span class="sd">        &gt;&gt;&gt; ci = pg.compute_bootci(x, y, func=&#39;pearson&#39;, seed=42)</span>
 <span class="sd">        &gt;&gt;&gt; print(stat, ci)</span>
 <span class="sd">            0.7468280049029223 [0.27 0.93]</span>
 
 <span class="sd">    2. Bootstrapped 95% confidence interval of a Cohen d</span>
 
-<span class="sd">        &gt;&gt;&gt; import pingouin as pg</span>
-<span class="sd">        &gt;&gt;&gt; x = [3, 4, 6, 7, 5, 6, 7, 3, 5, 4, 2]</span>
-<span class="sd">        &gt;&gt;&gt; y = [4, 6, 6, 7, 6, 5, 5, 2, 3, 4, 1]</span>
 <span class="sd">        &gt;&gt;&gt; stat = pg.compute_effsize(x, y, eftype=&#39;cohen&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; ci = pg.compute_boot_esci(x, y, func=&#39;cohen&#39;, decimals=3)</span>
+<span class="sd">        &gt;&gt;&gt; ci = pg.compute_bootci(x, y, func=&#39;cohen&#39;, decimals=3)</span>
 <span class="sd">        &gt;&gt;&gt; print(stat, ci)</span>
 <span class="sd">            0.1537753990658328 [-0.335  0.612]</span>
 
-<span class="sd">    3. Bootstrapped confidence interval using a custom function</span>
+<span class="sd">    3. Bootstrapped confidence interval of a standard deviation (univariate)</span>
 
 <span class="sd">        &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">        &gt;&gt;&gt; import pingouin as pg</span>
-<span class="sd">        &gt;&gt;&gt; x = [3, 4, 6, 7, 5, 6, 7, 3, 5, 4, 2]</span>
-<span class="sd">        &gt;&gt;&gt; y = [4, 6, 6, 7, 6, 5, 5, 2, 3, 4, 1]</span>
+<span class="sd">        &gt;&gt;&gt; stat = np.std(x, ddof=1)</span>
+<span class="sd">        &gt;&gt;&gt; ci = pg.compute_bootci(x, func=&#39;std&#39;, seed=123)</span>
+<span class="sd">        &gt;&gt;&gt; print(stat, ci)</span>
+<span class="sd">            1.6787441193290351 [1.21 2.16]</span>
+
+<span class="sd">    4. Bootstrapped confidence interval using a custom function</span>
+
 <span class="sd">        &gt;&gt;&gt; stat = np.sum(np.exp(x) / np.exp(y))</span>
-<span class="sd">        &gt;&gt;&gt; ci = pg.compute_boot_esci(x, y, func=lambda x, y: np.sum(np.exp(x)</span>
+<span class="sd">        &gt;&gt;&gt; ci = pg.compute_bootci(x, y, func=lambda x, y: np.sum(np.exp(x)</span>
 <span class="sd">        &gt;&gt;&gt;                           / np.exp(y)), n_boot=10000, seed=123)</span>
 <span class="sd">        &gt;&gt;&gt; print(stat, ci)</span>
 <span class="sd">            26.80405184881793 [12.76 45.15]</span>
+
+<span class="sd">    5. Get the bootstrapped distribution around a Pearson correlation</span>
+
+<span class="sd">        &gt;&gt;&gt; ci, bstat = pg.compute_bootci(x, y, return_dist=True)</span>
+<span class="sd">        &gt;&gt;&gt; print(bstat.size)</span>
+<span class="sd">            2000</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">inspect</span> <span class="k">import</span> <span class="n">isfunction</span>
     <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">norm</span>
 
     <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-    <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
+    <span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">1</span>
 
-    <span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">y</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">ny</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">assert</span> <span class="n">y</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="k">assert</span> <span class="n">ny</span> <span class="o">&gt;</span> <span class="mi">1</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">ny</span><span class="p">)</span>
+
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">confidence</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
     <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">confidence</span> <span class="o">&lt;</span> <span class="mi">1</span>
     <span class="k">assert</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;norm&#39;</span><span class="p">,</span> <span class="s1">&#39;normal&#39;</span><span class="p">,</span> <span class="s1">&#39;percentile&#39;</span><span class="p">,</span> <span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;cpercentile&#39;</span><span class="p">,</span>
@@ -356,16 +384,37 @@
 
             <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="n">paired</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="n">func_str</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">func</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+
+            <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">func</span> <span class="o">==</span> <span class="s1">&#39;std&#39;</span><span class="p">:</span>
+
+            <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">func</span> <span class="o">==</span> <span class="s1">&#39;var&#39;</span><span class="p">:</span>
+
+            <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Function string not recognized.&#39;</span><span class="p">)</span>
 
     <span class="c1"># Bootstrap</span>
-    <span class="n">reference</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>  <span class="c1"># Point estimate</span>
     <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>  <span class="c1"># Random seed</span>
     <span class="n">bootsam</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n_boot</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">bootstat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n_boot</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_boot</span><span class="p">):</span>
-        <span class="n">bootstat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">bootsam</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]],</span> <span class="n">y</span><span class="p">[</span><span class="n">bootsam</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]])</span>
+
+    <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">reference</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_boot</span><span class="p">):</span>
+            <span class="n">bootstat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">bootsam</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]],</span> <span class="n">y</span><span class="p">[</span><span class="n">bootsam</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">reference</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_boot</span><span class="p">):</span>
+            <span class="n">bootstat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">bootsam</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]])</span>
 
     <span class="c1"># CONFIDENCE INTERVALS</span>
     <span class="n">alpha</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">confidence</span>
@@ -396,7 +445,12 @@
         <span class="n">ll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">bootstat</span><span class="p">,</span> <span class="n">pct_ll</span><span class="p">)</span>
         <span class="n">ul</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">bootstat</span><span class="p">,</span> <span class="n">pct_ul</span><span class="p">)</span>
         <span class="n">ci</span> <span class="o">=</span> <span class="p">[</span><span class="n">ll</span><span class="p">,</span> <span class="n">ul</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ci</span><span class="p">,</span> <span class="n">decimals</span><span class="p">)</span></div>
+
+    <span class="n">ci</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ci</span><span class="p">,</span> <span class="n">decimals</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_dist</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ci</span><span class="p">,</span> <span class="n">bootstat</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ci</span></div>
 
 
 <div class="viewcode-block" id="convert_effsize"><a class="viewcode-back" href="../../generated/pingouin.convert_effsize.html#pingouin.convert_effsize">[docs]</a><span class="k">def</span> <span class="nf">convert_effsize</span><span class="p">(</span><span class="n">ef</span><span class="p">,</span> <span class="n">input_type</span><span class="p">,</span> <span class="n">output_type</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>

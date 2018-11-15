@@ -4,7 +4,7 @@ import pytest
 
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.effsize import (compute_esci, convert_effsize, compute_effsize,
-                              compute_effsize_from_t, compute_boot_esci)
+                              compute_effsize_from_t, compute_bootci)
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
@@ -29,20 +29,41 @@ class TestEffsize(_TestPingouin):
         assert np.allclose(ci, [-0.47, 0.94])
 
     def test_compute_boot_esci(self):
-        """Test function compute_boot_esci"""
+        """Test function compute_bootci"""
+        # Compare with Matlab
+        x_m = [3.39, 3.3, 2.81, 3.03, 3.44, 3.07, 3.0, 3.43, 3.36, 3.13,
+               3.12, 2.74, 2.76, 2.88, 2.96]
+        y_m = [576, 635, 558, 578, 666, 580, 555, 661, 651, 605, 653, 575,
+               545, 572, 594]
+        ci = compute_bootci(x_m, y_m, method='norm', seed=123, decimals=2)
+        assert ci[0] == 0.52 and ci[1] == 1.05
+        ci = compute_bootci(x_m, y_m, method='per', seed=123, decimals=2)
+        assert ci[0] == 0.45 and ci[1] == 0.96
+        ci = compute_bootci(x_m, y_m, method='cper', seed=123, decimals=2)
+        assert ci[0] == 0.39 and ci[1] == 0.95
+        # Test all combinations
         from itertools import product
         methods = ['norm', 'per', 'cper']
         funcs = ['spearman', 'pearson', 'cohen', 'hedges']
         paired = [True, False]
         pr = list(product(methods, funcs, paired))
         for m, f, p in pr:
-            compute_boot_esci(x, y, func=f, method=m, seed=123)
+            compute_bootci(x, y, func=f, method=m, seed=123, n_boot=100)
+
+        # Now the univariate function
+        funcs = ['mean', 'std', 'var']
+        for m, f in list(product(methods, funcs)):
+            compute_bootci(x, func=f, method=m, seed=123, n_boot=100)
+
         with pytest.raises(ValueError):
-            compute_boot_esci(x, y, func='wrong')
+            compute_bootci(x, y, func='wrong')
         # Using a custom function
-        compute_boot_esci(x, y,
-                          func=lambda x, y: np.sum(np.exp(x) / np.exp(y)),
-                          n_boot=10000, decimals=4, confidence=.68, seed=None)
+        compute_bootci(x, y,
+                       func=lambda x, y: np.sum(np.exp(x) / np.exp(y)),
+                       n_boot=10000, decimals=4, confidence=.68, seed=None)
+        # Get the bootstrapped distribution
+        _, bdist = compute_bootci(x, y, return_dist=True, n_boot=1500)
+        assert bdist.size == 1500
 
     def test_convert_effsize(self):
         """Test function convert_effsize"""

@@ -100,7 +100,7 @@ Effect sizes
     compute_effsize_from_t
     convert_effsize
     compute_esci
-    compute_boot_esci
+    compute_bootci
 
 Multiple comparisons and post-hoc tests
 ---------------------------------------
