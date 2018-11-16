@@ -57,7 +57,7 @@ if __name__ == "__main__":
           url=URL,
           version=VERSION,
           download_url=DOWNLOAD_URL,
-          install_requires=install_requires,
+          install_requires=INSTALL_REQUIRES,
           include_package_data=True,
           packages=PACKAGES,
           package_data=PACKAGE_DATA,
