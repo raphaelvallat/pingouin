@@ -15,35 +15,36 @@ DOWNLOAD_URL = 'https://github.com/raphaelvallat/pingouin/'
 VERSION = '0.2.0'
 PACKAGE_DATA = {'pingouin.data.icons': ['*.svg']}
 
+INSTALL_REQUIRES = [
+    'numpy>=1.15',
+    'scipy>=1.1',
+    'pandas>=0.23',
+]
+
+PACKAGES = [
+    'pingouin',
+    'pingouin.datasets',
+    'pingouin.external',
+]
+
+CLASSIFIERS = [
+    'Intended Audience :: Science/Research',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'License :: OSI Approved :: BSD License',
+    'Topic :: Scientific/Engineering :: Mathematics',
+    'Operating System :: POSIX',
+    'Operating System :: Unix',
+    'Operating System :: MacOS'
+]
+
 try:
     from setuptools import setup
     _has_setuptools = True
 except ImportError:
     from distutils.core import setup
 
-
-def check_dependencies():
-    install_requires = []
-
-    try:
-        import numpy
-    except ImportError:
-        install_requires.append('numpy')
-    try:
-        import scipy
-    except ImportError:
-        install_requires.append('scipy')
-    try:
-        import pandas
-    except ImportError:
-        install_requires.append('pandas')
-
-    return install_requires
-
-
 if __name__ == "__main__":
-
-    install_requires = check_dependencies()
 
     setup(name=DISTNAME,
           author=MAINTAINER,
@@ -58,14 +59,7 @@ if __name__ == "__main__":
           download_url=DOWNLOAD_URL,
           install_requires=install_requires,
           include_package_data=True,
-          packages=['pingouin', 'pingouin.external', 'pingouin.datasets'],
+          packages=PACKAGES,
           package_data=PACKAGE_DATA,
-          classifiers=[
-              'Intended Audience :: Science/Research',
-              'Programming Language :: Python :: 3.6',
-              'License :: OSI Approved :: BSD License',
-              'Topic :: Scientific/Engineering :: Mathematics',
-              'Operating System :: POSIX',
-              'Operating System :: Unix',
-              'Operating System :: MacOS'],
+          classifiers=CLASSIFIERS,
           )
