@@ -213,6 +213,51 @@ No, the central idea behind Pingouin is that all data manipulations and descript
 
     data.describe()
 
+.. raw:: html
+
+          </div>
+        </div>
+
+.. ############################################################################
+.. ############################################################################
+..                                  OTHERS
+.. ############################################################################
+.. ############################################################################
+
+Others
+------
+
+.. ----------------------------- DATA FORMAT -----------------------------
+.. raw:: html
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h5 class="panel-title">
+          <a data-toggle="collapse" href="#collapse_cite">How can I cite Pingouin?</a>
+        </h5>
+      </div>
+      <div id="collapse_cite" class="panel-collapse collapse">
+        <div class="panel-body">
+
+To cite Pingouin, please use the publication in JOSS:
+
+Vallat, R. (2018). Pingouin: statistics in Python. *Journal of Open Source Software*, 3(31), 1026, `https://doi.org/10.21105/joss.01026 <https://doi.org/10.21105/joss.01026>`_
+
+BibTeX:
+
+.. code-block:: latex
+
+  @ARTICLE{Vallat2018,
+    title    = "Pingouin: statistics in Python",
+    author   = "Vallat, Raphael",
+    journal  = "The Journal of Open Source Software",
+    volume   =  3,
+    number   =  31,
+    pages    = "1026",
+    month    =  nov,
+    year     =  2018
+  }
+
 .. ----------------------------- END -----------------------------
 .. raw:: html
 

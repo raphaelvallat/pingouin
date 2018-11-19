@@ -388,6 +388,34 @@ To see the code or report a bug, please visit the `GitHub repository <https://gi
 
 Note that this program is provided with NO WARRANTY OF ANY KIND. If you can, always double check the results with another statistical software.
 
+Contributors
+------------
+
+- Nicolas Legrand
+
+How to cite Pingouin?
+=====================
+
+If you want to cite Pingouin, please use the publication in JOSS:
+
+Vallat, R. (2018). Pingouin: statistics in Python. *Journal of Open Source Software*, 3(31), 1026, `https://doi.org/10.21105/joss.01026 <https://doi.org/10.21105/joss.01026>`_
+
+BibTeX:
+
+.. code-block:: latex
+
+  @ARTICLE{Vallat2018,
+    title    = "Pingouin: statistics in Python",
+    author   = "Vallat, Raphael",
+    journal  = "The Journal of Open Source Software",
+    volume   =  3,
+    number   =  31,
+    pages    = "1026",
+    month    =  nov,
+    year     =  2018
+  }
+
+
 Acknowledgement
 ===============
 
