@@ -7,7 +7,10 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-def plot_skipped(x, y, n_boot=2000, seed=None):
+__all__ = ["plot_skipped"]
+
+def plot_skipped_corr(x, y, n_boot=2000, seed=None):
+
     """Plot the bootstrapped 95% confidence intervals and distribution
     of a robust Skipped correlation.
 
@@ -84,3 +87,5 @@ def plot_skipped(x, y, n_boot=2000, seed=None):
                                                         pearson_ci[0],
                                                         pearson_ci[1]),
                                                         y=1.05)
+
+    return fig, ax1, ax2, ax3
