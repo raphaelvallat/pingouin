@@ -7,8 +7,8 @@ What's new
    :depth: 2
 
 
-v0.2.1 (dev)
-------------
+v0.2.1 (November 2018)
+----------------------
 
 **Effect size**
 
