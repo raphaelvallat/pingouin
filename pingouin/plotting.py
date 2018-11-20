@@ -7,7 +7,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-__all__ = ["plot_skipped"]
+__all__ = ["plot_skipped_corr"]
 
 def plot_skipped_corr(x, y, n_boot=2000, seed=None):
 
