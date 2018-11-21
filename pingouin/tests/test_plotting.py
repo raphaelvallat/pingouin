@@ -7,14 +7,12 @@ from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.plotting import plot_skipped_corr
 
 
-# Dataset for pairwise_ttests
-df = read_dataset('mixed_anova.csv')
-
 class TestPlotting(_TestPingouin):
     """Test plotting.py."""
 
     def test_ttest(self):
         """Test plot_skipped_corr()"""
+        # Data for correlation
         np.random.seed(123)
         x, y = np.random.multivariate_normal([170, 70], [[20, 10], [10, 20]], 30).T
         # Introduce two outliers
