@@ -33,7 +33,7 @@ def plot_skipped_corr(x, y, n_boot=2000, seed=None):
         Matplotlib Figure. To get the individual axes, use fig.axes.
     """
     from pingouin.correlation import skipped
-    from scipy.stats import spearmanr, pearsonr
+    from scipy.stats import pearsonr
     from pingouin.effsize import compute_bootci
 
     x = np.asarray(x)
