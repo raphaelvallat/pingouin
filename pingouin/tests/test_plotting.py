@@ -13,6 +13,6 @@ class TestPlotting(_TestPingouin):
         # Introduce two outliers
         x[10], y[10] = 160, 100
         x[8], y[8] = 165, 90
-        fig, ax1, ax2, ax3 = plot_skipped_corr(x, y)
-        fig, ax1, ax2, ax3 = plot_skipped_corr(x, y, n_boot=10)
-        fig, ax1, ax2, ax3 = plot_skipped_corr(x, y, seed=456)
+        fig = plot_skipped_corr(x, y)
+        fig = plot_skipped_corr(x, y, n_boot=10)
+        fig = plot_skipped_corr(x, y, seed=456)
