@@ -1,16 +1,11 @@
-import pytest
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 from pingouin.tests._tests_pingouin import _TestPingouin
 from pingouin.plotting import plot_skipped_corr
 
-
 class TestPlotting(_TestPingouin):
     """Test plotting.py."""
 
-    def test_ttest(self):
+    def test_plot_skipped_corr(self):
         """Test plot_skipped_corr()"""
         # Data for correlation
         np.random.seed(123)

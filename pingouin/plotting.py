@@ -7,6 +7,9 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+# Set default Seaborn preferences
+sns.set(style='ticks', context='notebook')
+
 __all__ = ["plot_skipped_corr"]
 
 def plot_skipped_corr(x, y, n_boot=2000, seed=None):
@@ -23,8 +26,12 @@ def plot_skipped_corr(x, y, n_boot=2000, seed=None):
         confidence intervals
     seed : int
         Random seed generator.
-    """
 
+    Returns
+    --------
+    fig : matplotlib Figure instance
+        Matplotlib Figure. To get the individual axes, use fig.axes.
+    """
     from pingouin.correlation import skipped
     from scipy.stats import spearmanr, pearsonr
     from pingouin.effsize import compute_bootci
@@ -48,7 +55,6 @@ def plot_skipped_corr(x, y, n_boot=2000, seed=None):
         n_boot=n_boot, return_dist=True, seed=seed)
 
     # START THE PLOT
-    sns.set(style='ticks', context='notebook', font_scale=1.2)
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(16, 4.2))
     plt.subplots_adjust(wspace=0.3)
     sns.despine()
@@ -88,4 +94,4 @@ def plot_skipped_corr(x, y, n_boot=2000, seed=None):
                                                         pearson_ci[1]),
                                                         y=1.05)
 
-    return fig, ax1, ax2, ax3
+    return fig
