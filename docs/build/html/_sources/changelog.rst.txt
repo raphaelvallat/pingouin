@@ -7,6 +7,15 @@ What's new
    :depth: 2
 
 
+v0.2.2 (dev)
+------------
+
+**Plotting**
+
+a. Started working on Pingouin's plotting module
+b. Added Seaborn and Matplotlib to dependencies
+c. Added plot_skipped_corr function (PR from Nicolas Legrand)
+
 v0.2.1 (November 2018)
 ----------------------
 

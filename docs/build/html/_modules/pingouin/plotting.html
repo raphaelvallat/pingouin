@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pingouin.plotting &#8212; pingouin 0.2.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/style.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/copybutton.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html"><span><img src="../../_static/pingouin_128x128.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.2.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../api.html">Functions</a></li>
+                <li><a href="../../guidelines.html">Guidelines</a></li>
+                <li><a href="../../examples.html">Examples</a></li>
+                <li><a href="../../faq.html">FAQ</a></li>
+                <li><a href="../../changelog.html">What's new</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guidelines.html">Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <h1>Source code for pingouin.plotting</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Plotting functions.</span>
+
+<span class="sd">Authors</span>
+<span class="sd">- Raphael Vallat &lt;raphaelvallat9@gmail.com&gt;</span>
+<span class="sd">- Nicolas Legrand &lt;legrand@cyceron.fr&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1"># Set default Seaborn preferences</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s1">&#39;ticks&#39;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="s1">&#39;notebook&#39;</span><span class="p">)</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;plot_skipped_corr&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="plot_skipped_corr"><a class="viewcode-back" href="../../generated/pingouin.plot_skipped_corr.html#pingouin.plot_skipped_corr">[docs]</a><span class="k">def</span> <span class="nf">plot_skipped_corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Plot the bootstrapped 95% confidence intervals and distribution</span>
+<span class="sd">    of a robust Skipped correlation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x, y : 1D-arrays or list</span>
+<span class="sd">        Samples</span>
+<span class="sd">    xlabel, ylabel : str</span>
+<span class="sd">        Axes labels</span>
+<span class="sd">    n_boot : int</span>
+<span class="sd">        Number of bootstrap iterations for the computation of the</span>
+<span class="sd">        confidence intervals</span>
+<span class="sd">    seed : int</span>
+<span class="sd">        Random seed generator for the bootstrap confidence intervals.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    fig : matplotlib Figure instance</span>
+<span class="sd">        Matplotlib Figure. To get the individual axes, use fig.axes.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function is inspired by the Matlab Robust Correlation Toolbox (Pernet,</span>
+<span class="sd">    Wilcox and Rousselet, 2012). It uses the skipped correlation to determine</span>
+<span class="sd">    the outliers. Note that this function requires the scikit-learn package.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Pernet, C.R., Wilcox, R., Rousselet, G.A., 2012. Robust correlation</span>
+<span class="sd">           analyses: false positive and power validation using a new open</span>
+<span class="sd">           source matlab toolbox. Front. Psychol. 3, 606.</span>
+<span class="sd">           https://doi.org/10.3389/fpsyg.2012.00606</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    Plot a robust Skipped correlation with bootstrapped confidence intervals</span>
+
+<span class="sd">    .. plot::</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; import pingouin as pg</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; mean, cov, n = [170, 70], [[20, 10], [10, 20]], 30</span>
+<span class="sd">        &gt;&gt;&gt; x, y = np.random.multivariate_normal(mean, cov, n).T</span>
+<span class="sd">        &gt;&gt;&gt; # Introduce two outliers</span>
+<span class="sd">        &gt;&gt;&gt; x[10], y[10] = 160, 100</span>
+<span class="sd">        &gt;&gt;&gt; x[8], y[8] = 165, 90</span>
+<span class="sd">        &gt;&gt;&gt; fig = pg.plot_skipped_corr(x, y, xlabel=&#39;Height&#39;, ylabel=&#39;Weight&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pingouin.correlation</span> <span class="k">import</span> <span class="n">skipped</span>
+    <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">pearsonr</span>
+    <span class="kn">from</span> <span class="nn">pingouin.effsize</span> <span class="k">import</span> <span class="n">compute_bootci</span>
+
+    <span class="c1"># Safety check</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="c1"># Skipped Spearman / Pearson correlations</span>
+    <span class="n">r</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">outliers</span> <span class="o">=</span> <span class="n">skipped</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;spearman&#39;</span><span class="p">)</span>
+    <span class="n">r_pearson</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">])</span>
+
+    <span class="c1"># Bootstrapped skipped Spearman distribution &amp; CI</span>
+    <span class="n">spearman_ci</span><span class="p">,</span> <span class="n">spearman_dist</span> <span class="o">=</span> <span class="n">compute_bootci</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">],</span> <span class="n">func</span><span class="o">=</span><span class="s1">&#39;spearman&#39;</span><span class="p">,</span>
+        <span class="n">n_boot</span><span class="o">=</span><span class="n">n_boot</span><span class="p">,</span> <span class="n">return_dist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="c1"># Bootstrapped skipped Pearson distribution &amp; CI</span>
+    <span class="n">pearson_ci</span><span class="p">,</span> <span class="n">pearson_dist</span> <span class="o">=</span> <span class="n">compute_bootci</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">],</span> <span class="n">func</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">,</span>
+        <span class="n">n_boot</span><span class="o">=</span><span class="n">n_boot</span><span class="p">,</span> <span class="n">return_dist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="c1"># START THE PLOT</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">,</span> <span class="n">ax3</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">))</span>
+    <span class="c1"># plt.subplots_adjust(wspace=0.3)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
+
+    <span class="c1"># Scatter plot and regression lines</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">regplot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;darkcyan&#39;</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">outliers</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">outliers</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;indianred&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;outliers&#39;</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">outliers</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;seagreen&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;good&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Labels</span>
+    <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span> <span class="k">if</span> <span class="n">xlabel</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">xlabel</span>
+    <span class="n">ylabel</span> <span class="o">=</span> <span class="s1">&#39;y&#39;</span> <span class="k">if</span> <span class="n">ylabel</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ylabel</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Outliers (n=</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">outliers</span><span class="p">)),</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.05</span><span class="p">)</span>
+
+    <span class="c1"># Spearman distribution</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">distplot</span><span class="p">(</span><span class="n">spearman_dist</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;darkcyan&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">spearman_ci</span><span class="p">:</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;coral&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Density of bootstrap samples&#39;</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Correlation coefficient&#39;</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+        <span class="s1">&#39;Skipped Spearman r = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">95% CI = [</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+                                                            <span class="n">spearman_ci</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                            <span class="n">spearman_ci</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="n">y</span><span class="o">=</span><span class="mf">1.05</span><span class="p">)</span>
+
+    <span class="c1"># Pearson dististribution</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">distplot</span><span class="p">(</span><span class="n">pearson_dist</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;steelblue&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pearson_ci</span><span class="p">:</span>
+        <span class="n">ax3</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;coral&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">ax3</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+    <span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Correlation coefficient&#39;</span><span class="p">)</span>
+    <span class="n">ax3</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+        <span class="s1">&#39;Skipped Pearson r = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">95% CI = [</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r_pearson</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+                                                           <span class="n">pearson_ci</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                           <span class="n">pearson_ci</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="n">y</span><span class="o">=</span><span class="mf">1.05</span><span class="p">)</span>
+
+    <span class="c1"># Optimize layout</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">fig</span></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2018, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

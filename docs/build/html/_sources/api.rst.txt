@@ -145,3 +145,13 @@ Others
       print_table
       pingouin.datasets.read_dataset
       pingouin.datasets.list_dataset
+
+Plotting
+--------
+
+.. _plotting:
+
+.. autosummary::
+     :toctree: generated/
+
+      plot_skipped_corr
