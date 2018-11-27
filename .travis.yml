@@ -38,7 +38,7 @@ install:
     # Install dependencies :
     - if [ "${TEST}" == "standard" ]; then
         pip install codecov pytest==3.9.2 pytest-cov pytest-sugar pytest-travis-fold openpyxl;
-        pip install pandas statsmodels scikit-learn;
+        pip install pandas matplotlib seaborn statsmodels scikit-learn;
       fi;
     - if [ "${TEST}" == "flake" ]; then
         pip install flake8 pep8-naming;
