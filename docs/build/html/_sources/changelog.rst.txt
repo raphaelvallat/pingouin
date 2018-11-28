@@ -15,6 +15,7 @@ v0.2.2 (dev)
 a. Started working on Pingouin's plotting module
 b. Added Seaborn and Matplotlib to dependencies
 c. Added plot_skipped_corr function (PR from Nicolas Legrand)
+d. Added qqplot function (Quantile-Quantile plot)
 
 v0.2.1 (November 2018)
 ----------------------

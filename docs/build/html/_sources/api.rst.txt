@@ -155,3 +155,4 @@ Plotting
      :toctree: generated/
 
       plot_skipped_corr
+      qqplot

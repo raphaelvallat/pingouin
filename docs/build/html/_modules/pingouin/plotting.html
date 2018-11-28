@@ -104,12 +104,13 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">stats</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
 <span class="c1"># Set default Seaborn preferences</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s1">&#39;ticks&#39;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="s1">&#39;notebook&#39;</span><span class="p">)</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;plot_skipped_corr&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;plot_skipped_corr&quot;</span><span class="p">,</span> <span class="s2">&quot;qqplot&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="plot_skipped_corr"><a class="viewcode-back" href="../../generated/pingouin.plot_skipped_corr.html#pingouin.plot_skipped_corr">[docs]</a><span class="k">def</span> <span class="nf">plot_skipped_corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -233,6 +234,194 @@
     <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<span class="k">def</span> <span class="nf">_ppoints</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ordinates For Probability Plotting.</span>
+
+<span class="sd">    Numpy analogue or `R`&#39;s `ppoints` function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n : int</span>
+<span class="sd">        Number of points generated</span>
+<span class="sd">    a : float</span>
+<span class="sd">        Offset fraction (typically between 0 and 1)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    p : array</span>
+<span class="sd">        Sequence of probabilities at which to evaluate the inverse</span>
+<span class="sd">        distribution.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">8</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">10</span> <span class="k">else</span> <span class="mf">0.5</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="qqplot"><a class="viewcode-back" href="../../generated/pingouin.qqplot.html#pingouin.qqplot">[docs]</a><span class="k">def</span> <span class="nf">qqplot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="s1">&#39;norm&#39;</span><span class="p">,</span> <span class="n">sparams</span><span class="o">=</span><span class="p">(),</span> <span class="n">confidence</span><span class="o">=.</span><span class="mi">95</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+           <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Quantile-Quantile plot.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : array_like</span>
+<span class="sd">        Sample data.</span>
+<span class="sd">    dist : str or stats.distributions instance, optional</span>
+<span class="sd">        Distribution or distribution function name. The default is &#39;norm&#39; for a</span>
+<span class="sd">        normal probability plot. Objects that look enough like a</span>
+<span class="sd">        `scipy.stats.distributions` instance (i.e. they have a ``ppf`` method)</span>
+<span class="sd">        are also accepted.</span>
+<span class="sd">    sparams : tuple, optional</span>
+<span class="sd">        Distribution-specific shape parameters (shape parameters, location,</span>
+<span class="sd">        and scale). See `scipy.stats.probplot` for more details.</span>
+<span class="sd">    confidence : float</span>
+<span class="sd">        Confidence level (.95 = 95%) for point-wise confidence envelope.</span>
+<span class="sd">        Pass False for no envelope.</span>
+<span class="sd">    figsize : tuple</span>
+<span class="sd">        Figsize in inches</span>
+<span class="sd">    ax : matplotlib axes</span>
+<span class="sd">        Axis on which to draw the plot</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ax : Matplotlib Axes instance</span>
+<span class="sd">        Returns the Axes object with the plot for further tweaking.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function returns a scatter plot of the quantile of the sample data `x`</span>
+<span class="sd">    against the theoretical quantiles of the distribution given in `dist`</span>
+<span class="sd">    (default = &#39;norm&#39;).</span>
+
+<span class="sd">    The points plotted in a Q–Q plot are always non-decreasing when viewed</span>
+<span class="sd">    from left to right. If the two distributions being compared are identical,</span>
+<span class="sd">    the Q–Q plot follows the 45° line y = x. If the two distributions agree</span>
+<span class="sd">    after linearly transforming the values in one of the distributions,</span>
+<span class="sd">    then the Q–Q plot follows some line, but not necessarily the line y = x.</span>
+<span class="sd">    If the general trend of the Q–Q plot is flatter than the line y = x,</span>
+<span class="sd">    the distribution plotted on the horizontal axis is more dispersed than</span>
+<span class="sd">    the distribution plotted on the vertical axis. Conversely, if the general</span>
+<span class="sd">    trend of the Q–Q plot is steeper than the line y = x, the distribution</span>
+<span class="sd">    plotted on the vertical axis is more dispersed than the distribution</span>
+<span class="sd">    plotted on the horizontal axis. Q–Q plots are often arced, or &quot;S&quot; shaped,</span>
+<span class="sd">    indicating that one of the distributions is more skewed than the other,</span>
+<span class="sd">    or that one of the distributions has heavier tails than the other.</span>
+
+<span class="sd">    In addition, the function also plots a best-fit line (linear regression)</span>
+<span class="sd">    for the data and annotates the plot with the coefficient of</span>
+<span class="sd">    determination :math:`R^2`. Note that the intercept and slope of the</span>
+<span class="sd">    linear regression between the quantiles gives a measure of the relative</span>
+<span class="sd">    location and relative scale of the samples.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] https://en.wikipedia.org/wiki/Q%E2%80%93Q_plot</span>
+
+<span class="sd">    .. [2] https://github.com/cran/car/blob/master/R/qqPlot.R</span>
+
+<span class="sd">    .. [3] Fox, J. (2008), Applied Regression Analysis and Generalized Linear</span>
+<span class="sd">           Models, 2nd Ed., Sage Publications, Inc.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    Q-Q plot using a normal theoretical distribution:</span>
+
+<span class="sd">    .. plot::</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; import pingouin as pg</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; x = np.random.normal(size=50)</span>
+<span class="sd">        &gt;&gt;&gt; ax = pg.qqplot(x, dist=&#39;norm&#39;)</span>
+
+<span class="sd">    Two Q-Q plots using two separate axes:</span>
+
+<span class="sd">    .. plot::</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; import pingouin as pg</span>
+<span class="sd">        &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; x = np.random.normal(size=50)</span>
+<span class="sd">        &gt;&gt;&gt; x_exp = np.random.exponential(size=50)</span>
+<span class="sd">        &gt;&gt;&gt; fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4))</span>
+<span class="sd">        &gt;&gt;&gt; ax1 = pg.qqplot(x, dist=&#39;norm&#39;, ax=ax1, confidence=False)</span>
+<span class="sd">        &gt;&gt;&gt; ax2 = pg.qqplot(x_exp, dist=&#39;expon&#39;, ax=ax2)</span>
+
+<span class="sd">    Using custom location / scale parameters as well as another Seaborn style</span>
+
+<span class="sd">    .. plot::</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; import seaborn as sns</span>
+<span class="sd">        &gt;&gt;&gt; import pingouin as pg</span>
+<span class="sd">        &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">        &gt;&gt;&gt; np.random.seed(123)</span>
+<span class="sd">        &gt;&gt;&gt; x = np.random.normal(size=50)</span>
+<span class="sd">        &gt;&gt;&gt; mean, std = 0, 0.8</span>
+<span class="sd">        &gt;&gt;&gt; sns.set_style(&#39;darkgrid&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; ax = pg.qqplot(x, dist=&#39;norm&#39;, sparams=(mean, std))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">stats</span><span class="p">,</span> <span class="n">dist</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="c1"># Extract quantiles and regression</span>
+    <span class="n">quantiles</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">probplot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sparams</span><span class="o">=</span><span class="n">sparams</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="n">dist</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">theor</span><span class="p">,</span> <span class="n">observed</span> <span class="o">=</span> <span class="n">quantiles</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">quantiles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">fit_params</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">loc</span> <span class="o">=</span> <span class="n">fit_params</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">fit_params</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Observed values to observed quantiles</span>
+    <span class="k">if</span> <span class="n">loc</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">scale</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">observed</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">observed</span><span class="p">)</span> <span class="o">-</span> <span class="n">fit_params</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="n">fit_params</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Linear regression</span>
+    <span class="n">slope</span><span class="p">,</span> <span class="n">intercept</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">linregress</span><span class="p">(</span><span class="n">theor</span><span class="p">,</span> <span class="n">observed</span><span class="p">)</span>
+
+    <span class="c1"># Start the plot</span>
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">theor</span><span class="p">,</span> <span class="n">observed</span><span class="p">,</span> <span class="s1">&#39;bo&#39;</span><span class="p">)</span>
+
+    <span class="n">stats</span><span class="o">.</span><span class="n">morestats</span><span class="o">.</span><span class="n">_add_axis_labels_title</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span>
+                                           <span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;Theoretical quantiles&#39;</span><span class="p">,</span>
+                                           <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Ordered quantiles&#39;</span><span class="p">,</span>
+                                           <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Q-Q Plot&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Add diagonal line</span>
+    <span class="n">end_pts</span> <span class="o">=</span> <span class="p">[</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">(),</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()]</span>
+    <span class="n">end_pts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">end_pts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">end_pts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">end_pts</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">end_pts</span><span class="p">,</span> <span class="n">end_pts</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;slategrey&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">end_pts</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">end_pts</span><span class="p">)</span>
+
+    <span class="c1"># Add regression line and annotate R2</span>
+    <span class="n">fit_val</span> <span class="o">=</span> <span class="n">slope</span> <span class="o">*</span> <span class="n">theor</span> <span class="o">+</span> <span class="n">intercept</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">theor</span><span class="p">,</span> <span class="n">fit_val</span><span class="p">,</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">posx</span> <span class="o">=</span> <span class="n">end_pts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.60</span> <span class="o">*</span> <span class="p">(</span><span class="n">end_pts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">end_pts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">posy</span> <span class="o">=</span> <span class="n">end_pts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.10</span> <span class="o">*</span> <span class="p">(</span><span class="n">end_pts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">end_pts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">posx</span><span class="p">,</span> <span class="n">posy</span><span class="p">,</span> <span class="s2">&quot;$R^2=</span><span class="si">%.3f</span><span class="s2">$&quot;</span> <span class="o">%</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">confidence</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="c1"># Confidence envelope</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">_ppoints</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">crit</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">confidence</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">se</span> <span class="o">=</span> <span class="p">(</span><span class="n">slope</span> <span class="o">/</span> <span class="n">dist</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">theor</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">P</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">P</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span>
+        <span class="n">upper</span> <span class="o">=</span> <span class="n">fit_val</span> <span class="o">+</span> <span class="n">crit</span> <span class="o">*</span> <span class="n">se</span>
+        <span class="n">lower</span> <span class="o">=</span> <span class="n">fit_val</span> <span class="o">-</span> <span class="n">crit</span> <span class="o">*</span> <span class="n">se</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">theor</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="s1">&#39;r--&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.25</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">theor</span><span class="p">,</span> <span class="n">lower</span><span class="p">,</span> <span class="s1">&#39;r--&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.25</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ax</span></div>
 </pre></div>
 
     </div>
@@ -250,7 +439,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2018, Raphael Vallat.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.<br/>
     </p>
   </div>
 </footer>
