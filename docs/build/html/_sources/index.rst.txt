@@ -38,7 +38,7 @@
 
 5. Bayes Factor
 
-6. Tests for sphericity, normality and homoscedasticity
+6. Tests for sphericity, normality and homoscedasticity ; Q-Q plot
 
 7. Effect sizes (Cohen's d, Hedges'g, AUC, Glass delta, eta-square...)
 
@@ -367,6 +367,17 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
   Direct     0.143       0.003        0.283  Yes
   Indirect  -0.007      -0.050        0.027  No
   ========  ======  ==========  ===========  =====
+
+13. Q-Q plot
+############
+
+.. plot::
+
+    >>> import numpy as np
+    >>> import pingouin as pg
+    >>> np.random.seed(123)
+    >>> x = np.random.normal(size=50)
+    >>> ax = pg.qqplot(x, dist='norm')
 
 Contents
 ========

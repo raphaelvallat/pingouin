@@ -117,7 +117,7 @@
 <li>Robust correlations</li>
 <li>Partial correlation, repeated measures correlation and intraclass correlation</li>
 <li>Bayes Factor</li>
-<li>Tests for sphericity, normality and homoscedasticity</li>
+<li>Tests for sphericity, normality and homoscedasticity ; Q-Q plot</li>
 <li>Effect sizes (Cohen’s d, Hedges’g, AUC, Glass delta, eta-square…)</li>
 <li>Parametric/bootstrapped confidence intervals around an effect size or a correlation coefficient</li>
 <li>Circular statistics</li>
@@ -712,6 +712,19 @@ python setup.py develop
 </tr>
 </tbody>
 </table>
+</div>
+<div class="section" id="q-q-plot">
+<h3>13. Q-Q plot</h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">qqplot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="s1">&#39;norm&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="figure">
+<img alt="_images/index-1.png" src="_images/index-1.png" />
+</div>
 </div>
 </div>
 </div>
