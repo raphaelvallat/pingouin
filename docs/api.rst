@@ -25,8 +25,6 @@ ANOVA and T-test
     mixed_anova
     ancova
     ttest
-    ttest_power
-    anova_power
 
 Bayesian
 --------
@@ -156,3 +154,15 @@ Plotting
 
       plot_skipped_corr
       qqplot
+
+Power analysis
+--------------
+
+.. _power:
+
+.. autosummary::
+     :toctree: generated/
+
+      power_anova
+      power_corr
+      power_ttest

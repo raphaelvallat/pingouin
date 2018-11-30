@@ -1,11 +1,12 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 import numpy as np
+from scipy import stats
 
-__all__ = ["ttest_power", "anova_power"]
+__all__ = ["power_ttest", "power_anova", "power_corr"]
 
 
-def ttest_power(d, nx, ny=None, paired=False, tail='two-sided',
+def power_ttest(d, nx, ny=None, paired=False, tail='two-sided',
                 alpha=.05):
     """Determine achieved power of a T test given effect size, sample size
     and alpha level.
@@ -70,7 +71,7 @@ def ttest_power(d, nx, ny=None, paired=False, tail='two-sided',
 
         >>> nx, ny = 20, 20
         >>> d = 0.5
-        >>> power = ttest_power(d, nx, ny, paired=True, tail='one-sided')
+        >>> power = power_ttest(d, nx, ny, paired=True, tail='one-sided')
         >>> print(power)
             0.695
 
@@ -78,11 +79,10 @@ def ttest_power(d, nx, ny=None, paired=False, tail='two-sided',
 
         >>> nx = 20
         >>> d = 0.6
-        >>> power = ttest_power(d, nx)
+        >>> power = power_ttest(d, nx)
         >>> print(power)
             0.721
     """
-    from scipy.stats import t, nct
     d = np.abs(d)
     if paired is True or ny is None or ny == 1:
         nc = d * np.sqrt(nx)
@@ -92,13 +92,13 @@ def ttest_power(d, nx, ny=None, paired=False, tail='two-sided',
         dof = nx + ny - 2
     # Critical T
     if tail == 'one-sided':
-        tcrit = t.ppf(1 - alpha, dof)
+        tcrit = stats.t.ppf(1 - alpha, dof)
     else:
-        tcrit = t.ppf(1 - alpha / 2, dof)
-    return nct.sf(tcrit, dof, nc).round(3)
+        tcrit = stats.t.ppf(1 - alpha / 2, dof)
+    return stats.nct.sf(tcrit, dof, nc).round(3)
 
 
-def anova_power(eta, ntot, ngroups, alpha=.05):
+def power_anova(eta, ntot, ngroups, alpha=.05):
     """Determine achieved power of a one-way ANOVA given effect size,
     sample size, number of groups and alpha level.
 
@@ -154,11 +154,10 @@ def anova_power(eta, ntot, ngroups, alpha=.05):
 
         >>> ntot, ngroups = 60, 3
         >>> eta = .2
-        >>> power = anova_power(eta, ntot, ngroups)
+        >>> power = power_anova(eta, ntot, ngroups)
         >>> print(power)
             0.932
     """
-    from scipy.stats import f, ncf
     # Non-centrality parameter
     f_sq = eta / (1 - eta)
     nc = ntot * f_sq
@@ -166,5 +165,145 @@ def anova_power(eta, ntot, ngroups, alpha=.05):
     dof1 = ngroups - 1
     dof2 = ntot - ngroups
     # Critical F
-    fcrit = f.ppf(1 - alpha, dof1, dof2)
-    return ncf.sf(fcrit, dof1, dof2, nc).round(3)
+    fcrit = stats.f.ppf(1 - alpha, dof1, dof2)
+    return stats.ncf.sf(fcrit, dof1, dof2, nc).round(3)
+
+
+def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
+    """
+    Evaluate power, sample size, correlation coefficient or
+    significance level of a correlation test.
+
+    Parameters
+    ----------
+    r : float
+        Correlation coefficient.
+
+    n : int
+        Number of observations (sample size).
+
+    power : float
+        Test power (= 1 - type II error).
+
+    alpha : float
+        Significance level (type I error probability).
+        The default is 0.05.
+
+    tail : str
+        Indicates whether the test is "two-sided" or "one-sided".
+
+    Notes
+    -----
+    Exactly ONE of the parameters `r`, `n`, `power` and `alpha` must
+    be passed as None, and that parameter is determined from the others.
+
+    Notice that `alpha` has a default value of 0.05 so None must be explicitly
+    passed if you want to compute it.
+
+    This function is a mere Python translation of the original `pwr.r.test`
+    function implemented in the `pwr` R package.
+    All credit goes to the author, Stephane Champely.
+
+    References
+    ----------
+
+    .. [1] Cohen, J. (1988). Statistical power analysis for the behavioral
+           sciences (2nd ed.). Hillsdale,NJ: Lawrence Erlbaum.
+
+    .. [2] https://cran.r-project.org/web/packages/pwr/pwr.pdf
+
+    Examples
+    --------
+    1. Compute achieved power given `r`, `n` and `alpha`
+
+        >>> from pingouin import power_corr
+        >>> print('power: %.4f' % power_corr(r=0.5, n=20))
+            power: 0.6379
+
+    2. Compute required sample size given `r`, `power` and `alpha`
+
+        >>> print('n: %.4f' % power_corr(r=0.5, power=0.80,
+        ...                                tail='one-sided'))
+            n: 22.6091
+
+    3. Compute achieved `r` given `n`, `power` and `alpha` level
+
+        >>> print('r: %.4f' % power_corr(n=20, power=0.80, alpha=0.05))
+            r: 0.5822
+
+    4. Compute achieved alpha (significance) level given `r`, `n` and `power`
+
+        >>> print('alpha: %.4f' % power_corr(r=0.5, n=20, power=0.80,
+        ...                                    alpha=None))
+            alpha: 0.1377
+    """
+    from scipy.optimize import brenth
+
+    # Check the number of arguments that are None
+    n_none = sum([v is None for v in [r, n, power, alpha]])
+    if n_none != 1:
+        raise ValueError('Exactly one of n, r, power, and alpha must be None')
+
+    # Safety checks
+    if r is not None:
+        assert -1 <= r <= 1
+        r = abs(r)
+    if alpha is not None:
+        assert 0 < alpha <= 1
+    if power is not None:
+        assert 0 < power <= 1
+    if n is not None:
+        assert n > 4
+
+    # Define main function
+    if tail == 'two-sided':
+
+        def func(r, n, power, alpha):
+            dof = n - 2
+            ttt = stats.t.ppf(1 - alpha / 2, dof)
+            rc = np.sqrt(ttt**2 / (ttt**2 + dof))
+            zr = np.arctanh(r) + r / (2 * (n - 1))
+            zrc = np.arctanh(rc)
+            power = stats.norm.cdf((zr - zrc) * np.sqrt(n - 3)) + \
+                stats.norm.cdf((-zr - zrc) * np.sqrt(n - 3))
+            return power
+
+    else:
+
+        def func(r, n, power, alpha):
+            dof = n - 2
+            ttt = stats.t.ppf(1 - alpha, dof)
+            rc = np.sqrt(ttt**2 / (ttt**2 + dof))
+            zr = np.arctanh(r) + r / (2 * (n - 1))
+            zrc = np.arctanh(rc)
+            power = stats.norm.cdf((zr - zrc) * np.sqrt(n - 3))
+            return power
+
+    # Evaluate missing variable
+    if power is None and n is not None and r is not None:
+        # Compute achieved power given r, n and alpha
+        return func(r, n, power=None, alpha=alpha)
+
+    elif n is None and power is not None and r is not None:
+        # Compute required sample size given r, power and alpha
+
+        def _eval_n(n, r, power, alpha):
+            return func(r, n, power, alpha) - power
+
+        return brenth(_eval_n, 4 + 1e-10, 1e+09, args=(r, power, alpha))
+
+    elif r is None and power is not None and n is not None:
+        # Compute achieved r given sample size, power and alpha level
+
+        def _eval_r(r, n, power, alpha):
+            return func(r, n, power, alpha) - power
+
+        return brenth(_eval_r, 1e-10, 1 - 1e-10, args=(n, power, alpha))
+
+    else:
+        # Compute achieved alpha (significance) level given r, n and power
+
+        def _eval_alpha(alpha, r, n, power):
+            return func(r, n, power, alpha) - power
+
+        return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(r, n, power))

@@ -17,6 +17,11 @@ b. Added Seaborn and Matplotlib to dependencies
 c. Added plot_skipped_corr function (PR from Nicolas Legrand)
 d. Added qqplot function (Quantile-Quantile plot)
 
+**Power**
+
+a. Added power_corr, based on the R `pwr` package.
+b. Renamed anova_power and ttest_power to power_anova and power_ttest.
+
 v0.2.1 (November 2018)
 ----------------------
 

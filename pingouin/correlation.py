@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr, spearmanr, kendalltau
+from pingouin.power import power_corr
 from pingouin.utils import _remove_na
 from pingouin.effsize import compute_esci
 from pingouin.bayesian import bayesfactor_pearson
@@ -306,6 +307,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
         'adj_r2' : Adjusted R-squared
         'p-val' : one or two tailed p-value
         'BF10' : Bayes Factor of the alternative hypothesis (Pearson only)
+        'power' : achieved power of the test (= 1 - type II error).
 
     Notes
     -----
@@ -462,10 +464,14 @@ def corr(x, y, tail='two-sided', method='pearson'):
     # Compute the parametric 95% confidence interval
     ci = compute_esci(stat=r, nx=nx, ny=nx, eftype='r')
 
+    # Compute achieved power
+    power = power_corr(r=r, n=nx, power=None, alpha=0.05, tail=tail)
+
     stats = pd.DataFrame({}, index=[method])
     stats['n'] = nx
     stats['r'] = np.round(r, 3)
     stats['CI95%'] = [ci]
+    stats['power'] = power
     stats['r2'] = np.round(r**2, 3)
     stats['adj_r2'] = np.round(adj_r2, 3)
     stats['p-val'] = pval if tail == 'two-sided' else .5 * pval
@@ -474,7 +480,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     if method == 'pearson' and nx < 1000:
         stats['BF10'] = bayesfactor_pearson(r, nx)
 
-    col_order = ['n', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'BF10']
+    col_order = ['n', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'BF10', 'power']
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
     return stats

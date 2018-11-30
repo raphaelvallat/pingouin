@@ -183,7 +183,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
             2.327     0.027   33      30.75    0.792  0.614  2.454
     """
     from scipy.stats import ttest_rel, ttest_ind, ttest_1samp
-    from pingouin import ttest_power, compute_effsize
+    from pingouin import power_ttest, compute_effsize
     x = np.asarray(x)
     y = np.asarray(y)
 
@@ -228,7 +228,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     # Effect size and achieved power
     d = compute_effsize(x, y, paired=paired, eftype='cohen')
-    power = ttest_power(d, nx, ny, paired=paired, tail=tail)
+    power = power_ttest(d, nx, ny, paired=paired, tail=tail)
 
     # Bayes factor
     bf = bayesfactor_ttest(tval, nx, ny, paired=paired, tail=tail, r=r)
