@@ -471,7 +471,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     stats['n'] = nx
     stats['r'] = np.round(r, 3)
     stats['CI95%'] = [ci]
-    stats['power'] = power
+    stats['power'] = np.round(power, 3)
     stats['r2'] = np.round(r**2, 3)
     stats['adj_r2'] = np.round(adj_r2, 3)
     stats['p-val'] = pval if tail == 'two-sided' else .5 * pval

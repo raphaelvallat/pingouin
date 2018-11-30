@@ -178,17 +178,13 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
     ----------
     r : float
         Correlation coefficient.
-
     n : int
         Number of observations (sample size).
-
     power : float
         Test power (= 1 - type II error).
-
     alpha : float
         Significance level (type I error probability).
         The default is 0.05.
-
     tail : str
         Indicates whether the test is "two-sided" or "one-sided".
 

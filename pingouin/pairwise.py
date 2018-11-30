@@ -740,7 +740,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
         >>> stats = pairwise_corr(data, method='spearman', tail='two-sided',
         >>>                       padjust='bonf')
-        >>> print_table(stats)
+        >>> stats
 
     2. Robust two-sided correlation with uncorrected p-values
 
@@ -835,7 +835,8 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
             'r2': cor_st['r2'][0],
             'adj_r2': cor_st['adj_r2'][0],
             'p-unc': cor_st['p-val'][0],
-            'BF10': cor_st['BF10'][0] if 'BF10' in cor_st.keys() else np.nan},
+            'BF10': cor_st['BF10'][0] if 'BF10' in cor_st.keys() else np.nan,
+            'power': cor_st['power'][0]},
             ignore_index=True)
 
     # Multiple comparisons
@@ -857,7 +858,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         stats[c] = stats[c].round(3)
 
     col_order = ['X', 'Y', 'method', 'tail', 'n', 'r', 'CI95%', 'r2', 'adj_r2',
-                 'z', 'p-unc', 'p-corr', 'p-adjust', 'BF10']
+                 'z', 'p-unc', 'p-corr', 'p-adjust', 'BF10', 'power']
 
     # Convert n to int
     stats['n'] = stats['n'].astype(int)

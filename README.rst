@@ -162,11 +162,11 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 .. table:: Output
    :widths: auto
 
-   ====  =====  ===========  =====  ========  =======  ======
-      n      r  CI95%           r2    adj_r2    p-val    BF10
-   ====  =====  ===========  =====  ========  =======  ======
-     30  0.595  [0.3  0.79]  0.354     0.306    0.001  54.222
-   ====  =====  ===========  =====  ========  =======  ======
+   ===  =====  ===========  =====  ========  =======  ======  ======
+     n      r  CI95%           r2    adj_r2    p-val    BF10   power
+   ===  =====  ===========  =====  ========  =======  ======  ======
+    30  0.595  [0.3  0.79]  0.354     0.306    0.001  54.222    0.95
+   ===  =====  ===========  =====  ========  =======  ======  ======
 
 ------------
 
@@ -183,11 +183,11 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 .. table:: Output
    :widths: auto
 
-   ====  =====  ===========  =====  ========  =======
-      n      r  CI95%           r2    adj_r2    p-val
-   ====  =====  ===========  =====  ========  =======
-     30  0.561  [0.25 0.77]  0.315     0.264    0.002
-   ====  =====  ===========  =====  ========  =======
+   ===  =====  ===========  =====  ========  =======  =======
+     n      r  CI95%           r2    adj_r2    p-val    power
+   ===  =====  ===========  =====  ========  =======  =======
+    30  0.561  [0.25 0.77]  0.315     0.264    0.002    0.917
+   ===  =====  ===========  =====  ========  =======  =======
 
 ------------
 
@@ -313,13 +313,13 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 .. table:: Output
   :widths: auto
 
-  ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======
-  X    Y    method    tail         n      r  CI95%             r2    adj_r2      z    p-unc    BF10
-  ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======
-  X    Y    pearson   two-sided   30  0.366  [0.01 0.64]    0.134     0.070  0.384    0.047   1.006
-  X    Z    pearson   two-sided   30  0.251  [-0.12  0.56]  0.063    -0.006  0.256    0.181   0.344
-  Y    Z    pearson   two-sided   30  0.020  [-0.34  0.38]  0.000    -0.074  0.020    0.916   0.142
-  ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======
+  ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======  =======
+  X    Y    method    tail         n      r  CI95%             r2    adj_r2      z    p-unc    BF10    power
+  ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======  =======
+  X    Y    pearson   two-sided   30  0.366  [0.01 0.64]    0.134     0.070  0.384    0.047   1.006    0.525
+  X    Z    pearson   two-sided   30  0.251  [-0.12  0.56]  0.063    -0.006  0.256    0.181   0.344    0.272
+  Y    Z    pearson   two-sided   30  0.020  [-0.34  0.38]  0.000    -0.074  0.020    0.916   0.142    0.051
+  ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======  =======
 
 10. Convert between effect sizes
 ################################
@@ -415,6 +415,7 @@ Several functions of Pingouin were translated to Python from the original R or M
 
 - `effsize package (R) <https://cran.r-project.org/web/packages/effsize/effsize.pdf>`_
 - `ezANOVA package (R) <https://cran.r-project.org/web/packages/ez/ez.pdf>`_
+- `pwr package (R) <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_
 - `circular statistics (Matlab) <https://www.mathworks.com/matlabcentral/fileexchange/10676-circular-statistics-toolbox-directional-statistics>`_ (Berens 2009)
 - `robust correlations (Matlab) <https://sourceforge.net/projects/robustcorrtool/>`_ (Pernet, Wilcox & Rousselet, 2012)
 - `repeated-measure correlation (R) <https://cran.r-project.org/web/packages/rmcorr/index.html>`_ (Bakdash & Marusich, 2017)
