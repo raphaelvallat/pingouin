@@ -464,20 +464,21 @@ def corr(x, y, tail='two-sided', method='pearson'):
     # Compute the parametric 95% confidence interval
     ci = compute_esci(stat=r, nx=nx, ny=nx, eftype='r')
 
-    # Compute achieved power
-    power = power_corr(r=r, n=nx, power=None, alpha=0.05, tail=tail)
-
     stats = pd.DataFrame({}, index=[method])
     stats['n'] = nx
     stats['r'] = np.round(r, 3)
     stats['CI95%'] = [ci]
-    stats['power'] = np.round(power, 3)
     stats['r2'] = np.round(r**2, 3)
     stats['adj_r2'] = np.round(adj_r2, 3)
     stats['p-val'] = pval if tail == 'two-sided' else .5 * pval
 
+    # Compute achieved power
+    if not np.isnan(r):
+        stats['power'] = np.round(power_corr(r=r, n=nx, power=None,
+                                             alpha=0.05, tail=tail), 3)
+
     # Compute the BF10 for Pearson correlation only
-    if method == 'pearson' and nx < 1000:
+    if method == 'pearson' and nx < 1000 and not np.isnan(r):
         stats['BF10'] = bayesfactor_pearson(r, nx)
 
     col_order = ['n', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'BF10', 'power']
