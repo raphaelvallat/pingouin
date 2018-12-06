@@ -183,7 +183,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
             2.327     0.027   33      30.75    0.792  0.614  2.454
     """
     from scipy.stats import ttest_rel, ttest_ind, ttest_1samp
-    from pingouin import power_ttest, compute_effsize
+    from pingouin import power_ttest, power_ttest2n, compute_effsize
     x = np.asarray(x)
     y = np.asarray(y)
 
@@ -226,9 +226,28 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     pval = pval / 2 if tail == 'one-sided' else pval
 
-    # Effect size and achieved power
+    # Effect size
     d = compute_effsize(x, y, paired=paired, eftype='cohen')
-    power = power_ttest(d, nx, ny, paired=paired, tail=tail)
+
+    # Achieved power
+    if ny == 1:
+        # One-sample
+        power = power_ttest(d=d, n=nx, power=None, alpha=0.05,
+                            contrast='one-sample', tail=tail)
+    if ny > 1 and paired is True:
+        # Paired two-sample
+        power = power_ttest(d=d, n=nx, power=None, alpha=0.05,
+                            contrast='paired', tail=tail)
+    elif ny > 1 and paired is False:
+        # Independent two-samples
+        if nx == ny:
+            # Equal sample sizes
+            power = power_ttest(d=d, n=nx, power=None, alpha=0.05,
+                                contrast='two-samples', tail=tail)
+        else:
+            # Unequal sample sizes
+            power = power_ttest2n(nx, ny, d=d, power=None, alpha=0.05,
+                                  tail=tail)
 
     # Bayes factor
     bf = bayesfactor_ttest(tval, nx, ny, paired=paired, tail=tail, r=r)
@@ -239,7 +258,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     stats['p-val'] = pval
     stats['tail'] = tail
     stats['cohen-d'] = np.abs(d).round(3)
-    stats['power'] = power
+    stats['power'] = np.round(power, 3)
     stats['BF10'] = bf
 
     col_order = ['T', 'p-val', 'dof', 'dof-corr', 'tail', 'cohen-d',

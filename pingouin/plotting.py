@@ -176,7 +176,7 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
         are also accepted.
     sparams : tuple, optional
         Distribution-specific shape parameters (shape parameters, location,
-        and scale). See `scipy.stats.probplot` for more details.
+        and scale). See :py:func:`scipy.stats.probplot` for more details.
     confidence : float
         Confidence level (.95 = 95%) for point-wise confidence envelope.
         Pass False for no envelope.

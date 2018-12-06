@@ -166,3 +166,4 @@ Power analysis
       power_anova
       power_corr
       power_ttest
+      power_ttest2n

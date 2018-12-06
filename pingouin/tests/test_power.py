@@ -1,22 +1,80 @@
 import pytest
 import numpy as np
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.power import (power_ttest, power_anova, power_corr)
+from pingouin.power import (power_ttest, power_ttest2n, power_anova,
+                            power_corr)
 
 
 class TestPower(_TestPingouin):
     """Test power.py."""
 
     def test_power_ttest(self):
-        """Test function power_ttest."""
-        nx, ny = 20, 20
-        d = 0.5
-        power = power_ttest(d, nx, ny, paired=True, tail='one-sided')
-        # Compare values with GPower 3.1.9
-        assert np.allclose(power, 0.695)
-        power = power_ttest(d, nx, ny, paired=False, tail='two-sided')
-        assert np.allclose(power, 0.338)
-        power_ttest(d, nx)
+        """Test function power_ttest.
+        Values are compared to the pwr R package."""
+        # ONE-SAMPLE / PAIRED
+        # One-sided (e.g. = alternative = 'Greater' in R)
+        assert np.allclose(power_ttest(d=0.5, n=20, contrast='one-sample',
+                                       tail='one-sided'), 0.6951493)
+        assert np.allclose(power_ttest(d=0.5, n=20, contrast='paired',
+                                       tail='one-sided'), 0.6951493)
+        assert np.allclose(power_ttest(d=0.5, power=0.80,
+                                       contrast='one-sample',
+                                       tail='one-sided'), 26.13753)
+        assert np.allclose(power_ttest(n=20, power=0.80, contrast='one-sample',
+                                       tail='one-sided'), 0.5769185)
+        assert np.allclose(power_ttest(d=0.5, n=20, power=0.80, alpha=None,
+                                       tail='one-sided',
+                                       contrast='one-sample'),
+                           0.09004593, rtol=1e-03)
+        # Two-sided
+        assert np.allclose(power_ttest(d=0.5, n=20, contrast='one-sample'),
+                           0.5645044, rtol=1e-03)
+        assert np.allclose(power_ttest(d=0.5, power=0.80,
+                                       contrast='one-sample'), 33.36713)
+        assert np.allclose(power_ttest(n=20, power=0.80,
+                           contrast='one-sample'), 0.6604413)
+        assert np.allclose(power_ttest(d=0.5, n=20, power=0.80, alpha=None,
+                                       contrast='one-sample'), 0.1798043,
+                           rtol=1e-02)
+
+        # TWO-SAMPLES
+        # One-sided (e.g. = alternative = 'Greater' in R)
+        assert np.allclose(power_ttest(d=0.5, n=20,
+                                       tail='one-sided'), 0.4633743)
+        assert np.allclose(power_ttest(d=0.5, power=0.80,
+                                       tail='one-sided'), 50.1508)
+        assert np.allclose(power_ttest(n=20, power=0.80,
+                                       tail='one-sided'), 0.8006879)
+        assert np.allclose(power_ttest(d=0.5, n=20, power=0.80, alpha=None,
+                                       tail='one-sided'),
+                           0.2315111, rtol=1e-01)
+        # Two-sided
+        assert np.allclose(power_ttest(d=0.5, n=20), 0.337939, rtol=1e-03)
+        assert np.allclose(power_ttest(d=0.5, power=0.80), 63.76561)
+        assert np.allclose(power_ttest(n=20, power=0.80), 0.9091587,
+                           rtol=1e-03)
+        assert np.allclose(power_ttest(d=0.5, n=20, power=0.80, alpha=None),
+                           0.4430163, rtol=1e-01)
+
+    def test_power_ttest2n(self):
+        """Test function power_ttest2n.
+        Values are compared to the pwr R package."""
+        # TWO-SAMPLES
+        # One-sided (e.g. = alternative = 'Greater' in R)
+        assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5,
+                                         tail='one-sided'), 0.4463552)
+        assert np.allclose(power_ttest2n(nx=20, ny=18, power=0.80,
+                                         tail='one-sided'), 0.8234684)
+        assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5, power=0.80,
+                                         alpha=None, tail='one-sided'),
+                           0.2444025, rtol=1e-01)
+        # Two-sided
+        assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5),
+                           0.3223224, rtol=1e-03)
+        assert np.allclose(power_ttest2n(nx=20, ny=18, power=0.80),
+                           0.9354168)
+        assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5, power=0.80,
+                                         alpha=None), 0.46372, rtol=1e-01)
 
     def test_power_anova(self):
         """Test function power_anova."""

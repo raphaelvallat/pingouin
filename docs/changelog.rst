@@ -22,6 +22,8 @@ d. Added qqplot function (Quantile-Quantile plot)
 a. Added power_corr, based on the R `pwr` package.
 b. Renamed anova_power and ttest_power to power_anova and power_ttest.
 c. Added power column to corr() and pairwise_corr()
+d. power_ttest function can now solve for sample size, alpha and d
+e. power_ttest2n for two-sample T-test with unequal n.
 
 v0.2.1 (November 2018)
 ----------------------
