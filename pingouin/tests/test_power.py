@@ -55,6 +55,9 @@ class TestPower(_TestPingouin):
                            rtol=1e-03)
         assert np.allclose(power_ttest(d=0.5, n=20, power=0.80, alpha=None),
                            0.4430163, rtol=1e-01)
+        # Error
+        with pytest.raises(ValueError):
+            power_ttest(d=0.5)
 
     def test_power_ttest2n(self):
         """Test function power_ttest2n.
@@ -75,13 +78,24 @@ class TestPower(_TestPingouin):
                            0.9354168)
         assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5, power=0.80,
                                          alpha=None), 0.46372, rtol=1e-01)
+        # Error
+        with pytest.raises(ValueError):
+            power_ttest2n(nx=20, ny=20)
 
     def test_power_anova(self):
-        """Test function power_anova."""
-        ntot, ngroups = 60, 3
-        eta = .20
-        power = power_anova(eta, ntot, ngroups)
-        assert np.allclose(power, 0.932)
+        """Test function power_anova.
+        Values are compared to the pwr R package."""
+        eta = 0.0727003
+        assert np.allclose(power_anova(eta=eta, k=4, n=20), 0.5149793)
+        assert np.allclose(power_anova(eta=eta, n=20, power=0.80), 10.70313)
+        assert np.allclose(power_anova(eta=eta, k=4, power=0.80), 35.75789)
+        assert np.allclose(power_anova(k=4, n=20, power=0.80, alpha=0.05),
+                           0.1254838, rtol=1e-03)
+        assert np.allclose(power_anova(eta=eta, k=4, n=20, power=0.80,
+                                       alpha=None), 0.2268337)
+        # Error
+        with pytest.raises(ValueError):
+            power_anova(eta=eta, k=2)
 
     def test_power_corr(self):
         """Test function power_corr.

@@ -81,7 +81,8 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
     degrees of freedom and non-centrality parameter.
 
     :py:func:`scipy.optimize.brenth` is used to solve power equations for other
-    variables (i.e. sample size, effect size, or significance level).
+    variables (i.e. sample size, effect size, or significance level). If the
+    solving fails, a nan value is returned.
 
     Results have been tested against GPower and the R pwr package.
 
@@ -167,7 +168,10 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
         def _eval_n(n, d, power, alpha):
             return func(d, n, power, alpha) - power
 
-        return brenth(_eval_n, 4 + 1e-10, 1e+09, args=(d, power, alpha))
+        try:
+            return brenth(_eval_n, 2 + 1e-10, 1e+07, args=(d, power, alpha))
+        except ValueError:  # pragma: no cover
+            return np.nan
 
     elif d is None:
         # Compute achieved d given sample size, power and alpha level
@@ -175,7 +179,10 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
         def _eval_d(d, n, power, alpha):
             return func(d, n, power, alpha) - power
 
-        return brenth(_eval_d, 1e-10, 1 - 1e-10, args=(n, power, alpha))
+        try:
+            return brenth(_eval_d, 1e-07, 10, args=(n, power, alpha))
+        except ValueError:  # pragma: no cover
+            return np.nan
 
     else:
         # Compute achieved alpha (significance) level given d, n and power
@@ -183,11 +190,14 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
         def _eval_alpha(alpha, d, n, power):
             return func(d, n, power, alpha) - power
 
-        alpha = brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(d, n, power))
-        if tail == 'one-sided':
-            return alpha
-        else:
-            return 2 * alpha
+        try:
+            alpha = brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(d, n, power))
+            if tail == 'one-sided':
+                return alpha
+            else:
+                return 2 * alpha
+        except ValueError:  # pragma: no cover
+            return np.nan
 
 
 def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
@@ -250,7 +260,8 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
     degrees of freedom and non-centrality parameter.
 
     :py:func:`scipy.optimize.brenth` is used to solve power equations for other
-    variables (i.e. sample size, effect size, or significance level).
+    variables (i.e. sample size, effect size, or significance level). If the
+    solving fails, a nan value is returned.
 
     Results have been tested against GPower and the R pwr package.
 
@@ -308,7 +319,10 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
         def _eval_d(d, nx, ny, power, alpha):
             return func(d, nx, ny, power, alpha) - power
 
-        return brenth(_eval_d, 1e-10, 1 - 1e-10, args=(nx, ny, power, alpha))
+        try:
+            return brenth(_eval_d, 1e-07, 10, args=(nx, ny, power, alpha))
+        except ValueError:  # pragma: no cover
+            return np.nan
 
     else:
         # Compute achieved alpha (significance) level given d, n and power
@@ -316,35 +330,56 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
         def _eval_alpha(alpha, d, nx, ny, power):
             return func(d, nx, ny, power, alpha) - power
 
-        alpha = brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(d, nx, ny, power))
-        if tail == 'one-sided':
-            return alpha
-        else:
-            return 2 * alpha
+        try:
+            alpha = brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(d, nx, ny,
+                                                                power))
+            if tail == 'one-sided':
+                return alpha
+            else:
+                return 2 * alpha
+        except ValueError:  # pragma: no cover
+            return np.nan
 
 
-def power_anova(eta, ntot, ngroups, alpha=.05):
-    """Determine achieved power of a one-way ANOVA given effect size,
-    sample size, number of groups and alpha level.
+def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
+    """
+    Evaluate power, sample size, effect size or
+    significance level of a one-way balanced ANOVA.
 
     Parameters
     ----------
     eta : float
-        Effect size (eta-square or partial eta-square).
-    ntot : int
-        Total sample size.
-    ngroups : int
-        Number of groups.
-    alpha : float
-        Significance level of the test.
-
-    Returns
-    -------
+        ANOVA effect size (eta-square == n^2 == np^2).
+    k : int
+        Number of groups
+    n : int
+        Sample size per group. Groups are assumed to be balanced
+        (i.e. same sample size).
     power : float
-        Achieved power of the test.
+        Test power (= 1 - type II error).
+    alpha : float
+        Significance level (type I error probability).
+        The default is 0.05.
 
     Notes
     -----
+    Exactly ONE of the parameters `eta`, `k`, `n`,`power` and `alpha` must
+    be passed as None, and that parameter is determined from the others.
+
+    Notice that `alpha` has a default value of 0.05 so None must be explicitly
+    passed if you want to compute it.
+
+    This function is a mere Python translation of the original `pwr.anova.test`
+    function implemented in the `pwr` package. All credit goes to the author,
+    Stephane Champely.
+
+    Statistical power is the likelihood that a study will
+    detect an effect when there is an effect there to be detected.
+    A high statistical power means that there is a low probability of
+    concluding that there is no effect when there is one.
+    Statistical power is mainly affected by the effect size and the sample
+    size.
+
     For one-way ANOVA, partial eta-square is the same as eta-square. It can be
     evaluated from the f-value and degrees of freedom of the ANOVA using
     the following formula:
@@ -371,27 +406,122 @@ def power_anova(eta, ntot, ngroups, alpha=.05):
     of the non-central F-distribution using the previously computed critical
     value, non-centrality parameter, and degrees of freedom.
 
-    Results have been tested against GPower.
+    :py:func:`scipy.optimize.brenth` is used to solve power equations for other
+    variables (i.e. sample size, effect size, or significance level). If the
+    solving fails, a nan value is returned.
+
+    Results have been tested against GPower and the R pwr package.
+
+    References
+    ----------
+
+    .. [1] Cohen, J. (1988). Statistical power analysis for the behavioral
+           sciences (2nd ed.). Hillsdale,NJ: Lawrence Erlbaum.
+
+    .. [2] https://cran.r-project.org/web/packages/pwr/pwr.pdf
 
     Examples
     --------
-    1. Achieved power of a one-way ANOVA.
+    1. Compute achieved power
 
-        >>> ntot, ngroups = 60, 3
-        >>> eta = .2
-        >>> power = power_anova(eta, ntot, ngroups)
-        >>> print(power)
-            0.932
+        >>> from pingouin import power_anova
+        >>> print('power: %.4f' % power_anova(eta=0.1, k=3, n=20))
+            power: 0.6804
+
+    2. Compute required number of groups
+
+        >>> print('k: %.4f' % power_anova(eta=0.1, n=20, power=0.80))
+            k: 6.0944
+
+    3. Compute required sample size
+
+        >>> print('n: %.4f' % power_anova(eta=0.1, k=3, power=0.80))
+            n: 25.5289
+
+    4. Compute achieved effect size
+
+        >>> print('d: %.4f' % power_anova(n=20, power=0.80, alpha=0.05))
+            d: 0.1255
+
+    5. Compute achieved alpha (significance)
+
+        >>> print('alpha: %.4f' % power_anova(eta=0.1, n=20, power=0.80,
+        ...                                   alpha=None))
+            alpha: 0.1085
     """
-    # Non-centrality parameter
-    f_sq = eta / (1 - eta)
-    nc = ntot * f_sq
-    # Degrees of freedom
-    dof1 = ngroups - 1
-    dof2 = ntot - ngroups
-    # Critical F
-    fcrit = stats.f.ppf(1 - alpha, dof1, dof2)
-    return stats.ncf.sf(fcrit, dof1, dof2, nc).round(3)
+    # Check the number of arguments that are None
+    n_none = sum([v is None for v in [eta, k, n, power, alpha]])
+    if n_none != 1:
+        err = 'Exactly one of eta, k, n, power, and alpha must be None.'
+        raise ValueError(err)
+
+    # Safety checks
+    if eta is not None:
+        eta = abs(eta)
+        f_sq = eta / (1 - eta)
+    if alpha is not None:
+        assert 0 < alpha <= 1
+    if power is not None:
+        assert 0 < power <= 1
+
+    def func(f_sq, k, n, power, alpha):
+        nc = (n * k) * f_sq
+        dof1 = k - 1
+        dof2 = (n * k) - k
+        fcrit = stats.f.ppf(1 - alpha, dof1, dof2)
+        return stats.ncf.sf(fcrit, dof1, dof2, nc)
+
+    # Evaluate missing variable
+    if power is None:
+        # Compute achieved power
+        return func(f_sq, k, n, power, alpha)
+
+    elif k is None:
+        # Compute required number of groups
+
+        def _eval_k(k, eta, n, power, alpha):
+            return func(f_sq, k, n, power, alpha) - power
+
+        try:
+            return brenth(_eval_k, 2, 100, args=(f_sq, n, power, alpha))
+        except ValueError:  # pragma: no cover
+            return np.nan
+
+    elif n is None:
+        # Compute required sample size
+
+        def _eval_n(n, f_sq, k, power, alpha):
+            return func(f_sq, k, n, power, alpha) - power
+
+        try:
+            return brenth(_eval_n, 2, 1e+07, args=(f_sq, k, power, alpha))
+        except ValueError:  # pragma: no cover
+            return np.nan
+
+    elif eta is None:
+        # Compute achieved eta
+
+        def _eval_eta(f_sq, k, n, power, alpha):
+            return func(f_sq, k, n, power, alpha) - power
+
+        try:
+            f_sq = brenth(_eval_eta, 1e-10, 1 - 1e-10, args=(k, n, power,
+                                                             alpha))
+            return f_sq / (f_sq + 1)  # Return eta-square
+        except ValueError:  # pragma: no cover
+            return np.nan
+
+    else:
+        # Compute achieved alpha
+
+        def _eval_alpha(alpha, f_sq, k, n, power):
+            return func(f_sq, k, n, power, alpha) - power
+
+        try:
+            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(f_sq, k, n,
+                                                               power))
+        except ValueError:  # pragma: no cover
+            return np.nan
 
 
 def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
@@ -422,7 +552,8 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
     passed if you want to compute it.
 
     :py:func:`scipy.optimize.brenth` is used to solve power equations for other
-    variables (i.e. sample size, effect size, or significance level).
+    variables (i.e. sample size, effect size, or significance level). If the
+    solving fails, a nan value is returned.
 
     This function is a mere Python translation of the original `pwr.r.test`
     function implemented in the `pwr` R package.
@@ -512,7 +643,10 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
         def _eval_n(n, r, power, alpha):
             return func(r, n, power, alpha) - power
 
-        return brenth(_eval_n, 4 + 1e-10, 1e+09, args=(r, power, alpha))
+        try:
+            return brenth(_eval_n, 4 + 1e-10, 1e+09, args=(r, power, alpha))
+        except ValueError:  # pragma: no cover
+            return np.nan
 
     elif r is None and power is not None and n is not None:
         # Compute achieved r given sample size, power and alpha level
@@ -520,7 +654,10 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
         def _eval_r(r, n, power, alpha):
             return func(r, n, power, alpha) - power
 
-        return brenth(_eval_r, 1e-10, 1 - 1e-10, args=(n, power, alpha))
+        try:
+            return brenth(_eval_r, 1e-10, 1 - 1e-10, args=(n, power, alpha))
+        except ValueError:  # pragma: no cover
+            return np.nan
 
     else:
         # Compute achieved alpha (significance) level given r, n and power
@@ -528,4 +665,7 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
         def _eval_alpha(alpha, r, n, power):
             return func(r, n, power, alpha) - power
 
-        return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(r, n, power))
+        try:
+            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(r, n, power))
+        except ValueError:  # pragma: no cover
+            return np.nan

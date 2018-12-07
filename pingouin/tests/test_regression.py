@@ -86,6 +86,7 @@ class TestRegression(_TestPingouin):
 
         # Test **kwargs
         logistic_regression(X, y, solver='sag', C=10, max_iter=10000)
+        logistic_regression(X, y, solver='sag', multi_class='auto')
 
         with pytest.raises(ValueError):
             y[3] = 2

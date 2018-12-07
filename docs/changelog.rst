@@ -24,6 +24,7 @@ b. Renamed anova_power and ttest_power to power_anova and power_ttest.
 c. Added power column to corr() and pairwise_corr()
 d. power_ttest function can now solve for sample size, alpha and d
 e. power_ttest2n for two-sample T-test with unequal n.
+f. power_anova can now solve for sample size, number of groups, alpha and eta
 
 v0.2.1 (November 2018)
 ----------------------

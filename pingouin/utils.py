@@ -153,10 +153,10 @@ def is_statsmodels_installed(raise_error=False):
     try:
         import statsmodels  # noqa
         is_installed = True
-    except IOError:
+    except IOError:  # pragma: no cover
         is_installed = False
     # Raise error (if needed) :
-    if raise_error and not is_installed:
+    if raise_error and not is_installed:  # pragma: no cover
         raise IOError("statsmodels needs to be installed. Please use `pip "
                       "install statsmodels`.")
     return is_installed
@@ -166,10 +166,10 @@ def is_sklearn_installed(raise_error=False):
     try:
         import sklearn  # noqa
         is_installed = True
-    except IOError:
+    except IOError:  # pragma: no cover
         is_installed = False
     # Raise error (if needed) :
-    if raise_error and not is_installed:
+    if raise_error and not is_installed:  # pragma: no cover
         raise IOError("sklearn needs to be installed. Please use `pip "
                       "install scikit-learn`.")
     return is_installed
