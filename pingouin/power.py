@@ -21,7 +21,7 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
     n : int
         Sample size
         In case of a two-sample T-test, sample sizes are assumed to be equal.
-        Otherwise, see the `power_ttest2n` function.
+        Otherwise, see the :py:func:`power_ttest2n` function.
     power : float
         Test power (= 1 - type II error).
     alpha : float
@@ -35,14 +35,14 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
 
     Notes
     -----
-    Exactly ONE of the parameters `d`, `n`,`power` and `alpha` must
+    Exactly ONE of the parameters `d`, `n`, `power` and `alpha` must
     be passed as None, and that parameter is determined from the others.
 
     For a paired T-test, the sample size `n` corresponds to the number of
     pairs. For an independent two-sample T-test with equal sample sizes, `n`
     corresponds to the sample size of each group (i.e. number of observations
     in one group). If the sample sizes are unequal, please use the
-    `power_ttest2n` function instead.
+    :py:func:`power_ttest2n` function instead.
 
     Notice that `alpha` has a default value of 0.05 so None must be explicitly
     passed if you want to compute it.
@@ -210,7 +210,7 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
     nx, ny : int
         Sample sizes. Must be specified.
         If the sample sizes are equal, you should use the
-        `power_ttest` function instead.
+        :py:func:`power_ttest` function instead.
     d : float
         Cohen d effect size
     power : float
@@ -349,7 +349,7 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
     Parameters
     ----------
     eta : float
-        ANOVA effect size (eta-square == n^2 == np^2).
+        ANOVA effect size (eta-square == :math:`\eta^2`).
     k : int
         Number of groups
     n : int
@@ -363,7 +363,7 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
 
     Notes
     -----
-    Exactly ONE of the parameters `eta`, `k`, `n`,`power` and `alpha` must
+    Exactly ONE of the parameters `eta`, `k`, `n`, `power` and `alpha` must
     be passed as None, and that parameter is determined from the others.
 
     Notice that `alpha` has a default value of 0.05 so None must be explicitly
@@ -380,7 +380,7 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
     Statistical power is mainly affected by the effect size and the sample
     size.
 
-    For one-way ANOVA, partial eta-square is the same as eta-square. It can be
+    For one-way ANOVA, eta-square is the same as partial eta-square. It can be
     evaluated from the f-value and degrees of freedom of the ANOVA using
     the following formula:
 
@@ -397,10 +397,10 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
     the percentile point function of the F-distribution with:
 
     .. math:: q = 1 - alpha
-    .. math:: \mathtt{df_1} = r - 1
-    .. math:: \mathtt{df_2} = N - r
+    .. math:: \mathtt{df_1} = k - 1
+    .. math:: \mathtt{df_2} = N - k
 
-    where :math:`r` is the number of groups.
+    where :math:`k` is the number of groups.
 
     Finally, the power of the ANOVA is calculated using the survival function
     of the non-central F-distribution using the previously computed critical
@@ -440,8 +440,8 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
 
     4. Compute achieved effect size
 
-        >>> print('d: %.4f' % power_anova(n=20, power=0.80, alpha=0.05))
-            d: 0.1255
+        >>> print('eta: %.4f' % power_anova(n=20, power=0.80, alpha=0.05))
+            eta: 0.1255
 
     5. Compute achieved alpha (significance)
 
