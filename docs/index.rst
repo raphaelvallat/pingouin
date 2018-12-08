@@ -418,8 +418,6 @@ If you want to cite Pingouin, please use the publication in JOSS:
 
 Vallat, R. (2018). Pingouin: statistics in Python. *Journal of Open Source Software*, 3(31), 1026, `https://doi.org/10.21105/joss.01026 <https://doi.org/10.21105/joss.01026>`_
 
-BibTeX:
-
 .. code-block:: latex
 
   @ARTICLE{Vallat2018,
