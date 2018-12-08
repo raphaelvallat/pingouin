@@ -84,27 +84,16 @@ User installation
 
   pip install pingouin
 
-Develop mode
-
-.. code-block:: shell
-
-  git clone https://github.com/raphaelvallat/pingouin.git pingouin/
-  cd pingouin/
-  pip install -r requirements.txt
-  python setup.py develop
-
 New releases are frequent so always make sure that you have the latest version:
 
 .. code-block:: shell
 
   pip install --upgrade pingouin
 
-
 GitHub repository
 -----------------
 
 * Link to the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
-
 
 Chat
 ====
