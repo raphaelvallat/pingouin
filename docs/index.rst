@@ -26,7 +26,7 @@
 .. figure::  /pictures/logo_pingouin.png
   :align:   center
 
-**Pingouin** is an open-source statistical package written in Python 3 and based on Pandas and NumPy.
+**Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy.
 
 1. ANOVAs: one- and two-ways, repeated measures, mixed, ancova
 
@@ -36,22 +36,24 @@
 
 4. Partial correlation, repeated measures correlation and intraclass correlation
 
-5. Bayes Factor
+5. Linear/logistic regression and mediation analysis
 
-6. Tests for sphericity, normality and homoscedasticity ; Q-Q plot
+6. Bayesian T-test and Pearson correlation
 
-7. Effect sizes (Cohen's d, Hedges'g, AUC, Glass delta, eta-square...)
+7. Tests for sphericity, normality and homoscedasticity
 
-8. Parametric/bootstrapped confidence intervals around an effect size or a correlation coefficient
+8. Effect sizes (Cohen's d, Hedges'g, AUC, Glass delta, eta-square...)
 
-9. Circular statistics
+9. Parametric/bootstrapped confidence intervals around an effect size or a correlation coefficient
 
-10. Linear/logistic regression and mediation analysis
+10. Circular statistics
+
+11. Plotting: Bland-Altman plot, Q-Q plot, etc...
 
 Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
 
-For example, the :code:`ttest_ind` function of SciPy returns only the T-value and the p-value. By contrast,
-the :code:`ttest` function of Pingouin returns the T-value, p-value, degrees of freedom, effect size (Cohen's d), statistical power and Bayes Factor (BF10) of the test.
+For example, the :py:func:`scipy.stats.ttest_ind` function returns only the T-value and the p-value. By contrast,
+the :py:func:`pingouin.ttest` function returns the T-value, p-value, degrees of freedom, effect size (Cohen's d), statistical power and Bayes Factor (BF10) of the test.
 
 
 Installation
@@ -204,7 +206,20 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 ------------
 
-5. One-way ANOVA using a pandas DataFrame
+5. Q-Q plot
+############
+
+.. plot::
+
+    >>> import numpy as np
+    >>> import pingouin as pg
+    >>> np.random.seed(123)
+    >>> x = np.random.normal(size=50)
+    >>> ax = pg.qqplot(x, dist='norm')
+
+------------
+
+6. One-way ANOVA using a pandas DataFrame
 #########################################
 
 .. code-block:: python
@@ -229,7 +244,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 ------------
 
-6. Repeated measures ANOVA
+7. Repeated measures ANOVA
 ##########################
 
 .. code-block:: python
@@ -248,7 +263,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 ------------
 
-7. Post-hoc tests corrected for multiple-comparisons
+8. Post-hoc tests corrected for multiple-comparisons
 ####################################################
 
 .. code-block:: python
@@ -273,7 +288,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 ------------
 
-8. Two-way mixed ANOVA
+9. Two-way mixed ANOVA
 ######################
 
 .. code-block:: python
@@ -297,8 +312,8 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 ------------
 
-9. Pairwise correlations between columns of a dataframe
-#######################################################
+10. Pairwise correlations between columns of a dataframe
+########################################################
 
 .. code-block:: python
 
@@ -318,7 +333,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
   Y    Z    pearson   two-sided   30  0.020  [-0.34  0.38]  0.000    -0.074  0.020    0.916   0.142    0.051
   ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======  =======
 
-10. Convert between effect sizes
+11. Convert between effect sizes
 ################################
 
 .. code-block:: python
@@ -330,7 +345,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
     0.384
 
-11. Multiple linear regression
+12. Multiple linear regression
 ##############################
 
 .. code-block:: ipython3
@@ -348,7 +363,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
   Z          -0.069  0.167  -0.416   0.681  0.139     0.076      -0.412        0.273
   =========  ======  =====  ======  ======  =====  ========  ==========  ===========
 
-12. Mediation analysis
+13. Mediation analysis
 ######################
 
 .. code-block:: ipython3
@@ -368,16 +383,17 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
   Indirect  -0.007      -0.050        0.027  No
   ========  ======  ==========  ===========  =====
 
-13. Q-Q plot
-############
+14. Bland-Altman plot
+#####################
 
 .. plot::
 
     >>> import numpy as np
     >>> import pingouin as pg
     >>> np.random.seed(123)
-    >>> x = np.random.normal(size=50)
-    >>> ax = pg.qqplot(x, dist='norm')
+    >>> mean, cov = [10, 11], [[1, 0.8], [0.8, 1]]
+    >>> x, y = np.random.multivariate_normal(mean, cov, 30).T
+    >>> ax = pg.plot_blandaltman(x, y)
 
 Contents
 ========

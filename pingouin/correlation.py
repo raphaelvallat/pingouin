@@ -337,16 +337,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     Please note that rows with NaN are automatically removed.
 
     If method='pearson', The JZS Bayes Factor is approximated using the
-    formula described in ref [5]_:
-
-    .. math::
-
-        BF_{10} = \dfrac{\sqrt{n/2}}{\gamma(1/2)}*\int_{0}^{\infty}e((n-2)/2)*
-        log(1+g)+(-(n-1)/2)log(1+(1-r^2)*g)+(-3/2)log(g)-n/2g
-
-    where **n** is the sample size and **r** is the Pearson correlation
-    coefficient.
-
+    :py:func:`pingouin.bayesfactor_pearson` function.
 
     References
     ----------
@@ -365,12 +356,6 @@ def corr(x, y, tail='two-sided', method='pearson'):
        analyses: false positive and power validation using a new open
        source matlab toolbox. Front. Psychol. 3, 606.
        https://doi.org/10.3389/fpsyg.2012.00606
-
-    .. [5] Wetzels, R., Wagenmakers, E.-J., 2012. A default Bayesian
-       hypothesis test for correlations and partial correlations.
-       Psychon. Bull. Rev. 19, 1057–1064.
-       https://doi.org/10.3758/s13423-012-0295-x
-
 
     Examples
     --------

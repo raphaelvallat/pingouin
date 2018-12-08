@@ -102,17 +102,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     The p-value is then calculated using a T-distribution with :math:`n-1`
     degrees of freedom.
 
-    The Bayes Factor is approximated using the formula described in Rouder
-    et al 2009:
-
-    .. math::
-
-        BF_{10} = \dfrac{\int_{0}^{\infty}(1 + Ngr^2)^{-1/2}
-        (1 + \dfrac{t^2}{v(1 + Ngr^2)})^{-(v+1) / 2}(2\pi)^{-1/2}g^
-        {-3/2}e^{-1/2g}}{(1 + \dfrac{t^2}{v})^{-(v+1) / 2}}
-
-    where **t** is the T-value, **v** the degrees of freedom, **N** the
-    sample size and **r** the Cauchy scale factor (i.e. prior on effect size).
+    The scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor is approximated using
+    the :py:func:`pingouin.bayesfactor_ttest` function.
 
     References
     ----------

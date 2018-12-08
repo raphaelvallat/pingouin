@@ -42,7 +42,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     https://github.com/anne-urai/Tools/tree/master/stats/BayesFactors
 
     If you would like to compute the Bayes Factor directly from the raw data
-    instead of from the T-value, use the ttest function.
+    instead of from the T-value, use the :py:func:`pingouin.ttest` function.
 
     The JZS Bayes Factor is approximated using the formula described
     in ref [1]_:
@@ -135,7 +135,8 @@ def bayesfactor_pearson(r, n):
     https://github.com/anne-urai/Tools/blob/master/stats/BayesFactors/corrbf.m
 
     If you would like to compute the Bayes Factor directly from the raw data
-    instead of from the correlation coefficient, use the corr function.
+    instead of from the correlation coefficient, use the
+    :py:func:`pingouin.corr` function.
 
     The JZS Bayes Factor is approximated using the formula described in
     ref [1]_:

@@ -28,10 +28,7 @@
 .. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/pictures/logo_pingouin.png
    :align:   center
 
-
-**Pingouin** is an open-source statistical package written in Python 3 and based on Pandas and NumPy.
-
-It provides easy-to-grasp functions for computing several statistical functions:
+**Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy.
 
 1. ANOVAs: one- and two-ways, repeated measures, mixed, ancova
 
@@ -41,23 +38,24 @@ It provides easy-to-grasp functions for computing several statistical functions:
 
 4. Partial correlation, repeated measures correlation and intraclass correlation
 
-5. Bayes Factor
+5. Linear/logistic regression and mediation analysis
 
-6. Tests for sphericity, normality and homoscedasticity
+6. Bayesian T-test and Pearson correlation
 
-7. Effect sizes (Cohen's d, Hedges'g, AUC, Glass delta, eta-square...)
+7. Tests for sphericity, normality and homoscedasticity
 
-8. Parametric/bootstrapped confidence intervals around an effect size or a correlation coefficient
+8. Effect sizes (Cohen's d, Hedges'g, AUC, Glass delta, eta-square...)
 
-9. Circular statistics
+9. Parametric/bootstrapped confidence intervals around an effect size or a correlation coefficient
 
-10. Linear/logistic regression and mediation analysis
+10. Circular statistics
+
+11. Plotting: Bland-Altman plot, Q-Q plot, etc...
 
 Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
 
 For example, the :code:`ttest_ind` function of SciPy returns only the T-value and the p-value. By contrast,
 the :code:`ttest` function of Pingouin returns the T-value, p-value, degrees of freedom, effect size (Cohen's d), statistical power and Bayes Factor (BF10) of the test.
-
 
 Documentation
 =============

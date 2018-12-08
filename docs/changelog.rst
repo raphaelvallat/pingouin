@@ -16,6 +16,7 @@ a. Started working on Pingouin's plotting module
 b. Added Seaborn and Matplotlib to dependencies
 c. Added plot_skipped_corr function (PR from Nicolas Legrand)
 d. Added qqplot function (Quantile-Quantile plot)
+e. Added plot_blandaltman function (Bland-Altman plot)
 
 **Power**
 

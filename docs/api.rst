@@ -152,6 +152,7 @@ Plotting
 .. autosummary::
      :toctree: generated/
 
+      plot_blandaltman
       plot_skipped_corr
       qqplot
 

@@ -3,11 +3,23 @@ import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
 from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.plotting import plot_skipped_corr, _ppoints, qqplot
+from pingouin.plotting import (plot_blandaltman, plot_skipped_corr, _ppoints,
+                               qqplot)
 
 
 class TestPlotting(_TestPingouin):
     """Test plotting.py."""
+
+    def test_plot_blandaltman(self):
+        """Test plot_blandaltman()"""
+        np.random.seed(123)
+        mean, cov = [10, 11], [[1, 0.8], [0.8, 1]]
+        x, y = np.random.multivariate_normal(mean, cov, 30).T
+        ax = plot_blandaltman(x, y)
+        assert isinstance(ax, matplotlib.axes.Axes)
+        _, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4))
+        plot_blandaltman(x, y, agreement=2, confidence=None, ax=ax1)
+        plot_blandaltman(x, y, agreement=2, confidence=.68, dpi=200, ax=ax2)
 
     def test_plot_skipped_corr(self):
         """Test plot_skipped_corr()"""
