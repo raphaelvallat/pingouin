@@ -60,7 +60,7 @@ the :code:`ttest` function of Pingouin returns the T-value, p-value, degrees of 
 Documentation
 =============
 
-- `Link to documentation <https://raphaelvallat.github.io/pingouin/build/html/index.html>`_
+- `Link to documentation <https://pingouin-stats.org/index.html>`_
 
 Chat
 ====
