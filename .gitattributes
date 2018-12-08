@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Make sure that GitHub does not classify the programming language as Jupyter Notebook
+*.ipynb linguist-documentation
