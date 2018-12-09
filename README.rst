@@ -44,7 +44,7 @@
 
 7. Tests for sphericity, normality and homoscedasticity
 
-8. Effect sizes (Cohen's d, Hedges'g, AUC, Glass delta, eta-square...)
+8. Effect sizes and power analysis
 
 9. Parametric/bootstrapped confidence intervals around an effect size or a correlation coefficient
 
