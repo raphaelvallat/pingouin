@@ -200,11 +200,11 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. plot::
 
-    >>> import numpy as np
-    >>> import pingouin as pg
-    >>> np.random.seed(123)
-    >>> x = np.random.normal(size=50)
-    >>> ax = pg.qqplot(x, dist='norm')
+    import numpy as np
+    import pingouin as pg
+    np.random.seed(123)
+    x = np.random.normal(size=50)
+    ax = pg.qqplot(x, dist='norm')
 
 ------------
 
@@ -377,12 +377,12 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. plot::
 
-    >>> import numpy as np
-    >>> import pingouin as pg
-    >>> np.random.seed(123)
-    >>> mean, cov = [10, 11], [[1, 0.8], [0.8, 1]]
-    >>> x, y = np.random.multivariate_normal(mean, cov, 30).T
-    >>> ax = pg.plot_blandaltman(x, y)
+    import numpy as np
+    import pingouin as pg
+    np.random.seed(123)
+    mean, cov = [10, 11], [[1, 0.8], [0.8, 1]]
+    x, y = np.random.multivariate_normal(mean, cov, 30).T
+    ax = pg.plot_blandaltman(x, y)
 
 15. Plot achieved power of a paired T-test
 ##########################################
@@ -391,22 +391,22 @@ Plot the curve of achieved power given the effect size (Cohen d) and the sample 
 
 .. plot::
 
-    >>> import matplotlib.pyplot as plt
-    >>> import seaborn as sns
-    >>> import pingouin as pg
-    >>> import numpy as np
-    >>> sns.set(style='ticks', context='notebook', font_scale=1.2)
-    >>> d = 0.5  # Fixed effect size
-    >>> n = np.arange(5, 80, 5)  # Incrementing sample size
-    >>> # Compute the achieved power
-    >>> pwr = pg.power_ttest(d=d, n=n, contrast='paired', tail='two-sided')
-    >>> # Start the plot
-    >>> plt.plot(n, pwr, 'ko-.')
-    >>> plt.axhline(0.8, color='r', ls=':')
-    >>> plt.xlabel('Sample size')
-    >>> plt.ylabel('Power (1 - type II error)')
-    >>> plt.title('Achieved power of a paired T-test')
-    >>> sns.despine()
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import pingouin as pg
+    import numpy as np
+    sns.set(style='ticks', context='notebook', font_scale=1.2)
+    d = 0.5  # Fixed effect size
+    n = np.arange(5, 80, 5)  # Incrementing sample size
+    # Compute the achieved power
+    pwr = pg.power_ttest(d=d, n=n, contrast='paired', tail='two-sided')
+    # Start the plot
+    plt.plot(n, pwr, 'ko-.')
+    plt.axhline(0.8, color='r', ls=':')
+    plt.xlabel('Sample size')
+    plt.ylabel('Power (1 - type II error)')
+    plt.title('Achieved power of a paired T-test')
+    sns.despine()
 
 Contents
 ========
