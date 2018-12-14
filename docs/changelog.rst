@@ -7,8 +7,8 @@ What's new
    :depth: 2
 
 
-v0.2.2 (dev)
-------------
+v0.2.2 (December 2018)
+----------------------
 
 **Plotting**
 
