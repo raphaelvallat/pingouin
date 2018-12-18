@@ -1,12 +1,12 @@
 import pytest
 import numpy as np
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.datasets import read_dataset
 from pingouin.circular import (circ_axial, circ_corrcc, circ_corrcl, circ_mean,
                                circ_r, circ_rayleigh, circ_vtest)
 
 
-class TestCircular(_TestPingouin):
+class TestCircular(TestCase):
     """Test circular.py."""
 
     def test_circ_axial(self):

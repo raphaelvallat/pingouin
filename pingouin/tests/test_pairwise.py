@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import pytest
 
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.pairwise import (pairwise_ttests, pairwise_corr, pairwise_tukey,
                                pairwise_gameshowell)
 from pingouin.datasets import read_dataset
@@ -11,7 +11,7 @@ from pingouin.datasets import read_dataset
 df = read_dataset('mixed_anova.csv')
 
 
-class TestPairwise(_TestPingouin):
+class TestPairwise(TestCase):
     """Test pairwise.py."""
 
     def test_pairwise_ttests(self):

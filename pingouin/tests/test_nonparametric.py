@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.nonparametric import (mad, madmedianrule, mwu, wilcoxon,
                                     kruskal, friedman, cochran)
 
@@ -10,7 +10,7 @@ y = np.random.normal(size=100)
 z = np.random.normal(size=100)
 
 
-class TestNonParametric(_TestPingouin):
+class TestNonParametric(TestCase):
     """Test nonparametric.py."""
 
     def test_mad(self):

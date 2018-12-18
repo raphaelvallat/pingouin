@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.distribution import (gzscore, normality, anderson, epsilon,
                                    multivariate_normality, homoscedasticity,
                                    sphericity)
@@ -19,7 +19,7 @@ y = np.random.normal(scale=0.8, size=100)
 z = np.random.normal(scale=0.9, size=100)
 
 
-class TestDistribution(_TestPingouin):
+class TestDistribution(TestCase):
     """Test distribution.py."""
 
     def test_gzscore(self):

@@ -1,5 +1,5 @@
 import pytest
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.multicomp import fdr, bonf, holm, multicomp
 
 # Dataset
@@ -11,7 +11,7 @@ pvals = [.52, .12, .0001, .03, .14]
 pvals2 = [.52, .12, .10, .30, .14]
 
 
-class TestMulticomp(_TestPingouin):
+class TestMulticomp(TestCase):
     """Test effsize.py."""
 
     def test_fdr(self):

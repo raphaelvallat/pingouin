@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_equal
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.regression import (linear_regression, logistic_regression,
                                  mediation_analysis)
 from pingouin.datasets import read_dataset
@@ -12,7 +12,7 @@ from sklearn.linear_model import LinearRegression
 df = read_dataset('mediation')
 
 
-class TestRegression(_TestPingouin):
+class TestRegression(TestCase):
     """Test regression.py."""
 
     def test_linear_regression(self):

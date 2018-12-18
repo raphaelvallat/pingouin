@@ -2,12 +2,12 @@ import matplotlib
 import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.plotting import (plot_blandaltman, plot_skipped_corr, _ppoints,
                                qqplot)
 
 
-class TestPlotting(_TestPingouin):
+class TestPlotting(TestCase):
     """Test plotting.py."""
 
     def test_plot_blandaltman(self):

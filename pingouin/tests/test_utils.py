@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import pytest
 
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.utils import (print_table, _export_table, _remove_rm_na,
                             _check_eftype, _check_dataframe, _remove_na,
                             is_sklearn_installed, is_statsmodels_installed)
@@ -14,7 +14,7 @@ df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
                    'Subject': [1, 1, 2, 2]})
 
 
-class TestUtils(_TestPingouin):
+class TestUtils(TestCase):
     """Test utils.py."""
 
     def test_print_table(self):

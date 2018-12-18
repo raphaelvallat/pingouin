@@ -1,13 +1,13 @@
 import pytest
 import numpy as np
 import pandas as pd
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.correlation import (corr, rm_corr, intraclass_corr, partial_corr,
                                   skipped)
 from pingouin.datasets import read_dataset
 
 
-class TestCorrelation(_TestPingouin):
+class TestCorrelation(TestCase):
     """Test correlation.py."""
 
     def test_corr(self):

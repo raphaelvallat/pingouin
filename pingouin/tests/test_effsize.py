@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import pytest
 
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.effsize import (compute_esci, convert_effsize, compute_effsize,
                               compute_effsize_from_t, compute_bootci)
 
@@ -15,7 +15,7 @@ x = np.random.normal(2, 1, 30)
 y = np.random.normal(2.5, 1, 30)
 
 
-class TestEffsize(_TestPingouin):
+class TestEffsize(TestCase):
     """Test effsize.py."""
 
     def test_compute_esci(self):

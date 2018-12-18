@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.parametric import (ttest, anova, anova2, rm_anova, mixed_anova,
                                  rm_anova2, ancova, welch_anova, ancovan)
 from pingouin.datasets import read_dataset
@@ -18,7 +18,7 @@ x = np.random.normal(scale=1., size=100)
 y = np.random.normal(scale=0.8, size=100)
 
 
-class TestParametric(_TestPingouin):
+class TestParametric(TestCase):
     """Test parametric.py."""
 
     def test_ttest(self):

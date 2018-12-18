@@ -1,11 +1,11 @@
 import pytest
 import numpy as np
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.power import (power_ttest, power_ttest2n, power_anova,
                             power_corr)
 
 
-class TestPower(_TestPingouin):
+class TestPower(TestCase):
     """Test power.py."""
 
     def test_power_ttest(self):
