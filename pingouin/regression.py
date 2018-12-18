@@ -45,7 +45,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     Notes
     -----
     The beta coefficients of the regression are estimated using the
-    np.linalg.lstsq function.
+    :py:func:`numpy.linalg.lstsq` function.
 
     It is generally recommanded to include a constant term (intercept) to the
     model to limit the bias and force the residual mean to equal zero.
