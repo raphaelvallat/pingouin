@@ -193,7 +193,7 @@ def multivariate_normality(X, alpha=.05):
     The Henze-Zirkler test has a good overall power against alternatives
     to normality and is feasable for any dimension and any sample size.
 
-    Translated to Python from a Matlab code by Antonio Trujillo-Ortiz.
+    Aapted to Python from a Matlab code by Antonio Trujillo-Ortiz.
 
     Tested against the R package MVN.
 

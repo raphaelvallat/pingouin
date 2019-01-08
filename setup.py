@@ -2,6 +2,9 @@
 #
 # Copyright (C) 2018 Raphael Vallat
 
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 DESCRIPTION = "Pingouin: statistical package for Python"
 LONG_DESCRIPTION = """Pingouin is a statistical Python package based on Pandas.
 """
@@ -10,7 +13,6 @@ DISTNAME = 'pingouin'
 MAINTAINER = 'Raphael Vallat'
 MAINTAINER_EMAIL = 'raphaelvallat9@gmail.com'
 URL = 'https://pingouin-stats.org/index.html'
-LICENSE = 'BSD (3-clause)'
 DOWNLOAD_URL = 'https://github.com/raphaelvallat/pingouin/'
 VERSION = '0.2.2'
 PACKAGE_DATA = {'pingouin.data.icons': ['*.svg']}
@@ -33,7 +35,6 @@ CLASSIFIERS = [
     'Intended Audience :: Science/Research',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
-    'License :: OSI Approved :: BSD License',
     'Topic :: Scientific/Engineering :: Mathematics',
     'Operating System :: POSIX',
     'Operating System :: Unix',
@@ -55,7 +56,7 @@ if __name__ == "__main__":
           maintainer_email=MAINTAINER_EMAIL,
           description=DESCRIPTION,
           long_description=LONG_DESCRIPTION,
-          license=LICENSE,
+          license=read('LICENSE'),
           url=URL,
           version=VERSION,
           download_url=DOWNLOAD_URL,

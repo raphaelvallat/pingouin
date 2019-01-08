@@ -711,7 +711,7 @@ def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
     total variation across all ratings and all subjects. The ratings are
     quantitative (e.g. Likert scale).
 
-    Translated in Python from:
+    Inspired from:
     http://www.real-statistics.com/reliability/intraclass-correlation/
 
     Examples

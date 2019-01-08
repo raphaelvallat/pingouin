@@ -397,7 +397,7 @@ Vallat, R. (2018). Pingouin: statistics in Python. *Journal of Open Source Softw
 Acknowledgement
 ===============
 
-Several functions of Pingouin were translated to Python from the original R or Matlab toolboxes, including:
+Several functions of Pingouin were adapted to Python from R or Matlab toolboxes, including:
 
 - `effsize package (R) <https://cran.r-project.org/web/packages/effsize/effsize.pdf>`_
 - `ezANOVA package (R) <https://cran.r-project.org/web/packages/ez/ez.pdf>`_

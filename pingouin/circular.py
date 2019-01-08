@@ -369,7 +369,7 @@ def circ_vtest(alpha, dir=0., w=None, d=None):
     The V test has more power than the Rayleigh test and is preferred if
     there is reason to believe in a specific mean direction.
 
-    Translated from the Matlab Circular Statistics Toolbox.
+    Adapted from the Matlab Circular Statistics Toolbox.
 
     Examples
     --------
