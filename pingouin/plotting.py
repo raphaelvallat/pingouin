@@ -423,6 +423,7 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
         dist = getattr(stats, dist)
 
     x = np.asarray(x)
+    x = x[~np.isnan(x)]  # NaN are automatically removed
 
     # Extract quantiles and regression
     quantiles = stats.probplot(x, sparams=sparams, dist=dist, fit=False)
