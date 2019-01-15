@@ -384,6 +384,7 @@ Contributors
 ------------
 
 - Nicolas Legrand
+- `Richard Höchenberger <http://hoechenberger.net/>`_
 
 How to cite Pingouin?
 =====================
