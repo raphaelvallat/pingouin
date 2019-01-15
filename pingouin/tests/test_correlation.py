@@ -24,6 +24,8 @@ class TestCorrelation(TestCase):
         stats = corr(x, y, method='skipped')
         assert np.round(stats['r'].values, 3) == 0.512
         assert stats['outliers'].values == 2
+        stats = corr(x, y, method='shepherd')
+        assert stats['outliers'].values == 2
         _, _, outliers = skipped(x, y, method='pearson')
         assert outliers.size == x.size
         assert stats['n'].values == 30

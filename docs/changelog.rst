@@ -13,6 +13,7 @@ v0.2.3 (dev)
 
 a. `shepherd` now also returns the outlier vector (same behavior as skipped).
 b. The `corr` function returns the number of outliers for shepherd and skipped.
+c. Removed `mahal` function.
 
 **Licensing**
 

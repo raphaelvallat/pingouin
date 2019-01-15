@@ -97,35 +97,6 @@ def skipped(x, y, method='spearman'):
     return r, pval, outliers
 
 
-def mahal(Y, X):
-    """Mahalanobis distance.
-
-    Equivalent to the Matlab mahal function.
-
-    Parameters
-    ----------
-    Y : ndarray (shape=(n, m))
-        Data
-    X : ndarray (shape=(p, m))
-        Reference samples
-
-    Returns
-    -------
-    MD : 1D-array (shape=(n,))
-        Squared Mahalanobis distance of each observation in Y to the
-        reference samples in X.
-    """
-    rx, cx = X.shape
-    ry, cy = Y.shape
-
-    m = X.mean(0)
-    M = np.tile(m, ry).reshape(ry, 2)
-    C = X - np.tile(m, rx).reshape(rx, 2)
-    _, R = np.linalg.qr(C)
-    ri = np.linalg.solve(R.T, (Y - M).T)
-    return np.sum(ri**2, 0) * (rx - 1)
-
-
 def bsmahal(a, b, n_boot=2000):
     """
     Bootstraps Mahalanobis distances for Shepherd's pi correlation.
@@ -145,7 +116,7 @@ def bsmahal(a, b, n_boot=2000):
         Mahalanobis distance for each row in a, averaged across all the
         bootstrap resamples.
     """
-    n = b.shape[0]
+    n, m = b.shape
     MD = np.zeros((n, n_boot))
     nr = np.arange(n)
     xB = np.random.choice(nr, size=(n_boot, n), replace=True)
@@ -154,8 +125,11 @@ def bsmahal(a, b, n_boot=2000):
     for i in np.arange(n_boot):
         s1 = b[xB[i, :], 0]
         s2 = b[xB[i, :], 1]
-        Y = np.column_stack((s1, s2))
-        MD[:, i] = mahal(a, Y)
+        X = np.column_stack((s1, s2))
+        mu = X.mean(0)
+        _, R = np.linalg.qr(X - mu)
+        sol = np.linalg.solve(R.T, (a - mu).T)
+        MD[:, i] = np.sum(sol**2, 0) * (n - 1)
 
     # Average across all bootstraps
     return MD.mean(1)
