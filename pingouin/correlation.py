@@ -179,6 +179,8 @@ def shepherd(x, y, n_boot=2000):
         Pi correlation coefficient
     pval : float
         Two-tailed adjusted p-value.
+    outliers : array of bool
+        Indicate if value is an outlier or not
 
     Notes
     -----
@@ -204,7 +206,7 @@ def shepherd(x, y, n_boot=2000):
     # pval *= 2
     # pval = 1 if pval > 1 else pval
 
-    return r, pval
+    return r, pval, outliers
 
 
 def percbend(x, y, beta=.2):
@@ -301,6 +303,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
         Test summary ::
 
         'n' : Sample size (after NaN removal)
+        'outliers' : number of outliers (only for 'shepherd' or 'skipped')
         'r' : Correlation coefficient
         'CI95' : 95% parametric confidence intervals
         'r2' : R-squared
@@ -393,18 +396,18 @@ def corr(x, y, tail='two-sided', method='pearson'):
     5. Shepherd's pi correlation (robust)
 
         >>> corr(x, y, method='shepherd')
-            method    n   r      CI95%         r2     adj_r2  p-val
-            percbend  30  0.437  [0.09, 0.69]  0.191  0.131   0.020
+            method    n   outliers  r      CI95%         r2     adj_r2  p-val
+            percbend  30  2         0.437  [0.09, 0.69]  0.191  0.131   0.020
 
     6. Skipped spearman correlation (robust)
 
         >>> corr(x, y, method='skipped')
-            method    n   r      CI95%         r2     adj_r2  p-val
-            percbend  30  0.437  [0.09, 0.69]  0.191  0.131   0.020
+            method    n   outliers r      CI95%         r2     adj_r2  p-val
+            percbend  30  2        0.437  [0.09, 0.69]  0.191  0.131   0.020
 
     7. One-tailed Spearman correlation
 
-        >>> corr(x, y, tail="one-sided", method='shepherd')
+        >>> corr(x, y, tail="one-sided", method='spearman')
             method    n   r      CI95%         r2     adj_r2  p-val
             spearman  30  0.401  [0.05, 0.67]  0.161  0.099   0.014
 
@@ -437,9 +440,9 @@ def corr(x, y, tail='two-sided', method='pearson'):
     elif method == 'percbend':
         r, pval = percbend(x, y)
     elif method == 'shepherd':
-        r, pval = shepherd(x, y)
+        r, pval, outliers = shepherd(x, y)
     elif method == 'skipped':
-        r, pval, _ = skipped(x, y, method='spearman')
+        r, pval, outliers = skipped(x, y, method='spearman')
     else:
         raise ValueError('Method not recognized.')
 
@@ -457,6 +460,9 @@ def corr(x, y, tail='two-sided', method='pearson'):
     stats['adj_r2'] = np.round(adj_r2, 3)
     stats['p-val'] = pval if tail == 'two-sided' else .5 * pval
 
+    if method in ['shepherd', 'skipped']:
+        stats['outliers'] = sum(outliers)
+
     # Compute achieved power
     if not np.isnan(r):
         stats['power'] = np.round(power_corr(r=r, n=nx, power=None,
@@ -466,7 +472,8 @@ def corr(x, y, tail='two-sided', method='pearson'):
     if method == 'pearson' and nx < 1000 and not np.isnan(r):
         stats['BF10'] = bayesfactor_pearson(r, nx)
 
-    col_order = ['n', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'BF10', 'power']
+    col_order = ['n', 'outliers', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val',
+                 'BF10', 'power']
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
     return stats
