@@ -6,6 +6,16 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
+v0.2.3 (dev)
+------------
+
+**Licensing**
+
+- Pingouin is now released under the GNU General Public Licence 3.
+
+**Plotting**
+
+- NaN are automatically removed in qqplot function
 
 v0.2.2 (December 2018)
 ----------------------

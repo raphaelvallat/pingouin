@@ -3,6 +3,9 @@
 .. image:: https://badge.fury.io/py/pingouin.svg
   :target: https://badge.fury.io/py/pingouin
 
+.. image:: https://img.shields.io/conda/vn/conda-forge/pingouin.svg
+  :target: https://anaconda.org/conda-forge/pingouin
+
 .. image:: https://img.shields.io/github/license/raphaelvallat/pingouin.svg
   :target: https://github.com/raphaelvallat/pingouin/blob/master/LICENSE
 
@@ -80,9 +83,17 @@ Pingouin is a Python 3 package. While most of the functions should work with Pyt
 User installation
 -----------------
 
+Pingouin can be easily installed using pip
+
 .. code-block:: shell
 
   pip install pingouin
+
+or conda
+
+.. code-block:: shell
+
+  conda install -c conda-forge pingouin
 
 New releases are frequent so always make sure that you have the latest version:
 
@@ -459,7 +470,7 @@ Vallat, R. (2018). Pingouin: statistics in Python. *Journal of Open Source Softw
 Acknowledgement
 ===============
 
-Several functions of Pingouin were adapted to Python from R or Matlab toolboxes, including:
+Several functions of Pingouin were inspired from R or Matlab toolboxes, including:
 
 - `effsize package (R) <https://cran.r-project.org/web/packages/effsize/effsize.pdf>`_
 - `ezANOVA package (R) <https://cran.r-project.org/web/packages/ez/ez.pdf>`_
