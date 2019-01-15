@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 #
 # Copyright (C) 2018 Raphael Vallat
+import os
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
