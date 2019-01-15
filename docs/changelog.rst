@@ -9,13 +9,19 @@ What's new
 v0.2.3 (dev)
 ------------
 
+**Correlation**
+
+a. `shepherd` now also returns the outlier vector (same behavior as skipped).
+b. The `corr` function returns the number of outliers for shepherd and skipped.
+
 **Licensing**
 
-- Pingouin is now released under the GNU General Public Licence 3.
+a. Pingouin is now released under the GNU General Public Licence 3.
+b. Added licenses files of external modules (qsturng and tabulate).
 
 **Plotting**
 
-- NaN are automatically removed in qqplot function
+a. NaN are automatically removed in qqplot function
 
 v0.2.2 (December 2018)
 ----------------------
