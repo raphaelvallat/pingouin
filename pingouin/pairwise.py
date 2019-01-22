@@ -821,6 +821,9 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     # Initialize vectors
     for comb in combs:
         col1, col2 = comb
+        # Avoid errors when one of the two columns has only one unique value
+        if data[col1].unique().size == 1 or data[col2].unique().size == 1:
+            continue
         cor_st = corr(data[col1].values,
                       data[col2].values,
                       tail=tail, method=method).reset_index(drop=True)
