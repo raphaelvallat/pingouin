@@ -2,5 +2,6 @@ Code
 ----
 - Add Hotelling test
 - Add Mantel test (see brainpipe)
+- Add paired plot
 - pingouin.plotting module (e.g. circular, repeated measures corr, covariance)?
 - Add more circular stats

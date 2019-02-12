@@ -5,7 +5,7 @@ Guidelines
 
 In this page, you will find a collection of flowcharts designed to help you choose
 which functions of `Pingouin` are adequate for your analysis. Click on
-the desired flowchart to view a full scale image.
+the desired flowchart to view a full scale image with hyperlinks.
 
 .. contents:: Table of Contents
    :depth: 2
@@ -13,7 +13,7 @@ the desired flowchart to view a full scale image.
 One-way ANOVA
 -------------
 
-.. figure::  /pictures/flowchart/flowchart_one_way_ANOVA.png
+.. figure::  /pictures/flowchart/flowchart_one_way_ANOVA.svg
   :align: center
   :scale: 50
   :alt: One-way ANOVA
@@ -46,7 +46,7 @@ Example code
 Correlation
 -----------
 
-.. figure::  /pictures/flowchart/flowchart_correlations.png
+.. figure::  /pictures/flowchart/flowchart_correlations.svg
   :align: center
   :scale: 50
   :alt: Correlations
@@ -78,7 +78,7 @@ Example code
 Non-parametric
 --------------
 
-.. figure::  /pictures/flowchart/flowchart_nonparametric.png
+.. figure::  /pictures/flowchart/flowchart_nonparametric.svg
   :align: center
   :scale: 50
   :alt: Non-parametric tests
