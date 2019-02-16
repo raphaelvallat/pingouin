@@ -111,7 +111,7 @@ def _remove_rm_na(dv=None, within=None, subject=None, data=None):
 def _check_eftype(eftype):
     """Check validity of eftype"""
     if eftype.lower() in ['none', 'hedges', 'cohen', 'glass', 'r',
-                          'eta-square', 'odds-ratio', 'auc']:
+                          'eta-square', 'odds-ratio', 'auc', 'cles']:
         return True
     else:
         return False

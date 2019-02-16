@@ -541,6 +541,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         'eta-square' : Eta-square
         'odds-ratio' : Odds ratio
         'AUC' : Area Under the Curve
+        'CLES' : Common language effect size
 
     Returns
     -------
@@ -660,6 +661,10 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         from scipy.stats import pearsonr
         r, _ = pearsonr(x, y)
         return r
+    elif eftype.lower() == 'cles':
+        # Compute exact CLES
+        diff = x[:, None] - y
+        return max((diff < 0).sum(), (diff > 0).sum()) / diff.size
     else:
         # Test equality of variance of data with a stringent threshold
         # equal_var, p = homoscedasticity(x, y, alpha=.001)

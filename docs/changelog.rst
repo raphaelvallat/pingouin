@@ -12,6 +12,8 @@ v0.2.4 (March 2019)
 **Pairwise**
 
 a. Added support for non-parametric pairwise tests in pairwise_ttests function.
+b. Common language effect size (CLES) is now reported by default in pairwise_ttests function.
+c. CLES is now implemented in the compute_effsize function.
 
 v0.2.3 (February 2019)
 ----------------------

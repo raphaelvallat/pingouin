@@ -113,7 +113,7 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         'p-adjust' : p-values correction method
         'BF10' : Bayes Factor
         'hedges' : Hedges effect size
-        'CLES' : Common language effect size (only if parametric=False)
+        'CLES' : Common language effect size
 
     Notes
     -----
@@ -245,11 +245,15 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
             y = ddic.get(col2)
             if parametric:
                 df_ttest = ttest(x, y, paired=paired, tail=tail)
+                # Compute exact CLES
+                df_ttest['CLES'] = compute_effsize(x, y, paired=paired,
+                                                   eftype='CLES')
             else:
                 if paired:
                     df_ttest = wilcoxon(x, y, tail=tail)
                 else:
                     df_ttest = mwu(x, y, tail=tail)
+            # Compute Hedges / Cohen
             ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
             stats = _append_stats_dataframe(stats, x, y, col1, col2, alpha,
                                             paired, tail, df_ttest, ef,
@@ -330,6 +334,9 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
             y = ddic.get((fac1, col2))
             if parametric:
                 df_ttest = ttest(x, y, paired=paired, tail=tail)
+                # Compute exact CLES
+                df_ttest['CLES'] = compute_effsize(x, y, paired=paired,
+                                                   eftype='CLES')
             else:
                 if paired:
                     df_ttest = wilcoxon(x, y, tail=tail)
