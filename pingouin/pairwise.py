@@ -15,7 +15,7 @@ __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
 def _append_stats_dataframe(stats, x, y, xlabel, ylabel, alpha, paired, tail,
                             df_ttest, ef, eftype, time=np.nan):
     # Create empty columns
-    for f in ['RBC', 'CLES', 'T', 'BF10', 'U-val', 'W-val']:
+    for f in ['CLES', 'T', 'BF10', 'U-val', 'W-val']:
         if f not in df_ttest.keys():
             df_ttest[f] = np.nan
     stats = stats.append({
@@ -35,7 +35,6 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, alpha, paired, tail,
         'p-unc': df_ttest['p-val'].iloc[0],
         'BF10': df_ttest['BF10'].iloc[0],
         'efsize': ef,
-        'RBC': df_ttest['RBC'].iloc[0],
         'CLES': df_ttest['CLES'].iloc[0],
         # 'eftype': eftype,
         'Time': time}, ignore_index=True, sort=False)
@@ -114,8 +113,7 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         'p-adjust' : p-values correction method
         'BF10' : Bayes Factor
         'hedges' : Hedges effect size
-        'RBC' : Rank-biserial correlation effect size (if parametric=False)
-        'CLES' : Common language effect size (if parametric=False)
+        'CLES' : Common language effect size (only if parametric=False)
 
     Notes
     -----
@@ -361,7 +359,7 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     # Reorganize column order
     col_order = ['Contrast', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
                  'std(B)', 'Paired', 'Parametric', 'T', 'U', 'W', 'tail',
-                 'p-unc', 'p-corr', 'p-adjust', 'BF10', 'RBC', 'CLES',
+                 'p-unc', 'p-corr', 'p-adjust', 'BF10', 'CLES',
                  'efsize']
 
     if return_desc is False:
