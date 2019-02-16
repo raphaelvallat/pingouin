@@ -35,17 +35,17 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
 
     Notes
     -----
-    Exactly ONE of the parameters `d`, `n`, `power` and `alpha` must
+    Exactly ONE of the parameters ``d``, ``n``, ``power`` and ``alpha`` must
     be passed as None, and that parameter is determined from the others.
 
-    For a paired T-test, the sample size `n` corresponds to the number of
-    pairs. For an independent two-sample T-test with equal sample sizes, `n`
+    For a paired T-test, the sample size ``n`` corresponds to the number of
+    pairs. For an independent two-sample T-test with equal sample sizes, ``n``
     corresponds to the sample size of each group (i.e. number of observations
     in one group). If the sample sizes are unequal, please use the
     :py:func:`power_ttest2n` function instead.
 
-    Notice that `alpha` has a default value of 0.05 so None must be explicitly
-    passed if you want to compute it.
+    Notice that ``alpha`` has a default value of 0.05 so None must be
+    explicitly passed if you want to compute it.
 
     This function is a mere Python translation of the original `pwr.t.test`
     function implemented in the `pwr` package. All credit goes to the author,
@@ -96,26 +96,26 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
 
     Examples
     --------
-    1. Compute achieved power of a one-sample T-test given `d`, `n` and `alpha`
+    1. Compute power of a one-sample T-test given ``d``, ``n`` and ``alpha``
 
         >>> from pingouin import power_ttest
         >>> print('power: %.4f' % power_ttest(d=0.5, n=20,
         ...                                   contrast='one-sample'))
             power: 0.5645
 
-    2. Compute required sample size given `d`, `power` and `alpha`
+    2. Compute required sample size given ``d``, ``power`` and ``alpha``
 
         >>> print('n: %.4f' % power_ttest(d=0.5, power=0.80,
         ...                               tail='one-sided'))
             n: 50.1508
 
-    3. Compute achieved `d` given `n`, `power` and `alpha` level
+    3. Compute achieved ``d`` given ``n``, ``power`` and ``alpha`` level
 
         >>> print('d: %.4f' % power_ttest(n=20, power=0.80, alpha=0.05,
         ...                               contrast='paired'))
             d: 0.6604
 
-    4. Compute achieved alpha (significance) level given `d`, `n` and `power`
+    4. Compute achieved alpha level given ``d``, ``n`` and ``power``
 
         >>> print('alpha: %.4f' % power_ttest(d=0.5, n=20, power=0.80,
         ...                                   alpha=None))
@@ -223,11 +223,11 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
 
     Notes
     -----
-    Exactly ONE of the parameters `d`, `power` and `alpha` must
+    Exactly ONE of the parameters ``d``, ``power`` and ``alpha`` must
     be passed as None, and that parameter is determined from the others.
 
-    Notice that `alpha` has a default value of 0.05 so None must be explicitly
-    passed if you want to compute it.
+    Notice that ``alpha`` has a default value of 0.05 so None must be
+    explicitly passed if you want to compute it.
 
     This function is a mere Python translation of the original `pwr.t2n.test`
     function implemented in the `pwr` package. All credit goes to the author,
@@ -267,20 +267,20 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
 
     Examples
     --------
-    1. Compute achieved power of a T-test given `d`, `n` and `alpha`
+    1. Compute achieved power of a T-test given ``d``, ``n`` and ``alpha``
 
         >>> from pingouin import power_ttest2n
         >>> print('power: %.4f' % power_ttest2n(nx=20, ny=15, d=0.5,
         ...                                     tail='one-sided'))
             power: 0.4164
 
-    3. Compute achieved `d` given `n`, `power` and `alpha` level
+    3. Compute achieved ``d`` given ``n``, ``power`` and ``alpha`` level
 
         >>> print('d: %.4f' % power_ttest2n(nx=20, ny=15, power=0.80,
         ...                                 alpha=0.05))
             d: 0.9859
 
-    4. Compute achieved alpha (significance) level given `d`, `n` and `power`
+    4. Compute achieved alpha level given``d``, ``n`` and ``power``
 
         >>> print('alpha: %.4f' % power_ttest2n(nx=20, ny=15, d=0.5,
         ...                                     power=0.80, alpha=None))
@@ -363,11 +363,12 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
 
     Notes
     -----
-    Exactly ONE of the parameters `eta`, `k`, `n`, `power` and `alpha` must
-    be passed as None, and that parameter is determined from the others.
+    Exactly ONE of the parameters ``eta``, ``k``, ``n``, ``power`` and
+    ``alpha`` must be passed as None, and that parameter is determined from
+    the others.
 
-    Notice that `alpha` has a default value of 0.05 so None must be explicitly
-    passed if you want to compute it.
+    Notice that ``alpha`` has a default value of 0.05 so None must be
+    explicitly passed if you want to compute it.
 
     This function is a mere Python translation of the original `pwr.anova.test`
     function implemented in the `pwr` package. All credit goes to the author,
@@ -545,11 +546,11 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
 
     Notes
     -----
-    Exactly ONE of the parameters `r`, `n`, `power` and `alpha` must
+    Exactly ONE of the parameters ``r``, ``n``, ``power`` and ``alpha`` must
     be passed as None, and that parameter is determined from the others.
 
-    Notice that `alpha` has a default value of 0.05 so None must be explicitly
-    passed if you want to compute it.
+    Notice that ``alpha`` has a default value of 0.05 so None must be
+    explicitly passed if you want to compute it.
 
     :py:func:`scipy.optimize.brenth` is used to solve power equations for other
     variables (i.e. sample size, effect size, or significance level). If the
@@ -569,24 +570,24 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
 
     Examples
     --------
-    1. Compute achieved power given `r`, `n` and `alpha`
+    1. Compute achieved power given ``r``, ``n`` and ``alpha``
 
         >>> from pingouin import power_corr
         >>> print('power: %.4f' % power_corr(r=0.5, n=20))
             power: 0.6379
 
-    2. Compute required sample size given `r`, `power` and `alpha`
+    2. Compute required sample size given ``r``, ``power`` and ``alpha``
 
         >>> print('n: %.4f' % power_corr(r=0.5, power=0.80,
         ...                                tail='one-sided'))
             n: 22.6091
 
-    3. Compute achieved `r` given `n`, `power` and `alpha` level
+    3. Compute achieved ``r`` given ``n``, ``power`` and ``alpha`` level
 
         >>> print('r: %.4f' % power_corr(n=20, power=0.80, alpha=0.05))
             r: 0.5822
 
-    4. Compute achieved alpha (significance) level given `r`, `n` and `power`
+    4. Compute achieved alpha level given ``r``, ``n`` and ``power``
 
         >>> print('alpha: %.4f' % power_corr(r=0.5, n=20, power=0.80,
         ...                                    alpha=None))

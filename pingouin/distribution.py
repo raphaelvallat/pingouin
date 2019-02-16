@@ -408,7 +408,7 @@ def anderson(*args, dist='norm'):
         True if data comes from this distribution.
     sig_level : float
         The significance levels for the corresponding critical values in %.
-        (See scipy.stats.anderson for more details)
+        (See :py:func:`scipy.stats.anderson` for more details)
 
     Examples
     --------

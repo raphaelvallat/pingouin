@@ -270,7 +270,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
   # FDR-corrected post hocs with Hedges'g effect size
   posthoc = pg.pairwise_ttests(data=df, dv='Scores', within='Time', subject='Subject',
-                               padjust='fdr_bh', effsize='hedges')
+                               parametric=True, padjust='fdr_bh', effsize='hedges')
 
   # Pretty printing of table
   pg.print_table(posthoc, floatfmt='.3f')

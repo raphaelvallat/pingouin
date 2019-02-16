@@ -25,18 +25,29 @@ class TestPairwise(TestCase):
         # Simple within
         pairwise_ttests(dv='Scores', within='Time', subject='Subject',
                         data=df, return_desc=True)
+        pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+                        data=df, parametric=False, return_desc=True)
         # Simple between
         pairwise_ttests(dv='Scores', between='Group',
                         data=df, padjust='bonf', tail='one-sided',
                         effsize='cohen', export_filename='test_export.csv')
+        pairwise_ttests(dv='Scores', between='Group',
+                        data=df, padjust='bonf', tail='one-sided',
+                        effsize='cohen', parametric=False,
+                        export_filename='test_export.csv')
 
         # Two between factors
         pairwise_ttests(dv='Scores', between=['Time', 'Group'], data=df,
                         padjust='holm')
+        pairwise_ttests(dv='Scores', between=['Time', 'Group'], data=df,
+                        padjust='holm', parametric=False)
 
         # Two within subject factors
         pairwise_ttests(dv='Scores', within=['Group', 'Time'],
                         subject='Subject', data=df, padjust='bonf')
+        pairwise_ttests(dv='Scores', within=['Group', 'Time'],
+                        subject='Subject', data=df, padjust='bonf',
+                        parametric=False)
 
         # Wrong tail argument
         with pytest.raises(ValueError):
@@ -130,3 +141,7 @@ class TestPairwise(TestCase):
         data1500 = pd.concat([data, data, data], ignore_index=True)
         pcor1500 = pairwise_corr(data1500, method='pearson')
         assert 'BF10' not in pcor1500.keys()
+        # Test when one column has only one unique value
+        data['One'] = 1
+        stats = pairwise_corr(data, columns=['Neuroticism', 'IQ', 'One'])
+        assert stats.shape[0] == 1

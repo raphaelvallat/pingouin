@@ -12,8 +12,12 @@ __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
            "pairwise_corr"]
 
 
-def _append_stats_dataframe(stats, x, y, xlabel, ylabel, alpha, paired,
+def _append_stats_dataframe(stats, x, y, xlabel, ylabel, alpha, paired, tail,
                             df_ttest, ef, eftype, time=np.nan):
+    # Create empty columns
+    for f in ['RBC', 'CLES', 'T', 'BF10', 'U-val', 'W-val']:
+        if f not in df_ttest.keys():
+            df_ttest[f] = np.nan
     stats = stats.append({
         'A': xlabel,
         'B': ylabel,
@@ -23,20 +27,25 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, alpha, paired,
         'std(A)': np.round(x.std(ddof=1), 3),
         'std(B)': np.round(y.std(ddof=1), 3),
         'Paired': paired,
-        'tail': df_ttest.loc['T-test', 'tail'],
+        'tail': tail,
         # 'Alpha': alpha,
-        'T': df_ttest.loc['T-test', 'T'],
-        'p-unc': df_ttest.loc['T-test', 'p-val'],
-        'BF10': df_ttest.loc['T-test', 'BF10'],
+        'T': df_ttest['T'].iloc[0],
+        'U': df_ttest['U-val'].iloc[0],
+        'W': df_ttest['W-val'].iloc[0],
+        'p-unc': df_ttest['p-val'].iloc[0],
+        'BF10': df_ttest['BF10'].iloc[0],
         'efsize': ef,
-        'eftype': eftype,
+        'RBC': df_ttest['RBC'].iloc[0],
+        'CLES': df_ttest['CLES'].iloc[0],
+        # 'eftype': eftype,
         'Time': time}, ignore_index=True, sort=False)
     return stats
 
 
 def pairwise_ttests(dv=None, between=None, within=None, subject=None,
-                    data=None, alpha=.05, tail='two-sided', padjust='none',
-                    effsize='hedges', return_desc=False, export_filename=None):
+                    data=None, parametric=True, alpha=.05, tail='two-sided',
+                    padjust='none', effsize='hedges', return_desc=False,
+                    export_filename=None):
     '''Pairwise T-tests.
 
     Parameters
@@ -52,6 +61,10 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         contrast including a within-subject factor.
     data : pandas DataFrame
         DataFrame
+    parametric : boolean
+        If True (default), use the parametric :py:func:`ttest` function.
+        If False, use :py:func:`pingouin.wilcoxon` or :py:func:`pingouin.mwu`
+        for paired or unpaired samples, respectively.
     alpha : float
         Significance level
     tail : string
@@ -91,32 +104,42 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         'A' : Name of first measurement
         'B' : Name of second measurement
         'Paired' : indicates whether the two measurements are paired or not
+        'Parametric' : indicates if (non)-parametric tests were used
         'Tail' : indicate whether the p-values are one-sided or two-sided
-        'T' : T-values
+        'T' : T-values (only if parametric=True)
+        'U' : Mann-Whitney U value (only if parametric=False and unpaired data)
+        'W' : Wilcoxon W value (only if parametric=False and paired data)
         'p-unc' : Uncorrected p-values
         'p-corr' : Corrected p-values
         'p-adjust' : p-values correction method
         'BF10' : Bayes Factor
-        'efsize' : effect sizes
-        'eftype' : type of effect size
+        'hedges' : Hedges effect size
+        'RBC' : Rank-biserial correlation effect size (if parametric=False)
+        'CLES' : Common language effect size (if parametric=False)
 
     Notes
     -----
-    If between or within is a list (e.g. ['col1', 'col2']), the function
-    returns 1) the pairwise T-tests between each values of the first column,
-    2) the pairwise T-tests between each values of the second column and
-    3) the interaction between col1 and col2. The interaction is dependent
-    of the order of the list, so ['col1', 'col2'] will not yield the same
-    results as ['col2', 'col1'].
+    If ``between`` or ``within`` is a list (e.g. ['col1', 'col2']),
+    the function returns 1) the pairwise T-tests between each values of the
+    first column, 2) the pairwise T-tests between each values of the second
+    column and 3) the interaction between col1 and col2. The interaction is
+    dependent of the order of the list, so ['col1', 'col2'] will not yield the
+    same results as ['col2', 'col1'].
 
-    In other words, if between is a list with two elements, the output model is
-    between1 + between2 + between1 * between2.
+    In other words, if ``between`` is a list with two elements, the output
+    model is between1 + between2 + between1 * between2.
 
-    Similarly, if within is a list with two elements, the output model is
+    Similarly, if `within`` is a list with two elements, the output model is
     within1 + within2 + within1 * within2.
 
-    If both between and within are specified, the function return within +
-    between + within * between.
+    If both ``between`` and ``within`` are specified, the function return
+    within + between + within * between.
+
+    See Also
+    --------
+    ttest : T-test.
+    wilcoxon : Non-parametric test for paired samples.
+    mwu : Non-parametric test for independent samples.
 
     Examples
     --------
@@ -134,18 +157,21 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         >>>                             subject='Subject', data=df)
         >>> print(post_hocs)
 
-    3. Within + Between + Within * Between with corrected p-values
+    3. Non-parametric pairwise paired test (wilcoxon)
+        >>> pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+        >>>                 data=df, parametric=False)
 
-        >>> post_hocs = pairwise_ttests(dv='Scores', within='Time',
-        >>>                             subject='Subject', between='Group',
-        >>>                             padjust='bonf', data=df)
-        >>> print(post_hocs)
+    4. Within + Between + Within * Between with corrected p-values
 
-    3. Between1 + Between2 + Between1 * Between2
+        >>> pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+        >>>                  between='Group', padjust='bonf', data=df)
+
+    5. Between1 + Between2 + Between1 * Between2
 
         >>> pairwise_ttests(dv='Scores', between=['Group', 'Time'], data=df)
     '''
     from pingouin.parametric import ttest
+    from pingouin.nonparametric import wilcoxon, mwu
 
     # Safety checks
     _check_dataframe(dv=dv, between=between, within=within, subject=subject,
@@ -219,10 +245,17 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
             col1, col2 = comb
             x = ddic.get(col1)
             y = ddic.get(col2)
-            df_ttest = ttest(x, y, paired=paired, tail=tail)
+            if parametric:
+                df_ttest = ttest(x, y, paired=paired, tail=tail)
+            else:
+                if paired:
+                    df_ttest = wilcoxon(x, y, tail=tail)
+                else:
+                    df_ttest = mwu(x, y, tail=tail)
             ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
             stats = _append_stats_dataframe(stats, x, y, col1, col2, alpha,
-                                            paired, df_ttest, ef, effsize)
+                                            paired, tail, df_ttest, ef,
+                                            effsize)
             stats['Contrast'] = col
 
         # Multiple comparisons
@@ -267,6 +300,7 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
                                                  within=fwt[i],
                                                  subject=subject,
                                                  data=data,
+                                                 parametric=parametric,
                                                  alpha=alpha,
                                                  tail=tail,
                                                  padjust=padjust,
@@ -293,10 +327,16 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
             fac1, (col1, col2) = comb
             x = ddic.get((fac1, col1))
             y = ddic.get((fac1, col2))
-            df_ttest = ttest(x, y, paired=paired, tail=tail)
+            if parametric:
+                df_ttest = ttest(x, y, paired=paired, tail=tail)
+            else:
+                if paired:
+                    df_ttest = wilcoxon(x, y, tail=tail)
+                else:
+                    df_ttest = mwu(x, y, tail=tail)
             ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
             stats = _append_stats_dataframe(stats, x, y, col1, col2,
-                                            alpha, paired, df_ttest, ef,
+                                            alpha, paired, tail, df_ttest, ef,
                                             effsize, fac1)
 
         # Update the Contrast columns
@@ -313,11 +353,13 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
 
     # ---------------------------------------------------------------------
     stats['Paired'] = stats['Paired'].astype(bool)
+    stats['Parametric'] = parametric
 
     # Reorganize column order
     col_order = ['Contrast', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
-                 'std(B)', 'Paired', 'T', 'tail', 'p-unc',
-                 'p-corr', 'p-adjust', 'BF10', 'efsize', 'eftype']
+                 'std(B)', 'Paired', 'Parametric', 'T', 'U', 'W', 'tail',
+                 'p-unc', 'p-corr', 'p-adjust', 'BF10', 'RBC', 'CLES',
+                 'efsize']
 
     if return_desc is False:
         stats.drop(columns=['mean(A)', 'mean(B)', 'std(A)', 'std(B)'],
@@ -325,6 +367,9 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
 
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
+
+    # Rename effect size column
+    stats.rename(columns={'efsize': effsize}, inplace=True)
 
     # Rename Time columns
     if contrast in ['multiple_within', 'multiple_between', 'within_between']:
@@ -815,8 +860,8 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     # Assert that all columns do exist in DataFrame
     # If you see this error, check for column name errors in `columns=[]`
     for comb in combs:
-        assert comb[0] in keys
-        assert comb[1] in keys
+        assert comb[0] in keys, 'Column %s is not in dataframe' % comb[0]
+        assert comb[1] in keys, 'Column %s is not in dataframe' % comb[1]
 
     # Initialize vectors
     for comb in combs:

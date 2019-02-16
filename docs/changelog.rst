@@ -6,6 +6,13 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
+v0.2.4 (March 2019)
+-------------------
+
+**Pairwise**
+
+a. Added support for non-parametric pairwise tests in pairwise_ttests function.
+
 v0.2.3 (February 2019)
 ----------------------
 

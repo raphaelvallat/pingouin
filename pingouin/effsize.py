@@ -1,5 +1,6 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
+import warnings
 import numpy as np
 from pingouin.utils import _check_eftype, _remove_na
 # from pingouin.distribution import homoscedasticity
@@ -488,12 +489,12 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
             return d * (1 - (3 / (4 * (nx + ny) - 9)))
         else:
             # If shapes of x and y are not known, return cohen's d
-            print("You need to pass nx and ny arguments to compute Hedges g.",
-                  "Returning Cohen's d instead")
+            warnings.warn("You need to pass nx and ny arguments to compute "
+                          "Hedges g. Returning Cohen's d instead")
             return d
     elif ot == 'glass':
-        print("Returning original effect size instead of Glass because",
-              "variance is not known.")
+        warnings.warn("Returning original effect size instead of Glass "
+                      "because variance is not known.")
         return ef
     elif ot == 'r':
         # McGrath and Meyer 2006
@@ -635,7 +636,8 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
     y = np.asarray(y)
 
     if x.size != y.size and paired:
-        print('x and y have unequal sizes. Switching to paired == False.')
+        warnings.warn("x and y have unequal sizes. Switching to "
+                      "paired == False.")
         paired = False
 
     # Remove NA

@@ -1,5 +1,6 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
+import warnings
 import numpy as np
 import pandas as pd
 from pingouin import (_check_dataframe, _remove_rm_na, _remove_na,
@@ -179,7 +180,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     y = np.asarray(y)
 
     if x.size != y.size and paired:
-        print('x and y have unequal sizes. Switching to paired == False.')
+        warnings.warn("x and y have unequal sizes. Switching to "
+                      "paired == False.")
         paired = False
 
     # Remove NA

@@ -103,7 +103,29 @@ def mwu(x, y, tail='two-sided'):
     mwu tests the hypothesis that data in x and y are samples from continuous
     distributions with equal medians. The test assumes that x and y
     are independent. This test corrects for ties and by default
-    uses a continuity correction.
+    uses a continuity correction (see :py:func:`scipy.stats.mannwhitneyu`
+    for details).
+
+    The rank biserial correlation is the difference between the proportion of
+    favorable evidence minus the proportion of unfavorable evidence
+    (see Kerby 2014).
+
+    The common language effect size is the probability (from 0 to 1) that a
+    randomly selected observation from the first sample will be greater than a
+    randomly selected observation from the second sample.
+
+    References
+    ----------
+    .. [1] Mann, H. B., & Whitney, D. R. (1947). On a test of whether one of
+           two random variables is stochastically larger than the other.
+           The annals of mathematical statistics, 50-60.
+
+    .. [2] Kerby, D. S. (2014). The simple difference formula: An approach to
+           teaching nonparametric correlation. Comprehensive Psychology,
+           3, 11-IT.
+
+    .. [3] McGraw, K. O., & Wong, S. P. (1992). A common language effect size
+           statistic. Psychological bulletin, 111(2), 361.
 
     Examples
     --------
@@ -125,8 +147,6 @@ def mwu(x, y, tail='two-sided'):
 
     # Remove NA
     x, y = _remove_na(x, y, paired=False)
-    nx = x.size
-    ny = y.size
 
     # Compute test
     if tail == 'one-sided':
@@ -134,12 +154,11 @@ def mwu(x, y, tail='two-sided'):
     uval, pval = mannwhitneyu(x, y, use_continuity=True, alternative=tail)
 
     # Effect size 1: common language effect size (McGraw and Wong 1992)
-    c = np.array([(a, b) for a in x for b in y])
-    num = max((c[:, 0] < c[:, 1]).sum(), (c[:, 0] > c[:, 1]).sum())
-    cles = num / (nx * ny)
+    diff = x[:, None] - y
+    cles = max((diff < 0).sum(), (diff > 0).sum()) / diff.size
 
     # Effect size 2: rank biserial correlation (Wendt 1972)
-    rbc = 1 - (2 * uval) / (nx * ny)
+    rbc = 1 - (2 * uval) / diff.size  # diff.size = x.size * y.size
 
     # Fill output DataFrame
     stats = pd.DataFrame({}, index=['MWU'])
@@ -179,8 +198,28 @@ def wilcoxon(x, y, tail='two-sided'):
     -----
     The Wilcoxon signed-rank test tests the null hypothesis that two related
     paired samples come from the same distribution.
-    A continuity correction is applied by default.
+    A continuity correction is applied by default
+    (see :py:func:`scipy.stats.wilcoxon` for details).
 
+    The rank biserial correlation is the difference between the proportion of
+    favorable evidence minus the proportion of unfavorable evidence
+    (see Kerby 2014).
+
+    The common language effect size is the probability (from 0 to 1) that a
+    randomly selected observation from the first sample will be greater than a
+    randomly selected observation from the second sample.
+
+    References
+    ----------
+    .. [1] Wilcoxon, F. (1945). Individual comparisons by ranking methods.
+           Biometrics bulletin, 1(6), 80-83.
+
+    .. [2] Kerby, D. S. (2014). The simple difference formula: An approach to
+           teaching nonparametric correlation. Comprehensive Psychology,
+           3, 11-IT.
+
+    .. [3] McGraw, K. O., & Wong, S. P. (1992). A common language effect size
+           statistic. Psychological bulletin, 111(2), 361.
 
     Examples
     --------
@@ -199,17 +238,14 @@ def wilcoxon(x, y, tail='two-sided'):
 
     # Remove NA
     x, y = _remove_na(x, y, paired=True)
-    nx = x.size
-    ny = y.size
 
     # Compute test
     wval, pval = wilcoxon(x, y, zero_method='wilcox', correction=False)
     pval *= .5 if tail == 'one-sided' else pval
 
     # Effect size 1: common language effect size (McGraw and Wong 1992)
-    c = np.array([(a, b) for a in x for b in y])
-    num = max((c[:, 0] < c[:, 1]).sum(), (c[:, 0] > c[:, 1]).sum())
-    cles = num / (nx * ny)
+    diff = x[:, None] - y
+    cles = max((diff < 0).sum(), (diff > 0).sum()) / diff.size
 
     # Effect size 2: matched-pairs rank biserial correlation (Kerby 2014)
     rank = np.arange(x.size, 0, -1)

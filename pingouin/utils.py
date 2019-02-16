@@ -1,5 +1,6 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
+import warnings
 import numpy as np
 from pingouin.external.tabulate import tabulate
 import pandas as pd
@@ -100,10 +101,10 @@ def _remove_rm_na(dv=None, within=None, subject=None, data=None):
         data = data.set_index(subject)
 
     # Find index with nan
-    iloc_nan = pd.isnull(data).any(1).nonzero()[0]
+    iloc_nan = pd.isnull(data).any(1).values.nonzero()[0]
     idx_nan = data.index[iloc_nan].values
-    print('\nNote: %i subject(s) removed because of missing value(s).\n'
-          % len(idx_nan))
+    warnings.warn("\nNote: %i subject(s) removed because of "
+                  "missing value(s)." % len(idx_nan))
     return data.drop(idx_nan).reset_index(drop=False)
 
 
