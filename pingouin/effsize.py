@@ -409,11 +409,11 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
 
     The formula to convert **d** to an odds-ratio is given in ref [4]:
 
-    .. math:: or = e(\dfrac{d * \pi}{\sqrt{3}})
+    .. math:: OR = e(\dfrac{d * \pi}{\sqrt{3}})
 
     The formula to convert **d** to area under the curve is given in ref [5]:
 
-    .. math:: auc = \mathcal{N}_{cdf}(\dfrac{d}{\sqrt{2}})
+    .. math:: AUC = \mathcal{N}_{cdf}(\dfrac{d}{\sqrt{2}})
 
     References
     ----------
@@ -509,7 +509,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     elif ot == 'odds-ratio':
         # Borenstein et al. 2009
         return np.exp(d * np.pi / np.sqrt(3))
-    elif ot == 'auc':
+    elif ot in ['auc', 'cles']:
         # Ruscio 2008
         from scipy.stats import norm
         return norm.cdf(d / np.sqrt(2))
@@ -555,10 +555,10 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
 
     Notes
     -----
-    Missing values are automatically removed from the data. If x and y are
-    paired, the entire row is removed.
+    Missing values are automatically removed from the data. If ``x`` and ``y``
+    are paired, the entire row is removed.
 
-    If x and y are independent, the Cohen's is:
+    If ``x`` and ``y`` are independent, the Cohen's is:
 
     .. math::
 
@@ -566,7 +566,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         {\sqrt{\dfrac{(n_{1} - 1)\sigma_{1}^{2} + (n_{2} - 1)
         \sigma_{2}^{2}}{n1 + n2 - 2}}}
 
-    If x and y are paired, the Cohen d-avg is computed:
+    If ``x`` and ``y`` are paired, the Cohen d-avg is computed:
 
     .. math::
 
