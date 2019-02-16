@@ -308,6 +308,9 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
                                                  return_desc=return_desc),
                                  ignore_index=True, sort=False)
 
+        # Rename effect size to generic name
+        stats.rename(columns={effsize: 'efsize'}, inplace=True)
+
         # Then compute the interaction between the factors
         labels_fac1 = data[factors[0]].unique().tolist()
         labels_fac2 = data[factors[1]].unique().tolist()
