@@ -35,25 +35,23 @@
 
 1. ANOVAs: one- and two-ways, repeated measures, mixed, ancova
 
-2. Post-hocs tests and pairwise comparisons
+2. Parwise post-hocs tests (parametric and non-parametric)
 
-3. Robust correlations
+3. Robust correlations, partial correlation, distance correlation, repeated measures correlation and intraclass correlation
 
-4. Partial correlation, repeated measures correlation and intraclass correlation
+4. Linear/logistic regression and mediation analysis
 
-5. Linear/logistic regression and mediation analysis
+5. Bayes Factor of T-test and Pearson correlation
 
-6. Bayesian T-test and Pearson correlation
+6. Tests for sphericity, normality and homoscedasticity
 
-7. Tests for sphericity, normality and homoscedasticity
+7. Effect sizes and power analysis
 
-8. Effect sizes and power analysis
+8. Parametric/bootstrapped confidence intervals around an effect size or a correlation coefficient
 
-9. Parametric/bootstrapped confidence intervals around an effect size or a correlation coefficient
+9. Circular statistics
 
-10. Circular statistics
-
-11. Plotting: Bland-Altman plot, Q-Q plot, etc...
+10. Plotting: Bland-Altman plot, Q-Q plot, etc...
 
 Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
 
