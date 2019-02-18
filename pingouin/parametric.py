@@ -35,7 +35,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         Smaller values of r (e.g. 0.5), may be appropriate when small effect
         sizes are expected a priori; larger values of r are appropriate when
         large effect sizes are expected (Rouder et al 2009).
-        The default is 0.707 (= sqrt(2) / 2).
+        The default is 0.707 (= :math:`\sqrt{2} / 2`).
 
     Returns
     -------
@@ -59,8 +59,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     Notes
     -----
-    Missing values are automatically removed from the data. If x and y are
-    paired, the entire row is removed.
+    Missing values are automatically removed from the data. If ``x`` and
+    ``y`` are paired, the entire row is removed.
 
     The **two-sample T-test for unpaired data** is defined as:
 
@@ -88,15 +88,15 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     The T-value for **paired samples** is defined by:
 
-    .. math:: t = \dfrac{\overline{x}_{diff}}{s_{\overline{x}}}
+    .. math:: t = \dfrac{\overline{x}_d}{s_{\overline{x}}}
 
     where
 
-    .. math:: s_{\overline{x}} = \dfrac{s_{diff}}{\sqrt n}
+    .. math:: s_{\overline{x}} = \dfrac{s_d}{\sqrt n}
 
-    where :math:`\overline{x}_{diff}` is the sample mean of the differences
+    where :math:`\overline{x}_d` is the sample mean of the differences
     between the two paired samples, :math:`n` is the number of observations
-    (sample size), :math:`s_{diff}` is the sample standard deviation of the
+    (sample size), :math:`s_d` is the sample standard deviation of the
     differences and :math:`s_{\overline{x}}` is the estimated standard error
     of the mean of the differences.
 

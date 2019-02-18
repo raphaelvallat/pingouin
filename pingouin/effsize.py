@@ -313,6 +313,14 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
     if y is not None:
         reference = func(x, y)
         for i in range(n_boot):
+            # Note that here we use a bootstrapping procedure with replacement
+            # of all the pairs (Xi, Yi). This is NOT suited for
+            # hypothesis testing such as p-value estimation). Instead, for the
+            # latter, one must only shuffle the Y values while keeping the X
+            # values constant, i.e.:
+            # >>> bootsam = rng.random_sample((n, n_boot)).argsort(axis=0)
+            # >>> for i in range(n_boot):
+            # >>>   bootstat[i] = func(x, y[bootsam[:, i]])
             bootstat[i] = func(x[bootsam[:, i]], y[bootsam[:, i]])
     else:
         reference = func(x)
