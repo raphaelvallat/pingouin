@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from unittest import TestCase
 from pingouin.correlation import (corr, rm_corr, intraclass_corr, partial_corr,
-                                  skipped)
+                                  skipped, distance_corr)
 from pingouin.datasets import read_dataset
 
 
@@ -93,3 +93,23 @@ class TestCorrelation(TestCase):
             intraclass_corr(df, 'Wine', 'Judge', 'Judge')
         with pytest.raises(ValueError):
             intraclass_corr(df.drop(index=0), 'Wine', 'Judge', 'Scores')
+
+    def test_distance_corr(self):
+        """Test function distance_corr
+        We compare against the energy R package"""
+        a = [1, 2, 3, 4, 5]
+        b = [1, 2, 9, 4, 4]
+        dcor1 = distance_corr(a, b, n_boot=None)
+        dcor, pval = distance_corr(a, b, seed=9)
+        assert dcor1 == dcor
+        assert np.round(dcor, 7) == 0.7626762
+        assert 0.30 < pval < 0.40
+        # With 2D arrays
+        np.random.seed(123)
+        a = np.random.random((10, 10))
+        b = np.random.random((10, 10))
+        distance_corr(a, b)
+
+        with pytest.raises(ValueError):
+            a[2, 4] = np.nan
+            distance_corr(a, b)

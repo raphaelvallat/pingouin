@@ -6,10 +6,12 @@ from pingouin.power import power_corr
 from pingouin.utils import _remove_na
 from pingouin.effsize import compute_esci
 from pingouin.bayesian import bayesfactor_pearson
+from scipy.spatial.distance import pdist, squareform
 
 from pingouin.nonparametric import mad, madmedianrule
 
-__all__ = ["corr", "partial_corr", "rm_corr", "intraclass_corr"]
+__all__ = ["corr", "partial_corr", "rm_corr", "intraclass_corr",
+           "distance_corr"]
 
 
 def skipped(x, y, method='spearman'):
@@ -739,3 +741,125 @@ def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
     upper = (f_upper - 1) / (f_upper + k - 1)
 
     return icc, np.round([lower, upper], 3)
+
+
+def _dcorr(y, n2, A, dcov2_xx):
+    """Helper function for distance correlation bootstrapping.
+    """
+    # Pairwise Euclidean distances
+    b = squareform(pdist(y, metric='euclidean'))
+    # Double centering
+    B = b - b.mean(axis=0)[None, :] - b.mean(axis=1)[:, None] + b.mean()
+    # Compute squared distance covariances
+    dcov2_yy = np.vdot(B, B) / n2
+    dcov2_xy = np.vdot(A, B) / n2
+    return np.sqrt(dcov2_xy) / np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
+
+
+def distance_corr(x, y, n_boot=1000, seed=None):
+    """Distance correlation between two arrays.
+
+    Statistical significance (p-value) is evaluated with a permutation test.
+
+    Parameters
+    ----------
+    x, y : np.ndarray
+        1D or 2D input arrays, shape (n_samples, n_features).
+        x and y must have the same number of samples and must not
+        contain missing values.
+    n_boot : int or None
+        Number of bootstrap to perform.
+        If None, no bootstrapping is performed and the function
+        only returns the distance correlation (no p-value).
+        Default is 1000 (thus giving a precision of 0.001).
+    seed : int or None
+        Random state seed.
+
+    Returns
+    -------
+    dcor : float
+        Distance correlation (range from 0 to 1).
+    pval : float
+        P-value.
+
+    Notes
+    -----
+    From Wikipedia:
+
+    Distance correlation is a measure of dependence between two paired
+    random vectors of arbitrary, not necessarily equal, dimension. The
+    distance correlation coefficient is zero if and only if the random vectors
+    are independent. Thus, distance correlation measures both linear and
+    nonlinear association between two random variables or random vectors.
+    This is in contrast to Pearson's correlation, which can only detect
+    linear association between two random variables.
+
+    Results have been tested against the 'energy' R package.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Distance_correlation
+
+    .. [2] Székely, G. J., Rizzo, M. L., & Bakirov, N. K. (2007).
+           Measuring and testing dependence by correlation of distances.
+           The annals of statistics, 35(6), 2769-2794.
+
+    .. [3] https://gist.github.com/satra/aa3d19a12b74e9ab7941
+
+    .. [4] https://gist.github.com/wladston/c931b1495184fbb99bec
+
+    .. [5] https://cran.r-project.org/web/packages/energy/energy.pdf
+
+    Examples
+    --------
+    1. With two 1D vectors
+
+        >>> a = [1, 2, 3, 4, 5]
+        >>> b = [1, 2, 9, 4, 4]
+        >>> distance_corr(a, b, seed=9)
+            (0.7626762424168667, 0.334)
+
+    2. With two 2D arrays and no p-value
+
+        >>> import numpy as np
+        >>> np.random.seed(123)
+        >>> a = np.random.random((10, 10))
+        >>> b = np.random.random((10, 10))
+        >>> distance_corr(a, b, n_boot=None)
+            0.8799633012275321
+    """
+    x = np.asarray(x)
+    y = np.asarray(y)
+    # Check for NaN values
+    if any([np.isnan(np.min(x)), np.isnan(np.min(y))]):
+        raise ValueError('Input arrays must not contain NaN values.')
+    if x.ndim == 1:
+        x = x[:, None]
+    if y.ndim == 1:
+        y = y[:, None]
+    assert x.shape[0] == y.shape[0], 'x and y must have same number of samples'
+
+    # Extract number of samples
+    n = x.shape[0]
+    n2 = n**2
+
+    # Process first array to avoid redundancy when performing bootstrap
+    a = squareform(pdist(x, metric='euclidean'))
+    A = a - a.mean(axis=0)[None, :] - a.mean(axis=1)[:, None] + a.mean()
+    dcov2_xx = np.vdot(A, A) / n2
+
+    # Process second array and compute final distance correlation
+    dcor = _dcorr(y, n2, A, dcov2_xx)
+
+    # Compute p-value using a bootstrap procedure
+    if n_boot is not None and n_boot > 1:
+        # Define random seed and permutation
+        rng = np.random.RandomState(seed)
+        bootsam = rng.random_sample((n, n_boot)).argsort(axis=0)
+        bootstat = np.empty(n_boot)
+        for i in range(n_boot):
+            bootstat[i] = _dcorr(y[bootsam[:, i]], n2, A, dcov2_xx)
+        pval = np.greater_equal(bootstat, dcor).sum() / n_boot
+        return dcor, pval
+    else:
+        return dcor
