@@ -108,7 +108,9 @@ class TestCorrelation(TestCase):
         np.random.seed(123)
         a = np.random.random((10, 10))
         b = np.random.random((10, 10))
-        distance_corr(a, b)
+        dcor, pval = distance_corr(a, b, n_boot=500, seed=9)
+        assert np.round(dcor, 5) == 0.87996
+        assert 0.20 < pval < 0.30
 
         with pytest.raises(ValueError):
             a[2, 4] = np.nan
