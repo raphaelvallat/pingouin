@@ -1,0 +1,9 @@
+pytest==3.9.2
+codecov
+pytest-cov
+pytest-sugar
+pytest-travis-fold
+openpyxl
+statsmodels
+scikit-learn
+seaborn
