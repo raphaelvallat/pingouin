@@ -778,7 +778,7 @@ def distance_corr(x, y, n_boot=1000, seed=None):
     Returns
     -------
     dcor : float
-        Distance correlation (range from 0 to 1).
+        Sample distance correlation (range from 0 to 1).
     pval : float
         P-value.
 
@@ -786,13 +786,29 @@ def distance_corr(x, y, n_boot=1000, seed=None):
     -----
     From Wikipedia:
 
-    Distance correlation is a measure of dependence between two paired
+    *Distance correlation is a measure of dependence between two paired
     random vectors of arbitrary, not necessarily equal, dimension. The
     distance correlation coefficient is zero if and only if the random vectors
     are independent. Thus, distance correlation measures both linear and
     nonlinear association between two random variables or random vectors.
     This is in contrast to Pearson's correlation, which can only detect
-    linear association between two random variables.
+    linear association between two random variables.*
+
+    The distance correlation of two random variables is obtained by
+    dividing their distance covariance by the product of their distance
+    standard deviations:
+
+    .. math::
+
+        \\text{dCor}(X, Y) = \\frac{\\text{dCov}(X, Y)}
+        {\\sqrt{\\text{dVar}(X) \\cdot \\text{dVar}(Y)}}
+
+    where :math:`\\text{dCov}(X, Y)` is the square root of the arithmetic
+    average of the product of the double-centered pairwise Euclidean distance
+    matrices.
+
+    Note that by contrast to Pearson's correlation, the distance correlation
+    cannot be negative, i.e :math:`0 \\leq \\text{dCor} \\leq 1`.
 
     Results have been tested against the 'energy' R package.
 
