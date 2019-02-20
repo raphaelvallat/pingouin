@@ -1,20 +1,16 @@
 language: python
-
+sudo: required
 matrix:
   include:
     - python: 3.5
     - python: 3.6
     - python: 3.7
       dist: xenial
-      sudo: true
 
 env:
   matrix:
     - TEST=standard
     - TEST=flake
-
-allow_failures:
-  - env: TEST=flake
 
 before_install:
   # Instal miniconda3 :
