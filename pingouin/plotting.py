@@ -134,18 +134,20 @@ def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
 
     ax.text(0.98, md + offset, 'Mean', ha="right", va="bottom",
             transform=trans)
-    ax.text(0.98, md - offset, f'{md:.2f}', ha="right", va="top",
+    ax.text(0.98, md - offset, '%.2f' % md, ha="right", va="top",
             transform=trans)
 
-    ax.text(0.98, md + (agreement * sd) + offset, f'+{agreement:.2f} SD',
+    ax.text(0.98, md + (agreement * sd) + offset, '+%.2f SD' % agreement,
             ha="right", va="bottom", transform=trans)
-    ax.text(0.98, md + (agreement * sd) - offset, f'{md + agreement * sd:.2f}',
-            ha="right", va="top", transform=trans)
+    ax.text(0.98, md + (agreement * sd) - offset,
+            '%.2f' % (md + agreement * sd), ha="right", va="top",
+            transform=trans)
 
-    ax.text(0.98, md - (agreement * sd) - offset, f'-{agreement:.2f} SD',
+    ax.text(0.98, md - (agreement * sd) - offset, '-%.2f SD' % agreement,
             ha="right", va="top", transform=trans)
-    ax.text(0.98, md - (agreement * sd) + offset, f'{md - agreement * sd:.2f}',
-            ha="right", va="bottom", transform=trans)
+    ax.text(0.98, md - (agreement * sd) + offset,
+            '%.2f' % (md - agreement * sd), ha="right", va="bottom",
+            transform=trans)
 
     if confidence is not None:
         ax.axhspan(ci['mean'][0], ci['mean'][1],
