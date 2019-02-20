@@ -8,9 +8,12 @@ platform:
 
 environment:
   matrix:
-    - PYTHON_VERSION: 3.6
-      MINICONDA: C:\Miniconda36-x64
-      PYTHON_ARCH: 64
+    - PYTHON: "C:\\Python35-x64"
+      TOX_ENV: "py35"
+    - PYTHON: "C:\\Python36-x64"
+      TOX_ENV: "py36"
+    - PYTHON: "C:\\Python37-x64"
+      TOX_ENV: "py37"
 
 init:
   - "ECHO %PYTHON_VERSION% %MINICONDA% %PYTHON_ARCH%"
