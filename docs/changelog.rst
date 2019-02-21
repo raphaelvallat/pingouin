@@ -9,15 +9,19 @@ What's new
 v0.2.4 (March 2019)
 -------------------
 
+**Correlation**
+
+a. Added distance correlation
+
 **Pairwise**
 
 a. Added support for non-parametric pairwise tests in pairwise_ttests function.
 b. Common language effect size (CLES) is now reported by default in pairwise_ttests function.
 c. CLES is now implemented in the compute_effsize function.
 
-**Correlation**
+**Testing**
 
-a. Added distance correlation
+a. Travis tests for Python 3.5, 3.6 and 3.7
 
 v0.2.3 (February 2019)
 ----------------------

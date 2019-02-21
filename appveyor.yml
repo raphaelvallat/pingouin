@@ -1,40 +1,27 @@
 build: false
 
-cache:
-  #- packages
-
-platform:
-    -x64
-
 environment:
   matrix:
-    - PYTHON: "C:\\Python35-x64"
-      TOX_ENV: "py35"
-    - PYTHON: "C:\\Python36-x64"
-      TOX_ENV: "py36"
-    - PYTHON: "C:\\Python37-x64"
-      TOX_ENV: "py37"
+    - PYTHON_VERSION: 3.5
+      MINICONDA: C:\Miniconda3
+    - PYTHON_VERSION: 3.6
+      MINICONDA: C:\Miniconda3
+    - PYTHON_VERSION: 3.7
+      MINICONDA: C:\Miniconda3
 
 init:
-  - "ECHO %PYTHON_VERSION% %MINICONDA% %PYTHON_ARCH%"
+  - "ECHO %PYTHON_VERSION% %MINICONDA%"
 
 install:
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-desktop.ps1'))
-  # - ps: $screen_resolution = '1280x800'; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-desktop.ps1'))
-  # ------------------- PYTHON ENVIRONNEMENT -------------------
   - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
-  - "conda config --set always_yes yes --set changeps1 no"
-  - "conda update -q conda"
-  - "conda info -a"
-  - "conda create -q -n testenv python=%PYTHON_VERSION% numpy scipy matplotlib pip cython"
-  # Activate testing environnement :
-  - "activate testenv"
-  - "python -m pip install --upgrade pip"
-  # Install dependencies :
-  - "pip install pytest pandas seaborn statsmodels scikit-learn patsy"
-  - "dir"
-  # ------------------- PINGOUIN -------------------
-  - "python setup.py develop"
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  - "conda create -q -n test_env python=%PYTHON_VERSION% numpy scipy"
+  - activate test_env
+  - pip install -r requirements.txt
+  - pip install -r requirements-test.txt
+  - pip install .
 
 test_script:
   - "pytest"
