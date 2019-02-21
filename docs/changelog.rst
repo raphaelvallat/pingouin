@@ -21,7 +21,7 @@ c. CLES is now implemented in the compute_effsize function.
 
 **Testing**
 
-a. Travis tests for Python 3.5, 3.6 and 3.7
+a. Travis and AppVeyor test for Python 3.5, 3.6 and 3.7
 
 v0.2.3 (February 2019)
 ----------------------
