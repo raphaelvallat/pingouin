@@ -103,8 +103,9 @@ def _remove_rm_na(dv=None, within=None, subject=None, data=None):
     # Find index with nan
     iloc_nan = pd.isnull(data).any(1).values.nonzero()[0]
     idx_nan = data.index[iloc_nan].values
-    warnings.warn("\nNote: %i subject(s) removed because of "
-                  "missing value(s)." % len(idx_nan))
+    if len(idx_nan) > 0:
+        warnings.warn("\nNote: %i subject(s) removed because of "
+                      "missing value(s)." % len(idx_nan))
     return data.drop(idx_nan).reset_index(drop=False)
 
 
