@@ -35,7 +35,7 @@
 
 1. ANOVAs: one- and two-ways, repeated measures, mixed, ancova
 
-2. Parwise post-hocs tests (parametric and non-parametric)
+2. Pairwise post-hocs tests (parametric and non-parametric)
 
 3. Robust correlations, partial correlation, distance correlation, repeated measures correlation and intraclass correlation
 
@@ -51,7 +51,7 @@
 
 9. Circular statistics
 
-10. Plotting: Bland-Altman plot, Q-Q plot, etc...
+10. Plotting: Bland-Altman plot, Q-Q plot, paired plot, robust correlation...
 
 Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
 

@@ -33,7 +33,7 @@
 
 1. ANOVAs: one- and two-ways, repeated measures, mixed, ancova
 
-2. Parwise post-hocs tests (parametric and non-parametric)
+2. Pairwise post-hocs tests (parametric and non-parametric)
 
 3. Robust correlations, partial correlation, distance correlation, repeated measures correlation and intraclass correlation
 
@@ -49,13 +49,12 @@
 
 9. Circular statistics
 
-10. Plotting: Bland-Altman plot, Q-Q plot, etc...
+10. Plotting: Bland-Altman plot, Q-Q plot, paired plot, robust correlation...
 
 Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
 
 For example, the :py:func:`scipy.stats.ttest_ind` function returns only the T-value and the p-value. By contrast,
 the :py:func:`pingouin.ttest` function returns the T-value, p-value, degrees of freedom, effect size (Cohen's d), statistical power and Bayes Factor (BF10) of the test.
-
 
 Installation
 ============
@@ -416,6 +415,17 @@ Plot the curve of achieved power given the effect size (Cohen d) and the sample 
     plt.ylabel('Power (1 - type II error)')
     plt.title('Achieved power of a paired T-test')
     sns.despine()
+
+16. Paired plot
+###############
+
+.. plot::
+
+    import pingouin as pg
+    from pingouin.datasets import read_dataset
+    df = read_dataset('mixed_anova').query("Group == 'Meditation' and Time != 'January'")
+    ax = pg.plot_paired(data=df, dv='Scores', within='Time', subject='Subject', dpi=150)
+    ax.set_title("Effect of meditation on school performance")
 
 Contents
 ========

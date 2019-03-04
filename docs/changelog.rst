@@ -11,13 +11,17 @@ v0.2.4 (March 2019)
 
 **Correlation**
 
-a. Added distance correlation
+a. Added :py:func:`pingouin.distance_corr` (distance correlation) function.
 
 **Pairwise**
 
-a. Added support for non-parametric pairwise tests in pairwise_ttests function.
-b. Common language effect size (CLES) is now reported by default in pairwise_ttests function.
-c. CLES is now implemented in the compute_effsize function.
+a. Added support for non-parametric pairwise tests in :py:func:`pingouin.pairwise_ttests` function.
+b. Common language effect size (CLES) is now reported by default in :py:func:`pingouin.pairwise_ttests` function.
+c. CLES is now implemented in the :py:func:`pingouin.compute_effsize` function.
+
+**Plotting**
+
+a. Added :py:func:`pingouin.plot_paired` function
 
 **Testing**
 

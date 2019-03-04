@@ -154,6 +154,7 @@ Plotting
      :toctree: generated/
 
       plot_blandaltman
+      plot_paired
       plot_skipped_corr
       qqplot
 

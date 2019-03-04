@@ -13,7 +13,7 @@ import matplotlib.transforms as transforms
 # Set default Seaborn preferences
 sns.set(style='ticks', context='notebook')
 
-__all__ = ["plot_blandaltman", "plot_skipped_corr", "qqplot"]
+__all__ = ["plot_blandaltman", "plot_skipped_corr", "qqplot", "plot_paired"]
 
 
 def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
@@ -478,5 +478,136 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
         lower = fit_val - crit * se
         ax.plot(theor, upper, 'r--', lw=1.25)
         ax.plot(theor, lower, 'r--', lw=1.25)
+
+    return ax
+
+
+def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
+                boxplot=True, figsize=(4, 4), dpi=100, ax=None,
+                colors=['green', 'grey', 'indianred'],
+                pointplot_kwargs={'scale': .6, 'markers': '.'},
+                boxplot_kwargs={'color': 'lightslategrey', 'width': .2}):
+    """
+    Paired plot.
+
+    Parameters
+    ----------
+    data : pandas DataFrame
+        Long-format dataFrame.
+    dv : string
+        Name of column containing the dependant variable.
+    within : string
+        Name of column containing the within-subject factor. Note that
+        ``within`` must have exactly two within-subject levels
+        (= two unique values).
+    subject : string
+        Name of column containing the subject identifier.
+    order : list of str
+        List of values in ``within`` that define the order of elements on the
+        x-axis of the plot. If None, uses alphabetical order.
+    boxplot : boolean
+        If True, add a boxplot to the paired lines using the
+        :py:func:`seaborn.boxplot` function.
+    figsize : tuple
+        Figsize in inches
+    dpi : int
+        Resolution of the figure in dots per inches.
+    ax : matplotlib axes
+        Axis on which to draw the plot.
+    colors : list of str
+        Line colors names. Default is green when value increases from A to B,
+        indianred when value decreases from A to B and grey when the value is
+        the same in both measurements.
+    pointplot_kwargs : dict
+        Dictionnary of optional arguments that are passed to the
+        :py:func:`seaborn.pointplot` function.
+    boxplot_kwargs : dict
+        Dictionnary of optional arguments that are passed to the
+        :py:func:`seaborn.boxplot` function.
+
+    Returns
+    -------
+    ax : Matplotlib Axes instance
+        Returns the Axes object with the plot for further tweaking.
+
+    Notes
+    -----
+    Data must be a long-format pandas DataFrame.
+
+    Examples
+    --------
+
+    Default paired plot:
+
+    .. plot::
+
+        >>> from pingouin.datasets import read_dataset
+        >>> df = read_dataset('mixed_anova')
+        >>> df = df.query("Group == 'Meditation' and Subject > 40")
+        >>> df = df.query("Time == 'August' or Time == 'June'")
+        >>> import pingouin as pg
+        >>> ax = pg.plot_paired(data=df, dv='Scores', within='Time',
+        >>>                     subject='Subject', dpi=150)
+
+    Paired plot on an existing axis (no boxplot and uniform color):
+
+    .. plot::
+
+        >>> from pingouin.datasets import read_dataset
+        >>> df = read_dataset('mixed_anova').query("Time != 'January'")
+        >>> import pingouin as pg
+        >>> import matplotlib.pyplot as plt
+        >>> fig, ax1 = plt.subplots(1, 1, figsize=(5, 4))
+        >>> pg.plot_paired(data=df[df['Group'] == 'Meditation'],
+        >>>                dv='Scores', within='Time', subject='Subject',
+        >>>                ax=ax1, boxplot=False,
+        >>>                colors=['grey', 'grey', 'grey'])
+    """
+    from pingouin.utils import _check_dataframe, _remove_rm_na
+
+    # Validate args
+    _check_dataframe(data=data, dv=dv, within=within, subject=subject,
+                     effects='within')
+
+    # Remove NaN values
+    data = _remove_rm_na(dv=dv, within=within, subject=subject, data=data)
+
+    # Extract subjects
+    subj = data[subject].unique()
+
+    # Extract within-subject level (alphabetical order)
+    x_cat = np.unique(data[within])
+    assert len(x_cat) == 2, 'Within must have exactly two unique levels.'
+
+    if order is None:
+        order = x_cat
+    else:
+        assert len(order) == 2, 'Order must have exactly two elements.'
+
+    # Start the plot
+    if ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
+
+    for idx, s in enumerate(subj):
+        tmp = data.loc[data[subject] == s, [dv, within, subject]]
+        x_val = tmp[tmp[within] == order[0]][dv].values[0]
+        y_val = tmp[tmp[within] == order[1]][dv].values[0]
+        if x_val < y_val:
+            color = colors[0]
+        elif x_val > y_val:
+            color = colors[2]
+        elif x_val == y_val:
+            color = colors[1]
+
+        # Plot individual lines using Seaborn
+        sns.pointplot(data=tmp, x=within, y=dv, order=order, color=color,
+                      ax=ax, **pointplot_kwargs)
+
+    if boxplot:
+        sns.boxplot(data=data, x=within, y=dv, order=order, ax=ax,
+                    **boxplot_kwargs)
+
+    # Despine and trim
+    sns.despine(trim=True, ax=ax)
 
     return ax

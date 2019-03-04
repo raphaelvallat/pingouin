@@ -218,4 +218,5 @@ intersphinx_mapping = {'numpy': ('http://docs.scipy.org/doc/numpy/', None),
                        'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
                        'matplotlib': ('http://matplotlib.org/', None),
                        'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
-                       'statsmodels': ('http://www.statsmodels.org/stable/', None)}
+                       'statsmodels': ('http://www.statsmodels.org/stable/', None),
+                       'seaborn': ('https://seaborn.pydata.org/', None)}

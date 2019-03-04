@@ -3,8 +3,9 @@ import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
 from unittest import TestCase
+from pingouin.datasets import read_dataset
 from pingouin.plotting import (plot_blandaltman, plot_skipped_corr, _ppoints,
-                               qqplot)
+                               qqplot, plot_paired)
 
 
 class TestPlotting(TestCase):
@@ -57,3 +58,19 @@ class TestPlotting(TestCase):
         qqplot(x_exp, dist='expon', ax=ax2)
         mean, std = 0, 0.8
         qqplot(x, dist=stats.norm, sparams=(mean, std), confidence=False)
+
+    def test_plot_paired(self):
+        """Test plot_paired()"""
+        df = read_dataset('mixed_anova')
+        df = df.query("Group == 'Meditation' and Subject > 40")
+        df = df.query("Time == 'August' or Time == 'June'")
+        df.loc[[101, 161], 'Scores'] = 6
+        ax = plot_paired(data=df, dv='Scores', within='Time',
+                         subject='Subject')
+        assert isinstance(ax, matplotlib.axes.Axes)
+        _, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4))
+        plot_paired(data=df, dv='Scores', within='Time',
+                    subject='Subject', boxplot=False, ax=ax1)
+        plot_paired(data=df, dv='Scores', within='Time',
+                    subject='Subject', order=['June', 'August'],
+                    ax=ax2)
