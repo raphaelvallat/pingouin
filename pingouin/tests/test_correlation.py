@@ -76,6 +76,10 @@ class TestCorrelation(TestCase):
         assert r == -0.507
         assert dof == 38
         assert np.round(p, 3) == 0.001
+        # Test with less than 3 subjects (same behavior as R package)
+        with pytest.raises(ValueError):
+            rm_corr(data=df[df['Subject'].isin([1, 2])], x='pH', y='PacO2',
+                    subject='Subject')
 
     def test_intraclass_corr(self):
         """Test function intraclass_corr"""
