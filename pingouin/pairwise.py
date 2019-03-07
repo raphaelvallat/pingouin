@@ -448,9 +448,10 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
 
     .. math::
 
-        t = \dfrac{\overline{x}_i - \overline{x}_j}{\sqrt{2 \cdot MS_w / n}}
+        t = \\frac{\\overline{x}_i - \\overline{x}_j}
+        {\\sqrt{2 \\cdot MS_w / n}}
 
-    where :math:`\overline{x}_i` and :math:`\overline{x}_j` are the means of
+    where :math:`\\overline{x}_i` and :math:`\\overline{x}_j` are the means of
     the first and second group, respectively, :math:`MS_w` the mean squares of
     the error (computed using ANOVA) and :math:`n` the sample size.
 
@@ -459,14 +460,14 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
 
     .. math::
 
-        t = \dfrac{\overline{x}_i - \overline{x}_j}{\sqrt{\dfrac{MS_w}{n_i}
-        + \dfrac{MS_w}{n_j}}}
+        t = \\frac{\\overline{x}_i - \\overline{x}_j}{\\sqrt{\\frac{MS_w}{n_i}
+        + \\frac{MS_w}{n_j}}}
 
     where :math:`n_i` and :math:`n_j` are the sample sizes of the first and
     second group, respectively.
 
     The p-values are then approximated using the Studentized range distribution
-    :math:`Q(\sqrt2*|t_i|, r, N - r)` where :math:`r` is the total number of
+    :math:`Q(\\sqrt2*|t_i|, r, N - r)` where :math:`r` is the total number of
     groups and :math:`N` is the total sample size.
 
     Note that the p-values might be slightly different than those obtained
@@ -603,24 +604,24 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
 
     .. math::
 
-        t = \dfrac{\overline{x}_i - \overline{x}_j}{\sqrt{(\dfrac{s_i^2}{n_i}
-        + \dfrac{s_j^2}{n_j})}}
+        t = \\frac{\\overline{x}_i - \\overline{x}_j}
+        {\\sqrt{(\\frac{s_i^2}{n_i} + \\frac{s_j^2}{n_j})}}
 
     and the corrected degrees of freedom are:
 
     .. math::
 
-        v = \dfrac{(\dfrac{s_i^2}{n_i} + \dfrac{s_j^2}{n_j})^2}
-        {\dfrac{(\dfrac{s_i^2}{n_i})^2}{n_i-1} +
-        \dfrac{(\dfrac{s_j^2}{n_j})^2}{n_j-1}}
+        v = \\frac{(\\frac{s_i^2}{n_i} + \\frac{s_j^2}{n_j})^2}
+        {\\frac{(\\frac{s_i^2}{n_i})^2}{n_i-1} +
+        \\frac{(\\frac{s_j^2}{n_j})^2}{n_j-1}}
 
-    where :math:`\overline{x}_i`, :math:`s_i^2`, and :math:`n_i`
+    where :math:`\\overline{x}_i`, :math:`s_i^2`, and :math:`n_i`
     are the mean, variance and sample size of the first group and
-    :math:`\overline{x}_j`, :math:`s_j^2`, and :math:`n_j` the mean, variance
+    :math:`\\overline{x}_j`, :math:`s_j^2`, and :math:`n_j` the mean, variance
     and sample size of the second group.
 
     The p-values are then approximated using the Studentized range distribution
-    :math:`Q(\sqrt2*|t_i|, r, v_i)`.
+    :math:`Q(\\sqrt2*|t_i|, r, v_i)`.
 
     Note that the p-values might be slightly different than those obtained
     using R or Matlab since the studentized range approximation is done using

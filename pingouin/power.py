@@ -59,15 +59,15 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
     size.
 
     The first step is to use the Cohen's d to calculate the non-centrality
-    parameter :math:`\delta` and degrees of freedom :math:`v`.
+    parameter :math:`\\delta` and degrees of freedom :math:`v`.
     In case of paired groups, this is:
 
-    .. math:: \delta = d * \sqrt n
+    .. math:: \\delta = d * \\sqrt n
     .. math:: v = n - 1
 
     and in case of independent groups with equal sample sizes:
 
-    .. math:: \delta = d * \sqrt{\dfrac{n}{2}}
+    .. math:: \\delta = d * \\sqrt{\\frac{n}{2}}
     .. math:: v = (n - 1) * 2
 
     where :math:`d` is the Cohen d and :math:`n` the sample size.
@@ -241,10 +241,10 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
     size.
 
     The first step is to use the Cohen's d to calculate the non-centrality
-    parameter :math:`\delta` and degrees of freedom :math:`v`.
+    parameter :math:`\\delta` and degrees of freedom :math:`v`.
     In case of two independent groups with unequal sample sizes, this is:
 
-    .. math:: \delta = d * \sqrt{\dfrac{n_i * n_j}{n_i + n_j}}
+    .. math:: \\delta = d * \\sqrt{\\frac{n_i * n_j}{n_i + n_j}}
     .. math:: v = n_i + n_j - 2
 
     where :math:`d` is the Cohen d, :math:`n` the sample size,
@@ -349,7 +349,7 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
     Parameters
     ----------
     eta : float
-        ANOVA effect size (eta-square == :math:`\eta^2`).
+        ANOVA effect size (eta-square == :math:`\\eta^2`).
     k : int
         Number of groups
     n : int
@@ -386,20 +386,19 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
     the following formula:
 
     .. math::
-        \eta^2 = \dfrac{F^* * \mathtt{df_1}}{F^* * \mathtt{df_1} +
-        \mathtt{df_2}}
+        \\eta^2 = \\frac{v_1 F^*}{v_1 F^* + v_2}
 
-    Using :math:`\eta^2` and the total sample size :math:`N`, the
+    Using :math:`\\eta^2` and the total sample size :math:`N`, the
     non-centrality parameter is defined by:
 
-    .. math:: \delta = N * \dfrac{\eta^2}{1 - \eta^2}
+    .. math:: \\delta = N * \\frac{\\eta^2}{1 - \\eta^2}
 
     Then the critical value of the non-central F-distribution is computed using
     the percentile point function of the F-distribution with:
 
     .. math:: q = 1 - alpha
-    .. math:: \mathtt{df_1} = k - 1
-    .. math:: \mathtt{df_2} = N - k
+    .. math:: v_1 = k - 1
+    .. math:: v_2 = N - k
 
     where :math:`k` is the number of groups.
 

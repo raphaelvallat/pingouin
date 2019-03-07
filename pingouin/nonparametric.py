@@ -531,7 +531,7 @@ def cochran(dv=None, within=None, subject=None, data=None,
 
     The Q statistics is defined as:
 
-    .. math:: Q = \dfrac{(r-1)(r\sum_j^rx_j^2-N^2)}{rN-\sum_i^nx_i^2}
+    .. math:: Q = \\frac{(r-1)(r\\sum_j^rx_j^2-N^2)}{rN-\\sum_i^nx_i^2}
 
     where :math:`N` is the total sum of all observations, :math:`j=1,...,r`
     where :math:`r` is the number of repeated measures, :math:`i=1,...,n` where
@@ -540,7 +540,7 @@ def cochran(dv=None, within=None, subject=None, data=None,
     The p-value is then approximated using a chi-square distribution with
     :math:`r-1` degrees of freedom:
 
-    .. math:: Q \sim \chi^2(r-1)
+    .. math:: Q \\sim \\chi^2(r-1)
 
     References
     ----------

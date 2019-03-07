@@ -23,11 +23,11 @@ def gzscore(x):
     z-scores when the sample data come from a log-normally distributed
     population.
 
-    Given the raw scores :math:`x`, the geometric mean :math:`\mu_g` and
-    the geometric standard deviation :math:`\sigma_g`,
+    Given the raw scores :math:`x`, the geometric mean :math:`\\mu_g` and
+    the geometric standard deviation :math:`\\sigma_g`,
     the standard score is given by the formula:
 
-    .. math:: z = \dfrac{log(x) - log(\mu_g)}{log(\sigma_g)}
+    .. math:: z = \\frac{log(x) - log(\\mu_g)}{log(\\sigma_g)}
 
     References
     ----------
@@ -86,15 +86,15 @@ def normality(*args, alpha=.05):
 
     .. math::
 
-        W = \dfrac{(\sum_{i=1}^n a_i x_{i})^2}
-        {\sum_{i=1}^n (x_i - \overline{x})^2}
+        W = \\frac{(\\sum_{i=1}^n a_i x_{i})^2}
+        {\\sum_{i=1}^n (x_i - \\overline{x})^2}
 
     where the :math:`x_i` are the ordered sample values (in ascending
     order) and the :math:`a_i` are constants generated from the means,
     variances and covariances of the order statistics of a sample of size
     :math:`n` from a standard normal distribution. Specifically:
 
-    .. math:: (a_1, ..., a_n) = \dfrac{m^TV^{-1}}{(m^TV^{-1}V^{-1}m)^{1/2}}
+    .. math:: (a_1, ..., a_n) = \\frac{m^TV^{-1}}{(m^TV^{-1}V^{-1}m)^{1/2}}
 
     with :math:`m = (m_1, ..., m_n)^T` and :math:`(m_1, ..., m_n)` are the
     expected values of the order statistics of independent and identically
@@ -313,8 +313,8 @@ def homoscedasticity(*args, alpha=.05):
 
     .. math::
 
-        T = \dfrac{(N-k) \ln{s^{2}_{p}} - \sum_{i=1}^{k}(N_{i} - 1)
-        \ln{s^{2}_{i}}}{1 + (1/(3(k-1)))((\sum_{i=1}^{k}{1/(N_{i} - 1))}
+        T = \\frac{(N-k) \\ln{s^{2}_{p}} - \\sum_{i=1}^{k}(N_{i} - 1)
+        \\ln{s^{2}_{i}}}{1 + (1/(3(k-1)))((\\sum_{i=1}^{k}{1/(N_{i} - 1))}
         - 1/(N-k))}
 
     where :math:`s_i^2` is the variance of the :math:`i^{th}` group,
@@ -325,27 +325,27 @@ def homoscedasticity(*args, alpha=.05):
     The pooled variance is a weighted average of the group variances and is
     defined as:
 
-    .. math:: s^{2}_{p} = \sum_{i=1}^{k}(N_{i} - 1)s^{2}_{i}/(N-k)
+    .. math:: s^{2}_{p} = \\sum_{i=1}^{k}(N_{i} - 1)s^{2}_{i}/(N-k)
 
     The p-value is then computed using a chi-square distribution:
 
-    .. math:: T \sim \chi^2(k-1)
+    .. math:: T \\sim \\chi^2(k-1)
 
     The **Levene** :math:`W` statistic is defined as:
 
     .. math::
 
-        W = \dfrac{(N-k)} {(k-1)}
-        \dfrac{\sum_{i=1}^{k}N_{i}(\overline{Z}_{i.}-\overline{Z})^{2} }
-        {\sum_{i=1}^{k}\sum_{j=1}^{N_i}(Z_{ij}-\overline{Z}_{i.})^{2} }
+        W = \\frac{(N-k)} {(k-1)}
+        \\frac{\\sum_{i=1}^{k}N_{i}(\\overline{Z}_{i.}-\\overline{Z})^{2} }
+        {\\sum_{i=1}^{k}\\sum_{j=1}^{N_i}(Z_{ij}-\\overline{Z}_{i.})^{2} }
 
     where :math:`Z_{ij} = |Y_{ij} - median({Y}_{i.})|`,
-    :math:`\overline{Z}_{i.}` are the group means of :math:`Z_{ij}` and
-    :math:`\overline{Z}` is the grand mean of :math:`Z_{ij}`.
+    :math:`\\overline{Z}_{i.}` are the group means of :math:`Z_{ij}` and
+    :math:`\\overline{Z}` is the grand mean of :math:`Z_{ij}`.
 
     The p-value is then computed using a F-distribution:
 
-    .. math:: W \sim F(k-1, N-k)
+    .. math:: W \\sim F(k-1, N-k)
 
     References
     ----------
@@ -462,7 +462,7 @@ def epsilon(data, correction='gg'):
 
     The **lower bound** for epsilon is:
 
-    .. math:: lb = \dfrac{1}{k - 1}
+    .. math:: lb = \\frac{1}{k - 1}
 
     where :math:`k` is the number of groups (= data.shape[1]).
 
@@ -470,20 +470,20 @@ def epsilon(data, correction='gg'):
 
     .. math::
 
-        \epsilon_{GG} = \dfrac{k^2(\overline{diag(S)} - \overline{S})^2}
-        {(k-1)(\sum_{i=1}^{k}\sum_{j=1}^{k}s_{ij}^2 - 2k\sum_{j=1}^{k}
-        \overline{s_i}^2 + k^2\overline{S}^2)}
+        \\epsilon_{GG} = \\frac{k^2(\\overline{diag(S)} - \\overline{S})^2}
+        {(k-1)(\\sum_{i=1}^{k}\\sum_{j=1}^{k}s_{ij}^2 - 2k\\sum_{j=1}^{k}
+        \\overline{s_i}^2 + k^2\\overline{S}^2)}
 
-    where :math:`S` is the covariance matrix, :math:`\overline{S}` the
-    grandmean of S and :math:`\overline{diag(S)}` the mean of all the elements
+    where :math:`S` is the covariance matrix, :math:`\\overline{S}` the
+    grandmean of S and :math:`\\overline{diag(S)}` the mean of all the elements
     on the diagonal of S (i.e. mean of the variances).
 
     The **Huynh-Feldt epsilon** is given by:
 
     .. math::
 
-        \epsilon_{HF} = \dfrac{n(k-1)\epsilon_{GG}-2}{(k-1)
-        (n-1-(k-1)\epsilon_{GG})}
+        \\epsilon_{HF} = \\frac{n(k-1)\\epsilon_{GG}-2}{(k-1)
+        (n-1-(k-1)\\epsilon_{GG})}
 
     where :math:`n` is the number of subjects.
 
@@ -581,34 +581,34 @@ def sphericity(data, method='mauchly', alpha=.05):
 
     .. math::
 
-        W = \dfrac{\prod_{j=1}^{r-1} \lambda_j}{(\dfrac{1}{r-1}
-        \cdot \sum_{j=1}^{^{r-1}} \lambda_j)^{r-1}}
+        W = \\frac{\prod_{j=1}^{r-1} \\lambda_j}{(\\frac{1}{r-1}
+        \\cdot \\sum_{j=1}^{^{r-1}} \\lambda_j)^{r-1}}
 
-    where :math:`\lambda_j` are the eigenvalues of the population
+    where :math:`\\lambda_j` are the eigenvalues of the population
     covariance matrix (= double-centered sample covariance matrix) and
     :math:`r` is the number of conditions.
 
     From then, the :math:`W` statistic is transformed into a chi-square
     score using the number of observations per condition :math:`n`
 
-    .. math:: f = \dfrac{2(r-1)^2+r+1}{6(r-1)(n-1)}
-    .. math:: \chi_w^2 = (f-1)(n-1) log(W)
+    .. math:: f = \\frac{2(r-1)^2+r+1}{6(r-1)(n-1)}
+    .. math:: \\chi_w^2 = (f-1)(n-1) log(W)
 
     The p-value is then approximated using a chi-square distribution:
 
-    .. math:: \chi_w^2 \sim \chi^2(\dfrac{r(r-1)}{2}-1)
+    .. math:: \\chi_w^2 \\sim \\chi^2(\\frac{r(r-1)}{2}-1)
 
     The **JNS** :math:`V` statistic is defined by:
 
     .. math::
 
-        V = \dfrac{(\sum_j^{r-1} \lambda_j)^2}{\sum_j^{r-1} \lambda_j^2}
+        V = \\frac{(\\sum_j^{r-1} \\lambda_j)^2}{\\sum_j^{r-1} \\lambda_j^2}
 
-    .. math:: \chi_v^2 = \dfrac{n}{2}  (r-1)^2 (V - \dfrac{1}{r-1})
+    .. math:: \\chi_v^2 = \\frac{n}{2}  (r-1)^2 (V - \\frac{1}{r-1})
 
     and the p-value approximated using a chi-square distribution
 
-    .. math:: \chi_v^2 \sim \chi^2(\dfrac{r(r-1)}{2}-1)
+    .. math:: \\chi_v^2 \\sim \\chi^2(\\frac{r(r-1)}{2}-1)
 
 
     References

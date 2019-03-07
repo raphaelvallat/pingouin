@@ -54,11 +54,11 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     The standard error of the estimates is a measure of the accuracy of the
     prediction defined as:
 
-    .. math:: se = \sqrt{MSE \cdot (X^TX)^{-1}}
+    .. math:: se = \\sqrt{MSE \\cdot (X^TX)^{-1}}
 
     where :math:`MSE` is the mean squared error,
 
-    .. math:: MSE = \dfrac{\sum{(true - pred)^2}}{n - p - 1}
+    .. math:: MSE = \\frac{\\sum{(true - pred)^2}}{n - p - 1}
 
     :math:`p` is the total number of explanatory variables in the model
     (excluding the intercept) and :math:`n` is the sample size.
@@ -66,18 +66,18 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     Using the coefficients and the standard errors, the T-values can be
     obtained:
 
-    .. math:: T = \dfrac{coef}{se}
+    .. math:: T = \\frac{coef}{se}
 
     and the p-values can then be approximated using a T-distribution
     with :math:`n - p - 1` degrees of freedom.
 
     The coefficient of determination (:math:`R^2`) is defined as:
 
-    .. math:: R^2 = 1 - (\dfrac{SS_{resid}}{SS_{total}})
+    .. math:: R^2 = 1 - (\\frac{SS_{resid}}{SS_{total}})
 
     The adjusted :math:`R^2` is defined as:
 
-    .. math:: \overline{R}^2 = 1 - (1 - R^2) \dfrac{n - 1}{n - p - 1}
+    .. math:: \\overline{R}^2 = 1 - (1 - R^2) \\frac{n - 1}{n - p - 1}
 
     Results have been compared against sklearn, statsmodels and JASP.
 

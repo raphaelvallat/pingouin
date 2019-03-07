@@ -49,9 +49,9 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
 
     .. math::
 
-        BF_{10} = \dfrac{\int_{0}^{\infty}(1 + Ngr^2)^{-1/2}
-        (1 + \dfrac{t^2}{v(1 + Ngr^2)})^{-(v+1) / 2}(2\pi)^{-1/2}g^
-        {-3/2}e^{-1/2g}}{(1 + \dfrac{t^2}{v})^{-(v+1) / 2}}
+        BF_{10} = \\frac{\\int_{0}^{\\infty}(1 + Ngr^2)^{-1/2}
+        (1 + \\frac{t^2}{v(1 + Ngr^2)})^{-(v+1) / 2}(2\\pi)^{-1/2}g^
+        {-3/2}e^{-1/2g}}{(1 + \\frac{t^2}{v})^{-(v+1) / 2}}
 
     where **t** is the T-value, **v** the degrees of freedom, **N** the
     sample size and **r** the Cauchy scale factor (i.e. prior on effect size).
@@ -143,7 +143,8 @@ def bayesfactor_pearson(r, n):
 
     .. math::
 
-        BF_{10} = \dfrac{\sqrt{n/2}}{\gamma(1/2)}*\int_{0}^{\infty}e((n-2)/2)*
+        BF_{10} = \\frac{\\sqrt{n/2}}{\\gamma(1/2)}*
+        \\int_{0}^{\\infty}e((n-2)/2)*
         log(1+g)+(-(n-1)/2)log(1+(1-r^2)*g)+(-3/2)log(g)-n/2g
 
     where **n** is the sample size and **r** is the Pearson correlation

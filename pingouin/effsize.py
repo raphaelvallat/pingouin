@@ -41,18 +41,18 @@ def compute_esci(stat=None, nx=None, ny=None, eftype='cohen', confidence=.95,
     **Pearson r correlation** coefficient, one must first apply a
     Fisher's r-to-z transformation:
 
-    .. math:: z = 0.5 \cdot \ln \dfrac{1 + r}{1 - r} = \mathtt{arctanh}(r)
+    .. math:: z = 0.5 \\cdot \\ln \\frac{1 + r}{1 - r} = \\text{arctanh}(r)
 
     and compute the standard deviation:
 
-    .. math:: se = \dfrac{1}{\sqrt{n - 3}}
+    .. math:: se = \\frac{1}{\\sqrt{n - 3}}
 
     where :math:`n` is the sample size.
 
     The lower and upper confidence intervals - *in z-space* - are then
     given by:
 
-    .. math:: ci_z = z \pm crit \cdot se
+    .. math:: ci_z = z \\pm crit \\cdot se
 
     where :math:`crit` is the critical value of the nomal distribution
     corresponding to the desired confidence level (e.g. 1.96 in case of a 95%
@@ -62,8 +62,8 @@ def compute_esci(stat=None, nx=None, ny=None, eftype='cohen', confidence=.95,
 
     .. math::
 
-        ci_r = \dfrac{\exp(2 \cdot ci_z) - 1}{\exp(2 \cdot ci_z) + 1} =
-        \mathtt{tanh}(ci_z)
+        ci_r = \\frac{\\exp(2 \\cdot ci_z) - 1}{\\exp(2 \\cdot ci_z) + 1} =
+        \\text{tanh}(ci_z)
 
     A formula for calculating the confidence interval for a
     **Cohen d effect size** is given by Hedges and Olkin (1985, p86).
@@ -72,14 +72,14 @@ def compute_esci(stat=None, nx=None, ny=None, eftype='cohen', confidence=.95,
 
     .. math::
 
-        se = \sqrt{\dfrac{n_x + n_y}{n_x \cdot n_y} +
-        \dfrac{d^2}{2 (n_x + n_y)}}
+        se = \\sqrt{\\frac{n_x + n_y}{n_x \\cdot n_y} +
+        \\frac{d^2}{2 (n_x + n_y)}}
 
     where :math:`n_x` and :math:`n_y` are the sample sizes of the two groups.
 
     The lower and upper confidence intervals are then given by:
 
-    .. math:: ci_d = d \pm crit \cdot se
+    .. math:: ci_d = d \\pm crit \\cdot se
 
     where :math:`crit` is the critical value of the nomal distribution
     corresponding to the desired confidence level (e.g. 1.96 in case of a 95%
@@ -402,26 +402,26 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     -----
     The formula to convert **r** to **d** is given in ref [1]:
 
-    .. math:: d = \dfrac{2r}{\sqrt{1 - r^2}}
+    .. math:: d = \\frac{2r}{\\sqrt{1 - r^2}}
 
     The formula to convert **d** to **r** is given in ref [2]:
 
     .. math::
 
-        r = \dfrac{d}{\sqrt{d^2 + \dfrac{(n_x + n_y)^2 - 2(n_x + n_y)}
+        r = \\frac{d}{\\sqrt{d^2 + \\frac{(n_x + n_y)^2 - 2(n_x + n_y)}
         {n_xn_y}}}
 
-    The formula to convert **d** to :math:`\eta^2` is given in ref [3]:
+    The formula to convert **d** to :math:`\\eta^2` is given in ref [3]:
 
-    .. math:: \eta^2 = \dfrac{(0.5 * d)^2}{1 + (0.5 * d)^2}
+    .. math:: \\eta^2 = \\frac{(0.5 * d)^2}{1 + (0.5 * d)^2}
 
     The formula to convert **d** to an odds-ratio is given in ref [4]:
 
-    .. math:: OR = e(\dfrac{d * \pi}{\sqrt{3}})
+    .. math:: OR = e(\\frac{d * \\pi}{\\sqrt{3}})
 
     The formula to convert **d** to area under the curve is given in ref [5]:
 
-    .. math:: AUC = \mathcal{N}_{cdf}(\dfrac{d}{\sqrt{2}})
+    .. math:: AUC = \\mathcal{N}_{cdf}(\\frac{d}{\\sqrt{2}})
 
     References
     ----------
@@ -570,27 +570,29 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
 
     .. math::
 
-        d = \dfrac{\overline{X} - \overline{Y}}
-        {\sqrt{\dfrac{(n_{1} - 1)\sigma_{1}^{2} + (n_{2} - 1)
-        \sigma_{2}^{2}}{n1 + n2 - 2}}}
+        d = \\frac{\\overline{X} - \\overline{Y}}
+        {\\sqrt{\\frac{(n_{1} - 1)\\sigma_{1}^{2} + (n_{2} - 1)
+        \\sigma_{2}^{2}}{n1 + n2 - 2}}}
 
     If ``x`` and ``y`` are paired, the Cohen d-avg is computed:
 
     .. math::
 
-        d_{avg} = \dfrac{\overline{X} - \overline{Y}}
-        {0.5 * (\sigma_1 + \sigma_2)}
+        d_{avg} = \\frac{\\overline{X} - \\overline{Y}}
+        {0.5 * (\\sigma_1 + \\sigma_2)}
 
     The Cohen’s d is a biased estimate of the population effect size,
     especially for small samples (n < 20). It is often preferable
     to use the corrected effect size, or Hedges’g, instead:
 
-    .. math:: g = d * (1 - \dfrac{3}{4(n_1 + n_2) - 9})
+    .. math:: g = d * (1 - \\frac{3}{4(n_1 + n_2) - 9})
 
-    If eftype = 'glass', the Glass :math:`\Delta` is reported, using the
+    If eftype = 'glass', the Glass :math:`\\delta` is reported, using the
     group with the lowest variance as the control group:
 
-    .. math:: \Delta = \dfrac{\overline{X} - \overline{Y}}{\sigma_{control}}
+    .. math::
+
+        \\delta = \\frac{\\overline{X} - \\overline{Y}}{\\sigma_{control}}
 
     References
     ----------
@@ -723,11 +725,11 @@ def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype='cohen'):
 
     If both nx and ny are specified, the formula to convert from *t* to *d* is:
 
-    .. math:: d = t * \sqrt{\dfrac{1}{n_x} + \dfrac{1}{n_y}}
+    .. math:: d = t * \\sqrt{\\frac{1}{n_x} + \\frac{1}{n_y}}
 
     If only N (total sample size) is specified, the formula is:
 
-    .. math:: d = \dfrac{2t}{\sqrt{N}}
+    .. math:: d = \\frac{2t}{\\sqrt{N}}
 
     Examples
     --------

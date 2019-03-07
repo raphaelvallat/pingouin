@@ -35,7 +35,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         Smaller values of r (e.g. 0.5), may be appropriate when small effect
         sizes are expected a priori; larger values of r are appropriate when
         large effect sizes are expected (Rouder et al 2009).
-        The default is 0.707 (= :math:`\sqrt{2} / 2`).
+        The default is 0.707 (= :math:`\\sqrt{2} / 2`).
 
     Returns
     -------
@@ -66,10 +66,10 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     .. math::
 
-        t = \dfrac{\overline{x} - \overline{y}}
-        {\sqrt{\dfrac{s^{2}_{x}}{n_{x}} + \dfrac{s^{2}_{y}}{n_{y}}}}
+        t = \\frac{\\overline{x} - \\overline{y}}
+        {\\sqrt{\\frac{s^{2}_{x}}{n_{x}} + \\frac{s^{2}_{y}}{n_{y}}}}
 
-    where :math:`\overline{x}` and :math:`\overline{y}` are the sample means,
+    where :math:`\\overline{x}` and :math:`\\overline{y}` are the sample means,
     :math:`n_{x}` and :math:`n_{y}` are the sample sizes, and
     :math:`s^{2}_{x}` and :math:`s^{2}_{y}` are the sample variances.
     The degrees of freedom :math:`v` are :math:`n_x + n_y - 2` when the sample
@@ -79,25 +79,25 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     .. math::
 
-        v = \dfrac{(\dfrac{s^{2}_{x}}{n_{x}} + \dfrac{s^{2}_{y}}{n_{y}})^{2}}
-        {\dfrac{(\dfrac{s^{2}_{x}}{n_{x}})^{2}}{(n_{x}-1)} +
-        \dfrac{(\dfrac{s^{2}_{y}}{n_{y}})^{2}}{(n_{y}-1)}}
+        v = \\frac{(\\frac{s^{2}_{x}}{n_{x}} + \\frac{s^{2}_{y}}{n_{y}})^{2}}
+        {\\frac{(\\frac{s^{2}_{x}}{n_{x}})^{2}}{(n_{x}-1)} +
+        \\frac{(\\frac{s^{2}_{y}}{n_{y}})^{2}}{(n_{y}-1)}}
 
     The p-value is then calculated using a T distribution with :math:`v`
     degrees of freedom.
 
     The T-value for **paired samples** is defined by:
 
-    .. math:: t = \dfrac{\overline{x}_d}{s_{\overline{x}}}
+    .. math:: t = \\frac{\\overline{x}_d}{s_{\\overline{x}}}
 
     where
 
-    .. math:: s_{\overline{x}} = \dfrac{s_d}{\sqrt n}
+    .. math:: s_{\\overline{x}} = \\frac{s_d}{\\sqrt n}
 
-    where :math:`\overline{x}_d` is the sample mean of the differences
+    where :math:`\\overline{x}_d` is the sample mean of the differences
     between the two paired samples, :math:`n` is the number of observations
     (sample size), :math:`s_d` is the sample standard deviation of the
-    differences and :math:`s_{\overline{x}}` is the estimated standard error
+    differences and :math:`s_{\\overline{x}}` is the estimated standard error
     of the mean of the differences.
 
     The p-value is then calculated using a T-distribution with :math:`n-1`
@@ -336,23 +336,23 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
 
     with
 
-    .. math:: SS_{total} = \sum_i^r \sum_j^n (Y_{ij} - \overline{Y})^2
-    .. math:: SS_{treatment} = \sum_i^r n_i (\overline{Y_i} - \overline{Y})^2
-    .. math:: SS_{subjects} = r\sum (\overline{Y}_s - \overline{Y})^2
+    .. math:: SS_{total} = \\sum_i^r \\sum_j^n (Y_{ij} - \\overline{Y})^2
+    .. math:: SS_{treatment} = \\sum_i^r n_i(\\overline{Y_i} - \\overline{Y})^2
+    .. math:: SS_{subjects} = r\\sum (\\overline{Y}_s - \\overline{Y})^2
     .. math:: SS_{error} = SS_{total} - SS_{treatment} - SS_{subjects}
 
     where :math:`i=1,...,r; j=1,...,n_i`, :math:`r` is the number of
     conditions, :math:`n_i` the number of observations for each condition,
-    :math:`\overline{Y}` the grand mean of the data, :math:`\overline{Y_i}`
-    the mean of the :math:`i^{th}` condition and :math:`\overline{Y}_{subj}`
+    :math:`\\overline{Y}` the grand mean of the data, :math:`\\overline{Y_i}`
+    the mean of the :math:`i^{th}` condition and :math:`\\overline{Y}_{subj}`
     the mean of the :math:`s^{th}` subject.
 
     The F-statistics is then defined as:
 
     .. math::
 
-        F^* = \dfrac{MS_{treatment}}{MS_{error}}\dfrac{\dfrac{SS_{treatment}}
-        {r-1}}{\dfrac{SS_{error}}{(n - 1)(r - 1)}}
+        F^* = \\frac{MS_{treatment}}{MS_{error}}\\frac{\\frac{SS_{treatment}}
+        {r-1}}{\\frac{SS_{error}}{(n - 1)(r - 1)}}
 
     and the p-value can be calculated using a F-distribution with
     :math:`v_{treatment} = r - 1` and
@@ -363,7 +363,7 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     partial eta-square is the same as eta-square
     (Bakeman 2005; Richardson 2011):
 
-    .. math:: \eta_p^2 = \dfrac{SS_{treatment}}{SS_{treatment} + SS_{error}}
+    .. math:: \\eta_p^2 = \\frac{SS_{treatment}}{SS_{treatment} + SS_{error}}
 
     Results have been tested against R and JASP. Note however that if the
     dataset contains one or more other within subject factors, an automatic
@@ -749,9 +749,9 @@ def anova(dv=None, between=None, data=None, detailed=False,
     into several components. For example, in one-way ANOVA:
 
     .. math:: SS_{total} = SS_{treatment} + SS_{error}
-    .. math:: SS_{total} = \sum_i \sum_j (Y_{ij} - \overline{Y})^2
-    .. math:: SS_{treatment} = \sum_i n_i (\overline{Y_i} - \overline{Y})^2
-    .. math:: SS_{error} = \sum_i \sum_j (Y_{ij} - \overline{Y}_i)^2
+    .. math:: SS_{total} = \\sum_i \\sum_j (Y_{ij} - \\overline{Y})^2
+    .. math:: SS_{treatment} = \\sum_i n_i (\\overline{Y_i} - \\overline{Y})^2
+    .. math:: SS_{error} = \\sum_i \\sum_j (Y_{ij} - \\overline{Y}_i)^2
 
     where :math:`i=1,...,r; j=1,...,n_i`, :math:`r` is the number of groups,
     and :math:`n_i` the number of observations for the :math:`i` th group.
@@ -760,7 +760,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
     .. math::
 
-        F^* = \dfrac{MS_{treatment}}{MS_{error}} = \dfrac{SS_{treatment}
+        F^* = \\frac{MS_{treatment}}{MS_{error}} = \\frac{SS_{treatment}
         / (r - 1)}{SS_{error} / (n_t - r)}
 
     and the p-value can be calculated using a F-distribution with
@@ -775,7 +775,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
     partial eta-square is the same as eta-square and generalized eta-square.
     For more details, see Bakeman 2005; Richardson 2011.
 
-    .. math:: \eta_p^2 = \dfrac{SS_{treatment}}{SS_{treatment} + SS_{error}}
+    .. math:: \\eta_p^2 = \\frac{SS_{treatment}}{SS_{treatment} + SS_{error}}
 
     Results have been tested against R, Matlab and JASP.
 
@@ -1061,40 +1061,40 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
     size :math:`n_i` and variance :math:`s_i^2` of each group
     :math:`i=1,...,r`:
 
-    .. math:: w_i = \dfrac{n_i}{s_i^2}
+    .. math:: w_i = \\frac{n_i}{s_i^2}
 
     Using these weights, the adjusted grand mean of the data is:
 
     .. math::
 
-        \overline{Y}_{welch} = \dfrac{\sum_{i=1}^r w_i\overline{Y}_i}
-        {\sum w}
+        \\overline{Y}_{welch} = \\frac{\\sum_{i=1}^r w_i\\overline{Y}_i}
+        {\\sum w}
 
-    where :math:`\overline{Y}_i` is the mean of the :math:`i` group.
+    where :math:`\\overline{Y}_i` is the mean of the :math:`i` group.
 
     The treatment sums of squares is defined as:
 
     .. math::
 
-        SS_{treatment} = \sum_{i=1}^r w_i
-        (\overline{Y}_i - \overline{Y}_{welch})^2
+        SS_{treatment} = \\sum_{i=1}^r w_i
+        (\\overline{Y}_i - \\overline{Y}_{welch})^2
 
     We then need to calculate a term lambda:
 
     .. math::
 
-        \Lambda = \dfrac{3\sum_{i=1}^r(\dfrac{1}{n_i-1})
-        (1 - \dfrac{w_i}{\sum w})^2}{r^2 - 1}
+        \\Lambda = \\frac{3\\sum_{i=1}^r(\\frac{1}{n_i-1})
+        (1 - \\frac{w_i}{\\sum w})^2}{r^2 - 1}
 
     from which the F-value can be calculated:
 
     .. math::
 
-        F_{welch} = \dfrac{SS_{treatment} / (r-1)}
-        {1 + \dfrac{2\Lambda(r-2)}{3}}
+        F_{welch} = \\frac{SS_{treatment} / (r-1)}
+        {1 + \\frac{2\\Lambda(r-2)}{3}}
 
     and the p-value approximated using a F-distribution with
-    :math:`(r-1, 1 / \Lambda)` degrees of freedom.
+    :math:`(r-1, 1 / \\Lambda)` degrees of freedom.
 
     When the groups are balanced and have equal variances, the optimal post-hoc
     test is the Tukey-HSD test (`pairwise_tukey`). If the groups have unequal
