@@ -588,9 +588,9 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
                              data=data[[a, b, subject, dv]])
 
     # Group sizes and grandmean
-    n_a = data[a].unique().size
-    n_b = data[b].unique().size
-    n_s = data[subject].unique().size
+    n_a = data[a].nunique()
+    n_b = data[b].nunique()
+    n_s = data[subject].nunique()
     mu = data[dv].mean()
 
     # Groupby means
@@ -962,9 +962,9 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
     # Degrees of freedom
     df_fac1 = aov_fac1.loc[0, 'DF']
     df_fac2 = aov_fac2.loc[0, 'DF']
-    df_inter = (data[fac1].unique().size - 1) * (data[fac2].unique().size - 1)
-    df_resid = data[dv].size - (data[fac1].unique().size
-                                * data[fac2].unique().size)
+    df_inter = (data[fac1].nunique() - 1) * (data[fac2].nunique() - 1)
+    df_resid = data[dv].size - (data[fac1].nunique()
+                                * data[fac2].nunique())
 
     # Mean squares
     ms_fac1 = aov_fac1.loc[0, 'MS']
@@ -1131,7 +1131,7 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
     data = data.reset_index(drop=True)
 
     # Number of groups
-    r = data[between].unique().size
+    r = data[between].nunique()
     ddof1 = r - 1
 
     # Compute weights and ajusted means

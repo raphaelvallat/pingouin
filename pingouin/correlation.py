@@ -726,12 +726,12 @@ def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
     if data[scores].dtype.kind not in 'fi':
         raise ValueError('Scores must be numeric.')
     # Check that data are fully balanced
-    if data.groupby(raters)[scores].count().unique().size > 1:
+    if data.groupby(raters)[scores].count().nunique() > 1:
         raise ValueError('Data must be balanced.')
 
     # Extract sizes
-    k = data[raters].unique().size
-    # n = data[groups].unique().size
+    k = data[raters].nunique()
+    # n = data[groups].nunique()
 
     # ANOVA and ICC
     aov = anova(dv=scores, data=data, between=groups, detailed=True)

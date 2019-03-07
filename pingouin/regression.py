@@ -506,7 +506,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     indirect = {}
 
     # Check if mediator is binary
-    mtype = 'logistic' if data[m].unique().size == 2 else 'linear'
+    mtype = 'logistic' if data[m].nunique() == 2 else 'linear'
 
     # Bootstrap
     for i in range(n_boot):

@@ -47,7 +47,7 @@ class TestUtils(TestCase):
                            'Ss': [0, 1, 0, 1]})
         _remove_rm_na(dv='Values', within='Time', data=df)
         df = _remove_rm_na(dv='Values', within='Time', subject='Ss', data=df)
-        assert df['Ss'].unique().size == 1
+        assert df['Ss'].nunique() == 1
 
     def test_check_eftype(self):
         """Test function _check_eftype."""

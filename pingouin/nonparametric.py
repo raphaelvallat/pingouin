@@ -572,7 +572,7 @@ def cochran(dv=None, within=None, subject=None, data=None,
     # Groupby and extract size
     grp = data.groupby(within)[dv]
     grp_s = data.groupby(subject)[dv]
-    k = data[within].unique().size
+    k = data[within].nunique()
     dof = k - 1
     # n = grp.count().unique()[0]
 

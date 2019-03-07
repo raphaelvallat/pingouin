@@ -656,7 +656,7 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
     data = data.reset_index(drop=True)
 
     # Extract infos
-    ng = data[between].unique().size
+    ng = data[between].nunique()
     grp = data.groupby(between)[dv]
     n = grp.count().values
     gmeans = grp.mean().values
@@ -875,7 +875,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     for comb in combs:
         col1, col2 = comb
         # Avoid errors when one of the two columns has only one unique value
-        if data[col1].unique().size == 1 or data[col2].unique().size == 1:
+        if data[col1].nunique() == 1 or data[col2].nunique() == 1:
             continue
         cor_st = corr(data[col1].values,
                       data[col2].values,
