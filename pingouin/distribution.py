@@ -581,7 +581,7 @@ def sphericity(data, method='mauchly', alpha=.05):
 
     .. math::
 
-        W = \\frac{\prod_{j=1}^{r-1} \\lambda_j}{(\\frac{1}{r-1}
+        W = \\frac{\\prod_{j=1}^{r-1} \\lambda_j}{(\\frac{1}{r-1}
         \\cdot \\sum_{j=1}^{^{r-1}} \\lambda_j)^{r-1}}
 
     where :math:`\\lambda_j` are the eigenvalues of the population
