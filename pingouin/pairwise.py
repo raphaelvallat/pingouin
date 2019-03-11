@@ -823,9 +823,6 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     data = data._get_numeric_data()
     keys = data.keys().tolist()
 
-    # Initialize empty DataFrame
-    stats = pd.DataFrame()
-
     # First ensure that columns is a list
     if isinstance(columns, str):
         columns = [columns]
@@ -866,37 +863,50 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
                     # combinations between ['a', 'b', 'c']
                     combs = list(combinations(columns, 2))
 
-    # Assert that all columns do exist in DataFrame
-    # If you see this error, check for column name errors in `columns=[]`
-    for comb in combs:
-        assert comb[0] in keys, 'Column %s is not in dataframe' % comb[0]
-        assert comb[1] in keys, 'Column %s is not in dataframe' % comb[1]
+    # Assert that all columns exist in DataFrame
+    combs = np.array(combs)
+    cols = data[np.unique(combs)]
+    cols_keys = cols.keys().values
+    cols_unique = cols.nunique()
 
-    # Initialize vectors
-    for comb in combs:
-        col1, col2 = comb
-        # Avoid errors when one of the two columns has only one unique value
-        if data[col1].nunique() == 1 or data[col2].nunique() == 1:
-            continue
-        cor_st = corr(data[col1].values,
-                      data[col2].values,
-                      tail=tail, method=method).reset_index(drop=True)
-        stats = stats.append({
-            'X': col1,
-            'Y': col2,
-            'method': method,
-            'tail': tail,
-            'n': cor_st['n'][0],
-            'r': cor_st['r'][0],
-            'CI95%': cor_st['CI95%'][0],
-            'r2': cor_st['r2'][0],
-            'adj_r2': cor_st['adj_r2'][0],
-            'p-unc': cor_st['p-val'][0],
-            'BF10': cor_st['BF10'][0] if 'BF10' in cor_st.keys() else np.nan,
-            'power': cor_st['power'][0]},
-            ignore_index=True)
+    # Check if the columns are in the dataframe
+    cols_exist = np.in1d(cols_keys, keys, assume_unique=True)
+    if any(~cols_exist):
+        raise ValueError('Column(s) are not in dataframe:',
+                         cols_keys[~cols_exist].tolist())
+
+    # Remove columns with unique values
+    combs_unique = np.isin(combs, cols_unique[cols_unique == 1].index.tolist())
+    combs = combs[~combs_unique.any(axis=1)]
+
+    # Initialize empty dataframe
+    stats = pd.DataFrame({'X': combs[:, 0],
+                          'Y': combs[:, 1],
+                          'method': method,
+                          'tail': tail},
+                         index=range(len(combs)),
+                         columns=['X', 'Y', 'method', 'tail', 'n', 'r',
+                                  'CI95%', 'r2', 'adj_r2', 'p-val', 'BF10',
+                                  'power'])
+
+    # Compute pairwise correlations and fill dataframe
+    dvs = ['n', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'power']
+    dvs_bf10 = dvs + ['BF10']
+    for i, (col1, col2) in enumerate(combs):
+        cor_st = corr(data[col1].values, data[col2].values, tail=tail,
+                      method=method)
+        if 'BF10' in cor_st.keys():
+            stats.loc[i, dvs_bf10] = cor_st[dvs_bf10].values
+        else:
+            stats.loc[i, dvs] = cor_st[dvs].values
+
+    # Force conversion to numeric
+    stats = stats.astype({'r': float, 'r2': float, 'adj_r2': float,
+                          'n': int, 'p-val': float, 'BF10': float,
+                          'power': float})
 
     # Multiple comparisons
+    stats = stats.rename(columns={'p-val': 'p-unc'})
     padjust = None if stats['p-unc'].size <= 1 else padjust
     if padjust is not None:
         if padjust.lower() != 'none':
@@ -911,14 +921,12 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     stats['z'] = np.arctanh(stats['r'].values)
 
     # Round values
-    for c in ['r', 'r2', 'adj_r2', 'z']:
-        stats[c] = stats[c].round(3)
+    stats = stats.round({'r': 3, 'r2': 3, 'adj_r2': 3, 'z': 3, 'BF10': 3})
 
     col_order = ['X', 'Y', 'method', 'tail', 'n', 'r', 'CI95%', 'r2', 'adj_r2',
                  'z', 'p-unc', 'p-corr', 'p-adjust', 'BF10', 'power']
 
     # Convert n to int
-    stats['n'] = stats['n'].astype(int)
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
     if export_filename is not None:
