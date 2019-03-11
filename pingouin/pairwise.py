@@ -849,6 +849,10 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
             # Column is a simple list
             if len(columns) == 1:
                 # Case B3: one-versus-all, e.g. ['a'] or 'a'
+                # Check that this column exist
+                if columns[0] not in keys:
+                    msg = '"%s" is not in data or is not numeric.' % columns[0]
+                    raise ValueError(msg)
                 others = [e for e in keys if e != columns[0]]
                 combs = list(product(columns, others))
             else:
@@ -863,21 +867,21 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
                     # combinations between ['a', 'b', 'c']
                     combs = list(combinations(columns, 2))
 
-    # Assert that all columns exist in DataFrame
     combs = np.array(combs)
-    cols = data[np.unique(combs)]
-    cols_keys = cols.keys().values
-    cols_unique = cols.nunique()
-
-    # Check if the columns are in the dataframe
-    cols_exist = np.in1d(cols_keys, keys, assume_unique=True)
-    if any(~cols_exist):
-        raise ValueError('Column(s) are not in dataframe:',
-                         cols_keys[~cols_exist].tolist())
+    if len(combs) == 0:
+        raise ValueError("No column combination found. Please make sure that "
+                         "the specified columns exist in the dataframe, are "
+                         "numeric, and contains at least two unique values.")
 
     # Remove columns with unique values
-    combs_unique = np.isin(combs, cols_unique[cols_unique == 1].index.tolist())
+    ckeys = np.unique(combs)  # List of unique labels in combs
+    cnunique = data[ckeys].nunique()  # Number of unique values per column
+    combs_unique = np.isin(combs, cnunique[cnunique == 1].index.tolist())
     combs = combs[~combs_unique.any(axis=1)]
+    if len(combs) == 0:
+        raise ValueError("No column combination found. Please make sure that "
+                         "the specified columns exist in the dataframe, are "
+                         "numeric, and contains at least two unique values.")
 
     # Initialize empty dataframe
     stats = pd.DataFrame({'X': combs[:, 0],
@@ -885,25 +889,29 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
                           'method': method,
                           'tail': tail},
                          index=range(len(combs)),
-                         columns=['X', 'Y', 'method', 'tail', 'n', 'r',
-                                  'CI95%', 'r2', 'adj_r2', 'p-val', 'BF10',
-                                  'power'])
+                         columns=['X', 'Y', 'method', 'tail', 'n', 'outliers',
+                                  'r', 'CI95%', 'r2', 'adj_r2', 'p-val',
+                                  'BF10', 'power'])
 
     # Compute pairwise correlations and fill dataframe
     dvs = ['n', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'power']
+    dvs_out = dvs + ['outliers']
     dvs_bf10 = dvs + ['BF10']
     for i, (col1, col2) in enumerate(combs):
         cor_st = corr(data[col1].values, data[col2].values, tail=tail,
                       method=method)
-        if 'BF10' in cor_st.keys():
+        cor_st_keys = cor_st.keys().tolist()
+        if 'BF10' in cor_st_keys:
             stats.loc[i, dvs_bf10] = cor_st[dvs_bf10].values
+        elif 'outliers' in cor_st_keys:
+            stats.loc[i, dvs_out] = cor_st[dvs_out].values
         else:
             stats.loc[i, dvs] = cor_st[dvs].values
 
     # Force conversion to numeric
     stats = stats.astype({'r': float, 'r2': float, 'adj_r2': float,
                           'n': int, 'p-val': float, 'BF10': float,
-                          'power': float})
+                          'outliers': float, 'power': float})
 
     # Multiple comparisons
     stats = stats.rename(columns={'p-val': 'p-unc'})
@@ -918,17 +926,15 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         stats['p-adjust'] = None
 
     # Standardize correlation coefficients (Fisher z-transformation)
-    stats['z'] = np.arctanh(stats['r'].values)
+    stats['z'] = np.round(np.arctanh(stats['r'].values), 3)
 
-    # Round values
-    stats = stats.round({'r': 3, 'r2': 3, 'adj_r2': 3, 'z': 3, 'BF10': 3})
+    col_order = ['X', 'Y', 'method', 'tail', 'n', 'outliers', 'r', 'CI95%',
+                 'r2', 'adj_r2', 'z', 'p-unc', 'p-corr', 'p-adjust',
+                 'BF10', 'power']
 
-    col_order = ['X', 'Y', 'method', 'tail', 'n', 'r', 'CI95%', 'r2', 'adj_r2',
-                 'z', 'p-unc', 'p-corr', 'p-adjust', 'BF10', 'power']
-
-    # Convert n to int
+    # Reorder columns and remove empty ones
     stats = stats.reindex(columns=col_order)
-    stats.dropna(how='all', axis=1, inplace=True)
+    stats = stats.dropna(how='all', axis=1)
     if export_filename is not None:
         _export_table(stats, export_filename)
     return stats

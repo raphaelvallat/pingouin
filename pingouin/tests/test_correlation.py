@@ -22,7 +22,7 @@ class TestCorrelation(TestCase):
         corr(x, y, method='shepherd', tail='two-sided')
         # Compare with robust corr toolbox
         stats = corr(x, y, method='skipped')
-        assert np.round(stats['r'].values, 3) == 0.512
+        assert stats['r'].values == 0.512
         assert stats['outliers'].values == 2
         stats = corr(x, y, method='shepherd')
         assert stats['outliers'].values == 2
@@ -30,13 +30,15 @@ class TestCorrelation(TestCase):
         assert outliers.size == x.size
         assert stats['n'].values == 30
         stats = corr(x, y, method='percbend')
-        assert np.round(stats['r'].values, 3) == 0.484
+        assert stats['r'].values == 0.484
         # Not normally distributed
         z = np.random.uniform(size=30)
         corr(x, z, method='pearson')
         # With NaN values
         x[3] = np.nan
         corr(x, y)
+        # With the same array
+        assert corr(x, x).loc['pearson', 'BF10'] == np.inf
         # Wrong argument
         with pytest.raises(ValueError):
             corr(x, y, method='error')

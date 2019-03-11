@@ -118,6 +118,8 @@ class TestPairwise(TestCase):
         pairwise_corr(data=data, columns=['Neuroticism', 'Extraversion'])
         with pytest.raises(ValueError):
             pairwise_corr(data=data, tail='wrong')
+        with pytest.raises(ValueError):
+            pairwise_corr(data=data, columns='wrong')
         # Check with non-numeric columns
         data['test'] = 'test'
         pairwise_corr(data=data, method='pearson')
@@ -125,23 +127,29 @@ class TestPairwise(TestCase):
         n = data.shape[0]
         data['Age'] = np.random.randint(18, 65, n)
         data['IQ'] = np.random.normal(105, 1, n)
+        data['One'] = 1
         data['Gender'] = np.repeat(['M', 'F'], int(n / 2))
-        pairwise_corr(data, columns=['Neuroticism', 'Gender'])
+        pairwise_corr(data, columns=['Neuroticism', 'Gender'],
+                      method='shepherd')
         pairwise_corr(data, columns=['Neuroticism', 'Extraversion', 'Gender'])
         pairwise_corr(data, columns=['Neuroticism'])
-        pairwise_corr(data, columns='Neuroticism')
-        pairwise_corr(data, columns=[['Neuroticism']])
-        pairwise_corr(data, columns=[['Neuroticism'], None])
+        pairwise_corr(data, columns='Neuroticism', method='skipped')
+        pairwise_corr(data, columns=[['Neuroticism']], method='spearman')
+        pairwise_corr(data, columns=[['Neuroticism'], None], method='percbend')
         pairwise_corr(data, columns=[['Neuroticism', 'Gender'], ['Age']])
         pairwise_corr(data, columns=[['Neuroticism'], ['Age', 'IQ']])
         pairwise_corr(data, columns=[['Age', 'IQ'], []])
         pairwise_corr(data, columns=['Age', 'Gender', 'IQ', 'Wrong'])
         pairwise_corr(data, columns=['Age', 'Gender', 'Wrong'])
-        # Test with more than 1000 columns (BF10 not computed)
+        # Test with more than 1000 samples (BF10 not computed)
         data1500 = pd.concat([data, data, data], ignore_index=True)
         pcor1500 = pairwise_corr(data1500, method='pearson')
         assert 'BF10' not in pcor1500.keys()
+        # Test with no good combinations
+        with pytest.raises(ValueError):
+            pairwise_corr(data, columns=['Gender', 'Gender'])
         # Test when one column has only one unique value
-        data['One'] = 1
+        with pytest.raises(ValueError):
+            pairwise_corr(data=data, columns=['Age', 'One', 'Gender'])
         stats = pairwise_corr(data, columns=['Neuroticism', 'IQ', 'One'])
         assert stats.shape[0] == 1

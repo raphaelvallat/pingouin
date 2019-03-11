@@ -288,6 +288,11 @@ def corr(x, y, tail='two-sided', method='pearson'):
         'BF10' : Bayes Factor of the alternative hypothesis (Pearson only)
         'power' : achieved power of the test (= 1 - type II error).
 
+    See also
+    --------
+    pairwise_corr : Pairwise correlation between columns of a pandas DataFrame
+    partial_corr : Partial correlation
+
     Notes
     -----
     The Pearson correlation coefficient measures the linear relationship
@@ -422,37 +427,48 @@ def corr(x, y, tail='two-sided', method='pearson'):
     else:
         raise ValueError('Method not recognized.')
 
-    # Compute adj_r2
-    adj_r2 = 1 - (((1 - r**2) * (nx - 1)) / (nx - 3))
+    assert not np.isnan(r), 'Correlation returned NaN. Check your data.'
 
-    # Compute the parametric 95% confidence interval
-    ci = compute_esci(stat=r, nx=nx, ny=nx, eftype='r')
+    # Compute r2 and adj_r2
+    r2 = r**2
+    adj_r2 = 1 - (((1 - r2) * (nx - 1)) / (nx - 3))
 
-    stats = pd.DataFrame({}, index=[method])
-    stats['n'] = nx
-    stats['r'] = np.round(r, 3)
-    stats['CI95%'] = [ci]
-    stats['r2'] = np.round(r**2, 3)
-    stats['adj_r2'] = np.round(adj_r2, 3)
-    stats['p-val'] = pval if tail == 'two-sided' else .5 * pval
+    # Compute the parametric 95% confidence interval and power
+    if r2 < 1:
+        ci = compute_esci(stat=r, nx=nx, ny=nx, eftype='r')
+        pr = round(power_corr(r=r, n=nx, power=None, alpha=0.05, tail=tail), 3)
+    else:
+        ci = [1., 1.]
+        pr = np.inf
+
+    # Create dictionnary
+    stats = {'n': nx,
+             'r': round(r, 3),
+             'r2': round(r2, 3),
+             'adj_r2': round(adj_r2, 3),
+             'CI95%': [ci],
+             'p-val': pval if tail == 'two-sided' else .5 * pval,
+             'power': pr
+             }
 
     if method in ['shepherd', 'skipped']:
         stats['outliers'] = sum(outliers)
 
-    # Compute achieved power
-    if not np.isnan(r):
-        stats['power'] = np.round(power_corr(r=r, n=nx, power=None,
-                                             alpha=0.05, tail=tail), 3)
-
     # Compute the BF10 for Pearson correlation only
-    if method == 'pearson' and nx < 1000 and not np.isnan(r):
-        stats['BF10'] = bayesfactor_pearson(r, nx)
+    if method == 'pearson' and nx < 1000:
+        if r2 < 1:
+            stats['BF10'] = round(bayesfactor_pearson(r, nx), 3)
+        else:
+            stats['BF10'] = np.inf
 
-    col_order = ['n', 'outliers', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val',
-                 'BF10', 'power']
-    stats = stats.reindex(columns=col_order)
-    stats.dropna(how='all', axis=1, inplace=True)
-    return stats
+    # Convert to DataFrame
+    stats = pd.DataFrame.from_records(stats, index=[method])
+
+    # Define order
+    col_keep = ['n', 'outliers', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val',
+                'BF10', 'power']
+    col_order = [k for k in col_keep if k in stats.keys().tolist()]
+    return stats[col_order]
 
 
 def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',

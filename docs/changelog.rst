@@ -13,6 +13,7 @@ v0.2.4 (March 2019)
 
 a. Added :py:func:`pingouin.distance_corr` (distance correlation) function.
 b. :py:func:`pingouin.rm_corr` now requires at least 3 unique subjects (same behavior as the original R package).
+c. The :py:func:`pingouin.pairwise_corr` is faster and returns the number of outlier if a robust correlation is used.
 
 **Pairwise**
 
