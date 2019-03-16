@@ -14,8 +14,9 @@ v0.2.4 (March 2019)
 a. Added :py:func:`pingouin.distance_corr` (distance correlation) function.
 b. :py:func:`pingouin.rm_corr` now requires at least 3 unique subjects (same behavior as the original R package).
 c. The :py:func:`pingouin.pairwise_corr` is faster and returns the number of outlier if a robust correlation is used.
+d. Added support for 2D level in the :py:func:`pingouin.pairwise_corr`. See Jupyter notebooks for examples.
 
-**Pairwise**
+**Pairwise T-tests**
 
 a. Added support for non-parametric pairwise tests in :py:func:`pingouin.pairwise_ttests` function.
 b. Common language effect size (CLES) is now reported by default in :py:func:`pingouin.pairwise_ttests` function.

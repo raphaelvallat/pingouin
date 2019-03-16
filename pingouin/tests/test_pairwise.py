@@ -149,7 +149,35 @@ class TestPairwise(TestCase):
         with pytest.raises(ValueError):
             pairwise_corr(data, columns=['Gender', 'Gender'])
         # Test when one column has only one unique value
-        with pytest.raises(ValueError):
-            pairwise_corr(data=data, columns=['Age', 'One', 'Gender'])
+        pairwise_corr(data=data, columns=['Age', 'One', 'Gender'])
         stats = pairwise_corr(data, columns=['Neuroticism', 'IQ', 'One'])
         assert stats.shape[0] == 1
+        ######################################################################
+        # MultiIndex columns
+        from numpy.random import random as rdm
+        # Create MultiIndex dataframe
+        columns = pd.MultiIndex.from_tuples([('Behavior', 'Rating'),
+                                             ('Behavior', 'RT'),
+                                             ('Physio', 'BOLD'),
+                                             ('Physio', 'HR'),
+                                             ('Psycho', 'Anxiety')])
+        data = pd.DataFrame(dict(Rating=rdm(size=10),
+                                 RT=rdm(size=10),
+                                 BOLD=rdm(size=10),
+                                 HR=rdm(size=10),
+                                 Anxiety=rdm(size=10)))
+        data.columns = columns
+        pairwise_corr(data, method='spearman')
+        stats = pairwise_corr(data, columns=[('Behavior', 'Rating')])
+        assert stats.shape[0] == data.shape[1] - 1
+        pairwise_corr(data, columns=[('Behavior', 'Rating'),
+                                     ('Behavior', 'RT')])
+        st1 = pairwise_corr(data, columns=[[('Behavior', 'Rating'),
+                                            ('Behavior', 'RT')], None])
+        st2 = pairwise_corr(data, columns=[[('Behavior', 'Rating'),
+                                            ('Behavior', 'RT')]])
+        assert st1['X'].equals(st2['X'])
+        st3 = pairwise_corr(data, columns=[[('Behavior', 'Rating')],
+                                           [('Behavior', 'RT'),
+                                            ('Physio', 'BOLD')]])
+        assert st3.shape[0] == 2

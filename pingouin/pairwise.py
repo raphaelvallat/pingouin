@@ -780,10 +780,13 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     confidence interval, Bayes Factor..). This comes however at
     an increased computational cost. While this should not be discernible for
     dataframe with less than 10,000 rows and/or less than 20 columns, this
-    function can be slow for very large dataset.
+    function can be slow for very large dataset. For speed purpose, the Bayes
+    Factor is only computed when the sample size is less than 1000
+    (and method='pearson').
 
-    For speed purpose, the Bayes Factor is only computed when the sample size
-    is less than 1000 (and method='pearson').
+    This functio also works with two-dimensional multi-index columns. In this
+    case, columns must be list(s) of tuple(s). See the Jupyter notebooks for
+    more details.
 
     Examples
     --------
@@ -821,11 +824,37 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
     # Keep only numeric columns
     data = data._get_numeric_data()
-    keys = data.keys().tolist()
+    # Remove columns with constant value
+    data = data.loc[:, (data != data.iloc[0]).any()]
+    # Extract columns names
+    keys = data.columns.tolist()
 
     # First ensure that columns is a list
-    if isinstance(columns, str):
+    if isinstance(columns, (str, tuple)):
         columns = [columns]
+
+    def traverse(o, tree_types=(list, tuple)):
+        """Helper function to flatten nested lists.
+        From https://stackoverflow.com/a/6340578
+        """
+        if isinstance(o, tree_types):
+            for value in o:
+                for subvalue in traverse(value, tree_types):
+                    yield subvalue
+        else:
+            yield o
+
+    # Check if columns index has multiple levels
+    if isinstance(data.columns, pd.core.index.MultiIndex):
+        multi_index = True
+        if columns is not None:
+            # Simple List with one element: [('L0', 'L1')]
+            # Simple list with >= 2 elements: [('L0', 'L1'), ('L0', 'L2')]
+            # Nested lists: [[('L0', 'L1')], ...] or [..., [('L0', 'L1')]]
+            col_flatten = list(traverse(columns, tree_types=list))
+            assert all(isinstance(c, (tuple, type(None))) for c in col_flatten)
+    else:
+        multi_index = False
 
     # Then define combinations / products between columns
     if columns is None:
@@ -851,14 +880,15 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
                 # Case B3: one-versus-all, e.g. ['a'] or 'a'
                 # Check that this column exist
                 if columns[0] not in keys:
-                    msg = '"%s" is not in data or is not numeric.' % columns[0]
+                    msg = ('"%s" is not in data or is not numeric.'
+                           % columns[0])
                     raise ValueError(msg)
                 others = [e for e in keys if e != columns[0]]
                 combs = list(product(columns, others))
             else:
                 # Combinations between all specified columns ['a', 'b', 'c']
                 # Make sure that we keep numeric columns
-                columns = np.intersect1d(keys, columns)
+                columns = [c for c in columns if c in keys]
                 if len(columns) == 1:
                     # If only one-column is left, equivalent to ['a']
                     others = [e for e in keys if e != columns[0]]
@@ -873,21 +903,14 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
                          "the specified columns exist in the dataframe, are "
                          "numeric, and contains at least two unique values.")
 
-    # Remove columns with unique values
-    ckeys = np.unique(combs)  # List of unique labels in combs
-    cnunique = data[ckeys].nunique()  # Number of unique values per column
-    combs_unique = np.isin(combs, cnunique[cnunique == 1].index.tolist())
-    combs = combs[~combs_unique.any(axis=1)]
-    if len(combs) == 0:
-        raise ValueError("No column combination found. Please make sure that "
-                         "the specified columns exist in the dataframe, are "
-                         "numeric, and contains at least two unique values.")
-
     # Initialize empty dataframe
-    stats = pd.DataFrame({'X': combs[:, 0],
-                          'Y': combs[:, 1],
-                          'method': method,
-                          'tail': tail},
+    if multi_index:
+        X = list(zip(combs[:, 0, 0], combs[:, 0, 1]))
+        Y = list(zip(combs[:, 1, 0], combs[:, 1, 1]))
+    else:
+        X = combs[:, 0]
+        Y = combs[:, 1]
+    stats = pd.DataFrame({'X': X, 'Y': Y, 'method': method, 'tail': tail},
                          index=range(len(combs)),
                          columns=['X', 'Y', 'method', 'tail', 'n', 'outliers',
                                   'r', 'CI95%', 'r2', 'adj_r2', 'p-val',
@@ -897,10 +920,11 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     dvs = ['n', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'power']
     dvs_out = dvs + ['outliers']
     dvs_bf10 = dvs + ['BF10']
-    for i, (col1, col2) in enumerate(combs):
+    for i in range(len(combs)):
+        col1, col2 = stats.loc[i, 'X'], stats.loc[i, 'Y']
         cor_st = corr(data[col1].values, data[col2].values, tail=tail,
                       method=method)
-        cor_st_keys = cor_st.keys().tolist()
+        cor_st_keys = cor_st.columns.tolist()
         if 'BF10' in cor_st_keys:
             stats.loc[i, dvs_bf10] = cor_st[dvs_bf10].values
         elif 'outliers' in cor_st_keys:
