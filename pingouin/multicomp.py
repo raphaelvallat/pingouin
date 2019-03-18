@@ -6,16 +6,8 @@ import numpy as np
 __all__ = ["fdr", "bonf", "holm", "multicomp"]
 
 
-def _ecdf(x):
-    """No frills empirical cdf used in fdrcorrection."""
-    nobs = len(x)
-    return np.arange(1, nobs + 1) / float(nobs)
-
-
-def fdr(pvals, alpha=0.05, method='indep'):
+def fdr(pvals, alpha=0.05, method='fdr_bh'):
     """P-values correction with False Discovery Rate (FDR).
-
-    Correction for multiple comparison using FDR.
 
     This covers Benjamini/Hochberg for independent or positively correlated and
     Benjamini/Yekutieli for general or negatively correlated tests.
@@ -23,19 +15,50 @@ def fdr(pvals, alpha=0.05, method='indep'):
     Parameters
     ----------
     pvals : array_like
-        set of p-values of the individual tests.
+        Array of p-values of the individual tests.
     alpha : float
-        error rate
-    method : 'indep' | 'negcorr'
-        If 'indep' it implements Benjamini/Hochberg for independent or if
-        'negcorr' it corresponds to Benjamini/Yekutieli.
+        Error rate (= alpha level).
+    method : str
+        FDR correction methods ::
+
+        'fdr_bh' : Benjamini/Hochberg for independent / posit correlated tests
+        'fdr_by' : Benjamini/Yekutieli for negatively correlated tests
 
     Returns
     -------
     reject : array, bool
         True if a hypothesis is rejected, False if not
     pval_corrected : array
-        pvalues adjusted for multiple hypothesis testing to limit FDR
+        P-values adjusted for multiple hypothesis testing using the BH or BY
+        correction.
+
+    See also
+    --------
+    bonf : Bonferroni correction
+    holm : Holm-Bonferroni correction
+
+    Notes
+    -----
+    From Wikipedia:
+
+    The **Benjamini–Hochberg** procedure (BH step-up procedure) controls the
+    false discovery rate (FDR) at level :math:`\\alpha`. It works as follows:
+
+    1. For a given :math:`\\alpha`, find the largest :math:`k` such that
+    :math:`P_{(k)}\\leq \\frac {k}{m}\\alpha.`
+
+    2. Reject the null hypothesis (i.e., declare discoveries) for all
+    :math:`H_{(i)}` for :math:`i = 1, \\ldots, k`.
+
+    The BH procedure is valid when the m tests are independent, and also in
+    various scenarios of dependence, but is not universally valid.
+
+    The **Benjamini–Yekutieli** procedure (BY) controls the FDR under arbitrary
+    dependence assumptions. This refinement modifies the threshold and finds
+    the largest :math:`k` such that:
+
+    .. math::
+        P_{(k)} \\leq \\frac{k}{m \\cdot c(m)} \\alpha
 
     References
     ----------
@@ -47,6 +70,8 @@ def fdr(pvals, alpha=0.05, method='indep'):
       discovery rate in multiple testing under dependency. Annals of
       Statistics, 29, 1165–1188.
 
+    - https://en.wikipedia.org/wiki/False_discovery_rate
+
     Examples
     --------
     FDR correction of an array of p-values
@@ -57,34 +82,36 @@ def fdr(pvals, alpha=0.05, method='indep'):
     >>> print(reject, pvals_corr)
     [False  True False False  True] [0.5    0.0075 0.4    0.09   0.0015]
     """
+    # Convert to array and save original shape
     pvals = np.asarray(pvals)
     shape_init = pvals.shape
     pvals = pvals.ravel()
+    num_nan = np.isnan(pvals).sum()
 
+    # Sort the (flattened) p-values
     pvals_sortind = np.argsort(pvals)
     pvals_sorted = pvals[pvals_sortind]
     sortrevind = pvals_sortind.argsort()
+    ntests = pvals.size - num_nan
 
-    if method in ['i', 'indep', 'p', 'poscorr']:
-        ecdffactor = _ecdf(pvals_sorted)
-    elif method in ['n', 'negcorr']:
-        cm = np.sum(1. / np.arange(1, len(pvals_sorted) + 1))
-        ecdffactor = _ecdf(pvals_sorted) / cm
-    else:
-        raise ValueError("Method should be 'indep' and 'negcorr'")
+    # Empirical CDF factor
+    ecdffactor = np.arange(1, ntests + 1) / float(ntests)
 
-    reject = pvals_sorted < (ecdffactor * alpha)
-    if reject.any():
-        rejectmax = max(np.nonzero(reject)[0])
-    else:
-        rejectmax = 0
-    reject[:rejectmax] = True
+    if method == 'fdr_by':
+        cm = np.sum(1. / np.arange(1, ntests + 1))
+        ecdffactor /= cm
 
-    pvals_corrected_raw = pvals_sorted / ecdffactor
-    pvals_corrected = np.minimum.accumulate(pvals_corrected_raw[::-1])[::-1]
-    pvals_corrected[pvals_corrected > 1.0] = 1.0
-    pvals_corrected = pvals_corrected[sortrevind].reshape(shape_init)
-    reject = reject[sortrevind].reshape(shape_init)
+    # Now we adjust the p-values
+    pvals_corr = np.diag(pvals_sorted / ecdffactor[..., None])
+    pvals_corr = np.minimum.accumulate(pvals_corr[::-1])[::-1]
+    pvals_corr = np.clip(pvals_corr, None, 1)
+
+    # And revert to the original shape and order
+    pvals_corr = np.append(pvals_corr, np.full(num_nan, np.nan))
+    pvals_corrected = pvals_corr[sortrevind].reshape(shape_init)
+    with np.errstate(invalid='ignore'):
+        reject = np.less(pvals_corrected, alpha)
+    # reject = reject[sortrevind].reshape(shape_init)
     return reject, pvals_corrected
 
 
@@ -106,6 +133,11 @@ def bonf(pvals, alpha=0.05):
         P-values adjusted for multiple hypothesis testing using the Bonferroni
         procedure (= multiplied by the number of tests).
 
+    See also
+    --------
+    holm : Holm-Bonferroni correction
+    fdr : Benjamini/Hochberg and Benjamini/Yekutieli FDR correction
+
     Notes
     -----
     From Wikipedia:
@@ -122,6 +154,12 @@ def bonf(pvals, alpha=0.05):
     trial is testing :math:`n=20` hypotheses with a desired
     :math:`\\alpha=0.05`, then the Bonferroni correction would test each
     individual hypothesis at :math:`\\alpha=0.05/20=0.0025``.
+
+    The Bonferroni adjusted p-values are defined as:
+
+    .. math::
+        \\widetilde {p}_{{(i)}}= n \\cdot p_{{(i)}}
+
 
     The Bonferroni correction tends to be a bit too conservative.
 
@@ -169,6 +207,11 @@ def holm(pvals, alpha=.05):
         P-values adjusted for multiple hypothesis testing using the Holm
         procedure.
 
+    See also
+    --------
+    bonf : Bonferroni correction
+    fdr : Benjamini/Hochberg and Benjamini/Yekutieli FDR correction
+
     Notes
     -----
     From Wikipedia:
@@ -177,6 +220,21 @@ def holm(pvals, alpha=.05):
     used to counteract the problem of multiple comparisons. It is intended to
     control the family-wise error rate and offers a simple test uniformly more
     powerful than the Bonferroni correction.
+
+    The Holm adjusted p-values are the running maximum of the sorted p-values
+    divided by the corresponding increasing alpha level:
+
+    .. math::
+
+        \\frac{\\alpha}{n}, \\frac{\\alpha}{n-1}, ..., \\frac{\\alpha}{1}
+
+    where :math:`n` is the number of test.
+
+    The full mathematical formula is:
+
+    .. math::
+        \\widetilde {p}_{{(i)}}=\\max _{{j\\leq i}}\\left\\{(n-j+1)p_{{(j)}}
+        \\right\\}_{{1}}
 
     Note that NaN values are not taken into account in the p-values correction.
 
@@ -211,9 +269,9 @@ def holm(pvals, alpha=.05):
     pvals_corr = np.diag(pvals_sorted * np.arange(ntests, 0, -1)[..., None])
     pvals_corr = np.maximum.accumulate(pvals_corr)
     pvals_corr = np.clip(pvals_corr, None, 1)
-    pvals_corr = np.append(pvals_corr, np.full(num_nan, np.nan))
 
     # And revert to the original shape and order
+    pvals_corr = np.append(pvals_corr, np.full(num_nan, np.nan))
     pvals_corrected = pvals_corr[sortrevind].reshape(shape_init)
     with np.errstate(invalid='ignore'):
         reject = np.less(pvals_corrected, alpha)
@@ -237,6 +295,7 @@ def multicomp(pvals, alpha=0.05, method='holm'):
         'holm' : step-down method using Bonferroni adjustments
         'fdr_bh' : Benjamini/Hochberg FDR correction
         'fdr_by' : Benjamini/Yekutieli FDR correction
+        'none' : pass-through option (no correction applied)
 
     Returns
     -------
@@ -247,6 +306,9 @@ def multicomp(pvals, alpha=0.05, method='holm'):
 
     See Also
     --------
+    bonf : Bonferroni correction
+    holm : Holm-Bonferroni correction
+    fdr : Benjamini/Hochberg and Benjamini/Yekutieli FDR correction
     pairwise_ttests : Pairwise post-hocs T-tests
 
     Notes
@@ -302,12 +364,14 @@ def multicomp(pvals, alpha=0.05, method='holm'):
         reject, pvals_corrected = bonf(pvals, alpha=alpha)
     elif method.lower() in ['h', 'holm']:
         reject, pvals_corrected = holm(pvals, alpha=alpha)
-    elif method.lower() in ['fdr_bh']:
-        reject, pvals_corrected = fdr(pvals, alpha=alpha, method='indep')
+    elif method.lower() in ['fdr', 'fdr_bh']:
+        reject, pvals_corrected = fdr(pvals, alpha=alpha, method='fdr_bh')
     elif method.lower() in ['fdr_by']:
-        reject, pvals_corrected = fdr(pvals, alpha=alpha, method='negcorr')
+        reject, pvals_corrected = fdr(pvals, alpha=alpha, method='fdr_by')
     elif method.lower() == 'none':
-        return None, None
+        pvals_corrected = pvals
+        with np.errstate(invalid='ignore'):
+            reject = np.less(pvals_corrected, alpha)
     else:
         raise ValueError('Multiple comparison method not recognized')
     return reject, pvals_corrected

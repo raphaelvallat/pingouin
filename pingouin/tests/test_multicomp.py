@@ -11,17 +11,46 @@ pvals_2d = np.array([pvals, pvals2_NA])
 
 
 class TestMulticomp(TestCase):
-    """Test effsize.py."""
+    """Test multicomp.py."""
 
     def test_fdr(self):
-        """Test function fdr"""
-        fdr(pvals)
-        fdr(pvals, alpha=.01, method='negcorr')
-        fdr(pvals2)
-        fdr(pvals2, alpha=.90, method='negcorr')
-        # Wrong arguments
-        with pytest.raises(ValueError):
-            fdr(pvals, method='wrong')
+        """Test function fdr.
+        Compare to the p.adjust R function.
+        """
+
+        # FDR BH
+        # ------
+        reject, pval_corr = fdr(pvals)
+        assert_array_equal(reject, [False, False, True, False, False])
+        assert_array_almost_equal(pval_corr, [0.52, .175, .0005, .075, .175])
+
+        # With NaN values
+        _, pval_corr = fdr(pvals2_NA)
+        assert_array_almost_equal(pval_corr, [.52, np.nan, .28, .40, .28])
+
+        # With 2D arrays
+        _, pval_corr = fdr(pvals_2d)
+        pval_corr = np.round(pval_corr.ravel(), 3)
+        assert_array_almost_equal(pval_corr, [.52, .21, .001, .135, .21, .52,
+                                              np.nan, .21, 0.386, .21])
+
+        # FDR BY
+        # ------
+        reject, pval_corr = fdr(pvals, method='fdr_by')
+        assert_array_equal(reject, [False, False, True, False, False])
+        assert_array_almost_equal(pval_corr, [1., 0.399583333, 0.001141667,
+                                              0.171250000, 0.399583333])
+
+        # With NaN values
+        _, pval_corr = fdr(pvals2_NA, method='fdr_by')
+        assert_array_almost_equal(pval_corr, [1., np.nan, 0.5833333, 0.8333333,
+                                              .5833333])
+
+        # With 2D arrays
+        _, pval_corr = fdr(pvals_2d, method='fdr_by')
+        pval_corr = np.round(pval_corr.ravel(), 3)
+        assert_array_almost_equal(pval_corr, [1., 0.594, 0.003, 0.382, 0.594,
+                                              1., np.nan, 0.594, 1., 0.594])
 
     def test_bonf(self):
         """Test function bonf
@@ -69,6 +98,7 @@ class TestMulticomp(TestCase):
         reject, pvals_corr = multicomp(pvals, method='h')
         reject, pvals_corr = multicomp(pvals, method='b')
         reject, pvals_corr = multicomp(pvals, method='none')
+        assert_array_equal(pvals, pvals_corr)
         reject, pvals_corr = multicomp(pvals2, method='holm')
         # Wrong arguments
         with pytest.raises(ValueError):

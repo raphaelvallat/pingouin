@@ -20,11 +20,13 @@ d. Added support for 2D level in the :py:func:`pingouin.pairwise_corr`. See Jupy
 
 a. Renamed :py:func:`pingouin.read_dataset` and :py:func:`pingouin.list_dataset` (before one needed to call these functions by calling pingouin.datasets)
 
-**Pairwise T-tests**
+**Pairwise T-tests and multi-comparisons**
 
 a. Added support for non-parametric pairwise tests in :py:func:`pingouin.pairwise_ttests` function.
 b. Common language effect size (CLES) is now reported by default in :py:func:`pingouin.pairwise_ttests` function.
 c. CLES is now implemented in the :py:func:`pingouin.compute_effsize` function.
+d. Better code, doc and testing for the functions in multicomp.py.
+e. P-values adjustment methods now do not take into account NaN values (same behavior as the R function p.adjust)
 
 **Plotting**
 
