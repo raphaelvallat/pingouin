@@ -25,8 +25,8 @@ def read_dataset(dname):
     --------
     Load the ANOVA dataset
 
-        >>> from pingouin.datasets import read_dataset
-        >>> df = read_dataset('anova')
+    >>> from pingouin import read_dataset
+    >>> df = read_dataset('anova')
     """
     # Check extension
     d, ext = op.splitext(dname)
@@ -46,8 +46,7 @@ def list_dataset():
     Examples
     --------
 
-        >>> from pingouin.datasets import list_dataset
-        >>> list_dataset()
-
+    >>> from pingouin import list_dataset
+    >>> list_dataset()
     """
     print_table(dts)

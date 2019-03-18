@@ -142,8 +142,8 @@ Others
      :toctree: generated/
 
       print_table
-      pingouin.datasets.read_dataset
-      pingouin.datasets.list_dataset
+      read_dataset
+      list_dataset
 
 Plotting
 --------

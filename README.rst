@@ -116,7 +116,7 @@ New releases are frequent so always make sure that you have the latest version:
 Quick start
 ============
 
-Try before you buy! Click on the link below and navigate to the notebooks folder to load a collection of interactive Jupyter notebooks demonstrating the main functionalities of Pingouin. No need to install Pingouin beforehand as the notebooks run in a Binder environment.
+Click on the link below and navigate to the notebooks/ folder to run a collection of interactive Jupyter notebooks showing the main functionalities of Pingouin. No need to install Pingouin beforehand, the notebooks run in a Binder environment.
 
 .. image:: https://mybinder.org/badge.svg
     :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
@@ -211,8 +211,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 .. code-block:: python
 
   # Read an example dataset
-  from pingouin.datasets import read_dataset
-  df = read_dataset('mixed_anova')
+  df = pg.read_dataset('mixed_anova')
 
   # Run the ANOVA
   aov = pg.anova(data=df, dv='Scores', between='Group', detailed=True)
@@ -303,6 +302,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: python
 
+  import pandas as pd
   np.random.seed(123)
   z = np.random.normal(5, 1, 30)
   data = pd.DataFrame({'X': x, 'Y': y, 'Z': z})
@@ -334,7 +334,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 11. Multiple linear regression
 ##############################
 
-.. code-block:: ipython3
+.. code-block:: python
 
     pg.linear_regression(data[['X', 'Z']], data['Y'])
 
@@ -352,9 +352,9 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 12. Mediation analysis
 ######################
 
-.. code-block:: ipython3
+.. code-block:: python
 
-  pg.mediation_analysis(data=data, x='X', m='Z', y='Y', n_boot=500)
+    pg.mediation_analysis(data=data, x='X', m='Z', y='Y', n_boot=500)
 
 .. table:: Mediation summary
   :widths: auto

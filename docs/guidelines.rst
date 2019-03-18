@@ -24,10 +24,9 @@ Example code
 .. code:: python
 
   import pingouin as pg
-  from pingouin.datasets import read_dataset
 
   # Load an example dataset comparing pain threshold as a function of hair color
-  df = read_dataset('anova')
+  df = pg.read_dataset('anova')
 
   # 1. This is a between subject design, so the first step is to test for equality of variances
   groups = df['Hair color'].unique()
@@ -58,10 +57,9 @@ Example code
 
   import pingouin as pg
   import seaborn as sns
-  from pingouin.datasets import read_dataset
 
   # Load an example dataset with the personality scores of 500 participants
-  df = read_dataset('pairwise_corr')
+  df = pg.read_dataset('pairwise_corr')
 
   # 1.Test for bivariate normality
   print(multivariate_normality(df[['Neuroticism', 'Openness']]))
@@ -89,10 +87,9 @@ Example code
 .. code:: python
 
   import pingouin as pg
-  from pingouin.datasets import read_dataset
 
   # Load an example dataset comparing pain threshold as a function of hair color
-  df = read_dataset('anova')
+  df = pg.read_dataset('anova')
 
   # There are 4 independent groups in our dataset, we'll therefore use the Kruskal-Wallis test:
   pg.kruskal(data=df, dv='Pain threshold', between='Hair color')

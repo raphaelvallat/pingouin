@@ -33,11 +33,13 @@ def mad(a, normalize=True, axis=0):
     Examples
     --------
 
-        >>> a = [1.2, 5.4, 3.2, 7.8, 2.5]
-        >>> mad(a)
-            2.965
-        >>> mad(a, normalize=False)
-            2.0
+    >>> from pingouin import mad
+    >>> a = [1.2, 5.4, 3.2, 7.8, 2.5]
+    >>> mad(a)
+    2.965204437011204
+
+    >>> mad(a, normalize=False)
+    2.0
     """
     from scipy.stats import norm
     c = norm.ppf(3 / 4.) if normalize else 1
@@ -68,9 +70,10 @@ def madmedianrule(a):
     Examples
     --------
 
-        >>> a = [-1.09, 1., 0.28, -1.51, -0.58, 6.61, -2.43, -0.43]
-        >>> madmedianrule(a)
-            array([False, False, False, False, False, True, False, False])
+    >>> from pingouin import madmedianrule
+    >>> a = [-1.09, 1., 0.28, -1.51, -0.58, 6.61, -2.43, -0.43]
+    >>> madmedianrule(a)
+    array([False, False, False, False, False,  True, False, False])
     """
     from scipy.stats import chi2
     k = np.sqrt(chi2.ppf(0.975, 1))
@@ -129,17 +132,15 @@ def mwu(x, y, tail='two-sided'):
 
     Examples
     --------
-    1. Compare the medians of two independent samples.
 
-        >>> import numpy as np
-        >>> from pingouin import mwu
-        >>> np.random.seed(123)
-        >>> x = np.random.uniform(low=0, high=1, size=20)
-        >>> y = np.random.uniform(low=0.2, high=1.2, size=20)
-        >>> print("Medians = %.2f - %.2f" % (np.median(x), np.median(y)))
-        >>> mwu(x, y, tail='two-sided')
-            U-val   p-val     RBC    CLES
-            97.0    0.006    0.51    0.75
+    >>> import numpy as np
+    >>> from pingouin import mwu
+    >>> np.random.seed(123)
+    >>> x = np.random.uniform(low=0, high=1, size=20)
+    >>> y = np.random.uniform(low=0.2, high=1.2, size=20)
+    >>> mwu(x, y, tail='two-sided')
+         U-val    p-val    RBC    CLES
+    MWU   97.0  0.00556  0.515  0.7575
     """
     from scipy.stats import mannwhitneyu
     x = np.asarray(x)
@@ -225,12 +226,13 @@ def wilcoxon(x, y, tail='two-sided'):
     --------
     1. Wilcoxon test on two related samples.
 
-        >>> import numpy as np
-        >>> from pingouin import wilcoxon
-        >>> x = [20, 22, 19, 20, 22, 18, 24, 20]
-        >>> y = [38, 37, 33, 29, 14, 12, 20, 22]
-        >>> print("Medians = %.2f - %.2f" % (np.median(x), np.median(y)))
-        >>> wilcoxon(x, y, tail='two-sided')
+    >>> import numpy as np
+    >>> from pingouin import wilcoxon
+    >>> x = [20, 22, 19, 20, 22, 18, 24, 20, 19, 24, 26, 13]
+    >>> y = [38, 37, 33, 29, 14, 12, 20, 22, 17, 25, 26, 16]
+    >>> wilcoxon(x, y, tail='two-sided')
+              W-val     p-val       RBC      CLES
+    Wilcoxon   20.5  0.070844  0.333333  0.583333
     """
     from scipy.stats import wilcoxon
     x = np.asarray(x)
@@ -310,12 +312,11 @@ def kruskal(dv=None, between=None, data=None, detailed=False,
     --------
     Compute the Kruskal-Wallis H-test for independent samples.
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import kruskal
-        >>> df = read_dataset('anova')
-        >>> kruskal(dv='Pain threshold', between='Hair color', data=df)
-            Source       ddof1   H        p-unc
-            Hair color   3       10.589   0.014172
+    >>> from pingouin import kruskal, read_dataset
+    >>> df = read_dataset('anova')
+    >>> kruskal(dv='Pain threshold', between='Hair color', data=df)
+                 Source  ddof1       H     p-unc
+    Kruskal  Hair color      3  10.589  0.014172
     """
     from scipy.stats import chi2, rankdata, tiecorrect
 
@@ -420,13 +421,12 @@ def friedman(dv=None, within=None, subject=None, data=None,
     --------
     Compute the Friedman test for repeated measurements.
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import friedman
-        >>> df = read_dataset('rm_anova')
-        >>> friedman(dv='DesireToKill', within='Disgustingness',
-        >>>          subject='Subject', data=df)
-            Source           ddof1   Q       p-unc
-            Disgustingness   1       9.228   0.002384
+    >>> from pingouin import friedman, read_dataset
+    >>> df = read_dataset('rm_anova')
+    >>> friedman(dv='DesireToKill', within='Disgustingness',
+    ...          subject='Subject', data=df)
+                      Source  ddof1      Q     p-unc
+    Friedman  Disgustingness      1  9.228  0.002384
     """
     from scipy.stats import rankdata, chi2, find_repeats
 
@@ -553,10 +553,11 @@ def cochran(dv=None, within=None, subject=None, data=None,
     --------
     Compute the Cochran Q test for repeated measurements.
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import cochran
-        >>> df = read_dataset('cochran')
-        >>> cochran(dv='Energetic', within='Time', subject='Subject', data=df)
+    >>> from pingouin import cochran, read_dataset
+    >>> df = read_dataset('cochran')
+    >>> cochran(dv='Energetic', within='Time', subject='Subject', data=df)
+            Source  dof      Q     p-unc
+    cochran   Time    2  6.706  0.034981
     """
     from scipy.stats import chi2
 

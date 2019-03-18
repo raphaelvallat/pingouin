@@ -127,52 +127,46 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     --------
     1. One-sample T-test.
 
-        >>> from pingouin import ttest
-        >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
-        >>> ttest(x, 4)
-            T      p-val  dof  cohen-d  power   BF10
-            1.397  0.2348    4    0.625  0.919  0.766
+    >>> from pingouin import ttest
+    >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
+    >>> ttest(x, 4)
+                T     p-val  dof       tail  cohen-d  power   BF10
+    T-test  1.397  0.234824    4  two-sided    0.625  0.191  0.766
 
     2. Paired two-sample T-test (one-tailed).
 
-        >>> from pingouin import ttest
-        >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
-        >>> post = [6.4, 3.4, 6.4, 11., 4.8]
-        >>> ttest(pre, post, paired=True, tail='one-sided')
-            T       p-val  dof  cohen-d  power   BF10
-            -2.308   0.04    4     0.25  0.121  3.122
+    >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
+    >>> post = [6.4, 3.4, 6.4, 11., 4.8]
+    >>> ttest(pre, post, paired=True, tail='one-sided')
+                T     p-val  dof       tail  cohen-d  power   BF10
+    T-test -2.308  0.041114    4  one-sided    0.251  0.121  3.122
 
     3. Paired two-sample T-test with missing values.
 
-        >>> from pingouin import ttest
-        >>> from numpy import nan
-        >>> pre = [5.5, 2.4, nan, 9.6, 4.2]
-        >>> post = [6.4, 3.4, 6.4, 11., 4.8]
-        >>> ttest(pre, post, paired=True)
-            T        p-val  dof  cohen-d  power    BF10
-            -5.902  0.0097    3   0.306   0.065   7.169
+    >>> import numpy as np
+    >>> pre = [5.5, 2.4, np.nan, 9.6, 4.2]
+    >>> post = [6.4, 3.4, 6.4, 11., 4.8]
+    >>> ttest(pre, post, paired=True)
+                T     p-val  dof       tail  cohen-d  power   BF10
+    T-test -5.902  0.009713    3  two-sided    0.306  0.065  7.169
 
     4. Independent two-sample T-test (equal sample size).
 
-        >>> from pingouin import ttest
-        >>> import numpy as np
-        >>> np.random.seed(123)
-        >>> x = np.random.normal(loc=7, size=20)
-        >>> y = np.random.normal(loc=4, size=20)
-        >>> ttest(x, y, correction='auto')
-            T         p-val  dof  cohen-d  power   BF10
-            9.106  4.30e-11   38     2.88    1.0  1.4e8
+    >>> np.random.seed(123)
+    >>> x = np.random.normal(loc=7, size=20)
+    >>> y = np.random.normal(loc=4, size=20)
+    >>> ttest(x, y, correction='auto')
+                T         p-val  dof       tail  cohen-d  power          BF10
+    T-test  9.106  4.306971e-11   38  two-sided     2.88    1.0  1.365699e+08
 
     5. Independent two-sample T-test (unequal sample size).
 
-        >>> from pingouin import ttest
-        >>> import numpy as np
-        >>> np.random.seed(123)
-        >>> x = np.random.normal(loc=7, size=20)
-        >>> y = np.random.normal(loc=6.5, size=15)
-        >>> ttest(x, y, correction='auto')
-            T         p-val  dof   dof-corr  cohen-d  power   BF10
-            2.327     0.027   33      30.75    0.792  0.614  2.454
+    >>> np.random.seed(123)
+    >>> x = np.random.normal(loc=7, size=20)
+    >>> y = np.random.normal(loc=6.5, size=15)
+    >>> ttest(x, y, correction='auto')
+                T     p-val  dof   dof-corr       tail  cohen-d  power   BF10
+    T-test  2.327  0.026748   33  30.745725  two-sided    0.792  0.614  2.454
     """
     from scipy.stats import ttest_rel, ttest_ind, ttest_1samp
     from pingouin import power_ttest, power_ttest2n, compute_effsize
@@ -386,12 +380,14 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     --------
     One-way repeated-measures ANOVA (Ryan et al 2013 dataset).
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import rm_anova
-        >>> df = read_dataset('rm_anova')
-        >>> aov = rm_anova(dv='DesireToKill', within='Disgustingness',
-                           subject='Subject', data=df, detailed=True)
-        >>> print(aov)
+    >>> from pingouin import rm_anova, read_dataset
+    >>> df = read_dataset('rm_anova')
+    >>> aov = rm_anova(dv='DesireToKill', within='Disgustingness',
+    ...                subject='Subject', data=df, detailed=True)
+    >>> print(aov)
+               Source       SS  DF      MS       F        p-unc    np2 eps
+    0  Disgustingness   27.485   1  27.485  12.044  0.000793016  0.116   1
+    1           Error  209.952  92   2.282       -            -      -   -
     """
     from scipy.stats import f
     if isinstance(within, list):
@@ -567,13 +563,11 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
     --------
     Two-way repeated-measures ANOVA.
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import rm_anova2
-        >>> df = read_dataset('rm_anova')
-        >>> aov = rm_anova2(dv='DesireToKill',
-        >>>                 within=['Disgustingness', 'Frighteningness'],
-        >>>                 subject='Subject', data=df)
-        >>> print(aov)
+    >>> from pingouin import rm_anova2, read_dataset
+    >>> df = read_dataset('rm_anova')
+    >>> aov = rm_anova2(dv='DesireToKill',
+    ...                 within=['Disgustingness', 'Frighteningness'],
+    ...                 subject='Subject', data=df)
     """
     from scipy.stats import f
     a, b = within
@@ -795,12 +789,14 @@ def anova(dv=None, between=None, data=None, detailed=False,
     --------
     1. One-way ANOVA on the pain threshold dataset.
 
-        >>> from pingouin import anova, print_table
-        >>> from pingouin.datasets import read_dataset
-        >>> df = read_dataset('anova')
-        >>> aov = anova(dv='Pain threshold', between='Hair color', data=df,
-                        detailed=True, export_filename='pain_anova.csv')
-        >>> print_table(aov)
+    >>> from pingouin import anova, read_dataset
+    >>> df = read_dataset('anova')
+    >>> aov = anova(dv='Pain threshold', between='Hair color', data=df,
+    ...             detailed=True)
+    >>> aov
+           Source        SS  DF       MS      F       p-unc    np2
+    0  Hair color  1360.726   3  453.575  6.791  0.00411423  0.576
+    1      Within  1001.800  15   66.787      -           -      -
     """
     if isinstance(between, list):
         if len(between) == 2:
@@ -918,17 +914,6 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
     Notes
     -----
     Results have been tested against JASP.
-
-    Examples
-    --------
-    Compute a two-way ANOVA.
-
-        >>> import pandas as pd
-        >>> from pingouin import anova2, print_table
-        >>> df = pd.read_csv('dataset.csv')
-        >>> aov = anova(dv='DV', between=['factor1', 'factor2'], data=df,
-                        export_filename='anova.csv')
-        >>> print_table(aov)
     """
     from scipy.stats import f
 
@@ -1114,14 +1099,13 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
     --------
     1. One-way Welch ANOVA on the pain threshold dataset.
 
-        >>> from pingouin import welch_anova
-        >>> from pingouin.datasets import read_dataset
-        >>> df = read_dataset('anova')
-        >>> aov = welch_anova(dv='Pain threshold', between='Hair color',
-        >>>                   data=df, export_filename='pain_anova.csv')
-        >>> aov
-            Source      ddof1   ddof2   F     p-unc
-            Hair color  3       8.33    5.89  0.018813
+    >>> from pingouin import welch_anova, read_dataset
+    >>> df = read_dataset('anova')
+    >>> aov = welch_anova(dv='Pain threshold', between='Hair color',
+    ...                   data=df, export_filename='pain_anova.csv')
+    >>> aov
+           Source  ddof1  ddof2     F     p-unc
+    0  Hair color      3   8.33  5.89  0.018813
     """
     from scipy.stats import f
     # Check data
@@ -1235,12 +1219,15 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
     --------
     Compute a two-way mixed model ANOVA.
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import mixed_anova
-        >>> df = read_dataset('mixed_anova')
-        >>> aov = mixed_anova(dv='Scores', between='Group',
-                              within='Time', subject='Subject', data=df)
-        >>> print(aov)
+    >>> from pingouin import mixed_anova, read_dataset
+    >>> df = read_dataset('mixed_anova')
+    >>> aov = mixed_anova(dv='Scores', between='Group',
+    ...                   within='Time', subject='Subject', data=df)
+    >>> aov
+            Source     SS  DF1  DF2     MS      F     p-unc    np2    eps
+    0        Group  5.460    1   58  5.460  5.052  0.028420  0.080      -
+    1         Time  7.628    2  116  3.814  4.027  0.020373  0.065  0.999
+    2  Interaction  5.168    2  116  2.584  2.728  0.069530  0.045      -
     """
     from scipy.stats import f
 
@@ -1395,19 +1382,23 @@ def ancova(dv=None, covar=None, between=None, data=None,
     1. Evaluate the reading scores of students with different teaching method
     and family income as a covariate.
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import ancova
-        >>> df = read_dataset('ancova')
-        >>> ancova(data=df, dv='Scores', covar='Income', between='Method')
+    >>> from pingouin import ancova, read_dataset
+    >>> df = read_dataset('ancova')
+    >>> ancova(data=df, dv='Scores', covar='Income', between='Method')
+         Source           SS  DF          F     p-unc
+    0    Method   571.030045   3   3.336482  0.031940
+    1    Income  1678.352687   1  29.419438  0.000006
+    2  Residual  1768.522365  31        NaN       NaN
 
     2. Evaluate the reading scores of students with different teaching method
     and family income + BMI as a covariate.
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import ancova
-        >>> df = read_dataset('ancova')
-        >>> ancova(data=df, dv='Scores', covar=['Income', 'BMI'],
-            between='Method')
+    >>> ancova(data=df, dv='Scores', covar=['Income', 'BMI'], between='Method')
+         Source        SS  DF       F     p-unc
+    0    Method   552.284   3   3.233  0.036113
+    1    Income  1573.952   1  27.637  0.000011
+    2       BMI    60.014   1   1.054  0.312842
+    3  Residual  1708.509  30     NaN       NaN
     """
     if isinstance(covar, list):
         if len(covar) > 1:
@@ -1533,11 +1524,15 @@ def ancovan(dv=None, covar=None, between=None, data=None,
     1. Evaluate the reading scores of students with different teaching method
     and family income and BMI as covariates.
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import ancovan
-        >>> df = read_dataset('ancova')
-        >>> ancovan(data=df, dv='Scores', covar=['Income', 'BMI'],
-                    between='Method')
+    >>> from pingouin import ancovan, read_dataset
+    >>> df = read_dataset('ancova')
+    >>> ancovan(data=df, dv='Scores', covar=['Income', 'BMI'],
+    ...         between='Method')
+         Source        SS  DF       F     p-unc
+    0    Method   552.284   3   3.233  0.036113
+    1    Income  1573.952   1  27.637  0.000011
+    2       BMI    60.014   1   1.054  0.312842
+    3  Residual  1708.509  30     NaN       NaN
     """
     # Assert that there are at least two covariates
     if not isinstance(covar, list):

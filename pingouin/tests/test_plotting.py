@@ -3,7 +3,7 @@ import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
 from unittest import TestCase
-from pingouin.datasets import read_dataset
+from pingouin import read_dataset
 from pingouin.plotting import (plot_blandaltman, plot_skipped_corr, _ppoints,
                                qqplot, plot_paired)
 
@@ -62,8 +62,8 @@ class TestPlotting(TestCase):
     def test_plot_paired(self):
         """Test plot_paired()"""
         df = read_dataset('mixed_anova')
-        df = df.query("Group == 'Meditation' and Subject > 40")
-        df = df.query("Time == 'August' or Time == 'June'")
+        df = df.query("Group == 'Meditation' and Subject > 40 and "
+                      "(Time == 'August' or Time == 'June')").copy()
         df.loc[[101, 161], 'Scores'] = 6
         ax = plot_paired(data=df, dv='Scores', within='Time',
                          subject='Subject')

@@ -38,12 +38,12 @@ def circ_axial(alpha, n):
     --------
     Transform degrees to unimodal radians in the Berens 2009 neuro dataset.
 
-        >>> import numpy as np
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin.circular import circ_axial
-        >>> df = read_dataset('circular')
-        >>> alpha = df['Orientation'].values
-        >>> alpha = circ_axial(np.deg2rad(alpha), 2)
+    >>> import numpy as np
+    >>> from pingouin import read_dataset
+    >>> from pingouin.circular import circ_axial
+    >>> df = read_dataset('circular')
+    >>> alpha = df['Orientation'].values
+    >>> alpha = circ_axial(np.deg2rad(alpha), 2)
     """
     alpha = np.array(alpha)
     return np.remainder(alpha * n, 2 * np.pi)
@@ -80,12 +80,12 @@ def circ_corrcc(x, y, tail='two-sided'):
     --------
     Compute the r and p-value of two circular variables
 
-        >>> from pingouin import circ_corrcc
-        >>> x = [0.785, 1.570, 3.141, 3.839, 5.934]
-        >>> y = [0.593, 1.291, 2.879, 3.892, 6.108]
-        >>> r, pval = circ_corrcc(x, y)
-        >>> print(r, pval)
-            0.942, 0.066
+    >>> from pingouin import circ_corrcc
+    >>> x = [0.785, 1.570, 3.141, 3.839, 5.934]
+    >>> y = [0.593, 1.291, 2.879, 3.892, 6.108]
+    >>> r, pval = circ_corrcc(x, y)
+    >>> print(r, pval)
+    0.942 0.06579836070349088
     """
     from scipy.stats import norm
     x = np.asarray(x)
@@ -143,12 +143,12 @@ def circ_corrcl(x, y, tail='two-sided'):
     --------
     Compute the r and p-value between one circular and one linear variables.
 
-        >>> from pingouin import circ_corrcl
-        >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
-        >>> y = [1.593, 1.291, -0.248, -2.892, 0.102]
-        >>> r, pval = circ_corrcl(x, y)
-        >>> print(r, pval)
-            0.109, 0.971
+    >>> from pingouin import circ_corrcl
+    >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
+    >>> y = [1.593, 1.291, -0.248, -2.892, 0.102]
+    >>> r, pval = circ_corrcl(x, y)
+    >>> print(r, pval)
+    0.109 0.9708899750629236
     """
     from scipy.stats import pearsonr, chi2
     x = np.asarray(x)
@@ -197,10 +197,10 @@ def circ_mean(alpha, w=None, axis=0):
     --------
     Mean resultant vector of circular data
 
-        >>> from pingouin import circ_mean
-        >>> alpha = [0.785, 1.570, 3.141, 0.839, 5.934]
-        >>> circ_mean(alpha)
-            1.013
+    >>> from pingouin import circ_mean
+    >>> alpha = [0.785, 1.570, 3.141, 0.839, 5.934]
+    >>> circ_mean(alpha)
+    1.012962445838065
     """
     alpha = np.array(alpha)
     w = np.array(w) if w is not None else np.ones(alpha.shape)
@@ -241,10 +241,10 @@ def circ_r(alpha, w=None, d=None, axis=0):
     --------
     Mean resultant vector length of circular data
 
-        >>> from pingouin import circ_r
-        >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
-        >>> circ_r(x)
-            0.497
+    >>> from pingouin import circ_r
+    >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
+    >>> circ_r(x)
+    0.49723034495605356
     """
     alpha = np.array(alpha)
     w = np.array(w) if w is not None else np.ones(alpha.shape)
@@ -301,16 +301,16 @@ def circ_rayleigh(alpha, w=None, d=None):
     --------
     1. Simple Rayleigh test for non-uniformity of circular data.
 
-        >>> from pingouin import circ_rayleigh
-        >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
-        >>> z, pval = circ_rayleigh(x)
-        >>> print(z, pval)
-            1.236 0.3048
+    >>> from pingouin import circ_rayleigh
+    >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
+    >>> z, pval = circ_rayleigh(x)
+    >>> print(z, pval)
+    1.236 0.3048435876500138
 
     2. Specifying w and d
 
-        >>> circ_rayleigh(x, w=[.1, .2, .3, .4, .5], d=0.2)
-            0.278, 0.807
+    >>> circ_rayleigh(x, w=[.1, .2, .3, .4, .5], d=0.2)
+    (0.278, 0.8069972000769801)
     """
     alpha = np.array(alpha)
     if w is None:
@@ -375,16 +375,16 @@ def circ_vtest(alpha, dir=0., w=None, d=None):
     --------
     1. V-test for non-uniformity of circular data.
 
-        >>> from pingouin import circ_vtest
-        >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
-        >>> v, pval = circ_vtest(x, dir=1)
-        >>> print(v, pval)
-            2.486 0.0579
+    >>> from pingouin import circ_vtest
+    >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
+    >>> v, pval = circ_vtest(x, dir=1)
+    >>> print(v, pval)
+    2.486 0.05794648732225438
 
     2. Specifying w and d
 
-        >>> circ_vtest(x, dir=0.5, w=[.1, .2, .3, .4, .5], d=0.2)
-            0.637, 0.2309
+    >>> circ_vtest(x, dir=0.5, w=[.1, .2, .3, .4, .5], d=0.2)
+    (0.637, 0.23086492929174185)
     """
     from scipy.stats import norm
     alpha = np.array(alpha)

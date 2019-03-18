@@ -5,7 +5,7 @@ import pytest
 from unittest import TestCase
 from pingouin.pairwise import (pairwise_ttests, pairwise_corr, pairwise_tukey,
                                pairwise_gameshowell)
-from pingouin.datasets import read_dataset
+from pingouin import read_dataset
 
 # Dataset for pairwise_ttests
 df = read_dataset('mixed_anova.csv')

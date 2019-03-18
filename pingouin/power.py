@@ -98,28 +98,25 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
     --------
     1. Compute power of a one-sample T-test given ``d``, ``n`` and ``alpha``
 
-        >>> from pingouin import power_ttest
-        >>> print('power: %.4f' % power_ttest(d=0.5, n=20,
-        ...                                   contrast='one-sample'))
-            power: 0.5645
+    >>> from pingouin import power_ttest
+    >>> print('power: %.4f' % power_ttest(d=0.5, n=20, contrast='one-sample'))
+    power: 0.5645
 
     2. Compute required sample size given ``d``, ``power`` and ``alpha``
 
-        >>> print('n: %.4f' % power_ttest(d=0.5, power=0.80,
-        ...                               tail='one-sided'))
-            n: 50.1508
+    >>> print('n: %.4f' % power_ttest(d=0.5, power=0.80, tail='one-sided'))
+    n: 50.1508
 
     3. Compute achieved ``d`` given ``n``, ``power`` and ``alpha`` level
 
-        >>> print('d: %.4f' % power_ttest(n=20, power=0.80, alpha=0.05,
-        ...                               contrast='paired'))
-            d: 0.6604
+    >>> print('d: %.4f' % power_ttest(n=20, power=0.80, alpha=0.05,
+    ...                               contrast='paired'))
+    d: 0.6604
 
     4. Compute achieved alpha level given ``d``, ``n`` and ``power``
 
-        >>> print('alpha: %.4f' % power_ttest(d=0.5, n=20, power=0.80,
-        ...                                   alpha=None))
-            alpha: 0.4630
+    >>> print('alpha: %.4f' % power_ttest(d=0.5, n=20, power=0.80, alpha=None))
+    alpha: 0.4630
     """
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [d, n, power, alpha]])
@@ -269,22 +266,21 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
     --------
     1. Compute achieved power of a T-test given ``d``, ``n`` and ``alpha``
 
-        >>> from pingouin import power_ttest2n
-        >>> print('power: %.4f' % power_ttest2n(nx=20, ny=15, d=0.5,
-        ...                                     tail='one-sided'))
-            power: 0.4164
+    >>> from pingouin import power_ttest2n
+    >>> print('power: %.4f' % power_ttest2n(nx=20, ny=15, d=0.5,
+    ...                                     tail='one-sided'))
+    power: 0.4164
 
     3. Compute achieved ``d`` given ``n``, ``power`` and ``alpha`` level
 
-        >>> print('d: %.4f' % power_ttest2n(nx=20, ny=15, power=0.80,
-        ...                                 alpha=0.05))
-            d: 0.9859
+    >>> print('d: %.4f' % power_ttest2n(nx=20, ny=15, power=0.80, alpha=0.05))
+    d: 0.9859
 
     4. Compute achieved alpha level given``d``, ``n`` and ``power``
 
-        >>> print('alpha: %.4f' % power_ttest2n(nx=20, ny=15, d=0.5,
-        ...                                     power=0.80, alpha=None))
-            alpha: 0.5366
+    >>> print('alpha: %.4f' % power_ttest2n(nx=20, ny=15, d=0.5,
+    ...                                     power=0.80, alpha=None))
+    alpha: 0.5366
     """
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [d, power, alpha]])
@@ -424,30 +420,30 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
     --------
     1. Compute achieved power
 
-        >>> from pingouin import power_anova
-        >>> print('power: %.4f' % power_anova(eta=0.1, k=3, n=20))
-            power: 0.6804
+    >>> from pingouin import power_anova
+    >>> print('power: %.4f' % power_anova(eta=0.1, k=3, n=20))
+    power: 0.6082
 
     2. Compute required number of groups
 
-        >>> print('k: %.4f' % power_anova(eta=0.1, n=20, power=0.80))
-            k: 6.0944
+    >>> print('k: %.4f' % power_anova(eta=0.1, n=20, power=0.80))
+    k: 6.0944
 
     3. Compute required sample size
 
-        >>> print('n: %.4f' % power_anova(eta=0.1, k=3, power=0.80))
-            n: 25.5289
+    >>> print('n: %.4f' % power_anova(eta=0.1, k=3, power=0.80))
+    n: 29.9255
 
     4. Compute achieved effect size
 
-        >>> print('eta: %.4f' % power_anova(n=20, power=0.80, alpha=0.05))
-            eta: 0.1255
+    >>> print('eta: %.4f' % power_anova(n=20, k=4, power=0.80, alpha=0.05))
+    eta: 0.1255
 
     5. Compute achieved alpha (significance)
 
-        >>> print('alpha: %.4f' % power_anova(eta=0.1, n=20, power=0.80,
-        ...                                   alpha=None))
-            alpha: 0.1085
+    >>> print('alpha: %.4f' % power_anova(eta=0.1, n=20, k=4, power=0.80,
+    ...                                   alpha=None))
+    alpha: 0.1085
     """
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [eta, k, n, power, alpha]])
@@ -571,26 +567,26 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
     --------
     1. Compute achieved power given ``r``, ``n`` and ``alpha``
 
-        >>> from pingouin import power_corr
-        >>> print('power: %.4f' % power_corr(r=0.5, n=20))
-            power: 0.6379
+    >>> from pingouin import power_corr
+    >>> print('power: %.4f' % power_corr(r=0.5, n=20))
+    power: 0.6379
 
     2. Compute required sample size given ``r``, ``power`` and ``alpha``
 
-        >>> print('n: %.4f' % power_corr(r=0.5, power=0.80,
-        ...                                tail='one-sided'))
-            n: 22.6091
+    >>> print('n: %.4f' % power_corr(r=0.5, power=0.80,
+    ...                                tail='one-sided'))
+    n: 22.6091
 
     3. Compute achieved ``r`` given ``n``, ``power`` and ``alpha`` level
 
-        >>> print('r: %.4f' % power_corr(n=20, power=0.80, alpha=0.05))
-            r: 0.5822
+    >>> print('r: %.4f' % power_corr(n=20, power=0.80, alpha=0.05))
+    r: 0.5822
 
     4. Compute achieved alpha level given ``r``, ``n`` and ``power``
 
-        >>> print('alpha: %.4f' % power_corr(r=0.5, n=20, power=0.80,
-        ...                                    alpha=None))
-            alpha: 0.1377
+    >>> print('alpha: %.4f' % power_corr(r=0.5, n=20, power=0.80,
+    ...                                    alpha=None))
+    alpha: 0.1377
     """
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [r, n, power, alpha]])

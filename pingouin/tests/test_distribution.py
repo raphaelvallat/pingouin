@@ -5,7 +5,7 @@ from unittest import TestCase
 from pingouin.distribution import (gzscore, normality, anderson, epsilon,
                                    multivariate_normality, homoscedasticity,
                                    sphericity)
-from pingouin.datasets import read_dataset
+from pingouin import read_dataset
 
 # Generate random dataframe
 df = read_dataset('mixed_anova.csv')

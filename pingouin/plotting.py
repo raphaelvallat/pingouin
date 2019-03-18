@@ -541,27 +541,27 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
 
     .. plot::
 
-        >>> from pingouin.datasets import read_dataset
+        >>> from pingouin import read_dataset
         >>> df = read_dataset('mixed_anova')
         >>> df = df.query("Group == 'Meditation' and Subject > 40")
         >>> df = df.query("Time == 'August' or Time == 'June'")
         >>> import pingouin as pg
         >>> ax = pg.plot_paired(data=df, dv='Scores', within='Time',
-        >>>                     subject='Subject', dpi=150)
+        ...                     subject='Subject', dpi=150)
 
     Paired plot on an existing axis (no boxplot and uniform color):
 
     .. plot::
 
-        >>> from pingouin.datasets import read_dataset
+        >>> from pingouin import read_dataset
         >>> df = read_dataset('mixed_anova').query("Time != 'January'")
         >>> import pingouin as pg
         >>> import matplotlib.pyplot as plt
         >>> fig, ax1 = plt.subplots(1, 1, figsize=(5, 4))
         >>> pg.plot_paired(data=df[df['Group'] == 'Meditation'],
-        >>>                dv='Scores', within='Time', subject='Subject',
-        >>>                ax=ax1, boxplot=False,
-        >>>                colors=['grey', 'grey', 'grey'])
+        ...                dv='Scores', within='Time', subject='Subject',
+        ...                ax=ax1, boxplot=False,
+        ...                colors=['grey', 'grey', 'grey'])
     """
     from pingouin.utils import _check_dataframe, _remove_rm_na
 

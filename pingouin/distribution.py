@@ -38,15 +38,13 @@ def gzscore(x):
     --------
     Standardize a log-normal array
 
-        >>> import numpy as np
-        >>> from pingouin import gzscore
-        >>> np.random.seed(123)
-        >>> raw = np.random.lognormal(size=100)
-        >>> print(raw.mean().round(3), raw.std().round(3))
-            1.849 2.282
-        >>> z = gzscore(raw)
-        >>> print(z.mean(), z.std())
-            0 0.995
+    >>> import numpy as np
+    >>> from pingouin import gzscore
+    >>> np.random.seed(123)
+    >>> raw = np.random.lognormal(size=100)
+    >>> z = gzscore(raw)
+    >>> print(round(z.mean(), 3), round(z.std(), 3))
+    -0.0 0.995
     """
     from scipy.stats import gmean
     # Geometric mean
@@ -130,24 +128,24 @@ def normality(*args, alpha=.05):
     --------
     1. Test the normality of one array.
 
-        >>> import numpy as np
-        >>> from pingouin import normality
-        >>> np.random.seed(123)
-        >>> x = np.random.normal(size=100)
-        >>> normal, p = normality(x, alpha=.05)
-        >>> print(normal, p)
-        True 0.27
+    >>> import numpy as np
+    >>> from pingouin import normality
+    >>> np.random.seed(123)
+    >>> x = np.random.normal(size=100)
+    >>> normal, p = normality(x, alpha=.05)
+    >>> print(normal, p)
+    True 0.275
 
     2. Test the normality of two arrays.
 
-        >>> import numpy as np
-        >>> from pingouin import normality
-        >>> np.random.seed(123)
-        >>> x = np.random.normal(size=100)
-        >>> y = np.random.rand(100)
-        >>> normal, p = normality(x, y, alpha=.05)
-        >>> print(normal, p)
-        [True   False] [0.27   0.0005]
+    >>> import numpy as np
+    >>> from pingouin import normality
+    >>> np.random.seed(123)
+    >>> x = np.random.normal(size=100)
+    >>> y = np.random.rand(100)
+    >>> normal, p = normality(x, y, alpha=.05)
+    >>> print(normal, p)
+    [ True False] [0.275 0.001]
     """
     from scipy.stats import shapiro
     k = len(args)
@@ -211,25 +209,25 @@ def multivariate_normality(X, alpha=.05):
     --------
     1. Test for multivariate normality of 2 variables
 
-        >>> import numpy as np
-        >>> from pingouin import multivariate_normality
-        >>> np.random.seed(123)
-        >>> mean, cov, n = [4, 6], [[1, .5], [.5, 1]], 30
-        >>> X = np.random.multivariate_normal(mean, cov, n)
-        >>> normal, p = multivariate_normality(X, alpha=.05)
-        >>> print(normal, p)
-            True 0.7523511059223078
+    >>> import numpy as np
+    >>> from pingouin import multivariate_normality
+    >>> np.random.seed(123)
+    >>> mean, cov, n = [4, 6], [[1, .5], [.5, 1]], 30
+    >>> X = np.random.multivariate_normal(mean, cov, n)
+    >>> normal, p = multivariate_normality(X, alpha=.05)
+    >>> print(normal, p)
+    True 0.7523511059223078
 
     2. Test for multivariate normality of 3 variables
 
-        >>> import numpy as np
-        >>> from pingouin import multivariate_normality
-        >>> np.random.seed(123)
-        >>> mean, cov = [4, 6, 5], [[1, .5, .2], [.5, 1, .1], [.2, .1, 1]]
-        >>> X = np.random.multivariate_normal(mean, cov, 50)
-        >>> normal, p = multivariate_normality(X, alpha=.05)
-        >>> print(normal, p)
-            True 0.46074660317578175
+    >>> import numpy as np
+    >>> from pingouin import multivariate_normality
+    >>> np.random.seed(123)
+    >>> mean, cov = [4, 6, 5], [[1, .5, .2], [.5, 1, .1], [.2, .1, 1]]
+    >>> X = np.random.multivariate_normal(mean, cov, 50)
+    >>> normal, p = multivariate_normality(X, alpha=.05)
+    >>> print(normal, p)
+    True 0.4607466031757833
     """
     from scipy.stats import lognorm
 
@@ -363,17 +361,15 @@ def homoscedasticity(*args, alpha=.05):
     --------
     Test the homoscedasticity of two arrays.
 
-        >>> import numpy as np
-        >>> from pingouin import homoscedasticity
-        >>> np.random.seed(123)
-        >>> # Scale = standard deviation of the distribution.
-        >>> x = np.random.normal(loc=0, scale=1., size=100)
-        >>> y = np.random.normal(loc=0, scale=0.8,size=100)
-        >>> print(np.var(x), np.var(y))
-            1.27 0.60
-        >>> equal_var, p = homoscedasticity(x, y, alpha=.05)
-        >>> print(equal_var, p)
-            False 0.0002
+    >>> import numpy as np
+    >>> from pingouin import homoscedasticity
+    >>> np.random.seed(123)
+    >>> # Scale = standard deviation of the distribution.
+    >>> x = np.random.normal(loc=0, scale=1., size=100)
+    >>> y = np.random.normal(loc=0, scale=0.8,size=100)
+    >>> equal_var, p = homoscedasticity(x, y, alpha=.05)
+    >>> print(round(np.var(x), 3), round(np.var(y), 3), equal_var, p)
+    1.273 0.602 False 0.0
     """
     from scipy.stats import levene, bartlett
     k = len(args)
@@ -414,16 +410,16 @@ def anderson(*args, dist='norm'):
     --------
     1. Test that an array comes from a normal distribution
 
-        >>> from pingouin import anderson
-        >>> x = [2.3, 5.1, 4.3, 2.6, 7.8, 9.2, 1.4]
-        >>> anderson(x, dist='norm')
-            (False, 15.0)
+    >>> from pingouin import anderson
+    >>> x = [2.3, 5.1, 4.3, 2.6, 7.8, 9.2, 1.4]
+    >>> anderson(x, dist='norm')
+    (False, 15.0)
 
     2. Test that two arrays comes from an exponential distribution
 
-        >>> y = [2.8, 12.4, 28.3, 3.2, 16.3, 14.2]
-        >>> anderson(x, y, dist='expon')
-            (array([False, False]), array([15., 15.]))
+    >>> y = [2.8, 12.4, 28.3, 3.2, 16.3, 14.2]
+    >>> anderson(x, y, dist='expon')
+    (array([False, False]), array([15., 15.]))
     """
     from scipy.stats import anderson as ads
     k = len(args)
@@ -498,19 +494,19 @@ def epsilon(data, correction='gg'):
     Examples
     --------
 
-        >>> import pandas as pd
-        >>> from pingouin import epsilon
-        >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
-        >>>                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
-        >>>                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
-        >>> epsilon(data, correction='gg')
-            0.558
+    >>> import pandas as pd
+    >>> from pingouin import epsilon
+    >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
+    ...                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
+    ...                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
+    >>> epsilon(data, correction='gg')
+    0.5587754577585018
 
-        >>> epsilon(data, correction='hf')
-            0.622
+    >>> epsilon(data, correction='hf')
+    0.6223448311539781
 
-        >>> epsilon(data, correction='lb')
-            0.50
+    >>> epsilon(data, correction='lb')
+    0.5
     """
     # Covariance matrix
     S = data.cov()
@@ -633,18 +629,18 @@ def sphericity(data, method='mauchly', alpha=.05):
     --------
     1. Mauchly test for sphericity
 
-        >>> import pandas as pd
-        >>> from pingouin import sphericity
-        >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
-        >>>                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
-        >>>                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
-        >>> sphericity(data)
-            (True, 0.21, 4.677, 2, 0.09649016283209648)
+    >>> import pandas as pd
+    >>> from pingouin import sphericity
+    >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
+    ...                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
+    ...                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
+    >>> sphericity(data)
+    (True, 0.21, 4.677, 2, 0.09649016283209666)
 
     2. JNS test for sphericity
 
-        >>> sphericity(data, method='jns')
-            (False, 1.118, 6.176, 2, 0.0456042403075201)
+    >>> sphericity(data, method='jns')
+    (False, 1.118, 6.176, 2, 0.04560424030751982)
     """
     from scipy.stats import chi2
     S = data.cov().values

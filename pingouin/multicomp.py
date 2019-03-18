@@ -41,14 +41,11 @@ def fdr(pvals, alpha=0.05, method='indep'):
     --------
     FDR correction of an array of p-values
 
-        >>> from pingouin import fdr
-        >>> pvals = [.50, .003, .32, .054, .0003]
-        >>> reject, pvals_corr = bonf(pvals, alpha=.05)
-        >>> print(reject, pvals_corr)
-
-    **Output:**
-
-    [False True False False  True] [0.5  0.0075  0.4  0.09  0.0015]
+    >>> from pingouin import fdr
+    >>> pvals = [.50, .003, .32, .054, .0003]
+    >>> reject, pvals_corr = fdr(pvals, alpha=.05)
+    >>> print(reject, pvals_corr)
+    [False  True False False  True] [0.5    0.0075 0.4    0.09   0.0015]
     """
     pvals = np.asarray(pvals)
     shape_init = pvals.shape
@@ -102,14 +99,11 @@ def bonf(pvals, alpha=0.05):
     --------
     Bonferroni correction of an array of p-values
 
-        >>> from pingouin import bonf
-        >>> pvals = [.50, .003, .32, .054, .0003]
-        >>> reject, pvals_corr = bonf(pvals, alpha=.05)
-        >>> print(reject, pvals_corr)
-
-    **Output:**
-
-    [False True False False  True] [1.  0.015   1.  0.27  0.0015]
+    >>> from pingouin import bonf
+    >>> pvals = [.50, .003, .32, .054, .0003]
+    >>> reject, pvals_corr = bonf(pvals, alpha=.05)
+    >>> print(reject, pvals_corr)
+    [False  True False False  True] [1.     0.015  1.     0.27   0.0015]
     """
     pvals = np.asarray(pvals)
     pvals_corrected = pvals * float(pvals.size)
@@ -139,14 +133,11 @@ def holm(pvals, alpha=.05):
     --------
     Holm correction of an array of p-values
 
-        >>> from pingouin import holm
-        >>> pvals = [.50, .003, .32, .054, .0003]
-        >>> reject, pvals_corr = holm(pvals, alpha=.05)
-        >>> print(reject, pvals_corr)
-
-    **Output:**
-
-    [False True False False True] [0.64  0.012  0.64  0.162  0.0015]
+    >>> from pingouin import holm
+    >>> pvals = [.50, .003, .32, .054, .0003]
+    >>> reject, pvals_corr = holm(pvals, alpha=.05)
+    >>> print(reject, pvals_corr)
+    [False  True False False  True] [0.64   0.012  0.64   0.162  0.0015]
     """
     pvals = np.asarray(pvals)
     shape_init = pvals.shape
@@ -209,14 +200,11 @@ def multicomp(pvals, alpha=0.05, method='holm'):
     --------
     FDR correction of an array of p-values
 
-        >>> from pingouin import multicomp
-        >>> pvals = [.50, .003, .32, .054, .0003]
-        >>> reject, pvals_corr = multicomp(pvals, method='fdr_bh')
-        >>> print(reject, pvals_corr)
-
-    **Output:**
-
-    [False True False False  True] [0.5  0.0075  0.4  0.09  0.0015]
+    >>> from pingouin import multicomp
+    >>> pvals = [.50, .003, .32, .054, .0003]
+    >>> reject, pvals_corr = multicomp(pvals, method='fdr_bh')
+    >>> print(reject, pvals_corr)
+    [False  True False False  True] [0.5    0.0075 0.4    0.09   0.0015]
     '''
     if not isinstance(pvals, (list, np.ndarray)):
         err = "pvals must be a list or a np.ndarray"

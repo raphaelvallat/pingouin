@@ -85,40 +85,42 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     --------
     1. Simple linear regression
 
-        >>> import numpy as np
-        >>> from pingouin import linear_regression
-        >>> np.random.seed(123)
-        >>> mean, cov, n = [4, 6], [[1, 0.5], [0.5, 1]], 30
-        >>> x, y = np.random.multivariate_normal(mean, cov, n).T
-        >>> lm = linear_regression(x, y)
-        >>> print(lm['coef'].values)
-            [4.39720706 0.39495526]
+    >>> import numpy as np
+    >>> from pingouin import linear_regression
+    >>> np.random.seed(123)
+    >>> mean, cov, n = [4, 6], [[1, 0.5], [0.5, 1]], 30
+    >>> x, y = np.random.multivariate_normal(mean, cov, n).T
+    >>> lm = linear_regression(x, y)
+    >>> lm.round(2)
+           names  coef    se     T  pval    r2  adj_r2  CI[2.5%]  CI[97.5%]
+    0  Intercept  4.40  0.54  8.16  0.00  0.24    0.21      3.29       5.50
+    1         x1  0.39  0.13  2.99  0.01  0.24    0.21      0.12       0.67
 
     2. Multiple linear regression
 
-        >>> np.random.seed(42)
-        >>> z = np.random.normal(size=n)
-        >>> X = np.column_stack((x, z))
-        >>> lm = linear_regression(X, y)
-        >>> print(lm['coef'].values)
-            [4.54123324 0.36628301 0.17709451]
+    >>> np.random.seed(42)
+    >>> z = np.random.normal(size=n)
+    >>> X = np.column_stack((x, z))
+    >>> lm = linear_regression(X, y)
+    >>> print(lm['coef'].values)
+    [4.54123324 0.36628301 0.17709451]
 
     3. Using a Pandas DataFrame
 
-        >>> import pandas as pd
-        >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
-        >>> lm = linear_regression(df[['x', 'z']], df['y'])
-        >>> print(lm['coef'].values)
-            [4.54123324 0.36628301 0.17709451]
+    >>> import pandas as pd
+    >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
+    >>> lm = linear_regression(df[['x', 'z']], df['y'])
+    >>> print(lm['coef'].values)
+    [4.54123324 0.36628301 0.17709451]
 
     4. No intercept and return coef only
 
-        >>> linear_regression(X, y, add_intercept=False, coef_only=True)
-            array([ 1.40935593, -0.2916508 ])
+    >>> linear_regression(X, y, add_intercept=False, coef_only=True)
+    array([ 1.40935593, -0.2916508 ])
 
     5. Return a dictionnary instead of a DataFrame
 
-        >>> linear_regression(X, y, as_dataframe=False)
+    >>> lm_dict = linear_regression(X, y, as_dataframe=False)
     """
     # Extract names if X is a Dataframe or Series
     if isinstance(X, pd.DataFrame):
@@ -243,42 +245,44 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     --------
     1. Simple binary logistic regression
 
-        >>> import numpy as np
-        >>> from pingouin import logistic_regression
-        >>> np.random.seed(123)
-        >>> x = np.random.normal(size=30)
-        >>> y = np.random.randint(0, 2, size=30)
-        >>> lom = logistic_regression(x, y)
-        >>> print(lom['coef'].values)
-            [-0.27122371  0.05927182]
+    >>> import numpy as np
+    >>> from pingouin import logistic_regression
+    >>> np.random.seed(123)
+    >>> x = np.random.normal(size=30)
+    >>> y = np.random.randint(0, 2, size=30)
+    >>> lom = logistic_regression(x, y)
+    >>> lom.round(2)
+           names  coef    se     z  pval  CI[2.5%]  CI[97.5%]
+    0  Intercept -0.27  0.37 -0.73  0.46     -0.99       0.45
+    1         x1  0.06  0.32  0.19  0.85     -0.56       0.68
 
     2. Multiple binary logistic regression
 
-        >>> np.random.seed(42)
-        >>> z = np.random.normal(size=30)
-        >>> X = np.column_stack((x, z))
-        >>> lom = logistic_regression(X, y)
-        >>> print(lom['coef'].values)
-            [-0.34933805 -0.0226106  -0.39453532]
+    >>> np.random.seed(42)
+    >>> z = np.random.normal(size=30)
+    >>> X = np.column_stack((x, z))
+    >>> lom = logistic_regression(X, y)
+    >>> print(lom['coef'].values)
+    [-0.34933805 -0.0226106  -0.39453532]
 
     3. Using a Pandas DataFrame
 
-        >>> import pandas as pd
-        >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
-        >>> lom = logistic_regression(df[['x', 'z']], df['y'])
-        >>> print(lom['coef'].values)
-            [-0.34933805 -0.0226106  -0.39453532]
+    >>> import pandas as pd
+    >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
+    >>> lom = logistic_regression(df[['x', 'z']], df['y'])
+    >>> print(lom['coef'].values)
+    [-0.34933805 -0.0226106  -0.39453532]
 
     4. Return only the coefficients
 
-        >>> logistic_regression(X, y, coef_only=True)
-            array([-0.34933805, -0.0226106 , -0.39453532])
+    >>> logistic_regression(X, y, coef_only=True)
+    array([-0.34933805, -0.0226106 , -0.39453532])
 
     4. Passing custom parameters to sklearn
 
-        >>> lom = logistic_regression(X, y, solver='sag', max_iter=10000)
-        >>> print(lom['coef'].values)
-            [-0.34941889 -0.02261911 -0.39451064]
+    >>> lom = logistic_regression(X, y, solver='sag', max_iter=10000)
+    >>> print(lom['coef'].values)
+    [-0.34941889 -0.02261911 -0.39451064]
     """
     # Check that sklearn is installed
     from pingouin.utils import is_sklearn_installed
@@ -480,24 +484,32 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     --------
     1. Simple mediation analysis
 
-        >>> from pingouin import mediation_analysis
-        >>> from pingouin.datasets import read_dataset
-        >>> df = read_dataset('mediation')
-        >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05)
+    >>> from pingouin import mediation_analysis, read_dataset
+    >>> df = read_dataset('mediation')
+    >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05)
+           Path    Beta  CI[2.5%]  CI[97.5%]  Sig
+    0    X -> M  0.5610    0.3735     0.7485  Yes
+    1    M -> Y  0.6542    0.4838     0.8245  Yes
+    2    X -> Y  0.3961    0.1755     0.6167  Yes
+    3    Direct  0.0396   -0.1780     0.2572   No
+    4  Indirect  0.3565    0.2200     0.5380  Yes
 
     2. Return the indirect bootstrapped beta coefficients
 
-        >>> stats, dist = mediation_analysis(data=df, x='X', m='M', y='Y',
-        >>>                                  return_dist=True)
-        >>> print(dist.shape)
-            (500,)
+    >>> stats, dist = mediation_analysis(data=df, x='X', m='M', y='Y',
+    ...                                  return_dist=True)
+    >>> print(dist.shape)
+    (500,)
 
     3. Mediation analysis with a binary mediator variable
 
-        >>> from pingouin import mediation_analysis
-        >>> from pingouin.datasets import read_dataset
-        >>> df = read_dataset('mediation')
-        >>> mediation_analysis(data=df, x='X', m='Mbin', y='Y', alpha=0.05)
+    >>> mediation_analysis(data=df, x='X', m='Mbin', y='Y', alpha=0.05)
+           Path    Beta  CI[2.5%]  CI[97.5%]  Sig
+    0    X -> M -0.0205   -0.2476     0.2066   No
+    1    M -> Y -0.1354   -0.9525     0.6818   No
+    2    X -> Y  0.3961    0.1755     0.6167  Yes
+    3    Direct  0.3956    0.1739     0.6173  Yes
+    4  Indirect  0.0023   -0.0582     0.1088   No
     """
     n = data.shape[0]
 

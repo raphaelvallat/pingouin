@@ -69,7 +69,7 @@ class TestNonParametric(TestCase):
 
     def test_cochran(self):
         """Test function cochran"""
-        from pingouin.datasets import read_dataset
+        from pingouin import read_dataset
         df = read_dataset('cochran')
         st = cochran(dv='Energetic', within='Time', subject='Subject', data=df)
         assert st.loc['cochran', 'Q'] == 6.706

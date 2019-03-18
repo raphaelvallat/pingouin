@@ -143,30 +143,29 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     --------
     1. One between-factor
 
-        >>> from pingouin import pairwise_ttests
-        >>> from pingouin.datasets import read_dataset
-        >>> df = read_dataset('mixed_anova.csv')
-        >>> post_hocs = pairwise_ttests(dv='Scores', between='Group', data=df)
-        >>> print(post_hocs)
+    >>> from pingouin import pairwise_ttests, read_dataset
+    >>> df = read_dataset('mixed_anova.csv')
+    >>> post_hocs = pairwise_ttests(dv='Scores', between='Group', data=df)
 
     2. One within-factor
 
-        >>> post_hocs = pairwise_ttests(dv='Scores', within='Time',
-        >>>                             subject='Subject', data=df)
-        >>> print(post_hocs)
+    >>> post_hocs = pairwise_ttests(dv='Scores', within='Time',
+    ...                             subject='Subject', data=df)
+    >>> print(post_hocs)
 
     3. Non-parametric pairwise paired test (wilcoxon)
-        >>> pairwise_ttests(dv='Scores', within='Time', subject='Subject',
-        >>>                 data=df, parametric=False)
+
+    >>> pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+    ...                 data=df, parametric=False)
 
     4. Within + Between + Within * Between with corrected p-values
 
-        >>> pairwise_ttests(dv='Scores', within='Time', subject='Subject',
-        >>>                  between='Group', padjust='bonf', data=df)
+    >>> pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+    ...                 between='Group', padjust='bonf', data=df)
 
     5. Between1 + Between2 + Between1 * Between2
 
-        >>> pairwise_ttests(dv='Scores', between=['Group', 'Time'], data=df)
+    >>> pairwise_ttests(dv='Scores', between=['Group', 'Time'], data=df)
     '''
     from pingouin.parametric import ttest
     from pingouin.nonparametric import wilcoxon, mwu
@@ -488,10 +487,9 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
     --------
     Pairwise Tukey post-hocs on the pain threshold dataset.
 
-        >>> from pingouin import pairwise_tukey
-        >>> from pingouin.datasets import read_dataset
-        >>> df = read_dataset('anova')
-        >>> pairwise_tukey(dv='Pain threshold', between='Hair color', data=df)
+    >>> from pingouin import pairwise_tukey, read_dataset
+    >>> df = read_dataset('anova')
+    >>> pairwise_tukey(dv='Pain threshold', between='Hair color', data=df)
     '''
     from pingouin.external.qsturng import psturng
 
@@ -642,11 +640,10 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
     --------
     Pairwise Games-Howell post-hocs on the pain threshold dataset.
 
-        >>> from pingouin import pairwise_gameshowell
-        >>> from pingouin.datasets import read_dataset
-        >>> df = read_dataset('anova')
-        >>> pairwise_gameshowell(dv='Pain threshold', between='Hair color',
-        >>>                      data=df)
+    >>> from pingouin import pairwise_gameshowell, read_dataset
+    >>> df = read_dataset('anova')
+    >>> pairwise_gameshowell(dv='Pain threshold', between='Hair color',
+    ...                      data=df)
     '''
     from pingouin.external.qsturng import psturng
 
@@ -785,37 +782,38 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     (and method='pearson').
 
     This functio also works with two-dimensional multi-index columns. In this
-    case, columns must be list(s) of tuple(s). See the Jupyter notebooks for
-    more details.
+    case, columns must be list(s) of tuple(s). See the Jupyter notebook
+    for more details:
+    https://github.com/raphaelvallat/pingouin/blob/master/notebooks/04_Correlations.ipynb
+
 
     Examples
     --------
     1. One-tailed spearman correlation corrected for multiple comparisons
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import pairwise_corr
-        >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
-        >>> stats = pairwise_corr(data, method='spearman', tail='two-sided',
-        >>>                       padjust='bonf')
-        >>> stats
+    >>> from pingouin import pairwise_corr, read_dataset
+    >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
+    >>> stats = pairwise_corr(data, method='spearman', tail='two-sided',
+    ...                       padjust='bonf')
+    >>> stats
 
     2. Robust two-sided correlation with uncorrected p-values
 
-        >>> pairwise_corr(data, columns=['Openness', 'Extraversion',
-        >>>                              'Neuroticism'], method='percbend')
+    >>> pairwise_corr(data, columns=['Openness', 'Extraversion',
+    ...                              'Neuroticism'], method='percbend')
 
     3. Export the results to a .csv file
 
-        >>> pairwise_corr(data, export_filename='pairwise_corr.csv')
+    >>> pairwise_corr(data, export_filename='pairwise_corr.csv')
 
-    4. One-versus-others pairwise correlations
+    4. One-versus-all pairwise correlations
 
-        >>> pairwise_corr(data, columns=['Neuroticism'])
+    >>> pairwise_corr(data, columns=['Neuroticism'])
 
     5. Pairwise correlations between two lists of columns (cartesian product)
 
-        >>> pairwise_corr(data, columns=[['Neuroticism', 'Extraversion'],
-        >>>                              ['Openness', 'Agreeableness'])
+    >>> pairwise_corr(data, columns=[['Neuroticism', 'Extraversion'],
+    ...                              ['Openness', 'Agreeableness'])
     '''
     from pingouin.correlation import corr
 

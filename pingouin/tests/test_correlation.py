@@ -4,7 +4,7 @@ import pandas as pd
 from unittest import TestCase
 from pingouin.correlation import (corr, rm_corr, intraclass_corr, partial_corr,
                                   skipped, distance_corr)
-from pingouin.datasets import read_dataset
+from pingouin import read_dataset
 
 
 class TestCorrelation(TestCase):

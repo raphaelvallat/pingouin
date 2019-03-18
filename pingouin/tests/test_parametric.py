@@ -4,7 +4,7 @@ import numpy as np
 from unittest import TestCase
 from pingouin.parametric import (ttest, anova, anova2, rm_anova, mixed_anova,
                                  rm_anova2, ancova, welch_anova, ancovan)
-from pingouin.datasets import read_dataset
+from pingouin import read_dataset
 
 # Generate random data for ANOVA
 df = read_dataset('mixed_anova.csv')

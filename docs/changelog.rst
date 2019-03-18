@@ -16,6 +16,10 @@ b. :py:func:`pingouin.rm_corr` now requires at least 3 unique subjects (same beh
 c. The :py:func:`pingouin.pairwise_corr` is faster and returns the number of outlier if a robust correlation is used.
 d. Added support for 2D level in the :py:func:`pingouin.pairwise_corr`. See Jupyter notebooks for examples.
 
+**Datasets**
+
+a. Renamed :py:func:`pingouin.read_dataset` and :py:func:`pingouin.list_dataset` (before one needed to call these functions by calling pingouin.datasets)
+
 **Pairwise T-tests**
 
 a. Added support for non-parametric pairwise tests in :py:func:`pingouin.pairwise_ttests` function.
@@ -24,11 +28,12 @@ c. CLES is now implemented in the :py:func:`pingouin.compute_effsize` function.
 
 **Plotting**
 
-a. Added :py:func:`pingouin.plot_paired` function
+a. Added :py:func:`pingouin.plot_paired` function.
 
 **Testing**
 
-a. Travis and AppVeyor test for Python 3.5, 3.6 and 3.7
+a. Travis and AppVeyor test for Python 3.5, 3.6 and 3.7.
+b. Better doctest & improved examples for many functions.
 
 v0.2.3 (February 2019)
 ----------------------

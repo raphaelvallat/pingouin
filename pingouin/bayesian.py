@@ -67,21 +67,24 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     --------
     1. Bayes Factor of an independent two-sample T-test
 
-        >>> from pingouin import bayesfactor_ttest
-        >>> bf = bayesfactor_ttest(3.5, 20, 20)
-        >>> print("Bayes Factor: %.2f (two-sample independent)" % bf)
+    >>> from pingouin import bayesfactor_ttest
+    >>> bf = bayesfactor_ttest(3.5, 20, 20)
+    >>> print("Bayes Factor: %.2f (two-sample independent)" % bf)
+    Bayes Factor: 26.74 (two-sample independent)
 
     2. Bayes Factor of a paired two-sample T-test
 
-        >>> from pingouin import bayesfactor_ttest
-        >>> bf = bayesfactor_ttest(3.5, 20, 20, paired=True)
-        >>> print("Bayes Factor: %.2f (two-sample paired)" % bf)
+    >>> from pingouin import bayesfactor_ttest
+    >>> bf = bayesfactor_ttest(3.5, 20, 20, paired=True)
+    >>> print("Bayes Factor: %.2f (two-sample paired)" % bf)
+    Bayes Factor: 17.18 (two-sample paired)
 
     3. Bayes Factor of an one-sided one-sample T-test
 
-        >>> from pingouin import bayesfactor_ttest
-        >>> bf = bayesfactor_ttest(3.5, 20, tail='one-sided')
-        >>> print("Bayes Factor: %.2f (one-sample)" % bf)
+    >>> from pingouin import bayesfactor_ttest
+    >>> bf = bayesfactor_ttest(3.5, 20, tail='one-sided')
+    >>> print("Bayes Factor: %.2f (one-sample)" % bf)
+    Bayes Factor: 34.37 (one-sample)
     """
     from scipy.integrate import quad
     one_sample = True if ny is None or ny == 1 else False
@@ -163,9 +166,10 @@ def bayesfactor_pearson(r, n):
     --------
     1. Bayes Factor of a Pearson correlation
 
-        >>> from pingouin import bayesfactor_pearson
-        >>> bf = bayesfactor_pearson(0.6, 20)
-        >>> print("Bayes Factor: %.3f" % bf)
+    >>> from pingouin import bayesfactor_pearson
+    >>> bf = bayesfactor_pearson(0.6, 20)
+    >>> print("Bayes Factor: %.3f" % bf)
+    Bayes Factor: 8.221
     """
     from scipy.integrate import quad
     from scipy.special import gamma

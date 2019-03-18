@@ -4,7 +4,7 @@ from numpy.testing import assert_almost_equal, assert_equal
 from unittest import TestCase
 from pingouin.regression import (linear_regression, logistic_regression,
                                  mediation_analysis)
-from pingouin.datasets import read_dataset
+from pingouin import read_dataset
 
 from scipy.stats import linregress
 from sklearn.linear_model import LinearRegression

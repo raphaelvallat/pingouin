@@ -345,60 +345,60 @@ def corr(x, y, tail='two-sided', method='pearson'):
     --------
     1. Pearson correlation
 
-        >>> # Generate random correlated samples
-        >>> np.random.seed(123)
-        >>> mean, cov = [4, 6], [(1, .5), (.5, 1)]
-        >>> x, y = np.random.multivariate_normal(mean, cov, 30).T
-        >>> # Compute Pearson correlation
-        >>> from pingouin import corr
-        >>> corr(x, y)
-            method   n   r      CI95%         r2     adj_r2  p-val   BF10
-            pearson  30  0.491  [0.16, 0.72]  0.242  0.185   0.0058  6.135
+    >>> # Generate random correlated samples
+    >>> np.random.seed(123)
+    >>> mean, cov = [4, 6], [(1, .5), (.5, 1)]
+    >>> x, y = np.random.multivariate_normal(mean, cov, 30).T
+    >>> # Compute Pearson correlation
+    >>> from pingouin import corr
+    >>> corr(x, y)
+              n      r         CI95%     r2  adj_r2     p-val   BF10  power
+    pearson  30  0.491  [0.16, 0.72]  0.242   0.185  0.005813  6.135  0.809
 
     2. Pearson correlation with two outliers
 
-        >>> x[3], y[5] = 12, -8
-        >>> corr(x, y)
-            method   n    r      CI95%          r2     adj_r2  p-val  BF10
-            pearson  30   0.147  [-0.23, 0.48]  0.022  -0.051  0.439  0.19
+    >>> x[3], y[5] = 12, -8
+    >>> corr(x, y)
+              n      r          CI95%     r2  adj_r2     p-val  BF10  power
+    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439148  0.19  0.121
 
     3. Spearman correlation
 
-        >>> corr(x, y, method="spearman")
-            method    n   r      CI95%         r2     adj_r2  p-val
-            spearman  30  0.401  [0.05, 0.67]  0.161  0.099   0.028
+    >>> corr(x, y, method="spearman")
+               n      r         CI95%     r2  adj_r2     p-val  power
+    spearman  30  0.401  [0.05, 0.67]  0.161   0.099  0.028034   0.61
 
     4. Percentage bend correlation (robust)
 
-        >>> corr(x, y, method='percbend')
-            method    n   r      CI95%         r2     adj_r2  p-val
-            percbend  30  0.389  [0.03, 0.66]  0.151  0.089   0.034
+    >>> corr(x, y, method='percbend')
+               n      r         CI95%     r2  adj_r2     p-val  power
+    percbend  30  0.389  [0.03, 0.66]  0.151   0.089  0.033508  0.581
 
     5. Shepherd's pi correlation (robust)
 
-        >>> corr(x, y, method='shepherd')
-            method    n   outliers  r      CI95%         r2     adj_r2  p-val
-            percbend  30  2         0.437  [0.09, 0.69]  0.191  0.131   0.020
+    >>> corr(x, y, method='shepherd')
+               n  outliers      r         CI95%     r2  adj_r2     p-val  power
+    shepherd  30         2  0.437  [0.09, 0.69]  0.191   0.131  0.020128  0.694
 
     6. Skipped spearman correlation (robust)
 
-        >>> corr(x, y, method='skipped')
-            method    n   outliers r      CI95%         r2     adj_r2  p-val
-            percbend  30  2        0.437  [0.09, 0.69]  0.191  0.131   0.020
+    >>> corr(x, y, method='skipped')
+              n  outliers      r         CI95%     r2  adj_r2     p-val  power
+    skipped  30         2  0.437  [0.09, 0.69]  0.191   0.131  0.020128  0.694
 
     7. One-tailed Spearman correlation
 
-        >>> corr(x, y, tail="one-sided", method='spearman')
-            method    n   r      CI95%         r2     adj_r2  p-val
-            spearman  30  0.401  [0.05, 0.67]  0.161  0.099   0.014
+    >>> corr(x, y, tail="one-sided", method='spearman')
+               n      r         CI95%     r2  adj_r2     p-val  power
+    spearman  30  0.401  [0.05, 0.67]  0.161   0.099  0.014017  0.726
 
     8. Using columns of a pandas dataframe
 
-        >>> import pandas as pd
-        >>> data = pd.DataFrame({'x': x, 'y': y})
-        >>> corr(data['x'], data['y'])
-            method   n    r      CI95%          r2     adj_r2  p-val  BF10
-            pearson  30   0.147  [-0.23, 0.48]  0.022  -0.051  0.439  0.19
+    >>> import pandas as pd
+    >>> data = pd.DataFrame({'x': x, 'y': y})
+    >>> corr(data['x'], data['y'])
+              n      r          CI95%     r2  adj_r2     p-val  BF10  power
+    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439148  0.19  0.121
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -532,30 +532,30 @@ def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
     --------
     1. Partial correlation with one covariate
 
-        >>> import numpy as np
-        >>> import pandas as pd
-        >>> from pingouin import partial_corr
-        >>> # Generate random correlated samples
-        >>> np.random.seed(123)
-        >>> mean, cov = [4, 6, 2], [(1, .5, .3), (.5, 1, .2), (.3, .2, 1)]
-        >>> x, y, z = np.random.multivariate_normal(mean, cov, size=30).T
-        >>> # Append in a dataframe
-        >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
-        >>> # Partial correlation of x and y controlling for z
-        >>> partial_corr(data=df, x='x', y='y', covar='z')
-            method   r      CI95%         r2     adj_r2  p-val   BF10
-            pearson  0.568  [0.26, 0.77]  0.323  0.273   0.0010  28.695
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> from pingouin import partial_corr
+    >>> # Generate random correlated samples
+    >>> np.random.seed(123)
+    >>> mean, cov = [4, 6, 2], [(1, .5, .3), (.5, 1, .2), (.3, .2, 1)]
+    >>> x, y, z = np.random.multivariate_normal(mean, cov, size=30).T
+    >>> # Append in a dataframe
+    >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
+    >>> # Partial correlation of x and y controlling for z
+    >>> partial_corr(data=df, x='x', y='y', covar='z')
+              n      r         CI95%     r2  adj_r2     p-val    BF10  power
+    pearson  30  0.568  [0.26, 0.77]  0.323   0.273  0.001055  28.695  0.925
 
     2. Partial correlation with several covariates
 
-        >>> # Add new random columns to the dataframe of the first example
-        >>> np.random.seed(123)
-        >>> df['w'] = np.random.normal(size=30)
-        >>> df['v'] = np.random.normal(size=30)
-        >>> # Partial correlation of x and y controlling for z, w and v
-        >>> partial_corr(data=df, x='x', y='y', covar=['z', 'w', 'v'])
-            method   r      CI95%         r2     adj_r2  p-val   BF10
-            pearson  0.493  [0.16, 0.72]  0.243  0.187   0.0056  6.258
+    >>> # Add new random columns to the dataframe of the first example
+    >>> np.random.seed(123)
+    >>> df['w'] = np.random.normal(size=30)
+    >>> df['v'] = np.random.normal(size=30)
+    >>> # Partial correlation of x and y controlling for z, w and v
+    >>> partial_corr(data=df, x='x', y='y', covar=['z', 'w', 'v'])
+              n      r         CI95%     r2  adj_r2     p-val   BF10  power
+    pearson  30  0.493  [0.16, 0.72]  0.243   0.187  0.005684  6.258  0.811
     """
     # Check arguments
     assert isinstance(x, str)
@@ -635,11 +635,10 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     --------
     1. Repeated measures correlation
 
-        >>> from pingouin import rm_corr
-        >>> from pingouin.datasets import read_dataset
-        >>> df = read_dataset('rm_corr')
-        >>> rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
-            (-0.507, 0.0008, 38)
+    >>> from pingouin import rm_corr, read_dataset
+    >>> df = read_dataset('rm_corr')
+    >>> rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
+    (-0.507, 0.0008470789034072481, 38)
     """
     # Safety checks
     assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame'
@@ -723,12 +722,10 @@ def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
     --------
     1. ICC of wine quality assessed by 4 judges.
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import intraclass_corr
-        >>> data = read_dataset('icc')
-        >>> intraclass_corr(data, 'Wine', 'Judge', 'Scores')
-            (0.727525596259691, array([0.434, 0.927]))
-
+    >>> from pingouin import intraclass_corr, read_dataset
+    >>> data = read_dataset('icc')
+    >>> intraclass_corr(data, 'Wine', 'Judge', 'Scores')
+    (0.727525596259691, array([0.434, 0.927]))
     """
     from pingouin import anova
     from scipy.stats import f
@@ -852,19 +849,21 @@ def distance_corr(x, y, n_boot=1000, seed=None):
     --------
     1. With two 1D vectors
 
-        >>> a = [1, 2, 3, 4, 5]
-        >>> b = [1, 2, 9, 4, 4]
-        >>> distance_corr(a, b, seed=9)
-            (0.7626762424168667, 0.334)
+    >>> from pingouin import distance_corr
+    >>> a = [1, 2, 3, 4, 5]
+    >>> b = [1, 2, 9, 4, 4]
+    >>> distance_corr(a, b, seed=9)
+    (0.7626762424168667, 0.334)
 
     2. With two 2D arrays and no p-value
 
-        >>> import numpy as np
-        >>> np.random.seed(123)
-        >>> a = np.random.random((10, 10))
-        >>> b = np.random.random((10, 10))
-        >>> distance_corr(a, b, n_boot=None)
-            0.8799633012275321
+    >>> import numpy as np
+    >>> np.random.seed(123)
+    >>> from pingouin import distance_corr
+    >>> a = np.random.random((10, 10))
+    >>> b = np.random.random((10, 10))
+    >>> distance_corr(a, b, n_boot=None)
+    0.8799633012275321
     """
     x = np.asarray(x)
     y = np.asarray(y)

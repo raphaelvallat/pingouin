@@ -114,7 +114,7 @@ If you have questions, please ask them in the public `Gitter chat <https://gitte
 Quick start
 ============
 
-Try before you buy! Click on the link below and navigate to the notebooks folder to load a collection of interactive Jupyter notebooks demonstrating the main functionalities of Pingouin. No need to install Pingouin beforehand as the notebooks run in a Binder environment.
+Click on the link below and navigate to the notebooks/ folder to run a collection of interactive Jupyter notebooks showing the main functionalities of Pingouin. No need to install Pingouin beforehand, the notebooks run in a Binder environment.
 
 .. image:: https://mybinder.org/badge.svg
     :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
@@ -222,8 +222,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 .. code-block:: python
 
   # Read an example dataset
-  from pingouin.datasets import read_dataset
-  df = read_dataset('mixed_anova')
+  df = pg.read_dataset('mixed_anova')
 
   # Run the ANOVA
   aov = pg.anova(data=df, dv='Scores', between='Group', detailed=True)
@@ -314,6 +313,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: python
 
+  import pandas as pd
   np.random.seed(123)
   z = np.random.normal(5, 1, 30)
   data = pd.DataFrame({'X': x, 'Y': y, 'Z': z})
@@ -345,7 +345,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 12. Multiple linear regression
 ##############################
 
-.. code-block:: ipython3
+.. code-block:: python
 
     pg.linear_regression(data[['X', 'Z']], data['Y'])
 
@@ -363,7 +363,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 13. Mediation analysis
 ######################
 
-.. code-block:: ipython3
+.. code-block:: python
 
   pg.mediation_analysis(data=data, x='X', m='Z', y='Y', n_boot=500)
 
@@ -422,8 +422,8 @@ Plot the curve of achieved power given the effect size (Cohen d) and the sample 
 .. plot::
 
     import pingouin as pg
-    from pingouin.datasets import read_dataset
-    df = read_dataset('mixed_anova').query("Group == 'Meditation' and Time != 'January'")
+    import numpy as np
+    df = pg.read_dataset('mixed_anova').query("Group == 'Meditation' and Time != 'January'")
     ax = pg.plot_paired(data=df, dv='Scores', within='Time', subject='Subject', dpi=150)
     ax.set_title("Effect of meditation on school performance")
 
