@@ -37,6 +37,16 @@ def fdr(pvals, alpha=0.05, method='indep'):
     pval_corrected : array
         pvalues adjusted for multiple hypothesis testing to limit FDR
 
+    References
+    ----------
+    - Benjamini, Y., and Hochberg, Y. (1995). Controlling the false discovery
+      rate: a practical and powerful approach to multiple testing. Journal of
+      the Royal Statistical Society Series B, 57, 289–300.
+
+    - Benjamini, Y., and Yekutieli, D. (2001). The control of the false
+      discovery rate in multiple testing under dependency. Annals of
+      Statistics, 29, 1165–1188.
+
     Examples
     --------
     FDR correction of an array of p-values
@@ -84,21 +94,46 @@ def bonf(pvals, alpha=0.05):
     Parameters
     ----------
     pvals : array_like
-        set of p-values of the individual tests.
+        Array of p-values of the individual tests.
     alpha : float
-        error rate
+        Error rate (= alpha level).
 
     Returns
     -------
     reject : array, bool
         True if a hypothesis is rejected, False if not
     pval_corrected : array
-        pvalues adjusted for multiple hypothesis testing
+        P-values adjusted for multiple hypothesis testing using the Bonferroni
+        procedure (= multiplied by the number of tests).
+
+    Notes
+    -----
+    From Wikipedia:
+
+    Statistical hypothesis testing is based on rejecting the null hypothesis
+    if the likelihood of the observed data under the null hypotheses is low.
+    If multiple hypotheses are tested, the chance of a rare event increases,
+    and therefore, the likelihood of incorrectly rejecting a null hypothesis
+    (i.e., making a Type I error) increases.
+    The Bonferroni correction compensates for that increase by testing each
+    individual hypothesis :math:`p_i` at a significance level of
+    :math:`p_i = \\alpha / n` where :math:`\\alpha` is the desired overall
+    alpha level and :math:`n` is the number of hypotheses. For example, if a
+    trial is testing :math:`n=20` hypotheses with a desired
+    :math:`\\alpha=0.05`, then the Bonferroni correction would test each
+    individual hypothesis at :math:`\\alpha=0.05/20=0.0025``.
+
+    The Bonferroni correction tends to be a bit too conservative.
+
+    References
+    ----------
+    - Bonferroni, C. E. (1935). Il calcolo delle assicurazioni su gruppi
+      di teste. Studi in onore del professore salvatore ortu carboni, 13-60.
+
+    - https://en.wikipedia.org/wiki/Bonferroni_correction
 
     Examples
     --------
-    Bonferroni correction of an array of p-values
-
     >>> from pingouin import bonf
     >>> pvals = [.50, .003, .32, .054, .0003]
     >>> reject, pvals_corr = bonf(pvals, alpha=.05)
@@ -118,21 +153,36 @@ def holm(pvals, alpha=.05):
     Parameters
     ----------
     pvals : array_like
-        set of p-values of the individual tests.
+        Array of p-values of the individual tests.
     alpha : float
-        error rate
+        Error rate (= alpha level).
 
     Returns
     -------
     reject : array, bool
         True if a hypothesis is rejected, False if not
     pval_corrected : array
-        pvalues adjusted for multiple hypothesis testing
+        P-values adjusted for multiple hypothesis testing using the Holm
+        procedure.
+
+    Notes
+    -----
+    From Wikipedia:
+
+    In statistics, the Holm–Bonferroni method (also called the Holm method) is
+    used to counteract the problem of multiple comparisons. It is intended to
+    control the family-wise error rate and offers a simple test uniformly more
+    powerful than the Bonferroni correction.
+
+    References
+    ----------
+    - Holm, S. (1979). A simple sequentially rejective multiple test procedure.
+      Scandinavian journal of statistics, 65-70.
+
+    - https://en.wikipedia.org/wiki/Holm%E2%80%93Bonferroni_method
 
     Examples
     --------
-    Holm correction of an array of p-values
-
     >>> from pingouin import holm
     >>> pvals = [.50, .003, .32, .054, .0003]
     >>> reject, pvals_corr = holm(pvals, alpha=.05)
@@ -167,14 +217,14 @@ def holm(pvals, alpha=.05):
 
 
 def multicomp(pvals, alpha=0.05, method='holm'):
-    '''P-values correction for multiple tests.
+    """P-values correction for multiple comparisons.
 
     Parameters
     ----------
     pvals : array_like
-        uncorrected p-values
+        uncorrected p-values.
     alpha : float
-        Significance level
+        Significance level.
     method : string
         Method used for testing and adjustment of pvalues. Can be either the
         full name or initial letters. Available methods are ::
@@ -184,17 +234,51 @@ def multicomp(pvals, alpha=0.05, method='holm'):
         'fdr_bh' : Benjamini/Hochberg FDR correction
         'fdr_by' : Benjamini/Yekutieli FDR correction
 
-
     Returns
     -------
     reject : array, boolean
-        true for hypothesis that can be rejected for given alpha
+        True for hypothesis that can be rejected for given alpha.
     pvals_corrected : array
-        p-values corrected for multiple tests
+        P-values corrected for multiple testing.
 
     See Also
     --------
     pairwise_ttests : Pairwise post-hocs T-tests
+
+    Notes
+    -----
+    This function is similar to the `p.adjust` R function.
+
+    The correction methods include the Bonferroni correction ("bonf")
+    in which the p-values are multiplied by the number of comparisons.
+    Less conservative methods are also included such as Holm (1979) ("holm"),
+    Benjamini & Hochberg (1995) ("fdr_bh"), and Benjamini
+    & Yekutieli (2001) ("fdr_by"), respectively.
+
+    The first two methods are designed to give strong control of the
+    family-wise error rate. Note that the Holm's method is usually preferred
+    over the Bonferroni correction.
+    The "fdr_bh" and "fdr_by" methods control the false discovery rate, i.e.
+    the expected proportion of false discoveries amongst the rejected
+    hypotheses. The false discovery rate is a less stringent condition than
+    the family-wise error rate, so these methods are more powerful than the
+    others.
+
+    References
+    ----------
+    - Bonferroni, C. E. (1935). Il calcolo delle assicurazioni su gruppi
+      di teste. Studi in onore del professore salvatore ortu carboni, 13-60.
+
+    - Holm, S. (1979). A simple sequentially rejective multiple test procedure.
+      Scandinavian Journal of Statistics, 6, 65–70.
+
+    - Benjamini, Y., and Hochberg, Y. (1995). Controlling the false discovery
+      rate: a practical and powerful approach to multiple testing. Journal of
+      the Royal Statistical Society Series B, 57, 289–300.
+
+    - Benjamini, Y., and Yekutieli, D. (2001). The control of the false
+      discovery rate in multiple testing under dependency. Annals of
+      Statistics, 29, 1165–1188.
 
     Examples
     --------
@@ -205,7 +289,7 @@ def multicomp(pvals, alpha=0.05, method='holm'):
     >>> reject, pvals_corr = multicomp(pvals, method='fdr_bh')
     >>> print(reject, pvals_corr)
     [False  True False False  True] [0.5    0.0075 0.4    0.09   0.0015]
-    '''
+    """
     if not isinstance(pvals, (list, np.ndarray)):
         err = "pvals must be a list or a np.ndarray"
         raise ValueError(err)
