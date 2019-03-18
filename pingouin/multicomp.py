@@ -125,6 +125,8 @@ def bonf(pvals, alpha=0.05):
 
     The Bonferroni correction tends to be a bit too conservative.
 
+    Note that NaN values are not taken into account in the p-values correction.
+
     References
     ----------
     - Bonferroni, C. E. (1935). Il calcolo delle assicurazioni su gruppi
@@ -141,9 +143,11 @@ def bonf(pvals, alpha=0.05):
     [False  True False False  True] [1.     0.015  1.     0.27   0.0015]
     """
     pvals = np.asarray(pvals)
-    pvals_corrected = pvals * float(pvals.size)
-    pvals_corrected[pvals_corrected > 1.0] = 1.0
-    reject = pvals_corrected < alpha
+    num_nan = np.isnan(pvals).sum()
+    pvals_corrected = pvals * (float(pvals.size) - num_nan)
+    pvals_corrected = np.clip(pvals_corrected, None, 1)
+    with np.errstate(invalid='ignore'):
+        reject = np.less(pvals_corrected, alpha)
     return reject, pvals_corrected
 
 
@@ -161,7 +165,7 @@ def holm(pvals, alpha=.05):
     -------
     reject : array, bool
         True if a hypothesis is rejected, False if not
-    pval_corr : array
+    pvals_corrected : array
         P-values adjusted for multiple hypothesis testing using the Holm
         procedure.
 
@@ -174,7 +178,7 @@ def holm(pvals, alpha=.05):
     control the family-wise error rate and offers a simple test uniformly more
     powerful than the Bonferroni correction.
 
-    Note that NaN values are not yaken into account in the p-values correction.
+    Note that NaN values are not taken into account in the p-values correction.
 
     References
     ----------
@@ -206,14 +210,14 @@ def holm(pvals, alpha=.05):
     # Now we adjust the p-values
     pvals_corr = np.diag(pvals_sorted * np.arange(ntests, 0, -1)[..., None])
     pvals_corr = np.maximum.accumulate(pvals_corr)
-    pvals_corr[pvals_corr > 1.0] = 1.0
+    pvals_corr = np.clip(pvals_corr, None, 1)
     pvals_corr = np.append(pvals_corr, np.full(num_nan, np.nan))
 
     # And revert to the original shape and order
-    pvals_corr = pvals_corr[sortrevind].reshape(shape_init)
+    pvals_corrected = pvals_corr[sortrevind].reshape(shape_init)
     with np.errstate(invalid='ignore'):
-        reject = np.less(pvals_corr, alpha)
-    return reject, pvals_corr
+        reject = np.less(pvals_corrected, alpha)
+    return reject, pvals_corrected
 
 
 def multicomp(pvals, alpha=0.05, method='holm'):
