@@ -161,7 +161,7 @@ def holm(pvals, alpha=.05):
     -------
     reject : array, bool
         True if a hypothesis is rejected, False if not
-    pval_corrected : array
+    pval_corr : array
         P-values adjusted for multiple hypothesis testing using the Holm
         procedure.
 
@@ -173,6 +173,8 @@ def holm(pvals, alpha=.05):
     used to counteract the problem of multiple comparisons. It is intended to
     control the family-wise error rate and offers a simple test uniformly more
     powerful than the Bonferroni correction.
+
+    Note that NaN values are not yaken into account in the p-values correction.
 
     References
     ----------
@@ -189,31 +191,29 @@ def holm(pvals, alpha=.05):
     >>> print(reject, pvals_corr)
     [False  True False False  True] [0.64   0.012  0.64   0.162  0.0015]
     """
+    # Convert to array and save original shape
     pvals = np.asarray(pvals)
     shape_init = pvals.shape
     pvals = pvals.ravel()
+    num_nan = np.isnan(pvals).sum()
 
+    # Sort the (flattened) p-values
     pvals_sortind = np.argsort(pvals)
     pvals_sorted = pvals[pvals_sortind]
     sortrevind = pvals_sortind.argsort()
-    ntests = pvals.size
+    ntests = pvals.size - num_nan
 
-    notreject = pvals_sorted > alpha / np.arange(ntests, 0, -1)
-    nr_index = np.nonzero(notreject)[0]
-    if nr_index.size == 0:
-        # nonreject is empty, all rejected
-        notrejectmin = ntests
-    else:
-        notrejectmin = np.min(nr_index)
-    notreject[notrejectmin:] = True
-    reject = ~notreject
-    pvals_corrected_raw = pvals_sorted * np.arange(ntests, 0, -1)
-    pvals_corrected = np.maximum.accumulate(pvals_corrected_raw)
-    pvals_corrected[pvals_corrected > 1.0] = 1.0
-    pvals_corrected = pvals_corrected[sortrevind].reshape(shape_init)
-    reject = reject[sortrevind].reshape(shape_init)
-    reject = pvals_corrected < alpha
-    return reject, pvals_corrected
+    # Now we adjust the p-values
+    pvals_corr = np.diag(pvals_sorted * np.arange(ntests, 0, -1)[..., None])
+    pvals_corr = np.maximum.accumulate(pvals_corr)
+    pvals_corr[pvals_corr > 1.0] = 1.0
+    pvals_corr = np.append(pvals_corr, np.full(num_nan, np.nan))
+
+    # And revert to the original shape and order
+    pvals_corr = pvals_corr[sortrevind].reshape(shape_init)
+    with np.errstate(invalid='ignore'):
+        reject = np.less(pvals_corr, alpha)
+    return reject, pvals_corr
 
 
 def multicomp(pvals, alpha=0.05, method='holm'):
