@@ -32,10 +32,11 @@ e. P-values adjustment methods now do not take into account NaN values (same beh
 
 a. Added :py:func:`pingouin.plot_paired` function.
 
-**Testing**
+**Bugs and tests**
 
 a. Travis and AppVeyor test for Python 3.5, 3.6 and 3.7.
 b. Better doctest & improved examples for many functions.
+c. Fix bug with :py:func:`pingouin.nonparametric.mad` when axis was not 0.
 
 v0.2.3 (February 2019)
 ----------------------

@@ -43,7 +43,8 @@ def mad(a, normalize=True, axis=0):
     """
     from scipy.stats import norm
     c = norm.ppf(3 / 4.) if normalize else 1
-    return np.median(np.abs(a - np.median(a)) / c, axis=axis)
+    center = np.apply_over_axes(np.median, a, axis)
+    return np.median((np.fabs(a - center)) / c, axis=axis)
 
 
 def madmedianrule(a):

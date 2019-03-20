@@ -1,6 +1,5 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
-# Code borrowed from statsmodel and mne.stats
 import numpy as np
 
 __all__ = ["fdr", "bonf", "holm", "multicomp"]
@@ -82,6 +81,7 @@ def fdr(pvals, alpha=0.05, method='fdr_bh'):
     >>> print(reject, pvals_corr)
     [False  True False False  True] [0.5    0.0075 0.4    0.09   0.0015]
     """
+    assert method.lower() in ['fdr_bh', 'fdr_by']
     # Convert to array and save original shape
     pvals = np.asarray(pvals)
     shape_init = pvals.shape
@@ -97,7 +97,7 @@ def fdr(pvals, alpha=0.05, method='fdr_bh'):
     # Empirical CDF factor
     ecdffactor = np.arange(1, ntests + 1) / float(ntests)
 
-    if method == 'fdr_by':
+    if method.lower() == 'fdr_by':
         cm = np.sum(1. / np.arange(1, ntests + 1))
         ecdffactor /= cm
 

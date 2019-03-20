@@ -4,11 +4,11 @@ import pandas as pd
 from scipy.stats import pearsonr, spearmanr, kendalltau
 from pingouin.power import power_corr
 from pingouin.utils import _remove_na
+from pingouin.nonparametric import mad
 from pingouin.effsize import compute_esci
 from pingouin.bayesian import bayesfactor_pearson
 from scipy.spatial.distance import pdist, squareform
 
-from pingouin.nonparametric import mad, madmedianrule
 
 __all__ = ["corr", "partial_corr", "rm_corr", "intraclass_corr",
            "distance_corr"]
@@ -86,7 +86,6 @@ def skipped(x, y, method='spearman'):
 
             # Apply the MAD median rule
             MAD = mad(dis)
-            outliers = madmedianrule(dis)
             record[i, :] = dis > (np.median(dis) + gval * MAD)
 
     outliers = np.sum(record, axis=0) >= 1
@@ -345,6 +344,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     --------
     1. Pearson correlation
 
+    >>> import numpy as np
     >>> # Generate random correlated samples
     >>> np.random.seed(123)
     >>> mean, cov = [4, 6], [(1, .5), (.5, 1)]
