@@ -4,7 +4,6 @@ import pandas as pd
 from scipy.stats import pearsonr, spearmanr, kendalltau
 from pingouin.power import power_corr
 from pingouin.utils import _remove_na
-from pingouin.nonparametric import mad
 from pingouin.effsize import compute_esci
 from pingouin.bayesian import bayesfactor_pearson
 from scipy.spatial.distance import pdist, squareform
@@ -67,28 +66,39 @@ def skipped(x, y, method='spearman'):
     from scipy.stats import chi2
     from sklearn.covariance import MinCovDet
     X = np.column_stack((x, y))
-    center = MinCovDet().fit(X).location_
-
-    # Detect outliers based on robust covariance
     nrows, ncols = X.shape
     gval = np.sqrt(chi2.ppf(0.975, 2))
 
+    # Compute center and distance to center
+    center = MinCovDet(random_state=42).fit(X).location_
+    B = X - center
+    B2 = B**2
+    bot = B2.sum(axis=1)
+
     # Loop over rows
-    record = np.zeros(shape=(nrows, nrows))
+    dis = np.zeros(shape=(nrows, nrows))
     for i in np.arange(nrows):
-        dis = np.zeros(nrows)
-        B = (X[i, :] - center).T
-        bot = np.sum(B**2)
-        if bot != 0:
-            for j in np.arange(nrows):
-                A = X[j, :] - center
-                dis[j] = np.linalg.norm(A * B / bot * B)
+        if bot[i] != 0:
+            dis[i, :] = np.linalg.norm(B * B2[i, :] / bot[i], axis=1)
 
-            # Apply the MAD median rule
-            MAD = mad(dis)
-            record[i, :] = dis > (np.median(dis) + gval * MAD)
+    # Detect outliers
+    def idealf(x):
+        """Compute the ideal fourths IQR (Wilcox 2012).
+        """
+        n = len(x)
+        j = int(np.floor(n / 4 + 5 / 12))
+        y = np.sort(x)
+        g = (n / 4) - j + (5 / 12)
+        low = (1 - g) * y[j - 1] + g * y[j]
+        k = n - j + 1
+        up = (1 - g) * y[k - 1] + g * y[k - 2]
+        return up - low
 
-    outliers = np.sum(record, axis=0) >= 1
+    # One can either use the MAD or the IQR (see Wilcox 2012)
+    # MAD = mad(dis, axis=1)
+    iqr = np.apply_along_axis(idealf, 1, dis)
+    thresh = (np.median(dis, axis=1) + gval * iqr)
+    outliers = np.apply_along_axis(np.greater, 0, dis, thresh).any(axis=0)
 
     # Compute correlation on remaining data
     if method == 'spearman':
@@ -98,7 +108,7 @@ def skipped(x, y, method='spearman'):
     return r, pval, outliers
 
 
-def bsmahal(a, b, n_boot=2000):
+def bsmahal(a, b, n_boot=200):
     """
     Bootstraps Mahalanobis distances for Shepherd's pi correlation.
 
@@ -136,7 +146,7 @@ def bsmahal(a, b, n_boot=2000):
     return MD.mean(1)
 
 
-def shepherd(x, y, n_boot=2000):
+def shepherd(x, y, n_boot=200):
     """
     Shepherd's Pi correlation, equivalent to Spearman's rho after outliers
     removal.

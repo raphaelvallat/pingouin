@@ -32,7 +32,6 @@ def mad(a, normalize=True, axis=0):
 
     Examples
     --------
-
     >>> from pingouin import mad
     >>> a = [1.2, 5.4, 3.2, 7.8, 2.5]
     >>> mad(a)
@@ -42,6 +41,7 @@ def mad(a, normalize=True, axis=0):
     2.0
     """
     from scipy.stats import norm
+    a = np.asarray(a)
     c = norm.ppf(3 / 4.) if normalize else 1
     center = np.apply_over_axes(np.median, a, axis)
     return np.median((np.fabs(a - center)) / c, axis=axis)
@@ -63,22 +63,21 @@ def madmedianrule(a):
 
     References
     ----------
-
     .. [1] Hall, P., Welsh, A.H., 1985. Limit theorems for the median
        deviation. Ann. Inst. Stat. Math. 37, 27–36.
        https://doi.org/10.1007/BF02481078
 
     Examples
     --------
-
     >>> from pingouin import madmedianrule
     >>> a = [-1.09, 1., 0.28, -1.51, -0.58, 6.61, -2.43, -0.43]
     >>> madmedianrule(a)
     array([False, False, False, False, False,  True, False, False])
     """
     from scipy.stats import chi2
+    a = np.asarray(a)
     k = np.sqrt(chi2.ppf(0.975, 1))
-    return (np.abs(a - np.median(a)) / mad(a)) > k
+    return (np.fabs(a - np.median(a)) / mad(a)) > k
 
 
 def mwu(x, y, tail='two-sided'):
@@ -133,7 +132,6 @@ def mwu(x, y, tail='two-sided'):
 
     Examples
     --------
-
     >>> import numpy as np
     >>> from pingouin import mwu
     >>> np.random.seed(123)
