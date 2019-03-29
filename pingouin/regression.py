@@ -81,6 +81,9 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
 
     Results have been compared against sklearn, statsmodels and JASP.
 
+    This function will not run if NaN values are either present in the target
+    or predictors variables. Please remove them before runing the function.
+
     Examples
     --------
     1. Simple linear regression
@@ -139,6 +142,15 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     if X.ndim == 1:
         # Convert to (n_samples, n_features) shape
         X = X[..., np.newaxis]
+
+    # Check for NaN / Inf
+    y_gd = np.isfinite(y).all()
+    X_gd = np.isfinite(X).all()
+    assert y_gd, 'Target (y) contains NaN or Inf. Please remove them.'
+    assert X_gd, 'Predictors (X) contain NaN or Inf. Please remove them.'
+
+    # Check that X and y have same length
+    assert y.shape[0] == X.shape[0], 'X and y must have same number of samples'
 
     if not names:
         names = ['x' + str(i + 1) for i in range(X.shape[1])]
@@ -238,6 +250,9 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     Note that the first coefficient is always the constant term (intercept) of
     the model.
 
+    This function will not run if NaN values are either present in the target
+    or predictors variables. Please remove them before runing the function.
+
     Adapted from a code found at
     https://gist.github.com/rspeare/77061e6e317896be29c6de9a85db301d
 
@@ -309,6 +324,15 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     # Add axis if only one-dimensional array
     if X.ndim == 1:
         X = X[..., np.newaxis]
+
+    # Check for NaN /  Inf
+    y_gd = np.isfinite(y).all()
+    X_gd = np.isfinite(X).all()
+    assert y_gd, 'Target variable contains NaN or Inf. Please remove them.'
+    assert X_gd, 'Predictors contains NaN or Inf. Please remove them.'
+
+    # Check that X and y have same length
+    assert y.shape[0] == X.shape[0], 'X and y must have same number of samples'
 
     if not names:
         names = ['x' + str(i + 1) for i in range(X.shape[1])]
@@ -469,6 +493,8 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
 
     Adapted from a code found at https://github.com/rmill040/pymediation
 
+    Note that NaN are automatically removed.
+
     References
     ----------
     .. [1] Baron, Reuben M., and David A. Kenny. "The moderator–mediator
@@ -511,7 +537,16 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     3    Direct  0.3956    0.1739     0.6173  Yes
     4  Indirect  0.0023   -0.0582     0.1088   No
     """
+    # Sanity check
+    assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame.'
+    assert {x, m, y}.issubset(data.columns), 'Columns must be present in data.'
+    err_msg = "Columns must be numeric or boolean."
+    assert all([data[c].dtype.kind in 'bfi' for c in [x, m, y]]), err_msg
+
+    # Drop rows with NAN Values
+    data = data[[x, m, y]].dropna()
     n = data.shape[0]
+    assert n > 5, 'DataFrame must have at least 5 samples (rows).'
 
     # Initialize variables
     ab_estimates = np.zeros(n_boot)
