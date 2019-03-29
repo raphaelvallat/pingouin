@@ -822,8 +822,8 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
     # Keep only numeric columns
     data = data._get_numeric_data()
-    # Remove columns with constant value
-    data = data.loc[:, (data != data.iloc[0]).any()]
+    # Remove columns with constant value and/or NaN
+    data = data.loc[:, data.nunique(dropna=True) >= 2]
     # Extract columns names
     keys = data.columns.tolist()
 
