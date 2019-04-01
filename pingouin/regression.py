@@ -434,7 +434,7 @@ def _bias_corrected_interval(ab_estimates, sample_point, n_boot, alpha=0.05):
 
 
 def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
-                       n_boot=500, return_dist=False):
+                       n_boot=500, seed=None, return_dist=False):
     """Mediation analysis using a bias-correct non-parametric bootstrap method.
 
     Parameters
@@ -455,6 +455,8 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
         CI = [ alpha / 2 ; 1 -  alpha / 2]
     n_boot : int
         Number of bootstrap iterations. The greater, the slower.
+    seed : int or None
+        Random state seed.
     return_dist : bool
         If True, the function also returns the indirect bootstrapped beta
         samples (size = n_boot). Can be plotted for instance using
@@ -512,7 +514,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
 
     >>> from pingouin import mediation_analysis, read_dataset
     >>> df = read_dataset('mediation')
-    >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05)
+    >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05, seed=42)
            Path    Beta  CI[2.5%]  CI[97.5%]  Sig
     0    X -> M  0.5610    0.3735     0.7485  Yes
     1    M -> Y  0.6542    0.4838     0.8245  Yes
@@ -556,9 +558,10 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     mtype = 'logistic' if data[m].nunique() == 2 else 'linear'
 
     # Bootstrap
+    rng = np.random.RandomState(seed)
+    idx = rng.choice(np.arange(n), replace=True, p=None, size=(n_boot, n))
     for i in range(n_boot):
-        idx = np.random.choice(np.arange(n), replace=True, p=None, size=n)
-        ab_estimates[i] = _point_estimate(data, x=x, m=m, y=y, idx=idx,
+        ab_estimates[i] = _point_estimate(data, x=x, m=m, y=y, idx=idx[i, :],
                                           mtype=mtype)
 
     # Bootstrap point estimate and confidence interval
