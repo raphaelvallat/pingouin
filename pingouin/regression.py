@@ -488,12 +488,12 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     stats : pd.DataFrame
         Mediation summary::
 
-        'Path' : regression model
-        'Beta' : regression estimates
+        'path' : regression model
+        'coef' : regression estimates
         'CI[2.5%]' : lower confidence interval
         'CI[97.5%]' : upper confidence interval
         'pval' : two-sided p-values
-        'Sig' : regression statistical significance
+        'sig' : statistical significance
 
     Notes
     -----
@@ -504,14 +504,14 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     intervening variable on the dependent variable (i.e., X → M → Y)"
     (from Fiedler et al. 2011).
 
-    The indirect effect (also referred to as average causal mediation effect
-    or ACME) of X on Y through mediator M quantifies the estimated difference
-    in Y resulting from a one-unit change in X through a sequence of causal
-    steps in which X affects M, which in turn affects Y. It is considered
-    significant if the specified confidence interval does not include 0.
-    The path 'X --> Y' is the sum of both the indirect and direct effect.
-    It is sometimes referred to as total effect. For more details, please refer
-    to Fiedler et al 2011 or Hayes and Rockwood 2017.
+    The **indirect effect** (also referred to as average causal mediation
+    effect or ACME) of X on Y through mediator M quantifies the estimated
+    difference in Y resulting from a one-unit change in X through a sequence of
+    causal steps in which X affects M, which in turn affects Y.
+    It is considered significant if the specified confidence interval does not
+    include 0. The path 'X --> Y' is the sum of both the indirect and direct
+    effect. It is sometimes referred to as total effect. For more details,
+    please refer to Fiedler et al 2011 or Hayes and Rockwood 2017.
 
     A linear regression is used if the mediator variable is continuous and a
     logistic regression if the mediator variable is dichotomous (binary).
@@ -542,7 +542,9 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
            Observations, recommendations, and implementation. Behav. Res.
            Ther. 98, 39–57 (2017).
 
-    .. [4] https://github.com/rmill040/pymediation
+    .. [4] https://cran.r-project.org/web/packages/mediation/mediation.pdf
+
+    .. [5] https://github.com/rmill040/pymediation
 
     Examples
     --------
