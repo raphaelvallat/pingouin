@@ -6,7 +6,7 @@ from unittest import TestCase
 from pingouin.utils import (print_table, _perm_pval, _export_table,
                             _remove_rm_na, _check_eftype, _check_dataframe,
                             _remove_na, _is_sklearn_installed,
-                            _is_statsmodels_installed)
+                            _is_statsmodels_installed, _flatten_list)
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
@@ -25,6 +25,15 @@ class TestUtils(TestCase):
         print_table(df2)
         df3['A'] = 0
         print_table(df3, tablefmt='html', floatfmt='.3f')
+
+    def test_flatten_list(self):
+        """Test function _flatten_list."""
+        x = ['X1', ['M1', 'M2'], 'Y1', ['Y2']]
+        fl = _flatten_list(x)
+        np.testing.assert_array_equal(fl, ['X1', 'M1', 'M2', 'Y1', 'Y2'])
+        x = ['Xaa', 'Xbb', 'Xcc']
+        fl = _flatten_list(x)
+        np.testing.assert_array_equal(fl, x)
 
     def test_perm_pval(self):
         """Test function _perm_pval.

@@ -20,8 +20,8 @@ def _flatten_list(x):
 
     Examples
     --------
-    >>> x = ['X1', ['M1', 'M2'], 'Y1', ['Y2']]
     >>> from pingouin.utils import _flatten_list
+    >>> x = ['X1', ['M1', 'M2'], 'Y1', ['Y2']]
     >>> _flatten_list(x)
     ['X1', 'M1', 'M2', 'Y1', 'Y2']
 
