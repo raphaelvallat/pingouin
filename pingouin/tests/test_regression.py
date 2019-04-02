@@ -3,7 +3,7 @@ import numpy as np
 from numpy.testing import assert_almost_equal, assert_equal
 from unittest import TestCase
 from pingouin.regression import (linear_regression, logistic_regression,
-                                 mediation_analysis)
+                                 mediation_analysis, _pval_from_bootci)
 from pingouin import read_dataset
 
 from scipy.stats import linregress
@@ -122,3 +122,11 @@ class TestRegression(TestCase):
         assert_almost_equal(ma['CI[2.5%]'][3], 0.1714, decimal=2)
         assert_almost_equal(ma['CI[97.5%]'][3], 0.617, decimal=1)
         assert ma['Sig'][3] == 'Yes'
+
+        # Test helper function _pval_from_bootci
+        np.random.seed(123)
+        bt2 = np.random.normal(loc=2, size=1000)
+        bt3 = np.random.normal(loc=3, size=1000)
+        assert _pval_from_bootci(bt2, 0) == 1
+        assert _pval_from_bootci(bt2, 0.9) < 0.10
+        assert _pval_from_bootci(bt3, 0.9) < _pval_from_bootci(bt2, 0.9)

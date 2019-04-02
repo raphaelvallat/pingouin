@@ -436,6 +436,17 @@ def _bias_corrected_interval(ab_estimates, sample_point, n_boot, alpha=0.05):
     return np.array([ll, ul])
 
 
+def _pval_from_bootci(boot, estimate):
+    """Compute p-value from CI distribution.
+    Similar to R package mediation.
+    """
+    if estimate == 0:
+        out = 1
+    else:
+        out = 2 * min(sum(boot > 0), sum(boot < 0)) / len(boot)
+    return min(out, 1)
+
+
 def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
                        n_boot=500, seed=None, return_dist=False):
     """Mediation analysis using a bias-correct non-parametric bootstrap method.
@@ -594,22 +605,12 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     indirect['ci'] = _bias_corrected_interval(ab_estimates, indirect['coef'],
                                               alpha=alpha, n_boot=n_boot)
 
-    def pval(boot, estimate):
-        """Compute p-value from CI distribution.
-        Similar to R package mediation
-        """
-        if estimate == 0:
-            out = 1
-        else:
-            out = 2 * min(sum(boot > 0), sum(boot < 0)) / len(boot)
-        return min(out, 1)
-
     # Significance and p-values
     sig_sxy = 'Yes' if sxy['pval'][1] < alpha else 'No'
     sig_sxm = 'Yes' if sxm['pval'][1] < alpha else 'No'
     sig_smy = 'Yes' if smy['pval'][1] < alpha else 'No'
     sig_direct = 'Yes' if direct['pval'][1] < alpha else 'No'
-    p_indirect = pval(ab_estimates, indirect['coef'])
+    p_indirect = _pval_from_bootci(ab_estimates, indirect['coef'])
     sig_indirect = 'Yes' if p_indirect < alpha else 'No'
 
     # Name of CI

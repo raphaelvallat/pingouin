@@ -109,7 +109,7 @@ class TestCorrelation(TestCase):
         dcor, pval = distance_corr(a, b, seed=9)
         assert dcor1 == dcor
         assert np.round(dcor, 7) == 0.7626762
-        assert 0.30 < pval < 0.40
+        assert 0.25 < pval < 0.40
         _, pval_low = distance_corr(a, b, seed=9, tail='lower')
         assert pval < pval_low
         # With 2D arrays
