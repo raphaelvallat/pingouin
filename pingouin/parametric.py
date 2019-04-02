@@ -1544,8 +1544,8 @@ def ancovan(dv=None, covar=None, between=None, data=None,
                       export_filename=export_filename)
 
     # Check that stasmodels is installed
-    from pingouin.utils import is_statsmodels_installed
-    is_statsmodels_installed(raise_error=True)
+    from pingouin.utils import _is_statsmodels_installed
+    _is_statsmodels_installed(raise_error=True)
     from statsmodels.api import stats
     from statsmodels.formula.api import ols
 

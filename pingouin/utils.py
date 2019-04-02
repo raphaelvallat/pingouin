@@ -5,9 +5,44 @@ import numpy as np
 from pingouin.external.tabulate import tabulate
 import pandas as pd
 
-__all__ = ["print_table", "_export_table", "_check_eftype",
+__all__ = ["_perm_pval", "print_table", "_export_table", "_check_eftype",
            "_remove_rm_na", "_remove_na", "_check_dataframe",
-           "is_sklearn_installed", "is_statsmodels_installed"]
+           "_is_sklearn_installed", "_is_statsmodels_installed"]
+
+
+def _perm_pval(bootstat, estimate, tail='two-sided'):
+    """
+    Compute p-values from a permutation test.
+
+    Parameters
+    ----------
+    bootstat : 1D array
+        Permutation distribution.
+    estimate : float or int
+        Point estimate.
+    tail : str
+        'upper': one-sided p-value (upper tail)
+        'lower': one-sided p-value (lower tail)
+        'two-sided': two-sided p-value
+
+    Returns
+    -------
+    p : float
+        P-value.
+    """
+    assert tail in ['two-sided', 'upper', 'lower'], 'Wrong tail argument.'
+    assert isinstance(estimate, (int, float))
+    bootstat = np.asarray(bootstat)
+    assert bootstat.ndim == 1, 'bootstat must be a 1D array.'
+    n_boot = bootstat.size
+    assert n_boot >= 1, 'bootstat must have at least one value.'
+    if tail == 'upper':
+        p = np.greater_equal(bootstat, estimate).sum() / n_boot
+    elif tail == 'lower':
+        p = np.less_equal(bootstat, estimate).sum() / n_boot
+    else:
+        p = np.greater_equal(np.fabs(bootstat), abs(estimate)).sum() / n_boot
+    return p
 
 
 def print_table(df, floatfmt=".3f", tablefmt='simple'):
@@ -151,7 +186,7 @@ def _check_dataframe(dv=None, between=None, within=None, subject=None,
                                  'effects=interaction')
 
 
-def is_statsmodels_installed(raise_error=False):
+def _is_statsmodels_installed(raise_error=False):
     try:
         import statsmodels  # noqa
         is_installed = True
@@ -164,7 +199,7 @@ def is_statsmodels_installed(raise_error=False):
     return is_installed
 
 
-def is_sklearn_installed(raise_error=False):
+def _is_sklearn_installed(raise_error=False):
     try:
         import sklearn  # noqa
         is_installed = True

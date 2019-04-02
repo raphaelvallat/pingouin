@@ -300,8 +300,8 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     [-0.34941889 -0.02261911 -0.39451064]
     """
     # Check that sklearn is installed
-    from pingouin.utils import is_sklearn_installed
-    is_sklearn_installed(raise_error=True)
+    from pingouin.utils import _is_sklearn_installed
+    _is_sklearn_installed(raise_error=True)
     from sklearn.linear_model import LogisticRegression
 
     # Extract names if X is a Dataframe or Series
@@ -386,17 +386,20 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         return stats
 
 
-def _point_estimate(data, x, m, y, idx, mtype='linear'):
+def _point_estimate(data, x, m, y, idx, mtype='linear', boot_type='ci'):
     """Point estimate of indirect effect based on bootstrap sample."""
+    assert boot_type in ['ci', 'pval']
     # Mediator model (M ~ X)
+    target = data[m].iloc[idx] if boot_type == 'ci' else data[m]
     if mtype == 'linear':
-        beta_m = linear_regression(data[x].iloc[idx], data[m].iloc[idx],
+        beta_m = linear_regression(data[x].iloc[idx], target,
                                    add_intercept=True, coef_only=True)
     else:
-        beta_m = logistic_regression(data[x].iloc[idx], data[m].iloc[idx],
+        beta_m = logistic_regression(data[x].iloc[idx], target,
                                      coef_only=True)
     # Full model (Y ~ X + M)
-    beta_y = linear_regression(data[[x, m]].iloc[idx], data[y].iloc[idx],
+    target = data[y].iloc[idx] if boot_type == 'ci' else data[y]
+    beta_y = linear_regression(data[[x, m]].iloc[idx], target,
                                add_intercept=True, coef_only=True)
     # Point estimate
     return beta_m[1] * beta_y[2]
@@ -454,7 +457,8 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
         Significance threshold. Used to determine the confidence interval,
         CI = [ alpha / 2 ; 1 -  alpha / 2]
     n_boot : int
-        Number of bootstrap iterations. The greater, the slower.
+        Number of bootstrap iterations for confidence intervals and p-values
+        estimation. The greater, the slower.
     seed : int or None
         Random state seed.
     return_dist : bool
@@ -471,6 +475,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
         'Beta' : regression estimates
         'CI[2.5%]' : lower confidence interval
         'CI[97.5%]' : upper confidence interval
+        'pval' : two-sided p-values
         'Sig' : regression statistical significance
 
     Notes
@@ -492,6 +497,9 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
 
     Results have been tested against the R mediation package and this tutorial
     https://data.library.virginia.edu/introduction-to-mediation-analysis/
+
+    P-values for the direct and indirect effects are computed using two-sided
+    permutation tests.
 
     Adapted from a code found at https://github.com/rmill040/pymediation
 
@@ -515,12 +523,12 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     >>> from pingouin import mediation_analysis, read_dataset
     >>> df = read_dataset('mediation')
     >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05, seed=42)
-           Path    Beta  CI[2.5%]  CI[97.5%]  Sig
-    0    X -> M  0.5610    0.3735     0.7485  Yes
-    1    M -> Y  0.6542    0.4838     0.8245  Yes
-    2    X -> Y  0.3961    0.1755     0.6167  Yes
-    3    Direct  0.0396   -0.1780     0.2572   No
-    4  Indirect  0.3565    0.2200     0.5380  Yes
+           Path    Beta  CI[2.5%]  CI[97.5%]    pval  Sig
+    0    X -> M  0.5610    0.3735     0.7485  0.0000  Yes
+    1    M -> Y  0.6542    0.4838     0.8245  0.0000  Yes
+    2    X -> Y  0.3961    0.1755     0.6167  0.0006  Yes
+    3    Direct  0.0396   -0.1780     0.2572  0.7980   No
+    4  Indirect  0.3565    0.2198     0.5377  0.0000  Yes
 
     2. Return the indirect bootstrapped beta coefficients
 
@@ -532,13 +540,14 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     3. Mediation analysis with a binary mediator variable
 
     >>> mediation_analysis(data=df, x='X', m='Mbin', y='Y', alpha=0.05)
-           Path    Beta  CI[2.5%]  CI[97.5%]  Sig
-    0    X -> M -0.0205   -0.2476     0.2066   No
-    1    M -> Y -0.1354   -0.9525     0.6818   No
-    2    X -> Y  0.3961    0.1755     0.6167  Yes
-    3    Direct  0.3956    0.1739     0.6173  Yes
-    4  Indirect  0.0023   -0.0582     0.1088   No
+           Path    Beta  CI[2.5%]  CI[97.5%]    pval  Sig
+    0    X -> M -0.0205   -0.2476     0.2066  0.8594   No
+    1    M -> Y -0.1354   -0.9525     0.6818  0.7431   No
+    2    X -> Y  0.3961    0.1755     0.6167  0.0006  Yes
+    3    Direct  0.3956    0.1739     0.6173  0.0000  Yes
+    4  Indirect  0.0023   -0.0787     0.1255  0.8980   No
     """
+    from pingouin.utils import _perm_pval
     # Sanity check
     assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame.'
     assert {x, m, y}.issubset(data.columns), 'Columns must be present in data.'
@@ -557,23 +566,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     # Check if mediator is binary
     mtype = 'logistic' if data[m].nunique() == 2 else 'linear'
 
-    # Bootstrap
-    rng = np.random.RandomState(seed)
-    idx = rng.choice(np.arange(n), replace=True, p=None, size=(n_boot, n))
-    for i in range(n_boot):
-        ab_estimates[i] = _point_estimate(data, x=x, m=m, y=y, idx=idx[i, :],
-                                          mtype=mtype)
-
-    # Bootstrap point estimate and confidence interval
-    indirect['coef'] = _point_estimate(data, x=x, m=m, y=y, idx=np.arange(n),
-                                       mtype=mtype)
-    indirect['ci'] = _bias_corrected_interval(ab_estimates, indirect['coef'],
-                                              alpha=alpha, n_boot=n_boot)
-    # Significance of the mediation effect
-    indirect['sig'] = 'Yes' if (np.sign(indirect['ci'][0])
-                                == np.sign(indirect['ci'][1])) else 'No'
-
-    # Compute linear regressions
+    # Compute regressions
     if mtype == 'linear':
         sxm = linear_regression(data[x], data[m], add_intercept=True,
                                 alpha=alpha, as_dataframe=False)
@@ -590,11 +583,41 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     direct = linear_regression(data[[x, m]], data[y], add_intercept=True,
                                alpha=alpha, as_dataframe=False)
 
+    # Bootstrap confidence intervals
+    rng = np.random.RandomState(seed)
+    idx = rng.choice(np.arange(n), replace=True, size=(n_boot, n))
+    for i in range(n_boot):
+        ab_estimates[i] = _point_estimate(data, x=x, m=m, y=y, idx=idx[i, :],
+                                          mtype=mtype)
+
+    indirect['coef'] = _point_estimate(data, x=x, m=m, y=y, idx=np.arange(n),
+                                       mtype=mtype)
+    indirect['ci'] = _bias_corrected_interval(ab_estimates, indirect['coef'],
+                                              alpha=alpha, n_boot=n_boot)
+
+    # Permutation test for p-values
+    bootsam = rng.random_sample((n_boot, n)).argsort(axis=1)
+    bt_direct, bt_ind = np.empty(n_boot), np.empty(n_boot)
+    # Direct effect
+    for i in range(n_boot):
+        bt_direct[i] = linear_regression(data[[x, m]],
+                                         data[y].iloc[bootsam[i, :]],
+                                         coef_only=True)[1]
+        bt_ind[i] = _point_estimate(data, x=x, m=m, y=y, idx=bootsam[i, :],
+                                    mtype=mtype, boot_type='pval')
+    # Two-sided p-values
+    p_direct = _perm_pval(bt_direct, direct['coef'][1], tail='two-sided')
+    p_indirect = _perm_pval(bt_ind, indirect['coef'], tail='two-sided')
+
     # Significance
     sig_sxy = 'Yes' if sxy['pval'][1] < alpha else 'No'
     sig_sxm = 'Yes' if sxm['pval'][1] < alpha else 'No'
     sig_smy = 'Yes' if smy['pval'][1] < alpha else 'No'
-    sig_direct = 'Yes' if direct['pval'][1] < alpha else 'No'
+    sig_direct = 'Yes' if p_direct < alpha else 'No'
+    sig_indirect = 'Yes' if p_indirect < alpha else 'No'
+    # sig_direct = 'Yes' if direct['pval'][1] < alpha else 'No'
+    # sig_indirect = 'Yes' if (np.sign(indirect['ci'][0])
+    #                          == np.sign(indirect['ci'][1])) else 'No'
 
     # Name of CI
     ll_name = 'CI[%.1f%%]' % (100 * alpha / 2)
@@ -615,9 +638,12 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
                           ul_name: [sxm[ul_name][1], smy[ul_name][1],
                                     sxy[ul_name][1], direct[ul_name][1],
                                     max(indirect['ci'])],
-                          # Significance level
+                          # P-value
+                          'pval': [sxm['pval'][1], smy['pval'][1],
+                                   sxy['pval'][1], p_direct, p_indirect],
+                          # Significant
                           'Sig': [sig_sxm, sig_smy, sig_sxy, sig_direct,
-                                  indirect['sig']],
+                                  sig_indirect],
                           }).round(4)
 
     if return_dist:

@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr, spearmanr, kendalltau
 from pingouin.power import power_corr
-from pingouin.utils import _remove_na
 from pingouin.effsize import compute_esci
+from pingouin.utils import _remove_na, _perm_pval
 from pingouin.bayesian import bayesfactor_pearson
 from scipy.spatial.distance import pdist, squareform
 
@@ -61,8 +61,8 @@ def skipped(x, y, method='spearman'):
        doi:10.3389/fpsyg.2012.00606.
     """
     # Check that sklearn is installed
-    from pingouin.utils import is_sklearn_installed
-    is_sklearn_installed(raise_error=True)
+    from pingouin.utils import _is_sklearn_installed
+    _is_sklearn_installed(raise_error=True)
     from scipy.stats import chi2
     from sklearn.covariance import MinCovDet
     X = np.column_stack((x, y))
@@ -661,8 +661,8 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     data = data[[x, y, subject]].dropna(axis=0)
 
     # Using STATSMODELS
-    # from pingouin.utils import is_statsmodels_installed
-    # is_statsmodels_installed(raise_error=True)
+    # from pingouin.utils import _is_statsmodels_installed
+    # _is_statsmodels_installed(raise_error=True)
     # from statsmodels.api import stats
     # from statsmodels.formula.api import ols
     # # ANCOVA model
@@ -809,7 +809,7 @@ def distance_corr(x, y, n_boot=1000, seed=None):
     dcor : float
         Sample distance correlation (range from 0 to 1).
     pval : float
-        P-value.
+        One-sided p-value (upper tail).
 
     Notes
     -----
@@ -839,7 +839,9 @@ def distance_corr(x, y, n_boot=1000, seed=None):
     Note that by contrast to Pearson's correlation, the distance correlation
     cannot be negative, i.e :math:`0 \\leq \\text{dCor} \\leq 1`.
 
-    Results have been tested against the 'energy' R package.
+    Results have been tested against the 'energy' R package. To be consistent
+    with this latter, only the one-sided p-value is computed, i.e. the upper
+    tail of the T-statistic.
 
     References
     ----------
@@ -898,7 +900,7 @@ def distance_corr(x, y, n_boot=1000, seed=None):
     # Process second array and compute final distance correlation
     dcor = _dcorr(y, n2, A, dcov2_xx)
 
-    # Compute p-value using a bootstrap procedure
+    # Compute one-sided p-value using a bootstrap procedure
     if n_boot is not None and n_boot > 1:
         # Define random seed and permutation
         rng = np.random.RandomState(seed)
@@ -906,7 +908,8 @@ def distance_corr(x, y, n_boot=1000, seed=None):
         bootstat = np.empty(n_boot)
         for i in range(n_boot):
             bootstat[i] = _dcorr(y[bootsam[:, i]], n2, A, dcov2_xx)
-        pval = np.greater_equal(bootstat, dcor).sum() / n_boot
+
+        pval = _perm_pval(bootstat, dcor, tail='upper')
         return dcor, pval
     else:
         return dcor
