@@ -1,13 +1,41 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 import warnings
+import collections
 import numpy as np
 from pingouin.external.tabulate import tabulate
 import pandas as pd
 
-__all__ = ["_perm_pval", "print_table", "_export_table", "_check_eftype",
-           "_remove_rm_na", "_remove_na", "_check_dataframe",
+__all__ = ["_flatten_list", "_perm_pval", "print_table", "_export_table",
+           "_check_eftype", "_remove_rm_na", "_remove_na", "_check_dataframe",
            "_is_sklearn_installed", "_is_statsmodels_installed"]
+
+
+def _flatten_list(x):
+    """Flatten an arbitrarily nested list into a new list.
+
+    This can be useful to select pandas DataFrame columns.
+
+    From https://stackoverflow.com/a/16176969/10581531
+
+    Examples
+    --------
+    >>> x = ['X1', ['M1', 'M2'], 'Y1', ['Y2']]
+    >>> from pingouin.utils import _flatten_list
+    >>> _flatten_list(x)
+    ['X1', 'M1', 'M2', 'Y1', 'Y2']
+
+    >>> x = ['Xaa', 'Xbb', 'Xcc']
+    >>> _flatten_list(x)
+    ['Xaa', 'Xbb', 'Xcc']
+    """
+    result = []
+    for el in x:
+        if isinstance(x, collections.Iterable) and not isinstance(el, str):
+            result.extend(_flatten_list(el))
+        else:
+            result.append(el)
+    return result
 
 
 def _perm_pval(bootstat, estimate, tail='two-sided'):
