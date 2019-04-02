@@ -437,8 +437,10 @@ def _bias_corrected_interval(ab_estimates, sample_point, n_boot, alpha=0.05):
 
 
 def _pval_from_bootci(boot, estimate):
-    """Compute p-value from CI distribution.
-    Similar to R package mediation.
+    """Compute p-value from bootstrap distribution.
+    Similar to the pval function in the R package mediation.
+    Note that this is less accurate than a permutation test because the
+    bootstrap distribution is not conditioned on a true null hypothesis.
     """
     if estimate == 0:
         out = 1
@@ -475,7 +477,8 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     return_dist : bool
         If True, the function also returns the indirect bootstrapped beta
         samples (size = n_boot). Can be plotted for instance using
-        seaborn.distplot() or seaborn.kdeplot() functions.
+        :py:func:`seaborn.distplot()` or :py:func:`seaborn.kdeplot()`
+        functions.
 
     Returns
     -------
@@ -491,41 +494,52 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
 
     Notes
     -----
-    Mediation analysis (MA) is a "statistical procedure to test
+    Mediation analysis is a "statistical procedure to test
     whether the effect of an independent variable X on a dependent variable
     Y (i.e., X → Y) is at least partly explained by a chain of effects of the
     independent variable on an intervening mediator variable M and of the
     intervening variable on the dependent variable (i.e., X → M → Y)"
     (from Fiedler et al. 2011).
 
+    The indirect effect (also referred to as average causal mediation effect
+    or ACME) of X on Y through mediator M quantifies the estimated difference
+    in Y resulting from a one-unit change in X through a sequence of causal
+    steps in which X affects M, which in turn affects Y. It is considered
+    significant if the specified confidence interval does not include 0.
+    The path 'X --> Y' is the sum of both the indirect and direct effect.
+    It is sometimes referred to as total effect. For more details, please refer
+    to Fiedler et al 2011 or Hayes and Rockwood 2017.
+
     A linear regression is used if the mediator variable is continuous and a
     logistic regression if the mediator variable is dichotomous (binary).
 
-    The indirect effect (also referred to as average causal mediation effect
-    or ACME) is considered significant if the specified confidence
-    interval does not include 0. The path 'X --> Y' is the sum of both the
-    indirect and direct effect. It is sometimes referred to as total effect.
+    The two-sided p-value of the indirect effect is computed using the
+    bootstrap distribution, as in the mediation R package. However, the p-value
+    should be interpreted with caution since it is a) not constructed
+    conditioned on a true null hypothesis (see Hayes and Rockwood 2017) and b)
+    varies depending on the number of bootstrap samples and the random seed.
+
+    Note that rows with NaN are automatically removed.
 
     Results have been tested against the R mediation package and this tutorial
     https://data.library.virginia.edu/introduction-to-mediation-analysis/
 
-    P-values for the direct and indirect effects are computed using two-sided
-    permutation tests.
-
-    Adapted from a code found at https://github.com/rmill040/pymediation
-
-    Note that NaN are automatically removed.
-
     References
     ----------
-    .. [1] Baron, Reuben M., and David A. Kenny. "The moderator–mediator
-           variable distinction in social psychological research: Conceptual,
-           strategic, and statistical considerations." Journal of personality
-           and social psychology 51.6 (1986): 1173.
+    .. [1] Baron, R. M. & Kenny, D. A. The moderator–mediator variable
+           distinction in social psychological research: Conceptual, strategic,
+           and statistical considerations. J. Pers. Soc. Psychol. 51, 1173–1182
+           (1986).
 
-    .. [2] Fiedler, Klaus, Malte Schott, and Thorsten Meiser.
-           "What mediation analysis can (not) do." Journal of Experimental
-           Social Psychology 47.6 (2011): 1231-1236.
+    .. [2] Fiedler, K., Schott, M. & Meiser, T. What mediation analysis can
+           (not) do. J. Exp. Soc. Psychol. 47, 1231–1236 (2011).
+
+    .. [3] Hayes, A. F. & Rockwood, N. J. Regression-based statistical
+           mediation and moderation analysis in clinical research:
+           Observations, recommendations, and implementation. Behav. Res.
+           Ther. 98, 39–57 (2017).
+
+    .. [4] https://github.com/rmill040/pymediation
 
     Examples
     --------
@@ -605,11 +619,16 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     indirect['ci'] = _bias_corrected_interval(ab_estimates, indirect['coef'],
                                               alpha=alpha, n_boot=n_boot)
 
-    # Significance and p-values
+    # Significance and p-values of regression and direct effects
     sig_sxy = 'Yes' if sxy['pval'][1] < alpha else 'No'
     sig_sxm = 'Yes' if sxm['pval'][1] < alpha else 'No'
     sig_smy = 'Yes' if smy['pval'][1] < alpha else 'No'
     sig_direct = 'Yes' if direct['pval'][1] < alpha else 'No'
+
+    # Bootstrapped p-value of indirect effect
+    # Note that this is less accurate than a permutation test because the
+    # bootstrap distribution is not conditioned on a true null hypothesis.
+    # For more details see Hayes and Rockwood. 2017
     p_indirect = _pval_from_bootci(ab_estimates, indirect['coef'])
     sig_indirect = 'Yes' if p_indirect < alpha else 'No'
 
