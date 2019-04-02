@@ -3,9 +3,10 @@ import numpy as np
 import pytest
 
 from unittest import TestCase
-from pingouin.utils import (print_table, _export_table, _remove_rm_na,
-                            _check_eftype, _check_dataframe, _remove_na,
-                            _is_sklearn_installed, _is_statsmodels_installed)
+from pingouin.utils import (print_table, _perm_pval, _export_table,
+                            _remove_rm_na, _check_eftype, _check_dataframe,
+                            _remove_na, _is_sklearn_installed,
+                            _is_statsmodels_installed)
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
@@ -24,6 +25,26 @@ class TestUtils(TestCase):
         print_table(df2)
         df3['A'] = 0
         print_table(df3, tablefmt='html', floatfmt='.3f')
+
+    def test_perm_pval(self):
+        """Test function _perm_pval.
+        """
+        np.random.seed(123)
+        bootstat = np.random.normal(size=1000)
+        x = -2
+        up = _perm_pval(bootstat, x, tail='upper')
+        low = _perm_pval(bootstat, x, tail='lower')
+        two = _perm_pval(bootstat, x, tail='two-sided')
+        assert up > low
+        assert up + low == 1
+        assert low < two < up
+        x = 2.5
+        up = _perm_pval(bootstat, x, tail='upper')
+        low = _perm_pval(bootstat, x, tail='lower')
+        two = _perm_pval(bootstat, x, tail='two-sided')
+        assert low > up
+        assert up + low == 1
+        assert up < two < low
 
     def test_export_table(self):
         """Test function export_table."""
