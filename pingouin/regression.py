@@ -523,12 +523,12 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     >>> from pingouin import mediation_analysis, read_dataset
     >>> df = read_dataset('mediation')
     >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05, seed=42)
-           Path   Beta  CI[2.5%]  CI[97.5%]          pval  Sig
-    0    X -> M  0.561     0.374      0.749  4.391362e-08  Yes
-    1    M -> Y  0.654     0.484      0.825  1.612674e-11  Yes
-    2    X -> Y  0.396     0.176      0.617  5.671128e-04  Yes
-    3    Direct  0.040    -0.178      0.257  7.980000e-01   No
-    4  Indirect  0.357     0.220      0.538  0.000000e+00  Yes
+           Path    Beta  CI[2.5%]  CI[97.5%]          pval  Sig
+    0    X -> M  0.5610    0.3735     0.7485  4.391362e-08  Yes
+    1    M -> Y  0.6542    0.4838     0.8245  1.612674e-11  Yes
+    2    X -> Y  0.3961    0.1755     0.6167  5.671128e-04  Yes
+    3    Direct  0.0396   -0.1780     0.2572  7.187429e-01   No
+    4  Indirect  0.3565    0.2198     0.5377  0.000000e+00  Yes
 
     2. Return the indirect bootstrapped beta coefficients
 
@@ -539,16 +539,14 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
 
     3. Mediation analysis with a binary mediator variable
 
-    >>> mediation_analysis(data=df, x='X', m='Mbin', y='Y', alpha=0.05)
-           Path   Beta  CI[2.5%]  CI[97.5%]      pval  Sig
-    0    X -> M -0.021    -0.248      0.207  0.859392   No
-    1    M -> Y -0.135    -0.952      0.682  0.743076   No
-    2    X -> Y  0.396     0.176      0.617  0.000567  Yes
-    3    Direct  0.396     0.174      0.617  0.000000  Yes
-    4  Indirect  0.002    -0.076      0.150  0.892000   No
-
+    >>> mediation_analysis(data=df, x='X', m='Mbin', y='Y', seed=42)
+           Path    Beta  CI[2.5%]  CI[97.5%]      pval  Sig
+    0    X -> M -0.0205   -0.2476     0.2066  0.859392   No
+    1    M -> Y -0.1354   -0.9525     0.6818  0.743076   No
+    2    X -> Y  0.3961    0.1755     0.6167  0.000567  Yes
+    3    Direct  0.3956    0.1739     0.6173  0.000614  Yes
+    4  Indirect  0.0023   -0.0715     0.1441  0.960000   No
     """
-    from pingouin.utils import _perm_pval
     # Sanity check
     assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame.'
     assert {x, m, y}.issubset(data.columns), 'Columns must be present in data.'
@@ -596,29 +594,23 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     indirect['ci'] = _bias_corrected_interval(ab_estimates, indirect['coef'],
                                               alpha=alpha, n_boot=n_boot)
 
-    # Permutation test for p-values
-    bootsam = rng.random_sample((n_boot, n)).argsort(axis=1)
-    bt_direct, bt_ind = np.empty(n_boot), np.empty(n_boot)
-    # Direct effect
-    for i in range(n_boot):
-        bt_direct[i] = linear_regression(data[[x, m]],
-                                         data[y].iloc[bootsam[i, :]],
-                                         coef_only=True)[1]
-        bt_ind[i] = _point_estimate(data, x=x, m=m, y=y, idx=bootsam[i, :],
-                                    mtype=mtype, boot_type='pval')
-    # Two-sided p-values
-    p_direct = _perm_pval(bt_direct, direct['coef'][1], tail='two-sided')
-    p_indirect = _perm_pval(bt_ind, indirect['coef'], tail='two-sided')
+    def pval(boot, estimate):
+        """Compute p-value from CI distribution.
+        Similar to R package mediation
+        """
+        if estimate == 0:
+            out = 1
+        else:
+            out = 2 * min(sum(boot > 0), sum(boot < 0)) / len(boot)
+        return min(out, 1)
 
-    # Significance
+    # Significance and p-values
     sig_sxy = 'Yes' if sxy['pval'][1] < alpha else 'No'
     sig_sxm = 'Yes' if sxm['pval'][1] < alpha else 'No'
     sig_smy = 'Yes' if smy['pval'][1] < alpha else 'No'
-    sig_direct = 'Yes' if p_direct < alpha else 'No'
+    sig_direct = 'Yes' if direct['pval'][1] < alpha else 'No'
+    p_indirect = pval(ab_estimates, indirect['coef'])
     sig_indirect = 'Yes' if p_indirect < alpha else 'No'
-    # sig_direct = 'Yes' if direct['pval'][1] < alpha else 'No'
-    # sig_indirect = 'Yes' if (np.sign(indirect['ci'][0])
-    #                          == np.sign(indirect['ci'][1])) else 'No'
 
     # Name of CI
     ll_name = 'CI[%.1f%%]' % (100 * alpha / 2)
@@ -641,7 +633,8 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
                                     max(indirect['ci'])],
                           # P-value
                           'pval': [sxm['pval'][1], smy['pval'][1],
-                                   sxy['pval'][1], p_direct, p_indirect],
+                                   sxy['pval'][1], direct['pval'][1],
+                                   p_indirect],
                           # Significant
                           'Sig': [sig_sxm, sig_smy, sig_sxy, sig_direct,
                                   sig_indirect],

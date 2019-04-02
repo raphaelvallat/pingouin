@@ -785,7 +785,7 @@ def _dcorr(y, n2, A, dcov2_xx):
     return np.sqrt(dcov2_xy) / np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
 
 
-def distance_corr(x, y, n_boot=1000, seed=None):
+def distance_corr(x, y, tail='upper', n_boot=1000, seed=None):
     """Distance correlation between two arrays.
 
     Statistical significance (p-value) is evaluated with a permutation test.
@@ -796,6 +796,13 @@ def distance_corr(x, y, n_boot=1000, seed=None):
         1D or 2D input arrays, shape (n_samples, n_features).
         x and y must have the same number of samples and must not
         contain missing values.
+    tail : str
+        Tail for p-value ::
+
+        'upper' : one-sided (upper tail)
+        'lower' : one-sided (lower tail)
+        'two-sided' : two-sided
+
     n_boot : int or None
         Number of bootstrap to perform.
         If None, no bootstrapping is performed and the function
@@ -809,7 +816,7 @@ def distance_corr(x, y, n_boot=1000, seed=None):
     dcor : float
         Sample distance correlation (range from 0 to 1).
     pval : float
-        One-sided p-value (upper tail).
+        P-value
 
     Notes
     -----
@@ -877,6 +884,7 @@ def distance_corr(x, y, n_boot=1000, seed=None):
     >>> distance_corr(a, b, n_boot=None)
     0.8799633012275321
     """
+    assert tail in ['upper', 'lower', 'two-sided'], 'Wrong tail argument.'
     x = np.asarray(x)
     y = np.asarray(y)
     # Check for NaN values
@@ -904,12 +912,12 @@ def distance_corr(x, y, n_boot=1000, seed=None):
     if n_boot is not None and n_boot > 1:
         # Define random seed and permutation
         rng = np.random.RandomState(seed)
-        bootsam = rng.random_sample((n, n_boot)).argsort(axis=0)
+        bootsam = rng.random_sample((n_boot, n)).argsort(axis=1)
         bootstat = np.empty(n_boot)
         for i in range(n_boot):
-            bootstat[i] = _dcorr(y[bootsam[:, i]], n2, A, dcov2_xx)
+            bootstat[i] = _dcorr(y[bootsam[i, :]], n2, A, dcov2_xx)
 
-        pval = _perm_pval(bootstat, dcor, tail='upper')
+        pval = _perm_pval(bootstat, dcor, tail=tail)
         return dcor, pval
     else:
         return dcor
