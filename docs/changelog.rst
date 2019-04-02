@@ -6,7 +6,7 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
-v0.2.4 (March 2019)
+v0.2.4 (April 2019)
 -------------------
 
 **Correlation**
