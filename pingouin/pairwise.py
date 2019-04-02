@@ -795,7 +795,6 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
     >>> stats = pairwise_corr(data, method='spearman', tail='two-sided',
     ...                       padjust='bonf')
-    >>> stats
 
     2. Robust two-sided correlation with uncorrected p-values
 

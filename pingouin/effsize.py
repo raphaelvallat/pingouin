@@ -221,9 +221,9 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
     2. Bootstrapped 95% confidence interval of a Cohen d
 
     >>> stat = pg.compute_effsize(x, y, eftype='cohen')
-    >>> ci = pg.compute_bootci(x, y, func='cohen', decimals=3)
+    >>> ci = pg.compute_bootci(x, y, func='cohen', seed=42, decimals=3)
     >>> print(stat, ci)
-    0.1537753990658328 [-0.351  0.601]
+    0.1537753990658328 [-0.327  0.562]
 
     3. Bootstrapped confidence interval of a standard deviation (univariate)
 
@@ -237,7 +237,7 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
 
     >>> stat = np.sum(np.exp(x) / np.exp(y))
     >>> ci = pg.compute_bootci(x, y, func=lambda x, y: np.sum(np.exp(x)
-    >>>                           / np.exp(y)), n_boot=10000, seed=123)
+    ...                           / np.exp(y)), n_boot=10000, seed=123)
     >>> print(stat, ci)
     26.80405184881793 [12.76 45.15]
 
@@ -318,9 +318,9 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
             # hypothesis testing such as p-value estimation). Instead, for the
             # latter, one must only shuffle the Y values while keeping the X
             # values constant, i.e.:
-            # >>> bootsam = rng.random_sample((n, n_boot)).argsort(axis=0)
+            # >>> bootsam = rng.random_sample((n_boot, n)).argsort(axis=1)
             # >>> for i in range(n_boot):
-            # >>>   bootstat[i] = func(x, y[bootsam[:, i]])
+            # >>>   bootstat[i] = func(x, y[bootsam[i, :]])
             bootstat[i] = func(x[bootsam[:, i]], y[bootsam[:, i]])
     else:
         reference = func(x)

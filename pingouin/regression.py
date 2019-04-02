@@ -408,6 +408,9 @@ def _point_estimate(data, x, m, y, idx, mtype='linear', boot_type='ci'):
 def _bias_corrected_interval(ab_estimates, sample_point, n_boot, alpha=0.05):
     """Get (1 - alpha) * 100 bias-corrected confidence interval estimate
 
+    Note that this is similar to the "cper" module implemented in
+    :py:func:`pingouin.compute_bootci`.
+
     Parameters
     ----------
     ab_estimates : 1d array-like
@@ -548,7 +551,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     >>> from pingouin import mediation_analysis, read_dataset
     >>> df = read_dataset('mediation')
     >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05, seed=42)
-           Path    Beta  CI[2.5%]  CI[97.5%]          pval  Sig
+           path    coef  CI[2.5%]  CI[97.5%]          pval  sig
     0    X -> M  0.5610    0.3735     0.7485  4.391362e-08  Yes
     1    M -> Y  0.6542    0.4838     0.8245  1.612674e-11  Yes
     2    X -> Y  0.3961    0.1755     0.6167  5.671128e-04  Yes
@@ -565,7 +568,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     3. Mediation analysis with a binary mediator variable
 
     >>> mediation_analysis(data=df, x='X', m='Mbin', y='Y', seed=42)
-           Path    Beta  CI[2.5%]  CI[97.5%]      pval  Sig
+           path    coef  CI[2.5%]  CI[97.5%]      pval  sig
     0    X -> M -0.0205   -0.2476     0.2066  0.859392   No
     1    M -> Y -0.1354   -0.9525     0.6818  0.743076   No
     2    X -> Y  0.3961    0.1755     0.6167  0.000567  Yes
@@ -637,10 +640,10 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     ul_name = 'CI[%.1f%%]' % (100 * (1 - alpha / 2))
 
     # Create output dataframe
-    stats = pd.DataFrame({'Path': ['X -> M', 'M -> Y', 'X -> Y', 'Direct',
+    stats = pd.DataFrame({'path': ['X -> M', 'M -> Y', 'X -> Y', 'Direct',
                                    'Indirect'],
                           # Beta coefficients
-                          'Beta': [sxm['coef'][1], smy['coef'][1],
+                          'coef': [sxm['coef'][1], smy['coef'][1],
                                    sxy['coef'][1], direct['coef'][1],
                                    indirect['coef']],
                           # Lower CI
@@ -656,11 +659,11 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
                                    sxy['pval'][1], direct['pval'][1],
                                    p_indirect],
                           # Significant
-                          'Sig': [sig_sxm, sig_smy, sig_sxy, sig_direct,
+                          'sig': [sig_sxm, sig_smy, sig_sxy, sig_direct,
                                   sig_indirect],
                           })
 
-    col_to_round = ['Beta', ll_name, ul_name]
+    col_to_round = ['coef', ll_name, ul_name]
     stats[col_to_round] = stats[col_to_round].round(4)
 
     if return_dist:

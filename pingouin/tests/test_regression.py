@@ -98,11 +98,11 @@ class TestRegression(TestCase):
         ma = mediation_analysis(data=df, x='X', m='M', y='Y', n_boot=500)
 
         # Compare against R package mediation
-        assert ma['Beta'][0] == 0.5610
-        assert ma['Beta'][1] == 0.6542
-        assert ma['Beta'][2] == 0.3961
-        assert ma['Beta'][3] == 0.0396
-        assert ma['Beta'][4] == 0.3565
+        assert ma['coef'][0] == 0.5610
+        assert ma['coef'][1] == 0.6542
+        assert ma['coef'][2] == 0.3961
+        assert ma['coef'][3] == 0.0396
+        assert ma['coef'][4] == 0.3565
 
         _, dist = mediation_analysis(data=df, x='X', m='M', y='Y', n_boot=1000,
                                      return_dist=True)
@@ -111,17 +111,17 @@ class TestRegression(TestCase):
 
         # Check with a binary mediator
         ma = mediation_analysis(data=df, x='X', m='Mbin', y='Y', n_boot=2000)
-        assert_almost_equal(ma['Beta'][0], -0.0208, decimal=2)
+        assert_almost_equal(ma['coef'][0], -0.0208, decimal=2)
 
         # Indirect effect
-        assert_almost_equal(ma['Beta'][4], 0.0033, decimal=2)
-        assert ma['Sig'][4] == 'No'
+        assert_almost_equal(ma['coef'][4], 0.0033, decimal=2)
+        assert ma['sig'][4] == 'No'
 
         # Direct effect
-        assert_almost_equal(ma['Beta'][3], 0.3956, decimal=2)
+        assert_almost_equal(ma['coef'][3], 0.3956, decimal=2)
         assert_almost_equal(ma['CI[2.5%]'][3], 0.1714, decimal=2)
         assert_almost_equal(ma['CI[97.5%]'][3], 0.617, decimal=1)
-        assert ma['Sig'][3] == 'Yes'
+        assert ma['sig'][3] == 'Yes'
 
         # Test helper function _pval_from_bootci
         np.random.seed(123)

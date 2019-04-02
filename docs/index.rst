@@ -365,20 +365,20 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 
 .. code-block:: python
 
-  pg.mediation_analysis(data=data, x='X', m='Z', y='Y', n_boot=500)
+    pg.mediation_analysis(data=data, x='X', m='Z', y='Y', seed=42, n_boot=1000)
 
 .. table:: Mediation summary
   :widths: auto
 
-  ========  ======  ==========  ===========  =====
-  Path        Beta    CI[2.5%]    CI[97.5%]  Sig
-  ========  ======  ==========  ===========  =====
-  X -> M     0.103      -0.051        0.256  No
-  M -> Y     0.018      -0.332        0.369  No
-  X -> Y     0.136       0.002        0.269  Yes
-  Direct     0.143       0.003        0.283  Yes
-  Indirect  -0.007      -0.050        0.027  No
-  ========  ======  ==========  ===========  =====
+  ========  ======  ==========  ===========  ======  =====
+  path        coef    CI[2.5%]    CI[97.5%]    pval  sig
+  ========  ======  ==========  ===========  ======  =====
+  X -> M     0.103      -0.051        0.256   0.181  No
+  M -> Y     0.018      -0.332        0.369   0.916  No
+  X -> Y     0.136       0.002        0.269   0.047  Yes
+  Direct     0.143       0.003        0.283   0.046  Yes
+  Indirect  -0.007      -0.070        0.029   0.898  No
+  ========  ======  ==========  ===========  ======  =====
 
 14. Bland-Altman plot
 #####################
