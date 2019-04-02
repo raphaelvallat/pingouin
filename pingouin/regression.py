@@ -523,12 +523,12 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     >>> from pingouin import mediation_analysis, read_dataset
     >>> df = read_dataset('mediation')
     >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05, seed=42)
-           Path    Beta  CI[2.5%]  CI[97.5%]    pval  Sig
-    0    X -> M  0.5610    0.3735     0.7485  0.0000  Yes
-    1    M -> Y  0.6542    0.4838     0.8245  0.0000  Yes
-    2    X -> Y  0.3961    0.1755     0.6167  0.0006  Yes
-    3    Direct  0.0396   -0.1780     0.2572  0.7980   No
-    4  Indirect  0.3565    0.2198     0.5377  0.0000  Yes
+           Path   Beta  CI[2.5%]  CI[97.5%]          pval  Sig
+    0    X -> M  0.561     0.374      0.749  4.391362e-08  Yes
+    1    M -> Y  0.654     0.484      0.825  1.612674e-11  Yes
+    2    X -> Y  0.396     0.176      0.617  5.671128e-04  Yes
+    3    Direct  0.040    -0.178      0.257  7.980000e-01   No
+    4  Indirect  0.357     0.220      0.538  0.000000e+00  Yes
 
     2. Return the indirect bootstrapped beta coefficients
 
@@ -540,12 +540,13 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     3. Mediation analysis with a binary mediator variable
 
     >>> mediation_analysis(data=df, x='X', m='Mbin', y='Y', alpha=0.05)
-           Path    Beta  CI[2.5%]  CI[97.5%]    pval  Sig
-    0    X -> M -0.0205   -0.2476     0.2066  0.8594   No
-    1    M -> Y -0.1354   -0.9525     0.6818  0.7431   No
-    2    X -> Y  0.3961    0.1755     0.6167  0.0006  Yes
-    3    Direct  0.3956    0.1739     0.6173  0.0000  Yes
-    4  Indirect  0.0023   -0.0787     0.1255  0.8980   No
+           Path   Beta  CI[2.5%]  CI[97.5%]      pval  Sig
+    0    X -> M -0.021    -0.248      0.207  0.859392   No
+    1    M -> Y -0.135    -0.952      0.682  0.743076   No
+    2    X -> Y  0.396     0.176      0.617  0.000567  Yes
+    3    Direct  0.396     0.174      0.617  0.000000  Yes
+    4  Indirect  0.002    -0.076      0.150  0.892000   No
+
     """
     from pingouin.utils import _perm_pval
     # Sanity check
@@ -644,7 +645,10 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
                           # Significant
                           'Sig': [sig_sxm, sig_smy, sig_sxy, sig_direct,
                                   sig_indirect],
-                          }).round(4)
+                          })
+
+    col_to_round = ['Beta', ll_name, ul_name]
+    stats[col_to_round] = stats[col_to_round].round(4)
 
     if return_dist:
         return stats, ab_estimates
