@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import t, norm
+from pingouin.utils import _flatten_list
 
 __all__ = ['linear_regression', 'logistic_regression', 'mediation_analysis']
 
@@ -386,26 +387,33 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         return stats
 
 
-def _point_estimate(data, x, m, y, idx, mtype='linear', boot_type='ci'):
+def _point_estimate(data, x, m, y, idx, mtype='linear'):
     """Point estimate of indirect effect based on bootstrap sample."""
-    assert boot_type in ['ci', 'pval']
-    # Mediator model (M ~ X)
-    target = data[m].iloc[idx] if boot_type == 'ci' else data[m]
-    if mtype == 'linear':
-        beta_m = linear_regression(data[x].iloc[idx], target,
-                                   add_intercept=True, coef_only=True)
-    else:
-        beta_m = logistic_regression(data[x].iloc[idx], target,
-                                     coef_only=True)
+    # Mediator(s) model (M(j) ~ X)
+    beta_m = []
+    for j in range(len(m)):
+        # Mediator model (M ~ X)
+        if mtype == 'linear':
+            beta_m.append(linear_regression(data[x].iloc[idx],
+                                            data[m[j]].iloc[idx],
+                                            add_intercept=True,
+                                            coef_only=True)[1])
+        else:
+            beta_m.append(logistic_regression(data[x].iloc[idx],
+                                              data[m[j]].iloc[idx],
+                                              coef_only=True)[1])
+
     # Full model (Y ~ X + M)
-    target = data[y].iloc[idx] if boot_type == 'ci' else data[y]
-    beta_y = linear_regression(data[[x, m]].iloc[idx], target,
-                               add_intercept=True, coef_only=True)
+    beta_y = linear_regression(data[_flatten_list([x, m])].iloc[idx],
+                               data[y].iloc[idx],
+                               add_intercept=True,
+                               coef_only=True)[2:]
+
     # Point estimate
-    return beta_m[1] * beta_y[2]
+    return beta_m * beta_y
 
 
-def _bias_corrected_interval(ab_estimates, sample_point, n_boot, alpha=0.05):
+def _bca(ab_estimates, sample_point, n_boot, alpha=0.05):
     """Get (1 - alpha) * 100 bias-corrected confidence interval estimate
 
     Note that this is similar to the "cper" module implemented in
@@ -463,9 +471,10 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     x : str
         Column name in data containing the predictor variable.
         The predictor variable must be continuous.
-    m : str
-        Column name in data containing the mediator variable.
-        The mediator can be continuous or binary (e.g. 0 or 1).
+    m : str or list of str
+        Column name(s) in data containing the mediator variable(s).
+        The mediator(s) can be continuous or binary (e.g. 0 or 1).
+        This function supports multiple parallel mediators.
     y : str
         Column name in data containing the outcome variable.
         The outcome variable must be continuous.
@@ -490,6 +499,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
 
         'path' : regression model
         'coef' : regression estimates
+        'se' : standard error
         'CI[2.5%]' : lower confidence interval
         'CI[97.5%]' : upper confidence interval
         'pval' : two-sided p-values
@@ -514,7 +524,11 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     please refer to Fiedler et al 2011 or Hayes and Rockwood 2017.
 
     A linear regression is used if the mediator variable is continuous and a
-    logistic regression if the mediator variable is dichotomous (binary).
+    logistic regression if the mediator variable is dichotomous (binary). Note
+    that this function also supports parallel multiple mediators: "in such
+    models, mediators may be and often are correlated, but nothing in the
+    model allows one mediator to causally influence another."
+    (Hayes and Rockwood 2017)
 
     The two-sided p-value of the indirect effect is computed using the
     bootstrap distribution, as in the mediation R package. However, the p-value
@@ -553,12 +567,12 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     >>> from pingouin import mediation_analysis, read_dataset
     >>> df = read_dataset('mediation')
     >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05, seed=42)
-           path    coef  CI[2.5%]  CI[97.5%]          pval  sig
-    0    X -> M  0.5610    0.3735     0.7485  4.391362e-08  Yes
-    1    M -> Y  0.6542    0.4838     0.8245  1.612674e-11  Yes
-    2    X -> Y  0.3961    0.1755     0.6167  5.671128e-04  Yes
-    3    Direct  0.0396   -0.1780     0.2572  7.187429e-01   No
-    4  Indirect  0.3565    0.2198     0.5377  0.000000e+00  Yes
+           path    coef      se          pval  CI[2.5%]  CI[97.5%]  sig
+    0    X -> M  0.5610  0.0945  4.391362e-08    0.3735     0.7485  Yes
+    1    M -> Y  0.6542  0.0858  1.612674e-11    0.4838     0.8245  Yes
+    2     Total  0.3961  0.1112  5.671128e-04    0.1755     0.6167  Yes
+    3    Direct  0.0396  0.1096  7.187429e-01   -0.1780     0.2572   No
+    4  Indirect  0.3565  0.0833  0.000000e+00    0.2198     0.5377  Yes
 
     2. Return the indirect bootstrapped beta coefficients
 
@@ -570,105 +584,130 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     3. Mediation analysis with a binary mediator variable
 
     >>> mediation_analysis(data=df, x='X', m='Mbin', y='Y', seed=42)
-           path    coef  CI[2.5%]  CI[97.5%]      pval  sig
-    0    X -> M -0.0205   -0.2476     0.2066  0.859392   No
-    1    M -> Y -0.1354   -0.9525     0.6818  0.743076   No
-    2    X -> Y  0.3961    0.1755     0.6167  0.000567  Yes
-    3    Direct  0.3956    0.1739     0.6173  0.000614  Yes
-    4  Indirect  0.0023   -0.0715     0.1441  0.960000   No
+            path    coef      se      pval  CI[2.5%]  CI[97.5%]  sig
+    0  X -> Mbin -0.0205  0.1159  0.859392   -0.2476     0.2066   No
+    1  Mbin -> Y -0.1354  0.4118  0.743076   -0.9525     0.6818   No
+    2      Total  0.3961  0.1112  0.000567    0.1755     0.6167  Yes
+    3     Direct  0.3956  0.1117  0.000614    0.1739     0.6173  Yes
+    4   Indirect  0.0023  0.0495  0.960000   -0.0715     0.1441   No
+
+    4. Mediation analysis with multiple parallel mediators
+
+    >>> np.random.seed(42)
+    >>> df.rename(columns={"M": "M1"}, inplace=True)
+    >>> df['M2'] = np.random.randint(0, 10, df.shape[0])
+    >>> mediation_analysis(data=df, x='X', m=['M1', 'M2'], y='Y', seed=42)
+              path    coef      se          pval  CI[2.5%]  CI[97.5%]  sig
+    0      X -> M1  0.5610  0.0945  4.391362e-08    0.3735     0.7485  Yes
+    1      X -> M2 -0.0435  0.1663  7.942276e-01   -0.3735     0.2865   No
+    2      M1 -> Y  0.6580  0.0901  7.731809e-11    0.4793     0.8368  Yes
+    3      M2 -> Y  0.0089  0.0596  8.821896e-01   -0.1095     0.1272   No
+    4        Total  0.3961  0.1112  5.671128e-04    0.1755     0.6167  Yes
+    5       Direct  0.0380  0.1114  7.336706e-01   -0.1832     0.2592   No
+    6  Indirect M1  0.3584  0.0882  0.000000e+00    0.2124     0.5572  Yes
+    7  Indirect M2 -0.0003  0.0105  9.400000e-01   -0.0285     0.0193   No
     """
     # Sanity check
+    assert isinstance(x, str), 'y must be a string.'
+    assert isinstance(y, str), 'y must be a string.'
+    assert isinstance(m, (list, str)), 'Mediator(s) must be a list or string.'
+    if isinstance(m, str):
+        m = [m]
+    n_mediator = len(m)
     assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame.'
-    assert {x, m, y}.issubset(data.columns), 'Columns must be present in data.'
+    # Check that columns are in dataframe
+    columns = _flatten_list([x, m, y])
+    keys = data.columns
+    assert all([c in keys for c in columns]), 'Column(s) are not in DataFrame.'
+    # Check that columns are numeric
     err_msg = "Columns must be numeric or boolean."
-    assert all([data[c].dtype.kind in 'bfi' for c in [x, m, y]]), err_msg
+    assert all([data[c].dtype.kind in 'bfi' for c in columns]), err_msg
 
     # Drop rows with NAN Values
-    data = data[[x, m, y]].dropna()
+    data = data[columns].dropna()
     n = data.shape[0]
     assert n > 5, 'DataFrame must have at least 5 samples (rows).'
 
-    # Initialize variables
-    ab_estimates = np.zeros(n_boot)
-    indirect = {}
-
     # Check if mediator is binary
-    mtype = 'logistic' if data[m].nunique() == 2 else 'linear'
-
-    # Compute regressions
-    if mtype == 'linear':
-        sxm = linear_regression(data[x], data[m], add_intercept=True,
-                                alpha=alpha, as_dataframe=False)
-    else:
-        sxm = logistic_regression(data[x], data[m], alpha=alpha,
-                                  as_dataframe=False)
-
-    smy = linear_regression(data[m], data[y], add_intercept=True, alpha=alpha,
-                            as_dataframe=False)
-    # sxy = Average Total Effects
-    sxy = linear_regression(data[x], data[y], add_intercept=True, alpha=alpha,
-                            as_dataframe=False)
-    # Average Direct Effects
-    direct = linear_regression(data[[x, m]], data[y], add_intercept=True,
-                               alpha=alpha, as_dataframe=False)
-
-    # Bootstrap confidence intervals
-    rng = np.random.RandomState(seed)
-    idx = rng.choice(np.arange(n), replace=True, size=(n_boot, n))
-    for i in range(n_boot):
-        ab_estimates[i] = _point_estimate(data, x=x, m=m, y=y, idx=idx[i, :],
-                                          mtype=mtype)
-
-    indirect['coef'] = _point_estimate(data, x=x, m=m, y=y, idx=np.arange(n),
-                                       mtype=mtype)
-    indirect['ci'] = _bias_corrected_interval(ab_estimates, indirect['coef'],
-                                              alpha=alpha, n_boot=n_boot)
-
-    # Significance and p-values of regression and direct effects
-    sig_sxy = 'Yes' if sxy['pval'][1] < alpha else 'No'
-    sig_sxm = 'Yes' if sxm['pval'][1] < alpha else 'No'
-    sig_smy = 'Yes' if smy['pval'][1] < alpha else 'No'
-    sig_direct = 'Yes' if direct['pval'][1] < alpha else 'No'
-
-    # Bootstrapped p-value of indirect effect
-    # Note that this is less accurate than a permutation test because the
-    # bootstrap distribution is not conditioned on a true null hypothesis.
-    # For more details see Hayes and Rockwood. 2017
-    p_indirect = _pval_from_bootci(ab_estimates, indirect['coef'])
-    sig_indirect = 'Yes' if p_indirect < alpha else 'No'
+    mtype = 'logistic' if all(data[m].nunique() == 2) else 'linear'
 
     # Name of CI
     ll_name = 'CI[%.1f%%]' % (100 * alpha / 2)
     ul_name = 'CI[%.1f%%]' % (100 * (1 - alpha / 2))
 
-    # Create output dataframe
-    stats = pd.DataFrame({'path': ['X -> M', 'M -> Y', 'X -> Y', 'Direct',
-                                   'Indirect'],
-                          # Beta coefficients
-                          'coef': [sxm['coef'][1], smy['coef'][1],
-                                   sxy['coef'][1], direct['coef'][1],
-                                   indirect['coef']],
-                          # Lower CI
-                          ll_name: [sxm[ll_name][1], smy[ll_name][1],
-                                    sxy[ll_name][1], direct[ll_name][1],
-                                    min(indirect['ci'])],
-                          # Upper CI
-                          ul_name: [sxm[ul_name][1], smy[ul_name][1],
-                                    sxy[ul_name][1], direct[ul_name][1],
-                                    max(indirect['ci'])],
-                          # P-value
-                          'pval': [sxm['pval'][1], smy['pval'][1],
-                                   sxy['pval'][1], direct['pval'][1],
-                                   p_indirect],
-                          # Significant
-                          'sig': [sig_sxm, sig_smy, sig_sxy, sig_direct,
-                                  sig_indirect],
-                          })
+    # Compute regressions
+    cols = ['names', 'coef', 'se', 'pval', ll_name, ul_name]
+    sxm = {}
+    for j in m:
+        if mtype == 'linear':
+            sxm[j] = linear_regression(data[x], data[j], alpha=alpha,
+                                       as_dataframe=True).loc[[1], cols]
+        else:
+            sxm[j] = logistic_regression(data[x], data[j], alpha=alpha,
+                                         as_dataframe=True).loc[[1], cols]
+        sxm[j].loc[1, 'names'] = 'X -> %s' % j
 
-    col_to_round = ['coef', ll_name, ul_name]
+    sxm = pd.concat(sxm, ignore_index=True)
+
+    smy = linear_regression(data[m], data[y], alpha=alpha).loc[1:, cols]
+
+    # Average Total Effects
+    sxy = linear_regression(data[x], data[y], alpha=alpha).loc[[1], cols]
+
+    # Average Direct Effects
+    direct = linear_regression(data[_flatten_list([x, m])], data[y],
+                               alpha=alpha).loc[[1], cols]
+
+    # Rename paths
+    smy['names'] = smy['names'].apply(lambda x: '%s -> Y' % x)
+    direct.loc[1, 'names'] = 'Direct'
+    sxy.loc[1, 'names'] = 'Total'
+
+    # Concatenate and create sig column
+    stats = pd.concat((sxm, smy, sxy, direct), ignore_index=True)
+    stats['sig'] = np.where(stats['pval'] < alpha, 'Yes', 'No')
+
+    # Bootstrap confidence intervals
+    rng = np.random.RandomState(seed)
+    idx = rng.choice(np.arange(n), replace=True, size=(n_boot, n))
+    ab_estimates = np.zeros(shape=(n_boot, n_mediator))
+    for i in range(n_boot):
+        ab_estimates[i, :] = _point_estimate(data, x=x, m=m, y=y,
+                                             idx=idx[i, :], mtype=mtype)
+
+    ab = _point_estimate(data, x=x, m=m, y=y, idx=np.arange(n), mtype=mtype)
+    indirect = {'names': m, 'coef': ab, 'se': [], 'pval': [], ll_name: [],
+                ul_name: [], 'sig': []}
+
+    for j in range(n_mediator):
+        ci_j = _bca(ab_estimates[:, j], indirect['coef'][j],
+                    alpha=alpha, n_boot=n_boot)
+        indirect[ll_name].append(min(ci_j))
+        indirect[ul_name].append(max(ci_j))
+        indirect['se'].append(ab_estimates[:, j].std(ddof=1))
+        # Bootstrapped p-value of indirect effect
+        # Note that this is less accurate than a permutation test because the
+        # bootstrap distribution is not conditioned on a true null hypothesis.
+        # For more details see Hayes and Rockwood. 2017
+        indirect['pval'].append(_pval_from_bootci(ab_estimates[:, j],
+                                indirect['coef'][j]))
+        indirect['sig'].append('Yes' if indirect['pval'][j] < alpha else 'No')
+
+    # Create output dataframe
+    indirect = pd.DataFrame.from_dict(indirect)
+    if n_mediator == 1:
+        indirect['names'] = 'Indirect'
+    else:
+        indirect['names'] = indirect['names'].apply(lambda x:
+                                                    'Indirect %s' % x)
+    stats = stats.append(indirect, ignore_index=True)
+    stats = stats.rename(columns={'names': 'path'})
+
+    # Round
+    col_to_round = ['coef', 'se', ll_name, ul_name]
     stats[col_to_round] = stats[col_to_round].round(4)
 
     if return_dist:
-        return stats, ab_estimates
+        return stats, np.squeeze(ab_estimates)
     else:
         return stats

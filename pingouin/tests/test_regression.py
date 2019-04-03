@@ -123,6 +123,14 @@ class TestRegression(TestCase):
         assert_almost_equal(ma['CI[97.5%]'][3], 0.617, decimal=1)
         assert ma['sig'][3] == 'Yes'
 
+        # With multiple mediator
+        np.random.seed(42)
+        df.rename(columns={"M": "M1"}, inplace=True)
+        df['M2'] = np.random.randint(0, 10, df.shape[0])
+        ma2 = mediation_analysis(data=df, x='X', m=['M1', 'M2'], y='Y',
+                                 seed=42)
+        assert ma['coef'][2] == ma2['coef'][4]
+
         # Test helper function _pval_from_bootci
         np.random.seed(123)
         bt2 = np.random.normal(loc=2, size=1000)
