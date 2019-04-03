@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import t, norm
-from pingouin.utils import _flatten_list
+from pingouin.utils import _flatten_list as _fl
 
 __all__ = ['linear_regression', 'logistic_regression', 'mediation_analysis']
 
@@ -387,27 +387,27 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         return stats
 
 
-def _point_estimate(data, x, m, y, idx, mtype='linear'):
+def _point_estimate(data, x, m, y, idx, covar=None, mtype='linear'):
     """Point estimate of indirect effect based on bootstrap sample."""
-    # Mediator(s) model (M(j) ~ X)
+    # Mediator(s) model (M(j) ~ X + covar)
+    n_mediator = len(m)
     beta_m = []
-    for j in range(len(m)):
-        # Mediator model (M ~ X)
+    for j in range(n_mediator):
         if mtype == 'linear':
-            beta_m.append(linear_regression(data[x].iloc[idx],
+            beta_m.append(linear_regression(data[_fl([x, covar])].iloc[idx],
                                             data[m[j]].iloc[idx],
                                             add_intercept=True,
                                             coef_only=True)[1])
         else:
-            beta_m.append(logistic_regression(data[x].iloc[idx],
+            beta_m.append(logistic_regression(data[_fl([x, covar])].iloc[idx],
                                               data[m[j]].iloc[idx],
                                               coef_only=True)[1])
 
-    # Full model (Y ~ X + M)
-    beta_y = linear_regression(data[_flatten_list([x, m])].iloc[idx],
+    # Full model (Y ~ X + M + covar)
+    beta_y = linear_regression(data[_fl([x, m, covar])].iloc[idx],
                                data[y].iloc[idx],
                                add_intercept=True,
-                               coef_only=True)[2:]
+                               coef_only=True)[2:(2 + n_mediator)]
 
     # Point estimate
     return beta_m * beta_y
@@ -460,8 +460,8 @@ def _pval_from_bootci(boot, estimate):
     return min(out, 1)
 
 
-def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
-                       n_boot=500, seed=None, return_dist=False):
+def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
+                       alpha=0.05, n_boot=500, seed=None, return_dist=False):
     """Mediation analysis using a bias-correct non-parametric bootstrap method.
 
     Parameters
@@ -478,6 +478,9 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     y : str
         Column name in data containing the outcome variable.
         The outcome variable must be continuous.
+    covar : None, str, or list
+        Covariate(s). If not None, the specified covariate(s) will be included
+        in all regressions.
     alpha : float
         Significance threshold. Used to determine the confidence interval,
         CI = [ alpha / 2 ; 1 -  alpha / 2]
@@ -591,32 +594,41 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     3     Direct  0.3956  0.1117  0.000614    0.1739     0.6173  Yes
     4   Indirect  0.0023  0.0495  0.960000   -0.0715     0.1441   No
 
-    4. Mediation analysis with multiple parallel mediators
+    4. Mediation analysis with covariates
 
-    >>> np.random.seed(42)
-    >>> df.rename(columns={"M": "M1"}, inplace=True)
-    >>> df['M2'] = np.random.randint(0, 10, df.shape[0])
-    >>> mediation_analysis(data=df, x='X', m=['M1', 'M2'], y='Y', seed=42)
-              path    coef      se          pval  CI[2.5%]  CI[97.5%]  sig
-    0      X -> M1  0.5610  0.0945  4.391362e-08    0.3735     0.7485  Yes
-    1      X -> M2 -0.0435  0.1663  7.942276e-01   -0.3735     0.2865   No
-    2      M1 -> Y  0.6580  0.0901  7.731809e-11    0.4793     0.8368  Yes
-    3      M2 -> Y  0.0089  0.0596  8.821896e-01   -0.1095     0.1272   No
-    4        Total  0.3961  0.1112  5.671128e-04    0.1755     0.6167  Yes
-    5       Direct  0.0380  0.1114  7.336706e-01   -0.1832     0.2592   No
-    6  Indirect M1  0.3584  0.0882  0.000000e+00    0.2124     0.5572  Yes
-    7  Indirect M2 -0.0003  0.0105  9.400000e-01   -0.0285     0.0193   No
+    >>> mediation_analysis(data=df, x='X', m='M', y='Y',
+    ...                    covar=['Mbin', 'Ybin'], seed=42)
+           path    coef      se          pval  CI[2.5%]  CI[97.5%]  sig
+    0    X -> M  0.5594  0.0968  9.394635e-08    0.3672     0.7516  Yes
+    1    M -> Y  0.6660  0.0861  1.017261e-11    0.4951     0.8368  Yes
+    2     Total  0.4204  0.1129  3.324252e-04    0.1962     0.6446  Yes
+    3    Direct  0.0645  0.1104  5.608583e-01   -0.1548     0.2837   No
+    4  Indirect  0.3559  0.0865  0.000000e+00    0.2093     0.5530  Yes
+
+    5. Mediation analysis with multiple parallel mediators
+
+    >>> mediation_analysis(data=df, x='X', m=['M', 'Mbin'], y='Y', seed=42)
+                path    coef      se          pval  CI[2.5%]  CI[97.5%]  sig
+    0         X -> M  0.5610  0.0945  4.391362e-08    0.3735     0.7485  Yes
+    1      X -> Mbin -0.0051  0.0290  8.592408e-01   -0.0626     0.0523   No
+    2         M -> Y  0.6537  0.0863  2.118163e-11    0.4824     0.8250  Yes
+    3      Mbin -> Y -0.0640  0.3282  8.456998e-01   -0.7154     0.5873   No
+    4          Total  0.3961  0.1112  5.671128e-04    0.1755     0.6167  Yes
+    5         Direct  0.0395  0.1102  7.206301e-01   -0.1792     0.2583   No
+    6     Indirect M  0.3563  0.0845  0.000000e+00    0.2148     0.5385  Yes
+    7  Indirect Mbin  0.0003  0.0097  9.520000e-01   -0.0172     0.0252   No
     """
     # Sanity check
     assert isinstance(x, str), 'y must be a string.'
     assert isinstance(y, str), 'y must be a string.'
     assert isinstance(m, (list, str)), 'Mediator(s) must be a list or string.'
+    assert isinstance(covar, (type(None), str, list))
     if isinstance(m, str):
         m = [m]
     n_mediator = len(m)
     assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame.'
     # Check that columns are in dataframe
-    columns = _flatten_list([x, m, y])
+    columns = _fl([x, m, y, covar])
     keys = data.columns
     assert all([c in keys for c in columns]), 'Column(s) are not in DataFrame.'
     # Check that columns are numeric
@@ -640,24 +652,24 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     sxm = {}
     for j in m:
         if mtype == 'linear':
-            sxm[j] = linear_regression(data[x], data[j], alpha=alpha,
-                                       as_dataframe=True).loc[[1], cols]
+            sxm[j] = linear_regression(data[_fl([x, covar])], data[j],
+                                       alpha=alpha).loc[[1], cols]
         else:
-            sxm[j] = logistic_regression(data[x], data[j], alpha=alpha,
-                                         as_dataframe=True).loc[[1], cols]
+            sxm[j] = logistic_regression(data[_fl([x, covar])], data[j],
+                                         alpha=alpha).loc[[1], cols]
         sxm[j].loc[1, 'names'] = 'X -> %s' % j
-
     sxm = pd.concat(sxm, ignore_index=True)
 
-    smy = linear_regression(data[m], data[y], alpha=alpha).loc[1:, cols]
+    smy = linear_regression(data[_fl([m, covar])], data[y],
+                            alpha=alpha).loc[1:n_mediator, cols]
 
     # Average Total Effects
-    sxy = linear_regression(data[x], data[y], alpha=alpha).loc[[1], cols]
+    sxy = linear_regression(data[_fl([x, covar])], data[y],
+                            alpha=alpha).loc[[1], cols]
 
     # Average Direct Effects
-    direct = linear_regression(data[_flatten_list([x, m])], data[y],
+    direct = linear_regression(data[_fl([x, m, covar])], data[y],
                                alpha=alpha).loc[[1], cols]
-
     # Rename paths
     smy['names'] = smy['names'].apply(lambda x: '%s -> Y' % x)
     direct.loc[1, 'names'] = 'Direct'
@@ -673,9 +685,11 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
     ab_estimates = np.zeros(shape=(n_boot, n_mediator))
     for i in range(n_boot):
         ab_estimates[i, :] = _point_estimate(data, x=x, m=m, y=y,
-                                             idx=idx[i, :], mtype=mtype)
+                                             idx=idx[i, :], covar=covar,
+                                             mtype=mtype)
 
-    ab = _point_estimate(data, x=x, m=m, y=y, idx=np.arange(n), mtype=mtype)
+    ab = _point_estimate(data, x=x, m=m, y=y, idx=np.arange(n), covar=covar,
+                         mtype=mtype)
     indirect = {'names': m, 'coef': ab, 'se': ab_estimates.std(ddof=1, axis=0),
                 'pval': [], ll_name: [], ul_name: [], 'sig': []}
 

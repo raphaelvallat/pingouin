@@ -30,6 +30,8 @@ def _flatten_list(x):
     ['Xaa', 'Xbb', 'Xcc']
     """
     result = []
+    # Remove None
+    x = list(filter(None.__ne__, x))
     for el in x:
         x_is_iter = isinstance(x, collections.Iterable)
         if x_is_iter and not isinstance(el, (str, tuple)):

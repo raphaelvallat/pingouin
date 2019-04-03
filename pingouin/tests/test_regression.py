@@ -131,6 +131,12 @@ class TestRegression(TestCase):
                                  seed=42)
         assert ma['coef'][2] == ma2['coef'][4]
 
+        # With covariate
+        mediation_analysis(data=df, x='X', m='M1', y='Y', covar='M2')
+        mediation_analysis(data=df, x='X', m='M1', y='Y', covar=['M2'])
+        mediation_analysis(data=df, x='X', m=['M1', 'Ybin'], y='Y',
+                           covar=['Mbin', 'M2'])
+
         # Test helper function _pval_from_bootci
         np.random.seed(123)
         bt2 = np.random.normal(loc=2, size=1000)

@@ -42,9 +42,10 @@ a. Added :py:func:`pingouin.plot_paired` function.
 a. NaN are now automatically removed in :py:func:`pingouin.mediation_analysis`.
 b. The :py:func:`pingouin.linear_regression` and :py:func:`pingouin.logistic_regression` now fail if NaN / Inf are present in the target or predictors variables. The user must remove then before running these functions.
 c. Added support for multiple parallel mediator in :py:func:`pingouin.mediation_analysis`.
-d. Added seed argument to :py:func:`pingouin.mediation_analysis` for reproducible results.
-e. :py:func:`pingouin.mediation_analysis` now returns two-sided p-values computed with a permutation test.
-f. Added :py:func:`pingouin._perm_pval` to compute p-value from a permutation test.
+d. Added support for covariates in :py:func:`pingouin.mediation_analysis`.
+e. Added seed argument to :py:func:`pingouin.mediation_analysis` for reproducible results.
+f. :py:func:`pingouin.mediation_analysis` now returns two-sided p-values computed with a permutation test.
+g. Added :py:func:`pingouin._perm_pval` to compute p-value from a permutation test.
 
 **Bugs and tests**
 
