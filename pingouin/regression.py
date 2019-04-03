@@ -649,6 +649,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
 
     # Compute regressions
     cols = ['names', 'coef', 'se', 'pval', ll_name, ul_name]
+    # M(j) ~ X + covar
     sxm = {}
     for j in m:
         if mtype == 'linear':
@@ -660,14 +661,15 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
         sxm[j].loc[1, 'names'] = 'X -> %s' % j
     sxm = pd.concat(sxm, ignore_index=True)
 
+    # Y ~ M + covar
     smy = linear_regression(data[_fl([m, covar])], data[y],
                             alpha=alpha).loc[1:n_mediator, cols]
 
-    # Average Total Effects
+    # Average Total Effects (Y ~ X + covar)
     sxy = linear_regression(data[_fl([x, covar])], data[y],
                             alpha=alpha).loc[[1], cols]
 
-    # Average Direct Effects
+    # Average Direct Effects (Y ~ X + M + covar)
     direct = linear_regression(data[_fl([x, m, covar])], data[y],
                                alpha=alpha).loc[[1], cols]
     # Rename paths
