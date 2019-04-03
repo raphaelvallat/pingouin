@@ -15,9 +15,11 @@ a. Added :py:func:`pingouin.distance_corr` (distance correlation) function.
 b. :py:func:`pingouin.rm_corr` now requires at least 3 unique subjects (same behavior as the original R package).
 c. The :py:func:`pingouin.pairwise_corr` is faster and returns the number of outlier if a robust correlation is used.
 d. Added support for 2D level in the :py:func:`pingouin.pairwise_corr`. See Jupyter notebooks for examples.
-e. Greatly improved execution speed of :py:func:`pingouin.correlation.skipped` function.
-f. Added default random state to compute the Min Covariance Determinant in the :py:func:`pingouin.correlation.skipped` function.
-g. The default number of bootstrap samples for the :py:func:`pingouin.correlation.shepherd` function is now set to 200 (previously 2000) to increase computation speed.
+e. Added support for partial correlation in the :py:func:`pingouin.pairwise_corr`.
+f. Greatly improved execution speed of :py:func:`pingouin.correlation.skipped` function.
+g. Added default random state to compute the Min Covariance Determinant in the :py:func:`pingouin.correlation.skipped` function.
+h. The default number of bootstrap samples for the :py:func:`pingouin.correlation.shepherd` function is now set to 200 (previously 2000) to increase computation speed.
+i. :py:func:`pingouin.partial_corr` now automatically drops rows with missing values.
 
 **Datasets**
 

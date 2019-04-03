@@ -152,6 +152,17 @@ class TestPairwise(TestCase):
         pairwise_corr(data=data, columns=['Age', 'One', 'Gender'])
         stats = pairwise_corr(data, columns=['Neuroticism', 'IQ', 'One'])
         assert stats.shape[0] == 1
+        # Test with covariate
+        pairwise_corr(data, covar='Age')
+        pairwise_corr(data, covar=['Age', 'Neuroticism'])
+        with pytest.raises(AssertionError):
+            pairwise_corr(data, covar=['Age', 'Gender'])
+        with pytest.raises(ValueError):
+            pairwise_corr(data, columns=['Neuroticism', 'Age'], covar='Age')
+        # Partial pairwise with missing values
+        data.loc[4, 'Age'] = np.nan
+        data.loc[10, 'Neuroticism'] = np.nan
+        pairwise_corr(data, covar='Age')
         ######################################################################
         # MultiIndex columns
         from numpy.random import random as rdm
@@ -181,3 +192,7 @@ class TestPairwise(TestCase):
                                            [('Behavior', 'RT'),
                                             ('Physio', 'BOLD')]])
         assert st3.shape[0] == 2
+        # With covar
+        pairwise_corr(data, covar=[('Psycho', 'Anxiety')])
+        pairwise_corr(data, columns=[('Behavior', 'Rating')],
+                      covar=[('Psycho', 'Anxiety')])

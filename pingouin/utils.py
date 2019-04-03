@@ -31,7 +31,8 @@ def _flatten_list(x):
     """
     result = []
     for el in x:
-        if isinstance(x, collections.Iterable) and not isinstance(el, str):
+        x_is_iter = isinstance(x, collections.Iterable)
+        if x_is_iter and not isinstance(el, (str, tuple)):
             result.extend(_flatten_list(el))
         else:
             result.append(el)

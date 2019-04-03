@@ -702,9 +702,9 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
     return stats
 
 
-def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
-                  padjust='none', export_filename=None):
-    '''Pairwise correlations between columns of a pandas dataframe.
+def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
+                  method='pearson', padjust='none', export_filename=None):
+    '''Pairwise (partial) correlations between columns of a pandas dataframe.
 
     Parameters
     ----------
@@ -722,6 +722,11 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         Note that if column is not specified, then the function will return the
         pairwise correlation between the combination of all the numeric columns
         in data. See the examples section for more details on this.
+    covar : None, string or list
+        Covariate(s) for partial correlation. Must be one or more columns
+        in data. Use a list if there are more than one covariate. If
+        ``covar`` is not None, a partial correlation will be computed using
+        :py:func:`pingouin.partial_corr` function.
     tail : string
         Indicates whether to return the 'two-sided' or 'one-sided' p-values
     method : string
@@ -756,6 +761,7 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
         'X' : Name(s) of first columns
         'Y' : Name(s) of second columns
         'method' : method used to compute the correlation
+        'covar' : List of specified covariate(s) (only for partial correlation)
         'tail' : indicates whether the p-values are one-sided or two-sided
         'n' : Sample size (after NaN removal)
         'r' : Correlation coefficients
@@ -769,11 +775,11 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
     Notes
     -----
-    Please refer to the `pingouin.corr()` function for a description of the
-    different methods. NaN are automatically removed from the data.
+    Please refer to the :py:func:`pingouin.corr()` function for a description
+    of the different methods. NaN are automatically removed from the data.
 
     This function is more flexible and gives a much more detailed
-    output than the `pandas.DataFrame.corr()` method (i.e. p-values,
+    output than the :py:func:`pandas.DataFrame.corr()` method (i.e. p-values,
     confidence interval, Bayes Factor..). This comes however at
     an increased computational cost. While this should not be discernible for
     dataframe with less than 10,000 rows and/or less than 20 columns, this
@@ -793,8 +799,8 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
     >>> from pingouin import pairwise_corr, read_dataset
     >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
-    >>> stats = pairwise_corr(data, method='spearman', tail='two-sided',
-    ...                       padjust='bonf')
+    >>> pairwise_corr(data, method='spearman', tail='two-sided',
+    ...               padjust='bonf')
 
     2. Robust two-sided correlation with uncorrected p-values
 
@@ -813,8 +819,13 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
 
     >>> pairwise_corr(data, columns=[['Neuroticism', 'Extraversion'],
     ...                              ['Openness', 'Agreeableness'])
+
+    6. Pairwise partial correlation
+
+    >>> pairwise_corr(data, covar='Neuroticism')  # With one covariate
+    >>> pairwise_corr(data, covar=['Neuroticism', 'Openness'])  # 2 covariates
     '''
-    from pingouin.correlation import corr
+    from pingouin.correlation import corr, partial_corr
 
     if tail not in ['one-sided', 'two-sided']:
         raise ValueError('Tail not recognized')
@@ -913,14 +924,34 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
                                   'r', 'CI95%', 'r2', 'adj_r2', 'p-val',
                                   'BF10', 'power'])
 
+    # Now we check if covariates are present
+    if covar is not None:
+        assert isinstance(covar, (str, list)), 'covar must be list or string.'
+        if isinstance(covar, str):
+            covar = [covar]
+        # Check that columns exist and are numeric
+        assert all([c in keys for c in covar]), 'covar not in data or not num.'
+        # And we make sure that X or Y does not contain covar
+        stats = stats[~stats[['X', 'Y']].isin(covar).any(1)]
+        stats = stats.reset_index(drop=True)
+        if stats.shape[0] == 0:
+            raise ValueError("No column combination found. Please make sure "
+                             "that the specified columns and covar exist in "
+                             "the dataframe, are numeric, and contains at "
+                             "least two unique values.")
+
     # Compute pairwise correlations and fill dataframe
     dvs = ['n', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'power']
     dvs_out = dvs + ['outliers']
     dvs_bf10 = dvs + ['BF10']
-    for i in range(len(combs)):
+    for i in range(stats.shape[0]):
         col1, col2 = stats.loc[i, 'X'], stats.loc[i, 'Y']
-        cor_st = corr(data[col1].values, data[col2].values, tail=tail,
-                      method=method)
+        if covar is None:
+            cor_st = corr(data[col1].values, data[col2].values, tail=tail,
+                          method=method)
+        else:
+            cor_st = partial_corr(data=data, x=col1, y=col2, covar=covar,
+                                  tail=tail, method=method)
         cor_st_keys = cor_st.columns.tolist()
         if 'BF10' in cor_st_keys:
             stats.loc[i, dvs_bf10] = cor_st[dvs_bf10].values
@@ -956,6 +987,11 @@ def pairwise_corr(data, columns=None, tail='two-sided', method='pearson',
     # Reorder columns and remove empty ones
     stats = stats.reindex(columns=col_order)
     stats = stats.dropna(how='all', axis=1)
+
+    # Add covariates names if present
+    if covar is not None:
+        stats.insert(loc=3, column='covar', value=str(covar))
+
     if export_filename is not None:
         _export_table(stats, export_filename)
     return stats

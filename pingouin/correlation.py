@@ -512,12 +512,15 @@ def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
     stats : pandas DataFrame
         Test summary ::
 
+        'n' : Sample size (after NaN removal)
+        'outliers' : number of outliers (only for 'shepherd' or 'skipped')
         'r' : Correlation coefficient
         'CI95' : 95% parametric confidence intervals
         'r2' : R-squared
         'adj_r2' : Adjusted R-squared
         'p-val' : one or two tailed p-value
         'BF10' : Bayes Factor of the alternative hypothesis (Pearson only)
+        'power' : achieved power of the test (= 1 - type II error).
 
     Notes
     -----
@@ -528,6 +531,8 @@ def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
 
     Inspired from a code found at:
     https://gist.github.com/fabianp/9396204419c7b638d38f
+
+    Rows with NaN are automatically removed from data.
 
     Results have been tested against the ppcor R package.
 
@@ -556,39 +561,42 @@ def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
               n      r         CI95%     r2  adj_r2     p-val    BF10  power
     pearson  30  0.568  [0.26, 0.77]  0.323   0.273  0.001055  28.695  0.925
 
-    2. Partial correlation with several covariates
+    2. Spearman partial correlation with several covariates
 
     >>> # Add new random columns to the dataframe of the first example
     >>> np.random.seed(123)
     >>> df['w'] = np.random.normal(size=30)
     >>> df['v'] = np.random.normal(size=30)
     >>> # Partial correlation of x and y controlling for z, w and v
-    >>> partial_corr(data=df, x='x', y='y', covar=['z', 'w', 'v'])
-              n      r         CI95%     r2  adj_r2     p-val   BF10  power
-    pearson  30  0.493  [0.16, 0.72]  0.243   0.187  0.005684  6.258  0.811
+    >>> partial_corr(data=df, x='x', y='y', covar=['z', 'w', 'v'],
+    ...              method='spearman')
+               n      r         CI95%     r2  adj_r2     p-val  power
+    spearman  30  0.491  [0.16, 0.72]  0.242   0.185  0.005817  0.809
     """
+    from pingouin.utils import _flatten_list
     # Check arguments
-    assert isinstance(x, str)
-    assert isinstance(y, str)
-    assert isinstance(covar, (str, list))
-    assert isinstance(data, pd.DataFrame)
+    assert isinstance(x, (str, tuple)), 'x must be a string.'
+    assert isinstance(y, (str, tuple)), 'y must be a string.'
+    assert isinstance(covar, (str, list)), 'covar must be a string or a list.'
+    assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
+    assert data.shape[0] > 2, 'Data must have at least 3 samples.'
     # Check that columns exist
+    col = _flatten_list([x, y, covar])
     if isinstance(covar, str):
-        col = [x] + [y] + [covar]
-        n_cvr = 1
-    if isinstance(covar, list):
-        col = [x] + [y] + covar
-        n_cvr = len(covar)
-        covar = covar[0] if n_cvr == 1 else covar
-    assert all([c in data for c in col])
+        covar = [covar]
+    assert all([c in data for c in col]), 'columns are not in dataframe.'
     # Check that columns are numeric
     assert all([data[c].dtype.kind in 'bfi' for c in col])
+
+    # Drop rows with NaN
+    data = data[col].dropna()
+    assert data.shape[0] > 2, 'Data must have at least 3 non-NAN samples.'
 
     # Standardize
     C = (data[col] - data[col].mean(axis=0)) / data[col].std(axis=0)
 
     # Covariates
-    cvar = C[covar].values[..., np.newaxis] if n_cvr == 1 else C[covar].values
+    cvar = np.atleast_2d(C[covar].values)
 
     # Compute beta
     beta_x = np.linalg.lstsq(cvar, C[y].values, rcond=None)[0]
