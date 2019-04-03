@@ -676,15 +676,15 @@ def mediation_analysis(data=None, x=None, m=None, y=None, alpha=0.05,
                                              idx=idx[i, :], mtype=mtype)
 
     ab = _point_estimate(data, x=x, m=m, y=y, idx=np.arange(n), mtype=mtype)
-    indirect = {'names': m, 'coef': ab, 'se': [], 'pval': [], ll_name: [],
-                ul_name: [], 'sig': []}
+    indirect = {'names': m, 'coef': ab, 'se': ab_estimates.std(ddof=1, axis=0),
+                'pval': [], ll_name: [], ul_name: [], 'sig': []}
 
     for j in range(n_mediator):
         ci_j = _bca(ab_estimates[:, j], indirect['coef'][j],
                     alpha=alpha, n_boot=n_boot)
         indirect[ll_name].append(min(ci_j))
         indirect[ul_name].append(max(ci_j))
-        indirect['se'].append(ab_estimates[:, j].std(ddof=1))
+        # indirect['se'].append(ab_estimates[:, j].std(ddof=1))
         # Bootstrapped p-value of indirect effect
         # Note that this is less accurate than a permutation test because the
         # bootstrap distribution is not conditioned on a true null hypothesis.
