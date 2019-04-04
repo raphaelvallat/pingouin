@@ -174,7 +174,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     dof = n - p if add_intercept else n - p - 1
     # Compute mean squared error, variance and SE
     MSE = ss_res / dof
-    beta_var = MSE * (np.linalg.inv(np.dot(X.T, X)).diagonal())
+    beta_var = MSE * (np.linalg.pinv(np.dot(X.T, X)).diagonal())
     beta_se = np.sqrt(beta_var)
 
     # Compute R2, adjusted R2 and RMSE
@@ -627,6 +627,13 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
         m = [m]
     n_mediator = len(m)
     assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame.'
+    # Check for duplicates
+    assert n_mediator == len(set(m)), 'Cannot have duplicates mediators.'
+    if isinstance(covar, str):
+        covar = [covar]
+    if isinstance(covar, list):
+        assert len(covar) == len(set(covar)), 'Cannot have duplicates covar.'
+        assert set(m).isdisjoint(covar), 'Mediator cannot be in covar.'
     # Check that columns are in dataframe
     columns = _fl([x, m, y, covar])
     keys = data.columns
