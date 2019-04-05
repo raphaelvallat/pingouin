@@ -6,7 +6,8 @@ __all__ = ["fdr", "bonf", "holm", "multicomp"]
 
 
 def fdr(pvals, alpha=0.05, method='fdr_bh'):
-    """P-values correction with False Discovery Rate (FDR).
+    """P-values FDR correction with Benjamini/Hochberg and
+    Benjamini/Yekutieli procedure.
 
     This covers Benjamini/Hochberg for independent or positively correlated and
     Benjamini/Yekutieli for general or negatively correlated tests.

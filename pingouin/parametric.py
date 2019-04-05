@@ -6,8 +6,8 @@ import pandas as pd
 from pingouin import (_check_dataframe, _remove_rm_na, _remove_na,
                       _export_table, bayesfactor_ttest, epsilon, sphericity)
 
-__all__ = ["ttest", "rm_anova", "rm_anova2", "anova", "anova2", "welch_anova",
-           "mixed_anova", "ancova", "ancovan"]
+__all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova",
+           "ancova"]
 
 
 def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
@@ -257,7 +257,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
 def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
              remove_na=True, detailed=False, export_filename=None):
-    """One-way repeated measures ANOVA.
+    """One-way and two-way repeated measures ANOVA.
 
     Parameters
     ----------
@@ -267,7 +267,7 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
         Name of column containing the within factor.
         If within is a single string, then compute a one-way repeated
         measures ANOVA, if within is a list with two strings, compute a two-way
-        repeated measures ANOVA using the rm_anova2 function.
+        repeated measures ANOVA.
     subject : string
         Name of column containing the subject identifier.
     data : pandas DataFrame
@@ -315,7 +315,6 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     See Also
     --------
     anova : One-way and two-way ANOVA
-    rm_anova2 : Two-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
     friedman : Non-parametric one-way repeated measures ANOVA
 
@@ -388,6 +387,12 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
                Source       SS  DF      MS       F        p-unc    np2 eps
     0  Disgustingness   27.485   1  27.485  12.044  0.000793016  0.116   1
     1           Error  209.952  92   2.282       -            -      -   -
+
+    Two-way repeated-measures ANOVA.
+
+    >>> aov = rm_anova2(dv='DesireToKill',
+    ...                 within=['Disgustingness', 'Frighteningness'],
+    ...                 subject='Subject', data=df)
     """
     from scipy.stats import f
     if isinstance(within, list):
@@ -558,16 +563,6 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
     rm_anova : One-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
     friedman : Non-parametric one-way repeated measures ANOVA
-
-    Examples
-    --------
-    Two-way repeated-measures ANOVA.
-
-    >>> from pingouin import rm_anova2, read_dataset
-    >>> df = read_dataset('rm_anova')
-    >>> aov = rm_anova2(dv='DesireToKill',
-    ...                 within=['Disgustingness', 'Frighteningness'],
-    ...                 subject='Subject', data=df)
     """
     from scipy.stats import f
     a, b = within
@@ -578,7 +573,7 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
 
     # Remove NaN
     if data[[a, b, subject, dv]].isnull().any().any():
-        data = _remove_rm_na(dv=dv, within=within, subject=subject,
+        data = _remove_rm_na(dv=dv, subject=subject,
                              data=data[[a, b, subject, dv]])
 
     # Group sizes and grandmean
@@ -725,8 +720,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
     See Also
     --------
-    rm_anova : One-way repeated measures ANOVA
-    rm_anova2 : Two-way repeated measures ANOVA
+    rm_anova : One-way and two-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
     welch_anova : One-way Welch ANOVA
     kruskal : Non-parametric one-way ANOVA
@@ -906,8 +900,7 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
     See Also
     --------
     anova : One-way and two way ANOVA
-    rm_anova : One-way repeated measures ANOVA
-    rm_anova2 : Two-way repeated measures ANOVA
+    rm_anova : One-way and two-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
     kruskal : Non-parametric one-way ANOVA
 
@@ -1027,8 +1020,7 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
     See Also
     --------
     anova : One-way ANOVA
-    rm_anova : One-way repeated measures ANOVA
-    rm_anova2 : Two-way repeated measures ANOVA
+    rm_anova : One-way and two-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
     kruskal : Non-parametric one-way ANOVA
 
@@ -1208,8 +1200,7 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
     See Also
     --------
     anova : One-way and two-way ANOVA
-    rm_anova : One-way repeated measures ANOVA
-    rm_anova2 : Two-way repeated measures ANOVA
+    rm_anova : One-way and two-way repeated measures ANOVA
 
     Notes
     -----
@@ -1524,9 +1515,9 @@ def ancovan(dv=None, covar=None, between=None, data=None,
     1. Evaluate the reading scores of students with different teaching method
     and family income and BMI as covariates.
 
-    >>> from pingouin import ancovan, read_dataset
+    >>> from pingouin import ancova, read_dataset
     >>> df = read_dataset('ancova')
-    >>> ancovan(data=df, dv='Scores', covar=['Income', 'BMI'],
+    >>> ancova(data=df, dv='Scores', covar=['Income', 'BMI'],
     ...         between='Method')
          Source        SS  DF       F     p-unc
     0    Method   552.284   3   3.233  0.036113

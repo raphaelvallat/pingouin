@@ -18,12 +18,11 @@ ANOVA and T-test
    :toctree: generated/
 
     anova
-    welch_anova
+    ancova
     rm_anova
-    rm_anova2
     epsilon
     mixed_anova
-    ancova
+    welch_anova
     ttest
 
 Bayesian
@@ -71,7 +70,6 @@ Correlation and regression
     logistic_regression
     mediation_analysis
 
-
 Distribution
 ------------
 
@@ -109,6 +107,7 @@ Multiple comparisons and post-hoc tests
 .. autosummary::
    :toctree: generated/
 
+    pairwise_corr
     pairwise_ttests
     pairwise_tukey
     pairwise_gameshowell
