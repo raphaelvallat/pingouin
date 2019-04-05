@@ -387,26 +387,21 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         return stats
 
 
-def _point_estimate(data, x, m, y, idx, covar=None, mtype='linear'):
+def _point_estimate(X_val, XM_val, M_val, y_val, idx, n_mediator,
+                    mtype='linear'):
     """Point estimate of indirect effect based on bootstrap sample."""
     # Mediator(s) model (M(j) ~ X + covar)
-    n_mediator = len(m)
     beta_m = []
     for j in range(n_mediator):
         if mtype == 'linear':
-            beta_m.append(linear_regression(data[_fl([x, covar])].iloc[idx],
-                                            data[m[j]].iloc[idx],
-                                            add_intercept=True,
+            beta_m.append(linear_regression(X_val[idx], M_val[idx, j],
                                             coef_only=True)[1])
         else:
-            beta_m.append(logistic_regression(data[_fl([x, covar])].iloc[idx],
-                                              data[m[j]].iloc[idx],
+            beta_m.append(logistic_regression(X_val[idx], M_val[idx, j],
                                               coef_only=True)[1])
 
     # Full model (Y ~ X + M + covar)
-    beta_y = linear_regression(data[_fl([x, m, covar])].iloc[idx],
-                               data[y].iloc[idx],
-                               add_intercept=True,
+    beta_y = linear_regression(XM_val[idx], y_val[idx],
                                coef_only=True)[2:(2 + n_mediator)]
 
     # Point estimate
@@ -656,29 +651,35 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
 
     # Compute regressions
     cols = ['names', 'coef', 'se', 'pval', ll_name, ul_name]
+
+    # For speed, we pass np.array instead of pandas DataFrame
+    X_val = data[_fl([x, covar])].values  # X + covar as predictors
+    XM_val = data[_fl([x, m, covar])].values  # X + M + covar as predictors
+    M_val = data[m].values  # M as target (no covariates)
+    y_val = data[y].values  # y as target (no covariates)
+
     # M(j) ~ X + covar
     sxm = {}
-    for j in m:
+    for idx, j in enumerate(m):
         if mtype == 'linear':
-            sxm[j] = linear_regression(data[_fl([x, covar])], data[j],
+            sxm[j] = linear_regression(X_val, M_val[:, idx],
                                        alpha=alpha).loc[[1], cols]
         else:
-            sxm[j] = logistic_regression(data[_fl([x, covar])], data[j],
+            sxm[j] = logistic_regression(X_val, M_val[:, idx],
                                          alpha=alpha).loc[[1], cols]
         sxm[j].loc[1, 'names'] = 'X -> %s' % j
     sxm = pd.concat(sxm, ignore_index=True)
 
     # Y ~ M + covar
-    smy = linear_regression(data[_fl([m, covar])], data[y],
+    smy = linear_regression(data[_fl([m, covar])], y_val,
                             alpha=alpha).loc[1:n_mediator, cols]
 
     # Average Total Effects (Y ~ X + covar)
-    sxy = linear_regression(data[_fl([x, covar])], data[y],
-                            alpha=alpha).loc[[1], cols]
+    sxy = linear_regression(X_val, y_val, alpha=alpha).loc[[1], cols]
 
     # Average Direct Effects (Y ~ X + M + covar)
-    direct = linear_regression(data[_fl([x, m, covar])], data[y],
-                               alpha=alpha).loc[[1], cols]
+    direct = linear_regression(XM_val, y_val, alpha=alpha).loc[[1], cols]
+
     # Rename paths
     smy['names'] = smy['names'].apply(lambda x: '%s -> Y' % x)
     direct.loc[1, 'names'] = 'Direct'
@@ -693,12 +694,11 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     idx = rng.choice(np.arange(n), replace=True, size=(n_boot, n))
     ab_estimates = np.zeros(shape=(n_boot, n_mediator))
     for i in range(n_boot):
-        ab_estimates[i, :] = _point_estimate(data, x=x, m=m, y=y,
-                                             idx=idx[i, :], covar=covar,
-                                             mtype=mtype)
+        ab_estimates[i, :] = _point_estimate(X_val, XM_val, M_val, y_val,
+                                             idx[i, :], n_mediator, mtype)
 
-    ab = _point_estimate(data, x=x, m=m, y=y, idx=np.arange(n), covar=covar,
-                         mtype=mtype)
+    ab = _point_estimate(X_val, XM_val, M_val, y_val, np.arange(n),
+                         n_mediator, mtype)
     indirect = {'names': m, 'coef': ab, 'se': ab_estimates.std(ddof=1, axis=0),
                 'pval': [], ll_name: [], ul_name: [], 'sig': []}
 
@@ -707,11 +707,10 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
                     alpha=alpha, n_boot=n_boot)
         indirect[ll_name].append(min(ci_j))
         indirect[ul_name].append(max(ci_j))
-        # indirect['se'].append(ab_estimates[:, j].std(ddof=1))
         # Bootstrapped p-value of indirect effect
         # Note that this is less accurate than a permutation test because the
         # bootstrap distribution is not conditioned on a true null hypothesis.
-        # For more details see Hayes and Rockwood. 2017
+        # For more details see Hayes and Rockwood 2017
         indirect['pval'].append(_pval_from_bootci(ab_estimates[:, j],
                                 indirect['coef'][j]))
         indirect['sig'].append('Yes' if indirect['pval'][j] < alpha else 'No')
