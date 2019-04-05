@@ -15,7 +15,7 @@ a. Added :py:func:`pingouin.distance_corr` (distance correlation) function.
 b. :py:func:`pingouin.rm_corr` now requires at least 3 unique subjects (same behavior as the original R package).
 c. The :py:func:`pingouin.pairwise_corr` is faster and returns the number of outlier if a robust correlation is used.
 d. Added support for 2D level in the :py:func:`pingouin.pairwise_corr`. See Jupyter notebooks for examples.
-e. Added support for partial correlation in the :py:func:`pingouin.pairwise_corr`.
+e. Added support for partial correlation in the :py:func:`pingouin.pairwise_corr` function.
 f. Greatly improved execution speed of :py:func:`pingouin.correlation.skipped` function.
 g. Added default random state to compute the Min Covariance Determinant in the :py:func:`pingouin.correlation.skipped` function.
 h. The default number of bootstrap samples for the :py:func:`pingouin.correlation.shepherd` function is now set to 200 (previously 2000) to increase computation speed.
@@ -45,13 +45,13 @@ c. Added support for multiple parallel mediator in :py:func:`pingouin.mediation_
 d. Added support for covariates in :py:func:`pingouin.mediation_analysis`.
 e. Added seed argument to :py:func:`pingouin.mediation_analysis` for reproducible results.
 f. :py:func:`pingouin.mediation_analysis` now returns two-sided p-values computed with a permutation test.
-g. Added :py:func:`pingouin._perm_pval` to compute p-value from a permutation test.
+g. Added :py:func:`pingouin.utils._perm_pval` to compute p-value from a permutation test.
 
 **Bugs and tests**
 
 a. Travis and AppVeyor test for Python 3.5, 3.6 and 3.7.
 b. Better doctest & improved examples for many functions.
-c. Fix bug with :py:func:`pingouin.nonparametric.mad` when axis was not 0.
+c. Fixed bug with :py:func:`pingouin.mad` when axis was not 0.
 
 v0.2.3 (February 2019)
 ----------------------
