@@ -576,6 +576,9 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
         data = _remove_rm_na(dv=dv, subject=subject,
                              data=data[[a, b, subject, dv]])
 
+    # Collapse to the mean
+    data = data.groupby([subject, a, b]).mean().reset_index()
+
     # Group sizes and grandmean
     n_a = data[a].nunique()
     n_b = data[b].nunique()
