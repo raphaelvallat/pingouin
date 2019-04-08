@@ -76,10 +76,9 @@ class TestPlotting(TestCase):
                     ax=ax2)
 
     def test_plot_shift(self):
-        """Test plot_shift."""
-        # Test
+        """Test plot_shift()."""
         x = np.random.normal(5.5, 2, 50)
         y = np.random.normal(6, 1.5, 50)
         plot_shift(x, y)
-        plot_shift(x, y, n_boot=100, percentiles=[5, 55, 95],
+        plot_shift(x, y, n_boot=100, percentiles=[5, 55, 95], ci=0.68,
                    show_median=False, seed=456, violin=False)
