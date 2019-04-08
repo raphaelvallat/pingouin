@@ -615,8 +615,7 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
 
 
 def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
-               ci=0.95, seed=None, show_median=True, violin=True,
-               boxplot=True):
+               ci=0.95, seed=None, show_median=True, violin=True):
     """Shift function, adapted from [1].
 
     Parameters
@@ -638,8 +637,6 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
     violin: boolean
         If True, plot the density of X and Y distributions.
         Defaut set to True.
-    boxplot: boolean
-        If True, show X and Y boxplots. Defaut set to True.
 
     Returns
     -------
@@ -659,11 +656,8 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
      neuroscience. Eur J Neurosci, 46: 1738-1748. doi:10.1111/ejn.13610
 
     """
-    import matplotlib.pyplot as plt
-    import numpy as np
-    import pandas as pd
-    import seaborn as sns
-
+    import pandas as import pd
+    
     rs = np.random.RandomState(seed)
 
     x_per = np.percentile(x, percentiles)
@@ -691,30 +685,27 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
     fig = plt.figure(figsize=(8, 5))
     ax1 = plt.subplot2grid((3, 3), (0, 0), rowspan=2, colspan=3)
 
-    if boxplot:
+    # Boxplot X & Y
+    def adjacent_values(vals, q1, q3):
+        upper_adjacent_value = q3 + (q3 - q1) * 1.5
+        upper_adjacent_value = np.clip(upper_adjacent_value, q3, vals[-1])
 
-        def adjacent_values(vals, q1, q3):
-            upper_adjacent_value = q3 + (q3 - q1) * 1.5
-            upper_adjacent_value = np.clip(upper_adjacent_value, q3, vals[-1])
+        lower_adjacent_value = q1 - (q3 - q1) * 1.5
+        lower_adjacent_value = np.clip(lower_adjacent_value, vals[0], q1)
+        return lower_adjacent_value, upper_adjacent_value
 
-            lower_adjacent_value = q1 - (q3 - q1) * 1.5
-            lower_adjacent_value = np.clip(lower_adjacent_value, vals[0], q1)
-            return lower_adjacent_value, upper_adjacent_value
+    for dis, pos in zip([x, y], [1.2, -0.2]):
+        qrt1, medians, qrt3 = np.percentile(dis, [25, 50, 75])
+        whiskers = adjacent_values(np.sort(dis), qrt1, qrt3)
+        ax1.plot(medians, pos, marker='o', color='white', zorder=10)
+        ax1.hlines(pos, qrt1, qrt3, color='k',
+                   linestyle='-', lw=7, zorder=9)
+        ax1.hlines(pos, whiskers[0], whiskers[1],
+                   color='k', linestyle='-', lw=2, zorder=9)
 
-        # Boxplot (X & Y)
-        for dis, pos in zip([x, y], [1.2, -0.2]):
-            qrt1, medians, qrt3 = np.percentile(dis, [25, 50, 75])
-            whiskers = adjacent_values(np.sort(dis), qrt1, qrt3)
-            ax1.plot(medians, pos, marker='o', color='white', zorder=10)
-            ax1.hlines(pos, qrt1, qrt3, color='k',
-                       linestyle='-', lw=7, zorder=9)
-            ax1.hlines(pos, whiskers[0], whiskers[1],
-                       color='k', linestyle='-', lw=2, zorder=9)
-
-        # Rax data (X & Y)
-        ax1 = sns.stripplot(data=data, x='value', y='variable',
-                            orient='h', order=['Y', 'X'],
-                            palette=['#88bedc', '#cfcfcf'])
+    ax1 = sns.stripplot(data=data, x='value', y='variable',
+                        orient='h', order=['Y', 'X'],
+                        palette=['#88bedc', '#cfcfcf'])
 
     if violin:
 
