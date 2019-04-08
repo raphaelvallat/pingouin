@@ -656,8 +656,8 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
      neuroscience. Eur J Neurosci, 46: 1738-1748. doi:10.1111/ejn.13610
 
     """
-    import pandas as import pd
-    
+    import pandas as pd
+
     rs = np.random.RandomState(seed)
 
     x_per = np.percentile(x, percentiles)
