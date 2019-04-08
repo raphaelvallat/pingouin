@@ -13,7 +13,8 @@ import matplotlib.transforms as transforms
 # Set default Seaborn preferences
 sns.set(style='ticks', context='notebook')
 
-__all__ = ["plot_blandaltman", "plot_skipped_corr", "qqplot", "plot_paired"]
+__all__ = ["plot_blandaltman", "plot_skipped_corr", "qqplot", "plot_paired",
+           "plot_shift"]
 
 
 def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
@@ -613,9 +614,9 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
     return ax
 
 
-def shift_function(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
-                   ci=0.95, seed=None, show_median=True, violin=True,
-                   boxplot=True):
+def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
+               ci=0.95, seed=None, show_median=True, violin=True,
+               boxplot=True):
     """Shift function, adapted from [1].
 
     Parameters
