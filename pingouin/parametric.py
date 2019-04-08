@@ -1,12 +1,13 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
+import warnings
 import numpy as np
 import pandas as pd
 from pingouin import (_check_dataframe, _remove_rm_na, _remove_na,
                       _export_table, bayesfactor_ttest, epsilon, sphericity)
 
-__all__ = ["ttest", "rm_anova", "rm_anova2", "anova", "anova2", "welch_anova",
-           "mixed_anova", "ancova", "ancovan"]
+__all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova",
+           "ancova"]
 
 
 def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
@@ -34,7 +35,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         Smaller values of r (e.g. 0.5), may be appropriate when small effect
         sizes are expected a priori; larger values of r are appropriate when
         large effect sizes are expected (Rouder et al 2009).
-        The default is 0.707 (= sqrt(2) / 2).
+        The default is 0.707 (= :math:`\\sqrt{2} / 2`).
 
     Returns
     -------
@@ -58,17 +59,17 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     Notes
     -----
-    Missing values are automatically removed from the data. If x and y are
-    paired, the entire row is removed.
+    Missing values are automatically removed from the data. If ``x`` and
+    ``y`` are paired, the entire row is removed.
 
     The **two-sample T-test for unpaired data** is defined as:
 
     .. math::
 
-        t = \dfrac{\overline{x} - \overline{y}}
-        {\sqrt{\dfrac{s^{2}_{x}}{n_{x}} + \dfrac{s^{2}_{y}}{n_{y}}}}
+        t = \\frac{\\overline{x} - \\overline{y}}
+        {\\sqrt{\\frac{s^{2}_{x}}{n_{x}} + \\frac{s^{2}_{y}}{n_{y}}}}
 
-    where :math:`\overline{x}` and :math:`\overline{y}` are the sample means,
+    where :math:`\\overline{x}` and :math:`\\overline{y}` are the sample means,
     :math:`n_{x}` and :math:`n_{y}` are the sample sizes, and
     :math:`s^{2}_{x}` and :math:`s^{2}_{y}` are the sample variances.
     The degrees of freedom :math:`v` are :math:`n_x + n_y - 2` when the sample
@@ -78,41 +79,32 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     .. math::
 
-        v = \dfrac{(\dfrac{s^{2}_{x}}{n_{x}} + \dfrac{s^{2}_{y}}{n_{y}})^{2}}
-        {\dfrac{(\dfrac{s^{2}_{x}}{n_{x}})^{2}}{(n_{x}-1)} +
-        \dfrac{(\dfrac{s^{2}_{y}}{n_{y}})^{2}}{(n_{y}-1)}}
+        v = \\frac{(\\frac{s^{2}_{x}}{n_{x}} + \\frac{s^{2}_{y}}{n_{y}})^{2}}
+        {\\frac{(\\frac{s^{2}_{x}}{n_{x}})^{2}}{(n_{x}-1)} +
+        \\frac{(\\frac{s^{2}_{y}}{n_{y}})^{2}}{(n_{y}-1)}}
 
     The p-value is then calculated using a T distribution with :math:`v`
     degrees of freedom.
 
     The T-value for **paired samples** is defined by:
 
-    .. math:: t = \dfrac{\overline{x}_{diff}}{s_{\overline{x}}}
+    .. math:: t = \\frac{\\overline{x}_d}{s_{\\overline{x}}}
 
     where
 
-    .. math:: s_{\overline{x}} = \dfrac{s_{diff}}{\sqrt n}
+    .. math:: s_{\\overline{x}} = \\frac{s_d}{\\sqrt n}
 
-    where :math:`\overline{x}_{diff}` is the sample mean of the differences
+    where :math:`\\overline{x}_d` is the sample mean of the differences
     between the two paired samples, :math:`n` is the number of observations
-    (sample size), :math:`s_{diff}` is the sample standard deviation of the
-    differences and :math:`s_{\overline{x}}` is the estimated standard error
+    (sample size), :math:`s_d` is the sample standard deviation of the
+    differences and :math:`s_{\\overline{x}}` is the estimated standard error
     of the mean of the differences.
 
     The p-value is then calculated using a T-distribution with :math:`n-1`
     degrees of freedom.
 
-    The Bayes Factor is approximated using the formula described in Rouder
-    et al 2009:
-
-    .. math::
-
-        BF_{10} = \dfrac{\int_{0}^{\infty}(1 + Ngr^2)^{-1/2}
-        (1 + \dfrac{t^2}{v(1 + Ngr^2)})^{-(v+1) / 2}(2\pi)^{-1/2}g^
-        {-3/2}e^{-1/2g}}{(1 + \dfrac{t^2}{v})^{-(v+1) / 2}}
-
-    where **t** is the T-value, **v** the degrees of freedom, **N** the
-    sample size and **r** the Cauchy scale factor (i.e. prior on effect size).
+    The scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor is approximated using
+    the :py:func:`pingouin.bayesfactor_ttest` function.
 
     References
     ----------
@@ -135,60 +127,55 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     --------
     1. One-sample T-test.
 
-        >>> from pingouin import ttest
-        >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
-        >>> ttest(x, 4)
-            T      p-val  dof  cohen-d  power   BF10
-            1.397  0.2348    4    0.625  0.919  0.766
+    >>> from pingouin import ttest
+    >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
+    >>> ttest(x, 4)
+                T     p-val  dof       tail  cohen-d  power   BF10
+    T-test  1.397  0.234824    4  two-sided    0.625  0.191  0.766
 
     2. Paired two-sample T-test (one-tailed).
 
-        >>> from pingouin import ttest
-        >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
-        >>> post = [6.4, 3.4, 6.4, 11., 4.8]
-        >>> ttest(pre, post, paired=True, tail='one-sided')
-            T       p-val  dof  cohen-d  power   BF10
-            -2.308   0.04    4     0.25  0.121  3.122
+    >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
+    >>> post = [6.4, 3.4, 6.4, 11., 4.8]
+    >>> ttest(pre, post, paired=True, tail='one-sided')
+                T     p-val  dof       tail  cohen-d  power   BF10
+    T-test -2.308  0.041114    4  one-sided    0.251  0.121  3.122
 
     3. Paired two-sample T-test with missing values.
 
-        >>> from pingouin import ttest
-        >>> from numpy import nan
-        >>> pre = [5.5, 2.4, nan, 9.6, 4.2]
-        >>> post = [6.4, 3.4, 6.4, 11., 4.8]
-        >>> ttest(pre, post, paired=True)
-            T        p-val  dof  cohen-d  power    BF10
-            -5.902  0.0097    3   0.306   0.065   7.169
+    >>> import numpy as np
+    >>> pre = [5.5, 2.4, np.nan, 9.6, 4.2]
+    >>> post = [6.4, 3.4, 6.4, 11., 4.8]
+    >>> ttest(pre, post, paired=True)
+                T     p-val  dof       tail  cohen-d  power   BF10
+    T-test -5.902  0.009713    3  two-sided    0.306  0.065  7.169
 
     4. Independent two-sample T-test (equal sample size).
 
-        >>> from pingouin import ttest
-        >>> import numpy as np
-        >>> np.random.seed(123)
-        >>> x = np.random.normal(loc=7, size=20)
-        >>> y = np.random.normal(loc=4, size=20)
-        >>> ttest(x, y, correction='auto')
-            T         p-val  dof  cohen-d  power   BF10
-            9.106  4.30e-11   38     2.88    1.0  1.4e8
+    >>> np.random.seed(123)
+    >>> x = np.random.normal(loc=7, size=20)
+    >>> y = np.random.normal(loc=4, size=20)
+    >>> ttest(x, y, correction='auto')
+                T         p-val  dof       tail  cohen-d  power          BF10
+    T-test  9.106  4.306971e-11   38  two-sided     2.88    1.0  1.365699e+08
 
     5. Independent two-sample T-test (unequal sample size).
 
-        >>> from pingouin import ttest
-        >>> import numpy as np
-        >>> np.random.seed(123)
-        >>> x = np.random.normal(loc=7, size=20)
-        >>> y = np.random.normal(loc=6.5, size=15)
-        >>> ttest(x, y, correction='auto')
-            T         p-val  dof   dof-corr  cohen-d  power   BF10
-            2.327     0.027   33      30.75    0.792  0.614  2.454
+    >>> np.random.seed(123)
+    >>> x = np.random.normal(loc=7, size=20)
+    >>> y = np.random.normal(loc=6.5, size=15)
+    >>> ttest(x, y, correction='auto')
+                T     p-val  dof   dof-corr       tail  cohen-d  power   BF10
+    T-test  2.327  0.026748   33  30.745725  two-sided    0.792  0.614  2.454
     """
     from scipy.stats import ttest_rel, ttest_ind, ttest_1samp
-    from pingouin import ttest_power, compute_effsize
+    from pingouin import power_ttest, power_ttest2n, compute_effsize
     x = np.asarray(x)
     y = np.asarray(y)
 
     if x.size != y.size and paired:
-        print('x and y have unequal sizes. Switching to paired == False.')
+        warnings.warn("x and y have unequal sizes. Switching to "
+                      "paired == False.")
         paired = False
 
     # Remove NA
@@ -226,9 +213,28 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     pval = pval / 2 if tail == 'one-sided' else pval
 
-    # Effect size and achieved power
+    # Effect size
     d = compute_effsize(x, y, paired=paired, eftype='cohen')
-    power = ttest_power(d, nx, ny, paired=paired, tail=tail)
+
+    # Achieved power
+    if ny == 1:
+        # One-sample
+        power = power_ttest(d=d, n=nx, power=None, alpha=0.05,
+                            contrast='one-sample', tail=tail)
+    if ny > 1 and paired is True:
+        # Paired two-sample
+        power = power_ttest(d=d, n=nx, power=None, alpha=0.05,
+                            contrast='paired', tail=tail)
+    elif ny > 1 and paired is False:
+        # Independent two-samples
+        if nx == ny:
+            # Equal sample sizes
+            power = power_ttest(d=d, n=nx, power=None, alpha=0.05,
+                                contrast='two-samples', tail=tail)
+        else:
+            # Unequal sample sizes
+            power = power_ttest2n(nx, ny, d=d, power=None, alpha=0.05,
+                                  tail=tail)
 
     # Bayes factor
     bf = bayesfactor_ttest(tval, nx, ny, paired=paired, tail=tail, r=r)
@@ -239,7 +245,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     stats['p-val'] = pval
     stats['tail'] = tail
     stats['cohen-d'] = np.abs(d).round(3)
-    stats['power'] = power
+    stats['power'] = np.round(power, 3)
     stats['BF10'] = bf
 
     col_order = ['T', 'p-val', 'dof', 'dof-corr', 'tail', 'cohen-d',
@@ -251,7 +257,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
 def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
              remove_na=True, detailed=False, export_filename=None):
-    """One-way repeated measures ANOVA.
+    """One-way and two-way repeated measures ANOVA.
 
     Parameters
     ----------
@@ -261,7 +267,7 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
         Name of column containing the within factor.
         If within is a single string, then compute a one-way repeated
         measures ANOVA, if within is a list with two strings, compute a two-way
-        repeated measures ANOVA using the rm_anova2 function.
+        repeated measures ANOVA.
     subject : string
         Name of column containing the subject identifier.
     data : pandas DataFrame
@@ -309,7 +315,6 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     See Also
     --------
     anova : One-way and two-way ANOVA
-    rm_anova2 : Two-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
     friedman : Non-parametric one-way repeated measures ANOVA
 
@@ -324,23 +329,23 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
 
     with
 
-    .. math:: SS_{total} = \sum_i^r \sum_j^n (Y_{ij} - \overline{Y})^2
-    .. math:: SS_{treatment} = \sum_i^r n_i (\overline{Y_i} - \overline{Y})^2
-    .. math:: SS_{subjects} = r\sum (\overline{Y}_s - \overline{Y})^2
+    .. math:: SS_{total} = \\sum_i^r \\sum_j^n (Y_{ij} - \\overline{Y})^2
+    .. math:: SS_{treatment} = \\sum_i^r n_i(\\overline{Y_i} - \\overline{Y})^2
+    .. math:: SS_{subjects} = r\\sum (\\overline{Y}_s - \\overline{Y})^2
     .. math:: SS_{error} = SS_{total} - SS_{treatment} - SS_{subjects}
 
     where :math:`i=1,...,r; j=1,...,n_i`, :math:`r` is the number of
     conditions, :math:`n_i` the number of observations for each condition,
-    :math:`\overline{Y}` the grand mean of the data, :math:`\overline{Y_i}`
-    the mean of the :math:`i^{th}` condition and :math:`\overline{Y}_{subj}`
+    :math:`\\overline{Y}` the grand mean of the data, :math:`\\overline{Y_i}`
+    the mean of the :math:`i^{th}` condition and :math:`\\overline{Y}_{subj}`
     the mean of the :math:`s^{th}` subject.
 
     The F-statistics is then defined as:
 
     .. math::
 
-        F^* = \dfrac{MS_{treatment}}{MS_{error}}\dfrac{\dfrac{SS_{treatment}}
-        {r-1}}{\dfrac{SS_{error}}{(n - 1)(r - 1)}}
+        F^* = \\frac{MS_{treatment}}{MS_{error}}\\frac{\\frac{SS_{treatment}}
+        {r-1}}{\\frac{SS_{error}}{(n - 1)(r - 1)}}
 
     and the p-value can be calculated using a F-distribution with
     :math:`v_{treatment} = r - 1` and
@@ -351,7 +356,7 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     partial eta-square is the same as eta-square
     (Bakeman 2005; Richardson 2011):
 
-    .. math:: \eta_p^2 = \dfrac{SS_{treatment}}{SS_{treatment} + SS_{error}}
+    .. math:: \\eta_p^2 = \\frac{SS_{treatment}}{SS_{treatment} + SS_{error}}
 
     Results have been tested against R and JASP. Note however that if the
     dataset contains one or more other within subject factors, an automatic
@@ -374,12 +379,20 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     --------
     One-way repeated-measures ANOVA (Ryan et al 2013 dataset).
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import rm_anova
-        >>> df = read_dataset('rm_anova')
-        >>> aov = rm_anova(dv='DesireToKill', within='Disgustingness',
-                           subject='Subject', data=df, detailed=True)
-        >>> print(aov)
+    >>> from pingouin import rm_anova, read_dataset
+    >>> df = read_dataset('rm_anova')
+    >>> aov = rm_anova(dv='DesireToKill', within='Disgustingness',
+    ...                subject='Subject', data=df, detailed=True)
+    >>> print(aov)
+               Source       SS  DF      MS       F        p-unc    np2 eps
+    0  Disgustingness   27.485   1  27.485  12.044  0.000793016  0.116   1
+    1           Error  209.952  92   2.282       -            -      -   -
+
+    Two-way repeated-measures ANOVA.
+
+    >>> aov = rm_anova2(dv='DesireToKill',
+    ...                 within=['Disgustingness', 'Frighteningness'],
+    ...                 subject='Subject', data=df)
     """
     from scipy.stats import f
     if isinstance(within, list):
@@ -550,18 +563,6 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
     rm_anova : One-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
     friedman : Non-parametric one-way repeated measures ANOVA
-
-    Examples
-    --------
-    Two-way repeated-measures ANOVA.
-
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import rm_anova2
-        >>> df = read_dataset('rm_anova')
-        >>> aov = rm_anova2(dv='DesireToKill',
-        >>>                 within=['Disgustingness', 'Frighteningness'],
-        >>>                 subject='Subject', data=df)
-        >>> print(aov)
     """
     from scipy.stats import f
     a, b = within
@@ -572,13 +573,16 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
 
     # Remove NaN
     if data[[a, b, subject, dv]].isnull().any().any():
-        data = _remove_rm_na(dv=dv, within=within, subject=subject,
+        data = _remove_rm_na(dv=dv, subject=subject,
                              data=data[[a, b, subject, dv]])
 
+    # Collapse to the mean
+    data = data.groupby([subject, a, b]).mean().reset_index()
+
     # Group sizes and grandmean
-    n_a = data[a].unique().size
-    n_b = data[b].unique().size
-    n_s = data[subject].unique().size
+    n_a = data[a].nunique()
+    n_b = data[b].nunique()
+    n_s = data[subject].nunique()
     mu = data[dv].mean()
 
     # Groupby means
@@ -719,8 +723,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
     See Also
     --------
-    rm_anova : One-way repeated measures ANOVA
-    rm_anova2 : Two-way repeated measures ANOVA
+    rm_anova : One-way and two-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
     welch_anova : One-way Welch ANOVA
     kruskal : Non-parametric one-way ANOVA
@@ -737,9 +740,9 @@ def anova(dv=None, between=None, data=None, detailed=False,
     into several components. For example, in one-way ANOVA:
 
     .. math:: SS_{total} = SS_{treatment} + SS_{error}
-    .. math:: SS_{total} = \sum_i \sum_j (Y_{ij} - \overline{Y})^2
-    .. math:: SS_{treatment} = \sum_i n_i (\overline{Y_i} - \overline{Y})^2
-    .. math:: SS_{error} = \sum_i \sum_j (Y_{ij} - \overline{Y}_i)^2
+    .. math:: SS_{total} = \\sum_i \\sum_j (Y_{ij} - \\overline{Y})^2
+    .. math:: SS_{treatment} = \\sum_i n_i (\\overline{Y_i} - \\overline{Y})^2
+    .. math:: SS_{error} = \\sum_i \\sum_j (Y_{ij} - \\overline{Y}_i)^2
 
     where :math:`i=1,...,r; j=1,...,n_i`, :math:`r` is the number of groups,
     and :math:`n_i` the number of observations for the :math:`i` th group.
@@ -748,7 +751,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
     .. math::
 
-        F^* = \dfrac{MS_{treatment}}{MS_{error}} = \dfrac{SS_{treatment}
+        F^* = \\frac{MS_{treatment}}{MS_{error}} = \\frac{SS_{treatment}
         / (r - 1)}{SS_{error} / (n_t - r)}
 
     and the p-value can be calculated using a F-distribution with
@@ -763,7 +766,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
     partial eta-square is the same as eta-square and generalized eta-square.
     For more details, see Bakeman 2005; Richardson 2011.
 
-    .. math:: \eta_p^2 = \dfrac{SS_{treatment}}{SS_{treatment} + SS_{error}}
+    .. math:: \\eta_p^2 = \\frac{SS_{treatment}}{SS_{treatment} + SS_{error}}
 
     Results have been tested against R, Matlab and JASP.
 
@@ -783,12 +786,14 @@ def anova(dv=None, between=None, data=None, detailed=False,
     --------
     1. One-way ANOVA on the pain threshold dataset.
 
-        >>> from pingouin import anova, print_table
-        >>> from pingouin.datasets import read_dataset
-        >>> df = read_dataset('anova')
-        >>> aov = anova(dv='Pain threshold', between='Hair color', data=df,
-                        detailed=True, export_filename='pain_anova.csv')
-        >>> print_table(aov)
+    >>> from pingouin import anova, read_dataset
+    >>> df = read_dataset('anova')
+    >>> aov = anova(dv='Pain threshold', between='Hair color', data=df,
+    ...             detailed=True)
+    >>> aov
+           Source        SS  DF       MS      F       p-unc    np2
+    0  Hair color  1360.726   3  453.575  6.791  0.00411423  0.576
+    1      Within  1001.800  15   66.787      -           -      -
     """
     if isinstance(between, list):
         if len(between) == 2:
@@ -898,25 +903,13 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
     See Also
     --------
     anova : One-way and two way ANOVA
-    rm_anova : One-way repeated measures ANOVA
-    rm_anova2 : Two-way repeated measures ANOVA
+    rm_anova : One-way and two-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
     kruskal : Non-parametric one-way ANOVA
 
     Notes
     -----
     Results have been tested against JASP.
-
-    Examples
-    --------
-    Compute a two-way ANOVA.
-
-        >>> import pandas as pd
-        >>> from pingouin import anova2, print_table
-        >>> df = pd.read_csv('dataset.csv')
-        >>> aov = anova(dv='DV', between=['factor1', 'factor2'], data=df,
-                        export_filename='anova.csv')
-        >>> print_table(aov)
     """
     from scipy.stats import f
 
@@ -950,9 +943,9 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
     # Degrees of freedom
     df_fac1 = aov_fac1.loc[0, 'DF']
     df_fac2 = aov_fac2.loc[0, 'DF']
-    df_inter = (data[fac1].unique().size - 1) * (data[fac2].unique().size - 1)
-    df_resid = data[dv].size - (data[fac1].unique().size
-                                * data[fac2].unique().size)
+    df_inter = (data[fac1].nunique() - 1) * (data[fac2].nunique() - 1)
+    df_resid = data[dv].size - (data[fac1].nunique()
+                                * data[fac2].nunique())
 
     # Mean squares
     ms_fac1 = aov_fac1.loc[0, 'MS']
@@ -1030,8 +1023,7 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
     See Also
     --------
     anova : One-way ANOVA
-    rm_anova : One-way repeated measures ANOVA
-    rm_anova2 : Two-way repeated measures ANOVA
+    rm_anova : One-way and two-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
     kruskal : Non-parametric one-way ANOVA
 
@@ -1049,40 +1041,40 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
     size :math:`n_i` and variance :math:`s_i^2` of each group
     :math:`i=1,...,r`:
 
-    .. math:: w_i = \dfrac{n_i}{s_i^2}
+    .. math:: w_i = \\frac{n_i}{s_i^2}
 
     Using these weights, the adjusted grand mean of the data is:
 
     .. math::
 
-        \overline{Y}_{welch} = \dfrac{\sum_{i=1}^r w_i\overline{Y}_i}
-        {\sum w}
+        \\overline{Y}_{welch} = \\frac{\\sum_{i=1}^r w_i\\overline{Y}_i}
+        {\\sum w}
 
-    where :math:`\overline{Y}_i` is the mean of the :math:`i` group.
+    where :math:`\\overline{Y}_i` is the mean of the :math:`i` group.
 
     The treatment sums of squares is defined as:
 
     .. math::
 
-        SS_{treatment} = \sum_{i=1}^r w_i
-        (\overline{Y}_i - \overline{Y}_{welch})^2
+        SS_{treatment} = \\sum_{i=1}^r w_i
+        (\\overline{Y}_i - \\overline{Y}_{welch})^2
 
     We then need to calculate a term lambda:
 
     .. math::
 
-        \Lambda = \dfrac{3\sum_{i=1}^r(\dfrac{1}{n_i-1})
-        (1 - \dfrac{w_i}{\sum w})^2}{r^2 - 1}
+        \\Lambda = \\frac{3\\sum_{i=1}^r(\\frac{1}{n_i-1})
+        (1 - \\frac{w_i}{\\sum w})^2}{r^2 - 1}
 
     from which the F-value can be calculated:
 
     .. math::
 
-        F_{welch} = \dfrac{SS_{treatment} / (r-1)}
-        {1 + \dfrac{2\Lambda(r-2)}{3}}
+        F_{welch} = \\frac{SS_{treatment} / (r-1)}
+        {1 + \\frac{2\\Lambda(r-2)}{3}}
 
     and the p-value approximated using a F-distribution with
-    :math:`(r-1, 1 / \Lambda)` degrees of freedom.
+    :math:`(r-1, 1 / \\Lambda)` degrees of freedom.
 
     When the groups are balanced and have equal variances, the optimal post-hoc
     test is the Tukey-HSD test (`pairwise_tukey`). If the groups have unequal
@@ -1102,14 +1094,13 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
     --------
     1. One-way Welch ANOVA on the pain threshold dataset.
 
-        >>> from pingouin import welch_anova
-        >>> from pingouin.datasets import read_dataset
-        >>> df = read_dataset('anova')
-        >>> aov = welch_anova(dv='Pain threshold', between='Hair color',
-        >>>                   data=df, export_filename='pain_anova.csv')
-        >>> aov
-            Source      ddof1   ddof2   F     p-unc
-            Hair color  3       8.33    5.89  0.018813
+    >>> from pingouin import welch_anova, read_dataset
+    >>> df = read_dataset('anova')
+    >>> aov = welch_anova(dv='Pain threshold', between='Hair color',
+    ...                   data=df, export_filename='pain_anova.csv')
+    >>> aov
+           Source  ddof1  ddof2     F     p-unc
+    0  Hair color      3   8.33  5.89  0.018813
     """
     from scipy.stats import f
     # Check data
@@ -1119,7 +1110,7 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
     data = data.reset_index(drop=True)
 
     # Number of groups
-    r = data[between].unique().size
+    r = data[between].nunique()
     ddof1 = r - 1
 
     # Compute weights and ajusted means
@@ -1212,8 +1203,7 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
     See Also
     --------
     anova : One-way and two-way ANOVA
-    rm_anova : One-way repeated measures ANOVA
-    rm_anova2 : Two-way repeated measures ANOVA
+    rm_anova : One-way and two-way repeated measures ANOVA
 
     Notes
     -----
@@ -1223,12 +1213,15 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
     --------
     Compute a two-way mixed model ANOVA.
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import mixed_anova
-        >>> df = read_dataset('mixed_anova')
-        >>> aov = mixed_anova(dv='Scores', between='Group',
-                              within='Time', subject='Subject', data=df)
-        >>> print(aov)
+    >>> from pingouin import mixed_anova, read_dataset
+    >>> df = read_dataset('mixed_anova')
+    >>> aov = mixed_anova(dv='Scores', between='Group',
+    ...                   within='Time', subject='Subject', data=df)
+    >>> aov
+            Source     SS  DF1  DF2     MS      F     p-unc    np2    eps
+    0        Group  5.460    1   58  5.460  5.052  0.028420  0.080      -
+    1         Time  7.628    2  116  3.814  4.027  0.020373  0.065  0.999
+    2  Interaction  5.168    2  116  2.584  2.728  0.069530  0.045      -
     """
     from scipy.stats import f
 
@@ -1383,19 +1376,23 @@ def ancova(dv=None, covar=None, between=None, data=None,
     1. Evaluate the reading scores of students with different teaching method
     and family income as a covariate.
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import ancova
-        >>> df = read_dataset('ancova')
-        >>> ancova(data=df, dv='Scores', covar='Income', between='Method')
+    >>> from pingouin import ancova, read_dataset
+    >>> df = read_dataset('ancova')
+    >>> ancova(data=df, dv='Scores', covar='Income', between='Method')
+         Source           SS  DF          F     p-unc
+    0    Method   571.030045   3   3.336482  0.031940
+    1    Income  1678.352687   1  29.419438  0.000006
+    2  Residual  1768.522365  31        NaN       NaN
 
     2. Evaluate the reading scores of students with different teaching method
     and family income + BMI as a covariate.
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import ancova
-        >>> df = read_dataset('ancova')
-        >>> ancova(data=df, dv='Scores', covar=['Income', 'BMI'],
-            between='Method')
+    >>> ancova(data=df, dv='Scores', covar=['Income', 'BMI'], between='Method')
+         Source        SS  DF       F     p-unc
+    0    Method   552.284   3   3.233  0.036113
+    1    Income  1573.952   1  27.637  0.000011
+    2       BMI    60.014   1   1.054  0.312842
+    3  Residual  1708.509  30     NaN       NaN
     """
     if isinstance(covar, list):
         if len(covar) > 1:
@@ -1521,11 +1518,15 @@ def ancovan(dv=None, covar=None, between=None, data=None,
     1. Evaluate the reading scores of students with different teaching method
     and family income and BMI as covariates.
 
-        >>> from pingouin.datasets import read_dataset
-        >>> from pingouin import ancovan
-        >>> df = read_dataset('ancova')
-        >>> ancovan(data=df, dv='Scores', covar=['Income', 'BMI'],
-                    between='Method')
+    >>> from pingouin import ancova, read_dataset
+    >>> df = read_dataset('ancova')
+    >>> ancova(data=df, dv='Scores', covar=['Income', 'BMI'],
+    ...         between='Method')
+         Source        SS  DF       F     p-unc
+    0    Method   552.284   3   3.233  0.036113
+    1    Income  1573.952   1  27.637  0.000011
+    2       BMI    60.014   1   1.054  0.312842
+    3  Residual  1708.509  30     NaN       NaN
     """
     # Assert that there are at least two covariates
     if not isinstance(covar, list):
@@ -1537,8 +1538,8 @@ def ancovan(dv=None, covar=None, between=None, data=None,
                       export_filename=export_filename)
 
     # Check that stasmodels is installed
-    from pingouin.utils import is_statsmodels_installed
-    is_statsmodels_installed(raise_error=True)
+    from pingouin.utils import _is_statsmodels_installed
+    _is_statsmodels_installed(raise_error=True)
     from statsmodels.api import stats
     from statsmodels.formula.api import ols
 

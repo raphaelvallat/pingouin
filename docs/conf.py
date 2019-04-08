@@ -32,8 +32,8 @@ import os
 import sys
 import time
 import pingouin
+import matplotlib as mpl
 import sphinx_bootstrap_theme
-
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -41,12 +41,13 @@ import sphinx_bootstrap_theme
 sys.path.insert(0, os.path.abspath('sphinxext'))
 extensions = [
               # 'sphinx.ext.mathjax',
+              'sphinx.ext.doctest',
               'sphinx.ext.viewcode',
               'sphinx.ext.githubpages',
               'sphinx.ext.autosummary',
               'sphinx.ext.autodoc',
-              # 'plot_generator',
-              # 'plot_directive',
+              'sphinx.ext.intersphinx',
+              'matplotlib.sphinxext.plot_directive',
               'numpydoc']
 
 # Generate the API documentation when building
@@ -209,3 +210,13 @@ texinfo_documents = [
 def setup(app):
     app.add_javascript('copybutton.js')
     app.add_stylesheet('style.css')
+
+
+# -- Intersphinx ------------------------------------------------
+
+intersphinx_mapping = {'numpy': ('http://docs.scipy.org/doc/numpy/', None),
+                       'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
+                       'matplotlib': ('http://matplotlib.org/', None),
+                       'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
+                       'statsmodels': ('http://www.statsmodels.org/stable/', None),
+                       'seaborn': ('https://seaborn.pydata.org/', None)}

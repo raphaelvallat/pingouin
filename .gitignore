@@ -62,6 +62,8 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/build/
+docs/generated/
 
 # PyBuilder
 target/
@@ -102,3 +104,4 @@ notebooks/mixed_anova.csv
 desktop.ini
 examples/mixed_anova.csv
 .pytest_cache/v/cache/nodeids
+pain_anova.csv

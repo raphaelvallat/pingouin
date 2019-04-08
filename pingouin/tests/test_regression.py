@@ -1,10 +1,10 @@
 import pytest
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_equal
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.regression import (linear_regression, logistic_regression,
-                                 mediation_analysis)
-from pingouin.datasets import read_dataset
+                                 mediation_analysis, _pval_from_bootci)
+from pingouin import read_dataset
 
 from scipy.stats import linregress
 from sklearn.linear_model import LinearRegression
@@ -12,7 +12,7 @@ from sklearn.linear_model import LinearRegression
 df = read_dataset('mediation')
 
 
-class TestRegression(_TestPingouin):
+class TestRegression(TestCase):
     """Test regression.py."""
 
     def test_linear_regression(self):
@@ -86,6 +86,7 @@ class TestRegression(_TestPingouin):
 
         # Test **kwargs
         logistic_regression(X, y, solver='sag', C=10, max_iter=10000)
+        logistic_regression(X, y, solver='sag', multi_class='auto')
 
         with pytest.raises(ValueError):
             y[3] = 2
@@ -97,11 +98,11 @@ class TestRegression(_TestPingouin):
         ma = mediation_analysis(data=df, x='X', m='M', y='Y', n_boot=500)
 
         # Compare against R package mediation
-        assert ma['Beta'][0] == 0.5610
-        assert ma['Beta'][1] == 0.6542
-        assert ma['Beta'][2] == 0.3961
-        assert ma['Beta'][3] == 0.0396
-        assert ma['Beta'][4] == 0.3565
+        assert ma['coef'][0] == 0.5610
+        assert ma['coef'][1] == 0.6542
+        assert ma['coef'][2] == 0.3961
+        assert ma['coef'][3] == 0.0396
+        assert ma['coef'][4] == 0.3565
 
         _, dist = mediation_analysis(data=df, x='X', m='M', y='Y', n_boot=1000,
                                      return_dist=True)
@@ -110,14 +111,36 @@ class TestRegression(_TestPingouin):
 
         # Check with a binary mediator
         ma = mediation_analysis(data=df, x='X', m='Mbin', y='Y', n_boot=2000)
-        assert_almost_equal(ma['Beta'][0], -0.0208, decimal=2)
+        assert_almost_equal(ma['coef'][0], -0.0208, decimal=2)
 
         # Indirect effect
-        assert_almost_equal(ma['Beta'][4], 0.0033, decimal=2)
-        assert ma['Sig'][4] == 'No'
+        assert_almost_equal(ma['coef'][4], 0.0033, decimal=2)
+        assert ma['sig'][4] == 'No'
 
         # Direct effect
-        assert_almost_equal(ma['Beta'][3], 0.3956, decimal=2)
+        assert_almost_equal(ma['coef'][3], 0.3956, decimal=2)
         assert_almost_equal(ma['CI[2.5%]'][3], 0.1714, decimal=2)
         assert_almost_equal(ma['CI[97.5%]'][3], 0.617, decimal=1)
-        assert ma['Sig'][3] == 'Yes'
+        assert ma['sig'][3] == 'Yes'
+
+        # With multiple mediator
+        np.random.seed(42)
+        df.rename(columns={"M": "M1"}, inplace=True)
+        df['M2'] = np.random.randint(0, 10, df.shape[0])
+        ma2 = mediation_analysis(data=df, x='X', m=['M1', 'M2'], y='Y',
+                                 seed=42)
+        assert ma['coef'][2] == ma2['coef'][4]
+
+        # With covariate
+        mediation_analysis(data=df, x='X', m='M1', y='Y', covar='M2')
+        mediation_analysis(data=df, x='X', m='M1', y='Y', covar=['M2'])
+        mediation_analysis(data=df, x='X', m=['M1', 'Ybin'], y='Y',
+                           covar=['Mbin', 'M2'])
+
+        # Test helper function _pval_from_bootci
+        np.random.seed(123)
+        bt2 = np.random.normal(loc=2, size=1000)
+        bt3 = np.random.normal(loc=3, size=1000)
+        assert _pval_from_bootci(bt2, 0) == 1
+        assert _pval_from_bootci(bt2, 0.9) < 0.10
+        assert _pval_from_bootci(bt3, 0.9) < _pval_from_bootci(bt2, 0.9)

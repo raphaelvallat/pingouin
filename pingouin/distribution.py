@@ -23,11 +23,11 @@ def gzscore(x):
     z-scores when the sample data come from a log-normally distributed
     population.
 
-    Given the raw scores :math:`x`, the geometric mean :math:`\mu_g` and
-    the geometric standard deviation :math:`\sigma_g`,
+    Given the raw scores :math:`x`, the geometric mean :math:`\\mu_g` and
+    the geometric standard deviation :math:`\\sigma_g`,
     the standard score is given by the formula:
 
-    .. math:: z = \dfrac{log(x) - log(\mu_g)}{log(\sigma_g)}
+    .. math:: z = \\frac{log(x) - log(\\mu_g)}{log(\\sigma_g)}
 
     References
     ----------
@@ -38,15 +38,13 @@ def gzscore(x):
     --------
     Standardize a log-normal array
 
-        >>> import numpy as np
-        >>> from pingouin import gzscore
-        >>> np.random.seed(123)
-        >>> raw = np.random.lognormal(size=100)
-        >>> print(raw.mean().round(3), raw.std().round(3))
-            1.849 2.282
-        >>> z = gzscore(raw)
-        >>> print(z.mean(), z.std())
-            0 0.995
+    >>> import numpy as np
+    >>> from pingouin import gzscore
+    >>> np.random.seed(123)
+    >>> raw = np.random.lognormal(size=100)
+    >>> z = gzscore(raw)
+    >>> print(round(z.mean(), 3), round(z.std(), 3))
+    -0.0 0.995
     """
     from scipy.stats import gmean
     # Geometric mean
@@ -86,15 +84,15 @@ def normality(*args, alpha=.05):
 
     .. math::
 
-        W = \dfrac{(\sum_{i=1}^n a_i x_{i})^2}
-        {\sum_{i=1}^n (x_i - \overline{x})^2}
+        W = \\frac{(\\sum_{i=1}^n a_i x_{i})^2}
+        {\\sum_{i=1}^n (x_i - \\overline{x})^2}
 
     where the :math:`x_i` are the ordered sample values (in ascending
     order) and the :math:`a_i` are constants generated from the means,
     variances and covariances of the order statistics of a sample of size
     :math:`n` from a standard normal distribution. Specifically:
 
-    .. math:: (a_1, ..., a_n) = \dfrac{m^TV^{-1}}{(m^TV^{-1}V^{-1}m)^{1/2}}
+    .. math:: (a_1, ..., a_n) = \\frac{m^TV^{-1}}{(m^TV^{-1}V^{-1}m)^{1/2}}
 
     with :math:`m = (m_1, ..., m_n)^T` and :math:`(m_1, ..., m_n)` are the
     expected values of the order statistics of independent and identically
@@ -130,24 +128,24 @@ def normality(*args, alpha=.05):
     --------
     1. Test the normality of one array.
 
-        >>> import numpy as np
-        >>> from pingouin import normality
-        >>> np.random.seed(123)
-        >>> x = np.random.normal(size=100)
-        >>> normal, p = normality(x, alpha=.05)
-        >>> print(normal, p)
-        True 0.27
+    >>> import numpy as np
+    >>> from pingouin import normality
+    >>> np.random.seed(123)
+    >>> x = np.random.normal(size=100)
+    >>> normal, p = normality(x, alpha=.05)
+    >>> print(normal, p)
+    True 0.275
 
     2. Test the normality of two arrays.
 
-        >>> import numpy as np
-        >>> from pingouin import normality
-        >>> np.random.seed(123)
-        >>> x = np.random.normal(size=100)
-        >>> y = np.random.rand(100)
-        >>> normal, p = normality(x, y, alpha=.05)
-        >>> print(normal, p)
-        [True   False] [0.27   0.0005]
+    >>> import numpy as np
+    >>> from pingouin import normality
+    >>> np.random.seed(123)
+    >>> x = np.random.normal(size=100)
+    >>> y = np.random.rand(100)
+    >>> normal, p = normality(x, y, alpha=.05)
+    >>> print(normal, p)
+    [ True False] [0.275 0.001]
     """
     from scipy.stats import shapiro
     k = len(args)
@@ -193,7 +191,7 @@ def multivariate_normality(X, alpha=.05):
     The Henze-Zirkler test has a good overall power against alternatives
     to normality and is feasable for any dimension and any sample size.
 
-    Translated to Python from a Matlab code by Antonio Trujillo-Ortiz.
+    Aapted to Python from a Matlab code by Antonio Trujillo-Ortiz.
 
     Tested against the R package MVN.
 
@@ -211,25 +209,25 @@ def multivariate_normality(X, alpha=.05):
     --------
     1. Test for multivariate normality of 2 variables
 
-        >>> import numpy as np
-        >>> from pingouin import multivariate_normality
-        >>> np.random.seed(123)
-        >>> mean, cov, n = [4, 6], [[1, .5], [.5, 1]], 30
-        >>> X = np.random.multivariate_normal(mean, cov, n)
-        >>> normal, p = multivariate_normality(X, alpha=.05)
-        >>> print(normal, p)
-            True 0.7523511059223078
+    >>> import numpy as np
+    >>> from pingouin import multivariate_normality
+    >>> np.random.seed(123)
+    >>> mean, cov, n = [4, 6], [[1, .5], [.5, 1]], 30
+    >>> X = np.random.multivariate_normal(mean, cov, n)
+    >>> normal, p = multivariate_normality(X, alpha=.05)
+    >>> print(normal, p)
+    True 0.7523511059223078
 
     2. Test for multivariate normality of 3 variables
 
-        >>> import numpy as np
-        >>> from pingouin import multivariate_normality
-        >>> np.random.seed(123)
-        >>> mean, cov = [4, 6, 5], [[1, .5, .2], [.5, 1, .1], [.2, .1, 1]]
-        >>> X = np.random.multivariate_normal(mean, cov, 50)
-        >>> normal, p = multivariate_normality(X, alpha=.05)
-        >>> print(normal, p)
-            True 0.46074660317578175
+    >>> import numpy as np
+    >>> from pingouin import multivariate_normality
+    >>> np.random.seed(123)
+    >>> mean, cov = [4, 6, 5], [[1, .5, .2], [.5, 1, .1], [.2, .1, 1]]
+    >>> X = np.random.multivariate_normal(mean, cov, 50)
+    >>> normal, p = multivariate_normality(X, alpha=.05)
+    >>> print(normal, p)
+    True 0.4607466031757833
     """
     from scipy.stats import lognorm
 
@@ -313,8 +311,8 @@ def homoscedasticity(*args, alpha=.05):
 
     .. math::
 
-        T = \dfrac{(N-k) \ln{s^{2}_{p}} - \sum_{i=1}^{k}(N_{i} - 1)
-        \ln{s^{2}_{i}}}{1 + (1/(3(k-1)))((\sum_{i=1}^{k}{1/(N_{i} - 1))}
+        T = \\frac{(N-k) \\ln{s^{2}_{p}} - \\sum_{i=1}^{k}(N_{i} - 1)
+        \\ln{s^{2}_{i}}}{1 + (1/(3(k-1)))((\\sum_{i=1}^{k}{1/(N_{i} - 1))}
         - 1/(N-k))}
 
     where :math:`s_i^2` is the variance of the :math:`i^{th}` group,
@@ -325,27 +323,27 @@ def homoscedasticity(*args, alpha=.05):
     The pooled variance is a weighted average of the group variances and is
     defined as:
 
-    .. math:: s^{2}_{p} = \sum_{i=1}^{k}(N_{i} - 1)s^{2}_{i}/(N-k)
+    .. math:: s^{2}_{p} = \\sum_{i=1}^{k}(N_{i} - 1)s^{2}_{i}/(N-k)
 
     The p-value is then computed using a chi-square distribution:
 
-    .. math:: T \sim \chi^2(k-1)
+    .. math:: T \\sim \\chi^2(k-1)
 
     The **Levene** :math:`W` statistic is defined as:
 
     .. math::
 
-        W = \dfrac{(N-k)} {(k-1)}
-        \dfrac{\sum_{i=1}^{k}N_{i}(\overline{Z}_{i.}-\overline{Z})^{2} }
-        {\sum_{i=1}^{k}\sum_{j=1}^{N_i}(Z_{ij}-\overline{Z}_{i.})^{2} }
+        W = \\frac{(N-k)} {(k-1)}
+        \\frac{\\sum_{i=1}^{k}N_{i}(\\overline{Z}_{i.}-\\overline{Z})^{2} }
+        {\\sum_{i=1}^{k}\\sum_{j=1}^{N_i}(Z_{ij}-\\overline{Z}_{i.})^{2} }
 
     where :math:`Z_{ij} = |Y_{ij} - median({Y}_{i.})|`,
-    :math:`\overline{Z}_{i.}` are the group means of :math:`Z_{ij}` and
-    :math:`\overline{Z}` is the grand mean of :math:`Z_{ij}`.
+    :math:`\\overline{Z}_{i.}` are the group means of :math:`Z_{ij}` and
+    :math:`\\overline{Z}` is the grand mean of :math:`Z_{ij}`.
 
     The p-value is then computed using a F-distribution:
 
-    .. math:: W \sim F(k-1, N-k)
+    .. math:: W \\sim F(k-1, N-k)
 
     References
     ----------
@@ -363,17 +361,15 @@ def homoscedasticity(*args, alpha=.05):
     --------
     Test the homoscedasticity of two arrays.
 
-        >>> import numpy as np
-        >>> from pingouin import homoscedasticity
-        >>> np.random.seed(123)
-        >>> # Scale = standard deviation of the distribution.
-        >>> x = np.random.normal(loc=0, scale=1., size=100)
-        >>> y = np.random.normal(loc=0, scale=0.8,size=100)
-        >>> print(np.var(x), np.var(y))
-            1.27 0.60
-        >>> equal_var, p = homoscedasticity(x, y, alpha=.05)
-        >>> print(equal_var, p)
-            False 0.0002
+    >>> import numpy as np
+    >>> from pingouin import homoscedasticity
+    >>> np.random.seed(123)
+    >>> # Scale = standard deviation of the distribution.
+    >>> x = np.random.normal(loc=0, scale=1., size=100)
+    >>> y = np.random.normal(loc=0, scale=0.8,size=100)
+    >>> equal_var, p = homoscedasticity(x, y, alpha=.05)
+    >>> print(round(np.var(x), 3), round(np.var(y), 3), equal_var, p)
+    1.273 0.602 False 0.0
     """
     from scipy.stats import levene, bartlett
     k = len(args)
@@ -408,22 +404,22 @@ def anderson(*args, dist='norm'):
         True if data comes from this distribution.
     sig_level : float
         The significance levels for the corresponding critical values in %.
-        (See scipy.stats.anderson for more details)
+        (See :py:func:`scipy.stats.anderson` for more details)
 
     Examples
     --------
     1. Test that an array comes from a normal distribution
 
-        >>> from pingouin import anderson
-        >>> x = [2.3, 5.1, 4.3, 2.6, 7.8, 9.2, 1.4]
-        >>> anderson(x, dist='norm')
-            (False, 15.0)
+    >>> from pingouin import anderson
+    >>> x = [2.3, 5.1, 4.3, 2.6, 7.8, 9.2, 1.4]
+    >>> anderson(x, dist='norm')
+    (False, 15.0)
 
     2. Test that two arrays comes from an exponential distribution
 
-        >>> y = [2.8, 12.4, 28.3, 3.2, 16.3, 14.2]
-        >>> anderson(x, y, dist='expon')
-            (array([False, False]), array([15., 15.]))
+    >>> y = [2.8, 12.4, 28.3, 3.2, 16.3, 14.2]
+    >>> anderson(x, y, dist='expon')
+    (array([False, False]), array([15., 15.]))
     """
     from scipy.stats import anderson as ads
     k = len(args)
@@ -462,7 +458,7 @@ def epsilon(data, correction='gg'):
 
     The **lower bound** for epsilon is:
 
-    .. math:: lb = \dfrac{1}{k - 1}
+    .. math:: lb = \\frac{1}{k - 1}
 
     where :math:`k` is the number of groups (= data.shape[1]).
 
@@ -470,20 +466,20 @@ def epsilon(data, correction='gg'):
 
     .. math::
 
-        \epsilon_{GG} = \dfrac{k^2(\overline{diag(S)} - \overline{S})^2}
-        {(k-1)(\sum_{i=1}^{k}\sum_{j=1}^{k}s_{ij}^2 - 2k\sum_{j=1}^{k}
-        \overline{s_i}^2 + k^2\overline{S}^2)}
+        \\epsilon_{GG} = \\frac{k^2(\\overline{diag(S)} - \\overline{S})^2}
+        {(k-1)(\\sum_{i=1}^{k}\\sum_{j=1}^{k}s_{ij}^2 - 2k\\sum_{j=1}^{k}
+        \\overline{s_i}^2 + k^2\\overline{S}^2)}
 
-    where :math:`S` is the covariance matrix, :math:`\overline{S}` the
-    grandmean of S and :math:`\overline{diag(S)}` the mean of all the elements
+    where :math:`S` is the covariance matrix, :math:`\\overline{S}` the
+    grandmean of S and :math:`\\overline{diag(S)}` the mean of all the elements
     on the diagonal of S (i.e. mean of the variances).
 
     The **Huynh-Feldt epsilon** is given by:
 
     .. math::
 
-        \epsilon_{HF} = \dfrac{n(k-1)\epsilon_{GG}-2}{(k-1)
-        (n-1-(k-1)\epsilon_{GG})}
+        \\epsilon_{HF} = \\frac{n(k-1)\\epsilon_{GG}-2}{(k-1)
+        (n-1-(k-1)\\epsilon_{GG})}
 
     where :math:`n` is the number of subjects.
 
@@ -498,19 +494,19 @@ def epsilon(data, correction='gg'):
     Examples
     --------
 
-        >>> import pandas as pd
-        >>> from pingouin import epsilon
-        >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
-        >>>                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
-        >>>                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
-        >>> epsilon(data, correction='gg')
-            0.558
+    >>> import pandas as pd
+    >>> from pingouin import epsilon
+    >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
+    ...                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
+    ...                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
+    >>> epsilon(data, correction='gg')
+    0.5587754577585018
 
-        >>> epsilon(data, correction='hf')
-            0.622
+    >>> epsilon(data, correction='hf')
+    0.6223448311539781
 
-        >>> epsilon(data, correction='lb')
-            0.50
+    >>> epsilon(data, correction='lb')
+    0.5
     """
     # Covariance matrix
     S = data.cov()
@@ -581,34 +577,34 @@ def sphericity(data, method='mauchly', alpha=.05):
 
     .. math::
 
-        W = \dfrac{\prod_{j=1}^{r-1} \lambda_j}{(\dfrac{1}{r-1}
-        \cdot \sum_{j=1}^{^{r-1}} \lambda_j)^{r-1}}
+        W = \\frac{\\prod_{j=1}^{r-1} \\lambda_j}{(\\frac{1}{r-1}
+        \\cdot \\sum_{j=1}^{^{r-1}} \\lambda_j)^{r-1}}
 
-    where :math:`\lambda_j` are the eigenvalues of the population
+    where :math:`\\lambda_j` are the eigenvalues of the population
     covariance matrix (= double-centered sample covariance matrix) and
     :math:`r` is the number of conditions.
 
     From then, the :math:`W` statistic is transformed into a chi-square
     score using the number of observations per condition :math:`n`
 
-    .. math:: f = \dfrac{2(r-1)^2+r+1}{6(r-1)(n-1)}
-    .. math:: \chi_w^2 = (f-1)(n-1) log(W)
+    .. math:: f = \\frac{2(r-1)^2+r+1}{6(r-1)(n-1)}
+    .. math:: \\chi_w^2 = (f-1)(n-1) log(W)
 
     The p-value is then approximated using a chi-square distribution:
 
-    .. math:: \chi_w^2 \sim \chi^2(\dfrac{r(r-1)}{2}-1)
+    .. math:: \\chi_w^2 \\sim \\chi^2(\\frac{r(r-1)}{2}-1)
 
     The **JNS** :math:`V` statistic is defined by:
 
     .. math::
 
-        V = \dfrac{(\sum_j^{r-1} \lambda_j)^2}{\sum_j^{r-1} \lambda_j^2}
+        V = \\frac{(\\sum_j^{r-1} \\lambda_j)^2}{\\sum_j^{r-1} \\lambda_j^2}
 
-    .. math:: \chi_v^2 = \dfrac{n}{2}  (r-1)^2 (V - \dfrac{1}{r-1})
+    .. math:: \\chi_v^2 = \\frac{n}{2}  (r-1)^2 (V - \\frac{1}{r-1})
 
     and the p-value approximated using a chi-square distribution
 
-    .. math:: \chi_v^2 \sim \chi^2(\dfrac{r(r-1)}{2}-1)
+    .. math:: \\chi_v^2 \\sim \\chi^2(\\frac{r(r-1)}{2}-1)
 
 
     References
@@ -633,18 +629,18 @@ def sphericity(data, method='mauchly', alpha=.05):
     --------
     1. Mauchly test for sphericity
 
-        >>> import pandas as pd
-        >>> from pingouin import sphericity
-        >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
-        >>>                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
-        >>>                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
-        >>> sphericity(data)
-            (True, 0.21, 4.677, 2, 0.09649016283209648)
+    >>> import pandas as pd
+    >>> from pingouin import sphericity
+    >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
+    ...                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
+    ...                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
+    >>> sphericity(data)
+    (True, 0.21, 4.677, 2, 0.09649016283209666)
 
     2. JNS test for sphericity
 
-        >>> sphericity(data, method='jns')
-            (False, 1.118, 6.176, 2, 0.0456042403075201)
+    >>> sphericity(data, method='jns')
+    (False, 1.118, 6.176, 2, 0.04560424030751982)
     """
     from scipy.stats import chi2
     S = data.cov().values

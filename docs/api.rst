@@ -18,15 +18,12 @@ ANOVA and T-test
    :toctree: generated/
 
     anova
-    welch_anova
+    ancova
     rm_anova
-    rm_anova2
     epsilon
     mixed_anova
-    ancova
+    welch_anova
     ttest
-    ttest_power
-    anova_power
 
 Bayesian
 --------
@@ -66,12 +63,12 @@ Correlation and regression
     corr
     pairwise_corr
     partial_corr
+    distance_corr
     rm_corr
     intraclass_corr
     linear_regression
     logistic_regression
     mediation_analysis
-
 
 Distribution
 ------------
@@ -110,6 +107,7 @@ Multiple comparisons and post-hoc tests
 .. autosummary::
    :toctree: generated/
 
+    pairwise_corr
     pairwise_ttests
     pairwise_tukey
     pairwise_gameshowell
@@ -143,5 +141,31 @@ Others
      :toctree: generated/
 
       print_table
-      pingouin.datasets.read_dataset
-      pingouin.datasets.list_dataset
+      read_dataset
+      list_dataset
+
+Plotting
+--------
+
+.. _plotting:
+
+.. autosummary::
+     :toctree: generated/
+
+      plot_blandaltman
+      plot_paired
+      plot_skipped_corr
+      qqplot
+
+Power analysis
+--------------
+
+.. _power:
+
+.. autosummary::
+     :toctree: generated/
+
+      power_anova
+      power_corr
+      power_ttest
+      power_ttest2n

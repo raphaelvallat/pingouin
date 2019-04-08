@@ -1,3 +1,4 @@
+# Copyright (c) 2011-2017 Sergey Astanin [see LICENSE_tabulate.txt]
 # -*- coding: utf-8 -*-
 
 """Pretty-print tabular data."""

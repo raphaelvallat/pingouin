@@ -1,13 +1,13 @@
 import pytest
 import numpy as np
 import pandas as pd
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.correlation import (corr, rm_corr, intraclass_corr, partial_corr,
-                                  skipped)
-from pingouin.datasets import read_dataset
+                                  skipped, distance_corr)
+from pingouin import read_dataset
 
 
-class TestCorrelation(_TestPingouin):
+class TestCorrelation(TestCase):
     """Test correlation.py."""
 
     def test_corr(self):
@@ -22,18 +22,23 @@ class TestCorrelation(_TestPingouin):
         corr(x, y, method='shepherd', tail='two-sided')
         # Compare with robust corr toolbox
         stats = corr(x, y, method='skipped')
-        assert np.round(stats['r'].values, 3) == 0.512
+        assert stats['r'].values == 0.512
+        assert stats['outliers'].values == 2
+        stats = corr(x, y, method='shepherd')
+        assert stats['outliers'].values == 2
         _, _, outliers = skipped(x, y, method='pearson')
         assert outliers.size == x.size
         assert stats['n'].values == 30
         stats = corr(x, y, method='percbend')
-        assert np.round(stats['r'].values, 3) == 0.484
+        assert stats['r'].values == 0.484
         # Not normally distributed
         z = np.random.uniform(size=30)
         corr(x, z, method='pearson')
         # With NaN values
         x[3] = np.nan
         corr(x, y)
+        # With the same array
+        assert corr(x, x).loc['pearson', 'BF10'] == np.inf
         # Wrong argument
         with pytest.raises(ValueError):
             corr(x, y, method='error')
@@ -73,6 +78,10 @@ class TestCorrelation(_TestPingouin):
         assert r == -0.507
         assert dof == 38
         assert np.round(p, 3) == 0.001
+        # Test with less than 3 subjects (same behavior as R package)
+        with pytest.raises(ValueError):
+            rm_corr(data=df[df['Subject'].isin([1, 2])], x='pH', y='PacO2',
+                    subject='Subject')
 
     def test_intraclass_corr(self):
         """Test function intraclass_corr"""
@@ -90,3 +99,27 @@ class TestCorrelation(_TestPingouin):
             intraclass_corr(df, 'Wine', 'Judge', 'Judge')
         with pytest.raises(ValueError):
             intraclass_corr(df.drop(index=0), 'Wine', 'Judge', 'Scores')
+
+    def test_distance_corr(self):
+        """Test function distance_corr
+        We compare against the energy R package"""
+        a = [1, 2, 3, 4, 5]
+        b = [1, 2, 9, 4, 4]
+        dcor1 = distance_corr(a, b, n_boot=None)
+        dcor, pval = distance_corr(a, b, seed=9)
+        assert dcor1 == dcor
+        assert np.round(dcor, 7) == 0.7626762
+        assert 0.25 < pval < 0.40
+        _, pval_low = distance_corr(a, b, seed=9, tail='lower')
+        assert pval < pval_low
+        # With 2D arrays
+        np.random.seed(123)
+        a = np.random.random((10, 10))
+        b = np.random.random((10, 10))
+        dcor, pval = distance_corr(a, b, n_boot=500, seed=9)
+        assert np.round(dcor, 5) == 0.87996
+        assert 0.20 < pval < 0.30
+
+        with pytest.raises(ValueError):
+            a[2, 4] = np.nan
+            distance_corr(a, b)

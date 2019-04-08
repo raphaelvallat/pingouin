@@ -5,6 +5,9 @@
 .. image:: https://badge.fury.io/py/pingouin.svg
   :target: https://badge.fury.io/py/pingouin
 
+.. image:: https://img.shields.io/conda/vn/conda-forge/pingouin.svg
+  :target: https://anaconda.org/conda-forge/pingouin
+
 .. image:: https://img.shields.io/github/license/raphaelvallat/pingouin.svg
   :target: https://github.com/raphaelvallat/pingouin/blob/master/LICENSE
 
@@ -28,41 +31,37 @@
 .. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/pictures/logo_pingouin.png
    :align:   center
 
-
-**Pingouin** is an open-source statistical package written in Python 3 and based on Pandas and NumPy.
-
-It provides easy-to-grasp functions for computing several statistical functions:
+**Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy.
 
 1. ANOVAs: one- and two-ways, repeated measures, mixed, ancova
 
-2. Post-hocs tests and pairwise comparisons
+2. Pairwise post-hocs tests (parametric and non-parametric)
 
-3. Robust correlations
+3. Robust correlations, partial correlation, distance correlation, repeated measures correlation and intraclass correlation
 
-4. Partial correlation, repeated measures correlation and intraclass correlation
+4. Linear/logistic regression and mediation analysis
 
-5. Bayes Factor
+5. Bayes Factor of T-test and Pearson correlation
 
 6. Tests for sphericity, normality and homoscedasticity
 
-7. Effect sizes (Cohen's d, Hedges'g, AUC, Glass delta, eta-square...)
+7. Effect sizes and power analysis
 
 8. Parametric/bootstrapped confidence intervals around an effect size or a correlation coefficient
 
 9. Circular statistics
 
-10. Linear/logistic regression and mediation analysis
+10. Plotting: Bland-Altman plot, Q-Q plot, paired plot, robust correlation...
 
 Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
 
 For example, the :code:`ttest_ind` function of SciPy returns only the T-value and the p-value. By contrast,
 the :code:`ttest` function of Pingouin returns the T-value, p-value, degrees of freedom, effect size (Cohen's d), statistical power and Bayes Factor (BF10) of the test.
 
-
 Documentation
 =============
 
-- `Link to documentation <https://raphaelvallat.github.io/pingouin/build/html/index.html>`_
+- `Link to documentation <https://pingouin-stats.org/index.html>`_
 
 Chat
 ====
@@ -83,29 +82,30 @@ The main dependencies of Pingouin are :
 * NumPy (>= 1.15)
 * SciPy (>= 1.1.0)
 * Pandas (>= 0.23)
+* Matplotlib (>= 3.0.2)
+* Seaborn (>= 0.9.0)
 
 In addition, some functions require :
 
 * Statsmodels
 * Scikit-learn
 
-Pingouin is a Python 3 package. While most of the functions should work with Python 2.7, we strongly recommend using Python >= 3.6.
+Pingouin is a Python 3 package and is currently tested for Python 3.5, 3.6 and 3.7. Note that Pingouin does not work with Python 2.7.
 
 User installation
 -----------------
+
+Pingouin can be easily installed using pip
 
 .. code-block:: shell
 
   pip install pingouin
 
-Develop mode
+or conda
 
 .. code-block:: shell
 
-  git clone https://github.com/raphaelvallat/pingouin.git pingouin/
-  cd pingouin/
-  pip install -r requirements.txt
-  python setup.py develop
+  conda install -c conda-forge pingouin
 
 New releases are frequent so always make sure that you have the latest version:
 
@@ -116,7 +116,7 @@ New releases are frequent so always make sure that you have the latest version:
 Quick start
 ============
 
-Try before you buy! Click on the link below and navigate to the notebooks folder to load a collection of interactive Jupyter notebooks demonstrating the main functionalities of Pingouin. No need to install Pingouin beforehand as the notebooks run in a Binder environment.
+Click on the link below and navigate to the notebooks/ folder to run a collection of interactive Jupyter notebooks showing the main functionalities of Pingouin. No need to install Pingouin beforehand, the notebooks run in a Binder environment.
 
 .. image:: https://mybinder.org/badge.svg
     :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
@@ -160,11 +160,11 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 .. table:: Output
    :widths: auto
 
-   ====  =====  ===========  =====  ========  =======  ======
-      n      r  CI95%           r2    adj_r2    p-val    BF10
-   ====  =====  ===========  =====  ========  =======  ======
-     30  0.595  [0.3  0.79]  0.354     0.306    0.001  54.222
-   ====  =====  ===========  =====  ========  =======  ======
+   ===  =====  ===========  =====  ========  =======  ======  ======
+     n      r  CI95%           r2    adj_r2    p-val    BF10   power
+   ===  =====  ===========  =====  ========  =======  ======  ======
+    30  0.595  [0.3  0.79]  0.354     0.306    0.001  54.222    0.95
+   ===  =====  ===========  =====  ========  =======  ======  ======
 
 ------------
 
@@ -181,11 +181,11 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 .. table:: Output
    :widths: auto
 
-   ====  =====  ===========  =====  ========  =======
-      n      r  CI95%           r2    adj_r2    p-val
-   ====  =====  ===========  =====  ========  =======
-     30  0.561  [0.25 0.77]  0.315     0.264    0.002
-   ====  =====  ===========  =====  ========  =======
+   ===  =====  ===========  =====  ========  =======  =======
+     n      r  CI95%           r2    adj_r2    p-val    power
+   ===  =====  ===========  =====  ========  =======  =======
+    30  0.561  [0.25 0.77]  0.315     0.264    0.002    0.917
+   ===  =====  ===========  =====  ========  =======  =======
 
 ------------
 
@@ -211,8 +211,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 .. code-block:: python
 
   # Read an example dataset
-  from pingouin.datasets import read_dataset
-  df = read_dataset('mixed_anova')
+  df = pg.read_dataset('mixed_anova')
 
   # Run the ANOVA
   aov = pg.anova(data=df, dv='Scores', between='Group', detailed=True)
@@ -256,7 +255,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
   # FDR-corrected post hocs with Hedges'g effect size
   posthoc = pg.pairwise_ttests(data=df, dv='Scores', within='Time', subject='Subject',
-                               padjust='fdr_bh', effsize='hedges')
+                               parametric=True, padjust='fdr_bh', effsize='hedges')
 
   # Pretty printing of table
   pg.print_table(posthoc, floatfmt='.3f')
@@ -264,13 +263,13 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 .. table:: Output
   :widths: auto
 
-  ==========  =======  =======  ========  ======  =========  =======  ========  ==========  ======  ========  ========
-  Contrast    A        B        Paired         T  tail         p-unc    p-corr  p-adjust      BF10    efsize  eftype
-  ==========  =======  =======  ========  ======  =========  =======  ========  ==========  ======  ========  ========
-  Time        August   January  True      -1.740  two-sided    0.087     0.131  fdr_bh       0.582    -0.328  hedges
-  Time        August   June     True      -2.743  two-sided    0.008     0.024  fdr_bh       4.232    -0.485  hedges
-  Time        January  June     True      -1.024  two-sided    0.310     0.310  fdr_bh       0.232    -0.170  hedges
-  ==========  =======  =======  ========  ======  =========  =======  ========  ==========  ======  ========  ========
+  ==========  =======  =======  ========  ============  ======  =========  =======  ========  ==========  ======  ======  ========
+  Contrast    A        B        Paired    Parametric         T  tail         p-unc    p-corr  p-adjust      BF10    CLES    hedges
+  ==========  =======  =======  ========  ============  ======  =========  =======  ========  ==========  ======  ======  ========
+  Time        August   January  True      True          -1.740  two-sided    0.087     0.131  fdr_bh       0.582   0.585    -0.328
+  Time        August   June     True      True          -2.743  two-sided    0.008     0.024  fdr_bh       4.232   0.644    -0.485
+  Time        January  June     True      True          -1.024  two-sided    0.310     0.310  fdr_bh       0.232   0.571    -0.170
+  ==========  =======  =======  ========  ============  ======  =========  =======  ========  ==========  ======  ======  ========
 
 ------------
 
@@ -303,6 +302,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 
 .. code-block:: python
 
+  import pandas as pd
   np.random.seed(123)
   z = np.random.normal(5, 1, 30)
   data = pd.DataFrame({'X': x, 'Y': y, 'Z': z})
@@ -311,13 +311,13 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 .. table:: Output
   :widths: auto
 
-  ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======
-  X    Y    method    tail         n      r  CI95%             r2    adj_r2      z    p-unc    BF10
-  ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======
-  X    Y    pearson   two-sided   30  0.366  [0.01 0.64]    0.134     0.070  0.384    0.047   1.006
-  X    Z    pearson   two-sided   30  0.251  [-0.12  0.56]  0.063    -0.006  0.256    0.181   0.344
-  Y    Z    pearson   two-sided   30  0.020  [-0.34  0.38]  0.000    -0.074  0.020    0.916   0.142
-  ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======
+  ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======  =======
+  X    Y    method    tail         n      r  CI95%             r2    adj_r2      z    p-unc    BF10    power
+  ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======  =======
+  X    Y    pearson   two-sided   30  0.366  [0.01 0.64]    0.134     0.070  0.384    0.047   1.006    0.525
+  X    Z    pearson   two-sided   30  0.251  [-0.12  0.56]  0.063    -0.006  0.256    0.181   0.344    0.272
+  Y    Z    pearson   two-sided   30  0.020  [-0.34  0.38]  0.000    -0.074  0.020    0.916   0.142    0.051
+  ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======  =======
 
 10. Convert between effect sizes
 ################################
@@ -334,7 +334,7 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 11. Multiple linear regression
 ##############################
 
-.. code-block:: ipython3
+.. code-block:: python
 
     pg.linear_regression(data[['X', 'Z']], data['Y'])
 
@@ -352,22 +352,22 @@ Try before you buy! Click on the link below and navigate to the notebooks folder
 12. Mediation analysis
 ######################
 
-.. code-block:: ipython3
+.. code-block:: python
 
-  pg.mediation_analysis(data=data, x='X', m='Z', y='Y', n_boot=500)
+    pg.mediation_analysis(data=data, x='X', m='Z', y='Y', seed=42, n_boot=1000)
 
 .. table:: Mediation summary
   :widths: auto
 
-  ========  ======  ==========  ===========  =====
-  Path        Beta    CI[2.5%]    CI[97.5%]  Sig
-  ========  ======  ==========  ===========  =====
-  X -> M     0.103      -0.051        0.256  No
-  M -> Y     0.018      -0.332        0.369  No
-  X -> Y     0.136       0.002        0.269  Yes
-  Direct     0.143       0.003        0.283  Yes
-  Indirect  -0.007      -0.050        0.027  No
-  ========  ======  ==========  ===========  =====
+  ========  ======  ==========  ===========  ======  =====
+  path        coef    CI[2.5%]    CI[97.5%]    pval  sig
+  ========  ======  ==========  ===========  ======  =====
+  X -> M     0.103      -0.051        0.256   0.181  No
+  M -> Y     0.018      -0.332        0.369   0.916  No
+  X -> Y     0.136       0.002        0.269   0.047  Yes
+  Direct     0.143       0.003        0.283   0.046  Yes
+  Indirect  -0.007      -0.070        0.029   0.898  No
+  ========  ======  ==========  ===========  ======  =====
 
 Development
 ===========
@@ -382,6 +382,7 @@ Contributors
 ------------
 
 - Nicolas Legrand
+- `Richard Höchenberger <http://hoechenberger.net/>`_
 
 How to cite Pingouin?
 =====================
@@ -389,8 +390,6 @@ How to cite Pingouin?
 If you want to cite Pingouin, please use the publication in JOSS:
 
 Vallat, R. (2018). Pingouin: statistics in Python. *Journal of Open Source Software*, 3(31), 1026, `https://doi.org/10.21105/joss.01026 <https://doi.org/10.21105/joss.01026>`_
-
-BibTeX:
 
 .. code-block:: latex
 
@@ -405,14 +404,14 @@ BibTeX:
     year     =  2018
   }
 
-
 Acknowledgement
 ===============
 
-Several functions of Pingouin were translated to Python from the original R or Matlab toolboxes, including:
+Several functions of Pingouin were inspired from R or Matlab toolboxes, including:
 
 - `effsize package (R) <https://cran.r-project.org/web/packages/effsize/effsize.pdf>`_
 - `ezANOVA package (R) <https://cran.r-project.org/web/packages/ez/ez.pdf>`_
+- `pwr package (R) <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_
 - `circular statistics (Matlab) <https://www.mathworks.com/matlabcentral/fileexchange/10676-circular-statistics-toolbox-directional-statistics>`_ (Berens 2009)
 - `robust correlations (Matlab) <https://sourceforge.net/projects/robustcorrtool/>`_ (Pernet, Wilcox & Rousselet, 2012)
 - `repeated-measure correlation (R) <https://cran.r-project.org/web/packages/rmcorr/index.html>`_ (Bakdash & Marusich, 2017)

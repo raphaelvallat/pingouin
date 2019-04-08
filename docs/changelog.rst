@@ -6,6 +6,90 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
+v0.2.4 (April 2019)
+-------------------
+
+**Correlation**
+
+a. Added :py:func:`pingouin.distance_corr` (distance correlation) function.
+b. :py:func:`pingouin.rm_corr` now requires at least 3 unique subjects (same behavior as the original R package).
+c. The :py:func:`pingouin.pairwise_corr` is faster and returns the number of outlier if a robust correlation is used.
+d. Added support for 2D level in the :py:func:`pingouin.pairwise_corr`. See Jupyter notebooks for examples.
+e. Added support for partial correlation in the :py:func:`pingouin.pairwise_corr` function.
+f. Greatly improved execution speed of :py:func:`pingouin.correlation.skipped` function.
+g. Added default random state to compute the Min Covariance Determinant in the :py:func:`pingouin.correlation.skipped` function.
+h. The default number of bootstrap samples for the :py:func:`pingouin.correlation.shepherd` function is now set to 200 (previously 2000) to increase computation speed.
+i. :py:func:`pingouin.partial_corr` now automatically drops rows with missing values.
+
+**Datasets**
+
+a. Renamed :py:func:`pingouin.read_dataset` and :py:func:`pingouin.list_dataset` (before one needed to call these functions by calling pingouin.datasets)
+
+**Pairwise T-tests and multi-comparisons**
+
+a. Added support for non-parametric pairwise tests in :py:func:`pingouin.pairwise_ttests` function.
+b. Common language effect size (CLES) is now reported by default in :py:func:`pingouin.pairwise_ttests` function.
+c. CLES is now implemented in the :py:func:`pingouin.compute_effsize` function.
+d. Better code, doc and testing for the functions in multicomp.py.
+e. P-values adjustment methods now do not take into account NaN values (same behavior as the R function p.adjust)
+
+**Plotting**
+
+a. Added :py:func:`pingouin.plot_paired` function.
+
+**Regression**
+
+a. NaN are now automatically removed in :py:func:`pingouin.mediation_analysis`.
+b. The :py:func:`pingouin.linear_regression` and :py:func:`pingouin.logistic_regression` now fail if NaN / Inf are present in the target or predictors variables. The user must remove then before running these functions.
+c. Added support for multiple parallel mediator in :py:func:`pingouin.mediation_analysis`.
+d. Added support for covariates in :py:func:`pingouin.mediation_analysis`.
+e. Added seed argument to :py:func:`pingouin.mediation_analysis` for reproducible results.
+f. :py:func:`pingouin.mediation_analysis` now returns two-sided p-values computed with a permutation test.
+g. Added :py:func:`pingouin.utils._perm_pval` to compute p-value from a permutation test.
+
+**Bugs and tests**
+
+a. Travis and AppVeyor test for Python 3.5, 3.6 and 3.7.
+b. Better doctest & improved examples for many functions.
+c. Fixed bug with :py:func:`pingouin.mad` when axis was not 0.
+
+v0.2.3 (February 2019)
+----------------------
+
+**Correlation**
+
+a. `shepherd` now also returns the outlier vector (same behavior as skipped).
+b. The `corr` function returns the number of outliers for shepherd and skipped.
+c. Removed `mahal` function.
+
+**Licensing**
+
+a. Pingouin is now released under the GNU General Public Licence 3.
+b. Added licenses files of external modules (qsturng and tabulate).
+
+**Plotting**
+
+a. NaN are automatically removed in qqplot function
+
+v0.2.2 (December 2018)
+----------------------
+
+**Plotting**
+
+a. Started working on Pingouin's plotting module
+b. Added Seaborn and Matplotlib to dependencies
+c. Added plot_skipped_corr function (PR from Nicolas Legrand)
+d. Added qqplot function (Quantile-Quantile plot)
+e. Added plot_blandaltman function (Bland-Altman plot)
+
+**Power**
+
+a. Added power_corr, based on the R `pwr` package.
+b. Renamed anova_power and ttest_power to power_anova and power_ttest.
+c. Added power column to corr() and pairwise_corr()
+d. power_ttest function can now solve for sample size, alpha and d
+e. power_ttest2n for two-sample T-test with unequal n.
+f. power_anova can now solve for sample size, number of groups, alpha and eta
 
 v0.2.1 (November 2018)
 ----------------------

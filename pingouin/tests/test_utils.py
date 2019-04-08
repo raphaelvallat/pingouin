@@ -2,10 +2,11 @@ import pandas as pd
 import numpy as np
 import pytest
 
-from pingouin.tests._tests_pingouin import _TestPingouin
-from pingouin.utils import (print_table, _export_table, _remove_rm_na,
-                            _check_eftype, _check_dataframe, _remove_na,
-                            is_sklearn_installed, is_statsmodels_installed)
+from unittest import TestCase
+from pingouin.utils import (print_table, _perm_pval, _export_table,
+                            _remove_rm_na, _check_eftype, _check_dataframe,
+                            _remove_na, _is_sklearn_installed,
+                            _is_statsmodels_installed, _flatten_list)
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
@@ -14,7 +15,7 @@ df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
                    'Subject': [1, 1, 2, 2]})
 
 
-class TestUtils(_TestPingouin):
+class TestUtils(TestCase):
     """Test utils.py."""
 
     def test_print_table(self):
@@ -24,6 +25,35 @@ class TestUtils(_TestPingouin):
         print_table(df2)
         df3['A'] = 0
         print_table(df3, tablefmt='html', floatfmt='.3f')
+
+    def test_flatten_list(self):
+        """Test function _flatten_list."""
+        x = ['X1', ['M1', 'M2'], 'Y1', ['Y2']]
+        fl = _flatten_list(x)
+        np.testing.assert_array_equal(fl, ['X1', 'M1', 'M2', 'Y1', 'Y2'])
+        x = ['Xaa', 'Xbb', 'Xcc']
+        fl = _flatten_list(x)
+        np.testing.assert_array_equal(fl, x)
+
+    def test_perm_pval(self):
+        """Test function _perm_pval.
+        """
+        np.random.seed(123)
+        bootstat = np.random.normal(size=1000)
+        x = -2
+        up = _perm_pval(bootstat, x, tail='upper')
+        low = _perm_pval(bootstat, x, tail='lower')
+        two = _perm_pval(bootstat, x, tail='two-sided')
+        assert up > low
+        assert up + low == 1
+        assert low < two < up
+        x = 2.5
+        up = _perm_pval(bootstat, x, tail='upper')
+        low = _perm_pval(bootstat, x, tail='lower')
+        two = _perm_pval(bootstat, x, tail='two-sided')
+        assert low > up
+        assert up + low == 1
+        assert up < two < low
 
     def test_export_table(self):
         """Test function export_table."""
@@ -47,7 +77,7 @@ class TestUtils(_TestPingouin):
                            'Ss': [0, 1, 0, 1]})
         _remove_rm_na(dv='Values', within='Time', data=df)
         df = _remove_rm_na(dv='Values', within='Time', subject='Ss', data=df)
-        assert df['Ss'].unique().size == 1
+        assert df['Ss'].nunique() == 1
 
     def test_check_eftype(self):
         """Test function _check_eftype."""
@@ -86,10 +116,10 @@ class TestUtils(_TestPingouin):
             _check_dataframe(dv='Values', between='Group', within='Time',
                              effects='within', data=df)
 
-    def is_statsmodels_installed(self):
-        """Test function is_statsmodels_installed."""
-        assert isinstance(is_statsmodels_installed(), bool)
+    def _is_statsmodels_installed(self):
+        """Test function _is_statsmodels_installed."""
+        assert isinstance(_is_statsmodels_installed(), bool)
 
-    def is_sklearn_installed(self):
-        """Test function is_statsmodels_installed."""
-        assert isinstance(is_sklearn_installed(), bool)
+    def _is_sklearn_installed(self):
+        """Test function _is_statsmodels_installed."""
+        assert isinstance(_is_sklearn_installed(), bool)

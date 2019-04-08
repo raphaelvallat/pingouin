@@ -2,16 +2,16 @@ import pandas as pd
 import numpy as np
 import pytest
 
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.pairwise import (pairwise_ttests, pairwise_corr, pairwise_tukey,
                                pairwise_gameshowell)
-from pingouin.datasets import read_dataset
+from pingouin import read_dataset
 
 # Dataset for pairwise_ttests
 df = read_dataset('mixed_anova.csv')
 
 
-class TestPairwise(_TestPingouin):
+class TestPairwise(TestCase):
     """Test pairwise.py."""
 
     def test_pairwise_ttests(self):
@@ -25,18 +25,29 @@ class TestPairwise(_TestPingouin):
         # Simple within
         pairwise_ttests(dv='Scores', within='Time', subject='Subject',
                         data=df, return_desc=True)
+        pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+                        data=df, parametric=False, return_desc=True)
         # Simple between
         pairwise_ttests(dv='Scores', between='Group',
                         data=df, padjust='bonf', tail='one-sided',
                         effsize='cohen', export_filename='test_export.csv')
+        pairwise_ttests(dv='Scores', between='Group',
+                        data=df, padjust='bonf', tail='one-sided',
+                        effsize='cohen', parametric=False,
+                        export_filename='test_export.csv')
 
         # Two between factors
         pairwise_ttests(dv='Scores', between=['Time', 'Group'], data=df,
                         padjust='holm')
+        pairwise_ttests(dv='Scores', between=['Time', 'Group'], data=df,
+                        padjust='holm', parametric=False)
 
         # Two within subject factors
         pairwise_ttests(dv='Scores', within=['Group', 'Time'],
                         subject='Subject', data=df, padjust='bonf')
+        pairwise_ttests(dv='Scores', within=['Group', 'Time'],
+                        subject='Subject', data=df, padjust='bonf',
+                        parametric=False)
 
         # Wrong tail argument
         with pytest.raises(ValueError):
@@ -107,6 +118,8 @@ class TestPairwise(_TestPingouin):
         pairwise_corr(data=data, columns=['Neuroticism', 'Extraversion'])
         with pytest.raises(ValueError):
             pairwise_corr(data=data, tail='wrong')
+        with pytest.raises(ValueError):
+            pairwise_corr(data=data, columns='wrong')
         # Check with non-numeric columns
         data['test'] = 'test'
         pairwise_corr(data=data, method='pearson')
@@ -114,19 +127,72 @@ class TestPairwise(_TestPingouin):
         n = data.shape[0]
         data['Age'] = np.random.randint(18, 65, n)
         data['IQ'] = np.random.normal(105, 1, n)
+        data['One'] = 1
         data['Gender'] = np.repeat(['M', 'F'], int(n / 2))
-        pairwise_corr(data, columns=['Neuroticism', 'Gender'])
+        pairwise_corr(data, columns=['Neuroticism', 'Gender'],
+                      method='shepherd')
         pairwise_corr(data, columns=['Neuroticism', 'Extraversion', 'Gender'])
         pairwise_corr(data, columns=['Neuroticism'])
-        pairwise_corr(data, columns='Neuroticism')
-        pairwise_corr(data, columns=[['Neuroticism']])
-        pairwise_corr(data, columns=[['Neuroticism'], None])
+        pairwise_corr(data, columns='Neuroticism', method='skipped')
+        pairwise_corr(data, columns=[['Neuroticism']], method='spearman')
+        pairwise_corr(data, columns=[['Neuroticism'], None], method='percbend')
         pairwise_corr(data, columns=[['Neuroticism', 'Gender'], ['Age']])
         pairwise_corr(data, columns=[['Neuroticism'], ['Age', 'IQ']])
         pairwise_corr(data, columns=[['Age', 'IQ'], []])
         pairwise_corr(data, columns=['Age', 'Gender', 'IQ', 'Wrong'])
         pairwise_corr(data, columns=['Age', 'Gender', 'Wrong'])
-        # Test with more than 1000 columns (BF10 not computed)
+        # Test with more than 1000 samples (BF10 not computed)
         data1500 = pd.concat([data, data, data], ignore_index=True)
         pcor1500 = pairwise_corr(data1500, method='pearson')
         assert 'BF10' not in pcor1500.keys()
+        # Test with no good combinations
+        with pytest.raises(ValueError):
+            pairwise_corr(data, columns=['Gender', 'Gender'])
+        # Test when one column has only one unique value
+        pairwise_corr(data=data, columns=['Age', 'One', 'Gender'])
+        stats = pairwise_corr(data, columns=['Neuroticism', 'IQ', 'One'])
+        assert stats.shape[0] == 1
+        # Test with covariate
+        pairwise_corr(data, covar='Age')
+        pairwise_corr(data, covar=['Age', 'Neuroticism'])
+        with pytest.raises(AssertionError):
+            pairwise_corr(data, covar=['Age', 'Gender'])
+        with pytest.raises(ValueError):
+            pairwise_corr(data, columns=['Neuroticism', 'Age'], covar='Age')
+        # Partial pairwise with missing values
+        data.loc[4, 'Age'] = np.nan
+        data.loc[10, 'Neuroticism'] = np.nan
+        pairwise_corr(data, covar='Age')
+        ######################################################################
+        # MultiIndex columns
+        from numpy.random import random as rdm
+        # Create MultiIndex dataframe
+        columns = pd.MultiIndex.from_tuples([('Behavior', 'Rating'),
+                                             ('Behavior', 'RT'),
+                                             ('Physio', 'BOLD'),
+                                             ('Physio', 'HR'),
+                                             ('Psycho', 'Anxiety')])
+        data = pd.DataFrame(dict(Rating=rdm(size=10),
+                                 RT=rdm(size=10),
+                                 BOLD=rdm(size=10),
+                                 HR=rdm(size=10),
+                                 Anxiety=rdm(size=10)))
+        data.columns = columns
+        pairwise_corr(data, method='spearman')
+        stats = pairwise_corr(data, columns=[('Behavior', 'Rating')])
+        assert stats.shape[0] == data.shape[1] - 1
+        pairwise_corr(data, columns=[('Behavior', 'Rating'),
+                                     ('Behavior', 'RT')])
+        st1 = pairwise_corr(data, columns=[[('Behavior', 'Rating'),
+                                            ('Behavior', 'RT')], None])
+        st2 = pairwise_corr(data, columns=[[('Behavior', 'Rating'),
+                                            ('Behavior', 'RT')]])
+        assert st1['X'].equals(st2['X'])
+        st3 = pairwise_corr(data, columns=[[('Behavior', 'Rating')],
+                                           [('Behavior', 'RT'),
+                                            ('Physio', 'BOLD')]])
+        assert st3.shape[0] == 2
+        # With covar
+        pairwise_corr(data, covar=[('Psycho', 'Anxiety')])
+        pairwise_corr(data, columns=[('Behavior', 'Rating')],
+                      covar=[('Psycho', 'Anxiety')])

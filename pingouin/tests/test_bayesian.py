@@ -1,8 +1,8 @@
-from pingouin.tests._tests_pingouin import _TestPingouin
+from unittest import TestCase
 from pingouin.bayesian import bayesfactor_ttest, bayesfactor_pearson
 
 
-class TestBayesian(_TestPingouin):
+class TestBayesian(TestCase):
     """Test bayesian.py."""
 
     def test_bayesfactor_ttest(self):
