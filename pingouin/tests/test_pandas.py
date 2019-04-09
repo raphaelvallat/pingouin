@@ -45,6 +45,10 @@ class TestParametric(TestCase):
         corrs = data.pairwise_corr(columns=['X', 'M', 'Y'], method='spearman')
         assert 'r2' in corrs.columns
 
+        # Test partial correlation
+        corrs = data.partial_corr(x='X', y='Y', covar='M', method='spearman')
+        assert 'r2' in corrs.columns
+
         # Test mediation analysis
         med = data.mediation_analysis(x='X', m='M', y='Y', seed=42, n_boot=500)
         assert 'coef' in med.columns

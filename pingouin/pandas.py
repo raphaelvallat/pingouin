@@ -5,6 +5,7 @@ Authors
 - Nicolas Legrand <nicolaslegrand21@gmail.com>
 """
 import pandas as pd
+from pingouin.correlation import partial_corr
 from pingouin.parametric import (anova, welch_anova, rm_anova, mixed_anova)
 from pingouin.pairwise import (pairwise_corr, pairwise_ttests)
 from pingouin.regression import mediation_analysis
@@ -82,6 +83,18 @@ def _pairwise_corr(self, columns=None, covar=None, tail='two-sided',
 
 
 pd.DataFrame.pairwise_corr = _pairwise_corr
+
+
+# Partial correlation
+def _partial_corr(self, x=None, y=None, covar=None, tail='two-sided',
+                  method='pearson'):
+    """Pairwise (partial) correlations."""
+    stats = partial_corr(data=self, x=x, y=y, covar=covar, tail=tail,
+                         method=method)
+    return stats
+
+
+pd.DataFrame.partial_corr = _partial_corr
 
 
 # Mediation analysis
