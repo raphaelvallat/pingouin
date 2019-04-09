@@ -13,7 +13,8 @@ import matplotlib.transforms as transforms
 # Set default Seaborn preferences
 sns.set(style='ticks', context='notebook')
 
-__all__ = ["plot_blandaltman", "plot_skipped_corr", "qqplot", "plot_paired"]
+__all__ = ["plot_blandaltman", "plot_skipped_corr", "qqplot", "plot_paired",
+           "plot_shift"]
 
 
 def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
@@ -611,3 +612,168 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
     sns.despine(trim=True, ax=ax)
 
     return ax
+
+
+def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
+               ci=0.95, seed=None, show_median=True, violin=True):
+    """Shift function, adapted from [1].
+
+    Parameters
+    ----------
+    x, y : array_like
+        First and second set of observations. x and y must be independent.
+    n_boot : int
+        Number of bootstrap iterations. The higher, the better, the slower.
+    percentiles: array_like
+        Sequence of percentiles to compute, which must be between 0 and 100
+        inclusive. Default set to [10, 20, 30, 40, 50, 60, 70, 80, 90].
+    ci: float
+        Confidence level (0.95 = 95%).
+    seed : int or None
+        Random seed for generating bootstrap samples, can be integer or
+        None (default).
+    show_median: boolean
+        If True, show the median with black lines. Defaut set to True.
+    violin: boolean
+        If True, plot the density of X and Y distributions.
+        Defaut set to True.
+
+    Returns
+    -------
+    fig : matplotlib Figure instance
+        Matplotlib Figure. To get the individual axes, use fig.axes.
+
+    Notes
+    -----
+    This function will estimate the bootstrap CI for the percentile difference
+    between X (fixed) and Y (resampled). If N is small, the CI of X -> Y and
+    Y -> X can vary.
+
+    References
+    ----------
+    [1] : Rousselet, G. A., Pernet, C. R. and Wilcox, R. R. (2017). Beyond
+     differences in means: robust graphical methods to compare two groups in
+     neuroscience. Eur J Neurosci, 46: 1738-1748. doi:10.1111/ejn.13610
+
+    """
+    import pandas as pd
+
+    rs = np.random.RandomState(seed)
+
+    x_per = np.percentile(x, percentiles)
+    y_per = np.percentile(y, percentiles)
+
+    # Compute bootstrap CI
+    boot = []
+    for i in range(n_boot):
+
+        y_boot = y.take(rs.randint(0, len(y), len(y)))
+        boot.append(np.percentile(y_boot, percentiles) - x_per)
+
+    # Find upper and lower confidence interval for each quantiles
+    ci = ci * 100
+    upper = np.percentile(np.asarray(boot), ci + (100 - ci) / 2, axis=0)
+    lower = np.percentile(np.asarray(boot), (100 - ci) / 2, axis=0)
+    median_per = np.median(np.asarray(boot), axis=0)
+
+    data = pd.DataFrame({'value': np.concatenate([x, y]),
+                        'variable': ['X'] * len(x) + ['Y'] * len(y)})
+
+    #############################
+    # Plots X and Y distributions
+    #############################
+    fig = plt.figure(figsize=(8, 5))
+    ax1 = plt.subplot2grid((3, 3), (0, 0), rowspan=2, colspan=3)
+
+    # Boxplot X & Y
+    def adjacent_values(vals, q1, q3):
+        upper_adjacent_value = q3 + (q3 - q1) * 1.5
+        upper_adjacent_value = np.clip(upper_adjacent_value, q3, vals[-1])
+
+        lower_adjacent_value = q1 - (q3 - q1) * 1.5
+        lower_adjacent_value = np.clip(lower_adjacent_value, vals[0], q1)
+        return lower_adjacent_value, upper_adjacent_value
+
+    for dis, pos in zip([x, y], [1.2, -0.2]):
+        qrt1, medians, qrt3 = np.percentile(dis, [25, 50, 75])
+        whiskers = adjacent_values(np.sort(dis), qrt1, qrt3)
+        ax1.plot(medians, pos, marker='o', color='white', zorder=10)
+        ax1.hlines(pos, qrt1, qrt3, color='k',
+                   linestyle='-', lw=7, zorder=9)
+        ax1.hlines(pos, whiskers[0], whiskers[1],
+                   color='k', linestyle='-', lw=2, zorder=9)
+
+    ax1 = sns.stripplot(data=data, x='value', y='variable',
+                        orient='h', order=['Y', 'X'],
+                        palette=['#88bedc', '#cfcfcf'])
+
+    if violin:
+
+        vl = plt.violinplot([y, x], showextrema=False, vert=False, widths=1)
+
+        # Upper plot
+        paths = vl['bodies'][0].get_paths()[0]
+        paths.vertices[:, 1][paths.vertices[:, 1] >= 1] = 1
+        paths.vertices[:, 1] = paths.vertices[:, 1] - 1.2
+        vl['bodies'][0].set_edgecolor('k')
+        vl['bodies'][0].set_facecolor('#88bedc')
+        vl['bodies'][0].set_alpha(0.8)
+
+        # Lower plot
+        paths = vl['bodies'][1].get_paths()[0]
+        paths.vertices[:, 1][paths.vertices[:, 1] <= 2] = 2
+        paths.vertices[:, 1] = paths.vertices[:, 1] - 0.8
+        vl['bodies'][1].set_edgecolor('k')
+        vl['bodies'][1].set_facecolor('#cfcfcf')
+        vl['bodies'][1].set_alpha(0.8)
+
+        # Rescale ylim
+        ax1.set_ylim(2, -1)
+
+    for i in range(len(percentiles)):
+        # Connection between quantiles
+        if upper[i] < 0:
+            col = '#4c72b0'
+        elif lower[i] > 0:
+            col = '#c34e52'
+        else:
+            col = 'darkgray'
+        plt.plot([y_per[i], x_per[i]], [0.2, 0.8],
+                 marker='o', color=col, zorder=10)
+        # X quantiles
+        plt.plot([x_per[i], x_per[i]], [0.8, 1.2], 'k--', zorder=9)
+        # Y quantiles
+        plt.plot([y_per[i], y_per[i]], [-0.2, 0.2], 'k--', zorder=9)
+
+    if show_median:
+        # X median
+        plt.plot([x_per[4], x_per[4]], [0.8, 1.2], 'k-')
+        # Y median
+        plt.plot([y_per[4], y_per[4]], [-0.2, 0.2], 'k-')
+
+    plt.xlabel('Scores (a.u.)', size=20)
+    ax1.set_yticklabels(['Y', 'X'], size=20)
+    ax1.set_ylabel('')
+
+    #######################
+    # Plots quantiles shift
+    #######################
+    ax2 = plt.subplot2grid((3, 3), (2, 0), rowspan=1, colspan=3)
+    for i, per in enumerate(x_per):
+        if upper[i] < 0:
+            col = '#4c72b0'
+        elif lower[i] > 0:
+            col = '#c34e52'
+        else:
+            col = 'darkgray'
+        plt.plot([per, per], [upper[i], lower[i]], lw=3, color=col, zorder=10)
+        plt.plot(per, median_per[i], marker='o', ms=10, color=col, zorder=10)
+
+    plt.axhline(y=0, ls='--', lw=2, color='gray')
+
+    ax2.set_xlabel('X quantiles', size=20)
+    ax2.set_ylabel('Y - X quantiles \n differences (a.u.)', size=10)
+    sns.despine()
+    plt.tight_layout()
+
+    return fig

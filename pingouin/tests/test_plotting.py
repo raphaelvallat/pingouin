@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from unittest import TestCase
 from pingouin import read_dataset
 from pingouin.plotting import (plot_blandaltman, plot_skipped_corr, _ppoints,
-                               qqplot, plot_paired)
+                               qqplot, plot_paired, plot_shift)
 
 
 class TestPlotting(TestCase):
@@ -74,3 +74,11 @@ class TestPlotting(TestCase):
         plot_paired(data=df, dv='Scores', within='Time',
                     subject='Subject', order=['June', 'August'],
                     ax=ax2)
+
+    def test_plot_shift(self):
+        """Test plot_shift()."""
+        x = np.random.normal(5.5, 2, 50)
+        y = np.random.normal(6, 1.5, 50)
+        plot_shift(x, y)
+        plot_shift(x, y, n_boot=100, percentiles=[5, 55, 95], ci=0.68,
+                   show_median=False, seed=456, violin=False)
