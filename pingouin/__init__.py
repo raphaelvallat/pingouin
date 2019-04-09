@@ -13,5 +13,6 @@ from .pairwise import *
 from .power import *
 from .regression import *
 from .plotting import *
+from .pandas import *
 
 __version__ = "0.2.4"
