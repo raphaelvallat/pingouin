@@ -5,6 +5,7 @@ Authors
 - Nicolas Legrand <legrand@cyceron.fr>
 """
 import numpy as np
+import pandas as pd
 import seaborn as sns
 from scipy import stats
 import matplotlib.pyplot as plt
@@ -616,7 +617,9 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
 
 def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
                ci=0.95, seed=None, show_median=True, violin=True):
-    """Shift function, adapted from [1].
+    """Shift plot.
+
+    The shift plot is described in Rousselet, Pernet and Wilcox (2017).
 
     Parameters
     ----------
@@ -651,33 +654,65 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
 
     References
     ----------
-    [1] : Rousselet, G. A., Pernet, C. R. and Wilcox, R. R. (2017). Beyond
-     differences in means: robust graphical methods to compare two groups in
-     neuroscience. Eur J Neurosci, 46: 1738-1748. doi:10.1111/ejn.13610
+    .. [1] Rousselet, G. A., Pernet, C. R. and Wilcox, R. R. (2017). Beyond
+           differences in means: robust graphical methods to compare two groups
+           in neuroscience. Eur J Neurosci, 46: 1738-1748.
+           doi:10.1111/ejn.13610
 
+    Examples
+    --------
+    Default shift plot
+
+    .. plot::
+
+        >>> import numpy as np
+        >>> import pingouin as pg
+        >>> np.random.seed(42)
+        >>> x = np.random.normal(5.5, 2, 50)
+        >>> y = np.random.normal(6, 1.5, 50)
+        >>> fig = pg.plot_shift(x, y)
+
+    With different options
+
+    .. plot::
+
+        >>> import numpy as np
+        >>> import pingouin as pg
+        >>> np.random.seed(42)
+        >>> x = np.random.normal(5.5, 2, 50)
+        >>> y = np.random.normal(6, 1.5, 50)
+        >>> fig = pg.plot_shift(x, y, n_boot=2000, percentiles=[5, 55, 95],
+        ...                     show_median=False, seed=456, violin=False)
     """
-    import pandas as pd
-
-    rs = np.random.RandomState(seed)
+    # Safety check
+    x = np.asarray(x)
+    y = np.asarray(y)
+    percentiles = np.asarray(percentiles)
+    assert x.ndim == 1, 'x must be 1D.'
+    assert y.ndim == 1, 'y must be 1D.'
+    nx, ny = x.size, y.size
+    assert nx >= 10, 'x must have at least 10 samples.'
+    assert ny >= 10, 'y must have at least 10 samples.'
+    assert 0 < ci < 1, 'ci must be between 0 and 1.'
 
     x_per = np.percentile(x, percentiles)
     y_per = np.percentile(y, percentiles)
 
     # Compute bootstrap CI
-    boot = []
-    for i in range(n_boot):
-
-        y_boot = y.take(rs.randint(0, len(y), len(y)))
-        boot.append(np.percentile(y_boot, percentiles) - x_per)
+    rng = np.random.RandomState(seed)
+    bootsam = rng.choice(y, size=(n_boot, ny), replace=True)
+    bootstat = np.swapaxes(np.percentile(bootsam, percentiles, axis=1), 1, 0)
+    bootstat -= x_per
 
     # Find upper and lower confidence interval for each quantiles
-    ci = ci * 100
-    upper = np.percentile(np.asarray(boot), ci + (100 - ci) / 2, axis=0)
-    lower = np.percentile(np.asarray(boot), (100 - ci) / 2, axis=0)
-    median_per = np.median(np.asarray(boot), axis=0)
+    ci *= 100
+    upper = np.percentile(bootstat, ci + (100 - ci) / 2, axis=0)
+    lower = np.percentile(bootstat, (100 - ci) / 2, axis=0)
+    median_per = np.median(bootstat, axis=0)
 
+    # Create long-format dataFrame for use with Seaborn
     data = pd.DataFrame({'value': np.concatenate([x, y]),
-                        'variable': ['X'] * len(x) + ['Y'] * len(y)})
+                         'variable': ['X'] * nx + ['Y'] * ny})
 
     #############################
     # Plots X and Y distributions

@@ -4,37 +4,47 @@ Authors
 - Nicolas Legrand <nicolaslegrand21@gmail.com>
 - Raphael Vallat <raphaelvallat9@gmail.com>
 """
-import pingouin
-import numpy as np
-import pandas as pd
-from pingouin.datasets import read_dataset
+import pingouin as pg
+from unittest import TestCase
 
-df = read_dataset('mixed_anova')
+df = pg.read_dataset('mixed_anova')
+data = pg.read_dataset('mediation')
 
-# Test the ANOVA (Pandas)
-df.anova(dv='Scores', between='Group', detailed=True)
 
-# Test the Welch ANOVA (Pandas)
-df.welch_anova(dv='Scores', between='Group')
+class TestParametric(TestCase):
+    """Test parametric.py."""
 
-# Test the repeated measures ANOVA (Pandas)
-df.rm_anova(dv='Scores', within='Time', subject='Subject', detailed=True)
+    def test_pandas(self):
+        """Test pandas method.
+        """
+        # Test the ANOVA (Pandas)
+        aov = df.anova(dv='Scores', between='Group', detailed=True)
+        assert 'F' in aov.columns
 
-# FDR-corrected post hocs with Hedges'g effect size
-df.pairwise_ttests(dv='Scores', within='Time', subject='Subject',
-                   parametric=True, padjust='fdr_bh', effsize='hedges')
+        # Test the Welch ANOVA (Pandas)
+        aov = df.welch_anova(dv='Scores', between='Group')
+        assert 'F' in aov.columns
 
-# Test two-way mixed ANOVA
-df.mixed_anova(dv='Scores', between='Group', within='Time', subject='Subject',
-               correction=False, export_filename='mixed_anova.csv')
+        # Test the repeated measures ANOVA (Pandas)
+        aov = df.rm_anova(dv='Scores', within='Time', subject='Subject',
+                          detailed=True)
+        assert 'F' in aov.columns
 
-# Test parwise correlations
-np.random.seed(123)
-mean, cov, n = [4, 5], [(1, .6), (.6, 1)], 30
-x, y = np.random.multivariate_normal(mean, cov, n).T
-z = np.random.normal(5, 1, 30)
-data = pd.DataFrame({'X': x, 'Y': y, 'Z': z})
-data.pairwise_corr(columns=['X', 'Y', 'Z'])
+        # FDR-corrected post hocs with Hedges'g effect size
+        ttests = df.pairwise_ttests(dv='Scores', within='Time',
+                                    subject='Subject', padjust='fdr_bh',
+                                    effsize='hedges')
+        assert 'p-corr' in ttests.columns
 
-# Test mediation Analysis
-data.mediation_analysis(x='X', m='Z', y='Y', seed=42, n_boot=1000)
+        # Test two-way mixed ANOVA
+        aov = df.mixed_anova(dv='Scores', between='Group', within='Time',
+                             subject='Subject', correction=False)
+        assert 'F' in aov.columns
+
+        # Test parwise correlations
+        corrs = data.pairwise_corr(columns=['X', 'M', 'Y'], method='spearman')
+        assert 'r2' in corrs.columns
+
+        # Test mediation analysis
+        med = data.mediation_analysis(x='X', m='M', y='Y', seed=42, n_boot=500)
+        assert 'coef' in med.columns

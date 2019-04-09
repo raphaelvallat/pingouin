@@ -6,6 +6,19 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
+
+v0.2.5 (May 2019)
+-----------------
+
+**Pandas integration**
+
+a. Several functions of pandas can now be directly used as Pandas DataFrame methods.
+
+**Plotting**
+
+a. Added :py:func:`pingouin.plot_shift` function.
+
+
 v0.2.4 (April 2019)
 -------------------
 
