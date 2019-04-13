@@ -263,13 +263,13 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 .. table:: Output
   :widths: auto
 
-  ==========  =======  =======  ========  ============  ======  =========  =======  ========  ==========  ======  ======  ========
-  Contrast    A        B        Paired    Parametric         T  tail         p-unc    p-corr  p-adjust      BF10    CLES    hedges
-  ==========  =======  =======  ========  ============  ======  =========  =======  ========  ==========  ======  ======  ========
-  Time        August   January  True      True          -1.740  two-sided    0.087     0.131  fdr_bh       0.582   0.585    -0.328
-  Time        August   June     True      True          -2.743  two-sided    0.008     0.024  fdr_bh       4.232   0.644    -0.485
-  Time        January  June     True      True          -1.024  two-sided    0.310     0.310  fdr_bh       0.232   0.571    -0.170
-  ==========  =======  =======  ========  ============  ======  =========  =======  ========  ==========  ======  ======  ========
+  ==========  =======  =======  ========  ============  ======  ======  =========  =======  ========  ==========  ======  ======  ========
+  Contrast    A        B        Paired    Parametric         T     dof  tail         p-unc    p-corr  p-adjust      BF10    CLES    hedges
+  ==========  =======  =======  ========  ============  ======  ======  =========  =======  ========  ==========  ======  ======  ========
+  Time        August   January  True      True          -1.740  59.000  two-sided    0.087     0.131  fdr_bh       0.582   0.585    -0.328
+  Time        August   June     True      True          -2.743  59.000  two-sided    0.008     0.024  fdr_bh       4.232   0.644    -0.485
+  Time        January  June     True      True          -1.024  59.000  two-sided    0.310     0.310  fdr_bh       0.232   0.571    -0.170
+  ==========  =======  =======  ========  ============  ======  ======  =========  =======  ========  ==========  ======  ======  ========
 
 ------------
 
@@ -368,6 +368,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
   Direct     0.143       0.003        0.283   0.046  Yes
   Indirect  -0.007      -0.070        0.029   0.898  No
   ========  ======  ==========  ===========  ======  =====
+
 
 Development
 ===========
