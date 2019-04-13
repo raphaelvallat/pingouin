@@ -10,9 +10,17 @@ What's new
 v0.2.5 (May 2019)
 -----------------
 
+**Missing values**
+
+a. :py:func:`pingouin.remove_rm_na` now works with multiple within-factors.
+
 **Pandas integration**
 
 a. Several functions of pandas can now be directly used as Pandas DataFrame methods.
+
+**Parametric**
+
+a. :py:func:`pingouin.pairwise_ttests` now returns the degrees of freedom (dof).
 
 **Plotting**
 

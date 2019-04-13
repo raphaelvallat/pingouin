@@ -437,7 +437,7 @@ def anderson(*args, dist='norm'):
 
 
 def epsilon(data, correction='gg'):
-    """Epsilon adjustement factor for repeated measurements.
+    """Epsilon adjustement factor for repeated measures.
 
     Parameters
     ----------

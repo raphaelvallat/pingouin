@@ -565,14 +565,14 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
         ...                ax=ax1, boxplot=False,
         ...                colors=['grey', 'grey', 'grey'])
     """
-    from pingouin.utils import _check_dataframe, _remove_rm_na
+    from pingouin.utils import _check_dataframe, remove_rm_na
 
     # Validate args
     _check_dataframe(data=data, dv=dv, within=within, subject=subject,
                      effects='within')
 
     # Remove NaN values
-    data = _remove_rm_na(dv=dv, within=within, subject=subject, data=data)
+    data = remove_rm_na(dv=dv, within=within, subject=subject, data=data)
 
     # Extract subjects
     subj = data[subject].unique()

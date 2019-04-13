@@ -6,7 +6,7 @@ from itertools import combinations, product
 from pingouin.parametric import anova
 from pingouin.multicomp import multicomp
 from pingouin.effsize import compute_effsize, convert_effsize
-from pingouin.utils import _remove_rm_na, _export_table, _check_dataframe
+from pingouin.utils import remove_rm_na, _export_table, _check_dataframe
 
 __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
            "pairwise_corr"]
@@ -15,7 +15,7 @@ __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
 def _append_stats_dataframe(stats, x, y, xlabel, ylabel, alpha, paired, tail,
                             df_ttest, ef, eftype, time=np.nan):
     # Create empty columns
-    for f in ['CLES', 'T', 'BF10', 'U-val', 'W-val']:
+    for f in ['CLES', 'T', 'BF10', 'U-val', 'W-val', 'dof']:
         if f not in df_ttest.keys():
             df_ttest[f] = np.nan
     stats = stats.append({
@@ -32,6 +32,7 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, alpha, paired, tail,
         'T': df_ttest['T'].iloc[0],
         'U': df_ttest['U-val'].iloc[0],
         'W': df_ttest['W-val'].iloc[0],
+        'dof': df_ttest['dof'].iloc[0],
         'p-unc': df_ttest['p-val'].iloc[0],
         'BF10': df_ttest['BF10'].iloc[0],
         'efsize': ef,
@@ -108,6 +109,7 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         'T' : T-values (only if parametric=True)
         'U' : Mann-Whitney U value (only if parametric=False and unpaired data)
         'W' : Wilcoxon W value (only if parametric=False and paired data)
+        'dof' : degrees of freedom (only if parametric=True)
         'p-unc' : Uncorrected p-values
         'p-corr' : Corrected p-values
         'p-adjust' : p-values correction method
@@ -132,6 +134,9 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
 
     If both ``between`` and ``within`` are specified, the function return
     within + between + within * between.
+
+    Missing values in repeated measurements are automatically removed using the
+    :py:func:`pingouin.remove_rm_na` function.
 
     See Also
     --------
@@ -226,8 +231,8 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         col = within if contrast == 'simple_within' else between
         # Remove NAN in repeated measurements
         if contrast == 'simple_within' and data[dv].isnull().values.any():
-            data = _remove_rm_na(dv=dv, within=within, subject=subject,
-                                 data=data)
+            data = remove_rm_na(dv=dv, within=within, subject=subject,
+                                data=data)
         # Extract effects
         labels = data[col].unique().tolist()
         for l in labels:
@@ -364,8 +369,8 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
 
     # Reorganize column order
     col_order = ['Contrast', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
-                 'std(B)', 'Paired', 'Parametric', 'T', 'U', 'W', 'tail',
-                 'p-unc', 'p-corr', 'p-adjust', 'BF10', 'CLES',
+                 'std(B)', 'Paired', 'Parametric', 'T', 'U', 'W', 'dof',
+                 'tail', 'p-unc', 'p-corr', 'p-adjust', 'BF10', 'CLES',
                  'efsize']
 
     if return_desc is False:

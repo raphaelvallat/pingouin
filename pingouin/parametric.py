@@ -3,7 +3,7 @@
 import warnings
 import numpy as np
 import pandas as pd
-from pingouin import (_check_dataframe, _remove_rm_na, _remove_na,
+from pingouin import (_check_dataframe, remove_rm_na, _remove_na,
                       _export_table, bayesfactor_ttest, epsilon, sphericity)
 
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova",
@@ -364,6 +364,9 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     as the ezANOVA R package). As such, results can differ from those of JASP.
     If you can, always double-check the results.
 
+    Missing values are automatically removed. For more details, see the
+    :py:func:`pingouin.remove_rm_na` function.
+
     References
     ----------
     .. [1] Bakeman, R. (2005). Recommended effect size statistics for
@@ -373,7 +376,6 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     .. [2] Richardson, J. T. (2011). Eta squared and partial eta squared as
            measures of effect size in educational research. Educational
            Research Review, 6(2), 135-147.
-
 
     Examples
     --------
@@ -411,8 +413,8 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
 
     # Remove NaN
     if remove_na and data[dv].isnull().any():
-        data = _remove_rm_na(dv=dv, within=within, subject=subject,
-                             data=data[[subject, within, dv]])
+        data = remove_rm_na(dv=dv, within=within, subject=subject,
+                            data=data[[subject, within, dv]])
 
     # Groupby
     grp_with = data.groupby(within)[dv]
@@ -572,11 +574,11 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
                      effects='within')
 
     # Remove NaN
-    if data[[a, b, subject, dv]].isnull().any().any():
-        data = _remove_rm_na(dv=dv, subject=subject,
-                             data=data[[a, b, subject, dv]])
+    if data[[subject, a, b, dv]].isnull().any().any():
+        data = remove_rm_na(dv=dv, subject=subject, within=[a, b],
+                            data=data[[subject, a, b, dv]])
 
-    # Collapse to the mean
+    # Collapse to the mean (that this is also done in remove_rm_na)
     data = data.groupby([subject, a, b]).mean().reset_index()
 
     # Group sizes and grandmean
@@ -1234,8 +1236,8 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
 
     # Remove NaN
     if remove_na and data[dv].isnull().any():
-        data = _remove_rm_na(dv=dv, within=within, subject=subject,
-                             data=data[[subject, between, within, dv]])
+        data = remove_rm_na(dv=dv, within=within, subject=subject,
+                            data=data[[subject, within, between, dv]])
 
     # SUMS OF SQUARES
     grandmean = data[dv].mean()

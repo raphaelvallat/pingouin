@@ -141,6 +141,7 @@ Others
      :toctree: generated/
 
       print_table
+      remove_rm_na
       read_dataset
       list_dataset
 

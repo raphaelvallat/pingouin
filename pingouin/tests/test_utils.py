@@ -3,8 +3,9 @@ import numpy as np
 import pytest
 
 from unittest import TestCase
+from pingouin import read_dataset
 from pingouin.utils import (print_table, _perm_pval, _export_table,
-                            _remove_rm_na, _check_eftype, _check_dataframe,
+                            remove_rm_na, _check_eftype, _check_dataframe,
                             _remove_na, _is_sklearn_installed,
                             _is_statsmodels_installed, _flatten_list)
 
@@ -71,13 +72,33 @@ class TestUtils(TestCase):
         assert np.allclose(x_out, [6.4, 4.5])
 
     def test_remove_rm_na(self):
-        """Test function _remove_rm_na."""
+        """Test function remove_rm_na."""
+        # With one within factor
         df = pd.DataFrame({'Time': ['A', 'A', 'B', 'B'],
                            'Values': [1.52, np.nan, 8.2, 3.4],
                            'Ss': [0, 1, 0, 1]})
-        _remove_rm_na(dv='Values', within='Time', data=df)
-        df = _remove_rm_na(dv='Values', within='Time', subject='Ss', data=df)
+        df = remove_rm_na(dv='Values', within='Time', subject='Ss', data=df)
         assert df['Ss'].nunique() == 1
+        # With multiple factor
+        df = read_dataset('rm_missing')
+        stats = remove_rm_na(data=df, dv='BOLD', within=['Session', 'Time'],
+                             subject='Subj')
+        assert stats['BOLD'].isnull().sum() == 0
+        assert stats['Memory'].isnull().sum() == 5
+        # Multiple factors
+        stats = remove_rm_na(data=df, within=['Time', 'Session'],
+                             subject='Subj')
+        assert stats['BOLD'].isnull().sum() == 0
+        assert stats['Memory'].isnull().sum() == 0
+        # Aggregation
+        remove_rm_na(data=df, dv='BOLD', within='Session', subject='Subj')
+        remove_rm_na(data=df, within='Session', subject='Subj',
+                     aggregate='sum')
+        remove_rm_na(data=df, within='Session', subject='Subj',
+                     aggregate='first')
+        df.loc['Subj', 1] = np.nan
+        with pytest.raises(ValueError):
+            remove_rm_na(data=df, within='Session', subject='Subj')
 
     def test_check_eftype(self):
         """Test function _check_eftype."""

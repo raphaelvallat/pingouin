@@ -1,44 +1,13 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
-import warnings
 import collections
 import numpy as np
 from pingouin.external.tabulate import tabulate
 import pandas as pd
 
-__all__ = ["_flatten_list", "_perm_pval", "print_table", "_export_table",
-           "_check_eftype", "_remove_rm_na", "_remove_na", "_check_dataframe",
+__all__ = ["_perm_pval", "print_table", "_export_table", "_check_eftype",
+           "remove_rm_na", "_remove_na", "_flatten_list", "_check_dataframe",
            "_is_sklearn_installed", "_is_statsmodels_installed"]
-
-
-def _flatten_list(x):
-    """Flatten an arbitrarily nested list into a new list.
-
-    This can be useful to select pandas DataFrame columns.
-
-    From https://stackoverflow.com/a/16176969/10581531
-
-    Examples
-    --------
-    >>> from pingouin.utils import _flatten_list
-    >>> x = ['X1', ['M1', 'M2'], 'Y1', ['Y2']]
-    >>> _flatten_list(x)
-    ['X1', 'M1', 'M2', 'Y1', 'Y2']
-
-    >>> x = ['Xaa', 'Xbb', 'Xcc']
-    >>> _flatten_list(x)
-    ['Xaa', 'Xbb', 'Xcc']
-    """
-    result = []
-    # Remove None
-    x = list(filter(None.__ne__, x))
-    for el in x:
-        x_is_iter = isinstance(x, collections.Iterable)
-        if x_is_iter and not isinstance(el, (str, tuple)):
-            result.extend(_flatten_list(el))
-        else:
-            result.append(el)
-    return result
 
 
 def _perm_pval(bootstat, estimate, tail='two-sided'):
@@ -75,6 +44,10 @@ def _perm_pval(bootstat, estimate, tail='two-sided'):
         p = np.greater_equal(np.fabs(bootstat), abs(estimate)).sum() / n_boot
     return p
 
+###############################################################################
+# PRINT & EXPORT OUTPUT TABLE
+###############################################################################
+
 
 def print_table(df, floatfmt=".3f", tablefmt='simple'):
     """Pretty display of table.
@@ -109,6 +82,10 @@ def _export_table(table, fname):
     table.to_csv(fname, index=None, sep=',', encoding='utf-8',
                  float_format='%.4f', decimal='.')
 
+###############################################################################
+# MISSING VALUES
+###############################################################################
+
 
 def _remove_na(x, y, paired=False):
     """Remove missing values in paired and independent measurements.
@@ -137,42 +114,115 @@ def _remove_na(x, y, paired=False):
     return x, y
 
 
-def _remove_rm_na(dv=None, within=None, subject=None, data=None):
-    """Remove subject(s) with one or more missing values in repeated
-    measurements.
+def remove_rm_na(dv=None, within=None, subject=None, data=None,
+                 aggregate='mean'):
+    """Remove missing values in long-format repeated-measures dataframe.
 
     Parameters
     ----------
-    dv : string
-        Dependant variable
+    dv : string or list
+        Dependent variable(s), from which the missing values should be removed.
+        If ``dv`` is not specified, all the columns in the dataframe are
+        considered. ``dv`` must be numeric.
     within : string or list
-        Within-subject factor
+        Within-subject factor(s).
     subject : string
-        Subject identifier
+        Subject identifier.
     data : dataframe
-        Dataframe
+        Long-format dataframe.
+    aggregate : string
+        Aggregation method if there are more within-factors in the data than
+        specified in the ``within`` argument. Can be `mean`, `median`, `sum`,
+        `first`, last`, or any other function accepted by
+        :py:func:`pandas.DataFrame.groupby`.
 
     Returns
     -------
     data : dataframe
-        Dataframe without the subjects nan values
-    """
-    if subject is None:
-        rm = list(data[within].dropna().unique())
-        n_rm = len(rm)
-        n_obs = int(data.groupby(within)[dv].count().max())
-        data['Subj'] = np.tile(np.arange(n_obs), n_rm)
-        data = data.set_index('Subj')
-    else:
-        data = data.set_index(subject)
+        Dataframe without the missing values.
 
-    # Find index with nan
-    iloc_nan = pd.isnull(data).any(1).values.nonzero()[0]
-    idx_nan = data.index[iloc_nan].values
-    if len(idx_nan) > 0:
-        warnings.warn("\nNote: %i subject(s) removed because of "
-                      "missing value(s)." % len(idx_nan))
-    return data.drop(idx_nan).reset_index(drop=False)
+    Notes
+    -----
+    If multiple factors are specified, the missing values are removed on the
+    last factor, so the order of ``within`` is important.
+
+    In addition, if there are more within-factors in the data than specified in
+    the ``within`` argument, data will be aggregated using the function
+    specified in ``aggregate``. Note that in the default case (aggregation
+    using the mean), all the non-numeric column(s) will be dropped.
+    """
+    # Safety checks
+    assert isinstance(aggregate, str), 'aggregate must be a str.'
+    assert isinstance(within, (str, list)), 'within must be str or list.'
+    assert isinstance(subject, str), 'subject must be a string.'
+    assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame.'
+
+    idx_cols = _flatten_list([subject, within])
+    all_cols = data.columns
+
+    if data[idx_cols].isnull().any().any():
+        raise ValueError("NaN are present in the within-factors or in the "
+                         "subject column. Please remove them manually.")
+
+    # Check if more within-factors are present and if so, aggregate
+    if (data.groupby(idx_cols).count() > 1).any().any():
+        # Make sure that we keep the non-numeric columns when aggregating
+        # This is disabled by default to avoid any confusion.
+        # all_others = all_cols.difference(idx_cols)
+        # all_num = data[all_others].select_dtypes(include='number').columns
+        # agg = {c: aggregate if c in all_num else 'first' for c in all_others}
+        data = data.groupby(idx_cols).agg(aggregate)
+    else:
+        # Set subject + within factors as index.
+        # Sorting is done to avoid performance warning when dropping.
+        data = data.set_index(idx_cols).sort_index()
+
+    # Find index with missing values
+    if dv is None:
+        iloc_nan = data.isnull().values.nonzero()[0]
+    else:
+        iloc_nan = data[dv].isnull().values.nonzero()[0]
+
+    # Drop the last within level
+    idx_nan = data.index[iloc_nan].droplevel(-1)
+
+    # Drop and re-order
+    data = data.drop(idx_nan).reset_index(drop=False)
+    return data.reindex(columns=all_cols).dropna(how='all', axis=1)
+
+
+###############################################################################
+# ARGUMENTS CHECK
+###############################################################################
+
+def _flatten_list(x):
+    """Flatten an arbitrarily nested list into a new list.
+
+    This can be useful to select pandas DataFrame columns.
+
+    From https://stackoverflow.com/a/16176969/10581531
+
+    Examples
+    --------
+    >>> from pingouin.utils import _flatten_list
+    >>> x = ['X1', ['M1', 'M2'], 'Y1', ['Y2']]
+    >>> _flatten_list(x)
+    ['X1', 'M1', 'M2', 'Y1', 'Y2']
+
+    >>> x = ['Xaa', 'Xbb', 'Xcc']
+    >>> _flatten_list(x)
+    ['Xaa', 'Xbb', 'Xcc']
+    """
+    result = []
+    # Remove None
+    x = list(filter(None.__ne__, x))
+    for el in x:
+        x_is_iter = isinstance(x, collections.Iterable)
+        if x_is_iter and not isinstance(el, (str, tuple)):
+            result.extend(_flatten_list(el))
+        else:
+            result.append(el)
+    return result
 
 
 def _check_eftype(eftype):
@@ -215,6 +265,10 @@ def _check_dataframe(dv=None, between=None, within=None, subject=None,
             if not isinstance(input, (str, list)):
                 raise ValueError('within and between must be specified when '
                                  'effects=interaction')
+
+###############################################################################
+# DEPENDENCIES
+###############################################################################
 
 
 def _is_statsmodels_installed(raise_error=False):

@@ -2,7 +2,7 @@
 # Date: May 2018
 import numpy as np
 import pandas as pd
-from pingouin import _remove_na, _remove_rm_na, _check_dataframe, _export_table
+from pingouin import _remove_na, remove_rm_na, _check_dataframe, _export_table
 
 __all__ = ["mad", "madmedianrule", "mwu", "wilcoxon", "kruskal", "friedman",
            "cochran"]
@@ -438,8 +438,8 @@ def friedman(dv=None, within=None, subject=None, data=None,
 
     # Remove NaN
     if data[dv].isnull().any():
-        data = _remove_rm_na(dv=dv, within=within, subject=subject,
-                             data=data[[subject, within, dv]])
+        data = remove_rm_na(dv=dv, within=within, subject=subject,
+                            data=data[[subject, within, dv]])
 
     # Extract number of groups and total sample size
     grp = data.groupby(within)[dv]
@@ -566,8 +566,8 @@ def cochran(dv=None, within=None, subject=None, data=None,
 
     # Remove NaN
     if data[dv].isnull().any():
-        data = _remove_rm_na(dv=dv, within=within, subject=subject,
-                             data=data[[subject, within, dv]])
+        data = remove_rm_na(dv=dv, within=within, subject=subject,
+                            data=data[[subject, within, dv]])
 
     # Groupby and extract size
     grp = data.groupby(within)[dv]
