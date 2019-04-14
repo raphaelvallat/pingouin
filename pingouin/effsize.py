@@ -80,6 +80,12 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
 
     where :math:`n_x` and :math:`n_y` are the sample sizes of the two groups.
 
+    In one-sample test or paired test, this becomes:
+
+    .. math::
+
+        se = \\sqrt{\\frac{1}{n_x} + \\frac{d^2}{2 \\cdot n_x}}
+
     The lower and upper confidence intervals are then given by:
 
     .. math:: ci_d = d \\pm crit \\cdot se
@@ -143,10 +149,10 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
         ci = np.tanh(ci_z)
     else:
         if ny == 1 or paired:
-            # One sample case
+            # One sample or paired
             se = np.sqrt(1 / nx + stat**2 / (2 * nx))
         else:
-            # Paired or two-sample test
+            # Two-sample test
             se = np.sqrt(((nx + ny) / (nx * ny)) + (stat**2) / (2 * (nx + ny)))
         ci = np.array([stat - crit * se, stat + crit * se])
     return np.round(ci, decimals)
@@ -574,7 +580,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
     Missing values are automatically removed from the data. If ``x`` and ``y``
     are paired, the entire row is removed.
 
-    If ``x`` and ``y`` are independent, the Cohen's is:
+    If ``x`` and ``y`` are independent, the Cohen's d is:
 
     .. math::
 
@@ -582,7 +588,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         {\\sqrt{\\frac{(n_{1} - 1)\\sigma_{1}^{2} + (n_{2} - 1)
         \\sigma_{2}^{2}}{n1 + n2 - 2}}}
 
-    If ``x`` and ``y`` are paired, the Cohen d-avg is computed:
+    If ``x`` and ``y`` are paired, the Cohen :math:`d_{avg}` is computed:
 
     .. math::
 
