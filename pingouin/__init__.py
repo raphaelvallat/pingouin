@@ -5,6 +5,7 @@ from .datasets import *
 from .distribution import *
 from .effsize import *
 from .multicomp import *
+from .multivariate import *
 from .parametric import *
 from .nonparametric import *
 from .correlation import *
