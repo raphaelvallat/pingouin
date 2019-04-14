@@ -93,6 +93,9 @@ class TestParametric(TestCase):
                   data=data, export_filename='test_export.csv')
         rm_anova(dv='Scores', within=['Time', 'Drug'], subject='Subject',
                  data=data)
+        # With missing values
+        df2 = read_dataset('rm_missing')
+        df2.rm_anova(dv='BOLD', within=['Session', 'Time'], subject='Subj')
 
     def test_mixed_anova(self):
         """Test function anova."""
