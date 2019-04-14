@@ -7,7 +7,7 @@
 # Journal of Statistical Software, Articles 31 (10): 1–21.
 import numpy as np
 from scipy.stats import circmean
-from pingouin import _remove_na
+from pingouin import remove_na
 
 __all__ = ["circ_axial", "circ_corrcc", "circ_corrcl", "circ_mean", "circ_r",
            "circ_rayleigh", "circ_vtest"]
@@ -96,7 +96,7 @@ def circ_corrcc(x, y, tail='two-sided'):
         raise ValueError('x and y must have the same length.')
 
     # Remove NA
-    x, y = _remove_na(x, y, paired=True)
+    x, y = remove_na(x, y, paired=True)
     n = x.size
 
     # Compute correlation coefficient
@@ -159,7 +159,7 @@ def circ_corrcl(x, y, tail='two-sided'):
         raise ValueError('x and y must have the same length.')
 
     # Remove NA
-    x, y = _remove_na(x, y, paired=True)
+    x, y = remove_na(x, y, paired=True)
     n = x.size
 
     # Compute correlation coefficent for sin and cos independently

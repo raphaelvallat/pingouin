@@ -18,6 +18,12 @@ b. :py:func:`pingouin.bayesfactor_ttest` and :py:func:`pingouin.bayesfactor_pear
 **Missing values**
 
 a. :py:func:`pingouin.remove_rm_na` now works with multiple within-factors.
+b. :py:func:`pingouin.remove_na` now works with 2D arrays.
+c. :py:func:`pingouin.remove_na` and :py:func:`pingouin.remove_rm_na` are now external function documented in the API.
+
+**Multivariate**
+
+a. Added :py:func:`pingouin.multivariate_ttest` (Hotelling T-squared) test.
 
 **Pandas integration**
 

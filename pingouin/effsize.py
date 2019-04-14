@@ -2,7 +2,7 @@
 # Date: April 2018
 import warnings
 import numpy as np
-from pingouin.utils import _check_eftype, _remove_na
+from pingouin.utils import _check_eftype, remove_na
 # from pingouin.distribution import homoscedasticity
 
 
@@ -665,10 +665,9 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
                       "paired == False.")
         paired = False
 
-    # Remove NA
-    x, y = _remove_na(x, y, paired=paired)
-    nx = x.size
-    ny = y.size
+    # Remove rows with missing values
+    x, y = remove_na(x, y, paired=paired)
+    nx, ny = x.size, y.size
 
     if ny == 1:
         # Case 1: One-sample Test

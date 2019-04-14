@@ -82,7 +82,6 @@ Distribution
     gzscore
     homoscedasticity
     normality
-    multivariate_normality
     sphericity
 
 Effect sizes
@@ -116,6 +115,17 @@ Multiple comparisons and post-hoc tests
     holm
     fdr
 
+Multivariate statistics
+-----------------------
+
+.. _multivar:
+
+.. autosummary::
+   :toctree: generated/
+
+    multivariate_normality
+    multivariate_ttest
+
 Non-parametric
 --------------
 
@@ -141,6 +151,7 @@ Others
      :toctree: generated/
 
       print_table
+      remove_na
       remove_rm_na
       read_dataset
       list_dataset

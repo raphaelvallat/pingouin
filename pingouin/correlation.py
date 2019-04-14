@@ -4,7 +4,7 @@ import pandas as pd
 from scipy.stats import pearsonr, spearmanr, kendalltau
 from pingouin.power import power_corr
 from pingouin.effsize import compute_esci
-from pingouin.utils import _remove_na, _perm_pval
+from pingouin.utils import remove_na, _perm_pval
 from pingouin.bayesian import bayesfactor_pearson
 from scipy.spatial.distance import pdist, squareform
 
@@ -418,7 +418,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
         raise ValueError('x and y must have the same length.')
 
     # Remove NA
-    x, y = _remove_na(x, y, paired=True)
+    x, y = remove_na(x, y, paired=True)
     nx = x.size
 
     # Compute correlation coefficient

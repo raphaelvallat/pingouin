@@ -1,6 +1,8 @@
 import numpy as np
+import pandas as pd
+from pingouin.utils import remove_na
 
-__all__ = ["multivariate_normality"]
+__all__ = ["multivariate_normality", "multivariate_ttest"]
 
 
 def multivariate_normality(X, alpha=.05):
@@ -9,8 +11,7 @@ def multivariate_normality(X, alpha=.05):
     Parameters
     ----------
     X : np.array
-        Data matrix of shape (n, p) where n are the observations and p the
-        variables.
+        Data matrix of shape (n_samples, n_features).
     alpha : float
         Significance level.
 
@@ -118,3 +119,96 @@ def multivariate_normality(X, alpha=.05):
     pval = lognorm.sf(hz, psi, scale=np.exp(pmu))
     normal = True if pval > alpha else False
     return normal, pval
+
+
+def multivariate_ttest(X, Y=None, paired=False):
+    """Hotelling T-squared test (= multivariate T-test)
+
+    Parameters
+    ----------
+    X : np.array
+        First data matrix of shape (n_samples, n_features).
+    Y : np.array or None
+        Second data matrix of shape (n_samples, n_features). If ``Y`` is a 1D
+        array of shape (n_features), a one-sample test is performed where the
+        null hypothesis is defined in ``Y``. If ``Y`` is None, a one-sample
+        is performed against np.zeros(n_features).
+    paired : boolean
+        Specify whether the two observations are related (i.e. repeated
+        measures) or independent. If ``paired`` is True, ``X`` and ``Y`` must
+        have exactly the same shape.
+
+    Returns
+    -------
+    stats : pandas DataFrame
+        Hotelling T-squared test summary ::
+
+        'T2' : T-squared value
+        'F' : F-value
+        'df1' : first degree of freedom
+        'df2' : second degree of freedom
+        'p-val' : p-value
+
+    Notes
+    -----
+    Missing values are automatically removed using the :py:func:`remove_na`
+    function.
+    """
+    from scipy.stats import f
+    x = np.asarray(X)
+    assert x.ndim == 2, 'x must be of shape (n_samples, n_features)'
+
+    if Y is None:
+        y = np.zeros(x.shape[1])
+        # Remove rows with missing values in x
+        x = x[~np.isnan(x).any(axis=1)]
+    else:
+        y = np.asarray(Y)
+        assert y.ndim == 2, 'x must be of shape (n_samples, n_features)'
+        nx, kx = x.shape
+        ny, ky = y.shape
+        err = 'X and Y must have the same number of features (= columns).'
+        assert ky == kx, err
+        if paired:
+            err = 'X and Y must have the same number of rows if paired is True'
+            assert ny == nx, err
+        # Remove rows with missing values in both x and y
+        x, y = remove_na(x, y, paired=paired, axis='rows')
+        ny, ky = y.shape
+
+    # Shape of arrays
+    nx, k = x.shape
+    assert nx >= 5, 'At least five samples are required.'
+
+    if y.ndim == 1 or paired is True:
+        n = nx
+        if y.ndim == 1:
+            # One sample test
+            cov = np.cov(x, rowvar=False)
+            diff = x.mean(0) - y
+        else:
+            # Paired two sample
+            cov = np.cov(x - y, rowvar=False)
+            diff = x.mean(0) - y.mean(0)
+        inv_cov = np.linalg.pinv(cov)
+        t2 = (diff @ inv_cov) @ diff * n
+    else:
+        n = nx + ny - 1
+        x_cov = np.cov(x, rowvar=False)
+        y_cov = np.cov(y, rowvar=False)
+        pooled_cov = ((nx - 1) * x_cov + (ny - 1) * y_cov) / (n - 1)
+        inv_cov = np.linalg.pinv((1 / nx + 1 / ny) * pooled_cov)
+        diff = x.mean(0) - y.mean(0)
+        t2 = (diff @ inv_cov) @ diff
+
+    # F-value, degrees of freedom and p-value
+    fval = t2 * (n - k) / (k * (n - 1))
+    df1 = k
+    df2 = n - k
+    pval = f.sf(fval, df1, df2)
+
+    # Create output dictionnary
+    stats = {'T2': t2, 'F': fval, 'df1': df1, 'df2': df2, 'pval': pval}
+    stats = pd.DataFrame(stats, index=['hotelling'])
+    stats[['T2', 'F']] = stats[['T2', 'F']].round(3)
+    return stats

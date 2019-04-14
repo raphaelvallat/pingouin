@@ -2,7 +2,7 @@
 # Date: May 2018
 import numpy as np
 import pandas as pd
-from pingouin import _remove_na, remove_rm_na, _check_dataframe, _export_table
+from pingouin import remove_na, remove_rm_na, _check_dataframe, _export_table
 
 __all__ = ["mad", "madmedianrule", "mwu", "wilcoxon", "kruskal", "friedman",
            "cochran"]
@@ -146,7 +146,7 @@ def mwu(x, y, tail='two-sided'):
     y = np.asarray(y)
 
     # Remove NA
-    x, y = _remove_na(x, y, paired=False)
+    x, y = remove_na(x, y, paired=False)
 
     # Compute test
     if tail == 'one-sided':
@@ -238,7 +238,7 @@ def wilcoxon(x, y, tail='two-sided'):
     y = np.asarray(y)
 
     # Remove NA
-    x, y = _remove_na(x, y, paired=True)
+    x, y = remove_na(x, y, paired=True)
 
     # Compute test
     wval, pval = wilcoxon(x, y, zero_method='wilcox', correction=False)

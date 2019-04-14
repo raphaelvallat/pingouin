@@ -3,7 +3,7 @@
 import warnings
 import numpy as np
 import pandas as pd
-from pingouin import (_check_dataframe, remove_rm_na, _remove_na,
+from pingouin import (_check_dataframe, remove_rm_na, remove_na,
                       _export_table, bayesfactor_ttest, epsilon, sphericity)
 
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova",
@@ -180,10 +180,9 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
                       "paired == False.")
         paired = False
 
-    # Remove NA
-    x, y = _remove_na(x, y, paired=paired)
-    nx = x.size
-    ny = y.size
+    # Remove rows with missing values
+    x, y = remove_na(x, y, paired=paired)
+    nx, ny = x.size, y.size
     dof_corr = None
 
     if ny == 1:

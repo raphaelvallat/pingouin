@@ -6,7 +6,7 @@ from pingouin.external.tabulate import tabulate
 import pandas as pd
 
 __all__ = ["_perm_pval", "print_table", "_export_table", "_check_eftype",
-           "remove_rm_na", "_remove_na", "_flatten_list", "_check_dataframe",
+           "remove_rm_na", "remove_na", "_flatten_list", "_check_dataframe",
            "_is_sklearn_installed", "_is_statsmodels_installed"]
 
 
@@ -87,30 +87,105 @@ def _export_table(table, fname):
 ###############################################################################
 
 
-def _remove_na(x, y, paired=False):
-    """Remove missing values in paired and independent measurements.
+def _remove_na_single(x, axis='rows'):
+    """Remove NaN in a single array.
+    This is an internal Pingouin function.
+    """
+    if x.ndim == 1:
+        # 1D arrays
+        x_mask = ~np.isnan(x)
+    else:
+        # 2D arrays
+        ax = 1 if axis == 'rows' else 0
+        x_mask = ~np.any(np.isnan(x), axis=ax)
+    # Check if missing values are present
+    if ~x_mask.all():
+        ax = 0 if axis == 'rows' else 1
+        ax = 0 if x.ndim == 1 else ax
+        x = x.compress(x_mask, axis=ax)
+    return x
+
+
+def remove_na(x, y=None, paired=False, axis='rows'):
+    """Remove missing values along a given axis in paired or independent
+    NumPy array(s).
 
     Parameters
     ----------
-    x, y : 1D arrays
-        Data
+    x, y : 1D or 2D arrays
+        Data. ``x`` and ``y`` must have the same number of dimensions.
+        ``y`` can be None to only remove missing values in ``x``.
     paired : bool
         Indicates if the measurements are paired or not.
+    axis : str
+        Axis or axes along which missing values are removed.
+        Can be 'rows' or 'columns'. This has no effect if ``x`` and ``y`` are
+        one-dimensional arrays.
 
     Returns
     -------
-    x, y : 1D arrays
-        Data without NaN
+    x, y : np.ndarray
+        Data without missing values
+
+    Examples
+    --------
+    Single 1D array
+
+    >>> import numpy as np
+    >>> from pingouin import remove_na
+    >>> x = [6.4, 3.2, 4.5, np.nan]
+    >>> remove_na(x)
+    array([6.4, 3.2, 4.5])
+
+    With paired 1D arrays
+
+    >>> y = [2.3, np.nan, 5.2, 4.6]
+    >>> remove_na(x, y, paired=True)
+    (array([6.4, 4.5]), array([2.3, 5.2]))
+
+    With independent 2D arrays
+
+    >>> x = np.array([[4, 2], [4, np.nan], [7, 6]])
+    >>> y = np.array([[6, np.nan], [3, 2], [2, 2]])
+    >>> x_no_nan, y_no_nan = remove_na(x, y, paired=False)
     """
-    x_na = np.any(np.isnan(x))
-    y_na = np.any(np.isnan(y))
-    if (x_na or y_na) and paired:
-        ar = np.column_stack((x, y))
-        ar = ar[~np.isnan(ar).any(axis=1)]
-        x, y = ar[:, 0], ar[:, 1]
-    elif (x_na or y_na) and not paired:
-        x = np.array(list(filter(lambda v: v == v, x))) if x_na else x
-        y = np.array(list(filter(lambda v: v == v, y))) if y_na else y
+    # Safety checks
+    x = np.asarray(x)
+    assert axis in ['rows', 'columns'], 'axis must be rows or columns.'
+
+    if y is None:
+        return _remove_na_single(x, axis=axis)
+    elif isinstance(y, (int, float, str)):
+        return _remove_na_single(x, axis=axis), y
+    elif isinstance(y, (list, np.ndarray)):
+        y = np.asarray(y)
+        if y.size == 1:
+            return _remove_na_single(x, axis=axis), y
+        if x.ndim != y.ndim or paired is False:
+            # x and y do not have the same dimension
+            x_no_nan = _remove_na_single(x, axis=axis)
+            y_no_nan = _remove_na_single(y, axis=axis)
+            return x_no_nan, y_no_nan
+
+    # At this point, we assume that x and y are paired and have same dimensions
+    if x.ndim == 1:
+        # 1D arrays
+        x_mask = ~np.isnan(x)
+        y_mask = ~np.isnan(y)
+    else:
+        # 2D arrays
+        ax = 1 if axis == 'rows' else 0
+        x_mask = ~np.any(np.isnan(x), axis=ax)
+        y_mask = ~np.any(np.isnan(y), axis=ax)
+
+    # Check if missing values are present
+    if ~x_mask.all() or ~y_mask.all():
+        ax = 0 if axis == 'rows' else 1
+        ax = 0 if x.ndim == 1 else ax
+        both = np.logical_and(x_mask, y_mask)
+        x = x.compress(both, axis=ax)
+        y = y.compress(both, axis=ax)
+
     return x, y
 
 

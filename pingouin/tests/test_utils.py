@@ -6,7 +6,7 @@ from unittest import TestCase
 from pingouin import read_dataset
 from pingouin.utils import (print_table, _perm_pval, _export_table,
                             remove_rm_na, _check_eftype, _check_dataframe,
-                            _remove_na, _is_sklearn_installed,
+                            remove_na, _is_sklearn_installed,
                             _is_statsmodels_installed, _flatten_list)
 
 # Dataset
@@ -65,11 +65,27 @@ class TestUtils(TestCase):
         x = [6.4, 3.2, 4.5, np.nan]
         y = [3.5, 7.2, 8.4, 3.2]
         z = [2.3, np.nan, 5.2, 4.6]
-        _remove_na(x, y, paired=True)
-        _remove_na(x, y, paired=False)
-        _remove_na(y, x, paired=False)
-        x_out, _ = _remove_na(x, z, paired=True)
+        remove_na(x, y, paired=True)
+        remove_na(x, y, paired=False)
+        remove_na(y, x, paired=False)
+        x_out, _ = remove_na(x, z, paired=True)
         assert np.allclose(x_out, [6.4, 4.5])
+        # When y is None
+        remove_na(x, None, paired=False)
+        # With 2D arrays
+        x = np.array([[4, 2], [4, np.nan], [7, 6]])
+        y = np.array([[6, np.nan], [3, 2], [2, 2]])
+        x_nan, y_nan = remove_na(x, y, paired=False)
+        assert np.allclose(x_nan, [[4., 2.], [7., 6.]])
+        assert np.allclose(y_nan, [[3., 2.], [2., 2.]])
+        x_nan, y_nan = remove_na(x, y, paired=True)
+        assert np.allclose(x_nan, [[7., 6.]])
+        assert np.allclose(y_nan, [[2., 2.]])
+        x_nan, y_nan = remove_na(x, y, paired=False, axis='columns')
+        assert np.allclose(x_nan, [[4.], [4.], [7.]])
+        assert np.allclose(y_nan, [[6.], [3.], [2.]])
+        # When y is None
+        remove_na(x, None, paired=False)
 
     def test_remove_rm_na(self):
         """Test function remove_rm_na."""
