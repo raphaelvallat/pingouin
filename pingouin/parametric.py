@@ -131,16 +131,16 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     >>> from pingouin import ttest
     >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> ttest(x, 4)
-                T     p-val  dof       tail  cohen-d  power   BF10
-    T-test  1.397  0.234824    4  two-sided    0.625  0.191  0.766
+                T  dof       tail     p-val  cohen-d   BF10  power
+    T-test  1.397    4  two-sided  0.234824    0.625  0.766  0.191
 
     2. Paired two-sample T-test (one-tailed).
 
     >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
     >>> ttest(pre, post, paired=True, tail='one-sided')
-                T     p-val  dof       tail  cohen-d  power   BF10
-    T-test -2.308  0.041114    4  one-sided    0.251  0.121  3.122
+                T  dof       tail     p-val  cohen-d   BF10  power
+    T-test -2.308    4  one-sided  0.041114    0.251  3.122  0.121
 
     3. Paired two-sample T-test with missing values.
 
@@ -148,8 +148,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     >>> pre = [5.5, 2.4, np.nan, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
     >>> ttest(pre, post, paired=True)
-                T     p-val  dof       tail  cohen-d  power   BF10
-    T-test -5.902  0.009713    3  two-sided    0.306  0.065  7.169
+                T  dof       tail     p-val  cohen-d   BF10  power
+    T-test -5.902    3  two-sided  0.009713    0.306  7.169  0.065
 
     4. Independent two-sample T-test (equal sample size).
 
@@ -157,8 +157,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     >>> x = np.random.normal(loc=7, size=20)
     >>> y = np.random.normal(loc=4, size=20)
     >>> ttest(x, y, correction='auto')
-                T         p-val  dof       tail  cohen-d  power          BF10
-    T-test  9.106  4.306971e-11   38  two-sided     2.88    1.0  1.365699e+08
+                T  dof       tail         p-val  cohen-d          BF10  power
+    T-test  9.106   38  two-sided  4.306971e-11     2.88  1.365699e+08    1.0
 
     5. Independent two-sample T-test (unequal sample size).
 
@@ -166,8 +166,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     >>> x = np.random.normal(loc=7, size=20)
     >>> y = np.random.normal(loc=6.5, size=15)
     >>> ttest(x, y, correction='auto')
-                T     p-val  dof   dof-corr       tail  cohen-d  power   BF10
-    T-test  2.327  0.026748   33  30.745725  two-sided    0.792  0.614  2.454
+                T  dof   dof-corr       tail     p-val  cohen-d   BF10  power
+    T-test  2.327   33  30.745725  two-sided  0.026748    0.792  2.454  0.614
     """
     from scipy.stats import ttest_rel, ttest_ind, ttest_1samp
     from scipy.stats.stats import _unequal_var_ttest_denom
@@ -257,8 +257,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     # Convert to dataframe
     stats = pd.DataFrame.from_records(stats, index=['T-test'])
 
-    col_order = ['T', 'p-val', 'dof', 'dof-corr', 'tail', 'cohen-d',
-                 'power', 'BF10']
+    col_order = ['T', 'dof', 'dof-corr', 'tail', 'p-val', 'cohen-d', 'BF10',
+                 'power']
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
     return stats
