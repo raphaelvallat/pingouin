@@ -13,6 +13,7 @@ v0.2.5 (May 2019)
 **Effect size**
 
 a. :py:func:`pingouin.compute_esci` now works for paired and one-sample Cohen d.
+b. :py:func:`pingouin.bayesfactor_ttest` and :py:func:`pingouin.bayesfactor_pearson` now return a formatted str and not a float.
 
 **Missing values**
 
@@ -25,6 +26,7 @@ a. Several functions of pandas can now be directly used as Pandas DataFrame meth
 **Parametric**
 
 a. :py:func:`pingouin.pairwise_ttests` now returns the degrees of freedom (dof).
+b. Better rounding of float in :py:func:`pingouin.pairwise_ttests`.
 
 **Plotting**
 

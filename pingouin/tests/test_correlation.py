@@ -38,7 +38,7 @@ class TestCorrelation(TestCase):
         x[3] = np.nan
         corr(x, y)
         # With the same array
-        assert corr(x, x).loc['pearson', 'BF10'] == np.inf
+        assert float(corr(x, x).loc['pearson', 'BF10']) == np.inf
         # Wrong argument
         with pytest.raises(ValueError):
             corr(x, y, method='error')
@@ -47,7 +47,7 @@ class TestCorrelation(TestCase):
         # Compare with JASP
         df = read_dataset('pairwise_corr')
         stats = corr(df['Neuroticism'], df['Extraversion'])
-        assert np.isclose(1 / stats['BF10'].values, 1.478e-13)
+        assert np.isclose(1 / float(stats['BF10'].values), 1.478e-13)
         # With more than 100 values to see if BF10 is computed
         xx, yy = np.random.multivariate_normal(mean, cov, 1500).T
         c1500 = corr(xx, yy)

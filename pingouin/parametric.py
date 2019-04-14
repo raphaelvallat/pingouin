@@ -157,8 +157,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     >>> x = np.random.normal(loc=7, size=20)
     >>> y = np.random.normal(loc=4, size=20)
     >>> ttest(x, y, correction='auto')
-                T  dof       tail         p-val  cohen-d          BF10  power
-    T-test  9.106   38  two-sided  4.306971e-11     2.88  1.365699e+08    1.0
+                T  dof       tail         p-val  cohen-d       BF10  power
+    T-test  9.106   38  two-sided  4.306971e-11     2.88  1.366e+08    1.0
 
     5. Independent two-sample T-test (unequal sample size).
 

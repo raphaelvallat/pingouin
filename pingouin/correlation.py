@@ -467,9 +467,9 @@ def corr(x, y, tail='two-sided', method='pearson'):
     # Compute the BF10 for Pearson correlation only
     if method == 'pearson' and nx < 1000:
         if r2 < 1:
-            stats['BF10'] = round(bayesfactor_pearson(r, nx), 3)
+            stats['BF10'] = bayesfactor_pearson(r, nx)
         else:
-            stats['BF10'] = np.inf
+            stats['BF10'] = str(np.inf)
 
     # Convert to DataFrame
     stats = pd.DataFrame.from_records(stats, index=[method])

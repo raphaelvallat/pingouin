@@ -138,8 +138,8 @@ def mwu(x, y, tail='two-sided'):
     >>> x = np.random.uniform(low=0, high=1, size=20)
     >>> y = np.random.uniform(low=0.2, high=1.2, size=20)
     >>> mwu(x, y, tail='two-sided')
-         U-val    p-val    RBC    CLES
-    MWU   97.0  0.00556  0.515  0.7575
+         U-val    p-val    RBC   CLES
+    MWU   97.0  0.00556  0.515  0.758
     """
     from scipy.stats import mannwhitneyu
     x = np.asarray(x)
@@ -162,10 +162,10 @@ def mwu(x, y, tail='two-sided'):
 
     # Fill output DataFrame
     stats = pd.DataFrame({}, index=['MWU'])
-    stats['U-val'] = uval.round(3)
+    stats['U-val'] = round(uval, 3)
     stats['p-val'] = pval
-    stats['RBC'] = rbc
-    stats['CLES'] = cles
+    stats['RBC'] = round(rbc, 3)
+    stats['CLES'] = round(cles, 3)
 
     col_order = ['U-val', 'p-val', 'RBC', 'CLES']
     stats = stats.reindex(columns=col_order)
@@ -230,8 +230,8 @@ def wilcoxon(x, y, tail='two-sided'):
     >>> x = [20, 22, 19, 20, 22, 18, 24, 20, 19, 24, 26, 13]
     >>> y = [38, 37, 33, 29, 14, 12, 20, 22, 17, 25, 26, 16]
     >>> wilcoxon(x, y, tail='two-sided')
-              W-val     p-val       RBC      CLES
-    Wilcoxon   20.5  0.070844  0.333333  0.583333
+              W-val     p-val    RBC   CLES
+    Wilcoxon   20.5  0.070844  0.333  0.583
     """
     from scipy.stats import wilcoxon
     x = np.asarray(x)
@@ -257,10 +257,10 @@ def wilcoxon(x, y, tail='two-sided'):
 
     # Fill output DataFrame
     stats = pd.DataFrame({}, index=['Wilcoxon'])
-    stats['W-val'] = wval.round(3)
+    stats['W-val'] = round(wval, 3)
     stats['p-val'] = pval
-    stats['RBC'] = rbc
-    stats['CLES'] = cles
+    stats['RBC'] = round(rbc, 3)
+    stats['CLES'] = round(cles, 3)
 
     col_order = ['W-val', 'p-val', 'RBC', 'CLES']
     stats = stats.reindex(columns=col_order)

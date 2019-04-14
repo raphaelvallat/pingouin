@@ -375,6 +375,9 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     stats['Paired'] = stats['Paired'].astype(bool)
     stats['Parametric'] = parametric
 
+    # Round effect size and CLES
+    stats[['efsize', 'CLES']] = stats[['efsize', 'CLES']].round(3)
+
     # Reorganize column order
     col_order = ['Contrast', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
                  'std(B)', 'Paired', 'Parametric', 'T', 'U', 'W', 'dof',
@@ -980,8 +983,8 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     # Force conversion to numeric
     stats = stats.astype({'r': float, 'r2': float, 'adj_r2': float,
-                          'n': int, 'p-val': float, 'BF10': float,
-                          'outliers': float, 'power': float})
+                          'n': int, 'p-val': float, 'outliers': float,
+                          'power': float})
 
     # Multiple comparisons
     stats = stats.rename(columns={'p-val': 'p-unc'})
