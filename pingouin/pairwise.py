@@ -137,7 +137,10 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     within + between + within * between.
 
     Missing values in repeated measurements are automatically removed using the
-    :py:func:`pingouin.remove_rm_na` function.
+    :py:func:`pingouin.remove_rm_na` function. However, you should be very
+    careful since it can result in undesired values removal (especially for the
+    interaction effect). We strongly recommend that you preprocess your data
+    and remove the missing values before using this function.
 
     See Also
     --------
