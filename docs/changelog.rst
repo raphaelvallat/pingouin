@@ -10,9 +10,9 @@ What's new
 v0.2.5 (May 2019)
 -----------------
 
-**Missing values**
+**Effect size**
 
-a. :py:func:`pingouin.compute_esci` now works for paired and one-sample cohen d.
+a. :py:func:`pingouin.compute_esci` now works for paired and one-sample Cohen d.
 
 **Missing values**
 
