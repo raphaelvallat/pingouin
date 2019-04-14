@@ -12,6 +12,10 @@ v0.2.5 (May 2019)
 
 **Missing values**
 
+a. :py:func:`pingouin.compute_esci` now works for paired and one-sample cohen d.
+
+**Missing values**
+
 a. :py:func:`pingouin.remove_rm_na` now works with multiple within-factors.
 
 **Pandas integration**

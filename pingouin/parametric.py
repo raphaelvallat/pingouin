@@ -46,6 +46,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         'p-val' : p-value
         'dof' : degrees of freedom
         'cohen-d' : Cohen d effect size
+        'CI95%' : 95% confidence intervals of Cohen d effect size
         'power' : achieved power of the test ( = 1 - type II error)
         'BF10' : Bayes Factor of the alternative hypothesis
 
@@ -169,7 +170,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     T-test  2.327  0.026748   33  30.745725  two-sided    0.792  0.614  2.454
     """
     from scipy.stats import ttest_rel, ttest_ind, ttest_1samp
-    from pingouin import power_ttest, power_ttest2n, compute_effsize
+    from scipy.stats.stats import _unequal_var_ttest_denom
+    from pingouin import (power_ttest, power_ttest2n, compute_effsize)
     x = np.asarray(x)
     y = np.asarray(y)
 
@@ -182,32 +184,28 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     x, y = _remove_na(x, y, paired=paired)
     nx = x.size
     ny = y.size
-    stats = pd.DataFrame({}, index=['T-test'])
+    dof_corr = None
 
     if ny == 1:
         # Case one sample T-test
         tval, pval = ttest_1samp(x, y)
         dof = nx - 1
         pval = pval / 2 if tail == 'one-sided' else pval
-
     if ny > 1 and paired is True:
         # Case paired two samples T-test
         tval, pval = ttest_rel(x, y)
         dof = nx - 1
         bf = bayesfactor_ttest(tval, nx, ny, paired=True, r=r)
-
     elif ny > 1 and paired is False:
         dof = nx + ny - 2
+        vx, vy = x.var(ddof=1), y.var(ddof=1)
         # Case unpaired two samples T-test
         if correction is True or (correction == 'auto' and nx != ny):
             # Use the Welch separate variance T-test
             tval, pval = ttest_ind(x, y, equal_var=False)
+            # Compute sample standard deviation
             # dof are approximated using Welch–Satterthwaite equation
-            vx = x.var(ddof=1)
-            vy = y.var(ddof=1)
-            dof_corr = (vx / nx + vy / ny)**2 / ((vx / nx)**2 / (nx - 1)
-                                                 + (vy / ny)**2 / (ny - 1))
-            stats['dof-corr'] = dof_corr
+            dof_corr, _ = _unequal_var_ttest_denom(vx, nx, vy, ny)
         else:
             tval, pval = ttest_ind(x, y, equal_var=True)
 
@@ -215,6 +213,10 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     # Effect size
     d = compute_effsize(x, y, paired=paired, eftype='cohen')
+
+    # 95% confidence interval for the effect size
+    # ci = compute_esci(d, nx, ny, paired=paired, eftype='cohen',
+    #                   confidence=.95)
 
     # Achieved power
     if ny == 1:
@@ -239,14 +241,21 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     # Bayes factor
     bf = bayesfactor_ttest(tval, nx, ny, paired=paired, tail=tail, r=r)
 
-    # Fill output DataFrame
-    stats['dof'] = dof
-    stats['T'] = tval.round(3)
-    stats['p-val'] = pval
-    stats['tail'] = tail
-    stats['cohen-d'] = np.abs(d).round(3)
-    stats['power'] = np.round(power, 3)
-    stats['BF10'] = bf
+    # Create output dictionnary
+    stats = {'dof': dof,
+             'T': round(tval, 3),
+             'p-val': pval,
+             'tail': tail,
+             'cohen-d': round(abs(d), 3),
+             # 'CI95%': [ci],
+             'power': round(power, 3),
+             'BF10': bf}
+
+    if dof_corr is not None:
+        stats['dof-corr'] = dof_corr
+
+    # Convert to dataframe
+    stats = pd.DataFrame.from_records(stats, index=['T-test'])
 
     col_order = ['T', 'p-val', 'dof', 'dof-corr', 'tail', 'cohen-d',
                  'power', 'BF10']

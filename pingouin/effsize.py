@@ -10,8 +10,8 @@ __all__ = ["compute_esci", "compute_bootci", "convert_effsize",
            "compute_effsize", "compute_effsize_from_t"]
 
 
-def compute_esci(stat=None, nx=None, ny=None, eftype='cohen', confidence=.95,
-                 decimals=2):
+def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
+                 confidence=.95, decimals=2):
     """Parametric confidence intervals around a Cohen d or a
     correlation coefficient.
 
@@ -22,6 +22,9 @@ def compute_esci(stat=None, nx=None, ny=None, eftype='cohen', confidence=.95,
         Cohen-type effect size (Cohen d or Hedges g).
     nx, ny : int
         Length of vector x and y.
+    paired : bool
+        Indicates if the effect size was estimated from a paired sample.
+        This is only relevant for cohen or hedges effect size.
     eftype : string
         Effect size type. Must be 'r' (correlation) or 'cohen'
         (Cohen d or Hedges g).
@@ -139,7 +142,12 @@ def compute_esci(stat=None, nx=None, ny=None, eftype='cohen', confidence=.95,
         # Transform back to r
         ci = np.tanh(ci_z)
     else:
-        se = np.sqrt(((nx + ny) / (nx * ny)) + (stat**2) / (2 * (nx + ny)))
+        if ny == 1 or paired:
+            # One sample case
+            se = np.sqrt(1 / nx + stat**2 / (2 * nx))
+        else:
+            # Paired or two-sample test
+            se = np.sqrt(((nx + ny) / (nx * ny)) + (stat**2) / (2 * (nx + ny)))
         ci = np.array([stat - crit * se, stat + crit * se])
     return np.round(ci, decimals)
 
@@ -660,7 +668,6 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         # Case 1: One-sample Test
         d = (x.mean() - y) / x.std(ddof=1)
         return d
-
     if eftype.lower() == 'glass':
         # Find group with lowest variance
         sd_control = np.min([x.std(ddof=1), y.std(ddof=1)])

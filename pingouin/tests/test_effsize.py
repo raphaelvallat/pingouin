@@ -27,6 +27,11 @@ class TestEffsize(TestCase):
         r, nx, ny = 0.5543563, 6, 6
         ci = compute_esci(stat=r, nx=nx, ny=ny, eftype='r')
         assert np.allclose(ci, [-0.47, 0.94])
+        # One sample / paired T-test
+        ci = compute_esci(-0.57932, nx=40, ny=1)
+        ci_p = compute_esci(-0.57932, nx=40, ny=1, paired=True)
+        assert np.allclose(ci, ci_p)
+        assert np.allclose(ci, [-0.91, -0.24])
 
     def test_compute_boot_esci(self):
         """Test function compute_bootci"""
