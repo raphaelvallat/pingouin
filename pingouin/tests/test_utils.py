@@ -71,7 +71,9 @@ class TestUtils(TestCase):
         x_out, _ = remove_na(x, z, paired=True)
         assert np.allclose(x_out, [6.4, 4.5])
         # When y is None
-        remove_na(x, None, paired=False)
+        remove_na(x, None)
+        remove_na(x, 4)
+        remove_na(4, y)
         # With 2D arrays
         x = np.array([[4, 2], [4, np.nan], [7, 6]])
         y = np.array([[6, np.nan], [3, 2], [2, 2]])
