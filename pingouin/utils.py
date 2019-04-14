@@ -137,13 +137,13 @@ def remove_na(x, y=None, paired=False, axis='rows'):
     >>> remove_na(x)
     array([6.4, 3.2, 4.5])
 
-    With paired 1D arrays
+    With two paired 1D arrays
 
     >>> y = [2.3, np.nan, 5.2, 4.6]
     >>> remove_na(x, y, paired=True)
     (array([6.4, 4.5]), array([2.3, 5.2]))
 
-    With independent 2D arrays
+    With two independent 2D arrays
 
     >>> x = np.array([[4, 2], [4, np.nan], [7, 6]])
     >>> y = np.array([[6, np.nan], [3, 2], [2, 2]])
@@ -159,8 +159,11 @@ def remove_na(x, y=None, paired=False, axis='rows'):
         return _remove_na_single(x, axis=axis), y
     elif isinstance(y, (list, np.ndarray)):
         y = np.asarray(y)
+        # Make sure that we just pass-through if x or y have only 1 element
         if y.size == 1:
             return _remove_na_single(x, axis=axis), y
+        if x.size == 1:
+            return x, _remove_na_single(y, axis=axis)
         if x.ndim != y.ndim or paired is False:
             # x and y do not have the same dimension
             x_no_nan = _remove_na_single(x, axis=axis)
@@ -185,7 +188,6 @@ def remove_na(x, y=None, paired=False, axis='rows'):
         both = np.logical_and(x_mask, y_mask)
         x = x.compress(both, axis=ax)
         y = y.compress(both, axis=ax)
-
     return x, y
 
 
