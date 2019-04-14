@@ -369,6 +369,33 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
   Indirect  -0.007      -0.070        0.029   0.898  No
   ========  ======  ==========  ===========  ======  =====
 
+Integration with Pandas
+-----------------------
+
+Several functions of Pingouin can be used directly as :py:class:`pandas.DataFrame` methods. Try for yourself with the code below:
+
+.. code-block:: python
+
+  import pingouin as pg
+
+  # Example 1 | ANOVA
+  df = pg.read_dataset('mixed_anova')
+  df.anova(dv='Scores', between='Group', detailed=True)
+
+  # Example 2 | Pairwise correlations
+  data = pg.read_dataset('mediation')
+  data.pairwise_corr(columns=['X', 'M', 'Y'], covar=['Mbin'])
+
+The functions that are currently supported as pandas method are:
+
+* :py:func:`pingouin.anova`
+* :py:func:`pingouin.rm_anova`
+* :py:func:`pingouin.mixed_anova`
+* :py:func:`pingouin.welch_anova`
+* :py:func:`pingouin.pairwise_ttests`
+* :py:func:`pingouin.pairwise_corr`
+* :py:func:`pingouin.partial_corr`
+* :py:func:`pingouin.mediation_analysis`
 
 Development
 ===========

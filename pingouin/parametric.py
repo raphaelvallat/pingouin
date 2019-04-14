@@ -271,7 +271,8 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     subject : string
         Name of column containing the subject identifier.
     data : pandas DataFrame
-        DataFrame
+        DataFrame. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
     correction : string or boolean
         If True, return Greenhouse-Geisser corrected p-value.
         If 'auto' (default), compute Mauchly's test of sphericity to determine
@@ -381,10 +382,10 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     --------
     One-way repeated-measures ANOVA (Ryan et al 2013 dataset).
 
-    >>> from pingouin import rm_anova, read_dataset
-    >>> df = read_dataset('rm_anova')
-    >>> aov = rm_anova(dv='DesireToKill', within='Disgustingness',
-    ...                subject='Subject', data=df, detailed=True)
+    >>> import pingouin as pg
+    >>> df = pg.read_dataset('rm_anova')
+    >>> aov = pg.rm_anova(dv='DesireToKill', within='Disgustingness',
+    ...                   subject='Subject', data=df, detailed=True)
     >>> print(aov)
                Source       SS  DF      MS       F        p-unc    np2 eps
     0  Disgustingness   27.485   1  27.485  12.044  0.000793016  0.116   1
@@ -392,9 +393,17 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
 
     Two-way repeated-measures ANOVA.
 
-    >>> aov = rm_anova2(dv='DesireToKill',
-    ...                 within=['Disgustingness', 'Frighteningness'],
-    ...                 subject='Subject', data=df)
+    >>> aov = pg.rm_anova(dv='DesireToKill',
+    ...                   within=['Disgustingness', 'Frighteningness'],
+    ...                   subject='Subject', data=df)
+
+    Note that this function can also directly be used as a Pandas method
+
+    >>> df.rm_anova(dv='DesireToKill', within='Disgustingness',
+    ...             subject='Subject',  detailed=True)
+               Source       SS  DF      MS       F        p-unc    np2 eps
+    0  Disgustingness   27.485   1  27.485  12.044  0.000793016  0.116   1
+    1           Error  209.952  92   2.282       -            -      -   -
     """
     from scipy.stats import f
     if isinstance(within, list):
@@ -701,7 +710,8 @@ def anova(dv=None, between=None, data=None, detailed=False,
         is a list with two elements (e.g. ['Factor1', 'Factor2']),
         compute a two-way ANOVA.
     data : pandas DataFrame
-        DataFrame
+        DataFrame. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
     detailed : boolean
         If True, return a detailed ANOVA table
     export_filename : string
@@ -786,13 +796,20 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
     Examples
     --------
-    1. One-way ANOVA on the pain threshold dataset.
+    One-way ANOVA on the pain threshold dataset
 
-    >>> from pingouin import anova, read_dataset
-    >>> df = read_dataset('anova')
-    >>> aov = anova(dv='Pain threshold', between='Hair color', data=df,
+    >>> import pingouin as pg
+    >>> df = pg.read_dataset('anova')
+    >>> aov = pg.anova(dv='Pain threshold', between='Hair color', data=df,
     ...             detailed=True)
     >>> aov
+           Source        SS  DF       MS      F       p-unc    np2
+    0  Hair color  1360.726   3  453.575  6.791  0.00411423  0.576
+    1      Within  1001.800  15   66.787      -           -      -
+
+    Note that this function can also directly be used as a Pandas method
+
+    >>> df.anova(dv='Pain threshold', between='Hair color', detailed=True)
            Source        SS  DF       MS      F       p-unc    np2
     0  Hair color  1360.726   3  453.575  6.791  0.00411423  0.576
     1      Within  1001.800  15   66.787      -           -      -
@@ -1002,7 +1019,8 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
     between : string
         Name of column containing the between factor.
     data : pandas DataFrame
-        DataFrame
+        DataFrame. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
     export_filename : string
         Filename (without extension) for the output file.
         If None, do not export the table.
@@ -1163,7 +1181,8 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
     between : string
         Name of column containing the between factor.
     data : pandas DataFrame
-        DataFrame
+        DataFrame. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
     correction : string or boolean
         If True, return Greenhouse-Geisser corrected p-value.
         If 'auto' (default), compute Mauchly's test of sphericity to determine

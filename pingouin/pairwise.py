@@ -60,7 +60,8 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         Name of column containing the subject identifier. Compulsory for
         contrast including a within-subject factor.
     data : pandas DataFrame
-        DataFrame
+        DataFrame. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
     parametric : boolean
         If True (default), use the parametric :py:func:`ttest` function.
         If False, use :py:func:`pingouin.wilcoxon` or :py:func:`pingouin.mwu`
@@ -714,7 +715,8 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     Parameters
     ----------
     data : pandas DataFrame
-        DataFrame
+        DataFrame. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
     columns : list or str
         Column names in data ::
 
@@ -829,6 +831,10 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     >>> pairwise_corr(data, covar='Neuroticism')  # With one covariate
     >>> pairwise_corr(data, covar=['Neuroticism', 'Openness'])  # 2 covariates
+
+    7. As a Pandas method
+
+    >>> data.pairwise_corr(covar='Neuroticism', method='spearman')
     '''
     from pingouin.correlation import corr, partial_corr
 

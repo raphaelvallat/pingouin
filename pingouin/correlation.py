@@ -488,7 +488,8 @@ def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
     Parameters
     ----------
     data : pd.DataFrame
-        Dataframe
+        Dataframe. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
     x, y : string
         x and y. Must be names of columns in data.
     covar : string or list
@@ -570,6 +571,12 @@ def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
     >>> # Partial correlation of x and y controlling for z, w and v
     >>> partial_corr(data=df, x='x', y='y', covar=['z', 'w', 'v'],
     ...              method='spearman')
+               n      r         CI95%     r2  adj_r2     p-val  power
+    spearman  30  0.491  [0.16, 0.72]  0.242   0.185  0.005817  0.809
+
+    3. As a pandas method
+
+    >>> df.partial_corr(x='x', y='y', covar=['z', 'w', 'v'], method='spearman')
                n      r         CI95%     r2  adj_r2     p-val  power
     spearman  30  0.491  [0.16, 0.72]  0.242   0.185  0.005817  0.809
     """

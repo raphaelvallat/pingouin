@@ -134,7 +134,7 @@ def remove_rm_na(dv=None, within=None, subject=None, data=None,
         Aggregation method if there are more within-factors in the data than
         specified in the ``within`` argument. Can be `mean`, `median`, `sum`,
         `first`, last`, or any other function accepted by
-        :py:func:`pandas.DataFrame.groupby`.
+        :py:meth:`pandas.DataFrame.groupby`.
 
     Returns
     -------
