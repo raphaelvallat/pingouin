@@ -1,8 +1,19 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 import numpy as np
+from scipy.integrate import quad
 
 __all__ = ["bayesfactor_ttest", "bayesfactor_pearson"]
+
+
+def _format_bf(bf, precision=3, trim='0'):
+    """Format BF10 to floating point or scientific notation.
+    """
+    if bf > 1e3 or bf < 1e-3:
+        out = np.format_float_scientific(bf, precision=precision, trim=trim)
+    else:
+        out = np.format_float_positional(bf, precision=precision, trim=trim)
+    return out
 
 
 def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
@@ -31,7 +42,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
 
     Returns
     -------
-    bf : float
+    bf : str
         Scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor (BF10).
         The Bayes Factor quantifies the evidence in favour of the
         alternative hypothesis.
@@ -69,24 +80,21 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
 
     >>> from pingouin import bayesfactor_ttest
     >>> bf = bayesfactor_ttest(3.5, 20, 20)
-    >>> print("Bayes Factor: %.2f (two-sample independent)" % bf)
-    Bayes Factor: 26.74 (two-sample independent)
+    >>> print("Bayes Factor: %s (two-sample independent)" % bf)
+    Bayes Factor: 26.743 (two-sample independent)
 
     2. Bayes Factor of a paired two-sample T-test
 
-    >>> from pingouin import bayesfactor_ttest
     >>> bf = bayesfactor_ttest(3.5, 20, 20, paired=True)
-    >>> print("Bayes Factor: %.2f (two-sample paired)" % bf)
-    Bayes Factor: 17.18 (two-sample paired)
+    >>> print("Bayes Factor: %s (two-sample paired)" % bf)
+    Bayes Factor: 17.185 (two-sample paired)
 
     3. Bayes Factor of an one-sided one-sample T-test
 
-    >>> from pingouin import bayesfactor_ttest
     >>> bf = bayesfactor_ttest(3.5, 20, tail='one-sided')
-    >>> print("Bayes Factor: %.2f (one-sample)" % bf)
-    Bayes Factor: 34.37 (one-sample)
+    >>> print("Bayes Factor: %s (one-sample)" % bf)
+    Bayes Factor: 34.369 (one-sample)
     """
-    from scipy.integrate import quad
     one_sample = True if ny is None or ny == 1 else False
 
     # Function to be integrated
@@ -105,13 +113,12 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
 
     # JZS Bayes factor calculation: eq. 1 in Rouder et al. (2009)
     integr = quad(fun, 0, np.inf, args=(t, n, r, df))[0]
-    bf01 = (1 + t**2 / df)**(-(df + 1) / 2) / integr
+    bf10 = 1 / ((1 + t**2 / df)**(-(df + 1) / 2) / integr)
 
     # Tail
-    bf01 /= 2 if tail == 'one-sided' else 1
+    bf10 *= 2 if tail == 'one-sided' else 1
 
-    # Invert Bayes Factor (alternative hypothesis)
-    return np.round(1 / bf01, 3)
+    return _format_bf(bf10)
 
 
 def bayesfactor_pearson(r, n):
@@ -127,7 +134,7 @@ def bayesfactor_pearson(r, n):
 
     Returns
     -------
-    bf : float
+    bf : str
         Bayes Factor (BF10).
         The Bayes Factor quantifies the evidence in favour of the alternative
         hypothesis.
@@ -164,14 +171,13 @@ def bayesfactor_pearson(r, n):
 
     Examples
     --------
-    1. Bayes Factor of a Pearson correlation
+    Bayes Factor of a Pearson correlation
 
     >>> from pingouin import bayesfactor_pearson
     >>> bf = bayesfactor_pearson(0.6, 20)
-    >>> print("Bayes Factor: %.3f" % bf)
+    >>> print("Bayes Factor: %s" % bf)
     Bayes Factor: 8.221
     """
-    from scipy.integrate import quad
     from scipy.special import gamma
 
     # Function to be integrated
@@ -183,4 +189,4 @@ def bayesfactor_pearson(r, n):
     # JZS Bayes factor calculation
     integr = quad(fun, 0, np.inf, args=(r, n))[0]
     bf10 = np.sqrt((n / 2)) / gamma(1 / 2) * integr
-    return np.round(bf10, 3)
+    return _format_bf(bf10)
