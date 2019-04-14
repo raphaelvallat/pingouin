@@ -120,6 +120,10 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
 
     Notes
     -----
+    Data are expected to be in long-format. If your data is in wide-format,
+    you can use the :py:func:`pandas.melt` function to convert from wide to
+    long format.
+
     If ``between`` or ``within`` is a list (e.g. ['col1', 'col2']),
     the function returns 1) the pairwise T-tests between each values of the
     first column, 2) the pairwise T-tests between each values of the second
