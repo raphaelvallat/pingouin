@@ -107,8 +107,8 @@ def _remove_na_single(x, axis='rows'):
 
 
 def remove_na(x, y=None, paired=False, axis='rows'):
-    """Remove missing values along a given axis in paired or independent
-    NumPy array(s).
+    """Remove missing values along a given axis in one or more (paired) numpy
+    arrays.
 
     Parameters
     ----------
@@ -151,6 +151,7 @@ def remove_na(x, y=None, paired=False, axis='rows'):
     """
     # Safety checks
     x = np.asarray(x)
+    assert x.size > 1, 'x must have more than one element.'
     assert axis in ['rows', 'columns'], 'axis must be rows or columns.'
 
     if y is None:
@@ -159,11 +160,9 @@ def remove_na(x, y=None, paired=False, axis='rows'):
         return _remove_na_single(x, axis=axis), y
     elif isinstance(y, (list, np.ndarray)):
         y = np.asarray(y)
-        # Make sure that we just pass-through if x or y have only 1 element
+        # Make sure that we just pass-through if y have only 1 element
         if y.size == 1:
             return _remove_na_single(x, axis=axis), y
-        if x.size == 1:
-            return x, _remove_na_single(y, axis=axis)
         if x.ndim != y.ndim or paired is False:
             # x and y do not have the same dimension
             x_no_nan = _remove_na_single(x, axis=axis)

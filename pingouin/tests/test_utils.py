@@ -73,7 +73,6 @@ class TestUtils(TestCase):
         # When y is None
         remove_na(x, None)
         remove_na(x, 4)
-        remove_na(4, y)
         # With 2D arrays
         x = np.array([[4, 2], [4, np.nan], [7, 6]])
         y = np.array([[6, np.nan], [3, 2], [2, 2]])
