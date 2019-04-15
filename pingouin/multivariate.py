@@ -33,9 +33,11 @@ def multivariate_normality(X, alpha=.05):
     The Henze-Zirkler test has a good overall power against alternatives
     to normality and is feasable for any dimension and any sample size.
 
-    Aapted to Python from a Matlab code by Antonio Trujillo-Ortiz.
+    Aapted to Python from a Matlab code by Antonio Trujillo-Ortiz and
+    tested against the R package MVN.
 
-    Tested against the R package MVN.
+    Rows with missing values are automatically removed using the
+    :py:func:`remove_na` function.
 
     References
     ----------
@@ -49,40 +51,28 @@ def multivariate_normality(X, alpha=.05):
 
     Examples
     --------
-    1. Test for multivariate normality of 2 variables
-
-    >>> import numpy as np
-    >>> from pingouin import multivariate_normality
-    >>> np.random.seed(123)
-    >>> mean, cov, n = [4, 6], [[1, .5], [.5, 1]], 30
-    >>> X = np.random.multivariate_normal(mean, cov, n)
-    >>> normal, p = multivariate_normality(X, alpha=.05)
-    >>> print(normal, p)
-    True 0.7523511059223078
-
-    2. Test for multivariate normality of 3 variables
-
-    >>> import numpy as np
-    >>> from pingouin import multivariate_normality
-    >>> np.random.seed(123)
-    >>> mean, cov = [4, 6, 5], [[1, .5, .2], [.5, 1, .1], [.2, .1, 1]]
-    >>> X = np.random.multivariate_normal(mean, cov, 50)
-    >>> normal, p = multivariate_normality(X, alpha=.05)
-    >>> print(normal, p)
-    True 0.4607466031757833
+    >>> import pingouin as pg
+    >>> data = pg.read_dataset('multivariate')
+    >>> X = data[['Fever', 'Pressure', 'Aches']]
+    >>> normal, p = pg.multivariate_normality(X, alpha=.05)
+    >>> print(normal, round(p, 3))
+    True 0.717
     """
     from scipy.stats import lognorm
 
-    # Check input
+    # Check input and remove missing values
     X = np.asarray(X)
-    assert X.ndim == 2
+    assert X.ndim == 2, 'X must be of shape (n_samples, n_features).'
+    X = X[~np.isnan(X).any(axis=1)]
     n, p = X.shape
-    assert p >= 2
+    assert n >= 3, 'X must have at least 3 rows.'
+    assert p >= 2, 'X must have at least two columns.'
 
     # Covariance matrix
     S = np.cov(X, rowvar=False, bias=True)
-    S_inv = np.linalg.inv(S)
+    S_inv = np.linalg.pinv(S)
     difT = X - X.mean(0)
+
     # Squared-Mahalanobis distances
     Dj = np.diag(np.linalg.multi_dot([difT, S_inv, difT.T]))
     Y = np.linalg.multi_dot([X, S_inv, X.T])
@@ -151,8 +141,36 @@ def multivariate_ttest(X, Y=None, paired=False):
 
     Notes
     -----
-    Missing values are automatically removed using the :py:func:`remove_na`
-    function.
+    Rows with missing values are automatically removed using the
+    :py:func:`remove_na` function.
+
+    Tested against the R package Hotelling.
+
+    Examples
+    --------
+    Two-sample independent Hotelling T-squared test
+
+    >>> import pingouin as pg
+    >>> data = pg.read_dataset('multivariate')
+    >>> dvs = ['Fever', 'Pressure', 'Aches']
+    >>> X = data[data['Condition'] == 'Drug'][dvs]
+    >>> Y = data[data['Condition'] == 'Placebo'][dvs]
+    >>> pg.multivariate_ttest(X, Y)
+                  T2      F  df1  df2      pval
+    hotelling  4.229  1.327    3   32  0.282898
+
+    Two-sample paired Hotelling T-squared test
+
+    >>> pg.multivariate_ttest(X, Y, paired=True)
+                  T2      F  df1  df2      pval
+    hotelling  4.468  1.314    3   15  0.306542
+
+    One-sample Hotelling T-squared test with a specified null hypothesis
+
+    >>> null_hypothesis_means = [37.5, 70, 5]
+    >>> pg.multivariate_ttest(X, Y=null_hypothesis_means)
+                    T2      F  df1  df2          pval
+    hotelling  253.231  74.48    3   15  3.081281e-09
     """
     from scipy.stats import f
     x = np.asarray(X)
@@ -163,21 +181,24 @@ def multivariate_ttest(X, Y=None, paired=False):
         # Remove rows with missing values in x
         x = x[~np.isnan(x).any(axis=1)]
     else:
-        y = np.asarray(Y)
-        assert y.ndim == 2, 'x must be of shape (n_samples, n_features)'
         nx, kx = x.shape
-        ny, ky = y.shape
-        err = 'X and Y must have the same number of features (= columns).'
-        assert ky == kx, err
-        if paired:
-            err = 'X and Y must have the same number of rows if paired is True'
-            assert ny == nx, err
+        y = np.asarray(Y)
+        if y.ndim == 1:
+            # One sample with specified null
+            assert y.size == kx
+        elif y.ndim == 2:
+            # Two-sample
+            err = 'X and Y must have the same number of features (= columns).'
+            assert y.shape[1] == kx, err
+            if paired:
+                err = 'X and Y must have the same number of rows if paired.'
+                assert y.shape[0] == nx, err
         # Remove rows with missing values in both x and y
         x, y = remove_na(x, y, paired=paired, axis='rows')
-        ny, ky = y.shape
 
     # Shape of arrays
     nx, k = x.shape
+    ny = y.shape[0]
     assert nx >= 5, 'At least five samples are required.'
 
     if y.ndim == 1 or paired is True:
