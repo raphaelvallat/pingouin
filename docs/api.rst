@@ -115,8 +115,8 @@ Multiple comparisons and post-hoc tests
     holm
     fdr
 
-Multivariate statistics
------------------------
+Multivariate tests
+------------------
 
 .. _multivar:
 
