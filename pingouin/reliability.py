@@ -1,12 +1,13 @@
 import numpy as np
 import pandas as pd
+from scipy.stats import f
 from pingouin.utils import remove_rm_na
 
 __all__ = ["cronbach_alpha", "intraclass_corr"]
 
 
 def cronbach_alpha(data=None, items=None, scores=None, subject=None,
-                   remove_na=True):
+                   remove_na=True, ci=.95):
     """Cronbach's alpha reliability measure.
 
     Parameters
@@ -21,6 +22,8 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
         Long-format dataframe.
     remove_na : bool
         If True, remove subject with missing values (listwise deletion).
+    ci : float
+        Confidence interval (.95 = 95%)
 
     Returns
     -------
@@ -50,6 +53,17 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     and :math:`\\sigma_{{Y_{i}}}^{2}` the variance of component :math:`i` for
     the current sample of subjects.
 
+    95% confidence intervals are calculated using Feldt's method:
+
+    .. math::
+
+        c_L = 1 - (1 - \\alpha) \\cdot F_{(0.025, N-1, (N-1)(K - 1))}
+
+        c_U = 1 - (1 - \\alpha) \\cdot F_{(0.975, N-1, (N-1)(K - 1))}
+
+    where :math:`N` is the number of subjects and :math:`K` the number of
+    items.
+
     Results have been tested against the R package psych.
 
     References
@@ -60,13 +74,17 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
 
     .. [3] https://cran.r-project.org/web/packages/psych/psych.pdf
 
+    .. [4] Feldt, Leonard S., Woodruff, David J., & Salih, Fathi A. (1987).
+           Statistical inference for coefficient alpha. Applied Psychological
+           Measurement, 11(1):93-103.
+
     Examples
     --------
     >>> import pingouin as pg
     >>> data = pg.read_dataset('cronbach_alpha')
     >>> pg.cronbach_alpha(data=data, items='Items', scores='Scores',
     ...                   subject='Subj')
-    0.591719
+    (0.591719, array([0.195, 0.84 ]))
     """
     # Safety check
     assert isinstance(data, pd.DataFrame), 'data must be a dataframe.'
@@ -96,8 +114,15 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     assert nsubj >= 2, 'At least two subjects are required.'
     sv1 = grp_item.var().sum()
     sv2 = grp_subj.sum().var()
-    alpha = (k / (k - 1)) * (1 - sv1 / sv2)
-    return round(alpha, 6)
+    cronbach = (k / (k - 1)) * (1 - sv1 / sv2)
+
+    # Confidence intervals
+    alpha = 1 - ci
+    df1 = nsubj - 1
+    df2 = df1 * (k - 1)
+    lower = 1 - (1 - cronbach) * f.isf(alpha / 2, df1, df2)
+    upper = 1 - (1 - cronbach) * f.isf(1 - alpha / 2, df1, df2)
+    return round(cronbach, 6), np.round([lower, upper], 3)
 
 
 def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
@@ -144,7 +169,6 @@ def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
     (0.727526, array([0.434, 0.927]))
     """
     from pingouin import anova
-    from scipy.stats import f
 
     # Check dataframe
     if any(v is None for v in [data, groups, raters, scores]):

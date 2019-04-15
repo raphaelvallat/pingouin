@@ -17,9 +17,11 @@ class TestReliability(TestCase):
         missing values are present in data.
         """
         df = read_dataset('cronbach_alpha')
-        alpha = cronbach_alpha(data=df, items='Items', scores='Scores',
-                               subject='Subj')
+        alpha, ci = cronbach_alpha(data=df, items='Items', scores='Scores',
+                                   subject='Subj')
         assert np.round(alpha, 3) == 0.592
+        assert ci[0] == .195
+        assert ci[1] == .840
         # With missing values
         df.loc[2, 'Scores'] = np.nan
         cronbach_alpha(data=df, items='Items', scores='Scores',
