@@ -29,11 +29,11 @@
 .. figure::  /pictures/logo_pingouin.png
   :align:   center
 
-**Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy.
+**Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy. Some of its main features are listed below. For a full list of available functions, please refer to the `API documentation <https://pingouin-stats.org/api.html>`_.
 
 1. ANOVAs: one- and two-ways, repeated measures, mixed, ancova
 
-2. Pairwise post-hocs tests (parametric and non-parametric)
+2. Pairwise post-hocs tests (parametric and non-parametric) and pairwise correlations
 
 3. Robust correlations, partial correlation, distance correlation, repeated measures correlation and intraclass correlation
 
@@ -41,7 +41,7 @@
 
 5. Bayes Factor of T-test and Pearson correlation
 
-6. Tests for sphericity, normality and homoscedasticity
+6. Multivariate tests
 
 7. Effect sizes and power analysis
 

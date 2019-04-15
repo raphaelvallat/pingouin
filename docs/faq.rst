@@ -150,7 +150,7 @@ Data
       <div id="collapse_data" class="panel-collapse collapse">
         <div class="panel-body">
 
-Most Pingouin functions assume that your data is in tidy or long format, that is, each variable should be in one column and each observation should be in a different row. This is true for all the ANOVA / post-hocs function as well as the linear/logistic regression, pairwise correlations, partial correlation, mediation analysis, etc...
+Most Pingouin functions assume that your data is in tidy or long format, that is, each variable should be in one column and each observation should be in a different row. This is true for all the ANOVA / post-hocs function as well as the linear/logistic regression, mediation analysis, etc...
 
 An example of data in long-format is shown below. Note that *Scores* is the dependant variable, *Subject* is the subject identifier, *Time* is a within-subject factor (two time points per subject), and *Age* and *Gender* are meta-data:
 
@@ -165,7 +165,7 @@ Subject Gender Age Time Scores
 3       F      38  Post 2.9
 ======= ====== === ==== ======
 
-To convert your data from a wide format (typical in Excel) to a long format, you can use the `pandas.melt() <https://pandas.pydata.org/pandas-docs/version/0.23.4/generated/pandas.melt.html>`_ function
+To convert your data from a wide format (typical in Excel) to a long format, you can use the `pandas.melt() <https://pandas.pydata.org/pandas-docs/version/0.23.4/generated/pandas.melt.html>`_ function.
 
 .. ----------------------------- READING -----------------------------
 .. raw:: html
