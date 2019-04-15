@@ -1,8 +1,77 @@
 import numpy as np
 import pandas as pd
-# from pingouin.utils import remove_rm_na
+from pingouin.utils import remove_rm_na
 
-__all__ = ["intraclass_corr"]
+__all__ = ["cronbach_alpha", "intraclass_corr"]
+
+
+def cronbach_alpha(data=None, items=None, scores=None, subject=None):
+    """Cronbach's alpha reliability measure.
+
+    Parameters
+    ----------
+    items : str
+        Column in ``data`` with the items names.
+    scores : str
+        Column in ``data`` with the scores.
+    subject : str
+        Column in ``data`` with the subject identifier.
+    data : pandas dataframe
+        Long-format dataframe.
+
+    Returns
+    -------
+    alpha : float
+        Cronbach's alpha
+
+    Notes
+    -----
+    Data are expected to be in long-format. If your data are in wide-format,
+    please use the :py:func:`pandas.melt` function before running
+    this function.
+
+    Internal consistency is usually measured with Cronbach's alpha, a statistic
+    calculated from the pairwise correlations between items.
+    Internal consistency ranges between negative infinity and one.
+    Coefficient alpha will be negative whenever there is greater
+    within-subject variability than between-subject variability.
+
+    Subject(s) with missing values are automatically removed using
+    the :py:func:`pingouin.remove_rm_na` function (listwise deletion).
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Cronbach%27s_alpha
+    """
+    # Safety check
+    assert isinstance(data, pd.DataFrame), 'data must be a dataframe.'
+    assert isinstance(items, str), 'items must be a column name in data.'
+    assert isinstance(scores, str), 'scores must be a column name in data.'
+    assert isinstance(subject, str), 'subj must be a column name in data.'
+    assert items in data.columns, 'items is not in dataframe.'
+    assert scores in data.columns, 'scores is not in dataframe.'
+    assert subject in data.columns, 'subj is not in dataframe.'
+
+    # Remove missing values
+    assert ~data[items].isna().any(), 'Cannot have NaN in items column.'
+    assert ~data[subject].isna().any(), 'Cannot have NaN in subject column.'
+    if data[scores].isna().any():
+        data = remove_rm_na(dv=scores, within=items,
+                            subject=subject, data=data)
+
+    # GroupBy
+    grp_item = data.groupby(items)[scores]
+    grp_subj = data.groupby(subject)[scores]
+
+    # Compute Cronbach's Alpha
+    k = grp_item.ngroups
+    nsubj = grp_subj.ngroups
+    assert k >= 2, 'At least two items are required.'
+    assert nsubj >= 2, 'At least two subjects are required.'
+    sv1 = grp_item.var().sum()
+    sv2 = grp_subj.sum().var()
+    alpha = (k / (k - 1)) * (1 - sv1 / sv2)
+    return alpha
 
 
 def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
