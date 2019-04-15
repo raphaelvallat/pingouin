@@ -3,6 +3,7 @@
 import warnings
 import numpy as np
 import pandas as pd
+from scipy.stats import f
 from pingouin import (_check_dataframe, remove_rm_na, remove_na,
                       _export_table, bayesfactor_ttest, epsilon, sphericity)
 
@@ -413,7 +414,6 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     0  Disgustingness   27.485   1  27.485  12.044  0.000793016  0.116   1
     1           Error  209.952  92   2.282       -            -      -   -
     """
-    from scipy.stats import f
     if isinstance(within, list):
         if len(within) == 2:
             return rm_anova2(dv=dv, within=within, data=data, subject=subject,
@@ -583,7 +583,6 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
     mixed_anova : Two way mixed ANOVA
     friedman : Non-parametric one-way repeated measures ANOVA
     """
-    from scipy.stats import f
     a, b = within
 
     # Validate the dataframe
@@ -853,7 +852,6 @@ def anova(dv=None, between=None, data=None, detailed=False,
     msbetween = ssbetween / ddof1
     mserror = sserror / ddof2
     fval = msbetween / mserror
-    from scipy.stats import f
     p_unc = f(ddof1, ddof2).sf(fval)
 
     # Calculating partial eta-square
@@ -938,8 +936,6 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
     -----
     Results have been tested against JASP.
     """
-    from scipy.stats import f
-
     # Validate the dataframe
     _check_dataframe(dv=dv, between=between, data=data, effects='between')
 
@@ -1130,7 +1126,6 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
            Source  ddof1  ddof2     F     p-unc
     0  Hair color      3   8.33  5.89  0.018813
     """
-    from scipy.stats import f
     # Check data
     _check_dataframe(dv=dv, between=between, data=data, effects='between')
 
@@ -1252,8 +1247,6 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
     1         Time  7.628    2  116  3.814  4.027  0.020373  0.065  0.999
     2  Interaction  5.168    2  116  2.584  2.728  0.069530  0.045      -
     """
-    from scipy.stats import f
-
     # Check data
     _check_dataframe(dv=dv, within=within, between=between, data=data,
                      subject=subject, effects='interaction')
@@ -1432,8 +1425,6 @@ def ancova(dv=None, covar=None, between=None, data=None,
 
     # Assert that covariate is numeric
     assert data[covar].dtype.kind in 'fi'
-
-    from scipy.stats import f
 
     def linreg(x, y):
         return np.corrcoef(x, y)[0, 1] * np.std(y, ddof=1) / np.std(x, ddof=1)

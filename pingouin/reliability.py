@@ -5,7 +5,8 @@ from pingouin.utils import remove_rm_na
 __all__ = ["cronbach_alpha", "intraclass_corr"]
 
 
-def cronbach_alpha(data=None, items=None, scores=None, subject=None):
+def cronbach_alpha(data=None, items=None, scores=None, subject=None,
+                   remove_na=True):
     """Cronbach's alpha reliability measure.
 
     Parameters
@@ -18,6 +19,8 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None):
         Column in ``data`` with the subject identifier.
     data : pandas dataframe
         Long-format dataframe.
+    remove_na : bool
+        If True, remove subject with missing values (listwise deletion).
 
     Returns
     -------
@@ -36,12 +39,26 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None):
     Coefficient alpha will be negative whenever there is greater
     within-subject variability than between-subject variability.
 
-    Subject(s) with missing values are automatically removed using
-    the :py:func:`pingouin.remove_rm_na` function (listwise deletion).
+    Cronbach's :math:`\\alpha` is defined as
+
+    .. math::
+
+        \\alpha ={K \\over K-1}\left(1-{\\sum_{{i=1}}^{K}\\sigma_{{Y_{i}}}^{2}
+        \\over\\sigma_{X}^{2}}\\right)
+
+    where :math:`\\sigma_{X}^{2}` is the variance of the observed total scores,
+    and :math:`\\sigma_{{Y_{i}}}^{2}` the variance of component :math:`i` for
+    the current sample of subjects.
+
+    Results have been tested against the R package psych.
 
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Cronbach%27s_alpha
+
+    .. [2] http://www.real-statistics.com/reliability/cronbachs-alpha/
+
+    .. [3] https://cran.r-project.org/web/packages/psych/psych.pdf
 
     Examples
     --------
@@ -49,7 +66,7 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None):
     >>> data = pg.read_dataset('cronbach_alpha')
     >>> pg.cronbach_alpha(data=data, items='Items', scores='Scores',
     ...                   subject='Subj')
-    0.59171885
+    0.591719
     """
     # Safety check
     assert isinstance(data, pd.DataFrame), 'data must be a dataframe.'
@@ -63,7 +80,8 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None):
     # Remove missing values
     assert ~data[items].isna().any(), 'Cannot have NaN in items column.'
     assert ~data[subject].isna().any(), 'Cannot have NaN in subject column.'
-    if data[scores].isna().any():
+    if data[scores].isna().any() and remove_na:
+        # In R = psych:alpha(data, use="complete.obs")
         data = remove_rm_na(dv=scores, within=items,
                             subject=subject, data=data)
 
@@ -79,7 +97,7 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None):
     sv1 = grp_item.var().sum()
     sv2 = grp_subj.sum().var()
     alpha = (k / (k - 1)) * (1 - sv1 / sv2)
-    return np.float32(alpha)
+    return round(alpha, 6)
 
 
 def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
@@ -123,7 +141,7 @@ def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
     >>> data = pg.read_dataset('icc')
     >>> pg.intraclass_corr(data=data, groups='Wine', raters='Judge',
     ...                    scores='Scores', ci=.95)
-    (0.7275256, array([0.434, 0.927]))
+    (0.727526, array([0.434, 0.927]))
     """
     from pingouin import anova
     from scipy.stats import f
@@ -131,11 +149,9 @@ def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
     # Check dataframe
     if any(v is None for v in [data, groups, raters, scores]):
         raise ValueError('Data, groups, raters and scores must be specified')
-    if not isinstance(data, pd.DataFrame):
-        raise ValueError('Data must be a pandas dataframe.')
+    assert isinstance(data, pd.DataFrame), 'Data must be a pandas dataframe.'
     # Check that scores is a numeric variable
-    if data[scores].dtype.kind not in 'fi':
-        raise ValueError('Scores must be numeric.')
+    assert data[scores].dtype.kind in 'fi', 'Scores must be numeric.'
     # Check that data are fully balanced
     if data.groupby(raters)[scores].count().nunique() > 1:
         raise ValueError('Data must be balanced.')
@@ -157,4 +173,4 @@ def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
     lower = (f_lower - 1) / (f_lower + k - 1)
     upper = (f_upper - 1) / (f_upper + k - 1)
 
-    return np.float32(icc), np.round([lower, upper], 3)
+    return round(icc, 6), np.round([lower, upper], 3)

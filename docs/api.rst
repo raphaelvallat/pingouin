@@ -182,12 +182,13 @@ Power analysis
       power_ttest
       power_ttest2n
 
-Reliability
------------
+Reliability and consistency
+---------------------------
 
 .. _reliability:
 
 .. autosummary::
      :toctree: generated/
 
+      cronbach_alpha
       intraclass_corr
