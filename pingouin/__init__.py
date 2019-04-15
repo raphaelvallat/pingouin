@@ -12,6 +12,7 @@ from .correlation import *
 from .circular import *
 from .pairwise import *
 from .power import *
+from .reliability import *
 from .regression import *
 from .plotting import *
 from .pandas import *

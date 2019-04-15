@@ -65,7 +65,6 @@ Correlation and regression
     partial_corr
     distance_corr
     rm_corr
-    intraclass_corr
     linear_regression
     logistic_regression
     mediation_analysis
@@ -182,3 +181,13 @@ Power analysis
       power_corr
       power_ttest
       power_ttest2n
+
+Reliability
+-----------
+
+.. _reliability:
+
+.. autosummary::
+     :toctree: generated/
+
+      intraclass_corr

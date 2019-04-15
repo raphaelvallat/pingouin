@@ -35,7 +35,7 @@
 
 2. Pairwise post-hocs tests (parametric and non-parametric) and pairwise correlations
 
-3. Robust correlations, partial correlation, distance correlation, repeated measures correlation and intraclass correlation
+3. Robust, partial, distance and repeated measures correlations
 
 4. Linear/logistic regression and mediation analysis
 
@@ -43,13 +43,15 @@
 
 6. Multivariate tests
 
-7. Effect sizes and power analysis
+7. Reliability and consistency
 
-8. Parametric/bootstrapped confidence intervals around an effect size or a correlation coefficient
+8. Effect sizes and power analysis
 
-9. Circular statistics
+9. Parametric/bootstrapped confidence intervals around an effect size or a correlation coefficient
 
-10. Plotting: Bland-Altman plot, Q-Q plot, paired plot, robust correlation...
+10. Circular statistics
+
+11. Plotting: Bland-Altman plot, Q-Q plot, paired plot, robust correlation...
 
 Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
 
