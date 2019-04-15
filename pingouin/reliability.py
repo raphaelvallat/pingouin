@@ -42,6 +42,14 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None):
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Cronbach%27s_alpha
+
+    Examples
+    --------
+    >>> import pingouin as pg
+    >>> data = pg.read_dataset('cronbach_alpha')
+    >>> pg.cronbach_alpha(data=data, items='Items', scores='Scores',
+    ...                   subject='Subj')
+    0.59171885
     """
     # Safety check
     assert isinstance(data, pd.DataFrame), 'data must be a dataframe.'
@@ -71,7 +79,7 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None):
     sv1 = grp_item.var().sum()
     sv2 = grp_subj.sum().var()
     alpha = (k / (k - 1)) * (1 - sv1 / sv2)
-    return alpha
+    return np.float32(alpha)
 
 
 def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
@@ -111,10 +119,11 @@ def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
     --------
     ICC of wine quality assessed by 4 judges.
 
-    >>> from pingouin import intraclass_corr, read_dataset
-    >>> data = read_dataset('icc')
-    >>> intraclass_corr(data, 'Wine', 'Judge', 'Scores')
-    (0.727525596259691, array([0.434, 0.927]))
+    >>> import pingouin as pg
+    >>> data = pg.read_dataset('icc')
+    >>> pg.intraclass_corr(data=data, groups='Wine', raters='Judge',
+    ...                    scores='Scores', ci=.95)
+    (0.7275256, array([0.434, 0.927]))
     """
     from pingouin import anova
     from scipy.stats import f
@@ -148,4 +157,4 @@ def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
     lower = (f_lower - 1) / (f_lower + k - 1)
     upper = (f_upper - 1) / (f_upper + k - 1)
 
-    return icc, np.round([lower, upper], 3)
+    return np.float32(icc), np.round([lower, upper], 3)

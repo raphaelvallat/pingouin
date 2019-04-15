@@ -3,6 +3,7 @@ ancova,Teaching method with family income as covariate,ANCOVA,www.real-statistic
 anova,Pain threshold per hair color,anova - pairwise_tukey,McClave and Dietrich 1991
 circular,Orientation tuning properties of three neurons,circular statistics,Berens 2009
 cochran,Energy level across three days,Cochran,www.real-statistics.com
+cronbach_alpha,Questionnaire ratings,cronbach_alpha,www.real-statistics.com
 icc,Wine quality rating by 4 judges,intraclass_corr,www.real-statistics.com
 mediation,Mediation analysis,linear_regression - mediation,https://data.library.virginia.edu/introduction-to-mediation-analysis/
 mixed_anova,Memory scores in two groups at three time points,mixed_anova,Pingouin

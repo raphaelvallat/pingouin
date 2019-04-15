@@ -8,6 +8,7 @@ include pingouin/datasets/ancova.csv
 include pingouin/datasets/anova.csv
 include pingouin/datasets/circular.csv
 include pingouin/datasets/cochran.csv
+include pingouin/datasets/cronbach_alpha.csv
 include pingouin/datasets/datasets.csv
 include pingouin/datasets/icc.csv
 include pingouin/datasets/mediation.csv
