@@ -26,9 +26,15 @@ class TestReliability(TestCase):
         df.loc[2, 'Scores'] = np.nan
         cronbach_alpha(data=df, items='Items', scores='Scores',
                        subject='Subj', remove_na=False)
-        # In R = alpha(data, use="complete.obs")
+        # In R = psych:alpha(data, use="complete.obs")
         cronbach_alpha(data=df, items='Items', scores='Scores',
                        subject='Subj', remove_na=True)
+        # Wide format
+        data = read_dataset('cronbach_wide_missing')
+        alpha, _ = cronbach_alpha(data=data)
+        assert np.round(alpha, 2) == .73
+        alpha, _ = cronbach_alpha(data=data, remove_na=True)
+        assert np.round(alpha, 2) == .80
 
     def test_intraclass_corr(self):
         """Test function intraclass_corr"""

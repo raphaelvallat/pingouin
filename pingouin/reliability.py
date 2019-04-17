@@ -1,27 +1,29 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import f
-from pingouin.utils import remove_rm_na
 
 __all__ = ["cronbach_alpha", "intraclass_corr"]
 
 
 def cronbach_alpha(data=None, items=None, scores=None, subject=None,
-                   remove_na=True, ci=.95):
+                   remove_na=False, ci=.95):
     """Cronbach's alpha reliability measure.
 
     Parameters
     ----------
-    items : str
-        Column in ``data`` with the items names.
-    scores : str
-        Column in ``data`` with the scores.
-    subject : str
-        Column in ``data`` with the subject identifier.
     data : pandas dataframe
-        Long-format dataframe.
+        Wide or long-format dataframe.
+    items : str
+        Column in ``data`` with the items names (long-format only).
+    scores : str
+        Column in ``data`` with the scores (long-format only).
+    subject : str
+        Column in ``data`` with the subject identifier (long-format only).
     remove_na : bool
-        If True, remove subject with missing values (listwise deletion).
+        If True, remove the entire rows that contain missing values
+        (= listwise deletion). If False, only pairwise missing values are
+        removed when computing the covariance matrix. For more details, please
+        refer to the :py:meth:`pandas.DataFrame.cov` method.
     ci : float
         Confidence interval (.95 = 95%)
 
@@ -32,9 +34,10 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
 
     Notes
     -----
-    Data are expected to be in long-format. If your data are in wide-format,
-    please use the :py:func:`pandas.melt` function before running
-    this function.
+    This function works with both wide and long format dataframe. If you pass a
+    long-format dataframe, you must also pass the ``items``, ``scores`` and
+    ``subj`` columns (in which case the data will be converted into wide
+    format using the :py:meth:`pandas.DataFrame.pivot` method).
 
     Internal consistency is usually measured with Cronbach's alpha, a statistic
     calculated from the pairwise correlations between items.
@@ -46,22 +49,32 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
 
     .. math::
 
-        \\alpha ={K \\over K-1}\left(1-{\\sum_{{i=1}}^{K}\\sigma_{{Y_{i}}}^{2}
-        \\over\\sigma_{X}^{2}}\\right)
+        \\alpha ={k \\over k-1}\\left(1-{\\sum_{{i=1}}^{k}\\sigma_{{y_{i}}}^{2}
+        \\over\\sigma_{x}^{2}}\\right)
 
-    where :math:`\\sigma_{X}^{2}` is the variance of the observed total scores,
-    and :math:`\\sigma_{{Y_{i}}}^{2}` the variance of component :math:`i` for
+    where :math:`k` refers to the number of items, :math:`\\sigma_{x}^{2}`
+    is the variance of the observed total scores, and
+    :math:`\\sigma_{{y_{i}}}^{2}` the variance of component :math:`i` for
     the current sample of subjects.
+
+    Another formula for Cronbach's :math:`\\alpha` is
+
+    .. math::
+
+        \\alpha = \\frac{k \\times \\bar c}{\\bar v + (k - 1) \\times \\bar c}
+
+    where :math:`\\bar c` refers to the average of all covariances between
+    items and :math:`\\bar v` to the average variance of each item.
 
     95% confidence intervals are calculated using Feldt's method:
 
     .. math::
 
-        c_L = 1 - (1 - \\alpha) \\cdot F_{(0.025, N-1, (N-1)(K - 1))}
+        c_L = 1 - (1 - \\alpha) \\cdot F_{(0.025, n-1, (n-1)(k-1))}
 
-        c_U = 1 - (1 - \\alpha) \\cdot F_{(0.975, N-1, (N-1)(K - 1))}
+        c_U = 1 - (1 - \\alpha) \\cdot F_{(0.975, n-1, (n-1)(k-1))}
 
-    where :math:`N` is the number of subjects and :math:`K` the number of
+    where :math:`n` is the number of subjects and :math:`k` the number of
     items.
 
     Results have been tested against the R package psych.
@@ -80,7 +93,27 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
 
     Examples
     --------
+    Binary wide-format dataframe (with missing values)
+
     >>> import pingouin as pg
+    >>> data = pg.read_dataset('cronbach_wide_missing')
+    >>> # In R: psych:alpha(data, use="pairwise")
+    >>> pg.cronbach_alpha(data=data)
+    (0.732661, array([0.435, 0.909]))
+
+    After listwise deletion of missing values (remove the entire rows)
+
+    >>> # In R: psych:alpha(data, use="complete.obs")
+    >>> pg.cronbach_alpha(data=data, remove_na=True)
+    (0.801695, array([0.581, 0.933]))
+
+    After imputing the missing values with the median of each column
+
+    >>> pg.cronbach_alpha(data=data.fillna(data.median()))
+    (0.738019, array([0.447, 0.911]))
+
+    Likert-type long-format dataframe
+
     >>> data = pg.read_dataset('cronbach_alpha')
     >>> pg.cronbach_alpha(data=data, items='Items', scores='Scores',
     ...                   subject='Subj')
@@ -88,37 +121,32 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     """
     # Safety check
     assert isinstance(data, pd.DataFrame), 'data must be a dataframe.'
-    assert isinstance(items, str), 'items must be a column name in data.'
-    assert isinstance(scores, str), 'scores must be a column name in data.'
-    assert isinstance(subject, str), 'subj must be a column name in data.'
-    assert items in data.columns, 'items is not in dataframe.'
-    assert scores in data.columns, 'scores is not in dataframe.'
-    assert subject in data.columns, 'subj is not in dataframe.'
 
-    # Remove missing values
-    assert ~data[items].isna().any(), 'Cannot have NaN in items column.'
-    assert ~data[subject].isna().any(), 'Cannot have NaN in subject column.'
-    if data[scores].isna().any() and remove_na:
-        # In R = psych:alpha(data, use="complete.obs")
-        data = remove_rm_na(dv=scores, within=items,
-                            subject=subject, data=data)
+    if all([v is not None for v in [items, scores, subject]]):
+        # Data in long-format: we first convert to a wide format
+        data = data.pivot(index=subject, values=scores, columns=items)
 
-    # GroupBy
-    grp_item = data.groupby(items)[scores]
-    grp_subj = data.groupby(subject)[scores]
-
-    # Compute Cronbach's Alpha
-    k = grp_item.ngroups
-    nsubj = grp_subj.ngroups
+    # From now we assume that data is in wide format
+    n, k = data.shape
     assert k >= 2, 'At least two items are required.'
-    assert nsubj >= 2, 'At least two subjects are required.'
-    sv1 = grp_item.var().sum()
-    sv2 = grp_subj.sum().var()
-    cronbach = (k / (k - 1)) * (1 - sv1 / sv2)
+    assert n >= 2, 'At least two raters/subjects are required.'
+    err = 'All columns must be numeric.'
+    assert all([data[c].dtype.kind in 'bfi' for c in data.columns]), err
+    if data.isna().any().any() and remove_na:
+        # In R = psych:alpha(data, use="complete.obs")
+        data = data.dropna(axis=0, how='any')
+
+    # Compute covariance matrix and Cronbach's alpha
+    C = data.cov()
+    cronbach = (k / (k - 1)) * (1 - np.trace(C) / C.sum().sum())
+    # which is equivalent to
+    # v = np.diag(C).mean()
+    # c = C.values[np.tril_indices_from(C, k=-1)].mean()
+    # cronbach = (k * c) / (v + (k - 1) * c)
 
     # Confidence intervals
     alpha = 1 - ci
-    df1 = nsubj - 1
+    df1 = n - 1
     df2 = df1 * (k - 1)
     lower = 1 - (1 - cronbach) * f.isf(alpha / 2, df1, df2)
     upper = 1 - (1 - cronbach) * f.isf(1 - alpha / 2, df1, df2)
