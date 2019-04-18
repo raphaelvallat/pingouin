@@ -264,24 +264,30 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     return stats
 
 
-def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
+def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
              remove_na=True, detailed=False, export_filename=None):
     """One-way and two-way repeated measures ANOVA.
 
     Parameters
     ----------
+    data : pandas DataFrame
+        DataFrame. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
+        Both wide and long-format dataframe are supported for one-way repeated
+        measures ANOVA. Data must be in long format for two-way repeated
+        measures.
     dv : string
-        Name of column containing the dependant variable.
+        Name of column containing the dependant variable (only required if
+        ``data`` is in long format).
     within : string
-        Name of column containing the within factor.
+        Name of column containing the within factor (only required if ``data``
+        is in long format).
         If within is a single string, then compute a one-way repeated
         measures ANOVA, if within is a list with two strings, compute a two-way
         repeated measures ANOVA.
     subject : string
-        Name of column containing the subject identifier.
-    data : pandas DataFrame
-        DataFrame. Note that this function can also directly be used as a
-        Pandas method, in which case this argument is no longer needed.
+        Name of column containing the subject identifier (only required if
+        ``data`` is in long format).
     correction : string or boolean
         If True, return Greenhouse-Geisser corrected p-value.
         If 'auto' (default), compute Mauchly's test of sphericity to determine
@@ -294,9 +300,9 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
             1     5.0      4.2      nan
             2     4.6      3.6      3.9
 
-        In this example, if remove_na == True, Ss 1 will be removed from the
-        ANOVA because of the x3 missing value. If False, the two non-missing
-        values will be included in the analysis.
+        In this example, if ``remove_na`` is True, Ss 1 will be removed from
+        the ANOVA because of the x3 missing value. If False, the two
+        non-missing values will be included in the analysis.
     detailed : boolean
         If True, return a full ANOVA table
     export_filename : string
@@ -330,7 +336,8 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
 
     Notes
     -----
-    Data are expected to be in long-format.
+    Data can be in wide or long format for one-way repeated measures ANOVA but
+    *must* be in long format for two-way repeated measures ANOVA.
 
     In one-way repeated-measures ANOVA, the total variance (sums of squares)
     is divided into three components
@@ -389,9 +396,16 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
 
     Examples
     --------
-    One-way repeated-measures ANOVA (Ryan et al 2013 dataset).
+    One-way repeated measures ANOVA using a wide-format dataset
 
     >>> import pingouin as pg
+    >>> data = pg.read_dataset('rm_anova_wide')
+    >>> pg.rm_anova(data)
+       Source  ddof1  ddof2      F     p-unc    np2    eps
+    0  Within      3     24  5.201  0.006557  0.394  0.694
+
+    One-way repeated-measures ANOVA using a long-format dataset
+
     >>> df = pg.read_dataset('rm_anova')
     >>> aov = pg.rm_anova(dv='DesireToKill', within='Disgustingness',
     ...                   subject='Subject', data=df, detailed=True)
@@ -406,7 +420,7 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
     ...                   within=['Disgustingness', 'Frighteningness'],
     ...                   subject='Subject', data=df)
 
-    Note that this function can also directly be used as a Pandas method
+    This function can also directly be used as a Pandas method
 
     >>> df.rm_anova(dv='DesireToKill', within='Disgustingness',
     ...             subject='Subject',  detailed=True)
@@ -421,7 +435,18 @@ def rm_anova(dv=None, within=None, subject=None, data=None, correction='auto',
         elif len(within) == 1:
             within = within[0]
 
-    # Check data
+    # Check data format
+    if all([v is None for v in [dv, within, subject]]):
+        # Convert from wide to long format
+        assert isinstance(data, pd.DataFrame)
+        data = data._get_numeric_data().dropna()
+        assert data.shape[0] > 2, 'Data must have at least 3 rows.'
+        assert data.shape[1] > 1, 'Data must contain at least two columns.'
+        data['Subj'] = np.arange(data.shape[0])
+        data = data.melt(id_vars='Subj', var_name='Within', value_name='DV')
+        subject, within, dv = 'Subj', 'Within', 'DV'
+
+    # Check dataframe
     _check_dataframe(dv=dv, within=within, data=data, subject=subject,
                      effects='within')
 

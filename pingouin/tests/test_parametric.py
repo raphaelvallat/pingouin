@@ -81,6 +81,15 @@ class TestParametric(TestCase):
                  correction=True, detailed=True)
         rm_anova(dv='Scores', within=['Time'], subject='Subject', data=df_nan,
                  export_filename='test_export.csv')
+        # Using a wide dataframe with NaN and compare with JASP
+        data = read_dataset('rm_anova_wide')
+        aov = data.rm_anova(detailed=True, correction=True)
+        assert aov.loc[0, 'F'] == 5.201
+        assert round(aov.loc[0, 'p-unc'], 3) == .007
+        assert aov.loc[0, 'np2'] == .394
+        assert aov.loc[0, 'eps'] == .694
+        assert aov.loc[0, 'W-spher'] == .307
+        assert round(aov.loc[0, 'p-GG-corr'], 3) == .017
 
     def test_rm_anova2(self):
         """Test function rm_anova2."""

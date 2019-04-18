@@ -34,7 +34,7 @@ pd.DataFrame.welch_anova = _welch_anova
 
 
 # Repeated measures ANOVA
-def _rm_anova(self, dv=None, within=None, subject=None, detailed=True,
+def _rm_anova(self, dv=None, within=None, subject=None, detailed=False,
               correction='auto', remove_na=True, export_filename=None):
     """One-way and two-way repeated measures ANOVA."""
     aov = rm_anova(data=self, dv=dv, within=within, subject=subject,

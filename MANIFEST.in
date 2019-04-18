@@ -17,5 +17,6 @@ include pingouin/datasets/mixed_anova.csv
 include pingouin/datasets/multivariate.csv
 include pingouin/datasets/pairwise_corr.csv
 include pingouin/datasets/rm_anova.csv
+include pingouin/datasets/rm_anova_wide.csv
 include pingouin/datasets/rm_corr.csv
 include pingouin/datasets/rm_missing.csv

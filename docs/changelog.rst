@@ -33,6 +33,7 @@ a. Several functions of pandas can now be directly used as Pandas DataFrame meth
 
 a. :py:func:`pingouin.pairwise_ttests` now returns the degrees of freedom (dof).
 b. Better rounding of float in :py:func:`pingouin.pairwise_ttests`.
+c. Support for wide-format data in :py:func:`pingouin.rm_anova`
 
 **Plotting**
 
