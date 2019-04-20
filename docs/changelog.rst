@@ -34,11 +34,12 @@ a. Several functions of pandas can now be directly used as Pandas DataFrame meth
 a. :py:func:`pingouin.pairwise_ttests` now returns the degrees of freedom (dof).
 b. Better rounding of float in :py:func:`pingouin.pairwise_ttests`.
 c. Support for wide-format data in :py:func:`pingouin.rm_anova`
+d. Removed the `remove_na` argument in :py:func:`pingouin.rm_anova` and :py:func:`pingouin.mixed_anova`, an automatic listwise deletion of missing values is applied (same behavior as JASP). Note that this was also the default behavior of Pingouin, but the user could also specify to not remove the missing values, which probably returned inaccurate results.
+e. The :py:func:`pingouin.ancova` function applies an automatic listwise deletion of missing values.
 
 **Plotting**
 
 a. Added :py:func:`pingouin.plot_shift` function.
-
 
 v0.2.4 (April 2019)
 -------------------

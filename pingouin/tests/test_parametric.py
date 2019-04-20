@@ -109,8 +109,7 @@ class TestParametric(TestCase):
     def test_mixed_anova(self):
         """Test function anova."""
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
-                          between='Group', data=df, correction='auto',
-                          remove_na=False)
+                          between='Group', data=df, correction='auto')
         # Compare with JASP
         assert np.allclose(aov.loc[0, 'F'].round(3), 5.052)
         assert np.allclose(aov.loc[1, 'F'].round(3), 4.027)
@@ -118,7 +117,7 @@ class TestParametric(TestCase):
 
         mixed_anova(dv='Scores', within='Time', subject='Subject',
                     between='Group', data=df_nan, correction=True,
-                    remove_na=True, export_filename='test_export.csv')
+                    export_filename='test_export.csv')
 
     def test_ancova(self):
         """Test function ancova."""

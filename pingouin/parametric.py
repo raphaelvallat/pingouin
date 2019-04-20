@@ -4,7 +4,7 @@ import warnings
 import numpy as np
 import pandas as pd
 from scipy.stats import f
-from pingouin import (_check_dataframe, remove_rm_na, remove_na,
+from pingouin import (_check_dataframe, remove_rm_na, remove_na, _flatten_list,
                       _export_table, bayesfactor_ttest, epsilon, sphericity)
 
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova",
@@ -265,7 +265,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
 
 def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
-             remove_na=True, detailed=False, export_filename=None):
+             detailed=False, export_filename=None):
     """One-way and two-way repeated measures ANOVA.
 
     Parameters
@@ -292,17 +292,6 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         If True, return Greenhouse-Geisser corrected p-value.
         If 'auto' (default), compute Mauchly's test of sphericity to determine
         whether the p-values needs to be corrected.
-    remove_na : boolean
-        If True, automatically remove from the analysis subjects with one or
-        more missing values::
-
-            Ss    x1       x2       x3
-            1     5.0      4.2      nan
-            2     4.6      3.6      3.9
-
-        In this example, if ``remove_na`` is True, Ss 1 will be removed from
-        the ANOVA because of the x3 missing value. If False, the two
-        non-missing values will be included in the analysis.
     detailed : boolean
         If True, return a full ANOVA table
     export_filename : string
@@ -361,7 +350,8 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
 
     .. math::
 
-        F^* = \\frac{MS_{treatment}}{MS_{error}}\\frac{\\frac{SS_{treatment}}
+        F^* = \\frac{MS_{treatment}}{MS_{error}} =
+        \\frac{\\frac{SS_{treatment}}
         {r-1}}{\\frac{SS_{error}}{(n - 1)(r - 1)}}
 
     and the p-value can be calculated using a F-distribution with
@@ -381,8 +371,10 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     as the ezANOVA R package). As such, results can differ from those of JASP.
     If you can, always double-check the results.
 
-    Missing values are automatically removed. For more details, see the
-    :py:func:`pingouin.remove_rm_na` function.
+    Missing values are automatically removed (listwise deletion) using the
+    :py:func:`pingouin.remove_rm_na` function. This could drastically decrease
+    the power of the ANOVA if many missing values are present. In that case,
+    it might be better to use linear mixed effects models.
 
     References
     ----------
@@ -454,7 +446,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     data = data.groupby([subject, within]).mean().reset_index()
 
     # Remove NaN
-    if remove_na and data[dv].isnull().any():
+    if data[dv].isnull().any():
         data = remove_rm_na(dv=dv, within=within, subject=subject,
                             data=data[[subject, within, dv]])
 
@@ -1195,7 +1187,7 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
 
 
 def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
-                correction='auto', remove_na=True, export_filename=None):
+                correction='auto', export_filename=None):
     """Mixed-design (split-plot) ANOVA.
 
     Parameters
@@ -1215,17 +1207,6 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
         If True, return Greenhouse-Geisser corrected p-value.
         If 'auto' (default), compute Mauchly's test of sphericity to determine
         whether the p-values needs to be corrected.
-    remove_na : boolean
-        If True, automatically remove from the analysis subjects with one or
-        more missing values::
-
-            Ss    x1       x2       x3
-            1     5.0      4.2      nan
-            2     4.6      3.6      3.9
-
-        In this example, if remove_na == True, Ss 1 will be removed from the
-        ANOVA because of the x3 missing value. If False, the two non-missing
-        values will be included in the analysis.
     export_filename : string
         Filename (without extension) for the output file.
         If None, do not export the table.
@@ -1258,6 +1239,11 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
     -----
     Results have been tested against R and JASP.
 
+    Missing values are automatically removed (listwise deletion) using the
+    :py:func:`pingouin.remove_rm_na` function. This could drastically decrease
+    the power of the ANOVA if many missing values are present. In that case,
+    it might be better to use linear mixed effects models.
+
     Examples
     --------
     Compute a two-way mixed model ANOVA.
@@ -1280,7 +1266,7 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
     data = data.groupby([subject, within, between]).mean().reset_index()
 
     # Remove NaN
-    if remove_na and data[dv].isnull().any():
+    if data[dv].isnull().any():
         data = remove_rm_na(dv=dv, within=within, subject=subject,
                             data=data[[subject, within, between, dv]])
 
@@ -1288,7 +1274,7 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
     grandmean = data[dv].mean()
     # Extract main effects of time and between
     mtime = rm_anova(dv=dv, within=within, subject=subject, data=data,
-                     correction=correction, remove_na=False, detailed=True)
+                     correction=correction, detailed=True)
     mbetw = anova(dv=dv, between=between, data=data, detailed=True)
     # Extract SS total, residuals and interactions
     grp = data.groupby([between, within])[dv]
@@ -1414,6 +1400,8 @@ def ancova(dv=None, covar=None, between=None, data=None,
     function. However, if there are more than one covariate, Pingouin will
     use the statsmodels package to compute the ANCOVA.
 
+    Rows with missing values are automatically removed (listwise deletion).
+
     See Also
     --------
     anova : One-way and two-way ANOVA
@@ -1441,6 +1429,16 @@ def ancova(dv=None, covar=None, between=None, data=None,
     2       BMI    60.014   1   1.054  0.312842
     3  Residual  1708.509  30     NaN       NaN
     """
+    # Safety checks
+    assert isinstance(data, pd.DataFrame)
+    assert dv in data, '%s is not in data.' % dv
+    assert between in data, '%s is not in data.' % between
+    assert isinstance(covar, (str, list)), 'covar must be a str or a list.'
+
+    # Drop missing values
+    data = data[_flatten_list([dv, between, covar])].dropna()
+
+    # Check the number of covariates
     if isinstance(covar, list):
         if len(covar) > 1:
             return ancovan(dv=dv, covar=covar, between=between, data=data,
