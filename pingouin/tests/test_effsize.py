@@ -20,12 +20,12 @@ class TestEffsize(TestCase):
 
     def test_compute_esci(self):
         """Test function compute_esci"""
-        compute_esci(stat=.6, nx=30, ny=30, eftype='r')
+        compute_esci(stat=.6, nx=30, eftype='r')
         compute_esci(stat=.4, nx=len(x), ny=len(y), confidence=.99, decimals=4)
         compute_esci(stat=.6, nx=30, ny=30, eftype='cohen')
         # Compare with R
-        r, nx, ny = 0.5543563, 6, 6
-        ci = compute_esci(stat=r, nx=nx, ny=ny, eftype='r')
+        r, nx = 0.5543563, 6
+        ci = compute_esci(stat=r, nx=nx, eftype='r')
         assert np.allclose(ci, [-0.47, 0.94])
         # One sample / paired T-test
         ci = compute_esci(-0.57932, nx=40, ny=1)

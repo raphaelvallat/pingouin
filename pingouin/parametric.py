@@ -272,28 +272,30 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     ----------
     data : pandas DataFrame
         DataFrame. Note that this function can also directly be used as a
-        Pandas method, in which case this argument is no longer needed.
+        :py:class:`pandas.DataFrame` method, in which case this argument is no
+        longer needed.
         Both wide and long-format dataframe are supported for one-way repeated
-        measures ANOVA. Data must be in long format for two-way repeated
-        measures.
+        measures ANOVA. However, ``data`` must be in long format for two-way
+        repeated measures.
     dv : string
         Name of column containing the dependant variable (only required if
         ``data`` is in long format).
     within : string
         Name of column containing the within factor (only required if ``data``
         is in long format).
-        If within is a single string, then compute a one-way repeated
-        measures ANOVA, if within is a list with two strings, compute a two-way
-        repeated measures ANOVA.
+        If ``within`` is a single string, then compute a one-way repeated
+        measures ANOVA, if ``within`` is a list with two strings,
+        compute a two-way repeated measures ANOVA.
     subject : string
         Name of column containing the subject identifier (only required if
         ``data`` is in long format).
     correction : string or boolean
-        If True, return Greenhouse-Geisser corrected p-value.
+        If True, also return the Greenhouse-Geisser corrected p-value.
         If 'auto' (default), compute Mauchly's test of sphericity to determine
-        whether the p-values needs to be corrected.
+        whether the p-values needs to be corrected
+        (see :py:func:`pingouin.sphericity`).
     detailed : boolean
-        If True, return a full ANOVA table
+        If True, return a full ANOVA table.
     export_filename : string
         Filename (without extension) for the output file.
         If None, do not export the table.
@@ -358,10 +360,8 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     :math:`v_{treatment} = r - 1` and
     :math:`v_{error} = (n - 1)(r - 1)` degrees of freedom.
 
-    The effect size reported in Pingouin is the partial eta-square.
-    However, one should keep in mind that for one-way repeated-measures ANOVA,
-    partial eta-square is the same as eta-square
-    (Bakeman 2005; Richardson 2011):
+    The effect size reported in Pingouin is the partial eta-square, which is
+    equivalent to eta-square for one-way repeated measures ANOVA.
 
     .. math:: \\eta_p^2 = \\frac{SS_{treatment}}{SS_{treatment} + SS_{error}}
 
@@ -386,6 +386,8 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
            measures of effect size in educational research. Educational
            Research Review, 6(2), 135-147.
 
+    .. [3] https://en.wikipedia.org/wiki/Repeated_measures_design
+
     Examples
     --------
     One-way repeated measures ANOVA using a wide-format dataset
@@ -406,13 +408,13 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     0  Disgustingness   27.485   1  27.485  12.044  0.000793016  0.116   1
     1           Error  209.952  92   2.282       -            -      -   -
 
-    Two-way repeated-measures ANOVA.
+    Two-way repeated-measures ANOVA
 
     >>> aov = pg.rm_anova(dv='DesireToKill',
     ...                   within=['Disgustingness', 'Frighteningness'],
     ...                   subject='Subject', data=df)
 
-    This function can also directly be used as a Pandas method
+    As a :py:class:`pandas.DataFrame` method
 
     >>> df.rm_anova(dv='DesireToKill', within='Disgustingness',
     ...             subject='Subject',  detailed=True)

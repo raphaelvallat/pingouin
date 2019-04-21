@@ -127,17 +127,17 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
     >>> print(stat, ci)
     0.1537753990658328 [-0.68  0.99]
     """
+    from scipy.stats import norm
     # Safety check
     assert eftype.lower() in['r', 'pearson', 'spearman', 'cohen',
                              'd', 'g', 'hedges']
-    assert stat is not None and nx is not None and ny is not None
+    assert stat is not None and nx is not None
     assert isinstance(confidence, float)
     assert 0 < confidence < 1
 
     # Note that we are using a normal dist and not a T dist:
     # from scipy.stats import t
     # crit = np.abs(t.ppf((1 - confidence) / 2), dof)
-    from scipy.stats import norm
     crit = np.abs(norm.ppf((1 - confidence) / 2))
 
     if eftype.lower() in ['r', 'pearson', 'spearman']:

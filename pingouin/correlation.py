@@ -622,48 +622,67 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     Parameters
     ----------
     data : pd.DataFrame
-        Dataframe containing the variables
+        Dataframe.
     x, y : string
-        Name of columns in data containing the two dependent variables
+        Name of columns in ``data`` containing the two dependent variables.
     subject : string
-        Name of column in data containing the subject indicator
+        Name of column in ``data`` containing the subject indicator.
     tail : string
         Specify whether to return 'one-sided' or 'two-sided' p-value.
 
     Returns
     -------
-    r : float
-        Repeated measures correlation coefficient
-    p : float
-        P-value
-    dof : int
-        Degrees of freedom
+    stats : pandas DataFrame
+        Test summary ::
+
+        'r' : Repeated measures correlation coefficient
+        'dof' : Degrees of freedom
+        'pval' : one or two tailed p-value
+        'CI95' : 95% parametric confidence intervals
+        'power' : achieved power of the test (= 1 - type II error).
 
     Notes
     -----
-    Repeated measures correlation [1]_ is a statistical technique
+    Repeated measures correlation (rmcorr) is a statistical technique
     for determining the common within-individual association for paired
     measures assessed on two or more occasions for multiple individuals.
 
+    From Bakdash and Marusich (2017):
+
+        "Rmcorr accounts for non-independence among observations using analysis
+        of covariance (ANCOVA) to statistically adjust for inter-individual
+        variability. By removing measured variance between-participants,
+        rmcorr provides the best linear fit for each participant using parallel
+        regression lines (the same slope) with varying intercepts.
+        Like a Pearson correlation coefficient, the rmcorr coefficient
+        is bounded by − 1 to 1 and represents the strength of the linear
+        association between two variables."
+
     Results have been tested against the `rmcorr` R package.
 
-    Please note that NaN are automatically removed from the dataframe.
+    Please note that NaN are automatically removed from the dataframe
+    (listwise deletion).
 
     References
     ----------
-
     .. [1] Bakdash, J.Z., Marusich, L.R., 2017. Repeated Measures Correlation.
-       Front. Psychol. 8, 456. https://doi.org/10.3389/fpsyg.2017.00456
+           Front. Psychol. 8, 456. https://doi.org/10.3389/fpsyg.2017.00456
+
+    .. [2] Bland, J. M., & Altman, D. G. (1995). Statistics notes: Calculating
+           correlation coefficients with repeated observations:
+           Part 1—correlation within subjects. Bmj, 310(6977), 446.
+
+    .. [3] https://github.com/cran/rmcorr
 
     Examples
     --------
-    1. Repeated measures correlation
-
-    >>> from pingouin import rm_corr, read_dataset
-    >>> df = read_dataset('rm_corr')
-    >>> rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
-    (-0.507, 0.0008470789034072481, 38)
+    >>> import pingouin as pg
+    >>> df = pg.read_dataset('rm_corr')
+    >>> pg.rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
+                 r  dof      pval           CI95%  power
+    rm_corr -0.507   38  0.000847  [-0.71, -0.23]   0.93
     """
+    from pingouin import ancova, power_corr
     # Safety checks
     assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame'
     assert x in data, 'The %s column is not in data.' % x
@@ -671,42 +690,27 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     assert subject in data, 'The %s column is not in data.' % subject
     if data[subject].nunique() < 3:
         raise ValueError('rm_corr requires at least 3 unique subjects.')
-    # Remove Nans
+    # Remove missing values
     data = data[[x, y, subject]].dropna(axis=0)
 
-    # Using STATSMODELS
-    # from pingouin.utils import _is_statsmodels_installed
-    # _is_statsmodels_installed(raise_error=True)
-    # from statsmodels.api import stats
-    # from statsmodels.formula.api import ols
-    # # ANCOVA model
-    # formula = y + ' ~ ' + 'C(' + subject + ') + ' + x
-    # model = ols(formula, data=data).fit()
-    # table = stats.anova_lm(model, typ=3)
-    # # Extract the sign of the correlation and dof
-    # sign = np.sign(model.params[x])
-    # dof = int(table.loc['Residual', 'df'])
-    # # Extract correlation coefficient from sum of squares
-    # ssfactor = table.loc[x, 'sum_sq']
-    # sserror = table.loc['Residual', 'sum_sq']
-    # rm = sign * np.sqrt(ssfactor / (ssfactor + sserror))
-    # # Extract p-value
-    # pval = table.loc[x, 'PR(>F)']
-    # pval *= 0.5 if tail == 'one-sided' else 1
-
     # Using PINGOUIN
-    from pingouin import ancova
     aov, bw = ancova(dv=y, covar=x, between=subject, data=data,
                      return_bw=True)
     sign = np.sign(bw)
     dof = int(aov.loc[2, 'DF'])
+    n = dof + 2
     ssfactor = aov.loc[1, 'SS']
     sserror = aov.loc[2, 'SS']
     rm = sign * np.sqrt(ssfactor / (ssfactor + sserror))
     pval = aov.loc[1, 'p-unc']
     pval *= 0.5 if tail == 'one-sided' else 1
-
-    return np.round(rm, 3), pval, dof
+    ci = compute_esci(stat=rm, nx=n, eftype='pearson').tolist()
+    pwr = power_corr(r=rm, n=n, tail=tail)
+    # Convert to Dataframe
+    stats = pd.DataFrame({"r": round(rm, 3), "dof": int(dof),
+                          "pval": pval, "CI95%": str(ci),
+                          "power": round(pwr, 3)}, index=["rm_corr"])
+    return stats
 
 
 def _dcorr(y, n2, A, dcov2_xx):

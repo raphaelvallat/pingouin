@@ -325,7 +325,9 @@ def epsilon(data, correction='gg'):
     Parameters
     ----------
     data : pd.DataFrame
-        DataFrame containing the repeated measurements (n_subj, n_groups).
+        DataFrame containing the repeated measurements.
+        ``data`` must be in wide-format. To convert from wide to long format,
+        use the :py:func:`pandas.pivot_table` function.
     correction : string
         Specify the epsilon version ::
 
@@ -333,12 +335,13 @@ def epsilon(data, correction='gg'):
             'hf' : Huynh-Feldt
             'lb' : Lower bound
 
+    Returns
+    -------
+    eps : float
+        Epsilon adjustement factor.
+
     Notes
     -----
-    Note that data are NOT expected to be in long format but rather with
-    shape (n_subj, n_groups). If your data are in long format, use the
-    pandas pivot function first.
-
     The **lower bound** for epsilon is:
 
     .. math:: lb = \\frac{1}{k - 1}
@@ -366,13 +369,9 @@ def epsilon(data, correction='gg'):
 
     where :math:`n` is the number of subjects.
 
-    Inspired from
-    http://www.real-statistics.com/anova-repeated-measures/sphericity/
-
-    Returns
-    -------
-    eps : float
-        Epsilon adjustement factor.
+    References
+    ----------
+    .. [1] http://www.real-statistics.com/anova-repeated-measures/sphericity/
 
     Examples
     --------
@@ -423,10 +422,8 @@ def sphericity(data, method='mauchly', alpha=.05):
     ----------
     data : pd.DataFrame
         DataFrame containing the repeated measurements.
-
-        Note that data are NOT expected to be in long format but rather with
-        shape (n_subj, n_groups). If your data are in long format, use the
-        pandas pivot function first.
+        ``data`` must be in wide-format. To convert from wide to long format,
+        use the :py:func:`pandas.pivot_table` function.
     method : str
         Method to compute sphericity ::
 

@@ -10,6 +10,10 @@ What's new
 v0.2.5 (May 2019)
 -----------------
 
+**Correlation**
+
+a. The :py:func:`pingouin.rm_corr` function now returns a :py:class:`pandas.DataFrame` with the r-value, degrees of freedom, p-value, confidence intervals and power.
+
 **Effect size**
 
 a. :py:func:`pingouin.compute_esci` now works for paired and one-sample Cohen d.
@@ -34,8 +38,8 @@ a. Several functions of pandas can now be directly used as Pandas DataFrame meth
 a. :py:func:`pingouin.pairwise_ttests` now returns the degrees of freedom (dof).
 b. Better rounding of float in :py:func:`pingouin.pairwise_ttests`.
 c. Support for wide-format data in :py:func:`pingouin.rm_anova`
-d. Removed the `remove_na` argument in :py:func:`pingouin.rm_anova` and :py:func:`pingouin.mixed_anova`, an automatic listwise deletion of missing values is applied (same behavior as JASP). Note that this was also the default behavior of Pingouin, but the user could also specify to not remove the missing values, which probably returned inaccurate results.
-e. The :py:func:`pingouin.ancova` function applies an automatic listwise deletion of missing values.
+d. Removed the `remove_na` argument in :py:func:`pingouin.rm_anova` and :py:func:`pingouin.mixed_anova`, an automatic listwise deletion of missing values is applied (same behavior as JASP). Note that this was also the default behavior of Pingouin, but the user could also specify not to remove the missing values, which most likely returned inaccurate results.
+e. The :py:func:`pingouin.ancova` function now applies an automatic listwise deletion of missing values.
 
 **Plotting**
 

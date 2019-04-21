@@ -74,10 +74,11 @@ class TestCorrelation(TestCase):
         """Test function rm_corr"""
         df = read_dataset('rm_corr')
         # Test again rmcorr R package.
-        r, p, dof = rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
-        assert r == -0.507
-        assert dof == 38
-        assert np.round(p, 3) == 0.001
+        stats = rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
+        assert stats.loc["rm_corr", "r"] == -0.507
+        assert stats.loc["rm_corr", "dof"] == 38
+        assert stats.loc["rm_corr", "CI95%"] == str([-0.71, -0.23])
+        assert round(stats.loc["rm_corr", "pval"], 3) == 0.001
         # Test with less than 3 subjects (same behavior as R package)
         with pytest.raises(ValueError):
             rm_corr(data=df[df['Subject'].isin([1, 2])], x='pH', y='PacO2',
