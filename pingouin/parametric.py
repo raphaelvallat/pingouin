@@ -108,6 +108,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     The scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor is approximated using
     the :py:func:`pingouin.bayesfactor_ttest` function.
 
+    Results have been tested against JASP and the `t.test` R function.
+
     References
     ----------
     .. [1] https://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm
