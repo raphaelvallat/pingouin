@@ -40,6 +40,8 @@ b. Better rounding of float in :py:func:`pingouin.pairwise_ttests`.
 c. Support for wide-format data in :py:func:`pingouin.rm_anova`
 d. Removed the `remove_na` argument in :py:func:`pingouin.rm_anova` and :py:func:`pingouin.mixed_anova`, an automatic listwise deletion of missing values is applied (same behavior as JASP). Note that this was also the default behavior of Pingouin, but the user could also specify not to remove the missing values, which most likely returned inaccurate results.
 e. The :py:func:`pingouin.ancova` function now applies an automatic listwise deletion of missing values.
+f. :py:func:`pingouin.ttest` now returns the confidence intervals around the T-values.
+g. Fixed error in one-sample one-sided T-test (:py:func:`pingouin.ttest`), the two-sided p-value was divided by 4 and not by 2.
 
 **Plotting**
 

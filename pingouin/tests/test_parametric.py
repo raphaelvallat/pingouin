@@ -33,6 +33,31 @@ class TestParametric(TestCase):
         ttest(x, y, paired=False, correction=True)
         ttest(x, y, paired=False, r=0.5)
         ttest(x, h, paired=True)
+        # Compare with R t.test
+        a = [4, 7, 8, 6, 3, 2]
+        b = [6, 8, 7, 10, 11, 9]
+        tt = ttest(a, b, paired=False, correction=False, tail='two-sided')
+        assert tt.loc['T-test', 'T'] == -2.842
+        assert tt.loc['T-test', 'dof'] == 10
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.01749
+        np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [-6.24, -0.76])
+        # - Two sample unequal variances
+        tt = ttest(a, b, paired=False, correction=True, tail='two-sided')
+        assert tt.loc['T-test', 'dof'] == 9.49
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.01837
+        np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [-6.26, -0.74])
+        # - Paired
+        tt = ttest(a, b, paired=True, correction=False, tail='two-sided')
+        assert tt.loc['T-test', 'T'] == -2.445
+        assert tt.loc['T-test', 'dof'] == 5
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.05833
+        np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [-7.18, 0.18])
+        # - One sample one-sided
+        tt = ttest(a, y=0, paired=False, correction=False, tail='one-sided')
+        assert tt.loc['T-test', 'T'] == 5.175
+        assert tt.loc['T-test', 'dof'] == 5
+        assert round(tt.loc['T-test', 'p-val'], 3) == 0.002
+        np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [3.05, 6.95])
 
     def test_anova(self):
         """Test function anova."""

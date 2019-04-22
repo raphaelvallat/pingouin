@@ -55,8 +55,8 @@
 
 Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
 
-For example, the :py:func:`scipy.stats.ttest_ind` function returns only the T-value and the p-value. By contrast,
-the :py:func:`pingouin.ttest` function returns the T-value, p-value, degrees of freedom, effect size (Cohen's d), statistical power and Bayes Factor (BF10) of the test.
+For example, the :code:`ttest_ind` function of SciPy returns only the T-value and the p-value. By contrast,
+the :code:`ttest` function of Pingouin returns the T-value, p-value, degrees of freedom, effect size (Cohen's d), 95% confidence intervals, statistical power and Bayes Factor (BF10) of the test.
 
 Installation
 ============
@@ -142,11 +142,11 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 .. table:: Output
    :widths: auto
 
-   ======  =====  =========  =======  =========  ======  =======
-        T    dof  tail         p-val    cohen-d    BF10    power
-   ======  =====  =========  =======  =========  ======  =======
-   -3.401     58  two-sided    0.001      0.878  26.155    0.917
-   ======  =====  =========  =======  =========  ======  =======
+   ======  =====  =========  =======  =============  =========  ======  =======
+        T    dof  tail         p-val  CI95%            cohen-d    BF10    power
+   ======  =====  =========  =======  =============  =========  ======  =======
+   -3.401     58  two-sided    0.001  [-1.68 -0.43]      0.878  26.155    0.917
+   ======  =====  =========  =======  =============  =========  ======  =======
 
 ------------
 

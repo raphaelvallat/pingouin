@@ -47,7 +47,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         'p-val' : p-value
         'dof' : degrees of freedom
         'cohen-d' : Cohen d effect size
-        'CI95%' : 95% confidence intervals of Cohen d effect size
+        'CI95%' : 95% confidence intervals of T value
         'power' : achieved power of the test ( = 1 - type II error)
         'BF10' : Bayes Factor of the alternative hypothesis
 
@@ -131,47 +131,42 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     >>> from pingouin import ttest
     >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
-    >>> ttest(x, 4)
-                T  dof       tail     p-val  cohen-d   BF10  power
-    T-test  1.397    4  two-sided  0.234824    0.625  0.766  0.191
+    >>> ttest(x, 4).round(2)
+              T  dof       tail  p-val          CI95%  cohen-d   BF10  power
+    T-test  1.4    4  two-sided   0.23  [-1.68, 5.08]     0.62  0.766   0.19
 
     2. Paired two-sample T-test (one-tailed).
 
     >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
-    >>> ttest(pre, post, paired=True, tail='one-sided')
-                T  dof       tail     p-val  cohen-d   BF10  power
-    T-test -2.308    4  one-sided  0.041114    0.251  3.122  0.121
+    >>> ttest(pre, post, paired=True, tail='one-sided').round(2)
+               T  dof       tail  p-val           CI95%  cohen-d   BF10  power
+    T-test -2.31    4  one-sided   0.04  [-1.35, -0.05]     0.25  3.122   0.12
 
     3. Paired two-sample T-test with missing values.
 
     >>> import numpy as np
     >>> pre = [5.5, 2.4, np.nan, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
-    >>> ttest(pre, post, paired=True)
-                T  dof       tail     p-val  cohen-d   BF10  power
-    T-test -5.902    3  two-sided  0.009713    0.306  7.169  0.065
+    >>> stats = ttest(pre, post, paired=True)
 
     4. Independent two-sample T-test (equal sample size).
 
     >>> np.random.seed(123)
     >>> x = np.random.normal(loc=7, size=20)
     >>> y = np.random.normal(loc=4, size=20)
-    >>> ttest(x, y, correction='auto')
-                T  dof       tail         p-val  cohen-d       BF10  power
-    T-test  9.106   38  two-sided  4.306971e-11     2.88  1.366e+08    1.0
+    >>> stats = ttest(x, y, correction='auto')
 
     5. Independent two-sample T-test (unequal sample size).
 
     >>> np.random.seed(123)
     >>> x = np.random.normal(loc=7, size=20)
     >>> y = np.random.normal(loc=6.5, size=15)
-    >>> ttest(x, y, correction='auto')
-                T  dof   dof-corr       tail     p-val  cohen-d   BF10  power
-    T-test  2.327   33  30.745725  two-sided  0.026748    0.792  2.454  0.614
+    >>> stats = ttest(x, y, correction='auto')
     """
-    from scipy.stats import ttest_rel, ttest_ind, ttest_1samp
-    from scipy.stats.stats import _unequal_var_ttest_denom
+    from scipy.stats import t, ttest_rel, ttest_ind, ttest_1samp
+    from scipy.stats.stats import (_unequal_var_ttest_denom,
+                                   _equal_var_ttest_denom)
     from pingouin import (power_ttest, power_ttest2n, compute_effsize)
     x = np.asarray(x)
     y = np.asarray(y)
@@ -184,17 +179,17 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     # Remove rows with missing values
     x, y = remove_na(x, y, paired=paired)
     nx, ny = x.size, y.size
-    dof_corr = None
 
     if ny == 1:
         # Case one sample T-test
         tval, pval = ttest_1samp(x, y)
         dof = nx - 1
-        pval = pval / 2 if tail == 'one-sided' else pval
+        se = np.sqrt(x.var(ddof=1) / nx)
     if ny > 1 and paired is True:
         # Case paired two samples T-test
         tval, pval = ttest_rel(x, y)
         dof = nx - 1
+        se = np.sqrt(np.var(x - y, ddof=1) / nx)
         bf = bayesfactor_ttest(tval, nx, ny, paired=True, r=r)
     elif ny > 1 and paired is False:
         dof = nx + ny - 2
@@ -205,9 +200,10 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
             tval, pval = ttest_ind(x, y, equal_var=False)
             # Compute sample standard deviation
             # dof are approximated using Welch–Satterthwaite equation
-            dof_corr, _ = _unequal_var_ttest_denom(vx, nx, vy, ny)
+            dof, se = _unequal_var_ttest_denom(vx, nx, vy, ny)
         else:
             tval, pval = ttest_ind(x, y, equal_var=True)
+            _, se = _equal_var_ttest_denom(vx, nx, vy, ny)
 
     pval = pval / 2 if tail == 'one-sided' else pval
 
@@ -217,6 +213,12 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     # 95% confidence interval for the effect size
     # ci = compute_esci(d, nx, ny, paired=paired, eftype='cohen',
     #                   confidence=.95)
+
+    # 95% confidence interval for the T-value
+    # Compare to the t.test r function
+    conf = 0.975 if tail == 'two-sided' else 0.95
+    tcrit = t.ppf(conf, dof)
+    ci = np.array([tval - tcrit, tval + tcrit]) * se
 
     # Achieved power
     if ny == 1:
@@ -242,22 +244,19 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     bf = bayesfactor_ttest(tval, nx, ny, paired=paired, tail=tail, r=r)
 
     # Create output dictionnary
-    stats = {'dof': dof,
+    stats = {'dof': np.round(dof, 2),
              'T': round(tval, 3),
              'p-val': pval,
              'tail': tail,
              'cohen-d': round(abs(d), 3),
-             # 'CI95%': [ci],
+             'CI95%': [np.round(ci, 2)],
              'power': round(power, 3),
              'BF10': bf}
-
-    if dof_corr is not None:
-        stats['dof-corr'] = dof_corr
 
     # Convert to dataframe
     stats = pd.DataFrame.from_records(stats, index=['T-test'])
 
-    col_order = ['T', 'dof', 'dof-corr', 'tail', 'p-val', 'cohen-d', 'BF10',
+    col_order = ['T', 'dof', 'tail', 'p-val', 'CI95%', 'cohen-d', 'BF10',
                  'power']
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
