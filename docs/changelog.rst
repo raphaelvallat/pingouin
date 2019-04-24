@@ -17,8 +17,9 @@ a. Fixed error in p-values for one-sample one-sided T-test (:py:func:`pingouin.t
 **New functions**
 
 a. Added :py:func:`pingouin.multivariate_ttest` (Hotelling T-squared) test.
-b. Added :py:func:`pingouin.plot_shift` function.
-c. Several functions of pandas can now be directly used as :py:class:`pandas.DataFrame` methods.
+b. Added :py:func:`pingouin.cronbach_alpha` function.
+c. Added :py:func:`pingouin.plot_shift` function.
+d. Several functions of pandas can now be directly used as :py:class:`pandas.DataFrame` methods.
 
 **Enhancements**
 
