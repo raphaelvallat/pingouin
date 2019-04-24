@@ -10,6 +10,10 @@ from scipy.stats import linregress
 from sklearn.linear_model import LinearRegression
 
 df = read_dataset('mediation')
+df_nan = df.copy()
+df_nan.loc[1, 'M'] = np.nan
+df_nan.loc[10, 'X'] = np.nan
+df_nan.loc[12, ['Y', 'Ybin']] = np.nan
 
 
 class TestRegression(TestCase):
@@ -55,6 +59,9 @@ class TestRegression(TestCase):
         linear_regression(df[['X', 'M']], df['Y'], alpha=0.01)
         linear_regression(df[['X', 'M']], df['Y'], alpha=0.10)
 
+        # With missing values
+        linear_regression(df_nan[['X', 'M']], df_nan['Y'], remove_na=True)
+
     def test_logistic_regression(self):
         """Test function logistic_regression."""
 
@@ -83,6 +90,9 @@ class TestRegression(TestCase):
         # Test other arguments
         c = logistic_regression(df[['X', 'M']], df['Ybin'], coef_only=True)
         assert_equal(np.round(c, 1), [1.3, -0.2, -0.0])
+
+        # With missing values
+        logistic_regression(df_nan[['X', 'M']], df_nan['Ybin'], remove_na=True)
 
         # Test **kwargs
         logistic_regression(X, y, solver='sag', C=10, max_iter=10000)

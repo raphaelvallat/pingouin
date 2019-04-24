@@ -1,13 +1,14 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import t, norm
+from pingouin.utils import remove_na as rm_na
 from pingouin.utils import _flatten_list as _fl
 
 __all__ = ['linear_regression', 'logistic_regression', 'mediation_analysis']
 
 
 def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
-                      as_dataframe=True):
+                      as_dataframe=True, remove_na=False):
     """(Multiple) Linear regression.
 
     Parameters
@@ -27,6 +28,9 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
         CI = [alpha / 2 ; 1 - alpha / 2]
     as_dataframe : bool
         If True, returns a pandas DataFrame. If False, returns a dictionnary.
+    remove_na : bool
+        If True, apply a listwise deletion of missing values (i.e. the entire
+        row is removed).
 
     Returns
     -------
@@ -125,6 +129,13 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     5. Return a dictionnary instead of a DataFrame
 
     >>> lm_dict = linear_regression(X, y, as_dataframe=False)
+
+    6. Remove missing values
+
+    >>> X[4, 1] = np.nan
+    >>> y[7] = np.nan
+    >>> linear_regression(X, y, remove_na=True, coef_only=True)
+    array([4.64069731, 0.35455398, 0.1888135 ])
     """
     # Extract names if X is a Dataframe or Series
     if isinstance(X, pd.DataFrame):
@@ -135,6 +146,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
         names = []
 
     assert 0 < alpha < 1
+    assert y.ndim == 1, 'y must be one-dimensional.'
 
     # Convert input to numpy array
     X = np.asarray(X)
@@ -145,6 +157,9 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
         X = X[..., np.newaxis]
 
     # Check for NaN / Inf
+    if remove_na:
+        X, y = rm_na(X, y[..., np.newaxis], paired=True, axis='rows')
+        y = np.squeeze(y)
     y_gd = np.isfinite(y).all()
     X_gd = np.isfinite(X).all()
     assert y_gd, 'Target (y) contains NaN or Inf. Please remove them.'
@@ -209,7 +224,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
 
 
 def logistic_regression(X, y, coef_only=False, alpha=0.05,
-                        as_dataframe=True, **kwargs):
+                        as_dataframe=True, remove_na=False, **kwargs):
     """(Multiple) Binary logistic regression.
 
     Parameters
@@ -226,6 +241,9 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         CI = [alpha / 2 ; 1 - alpha / 2]
     as_dataframe : bool
         If True, returns a pandas DataFrame. If False, returns a dictionnary.
+    remove_na : bool
+        If True, apply a listwise deletion of missing values (i.e. the entire
+        row is removed).
     **kwargs : optional
         Optional arguments passed to sklearn.linear_model.LogisticRegression
 
@@ -314,19 +332,20 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         names = []
 
     assert 0 < alpha < 1
+    assert y.ndim == 1, 'y must be one-dimensional.'
 
     # Convert to numpy array
     X = np.asarray(X)
     y = np.asarray(y)
-
-    if np.unique(y).size != 2:
-        raise ValueError('Dependent variable must be binary.')
 
     # Add axis if only one-dimensional array
     if X.ndim == 1:
         X = X[..., np.newaxis]
 
     # Check for NaN /  Inf
+    if remove_na:
+        X, y = rm_na(X, y[..., np.newaxis], paired=True, axis='rows')
+        y = np.squeeze(y)
     y_gd = np.isfinite(y).all()
     X_gd = np.isfinite(X).all()
     assert y_gd, 'Target variable contains NaN or Inf. Please remove them.'
@@ -334,6 +353,10 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
 
     # Check that X and y have same length
     assert y.shape[0] == X.shape[0], 'X and y must have same number of samples'
+
+    # Check that y is binary
+    if np.unique(y).size != 2:
+        raise ValueError('Dependent variable must be binary.')
 
     if not names:
         names = ['x' + str(i + 1) for i in range(X.shape[1])]
@@ -528,6 +551,11 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     model allows one mediator to causally influence another."
     (Hayes and Rockwood 2017)
 
+    This function wll only work well if the outcome variable is continuous.
+    It does not support binary or ordinal outcome variable. For more
+    advanced mediation models, please refer to the `lavaan` or `mediation` R
+    packages, or the PROCESS macro for SPSS.
+
     The two-sided p-value of the indirect effect is computed using the
     bootstrap distribution, as in the mediation R package. However, the p-value
     should be interpreted with caution since it is a) not constructed
@@ -556,7 +584,9 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
 
     .. [4] https://cran.r-project.org/web/packages/mediation/mediation.pdf
 
-    .. [5] https://github.com/rmill040/pymediation
+    .. [5] http://lavaan.ugent.be/tutorial/mediation.html
+
+    .. [6] https://github.com/rmill040/pymediation
 
     Examples
     --------

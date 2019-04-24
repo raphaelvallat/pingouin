@@ -10,42 +10,34 @@ What's new
 v0.2.5 (May 2019)
 -----------------
 
-**Correlation**
+**Bug fixes**
+
+a. Fixed error in p-values for one-sample one-sided T-test (:py:func:`pingouin.ttest`), the two-sided p-value was divided by 4 and not by 2, resulting in inaccurate (smaller) one-sided p-values.
+
+**New functions**
+
+a. Added :py:func:`pingouin.multivariate_ttest` (Hotelling T-squared) test.
+b. Added :py:func:`pingouin.plot_shift` function.
+c. Several functions of pandas can now be directly used as :py:class:`pandas.DataFrame` methods.
+
+**Enhancements**
 
 a. The :py:func:`pingouin.rm_corr` function now returns a :py:class:`pandas.DataFrame` with the r-value, degrees of freedom, p-value, confidence intervals and power.
-
-**Effect size**
-
-a. :py:func:`pingouin.compute_esci` now works for paired and one-sample Cohen d.
-b. :py:func:`pingouin.bayesfactor_ttest` and :py:func:`pingouin.bayesfactor_pearson` now return a formatted str and not a float.
+b. :py:func:`pingouin.compute_esci` now works for paired and one-sample Cohen d.
+c. :py:func:`pingouin.bayesfactor_ttest` and :py:func:`pingouin.bayesfactor_pearson` now return a formatted str and not a float.
+d. :py:func:`pingouin.pairwise_ttests` now returns the degrees of freedom (dof).
+e. Better rounding of float in :py:func:`pingouin.pairwise_ttests`.
+f. Support for wide-format data in :py:func:`pingouin.rm_anova`
+g. :py:func:`pingouin.ttest` now returns the confidence intervals around the T-values.
 
 **Missing values**
 
-a. :py:func:`pingouin.remove_rm_na` now works with multiple within-factors.
-b. :py:func:`pingouin.remove_na` now works with 2D arrays.
-c. :py:func:`pingouin.remove_na` and :py:func:`pingouin.remove_rm_na` are now external function documented in the API.
-
-**Multivariate**
-
-a. Added :py:func:`pingouin.multivariate_ttest` (Hotelling T-squared) test.
-
-**Pandas integration**
-
-a. Several functions of pandas can now be directly used as Pandas DataFrame methods.
-
-**Parametric**
-
-a. :py:func:`pingouin.pairwise_ttests` now returns the degrees of freedom (dof).
-b. Better rounding of float in :py:func:`pingouin.pairwise_ttests`.
-c. Support for wide-format data in :py:func:`pingouin.rm_anova`
+a. :py:func:`pingouin.remove_na` and :py:func:`pingouin.remove_rm_na` are now external function documented in the API.
+b. :py:func:`pingouin.remove_rm_na` now works with multiple within-factors.
+c. :py:func:`pingouin.remove_na` now works with 2D arrays.
 d. Removed the `remove_na` argument in :py:func:`pingouin.rm_anova` and :py:func:`pingouin.mixed_anova`, an automatic listwise deletion of missing values is applied (same behavior as JASP). Note that this was also the default behavior of Pingouin, but the user could also specify not to remove the missing values, which most likely returned inaccurate results.
 e. The :py:func:`pingouin.ancova` function now applies an automatic listwise deletion of missing values.
-f. :py:func:`pingouin.ttest` now returns the confidence intervals around the T-values.
-g. Fixed error in one-sample one-sided T-test (:py:func:`pingouin.ttest`), the two-sided p-value was divided by 4 and not by 2.
-
-**Plotting**
-
-a. Added :py:func:`pingouin.plot_shift` function.
+f. Added `remove_na` argument (default = False) in :py:func:`pingouin.linear_regression` and :py:func:`pingouin.logistic_regression` functions
 
 v0.2.4 (April 2019)
 -------------------
