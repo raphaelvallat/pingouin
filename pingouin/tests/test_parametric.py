@@ -170,17 +170,52 @@ class TestParametric(TestCase):
         df2.rm_anova(dv='BOLD', within=['Session', 'Time'], subject='Subj')
 
     def test_mixed_anova(self):
-        """Test function anova."""
+        """Test function anova.
+        Compare with JASP and ezANOVA"""
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
-                          between='Group', data=df, correction='auto')
-        # Compare with JASP
-        assert np.allclose(aov.loc[0, 'F'].round(3), 5.052)
-        assert np.allclose(aov.loc[1, 'F'].round(3), 4.027)
-        assert np.allclose(aov.loc[2, 'F'].round(3), 2.728)
-
-        mixed_anova(dv='Scores', within='Time', subject='Subject',
-                    between='Group', data=df_nan, correction=True,
-                    export_filename='test_export.csv')
+                          between='Group', data=df, correction=True).round(3)
+        # Compare with ezANOVA / JASP
+        assert aov.loc[0, 'SS'] == 5.460
+        assert aov.loc[1, 'SS'] == 7.628
+        assert aov.loc[2, 'SS'] == 5.168
+        assert aov.loc[0, 'F'] == 5.052
+        assert aov.loc[1, 'F'] == 4.027
+        assert aov.loc[2, 'F'] == 2.728
+        assert aov.loc[0, 'np2'] == 0.080
+        assert aov.loc[1, 'np2'] == 0.065
+        assert aov.loc[2, 'np2'] == 0.045
+        assert aov.loc[1, 'eps'] == 0.999
+        assert aov.loc[1, 'W-spher'] == 0.999
+        assert round(aov.loc[1, 'p-GG-corr'], 2) == 0.02
+        # With missing values
+        df_nan2 = df_nan.copy()
+        df_nan2.iloc[158, 0] = np.nan
+        aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
+                          between='Group', data=df_nan2, correction=True,
+                          export_filename='test_export.csv').round(3)
+        # Compare with ezANOVA / JASP
+        assert aov.loc[0, 'F'] == 5.692
+        assert aov.loc[1, 'F'] == 3.053
+        assert aov.loc[2, 'F'] == 3.501
+        assert aov.loc[0, 'np2'] == 0.094
+        assert aov.loc[1, 'np2'] == 0.053
+        assert aov.loc[2, 'np2'] == 0.060
+        assert aov.loc[1, 'eps'] == 0.997
+        assert aov.loc[1, 'W-spher'] == 0.996
+        # Unbalanced group
+        df_unbalanced = df[df["Subject"] <= 54]
+        aov = mixed_anova(data=df_unbalanced, dv='Scores',
+                          subject='Subject', within='Time', between='Group',
+                          correction=True).round(3)
+        # Compare with ezANOVA / JASP
+        assert aov.loc[0, 'F'] == 3.561
+        assert aov.loc[1, 'F'] == 2.421
+        assert aov.loc[2, 'F'] == 1.827
+        assert aov.loc[0, 'np2'] == 0.063
+        assert aov.loc[1, 'np2'] == 0.044
+        assert aov.loc[2, 'np2'] == 0.033
+        assert aov.loc[1, 'eps'] == 1.  # JASP = 0.998
+        assert aov.loc[1, 'W-spher'] == 1.  # JASP = 0.998
 
     def test_ancova(self):
         """Test function ancova."""

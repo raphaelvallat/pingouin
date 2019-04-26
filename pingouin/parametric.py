@@ -1279,6 +1279,9 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
     the power of the ANOVA if many missing values are present. In that case,
     it might be better to use linear mixed effects models.
 
+    If the between-subject groups are unbalanced (=  unequal sample sizes), a
+    type II ANOVA will be computed.
+
     Examples
     --------
     Compute a two-way mixed model ANOVA.
