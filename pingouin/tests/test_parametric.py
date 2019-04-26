@@ -91,7 +91,7 @@ class TestParametric(TestCase):
         assert aov2.loc[2, 'np2'] == 0.195
         # Two-way ANOVA with unbalanced design
         df_aov2 = read_dataset('anova2_unbalanced')
-        aov2 = df_aov2.anova(dv="Scores",
+        aov2 = df_aov2.anova(dv="Scores", export_filename='test_export.csv',
                              between=["Diet", "Exercise"]).round(3)
         assert aov2.loc[0, 'MS'] == 390.625
         assert aov2.loc[1, 'MS'] == 180.625

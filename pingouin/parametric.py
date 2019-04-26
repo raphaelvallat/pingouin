@@ -974,23 +974,15 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
     # Validate the dataframe
     _check_dataframe(dv=dv, between=between, data=data, effects='between')
 
-    # Assert that there are two factors
-    if not isinstance(between, list):
-        return anova(dv=dv, between=between, data=data,
-                     export_filename=export_filename, detailed=True)
-
-    if len(between) == 1:
-        return anova(dv=dv, between=between[0], data=data,
-                     export_filename=export_filename, detailed=True)
-
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
 
     fac1, fac2 = between
     grp_both = data.groupby(between)[dv]
+    ng1, ng2 = data[fac1].nunique(), data[fac2].nunique()
 
-    # BALANCED DESIGN
     if grp_both.count().nunique() == 1:
+        # BALANCED DESIGN
         aov_fac1 = anova(data=data, dv=dv, between=fac1, detailed=True)
         aov_fac2 = anova(data=data, dv=dv, between=fac2, detailed=True)
         # Sums of squares
@@ -1002,25 +994,10 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
         # Degrees of freedom
         df_fac1 = aov_fac1.loc[0, 'DF']
         df_fac2 = aov_fac2.loc[0, 'DF']
-        df_inter = (data[fac1].nunique() - 1) * (data[fac2].nunique() - 1)
-        df_resid = data[dv].size - (data[fac1].nunique()
-                                    * data[fac2].nunique())
-        # Mean squares
-        ms_fac1 = aov_fac1.loc[0, 'MS']
-        ms_fac2 = aov_fac2.loc[0, 'MS']
-        ms_inter = ss_inter / df_inter
-        ms_resid = ss_resid / df_resid
-        # F-values
-        fval_fac1 = ms_fac1 / ms_resid
-        fval_fac2 = ms_fac2 / ms_resid
-        fval_inter = ms_inter / ms_resid
-        # P-values
-        pval_fac1 = f(df_fac1, df_resid).sf(fval_fac1)
-        pval_fac2 = f(df_fac2, df_resid).sf(fval_fac2)
-        pval_inter = f(df_inter, df_resid).sf(fval_inter)
-
-    # UNBALANCED DESIGN
+        df_inter = (ng1 - 1) * (ng2 - 1)
+        df_resid = data[dv].size - (ng1 * ng2)
     else:
+        # UNBALANCED DESIGN
         import statsmodels.api as sm
         from statsmodels.formula.api import ols
         warnings.warn("Groups are unbalanced. Type II ANOVA will be computed "
@@ -1038,19 +1015,22 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
         df_fac2 = sts.iloc[1, 1]
         df_inter = sts.iloc[2, 1]
         df_resid = sts.iloc[3, 1]
-        # Mean squares
-        ms_fac1 = ss_fac1 / df_fac1
-        ms_fac2 = ss_fac2 / df_fac2
-        ms_inter = ss_inter / df_inter
-        ms_resid = ss_resid / df_resid
-        # F-values
-        fval_fac1 = sts.iloc[0, 2]
-        fval_fac2 = sts.iloc[1, 2]
-        fval_inter = sts.iloc[2, 2]
-        # P-values
-        pval_fac1 = sts.iloc[0, 3]
-        pval_fac2 = sts.iloc[1, 3]
-        pval_inter = sts.iloc[2, 3]
+
+    # Mean squares
+    ms_fac1 = ss_fac1 / df_fac1
+    ms_fac2 = ss_fac2 / df_fac2
+    ms_inter = ss_inter / df_inter
+    ms_resid = ss_resid / df_resid
+
+    # F-values
+    fval_fac1 = ms_fac1 / ms_resid
+    fval_fac2 = ms_fac2 / ms_resid
+    fval_inter = ms_inter / ms_resid
+
+    # P-values
+    pval_fac1 = f(df_fac1, df_resid).sf(fval_fac1)
+    pval_fac2 = f(df_fac2, df_resid).sf(fval_fac2)
+    pval_inter = f(df_inter, df_resid).sf(fval_inter)
 
     # Partial eta-square
     np2_fac1 = ss_fac1 / (ss_fac1 + ss_resid)
