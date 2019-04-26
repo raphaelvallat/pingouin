@@ -71,6 +71,14 @@ class TestParametric(TestCase):
         assert np.allclose(aov.loc[0, 'F'], 6.791)
         assert np.allclose(np.round(aov.loc[0, 'p-unc'], 3), .004)
         assert np.allclose(aov.loc[0, 'np2'], .576)
+        # Unbalanced and with missing values
+        df_pain.loc[[17, 18], 'Pain threshold'] = np.nan
+        aov = df_pain.anova(dv='Pain threshold', between='Hair color').round(3)
+        assert aov.loc[0, 'ddof1'] == 3
+        assert aov.loc[0, 'ddof2'] == 13
+        assert aov.loc[0, 'F'] == 4.359
+        assert aov.loc[0, 'p-unc'] == 0.025
+        assert aov.loc[0, 'np2'] == 0.501
         # Two-way ANOVA with balanced design
         df_aov2 = read_dataset('anova2')
         aov2 = anova(dv="Yield", between=["Blend", "Crop"],
@@ -105,6 +113,19 @@ class TestParametric(TestCase):
         assert aov2.loc[0, 'np2'] == 0.553
         assert aov2.loc[1, 'np2'] == 0.364
         assert aov2.loc[2, 'np2'] == 0.047
+        # Two-way ANOVA with unbalanced design and missing values
+        df_aov2.loc[9, 'Scores'] = np.nan
+        aov2 = anova(dv="Scores", between=["Diet", "Exercise"],
+                     data=df_aov2).round(3)
+        assert aov2.loc[0, 'F'] == 10.403
+        assert aov2.loc[1, 'F'] == 5.167
+        assert aov2.loc[2, 'F'] == 0.761
+        assert aov2.loc[0, 'p-unc'] == 0.023
+        assert aov2.loc[1, 'p-unc'] == 0.072
+        assert aov2.loc[2, 'p-unc'] == 0.423
+        assert aov2.loc[0, 'np2'] == 0.675
+        assert aov2.loc[1, 'np2'] == 0.508
+        assert aov2.loc[2, 'np2'] == 0.132
 
     def test_welch_anova(self):
         """Test function welch_anova."""

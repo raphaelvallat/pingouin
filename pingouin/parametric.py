@@ -808,7 +808,8 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
     .. math:: \\eta_p^2 = \\frac{SS_{treatment}}{SS_{treatment} + SS_{error}}
 
-    Results have been tested against R, Matlab and JASP.
+    Note that missing values are automatically removed. Results have been
+    tested against R, Matlab and JASP.
 
     **Important**
 
@@ -879,6 +880,9 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
     # Check data
     _check_dataframe(dv=dv, between=between, data=data, effects='between')
+
+    # Drop missing values
+    data = data[[dv, between]].dropna()
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
@@ -980,10 +984,14 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
     # Validate the dataframe
     _check_dataframe(dv=dv, between=between, data=data, effects='between')
 
+    fac1, fac2 = between
+
+    # Drop missing values
+    data = data[[dv, fac1, fac2]].dropna()
+
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
 
-    fac1, fac2 = between
     grp_both = data.groupby(between)[dv]
     ng1, ng2 = data[fac1].nunique(), data[fac2].nunique()
 

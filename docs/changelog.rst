@@ -41,6 +41,7 @@ c. :py:func:`pingouin.remove_na` now works with 2D arrays.
 d. Removed the `remove_na` argument in :py:func:`pingouin.rm_anova` and :py:func:`pingouin.mixed_anova`, an automatic listwise deletion of missing values is applied (same behavior as JASP). Note that this was also the default behavior of Pingouin, but the user could also specify not to remove the missing values, which most likely returned inaccurate results.
 e. The :py:func:`pingouin.ancova` function now applies an automatic listwise deletion of missing values.
 f. Added `remove_na` argument (default = False) in :py:func:`pingouin.linear_regression` and :py:func:`pingouin.logistic_regression` functions
+g. Missing values are automatically removed in the :py:func:`pingouin.anova` function.
 
 **Contributors**
 
