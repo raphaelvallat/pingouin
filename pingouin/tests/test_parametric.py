@@ -151,7 +151,8 @@ class TestParametric(TestCase):
         Compare with JASP."""
         data = read_dataset('rm_anova2')
         aov = rm_anova(data=data, subject='Subject', within=['Time', 'Metric'],
-                       dv='Performance').round(3)
+                       dv='Performance',
+                       export_filename='test_export.csv').round(3)
         assert aov.loc[0, "MS"] == 828.817
         assert aov.loc[1, "MS"] == 682.617
         assert aov.loc[2, "MS"] == 112.217
