@@ -1,9 +1,8 @@
-import pandas as pd
 import numpy as np
 
 from unittest import TestCase
 from pingouin.parametric import (ttest, anova, rm_anova, mixed_anova,
-                                 rm_anova2, ancova, welch_anova, ancovan)
+                                 ancova, welch_anova, ancovan)
 from pingouin import read_dataset
 
 # Generate random data for ANOVA
@@ -120,7 +119,8 @@ class TestParametric(TestCase):
         assert np.allclose(np.round(aov.loc[0, 'p-unc'], 4), .0188)
 
     def test_rm_anova(self):
-        """Test function rm_anova."""
+        """Test function rm_anova.
+        Compare with JASP"""
         rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
                  correction=False, detailed=False)
         rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
@@ -147,16 +147,24 @@ class TestParametric(TestCase):
         assert round(aov.loc[0, 'p-GG-corr'], 3) == .017
 
     def test_rm_anova2(self):
-        """Test function rm_anova2."""
-        data = pd.DataFrame({'Subject': [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
-                             'Time': [0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1],
-                             'Drug': ['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B',
-                                      'C', 'A', 'B', 'C'],
-                             'Scores': [3, 4, 5, 7, 2, 4, 5, 8, 5, 7, 3, 8]})
-        rm_anova2(dv='Scores', within=['Time', 'Drug'], subject='Subject',
-                  data=data, export_filename='test_export.csv')
-        rm_anova(dv='Scores', within=['Time', 'Drug'], subject='Subject',
-                 data=data)
+        """Test function rm_anova2.
+        Compare with JASP."""
+        data = read_dataset('rm_anova2')
+        aov = rm_anova(data=data, subject='Subject', within=['Time', 'Metric'],
+                       dv='Performance').round(3)
+        assert aov.loc[0, "MS"] == 828.817
+        assert aov.loc[1, "MS"] == 682.617
+        assert aov.loc[2, "MS"] == 112.217
+        assert aov.loc[0, "F"] == 33.852
+        assert aov.loc[1, "F"] == 26.959
+        assert aov.loc[2, "F"] == 12.632
+        assert aov.loc[0, "np2"] == 0.790
+        assert aov.loc[1, "np2"] == 0.750
+        assert aov.loc[2, "np2"] == 0.584
+        assert aov.loc[0, "eps"] == 1.000
+        assert aov.loc[1, "eps"] == 0.969
+        assert aov.loc[2, "eps"] == 0.500  # LOWER BOUND
+
         # With missing values
         df2 = read_dataset('rm_missing')
         df2.rm_anova(dv='BOLD', within=['Session', 'Time'], subject='Subj')

@@ -14,5 +14,6 @@ multivariate,Multivariate health outcomes in drug and placebo conditions,multiva
 pairwise_corr,Big 5 personality traits,corr - pairwise_corr,Dolan et al 2009
 rm_anova,Hostility towards insect,rm_anova - mixed_anova,Ryan et al 2013
 rm_anova_wide,Scores at 4 time points,rm_anova,Pingouin
+rm_anova2,Performance of employees at two time points and three areas,rm_anova2,www.real-statistics.com
 rm_corr,Repeated measurements of pH and PaCO2,rm_corr,Bland et Altmann 1995
 rm_missing,Missing values in long-format repeated measures dataframe,rm_anova - rm_anova2,Pingouin

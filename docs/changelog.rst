@@ -14,6 +14,7 @@ v0.2.5 (May 2019)
 
 a. Fixed error in p-values for **one-sample one-sided T-test** (:py:func:`pingouin.ttest`), the two-sided p-value was divided by 4 and not by 2, resulting in inaccurate (smaller) one-sided p-values.
 b. Fixed global error for **unbalanced two-way ANOVA** (:py:func:`pingouin.anova`), the sums of squares were wrong, and as a consequence so were the F and p-values. In case of unbalanced design, Pingouin now computes a type II sums of squares via a call to the statsmodels package.
+c. The epsilon factor for the interaction term in two-way repeated measures ANOVA (:py:func:`pingouin.rm_anova`) is now computed using the lower bound approach. This is more conservative than the Greenhouse-Geisser approach and therefore give (slightly) higher p-values. The reason for choosing this is that the Greenhouse-Geisser values for the interaction term differ than the ones returned by R and JASP. This will be hopefully fixed in future releases.
 
 **New functions**
 

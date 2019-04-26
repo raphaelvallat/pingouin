@@ -396,7 +396,12 @@ def epsilon(data, correction='gg'):
     k = data.shape[1]
 
     if correction == 'lb':
-        return 1 / (k - 1)
+        if S.columns.nlevels == 1:
+            return 1 / (k - 1)
+        elif S.columns.nlevels == 2:
+            ka = S.columns.levels[0].size
+            kb = S.columns.levels[1].size
+            return 1 / ((ka - 1) * (kb - 1))
 
     mean_var = np.diag(S).mean()
     S_mean = S.mean().mean()

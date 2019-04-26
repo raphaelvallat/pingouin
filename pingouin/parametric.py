@@ -370,7 +370,12 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     dataset contains one or more other within subject factors, an automatic
     collapsing to the mean is applied on the dependant variable (same behavior
     as the ezANOVA R package). As such, results can differ from those of JASP.
-    If you can, always double-check the results.
+
+    Similarly, in two-way repeated measures ANOVA, Pingouin uses the lower
+    bound epsilon factor for the interaction, which is more conservative than
+    the Greenhouse-Geisser epsilon factor used in R or JASP. Therefore, the
+    corrected p-values of the interaction term will be slightly higher in
+    Pingouin. If you can, always double-check your results.
 
     Missing values are automatically removed (listwise deletion) using the
     :py:func:`pingouin.remove_rm_na` function. This could drastically decrease
@@ -559,6 +564,9 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
               export_filename=None):
     """Two-way repeated measures ANOVA.
 
+    This is an internal function. The main call to this function should be done
+    by the :py:func:`pingouin.rm_anova` function.
+
     Parameters
     ----------
     dv : string
@@ -589,19 +597,6 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
         'np2' : Partial eta-square effect size
         'eps' : Greenhouse-Geisser epsilon factor (= index of sphericity)
         'p-GG-corr' : Greenhouse-Geisser corrected p-value
-
-    Notes
-    -----
-    Data are expected to be in long-format and perfectly balanced.
-
-    Results have been tested against ezANOVA (R) and MNE.
-
-    See Also
-    --------
-    anova : One-way and two-way ANOVA
-    rm_anova : One-way repeated measures ANOVA
-    mixed_anova : Two way mixed ANOVA
-    friedman : Non-parametric one-way repeated measures ANOVA
     """
     a, b = within
 
@@ -686,7 +681,11 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
     piv_ab = data.pivot_table(index=subject, columns=[a, b], values=dv)
     eps_a = epsilon(piv_a, correction='gg')
     eps_b = epsilon(piv_b, correction='gg')
-    eps_ab = epsilon(piv_ab, correction='gg')
+    # For the interaction term we use the lower bound epsilon factor
+    # (same behavior as described on real-statistics.com)
+    # TODO: understand how the Greenhouse-Geisser epsilon is computed for
+    # the interaction term.
+    eps_ab = epsilon(piv_ab, correction='lb')
 
     # Greenhouse-Geisser correction
     df_a_c, df_as_c = [np.maximum(d * eps_a, 1.) for d in (df_a, df_as)]
