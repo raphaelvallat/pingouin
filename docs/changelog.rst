@@ -13,8 +13,7 @@ v0.2.5 (May 2019)
 **TWO MAJOR BUG FIXES**
 
 a. Fixed error in p-values for **one-sample one-sided T-test** (:py:func:`pingouin.ttest`), the two-sided p-value was divided by 4 and not by 2, resulting in inaccurate (smaller) one-sided p-values.
-b. Fixed global error for **unbalanced two-way ANOVA** (:py:func:`pingouin.anova`), the sums of squares were wrong, and as a consequence so were the F and p-values. In case of unbalanced design, Pingouin now computes compute a type II sums of squares via a call to the statsmodels package.
-
+b. Fixed global error for **unbalanced two-way ANOVA** (:py:func:`pingouin.anova`), the sums of squares were wrong, and as a consequence so were the F and p-values. In case of unbalanced design, Pingouin now computes a type II sums of squares via a call to the statsmodels package.
 
 **New functions**
 
@@ -41,6 +40,11 @@ c. :py:func:`pingouin.remove_na` now works with 2D arrays.
 d. Removed the `remove_na` argument in :py:func:`pingouin.rm_anova` and :py:func:`pingouin.mixed_anova`, an automatic listwise deletion of missing values is applied (same behavior as JASP). Note that this was also the default behavior of Pingouin, but the user could also specify not to remove the missing values, which most likely returned inaccurate results.
 e. The :py:func:`pingouin.ancova` function now applies an automatic listwise deletion of missing values.
 f. Added `remove_na` argument (default = False) in :py:func:`pingouin.linear_regression` and :py:func:`pingouin.logistic_regression` functions
+
+**Contributors**
+
+* Raphael Vallat
+* Nicolas Legrand
 
 v0.2.4 (April 2019)
 -------------------
