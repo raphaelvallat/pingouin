@@ -2,7 +2,7 @@ import numpy as np
 
 from unittest import TestCase
 from pingouin.parametric import (ttest, anova, rm_anova, mixed_anova,
-                                 ancova, welch_anova, ancovan)
+                                 ancova, welch_anova)
 from pingouin import read_dataset
 
 # Generate random data for ANOVA
@@ -240,28 +240,32 @@ class TestParametric(TestCase):
         assert aov.loc[1, 'W-spher'] == 1.  # JASP = 0.998
 
     def test_ancova(self):
-        """Test function ancova."""
+        """Test function ancovan.
+        Compare with JASP."""
         df = read_dataset('ancova')
-        aov = ancova(data=df, dv='Scores', covar='Income', between='Method')
-        # Compare with statsmodels
-        assert np.allclose(aov.loc[0, 'F'].round(3), 3.336)
-        assert np.allclose(aov.loc[1, 'F'].round(3), 29.419)
+        # With one covariate, balanced design, no missing values
+        aov = ancova(data=df, dv='Scores', covar='Income',
+                     between='Method').round(3)
+        assert aov.loc[0, 'F'] == 3.336
+        assert aov.loc[1, 'F'] == 29.419
+        # With one covariate, missing values and unbalanced design
+        df.loc[[1, 2], 'Scores'] = np.nan
+        aov = ancova(data=df, dv='Scores', covar=['Income'],
+                     between='Method').round(3)
+        assert aov.loc[0, 'F'] == 3.147
+        assert aov.loc[1, 'F'] == 19.781
+        assert aov.loc[2, 'DF'] == 29
+        # With two covariates, missing values and unbalanced design
+        aov = ancova(data=df, dv='Scores', covar=['Income', 'BMI'],
+                     between='Method')
+        assert aov.loc[0, 'F'] == 3.019
+        assert aov.loc[1, 'F'] == 19.605
+        assert aov.loc[2, 'F'] == 1.228
+        assert aov.loc[3, 'DF'] == 28
+        # Other parameters
+        ancova(data=df, dv='Scores', covar=['Income', 'BMI'],
+               between='Method', export_filename='test_export.csv')
+        ancova(data=df, dv='Scores', covar=['Income'], between='Method')
         aov, bw = ancova(data=df, dv='Scores', covar='Income',
                          between='Method', export_filename='test_export.csv',
                          return_bw=True)
-        ancova(data=df, dv='Scores', covar=['Income'], between='Method')
-        ancova(data=df, dv='Scores', covar=['Income', 'BMI'],
-               between='Method')
-
-    def test_ancovan(self):
-        """Test function ancovan."""
-        df = read_dataset('ancova')
-        aov = ancovan(data=df, dv='Scores', covar=['Income', 'BMI'],
-                      between='Method')
-        # Compare with statsmodels
-        assert np.allclose(aov.loc[0, 'F'], 3.233)
-        assert np.allclose(aov.loc[1, 'F'], 27.637)
-        ancovan(data=df, dv='Scores', covar=['Income', 'BMI'],
-                between='Method', export_filename='test_export.csv')
-        ancovan(data=df, dv='Scores', covar=['Income'], between='Method')
-        ancovan(data=df, dv='Scores', covar='Income', between='Method')

@@ -1559,7 +1559,8 @@ def ancovan(dv=None, covar=None, between=None, data=None,
             export_filename=None):
     """ANCOVA with n covariates.
 
-    Requires statsmodels.
+    This is an internal function. The main call to this function should be done
+    by the :py:func:`pingouin.ancova` function.
 
     Parameters
     ----------
@@ -1587,45 +1588,7 @@ def ancovan(dv=None, covar=None, between=None, data=None,
         'DF' : Degrees of freedom
         'F' : F-values
         'p-unc' : Uncorrected p-values
-
-    Notes
-    -----
-    Analysis of covariance (ANCOVA) is a general linear model which blends
-    ANOVA and regression. ANCOVA evaluates whether the means of a dependent
-    variable (dv) are equal across levels of a categorical independent
-    variable (between) often called a treatment, while statistically
-    controlling for the effects of other continuous variables that are not
-    of primary interest, known as covariates or nuisance variables (covar).
-
-    See Also
-    --------
-    ancova : ANCOVA with one covariate
-    anova : One-way and two-way ANOVA
-
-    Examples
-    --------
-    1. Evaluate the reading scores of students with different teaching method
-    and family income and BMI as covariates.
-
-    >>> from pingouin import ancova, read_dataset
-    >>> df = read_dataset('ancova')
-    >>> ancova(data=df, dv='Scores', covar=['Income', 'BMI'],
-    ...         between='Method')
-         Source        SS  DF       F     p-unc
-    0    Method   552.284   3   3.233  0.036113
-    1    Income  1573.952   1  27.637  0.000011
-    2       BMI    60.014   1   1.054  0.312842
-    3  Residual  1708.509  30     NaN       NaN
     """
-    # Assert that there are at least two covariates
-    if not isinstance(covar, list):
-        return ancova(dv=dv, covar=covar, between=between, data=data,
-                      export_filename=export_filename)
-
-    if len(covar) == 1:
-        return ancova(dv=dv, covar=covar[0], between=between, data=data,
-                      export_filename=export_filename)
-
     # Check that stasmodels is installed
     from pingouin.utils import _is_statsmodels_installed
     _is_statsmodels_installed(raise_error=True)
