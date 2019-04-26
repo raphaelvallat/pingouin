@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 from unittest import TestCase
-from pingouin.parametric import (ttest, anova, anova2, rm_anova, mixed_anova,
+from pingouin.parametric import (ttest, anova, rm_anova, mixed_anova,
                                  rm_anova2, ancova, welch_anova, ancovan)
 from pingouin import read_dataset
 
@@ -60,7 +60,9 @@ class TestParametric(TestCase):
         np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [3.05, 6.95])
 
     def test_anova(self):
-        """Test function anova."""
+        """Test function anova.
+        Compare results to JASP.
+        """
         # Pain dataset
         df_pain = read_dataset('anova')
         aov = anova(dv='Pain threshold', between='Hair color', data=df_pain,
@@ -70,12 +72,40 @@ class TestParametric(TestCase):
         assert np.allclose(aov.loc[0, 'F'], 6.791)
         assert np.allclose(np.round(aov.loc[0, 'p-unc'], 3), .004)
         assert np.allclose(aov.loc[0, 'np2'], .576)
-        # Two-way ANOVA
-        anova(dv='Scores', between=['Group', 'Time'], data=df,
-              export_filename='test_export.csv')
-        anova2(dv='Scores', between=['Group', 'Time'], data=df)
-        anova2(dv='Scores', between=['Group'], data=df)
-        anova2(dv='Scores', between='Group', data=df)
+        # Two-way ANOVA with balanced design
+        df_aov2 = read_dataset('anova2')
+        aov2 = anova(dv="Yield", between=["Blend", "Crop"],
+                     data=df_aov2).round(3)
+        assert aov2.loc[0, 'MS'] == 2.042
+        assert aov2.loc[1, 'MS'] == 1368.292
+        assert aov2.loc[2, 'MS'] == 1180.042
+        assert aov2.loc[3, 'MS'] == 541.847
+        assert aov2.loc[0, 'F'] == 0.004
+        assert aov2.loc[1, 'F'] == 2.525
+        assert aov2.loc[2, 'F'] == 2.178
+        assert aov2.loc[0, 'p-unc'] == 0.952
+        assert aov2.loc[1, 'p-unc'] == 0.108
+        assert aov2.loc[2, 'p-unc'] == 0.142
+        assert aov2.loc[0, 'np2'] == 0.000
+        assert aov2.loc[1, 'np2'] == 0.219
+        assert aov2.loc[2, 'np2'] == 0.195
+        # Two-way ANOVA with unbalanced design
+        df_aov2 = read_dataset('anova2_unbalanced')
+        aov2 = df_aov2.anova(dv="Scores",
+                             between=["Diet", "Exercise"]).round(3)
+        assert aov2.loc[0, 'MS'] == 390.625
+        assert aov2.loc[1, 'MS'] == 180.625
+        assert aov2.loc[2, 'MS'] == 15.625
+        assert aov2.loc[3, 'MS'] == 52.625
+        assert aov2.loc[0, 'F'] == 7.423
+        assert aov2.loc[1, 'F'] == 3.432
+        assert aov2.loc[2, 'F'] == 0.297
+        assert aov2.loc[0, 'p-unc'] == 0.034
+        assert aov2.loc[1, 'p-unc'] == 0.113
+        assert aov2.loc[2, 'p-unc'] == 0.605
+        assert aov2.loc[0, 'np2'] == 0.553
+        assert aov2.loc[1, 'np2'] == 0.364
+        assert aov2.loc[2, 'np2'] == 0.047
 
     def test_welch_anova(self):
         """Test function welch_anova."""

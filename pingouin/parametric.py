@@ -809,6 +809,9 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
     Results have been tested against R, Matlab and JASP.
 
+    Note that the `statsmodels` package is required for two-way ANOVA with
+    unbalanced design. In this latter case, a type II ANOVA will be computed.
+
     References
     ----------
     .. [1] Liu, Hangcheng. "Comparing Welch's ANOVA, a Kruskal-Wallis test and
@@ -840,6 +843,26 @@ def anova(dv=None, between=None, data=None, detailed=False,
            Source        SS  DF       MS      F       p-unc    np2
     0  Hair color  1360.726   3  453.575  6.791  0.00411423  0.576
     1      Within  1001.800  15   66.787      -           -      -
+
+    Two-way ANOVA with balanced design
+
+    >>> data = pg.read_dataset('anova2')
+    >>> data.anova(dv="Yield", between=["Blend", "Crop"]).round(3)
+             Source        SS  DF        MS      F  p-unc    np2
+    0         Blend     2.042   1     2.042  0.004  0.952  0.000
+    1          Crop  2736.583   2  1368.292  2.525  0.108  0.219
+    2  Blend * Crop  2360.083   2  1180.042  2.178  0.142  0.195
+    3      residual  9753.250  18   541.847    NaN    NaN    NaN
+
+    Two-way ANOVA with unbalanced design (requires statsmodels)
+
+    >>> data = pg.read_dataset('anova2_unbalanced')
+    >>> data.anova(dv="Scores", between=["Diet", "Exercise"]).round(3)
+                Source       SS   DF       MS      F  p-unc    np2
+    0             Diet  390.625  1.0  390.625  7.423  0.034  0.553
+    1         Exercise  180.625  1.0  180.625  3.432  0.113  0.364
+    2  Diet * Exercise   15.625  1.0   15.625  0.297  0.605  0.047
+    3         residual  315.750  6.0   52.625    NaN    NaN    NaN
     """
     if isinstance(between, list):
         if len(between) == 2:
@@ -917,6 +940,9 @@ def anova(dv=None, between=None, data=None, detailed=False,
 def anova2(dv=None, between=None, data=None, export_filename=None):
     """Two-way ANOVA.
 
+    This is an internal function. The main call to this function should be done
+    by the :py:func:`pingouin.anova` function.
+
     Parameters
     ----------
     dv : string
@@ -944,17 +970,6 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
         'F' : F-values
         'p-unc' : uncorrected p-values
         'np2' : Partial eta-square effect sizes
-
-    See Also
-    --------
-    anova : One-way and two way ANOVA
-    rm_anova : One-way and two-way repeated measures ANOVA
-    mixed_anova : Two way mixed ANOVA
-    kruskal : Non-parametric one-way ANOVA
-
-    Notes
-    -----
-    Results have been tested against JASP.
     """
     # Validate the dataframe
     _check_dataframe(dv=dv, between=between, data=data, effects='between')
@@ -972,44 +987,75 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
     data = data.reset_index(drop=True)
 
     fac1, fac2 = between
-    aov_fac1 = anova(data=data, dv=dv, between=fac1, detailed=True)
-    aov_fac2 = anova(data=data, dv=dv, between=fac2, detailed=True)
+    grp_both = data.groupby(between)[dv]
 
-    # Sums of squares
-    ss_fac1 = aov_fac1.loc[0, 'SS']
-    ss_fac2 = aov_fac2.loc[0, 'SS']
-    ss_tot = ((data[dv] - data[dv].mean())**2).sum()
-    ss_resid = np.sum(data.groupby([fac1, fac2]).apply(lambda x:
-                                                       (x - x.mean())**2))[0]
-    ss_inter = ss_tot - (ss_resid + ss_fac1 + ss_fac2)
+    # BALANCED DESIGN
+    if grp_both.count().nunique() == 1:
+        aov_fac1 = anova(data=data, dv=dv, between=fac1, detailed=True)
+        aov_fac2 = anova(data=data, dv=dv, between=fac2, detailed=True)
+        # Sums of squares
+        ss_fac1 = aov_fac1.loc[0, 'SS']
+        ss_fac2 = aov_fac2.loc[0, 'SS']
+        ss_tot = ((data[dv] - data[dv].mean())**2).sum()
+        ss_resid = np.sum(grp_both.apply(lambda x: (x - x.mean())**2))
+        ss_inter = ss_tot - (ss_resid + ss_fac1 + ss_fac2)
+        # Degrees of freedom
+        df_fac1 = aov_fac1.loc[0, 'DF']
+        df_fac2 = aov_fac2.loc[0, 'DF']
+        df_inter = (data[fac1].nunique() - 1) * (data[fac2].nunique() - 1)
+        df_resid = data[dv].size - (data[fac1].nunique()
+                                    * data[fac2].nunique())
+        # Mean squares
+        ms_fac1 = aov_fac1.loc[0, 'MS']
+        ms_fac2 = aov_fac2.loc[0, 'MS']
+        ms_inter = ss_inter / df_inter
+        ms_resid = ss_resid / df_resid
+        # F-values
+        fval_fac1 = ms_fac1 / ms_resid
+        fval_fac2 = ms_fac2 / ms_resid
+        fval_inter = ms_inter / ms_resid
+        # P-values
+        pval_fac1 = f(df_fac1, df_resid).sf(fval_fac1)
+        pval_fac2 = f(df_fac2, df_resid).sf(fval_fac2)
+        pval_inter = f(df_inter, df_resid).sf(fval_inter)
 
-    # Degrees of freedom
-    df_fac1 = aov_fac1.loc[0, 'DF']
-    df_fac2 = aov_fac2.loc[0, 'DF']
-    df_inter = (data[fac1].nunique() - 1) * (data[fac2].nunique() - 1)
-    df_resid = data[dv].size - (data[fac1].nunique()
-                                * data[fac2].nunique())
-
-    # Mean squares
-    ms_fac1 = aov_fac1.loc[0, 'MS']
-    ms_fac2 = aov_fac2.loc[0, 'MS']
-    ms_inter = ss_inter / df_inter
-    ms_resid = ss_resid / df_resid
-
-    # F-values
-    fval_fac1 = ms_fac1 / ms_resid
-    fval_fac2 = ms_fac2 / ms_resid
-    fval_inter = ms_inter / ms_resid
-
-    # P-values
-    pval_fac1 = f(df_fac1, df_resid).sf(fval_fac1)
-    pval_fac2 = f(df_fac2, df_resid).sf(fval_fac2)
-    pval_inter = f(df_inter, df_resid).sf(fval_inter)
+    # UNBALANCED DESIGN
+    else:
+        import statsmodels.api as sm
+        from statsmodels.formula.api import ols
+        warnings.warn("Groups are unbalanced. Type II ANOVA will be computed "
+                      "using statsmodels")
+        formula = "%s ~ C(%s) * C(%s)" % (dv, fac1, fac2)
+        lm = ols(formula, data=data).fit()
+        sts = sm.stats.anova_lm(lm, typ=2)
+        # Sums of squares
+        ss_fac1 = sts.iloc[0, 0]
+        ss_fac2 = sts.iloc[1, 0]
+        ss_inter = sts.iloc[2, 0]
+        ss_resid = sts.iloc[3, 0]
+        # Degrees of freedom
+        df_fac1 = sts.iloc[0, 1]
+        df_fac2 = sts.iloc[1, 1]
+        df_inter = sts.iloc[2, 1]
+        df_resid = sts.iloc[3, 1]
+        # Mean squares
+        ms_fac1 = ss_fac1 / df_fac1
+        ms_fac2 = ss_fac2 / df_fac2
+        ms_inter = ss_inter / df_inter
+        ms_resid = ss_resid / df_resid
+        # F-values
+        fval_fac1 = sts.iloc[0, 2]
+        fval_fac2 = sts.iloc[1, 2]
+        fval_inter = sts.iloc[2, 2]
+        # P-values
+        pval_fac1 = sts.iloc[0, 3]
+        pval_fac2 = sts.iloc[1, 3]
+        pval_inter = sts.iloc[2, 3]
 
     # Partial eta-square
-    np2_fac1 = (fval_fac1 * df_fac1) / (fval_fac1 * df_fac1 + df_resid)
-    np2_fac2 = (fval_fac2 * df_fac2) / (fval_fac2 * df_fac2 + df_resid)
-    np2_inter = (fval_inter * df_inter) / (fval_inter * df_inter + df_resid)
+    np2_fac1 = ss_fac1 / (ss_fac1 + ss_resid)
+    np2_fac2 = ss_fac2 / (ss_fac2 + ss_resid)
+    np2_inter = ss_inter / (ss_inter + ss_resid)
 
     # Create output dataframe
     aov = pd.DataFrame({'Source': [fac1, fac2, fac1 + ' * ' + fac2,

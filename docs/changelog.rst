@@ -10,9 +10,11 @@ What's new
 v0.2.5 (May 2019)
 -----------------
 
-**Bug fixes**
+**TWO MAJOR BUG FIXES**
 
-a. Fixed error in p-values for one-sample one-sided T-test (:py:func:`pingouin.ttest`), the two-sided p-value was divided by 4 and not by 2, resulting in inaccurate (smaller) one-sided p-values.
+a. Fixed error in p-values for **one-sample one-sided T-test** (:py:func:`pingouin.ttest`), the two-sided p-value was divided by 4 and not by 2, resulting in inaccurate (smaller) one-sided p-values.
+b. Fixed global error for **unbalanced two-way ANOVA** (:py:func:`pingouin.anova`), the sums of squares were wrong, and as a consequence so were the F and p-values. In case of unbalanced design, Pingouin now computes compute a type II sums of squares via a call to the statsmodels package.
+
 
 **New functions**
 
