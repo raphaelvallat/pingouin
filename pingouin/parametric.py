@@ -730,17 +730,18 @@ def anova(dv=None, between=None, data=None, detailed=False,
     Parameters
     ----------
     dv : string
-        Name of column containing the dependant variable.
+        Name of column in ``data`` containing the dependent variable.
     between : string or list with two elements
-        Name(s) of column containing the between factor.
-        If between is a single string, then compute a one-way ANOVA, if between
-        is a list with two elements (e.g. ['Factor1', 'Factor2']),
-        compute a two-way ANOVA.
+        Name of column(s) in ``data`` containing the between-subject factor(s).
+        If ``between`` is a single string, a one-way ANOVA is computed.
+        If ``between`` is a list with two elements
+        (e.g. ['Factor1', 'Factor2']), a two-way ANOVA is computed.
     data : pandas DataFrame
         DataFrame. Note that this function can also directly be used as a
         Pandas method, in which case this argument is no longer needed.
     detailed : boolean
         If True, return a detailed ANOVA table
+        (default True for two-way ANOVA).
     export_filename : string
         Filename (without extension) for the output file.
         If None, do not export the table.
@@ -797,8 +798,9 @@ def anova(dv=None, between=None, data=None, detailed=False,
     :math:`r-1, n_t-1` degrees of freedom.
 
     When the groups are balanced and have equal variances, the optimal post-hoc
-    test is the Tukey-HSD test (`pairwise_tukey`). If the groups have unequal
-    variances, the Games-Howell test is more adequate.
+    test is the Tukey-HSD test (:py:func:`pingouin.pairwise_tukey`).
+    If the groups have unequal variances, the Games-Howell test is more
+    adequate (:py:func:`pingouin.pairwise_gameshowell`).
 
     The effect size reported in Pingouin is the partial eta-square.
     However, one should keep in mind that for one-way ANOVA
@@ -809,8 +811,13 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
     Results have been tested against R, Matlab and JASP.
 
-    Note that the `statsmodels` package is required for two-way ANOVA with
-    unbalanced design. In this latter case, a type II ANOVA will be computed.
+    **Important**
+
+    Versions of Pingouin below 0.2.5 gave wrong results for **unbalanced
+    two-way ANOVA**. This issue has been resolved in Pingouin>=0.2.5. In such
+    cases, a type II ANOVA is calculated via an internal call to the
+    statsmodels package. This latter package is therefore required for two-way
+    ANOVA with unequal sample sizes.
 
     References
     ----------
@@ -826,7 +833,7 @@ def anova(dv=None, between=None, data=None, detailed=False,
 
     Examples
     --------
-    One-way ANOVA on the pain threshold dataset
+    One-way ANOVA
 
     >>> import pingouin as pg
     >>> df = pg.read_dataset('anova')
