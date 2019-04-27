@@ -4,6 +4,7 @@ Authors
 - Nicolas Legrand <nicolaslegrand21@gmail.com>
 - Raphael Vallat <raphaelvallat9@gmail.com>
 """
+import numpy as np
 import pingouin as pg
 from unittest import TestCase
 
@@ -48,6 +49,11 @@ class TestParametric(TestCase):
         # Test partial correlation
         corrs = data.partial_corr(x='X', y='Y', covar='M', method='spearman')
         assert 'r2' in corrs.columns
+
+        # Test partial correlation matrix (compare with the ppcor package)
+        corrs = data.pcorr().round(3)
+        np.testing.assert_array_equal(corrs.iloc[0, :].values,
+                                      [1, 0.392, 0.06, -0.014, -0.149])
 
         # Test mediation analysis
         med = data.mediation_analysis(x='X', m='M', y='Y', seed=42, n_boot=500)

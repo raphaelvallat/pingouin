@@ -4,6 +4,7 @@ Authors
 - Raphael Vallat <raphaelvallat9@gmail.com>
 - Nicolas Legrand <nicolaslegrand21@gmail.com>
 """
+import numpy as np
 import pandas as pd
 from pingouin.correlation import partial_corr
 from pingouin.parametric import (anova, welch_anova, rm_anova, mixed_anova)
@@ -93,13 +94,29 @@ pd.DataFrame.pairwise_corr = _pairwise_corr
 # Partial correlation
 def _partial_corr(self, x=None, y=None, covar=None, tail='two-sided',
                   method='pearson'):
-    """Pairwise (partial) correlations."""
+    """Partial correlation."""
     stats = partial_corr(data=self, x=x, y=y, covar=covar, tail=tail,
                          method=method)
     return stats
 
 
 pd.DataFrame.partial_corr = _partial_corr
+
+
+# Partial correlation matrix
+def _pcorr(self):
+    """Partial correlation matrix.
+    Same behavior as the pcor function in the ppcor R package.
+    """
+    V = self.cov()  # Covariance matrix
+    Vi = np.linalg.pinv(V)  # Inverse covariance matrix
+    D = np.diag(np.sqrt(1 / np.diag(Vi)))
+    pcor = -1 * (D @ Vi @ D)  # Partial correlation matrix
+    pcor[np.diag_indices_from(pcor)] = 1
+    return pd.DataFrame(pcor, index=V.index, columns=V.columns)
+
+
+pd.DataFrame.pcorr = _pcorr
 
 
 # Mediation analysis

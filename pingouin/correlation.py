@@ -578,6 +578,16 @@ def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
     >>> df.partial_corr(x='x', y='y', covar=['z', 'w', 'v'], method='spearman')
                n      r         CI95%     r2  adj_r2     p-val  power
     spearman  30  0.491  [0.16, 0.72]  0.242   0.185  0.005817  0.809
+
+    4. Partial correlation matrix (returns only the correlation coefficients)
+
+    >>> df.pcorr().round(3)
+           x      y      z      w      v
+    x  1.000  0.493 -0.095  0.130 -0.385
+    y  0.493  1.000 -0.007  0.104 -0.002
+    z -0.095 -0.007  1.000 -0.241 -0.470
+    w  0.130  0.104 -0.241  1.000 -0.118
+    v -0.385 -0.002 -0.470 -0.118  1.000
     """
     from pingouin.utils import _flatten_list
     # Check arguments

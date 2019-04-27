@@ -22,6 +22,7 @@ a. Added :py:func:`pingouin.multivariate_ttest` (Hotelling T-squared) test.
 b. Added :py:func:`pingouin.cronbach_alpha` function.
 c. Added :py:func:`pingouin.plot_shift` function.
 d. Several functions of pandas can now be directly used as :py:class:`pandas.DataFrame` methods.
+e. Added pandas.DataFrame.pcorr function to compute the partial Pearson correlation matrix (same behavior as the pcor function in the ppcor package.)
 
 **Enhancements**
 
