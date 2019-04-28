@@ -395,6 +395,7 @@ def epsilon(data, correction='gg'):
     n = data.shape[0]
     k = data.shape[1]
 
+    # Lower bound
     if correction == 'lb':
         if S.columns.nlevels == 1:
             return 1 / (k - 1)
@@ -403,16 +404,22 @@ def epsilon(data, correction='gg'):
             kb = S.columns.levels[1].size
             return 1 / ((ka - 1) * (kb - 1))
 
+    # Compute GGEpsilon
+    # - Method 1
     mean_var = np.diag(S).mean()
     S_mean = S.mean().mean()
     ss_mat = (S**2).sum().sum()
     ss_rows = (S.mean(1)**2).sum().sum()
-
-    # Compute GGEpsilon
     num = (k * (mean_var - S_mean))**2
     den = (k - 1) * (ss_mat - 2 * k * ss_rows + k**2 * S_mean**2)
-    eps = num / den
+    eps = np.min([num / den, 1])
+    # - Method 2
+    # S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
+    # eig = np.linalg.eigvalsh(S_pop)[1:]
+    # V = eig.sum()**2 / np.sum(eig**2)
+    # eps = V / (k - 1)
 
+    # Huynh-Feldt
     if correction == 'hf':
         num = n * (k - 1) * eps - 2
         den = (k - 1) * (n - 1 - (k - 1) * eps)
