@@ -1,6 +1,5 @@
 import pytest
 import numpy as np
-import pandas as pd
 from unittest import TestCase
 from pingouin.correlation import (corr, rm_corr, partial_corr,
                                   skipped, distance_corr)
@@ -54,21 +53,30 @@ class TestCorrelation(TestCase):
         assert 'BF10' not in c1500.keys()
 
     def test_partial_corr(self):
-        """Test function partial_corr"""
-        np.random.seed(123)
-        mean, cov = [4, 6, 2], [(1, .5, .3), (.5, 1, .2), (.3, .2, 1)]
-        x, y, z = np.random.multivariate_normal(mean, cov, size=30).T
-        df = pd.DataFrame({'x': x, 'y': y, 'z': z})
-        stats = partial_corr(data=df, x='x', y='y', covar='z')
-        # Compare with R ppcorr
-        assert stats.loc['pearson', 'r'] == 0.568
-        df['w'] = np.random.normal(size=30)
-        df['v'] = np.random.normal(size=30)
-        # Partial correlation of x and y controlling for z, w and v
-        partial_corr(data=df, x='x', y='y', covar=['z'])
-        partial_corr(data=df, x='x', y='y', covar=['z', 'w', 'v'])
-        partial_corr(data=df, x='x', y='y', covar=['z', 'w', 'v'],
-                     method='spearman')
+        """Test function partial_corr.
+        Compare with the R package ppcor."""
+        df = read_dataset('partial_corr')
+        pc = partial_corr(data=df, x='x', y='y', covar='cv1')
+        assert pc.loc['pearson', 'r'] == 0.568
+        pc = df.partial_corr(x='x', y='y', covar='cv1', method='spearman')
+        # Warning: Spearman slightly different than ppcor package, is this
+        # caused by difference in Python / R when computing ranks?
+        # assert pc.loc['spearman', 'r'] == 0.578
+        # Partial correlation of x and y controlling for multiple covariates
+        pc = partial_corr(data=df, x='x', y='y', covar=['cv1'])
+        pc = partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'])
+        assert pc.loc['pearson', 'r'] == 0.493
+        pc = partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'],
+                          method='percbend')
+        # Semi-partial correlation
+        pc = df.partial_corr(x='x', y='y', x_covar=['cv1', 'cv2', 'cv3'])
+        assert pc.loc['pearson', 'r'] == 0.463
+        pc = df.partial_corr(x='x', y='y', y_covar=['cv1', 'cv2', 'cv3'])
+        assert pc.loc['pearson', 'r'] == 0.421
+        partial_corr(data=df, x='x', y='y', x_covar='cv1',
+                     y_covar=['cv2', 'cv3'], method='spearman')
+        with pytest.raises(ValueError):
+            partial_corr(data=df, x='x', y='y', covar='cv2', x_covar='cv1')
 
     def test_rmcorr(self):
         """Test function rm_corr"""

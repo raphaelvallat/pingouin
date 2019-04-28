@@ -480,22 +480,33 @@ def corr(x, y, tail='two-sided', method='pearson'):
     return stats[col_order]
 
 
-def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
-                 method='pearson'):
-    """Partial correlation.
+def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
+                 y_covar=None, tail='two-sided', method='pearson'):
+    """Partial and semi-partial correlation.
 
     Parameters
     ----------
     data : pd.DataFrame
         Dataframe. Note that this function can also directly be used as a
-        Pandas method, in which case this argument is no longer needed.
+        :py:class:`pandas.DataFrame` method, in which case this argument is
+        no longer needed.
     x, y : string
-        x and y. Must be names of columns in data.
+        x and y. Must be names of columns in ``data``.
     covar : string or list
-        Covariate(s). Must be a names of columns in data. Use a list if there
-        are more than one covariate.
+        Covariate(s). Must be a names of columns in ``data``. Use a list if
+        there are two or more covariates.
+    x_covar : string or list
+        Covariate(s) for the ``x`` variable. This is used to compute
+        semi-partial correlation (i.e. the effect of ``x_covar`` is removed
+        from ``x`` but not from ``y``). Note that you cannot specify both
+        ``covar`` and ``x_covar``.
+    y_covar : string or list
+        Covariate(s) for the ``y`` variable. This is used to compute
+        semi-partial correlation (i.e. the effect of ``y_covar`` is removed
+        from ``y`` but not from ``x``). Note that you cannot specify both
+        ``covar`` and ``y_covar``.
     tail : string
-        Specify whether to return 'one-sided' or 'two-sided' p-value.
+        Specify whether to return the 'one-sided' or 'two-sided' p-value.
     method : string
         Specify which method to use for the computation of the correlation
         coefficient. Available methods are ::
@@ -524,17 +535,18 @@ def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
 
     Notes
     -----
-    Partial correlation is a measure of the strength and direction of a
-    linear relationship between two continuous variables whilst controlling
-    for the effect of one or more other continuous variables
-    (also known as covariates or control variables).
+    From [4]_:
 
-    The partial correlation between :math:`x` and :math:`y` given the
-    covariate(s) :math:`C` is equivalent to the correlation of the residuals
-    of :math:`x` and :math:`y` after regressing each variable with :math:`C`.
+    “With *partial correlation*, we find the correlation between :math:`x`
+    and :math:`y` holding :math:`C` constant for both :math:`x` and
+    :math:`y`. Sometimes, however, we want to hold :math:`C` constant for
+    just :math:`x` or just :math:`y`. In that case, we compute a
+    *semi-partial correlation*. A partial correlation is computed between
+    two residuals. A semi-partial correlation is computed between one
+    residual and another raw (or unresidualized) variable.”
 
     Note that if you are not interested in calculating the statistics and
-    p-values but only the correlation coefficient matrix, a (faster)
+    p-values but only the partial correlation matrix, a (faster)
     alternative is to use the :py:func:`pingouin.pcorr` method (see example 4).
 
     Rows with missing values are automatically removed from data. Results have
@@ -548,63 +560,74 @@ def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
 
     .. [3] https://gist.github.com/fabianp/9396204419c7b638d38f
 
+    .. [4] http://faculty.cas.usf.edu/mbrannick/regression/Partial.html
+
     Examples
     --------
     1. Partial correlation with one covariate
 
-    >>> import numpy as np
-    >>> import pandas as pd
-    >>> from pingouin import partial_corr
-    >>> # Generate random correlated samples
-    >>> np.random.seed(123)
-    >>> mean, cov = [4, 6, 2], [(1, .5, .3), (.5, 1, .2), (.3, .2, 1)]
-    >>> x, y, z = np.random.multivariate_normal(mean, cov, size=30).T
-    >>> # Append in a dataframe
-    >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
-    >>> # Partial correlation of x and y controlling for z
-    >>> partial_corr(data=df, x='x', y='y', covar='z')
+    >>> import pingouin as pg
+    >>> df = pg.read_dataset('partial_corr')
+    >>> pg.partial_corr(data=df, x='x', y='y', covar='cv1')
               n      r         CI95%     r2  adj_r2     p-val    BF10  power
     pearson  30  0.568  [0.26, 0.77]  0.323   0.273  0.001055  28.695  0.925
 
     2. Spearman partial correlation with several covariates
 
-    >>> # Add new random columns to the dataframe of the first example
-    >>> np.random.seed(123)
-    >>> df['w'] = np.random.normal(size=30)
-    >>> df['v'] = np.random.normal(size=30)
-    >>> # Partial correlation of x and y controlling for z, w and v
-    >>> partial_corr(data=df, x='x', y='y', covar=['z', 'w', 'v'],
-    ...              method='spearman')
+    >>> # Partial correlation of x and y controlling for cv1, cv2 and cv3
+    >>> pg.partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'],
+    ...                 method='spearman')
                n      r         CI95%     r2  adj_r2     p-val  power
     spearman  30  0.491  [0.16, 0.72]  0.242   0.185  0.005817  0.809
 
     3. As a pandas method
 
-    >>> df.partial_corr(x='x', y='y', covar=['z', 'w', 'v'], method='spearman')
+    >>> df.partial_corr(x='x', y='y', covar=['cv1'], method='spearman')
                n      r         CI95%     r2  adj_r2     p-val  power
-    spearman  30  0.491  [0.16, 0.72]  0.242   0.185  0.005817  0.809
+    spearman  30  0.568  [0.26, 0.77]  0.323   0.273  0.001049  0.925
 
     4. Partial correlation matrix (returns only the correlation coefficients)
 
     >>> df.pcorr().round(3)
-           x      y      z      w      v
-    x  1.000  0.493 -0.095  0.130 -0.385
-    y  0.493  1.000 -0.007  0.104 -0.002
-    z -0.095 -0.007  1.000 -0.241 -0.470
-    w  0.130  0.104 -0.241  1.000 -0.118
-    v -0.385 -0.002 -0.470 -0.118  1.000
+             x      y    cv1    cv2    cv3
+    x    1.000  0.493 -0.095  0.130 -0.385
+    y    0.493  1.000 -0.007  0.104 -0.002
+    cv1 -0.095 -0.007  1.000 -0.241 -0.470
+    cv2  0.130  0.104 -0.241  1.000 -0.118
+    cv3 -0.385 -0.002 -0.470 -0.118  1.000
+
+    5. Semi-partial correlation on ``x``
+
+    >>> pg.partial_corr(data=df, x='x', y='y', x_covar=['cv1', 'cv2', 'cv3'])
+              n      r         CI95%     r2  adj_r2     p-val   BF10  power
+    pearson  30  0.463  [0.12, 0.71]  0.215   0.156  0.009946  3.809  0.752
+
+    6. Semi-partial on both``x`` and ``y`` controlling for different variables
+
+    >>> pg.partial_corr(data=df, x='x', y='y', x_covar='cv1',
+    ...                 y_covar=['cv2', 'cv3'], method='spearman')
+               n      r         CI95%     r2  adj_r2     p-val  power
+    spearman  30  0.429  [0.08, 0.68]  0.184   0.123  0.018092  0.676
     """
     from pingouin.utils import _flatten_list
     # Check arguments
-    assert isinstance(x, (str, tuple)), 'x must be a string.'
-    assert isinstance(y, (str, tuple)), 'y must be a string.'
-    assert isinstance(covar, (str, list)), 'covar must be a string or a list.'
     assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
     assert data.shape[0] > 2, 'Data must have at least 3 samples.'
+    assert isinstance(x, (str, tuple)), 'x must be a string.'
+    assert isinstance(y, (str, tuple)), 'y must be a string.'
+    assert isinstance(covar, (str, list, type(None)))
+    assert isinstance(x_covar, (str, list, type(None)))
+    assert isinstance(y_covar, (str, list, type(None)))
+    if covar is not None and (x_covar is not None or y_covar is not None):
+        raise ValueError('Cannot specify both covar and {x,y}_covar.')
     # Check that columns exist
-    col = _flatten_list([x, y, covar])
+    col = _flatten_list([x, y, covar, x_covar, y_covar])
     if isinstance(covar, str):
         covar = [covar]
+    if isinstance(x_covar, str):
+        x_covar = [x_covar]
+    if isinstance(y_covar, str):
+        y_covar = [y_covar]
     assert all([c in data for c in col]), 'columns are not in dataframe.'
     # Check that columns are numeric
     assert all([data[c].dtype.kind in 'bfi' for c in col])
@@ -613,21 +636,28 @@ def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
     data = data[col].dropna()
     assert data.shape[0] > 2, 'Data must have at least 3 non-NAN samples.'
 
-    # Standardize
+    # Standardize (= no need for an intercept in least-square regression)
     C = (data[col] - data[col].mean(axis=0)) / data[col].std(axis=0)
 
-    # Covariates
-    cvar = np.atleast_2d(C[covar].values)
-
-    # Compute beta
-    beta_x = np.linalg.lstsq(cvar, C[y].values, rcond=None)[0]
-    beta_y = np.linalg.lstsq(cvar, C[x].values, rcond=None)[0]
-
-    # Compute residuals
-    res_x = C[x].values - np.dot(cvar, beta_y)
-    res_y = C[y].values - np.dot(cvar, beta_x)
-
-    # Partial correlation = corr between these residuals
+    if covar is not None:
+        # PARTIAL CORRELATION
+        cvar = np.atleast_2d(C[covar].values)
+        beta_x = np.linalg.lstsq(cvar, C[x].values, rcond=None)[0]
+        beta_y = np.linalg.lstsq(cvar, C[y].values, rcond=None)[0]
+        res_x = C[x].values - np.dot(cvar, beta_x)
+        res_y = C[y].values - np.dot(cvar, beta_y)
+    else:
+        # SEMI-PARTIAL CORRELATION
+        # Initialize "fake" residuals
+        res_x, res_y = data[x].values, data[y].values
+        if x_covar is not None:
+            cvar = np.atleast_2d(C[x_covar].values)
+            beta_x = np.linalg.lstsq(cvar, C[x].values, rcond=None)[0]
+            res_x = C[x].values - np.dot(cvar, beta_x)
+        if y_covar is not None:
+            cvar = np.atleast_2d(C[y_covar].values)
+            beta_y = np.linalg.lstsq(cvar, C[y].values, rcond=None)[0]
+            res_y = C[y].values - np.dot(cvar, beta_y)
     return corr(res_x, res_y, method=method, tail=tail)
 
 

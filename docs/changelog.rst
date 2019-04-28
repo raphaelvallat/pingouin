@@ -23,6 +23,7 @@ b. Added :py:func:`pingouin.cronbach_alpha` function.
 c. Added :py:func:`pingouin.plot_shift` function.
 d. Several functions of pandas can now be directly used as :py:class:`pandas.DataFrame` methods.
 e. Added :py:func:`pingouin.pcorr` method to compute the partial Pearson correlation matrix of a :py:class:`pandas.DataFrame` (similar to the pcor function in the ppcor package).
+f. The :py:func:`pingouin.partial_corr` now supports semi-partial correlation.
 
 **Enhancements**
 

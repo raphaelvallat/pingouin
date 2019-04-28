@@ -18,6 +18,7 @@ include pingouin/datasets/mediation.csv
 include pingouin/datasets/mixed_anova.csv
 include pingouin/datasets/multivariate.csv
 include pingouin/datasets/pairwise_corr.csv
+include pingouin/datasets/partial_corr.csv
 include pingouin/datasets/rm_anova.csv
 include pingouin/datasets/rm_anova2.csv
 include pingouin/datasets/rm_anova_wide.csv

@@ -12,6 +12,7 @@ mediation,Mediation analysis,linear_regression - mediation,https://data.library.
 mixed_anova,Memory scores in two groups at three time points,mixed_anova,Pingouin
 multivariate,Multivariate health outcomes in drug and placebo conditions,multivariate statistics,www.real-statistics.com
 pairwise_corr,Big 5 personality traits,corr - pairwise_corr,Dolan et al 2009
+partial_corr,Multivariate random variables,partial_corr,Pingouin
 rm_anova,Hostility towards insect,rm_anova - mixed_anova,Ryan et al 2013
 rm_anova_wide,Scores at 4 time points,rm_anova,Pingouin
 rm_anova2,Performance of employees at two time points and three areas,rm_anova2,www.real-statistics.com

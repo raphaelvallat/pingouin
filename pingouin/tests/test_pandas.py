@@ -75,5 +75,5 @@ class TestParametric(TestCase):
 
         # Test mediation analysis
         med = data.mediation_analysis(x='X', m='M', y='Y', seed=42, n_boot=500)
-        assert med.equals(pg.mediation_analysis(data=data, x='X', m='M', y='Y',
-                                                seed=42, n_boot=500))
+        np.testing.assert_array_equal(med.loc[:, 'coef'].values,
+                                      [0.5610, 0.6542, 0.3961, 0.0396, 0.3565])

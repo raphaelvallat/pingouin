@@ -94,11 +94,11 @@ pd.DataFrame.pairwise_corr = _pairwise_corr
 
 
 # Partial correlation
-def _partial_corr(self, x=None, y=None, covar=None, tail='two-sided',
-                  method='pearson'):
-    """Partial correlation."""
-    stats = partial_corr(data=self, x=x, y=y, covar=covar, tail=tail,
-                         method=method)
+def _partial_corr(self, x=None, y=None, covar=None, x_covar=None, y_covar=None,
+                  tail='two-sided', method='pearson'):
+    """Partial and semi-partial correlation."""
+    stats = partial_corr(data=self, x=x, y=y, covar=covar, x_covar=x_covar,
+                         y_covar=y_covar, tail=tail, method=method)
     return stats
 
 
@@ -126,7 +126,8 @@ def pcorr(self):
     the :py:func:`pingouin.pairwise_corr` or :py:func:`pingouin.partial_corr`
     functions. The :py:func:`pingouin.pcorr` function uses the inverse of
     the variance-covariance matrix to calculate the partial correlation matrix
-    and is therefore much faster than the two latter functions.
+    and is therefore much faster than the two latter functions which are based
+    on the residuals.
 
     References
     ----------
