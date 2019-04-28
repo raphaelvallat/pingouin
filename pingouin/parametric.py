@@ -614,6 +614,10 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
     # Collapse to the mean (that this is also done in remove_rm_na)
     data = data.groupby([subject, a, b]).mean().reset_index()
 
+    assert not data[a].isnull().any(), 'Cannot have NaN in %s' % a
+    assert not data[b].isnull().any(), 'Cannot have NaN in %s' % b
+    assert not data[subject].isnull().any(), 'Cannot have NaN in %s' % subject
+
     # Group sizes and grandmean
     n_a = data[a].nunique()
     n_b = data[b].nunique()
