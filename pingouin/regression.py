@@ -245,7 +245,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         If True, apply a listwise deletion of missing values (i.e. the entire
         row is removed).
     **kwargs : optional
-        Optional arguments passed to sklearn.linear_model.LogisticRegression
+        Optional arguments passed to sklearn.linear_model.LogisticRegression.
 
     Returns
     -------
@@ -262,7 +262,8 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
 
     Notes
     -----
-    This is a wrapper around the sklearn.linear_model.LogisticRegression class.
+    This is a wrapper around the
+    :py:class:`sklearn.linear_model.LogisticRegression` class.
 
     Results have been compared against statsmodels and JASP.
 
