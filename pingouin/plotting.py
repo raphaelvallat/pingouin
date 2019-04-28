@@ -436,6 +436,7 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
     fit_params = dist.fit(x)
     loc = fit_params[-2]
     scale = fit_params[-1]
+    shape = fit_params[0] if len(fit_params) == 3 else None
 
     # Observed values to observed quantiles
     if loc != 0 and scale != 1:
@@ -475,7 +476,8 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
         n = x.size
         P = _ppoints(n)
         crit = stats.norm.ppf(1 - (1 - confidence) / 2)
-        se = (slope / dist.pdf(theor)) * np.sqrt(P * (1 - P) / n)
+        pdf = dist.pdf(theor) if shape is None else dist.pdf(theor, shape)
+        se = (slope / pdf) * np.sqrt(P * (1 - P) / n)
         upper = fit_val + crit * se
         lower = fit_val - crit * se
         ax.plot(theor, upper, 'r--', lw=1.25)

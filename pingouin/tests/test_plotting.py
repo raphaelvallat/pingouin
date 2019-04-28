@@ -51,6 +51,7 @@ class TestPlotting(TestCase):
         """Test qqplot()"""
         np.random.seed(123)
         x = np.random.normal(size=50)
+        x_ln = np.random.lognormal(size=50)
         x_exp = np.random.exponential(size=50)
         ax = qqplot(x, dist='norm')
         assert isinstance(ax, matplotlib.axes.Axes)
@@ -58,6 +59,9 @@ class TestPlotting(TestCase):
         qqplot(x_exp, dist='expon', ax=ax2)
         mean, std = 0, 0.8
         qqplot(x, dist=stats.norm, sparams=(mean, std), confidence=False)
+        # For lognormal distribution, the shape parameter must be specified
+        ax = qqplot(x_ln, dist='lognorm', sparams=(1))
+        assert isinstance(ax, matplotlib.axes.Axes)
 
     def test_plot_paired(self):
         """Test plot_paired()"""
