@@ -146,6 +146,8 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     interaction effect). We strongly recommend that you preprocess your data
     and remove the missing values before using this function.
 
+    This function has been tested against the `pairwise.t.test` R function.
+
     See Also
     --------
     ttest : T-test.
@@ -164,21 +166,23 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
 
     >>> post_hocs = pairwise_ttests(dv='Scores', within='Time',
     ...                             subject='Subject', data=df)
-    >>> print(post_hocs)
+    >>> print(post_hocs)  # doctest: +SKIP
 
     3. Non-parametric pairwise paired test (wilcoxon)
 
     >>> pairwise_ttests(dv='Scores', within='Time', subject='Subject',
-    ...                 data=df, parametric=False)
+    ...                 data=df, parametric=False)  # doctest: +SKIP
 
     4. Within + Between + Within * Between with corrected p-values
 
-    >>> pairwise_ttests(dv='Scores', within='Time', subject='Subject',
-    ...                 between='Group', padjust='bonf', data=df)
+    >>> posthocs = pairwise_ttests(dv='Scores', within='Time',
+    ...                            subject='Subject', between='Group',
+    ...                            padjust='bonf', data=df)
 
     5. Between1 + Between2 + Between1 * Between2
 
-    >>> pairwise_ttests(dv='Scores', between=['Group', 'Time'], data=df)
+    >>> posthocs = pairwise_ttests(dv='Scores', between=['Group', 'Time'],
+    ...                            data=df)
     '''
     from pingouin.parametric import ttest
     from pingouin.nonparametric import wilcoxon, mwu
@@ -505,7 +509,7 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
 
     >>> from pingouin import pairwise_tukey, read_dataset
     >>> df = read_dataset('anova')
-    >>> pairwise_tukey(dv='Pain threshold', between='Hair color', data=df)
+    >>> pt = pairwise_tukey(dv='Pain threshold', between='Hair color', data=df)
     '''
     from pingouin.external.qsturng import psturng
 
@@ -659,7 +663,7 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
     >>> from pingouin import pairwise_gameshowell, read_dataset
     >>> df = read_dataset('anova')
     >>> pairwise_gameshowell(dv='Pain threshold', between='Hair color',
-    ...                      data=df)
+    ...                      data=df)  # doctest: +SKIP
     '''
     from pingouin.external.qsturng import psturng
 
@@ -814,7 +818,7 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     the partial correlation matrix (i.e. the raw pairwise partial correlation
     coefficient matrix, without the p-values, sample sizes, etc), a better
     alternative is to use the :py:func:`pingouin.pcorr` function (see
-    example 8).
+    example 7).
 
     Examples
     --------
@@ -823,36 +827,32 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     >>> from pingouin import pairwise_corr, read_dataset
     >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
     >>> pairwise_corr(data, method='spearman', tail='two-sided',
-    ...               padjust='bonf')
+    ...               padjust='bonf')  # doctest: +SKIP
 
     2. Robust two-sided correlation with uncorrected p-values
 
-    >>> pairwise_corr(data, columns=['Openness', 'Extraversion',
-    ...                              'Neuroticism'], method='percbend')
+    >>> pcor = pairwise_corr(data, columns=['Openness', 'Extraversion',
+    ...                                     'Neuroticism'], method='percbend')
 
-    3. Export the results to a .csv file
+    3. One-versus-all pairwise correlations
 
-    >>> pairwise_corr(data, export_filename='pairwise_corr.csv')
+    >>> pairwise_corr(data, columns=['Neuroticism'])  # doctest: +SKIP
 
-    4. One-versus-all pairwise correlations
+    4. Pairwise correlations between two lists of columns (cartesian product)
 
-    >>> pairwise_corr(data, columns=['Neuroticism'])
+    >>> columns = [['Neuroticism', 'Extraversion'], ['Openness']]
+    >>> pairwise_corr(data, columns)   # doctest: +SKIP
 
-    5. Pairwise correlations between two lists of columns (cartesian product)
+    5. As a Pandas method
 
-    >>> pairwise_corr(data, columns=[['Neuroticism', 'Extraversion'],
-    ...                              ['Openness', 'Agreeableness'])
+    >>> pcor = data.pairwise_corr(covar='Neuroticism', method='spearman')
 
-    6. As a Pandas method
+    6. Pairwise partial correlation
 
-    >>> data.pairwise_corr(covar='Neuroticism', method='spearman')
+    >>> pcor = pairwise_corr(data, covar='Neuroticism')  # One covariate
+    >>> pcor = pairwise_corr(data, covar=['Neuroticism', 'Openness'])  # Two
 
-    7. Pairwise partial correlation
-
-    >>> pairwise_corr(data, covar='Neuroticism')  # With one covariate
-    >>> pairwise_corr(data, covar=['Neuroticism', 'Openness'])  # 2 covariates
-
-    8. Pairwise partial correlation matrix (only the r-values)
+    7. Pairwise partial correlation matrix (only the r-values)
 
     >>> data[['Neuroticism', 'Openness', 'Extraversion']].pcorr()
                   Neuroticism  Openness  Extraversion

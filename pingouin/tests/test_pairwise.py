@@ -15,7 +15,8 @@ class TestPairwise(TestCase):
     """Test pairwise.py."""
 
     def test_pairwise_ttests(self):
-        """Test function pairwise_ttests"""
+        """Test function pairwise_ttests.
+        Tested against the pairwise.t.test R function."""
         # Within + Between + Within * Between
         pairwise_ttests(dv='Scores', within='Time', between='Group',
                         subject='Subject', data=df, alpha=.01)
@@ -23,14 +24,22 @@ class TestPairwise(TestCase):
                         subject='Subject', data=df, padjust='fdr_bh',
                         return_desc=True)
         # Simple within
-        pairwise_ttests(dv='Scores', within='Time', subject='Subject',
-                        data=df, return_desc=True)
+        # In R:
+        # >>> pairwise.t.test(df$Scores, df$Time, pool.sd = FALSE,
+        # ...                 p.adjust.method = 'holm', paired = TRUE)
+        pt = pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+                             data=df, return_desc=True, padjust='holm')
+        np.testing.assert_array_equal(pt.loc[:, 'p-corr'].round(3),
+                                      [0.174, 0.024, 0.310])
+        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                      [0.087, 0.008, 0.310])
         pairwise_ttests(dv='Scores', within='Time', subject='Subject',
                         data=df, parametric=False, return_desc=True)
         # Simple between
-        pairwise_ttests(dv='Scores', between='Group',
-                        data=df, padjust='bonf', tail='one-sided',
-                        effsize='cohen', export_filename='test_export.csv')
+        # In R:
+        # >>> pairwise.t.test(df$Scores, df$Group, pool.sd = FALSE)
+        pt = pairwise_ttests(dv='Scores', between='Group', data=df).round(3)
+        assert pt.loc[0, 'p-unc'] == 0.023
         pairwise_ttests(dv='Scores', between='Group',
                         data=df, padjust='bonf', tail='one-sided',
                         effsize='cohen', parametric=False,

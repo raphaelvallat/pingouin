@@ -47,6 +47,6 @@ def list_dataset():
     --------
 
     >>> from pingouin import list_dataset
-    >>> list_dataset()
+    >>> list_dataset()  # doctest: +SKIP
     """
     print_table(dts)

@@ -565,7 +565,7 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
         >>> pg.plot_paired(data=df[df['Group'] == 'Meditation'],
         ...                dv='Scores', within='Time', subject='Subject',
         ...                ax=ax1, boxplot=False,
-        ...                colors=['grey', 'grey', 'grey'])
+        ...                colors=['grey', 'grey', 'grey'])  # doctest: +SKIP
     """
     from pingouin.utils import _check_dataframe, remove_rm_na
 
