@@ -457,6 +457,8 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     if data[dv].isnull().any():
         data = remove_rm_na(dv=dv, within=within, subject=subject,
                             data=data[[subject, within, dv]])
+    assert not data[within].isnull().any(), 'Cannot have NaN in `within`.'
+    assert not data[subject].isnull().any(), 'Cannot have NaN in `subject`.'
 
     # Groupby
     grp_with = data.groupby(within)[dv]
