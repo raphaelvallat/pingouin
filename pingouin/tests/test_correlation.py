@@ -54,7 +54,7 @@ class TestCorrelation(TestCase):
 
     def test_partial_corr(self):
         """Test function partial_corr.
-        Compare with the R package ppcor."""
+        Compare with the R package ppcor and JASP."""
         df = read_dataset('partial_corr')
         pc = partial_corr(data=df, x='x', y='y', covar='cv1')
         assert pc.loc['pearson', 'r'] == 0.568
@@ -69,6 +69,7 @@ class TestCorrelation(TestCase):
         pc = partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'],
                           method='percbend')
         # Semi-partial correlation
+        df.partial_corr(x='x', y='y', y_covar='cv1')
         pc = df.partial_corr(x='x', y='y', x_covar=['cv1', 'cv2', 'cv3'])
         assert pc.loc['pearson', 'r'] == 0.463
         pc = df.partial_corr(x='x', y='y', y_covar=['cv1', 'cv2', 'cv3'])
