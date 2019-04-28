@@ -11,6 +11,8 @@ from pingouin.parametric import (anova, welch_anova, rm_anova, mixed_anova)
 from pingouin.pairwise import (pairwise_corr, pairwise_ttests)
 from pingouin.regression import mediation_analysis
 
+__all__ = ['pcorr']
+
 
 # ANOVA
 def _anova(self, dv=None, between=None, detailed=False, export_filename=None):
@@ -104,9 +106,51 @@ pd.DataFrame.partial_corr = _partial_corr
 
 
 # Partial correlation matrix
-def _pcorr(self):
-    """Partial correlation matrix.
-    Same behavior as the pcor function in the ppcor R package.
+def pcorr(self):
+    """Partial correlation matrix (:py:class:`pandas.DataFrame` method).
+
+    Returns
+    ----------
+    pcormat : :py:class:`pandas.DataFrame`
+        Partial correlation matrix.
+
+    Notes
+    -----
+    This function calculate the pairwise partial correlations for each pair of
+    variables in a :py:class:`pandas.DataFrame` given all the others. It has
+    the same behavior as the pcor function in the `ppcor` R package.
+
+    Note that this function only returns the raw Pearson correlation
+    coefficient. If you want to calculate the test statistic and p-values, or
+    use more robust estimates of the correlation coefficient, please refer to
+    the :py:func:`pingouin.pairwise_corr` or :py:func:`pingouin.partial_corr`
+    functions. The :py:func:`pingouin.pcorr` function uses the inverse of
+    the variance-covariance matrix to calculate the partial correlation matrix
+    and is therefore much faster than the two latter functions.
+
+    References
+    ----------
+    .. [1] https://cran.r-project.org/web/packages/ppcor/index.html
+
+    Examples
+    --------
+    >>> import pingouin as pg
+    >>> data = pg.read_dataset('mediation')
+    >>> data.pcorr()
+                 X         M         Y      Mbin      Ybin
+    X     1.000000  0.392251  0.059771 -0.014405 -0.149210
+    M     0.392251  1.000000  0.545618 -0.015622 -0.094309
+    Y     0.059771  0.545618  1.000000 -0.007009  0.161334
+    Mbin -0.014405 -0.015622 -0.007009  1.000000 -0.076614
+    Ybin -0.149210 -0.094309  0.161334 -0.076614  1.000000
+
+    On a subset of columns
+
+    >>> data[['X', 'Y', 'M']].pcorr().round(3)
+           X      Y      M
+    X  1.000  0.037  0.413
+    Y  0.037  1.000  0.540
+    M  0.413  0.540  1.000
     """
     V = self.cov()  # Covariance matrix
     Vi = np.linalg.pinv(V)  # Inverse covariance matrix
@@ -116,7 +160,7 @@ def _pcorr(self):
     return pd.DataFrame(pcor, index=V.index, columns=V.columns)
 
 
-pd.DataFrame.pcorr = _pcorr
+pd.DataFrame.pcorr = pcorr
 
 
 # Mediation analysis

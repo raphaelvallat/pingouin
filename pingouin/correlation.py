@@ -529,19 +529,24 @@ def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
     for the effect of one or more other continuous variables
     (also known as covariates or control variables).
 
-    Inspired from a code found at:
-    https://gist.github.com/fabianp/9396204419c7b638d38f
+    The partial correlation between :math:`x` and :math:`y` given the
+    covariate(s) :math:`C` is equivalent to the correlation of the residuals
+    of :math:`x` and :math:`y` after regressing each variable with :math:`C`.
 
-    Rows with NaN are automatically removed from data.
+    Note that if you are not interested in calculating the statistics and
+    p-values but only the correlation coefficient matrix, a (faster)
+    alternative is to use the :py:func:`pingouin.pcorr` method (see example 4).
 
-    Results have been tested against the ppcor R package.
+    Rows with missing values are automatically removed from data. Results have
+    been tested against the `ppcor` R package.
 
     References
     ----------
-
     .. [1] https://en.wikipedia.org/wiki/Partial_correlation
 
     .. [2] https://cran.r-project.org/web/packages/ppcor/index.html
+
+    .. [3] https://gist.github.com/fabianp/9396204419c7b638d38f
 
     Examples
     --------

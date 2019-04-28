@@ -804,11 +804,17 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     Factor is only computed when the sample size is less than 1000
     (and method='pearson').
 
-    This functio also works with two-dimensional multi-index columns. In this
+    This function also works with two-dimensional multi-index columns. In this
     case, columns must be list(s) of tuple(s). See the Jupyter notebook
     for more details:
     https://github.com/raphaelvallat/pingouin/blob/master/notebooks/04_Correlations.ipynb
 
+    If ``covar`` is specified, this function will compute the pairwise partial
+    correlation between the variables. If you are only interested in computing
+    the partial correlation matrix (i.e. the raw pairwise partial correlation
+    coefficient matrix, without the p-values, sample sizes, etc), a better
+    alternative is to use the :py:func:`pingouin.pcorr` function (see
+    example 8).
 
     Examples
     --------
@@ -837,14 +843,22 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     >>> pairwise_corr(data, columns=[['Neuroticism', 'Extraversion'],
     ...                              ['Openness', 'Agreeableness'])
 
-    6. Pairwise partial correlation
+    6. As a Pandas method
+
+    >>> data.pairwise_corr(covar='Neuroticism', method='spearman')
+
+    7. Pairwise partial correlation
 
     >>> pairwise_corr(data, covar='Neuroticism')  # With one covariate
     >>> pairwise_corr(data, covar=['Neuroticism', 'Openness'])  # 2 covariates
 
-    7. As a Pandas method
+    8. Pairwise partial correlation matrix (only the r-values)
 
-    >>> data.pairwise_corr(covar='Neuroticism', method='spearman')
+    >>> data[['Neuroticism', 'Openness', 'Extraversion']].pcorr()
+                  Neuroticism  Openness  Extraversion
+    Neuroticism      1.000000  0.092097     -0.360421
+    Openness         0.092097  1.000000      0.281312
+    Extraversion    -0.360421  0.281312      1.000000
     '''
     from pingouin.correlation import corr, partial_corr
 

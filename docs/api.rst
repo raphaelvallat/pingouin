@@ -63,6 +63,7 @@ Correlation and regression
     corr
     pairwise_corr
     partial_corr
+    pcorr
     distance_corr
     rm_corr
     linear_regression

@@ -388,6 +388,9 @@ Several functions of Pingouin can be used directly as :py:class:`pandas.DataFram
   data = pg.read_dataset('mediation')
   data.pairwise_corr(columns=['X', 'M', 'Y'], covar=['Mbin'])
 
+  # Example 3 | Partial correlation matrix
+  data.pcorr()
+
 The functions that are currently supported as pandas method are:
 
 * :py:func:`pingouin.anova`
@@ -397,6 +400,7 @@ The functions that are currently supported as pandas method are:
 * :py:func:`pingouin.pairwise_ttests`
 * :py:func:`pingouin.pairwise_corr`
 * :py:func:`pingouin.partial_corr`
+* :py:func:`pingouin.pcorr`
 * :py:func:`pingouin.mediation_analysis`
 
 Development
