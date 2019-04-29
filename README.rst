@@ -393,15 +393,15 @@ Several functions of Pingouin can be used directly as :py:class:`pandas.DataFram
 
 The functions that are currently supported as pandas method are:
 
-* :py:func:`pingouin.anova`
-* :py:func:`pingouin.rm_anova`
-* :py:func:`pingouin.mixed_anova`
-* :py:func:`pingouin.welch_anova`
-* :py:func:`pingouin.pairwise_ttests`
-* :py:func:`pingouin.pairwise_corr`
-* :py:func:`pingouin.partial_corr`
-* :py:func:`pingouin.pcorr`
-* :py:func:`pingouin.mediation_analysis`
+* `pingouin.anova <https://pingouin-stats.org/generated/pingouin.anova.html#pingouin.anova>`_
+* `pingouin.rm_anova <https://pingouin-stats.org/generated/pingouin.rm_anova.html#pingouin.rm_anova>`_
+* `pingouin.mixed_anova <https://pingouin-stats.org/generated/pingouin.mixed_anova.html#pingouin.mixed_anova>`_
+* `pingouin.welch_anova <https://pingouin-stats.org/generated/pingouin.welch_anova.html#pingouin.welch_anova>`_
+* `pingouin.pairwise_ttests <https://pingouin-stats.org/generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests>`_
+* `pingouin.pairwise_corr <https://pingouin-stats.org/generated/pingouin.pairwise_corr.html#pingouin.pairwise_corr>`_
+* `pingouin.partial_corr <https://pingouin-stats.org/generated/pingouin.partial_corr.html#pingouin.partial_corr>`_
+* `pingouin.pcorr <https://pingouin-stats.org/generated/pingouin.pcorr.html#pingouin.pcorr>`_
+* `pingouin.pingouin.mediation_analysis <https://pingouin-stats.org/generated/pingouin.mediation_analysis.html#pingouin.mediation_analysis>`_
 
 Development
 ===========
