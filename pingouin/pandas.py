@@ -116,7 +116,7 @@ def pcorr(self):
 
     Notes
     -----
-    This function calculate the pairwise partial correlations for each pair of
+    This function calculates the pairwise partial correlations for each pair of
     variables in a :py:class:`pandas.DataFrame` given all the others. It has
     the same behavior as the pcor function in the `ppcor` R package.
 

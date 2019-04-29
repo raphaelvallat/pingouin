@@ -77,7 +77,7 @@ In addition, some functions require :
 * Statsmodels
 * Scikit-learn
 
-Pingouin is a Python 3 package and is currently tested for Python 3.5, 3.6 and 3.7. Note that Pingouin does not work with Python 2.7.
+Pingouin is a Python 3 package and is currently tested for Python 3.5, 3.6 and 3.7. Pingouin does not work with Python 2.7.
 
 User installation
 -----------------
@@ -94,7 +94,7 @@ or conda
 
   conda install -c conda-forge pingouin
 
-New releases are frequent so always make sure that you have the latest version:
+New releases are `frequent <https://pingouin-stats.org/changelog.html>`_ so always make sure that you have the latest version:
 
 .. code-block:: shell
 
