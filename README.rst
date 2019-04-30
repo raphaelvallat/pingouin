@@ -374,7 +374,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 Integration with Pandas
 -----------------------
 
-Several functions of Pingouin can be used directly as :py:class:`pandas.DataFrame` methods. Try for yourself with the code below:
+Several functions of Pingouin can be used directly as pandas DataFrame methods. Try for yourself with the code below:
 
 .. code-block:: python
 
