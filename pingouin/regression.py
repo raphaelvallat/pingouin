@@ -46,6 +46,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
         'adj_r2' : adjusted R2
         'CI[2.5%]' : lower confidence interval
         'CI[97.5%]' : upper confidence interval
+        'residuals' : residuals (only if as_dataframe is False)
 
     Notes
     -----
@@ -84,10 +85,15 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
 
     .. math:: \\overline{R}^2 = 1 - (1 - R^2) \\frac{n - 1}{n - p - 1}
 
+    The residuals can be accessed via :code:`stats.residuals_` if ``stats``
+    is a pandas DataFrame or :code:`stats['residuals']` if ``stats`` is a
+    dict.
+
     Results have been compared against sklearn, statsmodels and JASP.
 
-    This function will not run if NaN values are either present in the target
-    or predictors variables. Please remove them before runing the function.
+    This function will return an error if missing values are present in either
+    the target or predictor(s) variables. Please remove them before runing
+    the function.
 
     Examples
     --------
@@ -113,7 +119,15 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     >>> print(lm['coef'].values)
     [4.54123324 0.36628301 0.17709451]
 
-    3. Using a Pandas DataFrame
+    3. Get the residuals
+
+    >>> np.round(lm.residuals_, 2)
+    array([ 1.18, -1.17,  1.32,  0.76, -1.25,  0.34, -1.54, -0.2 ,  0.36,
+           -0.39,  0.69,  1.39,  0.2 , -1.14, -0.21, -1.68,  0.67, -0.69,
+            0.62,  0.92, -1.  ,  0.64, -0.21, -0.78,  1.08, -0.03, -1.3 ,
+            0.64,  0.81, -0.04])
+
+    4. Using a Pandas DataFrame
 
     >>> import pandas as pd
     >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
@@ -121,16 +135,16 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     >>> print(lm['coef'].values)
     [4.54123324 0.36628301 0.17709451]
 
-    4. No intercept and return coef only
+    5. No intercept and return coef only
 
     >>> linear_regression(X, y, add_intercept=False, coef_only=True)
     array([ 1.40935593, -0.2916508 ])
 
-    5. Return a dictionnary instead of a DataFrame
+    6. Return a dictionnary instead of a DataFrame
 
     >>> lm_dict = linear_regression(X, y, as_dataframe=False)
 
-    6. Remove missing values
+    7. Remove missing values
 
     >>> X[4, 1] = np.nan
     >>> y[7] = np.nan
@@ -177,12 +191,12 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
         names.insert(0, "Intercept")
 
     # Compute beta coefficient and predictions
-    coef = np.linalg.lstsq(X, y, rcond=None)[0]
+    coef, ss_res, _, _ = np.linalg.lstsq(X, y, rcond=None)
     if coef_only:
         return coef
+    ss_res = np.squeeze(ss_res)
     pred = np.dot(X, coef)
-    resid = np.square(y - pred)
-    ss_res = resid.sum()
+    resid = y - pred
 
     n, p = X.shape[0], X.shape[1]
     # Degrees of freedom should not include the intercept
@@ -218,9 +232,12 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
              ul_name: ul}
 
     if as_dataframe:
-        return pd.DataFrame.from_dict(stats)
+        stats = pd.DataFrame.from_dict(stats)
+        stats.residuals_ = 0  # Trick to avoid Pandas warning
+        stats.residuals_ = resid  # Residuals is a hidden attribute
     else:
-        return stats
+        stats['residuals'] = resid
+    return stats
 
 
 def logistic_regression(X, y, coef_only=False, alpha=0.05,

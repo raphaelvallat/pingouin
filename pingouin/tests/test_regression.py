@@ -31,6 +31,7 @@ class TestRegression(TestCase):
         assert_almost_equal(lm['se'][1], sc.stderr)
         assert_almost_equal(lm['pval'][1], sc.pvalue)
         assert_almost_equal(np.sqrt(lm['r2'][0]), sc.rvalue)
+        assert lm.residuals_.size == df['Y'].size
 
         # Multiple regression with intercept
         X = df[['X', 'M']].values
@@ -41,6 +42,8 @@ class TestRegression(TestCase):
         assert_almost_equal(lm['coef'][1:], sk.coef_)
         assert_almost_equal(lm['coef'][0], sk.intercept_)
         assert_almost_equal(sk.score(X, y), lm['r2'])
+        assert lm['residuals'].size == y.size
+
         # Compare values to JASP
         assert_equal([.605, .110, .101], np.round(lm['se'], 3))
         assert_equal([3.145, 0.361, 6.321], np.round(lm['T'], 3))
