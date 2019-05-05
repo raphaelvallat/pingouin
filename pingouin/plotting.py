@@ -661,6 +661,8 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
            in neuroscience. Eur J Neurosci, 46: 1738-1748.
            doi:10.1111/ejn.13610
 
+    .. [2] https://garstats.wordpress.com/2016/07/12/shift-function/
+
     Examples
     --------
     Default shift plot
@@ -693,6 +695,8 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
     assert x.ndim == 1, 'x must be 1D.'
     assert y.ndim == 1, 'y must be 1D.'
     nx, ny = x.size, y.size
+    assert not np.isnan(x).any(), 'Missing values are not allowed.'
+    assert not np.isnan(y).any(), 'Missing values are not allowed.'
     assert nx >= 10, 'x must have at least 10 samples.'
     assert ny >= 10, 'y must have at least 10 samples.'
     assert 0 < ci < 1, 'ci must be between 0 and 1.'
