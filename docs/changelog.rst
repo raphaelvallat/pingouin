@@ -6,6 +6,12 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
+v0.2.6 (June 2019)
+------------------
+
+**Enhancements**
+
+a. :py:func:`pingouin.linear_regression` now returns the residuals
 
 v0.2.5 (May 2019)
 -----------------
