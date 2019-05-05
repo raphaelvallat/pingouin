@@ -153,15 +153,15 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     return round(cronbach, 6), np.round([lower, upper], 3)
 
 
-def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
+def intraclass_corr(data=None, items=None, raters=None, scores=None, ci=.95):
     """Intra-class correlation coefficient.
 
     Parameters
     ----------
     data : pd.DataFrame
         Dataframe containing the variables
-    groups : string
-        Name of column in data containing the groups.
+    items : string
+        Name of column in data containing the items (targets).
     raters : string
         Name of column in data containing the raters (scorers).
     scores : string
@@ -183,8 +183,26 @@ def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
     total variation across all ratings and all subjects. The ratings are
     quantitative (e.g. Likert scale).
 
-    Inspired from:
-    http://www.real-statistics.com/reliability/intraclass-correlation/
+    Shrout and Fleiss (1979) describe six cases of reliability of ratings done
+    by :math:`k` raters on :math:`n` targets. Pingouin only returns ICC1,
+    which consider that each target is rated by a different rater and the
+    raters are selected at random. (This is a one-way ANOVA
+    fixed effects model and is found by (MSB - MSW)/(MSB + (nr - 1) * MSW)).
+    ICC1 is sensitive to differences in means between raters and is a measure
+    of absolute agreement.
+
+    This function has been tested against the ICC function of the R psych
+    package.
+
+    References
+    ----------
+    .. [1] Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations:
+           uses in assessing rater reliability. Psychological bulletin, 86(2),
+           420.
+
+    .. [2] https://cran.r-project.org/web/packages/psych/psych.pdf
+
+    .. [3] http://www.real-statistics.com/reliability/intraclass-correlation/
 
     Examples
     --------
@@ -192,15 +210,15 @@ def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
 
     >>> import pingouin as pg
     >>> data = pg.read_dataset('icc')
-    >>> pg.intraclass_corr(data=data, groups='Wine', raters='Judge',
+    >>> pg.intraclass_corr(data=data, items='Wine', raters='Judge',
     ...                    scores='Scores', ci=.95)
     (0.727526, array([0.434, 0.927]))
     """
     from pingouin import anova
 
     # Check dataframe
-    if any(v is None for v in [data, groups, raters, scores]):
-        raise ValueError('Data, groups, raters and scores must be specified')
+    if any(v is None for v in [data, items, raters, scores]):
+        raise ValueError('Data, items, raters and scores must be specified')
     assert isinstance(data, pd.DataFrame), 'Data must be a pandas dataframe.'
     # Check that scores is a numeric variable
     assert data[scores].dtype.kind in 'fi', 'Scores must be numeric.'
@@ -213,7 +231,7 @@ def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
     # n = data[groups].nunique()
 
     # ANOVA and ICC
-    aov = anova(dv=scores, data=data, between=groups, detailed=True)
+    aov = anova(dv=scores, data=data, between=items, detailed=True)
     icc = (aov.loc[0, 'MS'] - aov.loc[1, 'MS']) / \
           (aov.loc[0, 'MS'] + (k - 1) * aov.loc[1, 'MS'])
 
