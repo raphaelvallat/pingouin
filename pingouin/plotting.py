@@ -618,7 +618,7 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
 
 
 def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
-               ci=0.95, seed=None, show_median=True, violin=True):
+               ci=.95, seed=None, show_median=True, violin=True):
     """Shift plot.
 
     The shift plot is described in Rousselet, Pernet and Wilcox (2017).
@@ -745,7 +745,6 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
                         palette=['#88bedc', '#cfcfcf'])
 
     if violin:
-
         vl = plt.violinplot([y, x], showextrema=False, vert=False, widths=1)
 
         # Upper plot
@@ -783,13 +782,12 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
         plt.plot([y_per[i], y_per[i]], [-0.2, 0.2], 'k--', zorder=9)
 
     if show_median:
-        # X median
-        plt.plot([x_per[4], x_per[4]], [0.8, 1.2], 'k-')
-        # Y median
-        plt.plot([y_per[4], y_per[4]], [-0.2, 0.2], 'k-')
+        x_med, y_med = np.median(x), np.median(y)
+        plt.plot([x_med, x_med], [0.8, 1.2], 'k-')
+        plt.plot([y_med, y_med], [-0.2, 0.2], 'k-')
 
-    plt.xlabel('Scores (a.u.)', size=20)
-    ax1.set_yticklabels(['Y', 'X'], size=20)
+    plt.xlabel('Scores (a.u.)', size=15)
+    ax1.set_yticklabels(['Y', 'X'], size=15)
     ax1.set_ylabel('')
 
     #######################
@@ -808,7 +806,7 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
 
     plt.axhline(y=0, ls='--', lw=2, color='gray')
 
-    ax2.set_xlabel('X quantiles', size=20)
+    ax2.set_xlabel('X quantiles', size=15)
     ax2.set_ylabel('Y - X quantiles \n differences (a.u.)', size=10)
     sns.despine()
     plt.tight_layout()

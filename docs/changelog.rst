@@ -9,9 +9,13 @@ What's new
 v0.2.6 (June 2019)
 ------------------
 
+**Bugfixes**
+
+a. The ``show_median`` argument of the :py:func:`pingouin.plot_shift` function was not working properly when the percentiles were different that the default parameters.
+
 **Enhancements**
 
-a. :py:func:`pingouin.linear_regression` now returns the residuals
+a. :py:func:`pingouin.linear_regression` now returns the residuals.
 
 v0.2.5 (May 2019)
 -----------------
