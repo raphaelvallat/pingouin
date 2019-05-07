@@ -36,6 +36,16 @@ Bayesian
     bayesfactor_ttest
     bayesfactor_pearson
 
+Contingency
+-----------
+
+.. _contingency:
+
+.. autosummary::
+   :toctree: generated/
+
+    chi2
+
 Circular
 --------
 

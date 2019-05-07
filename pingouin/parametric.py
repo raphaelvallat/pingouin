@@ -1119,6 +1119,12 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
 
     Notes
     -----
+    From Wikipedia:
+
+    *It is named for its creator, Bernard Lewis Welch, and is an adaptation of
+    Student's t-test, and is more reliable when the two samples have
+    unequal variances and/or unequal sample sizes.*
+
     The classic ANOVA is very powerful when the groups are normally distributed
     and have equal variances. However, when the groups have unequal variances,
     it is best to use the Welch ANOVA that better controls for
