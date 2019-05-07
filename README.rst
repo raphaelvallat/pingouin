@@ -209,20 +209,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 
 ------------
 
-5. Q-Q plot
-############
-
-.. plot::
-
-    import numpy as np
-    import pingouin as pg
-    np.random.seed(123)
-    x = np.random.normal(size=50)
-    ax = pg.qqplot(x, dist='norm')
-
-------------
-
-6. One-way ANOVA using a pandas DataFrame
+5. One-way ANOVA using a pandas DataFrame
 #########################################
 
 .. code-block:: python
@@ -246,7 +233,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 
 ------------
 
-7. Repeated measures ANOVA
+6. Repeated measures ANOVA
 ##########################
 
 .. code-block:: python
@@ -265,7 +252,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 
 ------------
 
-8. Post-hoc tests corrected for multiple-comparisons
+7. Post-hoc tests corrected for multiple-comparisons
 ####################################################
 
 .. code-block:: python
@@ -290,7 +277,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 
 ------------
 
-9. Two-way mixed ANOVA
+8. Two-way mixed ANOVA
 ######################
 
 .. code-block:: python
@@ -314,8 +301,8 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 
 ------------
 
-10. Pairwise correlations between columns of a dataframe
-########################################################
+9. Pairwise correlations between columns of a dataframe
+#######################################################
 
 .. code-block:: python
 
@@ -336,7 +323,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
   Y    Z    pearson   two-sided   30  0.020  [-0.34  0.38]  0.000    -0.074  0.020    0.916   0.142    0.051
   ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======  =======
 
-11. Convert between effect sizes
+10. Convert between effect sizes
 ################################
 
 .. code-block:: python
@@ -348,7 +335,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 
     0.384
 
-12. Multiple linear regression
+11. Multiple linear regression
 ##############################
 
 .. code-block:: python
@@ -366,7 +353,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
   Z          -0.069  0.167  -0.416   0.681  0.139     0.076      -0.412        0.273
   =========  ======  =====  ======  ======  =====  ========  ==========  ===========
 
-13. Mediation analysis
+12. Mediation analysis
 ######################
 
 .. code-block:: python
@@ -386,7 +373,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
   Indirect  -0.007  0.025   0.898      -0.070        0.029  No
   ========  ======  =====  ======  ==========  ===========  =====
 
-14. Contingency analysis
+13. Contingency analysis
 ########################
 
 .. code-block:: python
@@ -408,53 +395,6 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
   -1.000000  25.071078  5.525544e-07
   -2.000000  27.457956  1.605471e-07
   =========  =========  ============
-
-15. Bland-Altman plot
-#####################
-
-.. plot::
-
-    import numpy as np
-    import pingouin as pg
-    np.random.seed(123)
-    mean, cov = [10, 11], [[1, 0.8], [0.8, 1]]
-    x, y = np.random.multivariate_normal(mean, cov, 30).T
-    ax = pg.plot_blandaltman(x, y)
-
-16. Plot achieved power of a paired T-test
-##########################################
-
-Plot the curve of achieved power given the effect size (Cohen d) and the sample size of a paired T-test.
-
-.. plot::
-
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    import pingouin as pg
-    import numpy as np
-    sns.set(style='ticks', context='notebook', font_scale=1.2)
-    d = 0.5  # Fixed effect size
-    n = np.arange(5, 80, 5)  # Incrementing sample size
-    # Compute the achieved power
-    pwr = pg.power_ttest(d=d, n=n, contrast='paired', tail='two-sided')
-    # Start the plot
-    plt.plot(n, pwr, 'ko-.')
-    plt.axhline(0.8, color='r', ls=':')
-    plt.xlabel('Sample size')
-    plt.ylabel('Power (1 - type II error)')
-    plt.title('Achieved power of a paired T-test')
-    sns.despine()
-
-17. Paired plot
-###############
-
-.. plot::
-
-    import pingouin as pg
-    import numpy as np
-    df = pg.read_dataset('mixed_anova').query("Group == 'Meditation' and Time != 'January'")
-    ax = pg.plot_paired(data=df, dv='Scores', within='Time', subject='Subject', dpi=150)
-    ax.set_title("Effect of meditation on school performance")
 
 Integration with Pandas
 -----------------------
@@ -486,7 +426,7 @@ The functions that are currently supported as pandas method are:
 * `pingouin.pairwise_corr <https://pingouin-stats.org/generated/pingouin.pairwise_corr.html#pingouin.pairwise_corr>`_
 * `pingouin.partial_corr <https://pingouin-stats.org/generated/pingouin.partial_corr.html#pingouin.partial_corr>`_
 * `pingouin.pcorr <https://pingouin-stats.org/generated/pingouin.pcorr.html#pingouin.pcorr>`_
-* `pingouin.pingouin.mediation_analysis <https://pingouin-stats.org/generated/pingouin.mediation_analysis.html#pingouin.mediation_analysis>`_
+* `pingouin.mediation_analysis <https://pingouin-stats.org/generated/pingouin.mediation_analysis.html#pingouin.mediation_analysis>`_
 
 Development
 ===========
