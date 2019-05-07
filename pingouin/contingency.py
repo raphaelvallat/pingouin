@@ -64,12 +64,12 @@ def chi2(data, x, y, correction=True):
     References
     ----------
     .. [1] Cressie, N., & Timothy R. C. Read. (1984). Multinomial
-       Goodness-of-Fit Tests. Journal of the Royal Statistical Society. Series
-       B (Methodological), 46(3), 440-464.
+           Goodness-of-Fit Tests. Journal of the Royal Statistical Society.
+           Series B (Methodological), 46(3), 440-464.
 
     .. [2] Yates, F. (1934). Contingency Tables Involving Small Numbers and the
-       :math:`\chi^2` Test. Supplement to the Journal of the Royal Statistical
-       Society, 1, 217-235.
+           :math:`\chi^2` Test. Supplement to the Journal of the Royal
+           Statistical Society, 1, 217-235.
 
     Examples
     --------

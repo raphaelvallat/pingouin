@@ -40,7 +40,7 @@ import sphinx_bootstrap_theme
 # ones.
 sys.path.insert(0, os.path.abspath('sphinxext'))
 extensions = [
-              # 'sphinx.ext.mathjax',
+              'sphinx.ext.mathjax',
               'sphinx.ext.doctest',
               'sphinx.ext.viewcode',
               'sphinx.ext.githubpages',
