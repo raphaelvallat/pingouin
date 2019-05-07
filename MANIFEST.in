@@ -13,6 +13,7 @@ include pingouin/datasets/cochran.csv
 include pingouin/datasets/cronbach_alpha.csv
 include pingouin/datasets/cronbach_wide_missing.csv
 include pingouin/datasets/datasets.csv
+include pingouin/datasets/heart.csv
 include pingouin/datasets/icc.csv
 include pingouin/datasets/mediation.csv
 include pingouin/datasets/mixed_anova.csv

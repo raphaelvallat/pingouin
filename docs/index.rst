@@ -382,7 +382,30 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
   Indirect  -0.007  0.025   0.898      -0.070        0.029  No
   ========  ======  =====  ======  ==========  ===========  =====
 
-14. Bland-Altman plot
+14. Contingency analysis
+########################
+
+.. code-block:: python
+
+    data = pg.read_dataset('heart')
+    expected, observed, dof, stats = pg.chi2(data, 'sex', 'target')
+    stats
+
+.. table:: Chi-squared tests summary
+  :widths: auto
+
+  =========  =========  ============
+  lambda     chi2       p
+  =========  =========  ============
+  1.000000   22.717227  1.876778e-06
+  0.666667   22.931427  1.678845e-06
+  0.000000   23.557374  1.212439e-06
+  -0.500000  24.219622  8.595211e-07
+  -1.000000  25.071078  5.525544e-07
+  -2.000000  27.457956  1.605471e-07
+  =========  =========  ============
+
+15. Bland-Altman plot
 #####################
 
 .. plot::
@@ -394,7 +417,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
     x, y = np.random.multivariate_normal(mean, cov, 30).T
     ax = pg.plot_blandaltman(x, y)
 
-15. Plot achieved power of a paired T-test
+16. Plot achieved power of a paired T-test
 ##########################################
 
 Plot the curve of achieved power given the effect size (Cohen d) and the sample size of a paired T-test.
@@ -418,7 +441,7 @@ Plot the curve of achieved power given the effect size (Cohen d) and the sample 
     plt.title('Achieved power of a paired T-test')
     sns.despine()
 
-16. Paired plot
+17. Paired plot
 ###############
 
 .. plot::
