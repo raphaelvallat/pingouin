@@ -138,17 +138,6 @@ def chi2(data, x, y, correction=True):
     expected = pd.DataFrame(expected_freq(observed), index=observed.index,
                             columns=observed.columns)
 
-    expected_zero_mask = expected == 0
-
-    if expected_zero_mask.any(axis=None):
-        expected_zero_mask_pos = [(i, j) for i in expected_zero_mask.index
-                                  for j in expected_zero_mask.columns
-                                  if expected_zero_mask.at[i, j]]
-        raise ValueError(
-            'Expected frequencies has value 0 for the following {} pairs:' +
-            '\n\t{}'.format((x, y), expected_zero_mask_pos)
-        )
-
     # All count frequencies should be at least 5
     for df, name in zip([observed, expected], ['observed', 'expected']):
         if (df < 5).any(axis=None):
