@@ -3,11 +3,11 @@ ancova,Teaching method with family income as covariate,ANCOVA,www.real-statistic
 anova,Pain threshold per hair color,anova - pairwise_tukey,McClave and Dietrich 1991
 anova2,Fertilizer impact on the yield of crops,anova2,www.real-statistics.com
 anova2_unbalanced,Diet and exercise impact,anova2,http://onlinestatbook.com/2/analysis_of_variance/unequal.html
+chi2,Patients' attributes and heart conditions,chi2,https://archive.ics.uci.edu/ml/datasets/Heart+Disease
 circular,Orientation tuning properties of three neurons,circular statistics,Berens 2009
 cochran,Energy level across three days,Cochran,www.real-statistics.com
 cronbach_alpha,Questionnaire ratings,cronbach_alpha,www.real-statistics.com
 cronbach_wide_missing,Questionnaire rating (binary) in wide format and with missing values,cronbach_alpha,www.real-statistics.com
-heart,Patients' attributes and heart conditions,chi2,https://archive.ics.uci.edu/ml/datasets/Heart+Disease
 icc,Wine quality rating by 4 judges,intraclass_corr,www.real-statistics.com
 mediation,Mediation analysis,linear_regression - mediation,https://data.library.virginia.edu/introduction-to-mediation-analysis/
 mixed_anova,Memory scores in two groups at three time points,mixed_anova,Pingouin

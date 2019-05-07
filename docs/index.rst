@@ -51,7 +51,9 @@
 
 10. Circular statistics
 
-11. Plotting: Bland-Altman plot, Q-Q plot, paired plot, robust correlation...
+11. Chi-squared tests
+
+12. Plotting: Bland-Altman plot, Q-Q plot, paired plot, robust correlation...
 
 Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
 
@@ -387,7 +389,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 
 .. code-block:: python
 
-    data = pg.read_dataset('heart')
+    data = pg.read_dataset('chi2')
     expected, observed, dof, stats = pg.chi2(data, 'sex', 'target')
     stats
 
@@ -511,6 +513,7 @@ Contributors
 
 - Nicolas Legrand
 - `Richard Höchenberger <http://hoechenberger.net/>`_
+- `Arthur Paulino <https://github.com/arthurpaulino>`_
 
 How to cite Pingouin?
 =====================

@@ -13,9 +13,18 @@ v0.2.6 (June 2019)
 
 a. The ``show_median`` argument of the :py:func:`pingouin.plot_shift` function was not working properly when the percentiles were different that the default parameters.
 
+**New functions**
+
+a. Added :py:func:`pingouin.chi2` (Chi-squared) tests.
+
 **Enhancements**
 
 a. :py:func:`pingouin.linear_regression` now returns the residuals.
+
+**Contributors**
+
+* Raphael Vallat
+* `Arthur Paulino <https://github.com/arthurpaulino>`_
 
 v0.2.5 (May 2019)
 -----------------

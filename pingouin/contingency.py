@@ -13,7 +13,7 @@ __all__ = ['chi2']
 def chi2(data, x, y, correction=True):
     """
     Chi-squared tests between two categorical variables for different values of
-    :math:`\lambda`: 1, 2/3, 0, -1/2, -1 and -2 [1]_.
+    :math:`\\lambda`: 1, 2/3, 0, -1/2, -1 and -2 [1]_.
 
     Parameters
     ----------
@@ -37,7 +37,7 @@ def chi2(data, x, y, correction=True):
     stats : pd.DataFrame
         The tests summary, containing three columns:
 
-        * ``'lambda'``: The :math:`\lambda` value used for the power\
+        * ``'lambda'``: The :math:`\\lambda` value used for the power\
                         divergence statistic
         * ``'chi2'``: The test statistic
         * ``'p'``: The p-value of the test
@@ -54,8 +54,8 @@ def chi2(data, x, y, correction=True):
     quality of a categorical variable in a classification problem or to *ii*)
     check the similarity between two categorical variables. In the first
     example, a good categorical predictor and the class column should present
-    high :math:`\chi^2` and low p-value. In the second example, similar
-    categorical variables should present low :math:`\chi^2` and high p-value.
+    high :math:`\\chi^2` and low p-value. In the second example, similar
+    categorical variables should present low :math:`\\chi^2` and high p-value.
 
     .. warning :: As a general guideline for the consistency of this test, the
         observed and the expected contingency tables should not have cells
@@ -68,7 +68,7 @@ def chi2(data, x, y, correction=True):
            Series B (Methodological), 46(3), 440-464.
 
     .. [2] Yates, F. (1934). Contingency Tables Involving Small Numbers and the
-           :math:`\chi^2` Test. Supplement to the Journal of the Royal
+           :math:`\\chi^2` Test. Supplement to the Journal of the Royal
            Statistical Society, 1, 217-235.
 
     Examples
@@ -77,7 +77,7 @@ def chi2(data, x, y, correction=True):
     heart disease.
 
     >>> import pingouin as pg
-    >>> data = pg.read_dataset('heart')
+    >>> data = pg.read_dataset('chi2')
     >>> data['sex'].value_counts(ascending=True)
     0     96
     1    207
