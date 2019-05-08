@@ -1,7 +1,7 @@
-.. faq:
+.. _faq:
 
 FAQ
-***
+===
 
 Python
 ------
@@ -300,4 +300,3 @@ BibTeX:
           </div>
         </div>
       </div>
-    </div>

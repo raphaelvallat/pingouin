@@ -55,16 +55,17 @@
 
 12. Plotting: Bland-Altman plot, Q-Q plot, paired plot, robust correlation...
 
-Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
+Pingouin is designed for users who want **simple yet exhaustive stats functions**.
 
 For example, the :code:`ttest_ind` function of SciPy returns only the T-value and the p-value. By contrast,
 the :code:`ttest` function of Pingouin returns the T-value, p-value, degrees of freedom, effect size (Cohen's d), 95% confidence intervals, statistical power and Bayes Factor (BF10) of the test.
 
+***********************
+
 Installation
 ============
 
-Dependencies
-------------
+Pingouin is a Python 3 package and is currently tested for Python 3.5, 3.6 and 3.7. It will **not** work with Python 2.7.
 
 The main dependencies of Pingouin are :
 
@@ -78,11 +79,6 @@ In addition, some functions require :
 
 * Statsmodels
 * Scikit-learn
-
-Pingouin is a Python 3 package and is currently tested for Python 3.5, 3.6 and 3.7. Pingouin does not work with Python 2.7.
-
-User installation
------------------
 
 Pingouin can be easily installed using pip
 
@@ -102,26 +98,19 @@ New releases are `frequent <https://pingouin-stats.org/changelog.html>`_ so alwa
 
   pip install --upgrade pingouin
 
-GitHub repository
------------------
-
-* Link to the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
-
-Chat
-====
-
-If you have questions, please ask them in the public `Gitter chat <https://gitter.im/pingouin-stats/Lobby>`_
-
-.. image:: https://badges.gitter.im/owner/repo.png
-    :target: https://gitter.im/pingouin-stats/Lobby
+***********************
 
 Quick start
-============
+===========
 
-Click on the link below and navigate to the notebooks/ folder to run a collection of interactive Jupyter notebooks showing the main functionalities of Pingouin. No need to install Pingouin beforehand, the notebooks run in a Binder environment.
+* If you have *questions*, please ask them in the public `Gitter chat <https://gitter.im/pingouin-stats/Lobby>`_.
 
-.. image:: https://mybinder.org/badge.svg
-    :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
+* If you want to *report a bug*, please open an issue on the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
+
+* If you want to see *Pingouin in action*, please click on the link below and navigate to the *notebooks/* folder to open a collection of interactive Jupyter notebooks.
+
+  .. image:: https://mybinder.org/badge.svg
+      :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
 
 10 minutes to Pingouin
 ----------------------
@@ -486,18 +475,8 @@ The functions that are currently supported as pandas method are:
 * :py:func:`pingouin.pcorr`
 * :py:func:`pingouin.mediation_analysis`
 
-Contents
-========
 
-.. toctree::
-   :maxdepth: 1
-
-   api
-   guidelines
-   faq
-   changelog
-   examples
-
+***********************
 
 Development
 ===========
