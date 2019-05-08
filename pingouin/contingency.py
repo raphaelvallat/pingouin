@@ -12,8 +12,10 @@ __all__ = ['chi2']
 
 def chi2(data, x, y, correction=True):
     """
-    Chi-squared tests between two categorical variables for different values of
-    :math:`\\lambda`: 1, 2/3, 0, -1/2, -1 and -2 [1]_.
+    Chi-squared tests between two categorical variables.
+
+    The test is computed for different values of :math:`\\lambda`: 1, 2/3, 0,
+    -1/2, -1 and -2 (Cressie and Read, 1984).
 
     Parameters
     ----------
@@ -24,7 +26,7 @@ def chi2(data, x, y, correction=True):
         in ``data``.
     correction : bool
         Whether to apply Yates' correction when the degree of freedom of the
-        observed contingency table is 1 [2]_.
+        observed contingency table is 1 (Yates 1934).
 
     Returns
     -------
@@ -86,7 +88,7 @@ def chi2(data, x, y, correction=True):
     If gender is not a good predictor for heart disease, we should expect the
     same 96:207 ratio across the target classes.
 
-    >>> expected, observed, dof, stats = pg.chi2(data, 'sex', 'target')
+    >>> expected, observed, dof, stats = pg.chi2(data, x='sex', y='target')
     >>> expected
     target          0           1
     sex

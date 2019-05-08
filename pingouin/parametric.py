@@ -777,9 +777,9 @@ def anova(dv=None, between=None, data=None, detailed=False,
     -----
     The classic ANOVA is very powerful when the groups are normally distributed
     and have equal variances. However, when the groups have unequal variances,
-    it is best to use the Welch ANOVA (`welch_anova`) that better controls for
-    type I error (Liu 2015). The homogeneity of variances can be measured with
-    the `homoscedasticity` function.
+    it is best to use the Welch ANOVA (:py:func:`pingouin.welch_anova`) that
+    better controls for type I error (Liu 2015). The homogeneity of variances
+    can be measured with the :py:func:`pingouin.homoscedasticity` function.
 
     The main idea of ANOVA is to partition the variance (sums of squares)
     into several components. For example, in one-way ANOVA:
@@ -817,13 +817,11 @@ def anova(dv=None, between=None, data=None, detailed=False,
     Note that missing values are automatically removed. Results have been
     tested against R, Matlab and JASP.
 
-    **Important**
-
-    Versions of Pingouin below 0.2.5 gave wrong results for **unbalanced
-    two-way ANOVA**. This issue has been resolved in Pingouin>=0.2.5. In such
-    cases, a type II ANOVA is calculated via an internal call to the
-    statsmodels package. This latter package is therefore required for two-way
-    ANOVA with unequal sample sizes.
+    .. warning :: Versions of Pingouin below 0.2.5 gave wrong results for
+        **unbalanced two-way ANOVA**. This issue has been resolved in
+        Pingouin>=0.2.5. In such cases, a type II ANOVA is calculated via an
+        internal call to the statsmodels package. This latter package is
+        therefore required for two-way ANOVA with unequal sample sizes.
 
     References
     ----------
@@ -1173,8 +1171,9 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
     :math:`(r-1, 1 / \\Lambda)` degrees of freedom.
 
     When the groups are balanced and have equal variances, the optimal post-hoc
-    test is the Tukey-HSD test (`pairwise_tukey`). If the groups have unequal
-    variances, the Games-Howell test is more adequate.
+    test is the Tukey-HSD test (:py:func:`pingouin.pairwise_tukey`).
+    If the groups have unequal variances, the Games-Howell test is more
+    adequate (:py:func:`pingouin.pairwise_gameshowell`).
 
     Results have been tested against R.
 
