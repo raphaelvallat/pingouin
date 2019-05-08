@@ -379,22 +379,22 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 .. code-block:: python
 
     data = pg.read_dataset('chi2')
-    expected, observed, dof, stats = pg.chi2(data, 'sex', 'target')
+    expected, observed, stats = pg.chi2(data, x='sex', y='target')
     stats
 
 .. table:: Chi-squared tests summary
   :widths: auto
 
-  =========  =========  ============
-  lambda     chi2       p
-  =========  =========  ============
-  1.000000   22.717227  1.876778e-06
-  0.666667   22.931427  1.678845e-06
-  0.000000   23.557374  1.212439e-06
-  -0.500000  24.219622  8.595211e-07
-  -1.000000  25.071078  5.525544e-07
-  -2.000000  27.457956  1.605471e-07
-  =========  =========  ============
+  ==================  ========  ======  =====  =====
+  test                  lambda    chi2    dof      p
+  ==================  ========  ======  =====  =====
+  pearson                1.000  22.717      1  0.000
+  cressie-read           0.667  22.931      1  0.000
+  log-likelihood         0.000  23.557      1  0.000
+  freeman-tukey         -0.500  24.220      1  0.000
+  mod-log-likelihood    -1.000  25.071      1  0.000
+  neyman                -2.000  27.458      1  0.000
+  ==================  ========  ======  =====  =====
 
 Integration with Pandas
 -----------------------

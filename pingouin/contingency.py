@@ -37,8 +37,9 @@ def chi2(data, x, y, correction=True):
     dof : float
         The degree of freedom of ``observed``.
     stats : pd.DataFrame
-        The tests summary, containing three columns:
+        The tests summary, containing four columns:
 
+        * ``'test'``: The statistic name
         * ``'lambda'``: The :math:`\\lambda` value used for the power\
                         divergence statistic
         * ``'chi2'``: The test statistic
@@ -58,6 +59,9 @@ def chi2(data, x, y, correction=True):
     example, a good categorical predictor and the class column should present
     high :math:`\\chi^2` and low p-value. In the second example, similar
     categorical variables should present low :math:`\\chi^2` and high p-value.
+
+    This function is a wrapper around the
+    :py:func:`scipy.stats.power_divergence` function.
 
     .. warning :: As a general guideline for the consistency of this test, the
         observed and the expected contingency tables should not have cells
@@ -88,7 +92,7 @@ def chi2(data, x, y, correction=True):
     If gender is not a good predictor for heart disease, we should expect the
     same 96:207 ratio across the target classes.
 
-    >>> expected, observed, dof, stats = pg.chi2(data, x='sex', y='target')
+    >>> expected, observed, stats = pg.chi2(data, x='sex', y='target')
     >>> expected
     target          0           1
     sex
@@ -96,12 +100,6 @@ def chi2(data, x, y, correction=True):
     1       94.277228  112.722772
 
     Let's see what the data tells us.
-
-    >>> dof
-    1
-
-    The observed contingency table was adjusted. We should see fractional
-    cells.
 
     >>> observed
     target      0     1
@@ -113,13 +111,13 @@ def chi2(data, x, y, correction=True):
     tests should be sensitive to this difference.
 
     >>> stats
-         lambda       chi2             p
-    0  1.000000  22.717227  1.876778e-06
-    1  0.666667  22.931427  1.678845e-06
-    2  0.000000  23.557374  1.212439e-06
-    3 -0.500000  24.219622  8.595211e-07
-    4 -1.000000  25.071078  5.525544e-07
-    5 -2.000000  27.457956  1.605471e-07
+                     test  lambda    chi2  dof             p
+    0             pearson   1.000  22.717    1  1.876778e-06
+    1        cressie-read   0.667  22.931    1  1.678845e-06
+    2      log-likelihood   0.000  23.557    1  1.212439e-06
+    3       freeman-tukey  -0.500  24.220    1  8.595211e-07
+    4  mod-log-likelihood  -1.000  25.071    1  5.525544e-07
+    5              neyman  -2.000  27.458    1  1.605471e-07
 
     Very low p-values indeed. The gender qualifies as a good predictor for the
     presence of heart disease on this dataset.
@@ -153,16 +151,18 @@ def chi2(data, x, y, correction=True):
 
     ddof = observed.size - 1 - dof
     stats = []
+    names = ["pearson", "cressie-read", "log-likelihood",
+             "freeman-tukey", "mod-log-likelihood", "neyman"]
 
-    for lambda_ in [1.0, 2 / 3, 0.0, -1 / 2, -1.0, -2.0]:
+    for name, lambda_ in zip(names, [1.0, 2 / 3, 0.0, -1 / 2, -1.0, -2.0]):
         if dof == 0:
             chi2, p = 0.0, 1.0
         else:
             chi2, p = power_divergence(observed, expected, ddof=ddof,
                                        axis=None, lambda_=lambda_)
 
-        stats.append({'lambda': lambda_, 'chi2': chi2, 'p': p})
+        stats.append({'test': name, 'lambda': round(lambda_, 3),
+                      'chi2': round(chi2, 3), 'dof': dof, 'p': p})
 
-    stats = pd.DataFrame(stats)[['lambda', 'chi2', 'p']]
-
-    return expected, observed, dof, stats
+    stats = pd.DataFrame(stats)[['test', 'lambda', 'chi2', 'dof', 'p']]
+    return expected, observed, stats
