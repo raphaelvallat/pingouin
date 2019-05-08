@@ -22,7 +22,7 @@ Code guidelines
 
 * When adding new functions, make sure that they are **generalizable to various situations**, including missing data, unbalanced groups, etc.
 
-* Changes must be accompanied by updated documentation and examples.
+* Changes must be accompanied by **updated documentation** and examples.
 
 * After making changes, **ensure all tests pass**. This can be done by running:
 
@@ -33,15 +33,12 @@ Code guidelines
 Checking and building documentation
 -----------------------------------
 
-All changes to the codebase must be properly documented.
-To ensure that documentation is rendered correctly, the best bet is to follow the existing examples for function docstrings.
-
 Pingouin's documentation (including docstring in code) uses ReStructuredText format,
 see `Sphinx documentation <http://www.sphinx-doc.org/en/master/>`_ to learn more about editing them. The code
 follows the `NumPy docstring standard <https://numpydoc.readthedocs.io/en/latest/format.html>`_.
 
-Documentation is automatically built remotely during pull requests. If
-you want to also test documentation locally, you will need to install the following packages:
+
+All changes to the codebase must be properly documented. To ensure that documentation is rendered correctly, the best bet is to follow the existing examples for function docstrings. If you want to test the documentation locally, you will need to install the following packages:
 
 .. code-block:: bash
 
