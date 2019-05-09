@@ -34,8 +34,6 @@ def chi2(data, x, y, correction=True):
         The expected contingency table of frequencies.
     observed : pd.DataFrame
         The (corrected or not) observed contingency table of frequencies.
-    dof : float
-        The degree of freedom of ``observed``.
     stats : pd.DataFrame
         The tests summary, containing four columns:
 
