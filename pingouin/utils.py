@@ -7,7 +7,8 @@ import pandas as pd
 
 __all__ = ["_perm_pval", "print_table", "_export_table", "_check_eftype",
            "remove_rm_na", "remove_na", "_flatten_list", "_check_dataframe",
-           "_is_sklearn_installed", "_is_statsmodels_installed"]
+           "_is_sklearn_installed", "_is_statsmodels_installed",
+           "dichotomous_crosstab"]
 
 
 def _perm_pval(bootstat, estimate, tail='two-sided'):
@@ -341,6 +342,53 @@ def _check_dataframe(dv=None, between=None, within=None, subject=None,
             if not isinstance(input, (str, list)):
                 raise ValueError('within and between must be specified when '
                                  'effects=interaction')
+
+
+###############################################################################
+# DICHOTOMOUS CONTINGENCY TABLES
+###############################################################################
+
+
+def _process_series(data, column):
+    """Converts the values of a pd.DataFrame column into 0 or 1"""
+    series = data[column]
+    if series.dtype == int:
+        return series
+    if series.dtype == bool:
+        return series.astype(int)
+
+    def convert_elem(elem):
+        if isinstance(elem, int):
+            return elem
+        elif isinstance(elem, bool):
+            return int(elem)
+        elif isinstance(elem, str):
+            lower = elem.lower()
+            if lower in ('n', 'no', 'absent'):
+                return 0
+            elif lower in ('y', 'yes', 'present'):
+                return 1
+        elif isinstance(elem, float) and (elem in (0, 1) or elem is np.nan):
+            return elem
+        raise ValueError('Invalid value to build a dichotomous contingency ' +
+                         'table on column {}: {}'.format(column, elem))
+
+    return series.apply(convert_elem)
+
+
+def dichotomous_crosstab(data, x, y):
+    """
+    Generates a 2x2 contingency table from a pd.DataFrame that contains only
+    dichotomous entries, which are translated as 0 or 1.
+    """
+    crosstab = pd.crosstab(_process_series(data, x), _process_series(data, y))
+    shape = crosstab.shape
+    if shape != (2, 2):
+        raise ValueError('Invalid contingency table format: {}'.format(shape))
+    crosstab.index, crosstab.columns = (0, 1), (0, 1)
+    crosstab.index.name, crosstab.columns.name = x, y
+    return crosstab
+
 
 ###############################################################################
 # DEPENDENCIES

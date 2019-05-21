@@ -1,13 +1,15 @@
 # Author: Arthur Paulino <arthurleonardo.ap@gmail.com>
 # Date: May 2019
+from scipy import stats as sp_stats
 from scipy.stats.contingency import expected_freq
 from scipy.stats import power_divergence
 import pandas as pd
 import numpy as np
 import warnings
+from .utils import dichotomous_crosstab
 
 
-__all__ = ['chi2']
+__all__ = ['chi2', 'chi2_mcnemar']
 
 
 def chi2(data, x, y, correction=True):
@@ -164,3 +166,38 @@ def chi2(data, x, y, correction=True):
 
     stats = pd.DataFrame(stats)[['test', 'lambda', 'chi2', 'dof', 'p']]
     return expected, observed, stats
+
+
+def chi2_mcnemar(data, procedure1, procedure2, correction=True):
+    # Python code inspired by statsmodel's mcnemar
+    procedures = (procedure1, procedure2)
+    assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
+    assert all(isinstance(procedure, str) for procedure in procedures),\
+        'procedures must contain strings, only.'
+    assert all(procedure in data.columns for procedure in procedures),\
+        'columns are not in dataframe.'
+
+    observed = dichotomous_crosstab(data, procedure1, procedure2)
+    n1, n2 = observed.at[0, 1], observed.at[1, 0]
+
+    # Exact test
+    chi2 = min(n1, n2)
+    exact = {
+        'test': 'exact',
+        'chi2': round(chi2, 3),
+        'p': round(min(1, sp_stats.binom.cdf(chi2, n1 + n2, 0.5) * 2), 3)
+    }
+
+    # Approximated test
+    chi2 = (abs(n1 - n2) - int(correction))**2 / (n1 + n2)
+    approximated = {
+        'test': 'approximated',
+        'chi2': round(chi2, 3),
+        'p': round(sp_stats.chi2.sf(chi2, 1), 3)
+    }
+
+    stats = pd.DataFrame([exact, approximated])
+    stats['dof'] = 1
+    stats = stats[['test', 'chi2', 'dof', 'p']]
+
+    return observed, stats
