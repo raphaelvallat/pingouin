@@ -4,6 +4,7 @@ anova,Pain threshold per hair color,anova - pairwise_tukey,McClave and Dietrich 
 anova2,Fertilizer impact on the yield of crops,anova2,www.real-statistics.com
 anova2_unbalanced,Diet and exercise impact,anova2,http://onlinestatbook.com/2/analysis_of_variance/unequal.html
 chi2,Patients' attributes and heart conditions,chi2,https://archive.ics.uci.edu/ml/datasets/Heart+Disease
+chi2_mcnemar, Reflexes while using/not using cellphones, chi2_mcnemar, http://sites.williams.edu/bklingen/files/2015/07/ReactionTime_wide.csv (adapted)
 circular,Orientation tuning properties of three neurons,circular statistics,Berens 2009
 cochran,Energy level across three days,Cochran,www.real-statistics.com
 cronbach_alpha,Questionnaire ratings,cronbach_alpha,www.real-statistics.com

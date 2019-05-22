@@ -364,9 +364,10 @@ def _process_series(data, column):
             return int(elem)
         elif isinstance(elem, str):
             lower = elem.lower()
-            if lower in ('n', 'no', 'absent'):
+            if lower in ('n', 'no', 'absent', 'false', 'f', 'negative'):
                 return 0
-            elif lower in ('y', 'yes', 'present'):
+            elif lower in ('y', 'yes', 'present', 'true', 't', 'positive',
+                           'p'):
                 return 1
         elif isinstance(elem, float) and (elem in (0, 1) or elem is np.nan):
             return elem

@@ -168,16 +168,117 @@ def chi2(data, x, y, correction=True):
     return expected, observed, stats
 
 
-def chi2_mcnemar(data, procedure1, procedure2, correction=True):
+def chi2_mcnemar(data, x, y, correction=True):
+    """
+    Performs the exact and approximated versions of McNemar's test.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The dataframe containing the ocurrences for the test. Each row must
+        represent either a subject or a pair of subjects.
+    x, y : string
+        The variables names for the McNemar's test. Must be names of columns
+        in ``data``.
+
+        If each row of ``data`` represents a subject, then ``x`` and ``y`` must
+        be columns containing dichotomous measurements in two different
+        contexts. For instance: the presence of pain before and after a certain
+        treatment.
+
+        If each row of ``data`` represents a pair of subjects, then ``x`` and
+        ``y`` must be columns containing dichotomous measurements for each of
+        the subjects. For instance: a positive response to a certain drug in
+        the control group and in the test group, supposing that each pair
+        contains a subject in each group.
+
+        Currently, Pingouin recognizes the following values as dichotomous
+        measurements:
+
+        * ``0``, ``0.0``, ``False``, ``'No'``, ``'N'``, ``'Absent'``,\
+        ``'False'``, ``'F'`` or ``'Negative'`` for negative cases;
+
+        * ``1``, ``1.0``, ``True``, ``'Yes'``, ``'Y'``, ``'Present'``,\
+        ``'True'``, ``'T'``, ``'Positive'`` or ``'P'``,  for positive cases;
+
+        If strings are used, Pingouin will recognize them regardless of their
+        uppercase/lowercase combinations.
+
+    correction : bool
+        Whether to apply the correction for continuity (Edwards, A. 1948).
+
+    Returns
+    -------
+    observed : pd.DataFrame
+        The observed contingency table of frequencies.
+    stats : pd.DataFrame
+        The tests summary, containing four columns:
+
+        * ``'test'``: The test that was performed
+        * ``'chi2'``: The test statistic
+        * ``'dof'``: The degree of freedom
+        * ``'p'``: The p-value of the test
+
+    Notes
+    -----
+    The McNemar's test is compatible with dichotomous paired data, generally
+    used to assert the effectiveness of a certain procedure, such as a
+    treatment or the use of a drug. "Dichotomous" means that the values of the
+    measurements are binary. "Paired data" means that each measurement is done
+    twice, either on the same subject in two different moments or in two
+    similar (paired) subjects from different groups (e.g.: control/test). In
+    order to better understand the idea behind McNemar's test, let's illustrate
+    it with an example.
+
+    Suppose that we wanted to test the impact of the usage of cellphones in the
+    reaction time (which can be good or bad) of a certain group of `n` people.
+    To achieve this, we measured their reflexes while using and while not using
+    a cellphone. The observed data summary was:
+
+    * Good reflexes with and without cellphone: `a`
+    * Good reflexes with and bad without cellphone: `b`
+    * Bad reflexes with and good without cellphone: `c`
+    * Bad reflexes with and without cellphone: `d`
+
+    Now consider two groups:
+
+    1. The group of people who had good reflexes while using a cellphone
+    2. The group of people who had good reflexes while not using a cellphone
+
+    If the usage of cellphone does not impact their reaction times, we should
+    expect the probabilities of having good reflexes to be the same, regardless
+    of the cellphone usage. Mathematically, such statement can be translated
+    into the following equation:
+
+    .. math::
+
+        \\frac{a+b}{n} = \\frac{a+c}{n} \\Rightarrow b = c
+
+    Thus, this test should indicate higher statistical significances for higher
+    distances between `b` and `c` (McNemar, Q. 1947):
+
+    .. math::
+
+        \\chi^2 = \\frac{(b - c)^2}{b + c}
+
+    References
+    ----------
+    .. [1] Edwards, A. L. (1948). Note on the "correction for continuity" in
+           testing the significance of the difference between correlated
+           proportions. Psychometrika, 13(3), 185-187.
+
+    .. [2] McNemar, Q. (1947). Note on the sampling error of the difference
+           between correlated proportions or percentages. Psychometrika, 12(2),
+           153-157.
+    """
     # Python code inspired by statsmodel's mcnemar
-    procedures = (procedure1, procedure2)
     assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
-    assert all(isinstance(procedure, str) for procedure in procedures),\
+    assert all(isinstance(column, str) for column in (x, y)),\
         'procedures must contain strings, only.'
-    assert all(procedure in data.columns for procedure in procedures),\
+    assert all(column in data.columns for column in (x, y)),\
         'columns are not in dataframe.'
 
-    observed = dichotomous_crosstab(data, procedure1, procedure2)
+    observed = dichotomous_crosstab(data, x, y)
     n1, n2 = observed.at[0, 1], observed.at[1, 0]
 
     # Exact test
