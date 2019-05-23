@@ -9,7 +9,7 @@ subject,good_reaction_without_cellphone,good_reaction_with_cellphone
 8,True,True
 9,True,True
 10,True,True
-11,False,False
+11,False,True
 12,True,True
 13,False,False
 14,True,False
@@ -26,7 +26,7 @@ subject,good_reaction_without_cellphone,good_reaction_with_cellphone
 25,True,True
 26,True,False
 27,False,False
-28,False,False
+28,False,True
 29,True,True
 30,True,True
 31,True,True

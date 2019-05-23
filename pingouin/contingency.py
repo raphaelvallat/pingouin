@@ -1,8 +1,7 @@
 # Author: Arthur Paulino <arthurleonardo.ap@gmail.com>
 # Date: May 2019
-from scipy import stats as sp_stats
 from scipy.stats.contingency import expected_freq
-from scipy.stats import power_divergence
+from scipy.stats import power_divergence, binom, chi2 as sp_chi2
 import pandas as pd
 import numpy as np
 import warnings
@@ -286,18 +285,27 @@ def chi2_mcnemar(data, x, y, correction=True):
     exact = {
         'test': 'exact',
         'chi2': round(chi2, 3),
-        'p': round(min(1, sp_stats.binom.cdf(chi2, n1 + n2, 0.5) * 2), 3)
+        'p': min(1, 2 * binom.cdf(chi2, n1 + n2, 0.5))
     }
+
+    # mid-p test
+    mid_p = {
+        'test': 'mid-p',
+        'chi2': round(chi2, 3),
+        'p': round(exact['p'] - binom.pmf(n2, n1 + n2, 0.5), 3)
+    }
+
+    exact['p'] = round(exact['p'], 3)
 
     # Approximated test
     chi2 = (abs(n1 - n2) - int(correction))**2 / (n1 + n2)
     approximated = {
         'test': 'approximated',
         'chi2': round(chi2, 3),
-        'p': round(sp_stats.chi2.sf(chi2, 1), 3)
+        'p': round(sp_chi2.sf(chi2, 1), 3)
     }
 
-    stats = pd.DataFrame([exact, approximated])
+    stats = pd.DataFrame([exact, mid_p, approximated])
     stats['dof'] = 1
     stats = stats[['test', 'chi2', 'dof', 'p']]
 
