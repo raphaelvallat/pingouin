@@ -16,6 +16,7 @@ a. The ``show_median`` argument of the :py:func:`pingouin.plot_shift` function w
 **New functions**
 
 a. Added :py:func:`pingouin.chi2` (Chi-squared) tests.
+b. Added :py:func:`pingouin.power_chi2` function.
 
 **Enhancements**
 

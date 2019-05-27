@@ -188,6 +188,7 @@ Power analysis
      :toctree: generated/
 
       power_anova
+      power_chi2
       power_corr
       power_ttest
       power_ttest2n
