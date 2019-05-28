@@ -166,7 +166,13 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
     Mbin  839.716156  4.549393e-183   False
     Ybin  814.468158  1.381932e-177   False
 
-    3. Long-format dataframe
+    3. Pandas Series
+
+    >>> pg.normality(data['X'], method='normaltest')
+              W      pval  normal
+    X  1.791839  0.408232    True
+
+    4. Long-format dataframe
 
     >>> data = pg.read_dataset('rm_anova2')
     >>> pg.normality(data, dv='Performance', group='Time')
@@ -176,9 +182,11 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
     """
     assert isinstance(data, (pd.DataFrame, pd.Series, list, np.ndarray))
     assert method in ['shapiro', 'normaltest']
+    if isinstance(data, pd.Series):
+        data = data.to_frame()
     col_names = ['W', 'pval']
     func = getattr(scipy.stats, method)
-    if isinstance(data, (list, np.ndarray, pd.Series)):
+    if isinstance(data, (list, np.ndarray)):
         data = np.asarray(data)
         assert data.ndim == 1, 'Data must be 1D.'
         assert data.size > 3, 'Data must have more than 3 samples.'

@@ -34,7 +34,8 @@ class TestDistribution(TestCase):
         # Pandas DataFrame
         df_nan_piv = df_nan.pivot(index='Subject', columns='Time',
                                   values='Scores')
-        normality(df_nan_piv)
+        normality(df_nan_piv)  # Wide-format dataframe
+        normality(df_nan_piv['August'])  # pandas Series
         # The line below is disabled because test fails on python 3.5
         # assert stats_piv.equals(normality(df_nan, group='Time', dv='Scores'))
         normality(df_nan, group='Group', dv='Scores', method='normaltest')
