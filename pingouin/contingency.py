@@ -229,25 +229,25 @@ def chi2_mcnemar(data, x, y, correction=True):
     order to better understand the idea behind McNemar's test, let's illustrate
     it with an example.
 
-    Suppose that we wanted to test the impact of the usage of cellphones in the
-    reaction time (which can be good or bad) of a certain group of `n` people.
-    To achieve this, we measured their reflexes while using and while not using
-    a cellphone. The observed data summary was:
+    Suppose that we wanted to compare the effectiveness of two different
+    treatments (X and Y) for athlete's foot on a certain group of `n` people.
+    To achieve this, we measured their responses to such treatments on each
+    foot. The observed data summary was:
 
-    * Good reflexes with and without cellphone: `a`
-    * Good reflexes with and bad without cellphone: `b`
-    * Bad reflexes with and good without cellphone: `c`
-    * Bad reflexes with and without cellphone: `d`
+    * Number of people with good responses to X and Y: `a`
+    * Number of people with good response to X and bad response to Y: `b`
+    * Number of people with bad response to X and good response to Y: `c`
+    * Number of people with bad responses to X and Y: `d`
 
-    Now consider two groups:
+    Now consider the two groups:
 
-    1. The group of people who had good reflexes while using a cellphone
-    2. The group of people who had good reflexes while not using a cellphone
+    1. The group of people who had good response to X (`a` + `b` subjects)
+    2. The group of people who had good response to Y (`a` + `c` subjects)
 
-    If the usage of cellphone does not impact their reaction times, we should
-    expect the probabilities of having good reflexes to be the same, regardless
-    of the cellphone usage. Mathematically, such statement can be translated
-    into the following equation:
+    If the treatments have the same effectiveness, we should expect the
+    probabilities of having good responses to be the same, regardless of the
+    treatment. Mathematically, such statement can be translated into the
+    following equation:
 
     .. math::
 
@@ -269,6 +269,26 @@ def chi2_mcnemar(data, x, y, correction=True):
     .. [2] McNemar, Q. (1947). Note on the sampling error of the difference
            between correlated proportions or percentages. Psychometrika, 12(2),
            153-157.
+
+    Examples
+    --------
+    >>> import pingouin as pg
+    >>> data = pg.read_dataset('chi2_mcnemar')
+    >>> observed, stats = pg.chi2_mcnemar(data, 'treatment_X', 'treatment_Y')
+    >>> observed
+    treatment_Y   0   1
+    treatment_X
+    0            20  40
+    1             8  12
+
+    In this case, `c` seems to be a significantly greater than `b`. The tests
+    should be sensitive to this.
+
+    >>> stats
+               test    chi2  dof    p
+    0         exact   8.000    1  0.0
+    1         mid-p   8.000    1  0.0
+    2  approximated  20.021    1  0.0
     """
     # Python code inspired by statsmodel's mcnemar
     assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
