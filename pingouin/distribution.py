@@ -186,7 +186,8 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
         stats = pd.DataFrame(func(data)).T
         stats.columns = col_names
         stats['normal'] = np.where(stats['pval'] > alpha, True, False)
-    elif isinstance(data, pd.DataFrame):
+    else:
+        # Data is a Pandas DataFrame
         if dv is None and group is None:
             # Wide-format
             # Get numeric data only
