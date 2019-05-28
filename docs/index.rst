@@ -183,15 +183,24 @@ Quick start
 4. Test the normality of the data
 #################################
 
+The :py:func:`pingouin.normality` function works with lists, arrays, or pandas DataFrame in wide or long-format.
+
 .. code-block:: python
 
-   # Return a boolean (true if normal) and the associated p-value
-   print(pg.normality(x, y))                                 # Univariate normality
+   print(pg.normality(x))                                    # Univariate normality
    print(pg.multivariate_normality(np.column_stack((x, y)))) # Multivariate normality
+
+.. table:: Output
+   :widths: auto
+
+   =====  ======  ========
+      W    pval   normal
+   =====  ======  ========
+   0.615   0.000  False
+   =====  ======  ========
 
 .. parsed-literal::
 
-   (array([False,  True]), array([0., 0.552]))
    (False, 0.00018)
 
 ------------

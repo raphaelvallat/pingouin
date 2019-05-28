@@ -28,8 +28,15 @@ class TestDistribution(TestCase):
 
     def test_normality(self):
         """Test function test_normality."""
+        # List / 1D array
         normality(x, alpha=.05)
-        normality(x, y, alpha=.05)
+        normality(x.tolist(), method='normaltest', alpha=.05)
+        # Pandas DataFrame
+        df_nan_piv = df_nan.pivot(index='Subject', columns='Time',
+                                  values='Scores')
+        stats_piv = normality(df_nan_piv)
+        assert stats_piv.equals(normality(df_nan, group='Time', dv='Scores'))
+        normality(df_nan, group='Group', dv='Scores', method='normaltest')
 
     def test_homoscedasticity(self):
         """Test function test_homoscedasticity."""

@@ -21,6 +21,7 @@ b. Added :py:func:`pingouin.power_chi2` function.
 **Enhancements**
 
 a. :py:func:`pingouin.linear_regression` now returns the residuals.
+b. Completely rewrote :py:func:`pingouin.normality` function: support pandas DataFrame (wide & long format), multiple methods, casewise removal of missing values...
 
 **Contributors**
 
