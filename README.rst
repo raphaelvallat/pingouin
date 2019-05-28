@@ -206,11 +206,11 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
 .. table:: Output
   :widths: auto
 
-   =====  ======  ========
-      W    pval   normal
-   =====  ======  ========
-   0.615   0.000  False
-   =====  ======  ========
+  =====  ======  ========
+      W    pval    normal
+  =====  ======  ========
+  0.615   0.000  False
+  =====  ======  ========
 
 .. parsed-literal::
 
