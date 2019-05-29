@@ -288,10 +288,10 @@ def chi2_mcnemar(data, x, y, correction=True):
     should be sensitive to this.
 
     >>> stats
-               test    chi2  dof    p
-    0         exact   8.000    1  0.0
-    1         mid-p   8.000    1  0.0
-    2  approximated  20.021    1  0.0
+               test    chi2  dof         p
+    0         exact   8.000    1  0.000000
+    1         mid-p   8.000    1  0.000002
+    2  approximated  20.021    1  0.000008
     """
     # Python code inspired by statsmodel's mcnemar
     assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
@@ -319,7 +319,7 @@ def chi2_mcnemar(data, x, y, correction=True):
     mid_p = {
         'test': 'mid-p',
         'chi2': round(chi2, 3),
-        'p': round(exact['p'] - binom.pmf(n2, n1 + n2, 0.5), 3)
+        'p': exact['p'] - binom.pmf(n2, n1 + n2, 0.5)
     }
 
     exact['p'] = round(exact['p'], 3)
@@ -329,7 +329,7 @@ def chi2_mcnemar(data, x, y, correction=True):
     approximated = {
         'test': 'approximated',
         'chi2': round(chi2, 3),
-        'p': round(sp_chi2.sf(chi2, 1), 3)
+        'p': sp_chi2.sf(chi2, 1)
     }
 
     stats = pd.DataFrame([exact, mid_p, approximated])
