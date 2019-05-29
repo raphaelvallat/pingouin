@@ -4,7 +4,8 @@ import numpy as np
 from scipy import stats
 from scipy.optimize import brenth
 
-__all__ = ["power_ttest", "power_ttest2n", "power_anova", "power_corr"]
+__all__ = ["power_ttest", "power_ttest2n", "power_anova", "power_corr",
+           "power_chi2"]
 
 
 def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
@@ -663,5 +664,154 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
 
         try:
             return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(r, n, power))
+        except ValueError:  # pragma: no cover
+            return np.nan
+
+
+def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
+    """
+    Evaluate power, sample size, effect size or
+    significance level of chi-squared tests.
+
+    Parameters
+    ----------
+    dof : float
+        Degree of freedom (depends on the chosen test).
+    w : float
+        Effect size.
+    n : int
+        Total number of observations.
+    power : float
+        Test power (= 1 - type II error).
+    alpha : float
+        Significance level (type I error probability).
+        The default is 0.05.
+
+    Notes
+    -----
+    Exactly ONE of the parameters ``w``, ``n``, ``power`` and ``alpha`` must
+    be passed as None, and that parameter is determined from the others. The
+    degrees of freedom ``dof`` must always be specified.
+
+    Notice that ``alpha`` has a default value of 0.05 so None must be
+    explicitly passed if you want to compute it.
+
+    This function is a mere Python translation of the original `pwr.chisq.test`
+    function implemented in the `pwr` package. All credit goes to the author,
+    Stephane Champely.
+
+    Statistical power is the likelihood that a study will
+    detect an effect when there is an effect there to be detected.
+    A high statistical power means that there is a low probability of
+    concluding that there is no effect when there is one.
+    Statistical power is mainly affected by the effect size and the sample
+    size.
+
+    The non-centrality parameter is defined by:
+
+    .. math:: \\delta = N * w^2
+
+    Then the critical value is computed using the percentile point function of
+    the :math:`\\chi^2` distribution with the alpha level and degrees of
+    freedom.
+
+    Finally, the power of the chi-squared test is calculated using the survival
+    function of the non-central :math:`\\chi^2` distribution using the
+    previously computed critical value, non-centrality parameter, and the
+    degrees of freedom of the test.
+
+    :py:func:`scipy.optimize.brenth` is used to solve power equations for other
+    variables (i.e. sample size, effect size, or significance level). If the
+    solving fails, a nan value is returned.
+
+    Results have been tested against GPower and the R pwr package.
+
+    References
+    ----------
+
+    .. [1] Cohen, J. (1988). Statistical power analysis for the behavioral
+           sciences (2nd ed.). Hillsdale,NJ: Lawrence Erlbaum.
+
+    .. [2] https://cran.r-project.org/web/packages/pwr/pwr.pdf
+
+    Examples
+    --------
+    1. Compute achieved power
+
+    >>> from pingouin import power_chi2
+    >>> print('power: %.4f' % power_chi2(dof=1, w=0.3, n=20))
+    power: 0.2687
+
+    2. Compute required sample size
+
+    >>> print('n: %.4f' % power_chi2(dof=3, w=0.3, power=0.80))
+    n: 121.1396
+
+    3. Compute achieved effect size
+
+    >>> print('w: %.4f' % power_chi2(dof=2, n=20, power=0.80, alpha=0.05))
+    w: 0.6941
+
+    4. Compute achieved alpha (significance)
+
+    >>> print('alpha: %.4f' % power_chi2(dof=1, w=0.5, n=20, power=0.80,
+    ...                                   alpha=None))
+    alpha: 0.1630
+    """
+    assert isinstance(dof, (int, float))
+    # Check the number of arguments that are None
+    n_none = sum([v is None for v in [w, n, power, alpha]])
+    if n_none != 1:
+        err = 'Exactly one of w, n, power, and alpha must be None.'
+        raise ValueError(err)
+
+    # Safety checks
+    if w is not None:
+        w = abs(w)
+    if alpha is not None:
+        assert 0 < alpha <= 1
+    if power is not None:
+        assert 0 < power <= 1
+
+    def func(w, n, power, alpha):
+        k = stats.chi2.ppf(1 - alpha, dof)
+        nc = n * w**2
+        return stats.ncx2.sf(k, dof, nc)
+
+    # Evaluate missing variable
+    if power is None:
+        # Compute achieved power
+        return func(w, n, power, alpha)
+
+    elif n is None:
+        # Compute required sample size
+
+        def _eval_n(n, w, power, alpha):
+            return func(w, n, power, alpha) - power
+
+        try:
+            return brenth(_eval_n, 1, 1e+07, args=(w, power, alpha))
+        except ValueError:  # pragma: no cover
+            return np.nan
+
+    elif w is None:
+        # Compute achieved effect size
+
+        def _eval_w(w, n, power, alpha):
+            return func(w, n, power, alpha) - power
+
+        try:
+            return brenth(_eval_w, 1e-10, 1e+07, args=(n, power, alpha))
+        except ValueError:  # pragma: no cover
+            return np.nan
+
+    else:
+        # Compute achieved alpha
+
+        def _eval_alpha(alpha, w, n, power):
+            return func(w, n, power, alpha) - power
+
+        try:
+            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(w, n, power))
         except ValueError:  # pragma: no cover
             return np.nan

@@ -1,3 +1,4 @@
+import scipy
 import numpy as np
 import pandas as pd
 from unittest import TestCase
@@ -28,13 +29,22 @@ class TestNonParametric(TestCase):
 
     def test_mwu(self):
         """Test function mwu"""
+        mwu_scp = scipy.stats.mannwhitneyu(x, y, use_continuity=True,
+                                           alternative='two-sided')
+        mwu_pg = mwu(x, y, tail='two-sided')
+        assert mwu_scp[0] == mwu_pg.at['MWU', 'U-val']
+        assert mwu_scp[1] == mwu_pg.at['MWU', 'p-val']
         mwu(x, y, tail='one-sided')
-        mwu(x, y, tail='two-sided')
 
     def test_wilcoxon(self):
         """Test function wilcoxon"""
-        wilcoxon(x, y, tail='one-sided')
-        wilcoxon(x, y, tail='two-sided')
+        wc_scp = scipy.stats.wilcoxon(x, y, correction=True)
+        wc_pg = wilcoxon(x, y, tail='two-sided')
+        wc_pg_1 = wilcoxon(x, y, tail='one-sided')
+        assert wc_scp[0] == wc_pg.at['Wilcoxon', 'W-val']
+        assert wc_scp[1] == wc_pg.at['Wilcoxon', 'p-val']
+        assert (wc_pg.at['Wilcoxon', 'p-val'] / 2) == wc_pg_1.at['Wilcoxon',
+                                                                 'p-val']
 
     def test_friedman(self):
         """Test function friedman"""
@@ -55,15 +65,15 @@ class TestNonParametric(TestCase):
 
     def test_kruskal(self):
         """Test function kruskal"""
-        x[10] = np.nan
-        df = pd.DataFrame({'DV': np.r_[x, y, z],
+        x_nan = x.copy()
+        x_nan[10] = np.nan
+        df = pd.DataFrame({'DV': np.r_[x_nan, y, z],
                            'Group': np.repeat(['A', 'B', 'C'], 100)})
         kruskal(data=df, dv='DV', between='Group')
         summary = kruskal(data=df, dv='DV', between='Group',
                           export_filename='test_export.csv')
         # Compare with SciPy built-in function
-        from scipy import stats
-        H, p = stats.kruskal(x, y, z, nan_policy='omit')
+        H, p = scipy.stats.kruskal(x_nan, y, z, nan_policy='omit')
         assert np.allclose(np.round(H, 3), summary['H']['Kruskal'])
         assert np.allclose(p, summary['p-unc']['Kruskal'])
 

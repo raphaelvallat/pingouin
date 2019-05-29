@@ -116,7 +116,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     bf10 = 1 / ((1 + t**2 / df)**(-(df + 1) / 2) / integr)
 
     # Tail
-    bf10 *= 2 if tail == 'one-sided' else 1
+    bf10 = bf10 * (1 / 0.5) if tail == 'one-sided' else bf10
 
     return _format_bf(bf10)
 

@@ -1,4 +1,7 @@
+import scipy.stats
 import numpy as np
+import pandas as pd
+from .utils import remove_na
 
 __all__ = ["gzscore", "normality", "homoscedasticity", "anderson",
            "epsilon", "sphericity"]
@@ -46,29 +49,42 @@ def gzscore(x):
     >>> print(round(z.mean(), 3), round(z.std(), 3))
     -0.0 0.995
     """
-    from scipy.stats import gmean
     # Geometric mean
-    geo_mean = gmean(x)
+    geo_mean = scipy.stats.gmean(x)
     # Geometric standard deviation
     gstd = np.exp(np.sqrt(np.sum((np.log(x / geo_mean))**2) / (len(x) - 1)))
     # Geometric z-score
     return np.log(x / geo_mean) / np.log(gstd)
 
 
-def normality(*args, alpha=.05):
-    """Shapiro-Wilk univariate normality test.
+def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
+    """Univariate normality test.
 
     Parameters
     ----------
-    sample1, sample2,... : array_like
-        Array of sample data. May be of different lengths.
+    data : dataframe, series, list or 1D np.array
+        Iterable. Can be either a single list, 1D numpy array,
+        or a wide- or long-format pandas dataframe.
+    dv : str
+        Dependent variable (only when ``data`` is a long-format dataframe).
+    group : str
+        Grouping variable (only when ``data`` is a long-format dataframe).
+    method : str
+        Normality test. 'shapiro' (default) performs the Shapiro-Wilk test
+        using :py:func:`scipy.stats.shapiro`, and 'normaltest' performs the
+        omnibus test of normality using :py:func:`scipy.stats.normaltest`.
+        The latter is more appropriate for large samples.
+    alpha : float
+        Significance level.
 
     Returns
     -------
-    normal : boolean
-        True if x comes from a normal distribution.
-    p : float
-        P-value.
+    stats : dataframe
+        Pandas DataFrame with columns:
+
+        * ``'W'``: test statistic
+        * ``'pval'``: p-value
+        * ``'normal'``: True if ``data`` is normally distributed.
 
     See Also
     --------
@@ -115,6 +131,8 @@ def normality(*args, alpha=.05):
     additional investigation of the effect size is typically advisable,
     e.g., a Q–Q plot in this case."*
 
+    Note that missing values are automatically removed (casewise deletion).
+
     References
     ----------
     .. [1] Shapiro, S. S., & Wilk, M. B. (1965). An analysis of variance test
@@ -126,40 +144,78 @@ def normality(*args, alpha=.05):
 
     Examples
     --------
-    1. Test the normality of one array.
+    1. Shapiro-Wilk test on a 1D array.
 
     >>> import numpy as np
-    >>> from pingouin import normality
+    >>> import pingouin as pg
     >>> np.random.seed(123)
     >>> x = np.random.normal(size=100)
-    >>> normal, p = normality(x, alpha=.05)
-    >>> print(normal, p)
-    True 0.275
+    >>> pg.normality(x)
+             W      pval  normal
+    0  0.98414  0.274886    True
 
-    2. Test the normality of two arrays.
+    2. Omnibus test on a wide-format dataframe with missing values
 
-    >>> import numpy as np
-    >>> from pingouin import normality
-    >>> np.random.seed(123)
-    >>> x = np.random.normal(size=100)
-    >>> y = np.random.rand(100)
-    >>> normal, p = normality(x, y, alpha=.05)
-    >>> print(normal, p)
-    [ True False] [0.275 0.001]
+    >>> data = pg.read_dataset('mediation')
+    >>> data.loc[1, 'X'] = np.nan
+    >>> pg.normality(data, method='normaltest')
+                   W           pval  normal
+    X       1.791839   4.082320e-01    True
+    M       0.492349   7.817859e-01    True
+    Y       0.348676   8.400129e-01    True
+    Mbin  839.716156  4.549393e-183   False
+    Ybin  814.468158  1.381932e-177   False
+
+    3. Pandas Series
+
+    >>> pg.normality(data['X'], method='normaltest')
+              W      pval  normal
+    X  1.791839  0.408232    True
+
+    4. Long-format dataframe
+
+    >>> data = pg.read_dataset('rm_anova2')
+    >>> pg.normality(data, dv='Performance', group='Time')
+                 W      pval  normal
+    Pre   0.967718  0.478773    True
+    Post  0.940728  0.095157    True
     """
-    from scipy.stats import shapiro
-    k = len(args)
-    p = np.zeros(k)
-    normal = np.zeros(k, 'bool')
-    for j in range(k):
-        _, p[j] = shapiro(args[j])
-        normal[j] = True if p[j] > alpha else False
-
-    if k == 1:
-        normal = bool(normal)
-        p = float(p)
-
-    return normal, np.round(p, 3)
+    assert isinstance(data, (pd.DataFrame, pd.Series, list, np.ndarray))
+    assert method in ['shapiro', 'normaltest']
+    if isinstance(data, pd.Series):
+        data = data.to_frame()
+    col_names = ['W', 'pval']
+    func = getattr(scipy.stats, method)
+    if isinstance(data, (list, np.ndarray)):
+        data = np.asarray(data)
+        assert data.ndim == 1, 'Data must be 1D.'
+        assert data.size > 3, 'Data must have more than 3 samples.'
+        data = remove_na(data)
+        stats = pd.DataFrame(func(data)).T
+        stats.columns = col_names
+        stats['normal'] = np.where(stats['pval'] > alpha, True, False)
+    else:
+        # Data is a Pandas DataFrame
+        if dv is None and group is None:
+            # Wide-format
+            # Get numeric data only
+            numdata = data._get_numeric_data()
+            stats = numdata.apply(lambda x: func(x.dropna()),
+                                  result_type='expand', axis=0).T
+            stats.columns = col_names
+            stats['normal'] = np.where(stats['pval'] > alpha, True, False)
+        else:
+            # Long-format
+            stats = pd.DataFrame([])
+            assert group in data.columns
+            assert dv in data.columns
+            grp = data.groupby(group, sort=False)
+            cols = grp.groups.keys()
+            for _, tmp in grp:
+                stats = stats.append(normality(tmp[dv].values, method=method,
+                                               alpha=alpha))
+            stats.index = cols
+    return stats
 
 
 def homoscedasticity(*args, alpha=.05):
@@ -254,18 +310,20 @@ def homoscedasticity(*args, alpha=.05):
     >>> print(round(np.var(x), 3), round(np.var(y), 3), equal_var, p)
     1.273 0.602 False 0.0
     """
-    from scipy.stats import levene, bartlett
     k = len(args)
     if k < 2:
         raise ValueError("Must enter at least two input sample vectors.")
 
     # Test normality of data
-    normal, _ = normality(*args)
+    normal = np.zeros(k, dtype='bool')
+    for j in range(k):
+        normal[j] = normality(args[j]).loc[0, 'normal']
+
     if np.count_nonzero(normal) != normal.size:
         # print('Data are not normally distributed. Using Levene test.')
-        _, p = levene(*args)
+        _, p = scipy.stats.levene(*args)
     else:
-        _, p = bartlett(*args)
+        _, p = scipy.stats.bartlett(*args)
 
     equal_var = True if p > alpha else False
     return equal_var, np.round(p, 3)
@@ -304,12 +362,11 @@ def anderson(*args, dist='norm'):
     >>> anderson(x, y, dist='expon')
     (array([False, False]), array([15., 15.]))
     """
-    from scipy.stats import anderson as ads
     k = len(args)
     from_dist = np.zeros(k, 'bool')
     sig_level = np.zeros(k)
     for j in range(k):
-        st, cr, sig = ads(args[j], dist=dist)
+        st, cr, sig = scipy.stats.anderson(args[j], dist=dist)
         from_dist[j] = True if (st > cr).any() else False
         sig_level[j] = sig[np.argmin(np.abs(st - cr))]
 
@@ -534,7 +591,6 @@ def sphericity(data, method='mauchly', alpha=.05):
     >>> sphericity(data, method='jns')
     (False, 1.118, 6.176, 2, 0.04560424030751982)
     """
-    from scipy.stats import chi2
     S = data.cov().values
     n = data.shape[0]
     p = data.shape[1]
@@ -563,7 +619,7 @@ def sphericity(data, method='mauchly', alpha=.05):
     ddof = 0.5 * d * p - 1
     # Ensure that dof is not zero
     ddof = 1 if ddof == 0 else ddof
-    pval = chi2.sf(chi_sq, ddof)
+    pval = scipy.stats.chi2.sf(chi_sq, ddof)
 
     # Second order approximation
     # pval2 = chi2.sf(chi_sq, ddof + 4)

@@ -748,7 +748,7 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     sserror = aov.loc[2, 'SS']
     rm = sign * np.sqrt(ssfactor / (ssfactor + sserror))
     pval = aov.loc[1, 'p-unc']
-    pval *= 0.5 if tail == 'one-sided' else 1
+    pval = pval * 0.5 if tail == 'one-sided' else pval
     ci = compute_esci(stat=rm, nx=n, eftype='pearson').tolist()
     pwr = power_corr(r=rm, n=n, tail=tail)
     # Convert to Dataframe
