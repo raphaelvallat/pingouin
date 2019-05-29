@@ -16,6 +16,12 @@ df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
                    'Values': [1.52, 5.8, 8.2, 3.4],
                    'Subject': [1, 1, 2, 2]})
 
+data = pd.DataFrame({'A': [0, 1, 0],
+                     'B': [False, True, False],
+                     'C': [1, 2, 3],
+                     'D': ['No', 'Yes', 'No'],
+                     'E': [1., 1., 1.]})
+
 
 class TestUtils(TestCase):
     """Test utils.py."""
@@ -172,11 +178,6 @@ class TestUtils(TestCase):
     def test_dichotomous_crosstab(self):
         """Test function dichotomous_crosstab."""
         # Integer
-        data = pd.DataFrame({'A': [0, 1, 0],
-                             'B': [False, True, False],
-                             'C': [1, 2, 3],
-                             'D': ['No', 'Yes', 'No'],
-                             'E': [1., 1., 1.]})
         d1 = dichotomous_crosstab(data, 'A', 'B')
         d2 = dichotomous_crosstab(data, 'A', 'D')
         assert d1.equals(d2)
