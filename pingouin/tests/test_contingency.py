@@ -9,8 +9,8 @@ import pingouin as pg
 class TestContingency(TestCase):
     """Test contingency.py."""
 
-    def test_chi2(self):
-        """Test function chi2."""
+    def test_chi2_independence(self):
+        """Test function chi2_independence."""
         # Setup
         np.random.seed(42)
         mean, cov = [0.5, 0.5], [(1, .6), (.6, 1)]
@@ -21,7 +21,7 @@ class TestContingency(TestCase):
         data[~mask_class_1] = 0
 
         # Comparing results with SciPy
-        _, _, stats = pg.chi2(data, x='x', y='y')
+        _, _, stats = pg.chi2_independence(data, x='x', y='y')
         contingency_table = pd.crosstab(data['x'], data['y'])
         for i in stats.index:
             lambda_ = stats.at[i, 'lambda']
@@ -36,12 +36,12 @@ class TestContingency(TestCase):
         # Testing resilience to NaN
         mask_nan = np.random.random(data.shape) > 0.8  # ~20% NaN values
         data[mask_nan] = np.nan
-        pg.chi2(data, x='x', y='y')
+        pg.chi2_independence(data, x='x', y='y')
 
         # Testing validations
         def expect_assertion_error(*params):
             with pytest.raises(AssertionError):
-                pg.chi2(*params)
+                pg.chi2_independence(*params)
         expect_assertion_error(1, 'x', 'y')  # Not a pd.DataFrame
         expect_assertion_error(data, x, 'y')  # Not a string
         expect_assertion_error(data, 'x', y)  # Not a string
@@ -50,12 +50,12 @@ class TestContingency(TestCase):
         # Testing "no data" ValueError
         data['x'] = np.nan
         with pytest.raises(ValueError):
-            pg.chi2(data, x='x', y='y')
+            pg.chi2_independence(data, x='x', y='y')
 
         # Testing degenerated case (observed == expected)
         data['x'] = 1
         data['y'] = 1
-        expected, observed, stats = pg.chi2(data, 'x', 'y')
+        expected, observed, stats = pg.chi2_independence(data, 'x', 'y')
         assert expected.iloc[0, 0] == observed.iloc[0, 0]
         assert stats.at[0, 'dof'] == 0
         for i in stats.index:
@@ -66,7 +66,7 @@ class TestContingency(TestCase):
         # Testing warning on low count
         data.iloc[0, 0] = 0
         with pytest.warns(UserWarning):
-            pg.chi2(data, 'x', 'y')
+            pg.chi2_independence(data, 'x', 'y')
 
     def test_chi2_mcnemar(self):
         """Test function chi2_mcnemar."""
