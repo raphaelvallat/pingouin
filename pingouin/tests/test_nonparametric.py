@@ -65,15 +65,15 @@ class TestNonParametric(TestCase):
 
     def test_kruskal(self):
         """Test function kruskal"""
-        x[10] = np.nan
-        df = pd.DataFrame({'DV': np.r_[x, y, z],
+        x_nan = x.copy()
+        x_nan[10] = np.nan
+        df = pd.DataFrame({'DV': np.r_[x_nan, y, z],
                            'Group': np.repeat(['A', 'B', 'C'], 100)})
         kruskal(data=df, dv='DV', between='Group')
         summary = kruskal(data=df, dv='DV', between='Group',
                           export_filename='test_export.csv')
         # Compare with SciPy built-in function
-        from scipy import stats
-        H, p = stats.kruskal(x, y, z, nan_policy='omit')
+        H, p = scipy.stats.kruskal(x_nan, y, z, nan_policy='omit')
         assert np.allclose(np.round(H, 3), summary['H']['Kruskal'])
         assert np.allclose(p, summary['p-unc']['Kruskal'])
 
