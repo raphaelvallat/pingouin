@@ -67,3 +67,33 @@ class TestContingency(TestCase):
         data.iloc[0, 0] = 0
         with pytest.warns(UserWarning):
             pg.chi2(data, 'x', 'y')
+
+    def test_chi2_mcnemar(self):
+        """Test function chi2_mcnemar."""
+        # Setup
+        np.random.seed(42)
+        mean, cov = [0.5, 0.5], [(1, .6), (.6, 1)]
+        x, y = np.random.multivariate_normal(mean, cov, 30).T
+        data = pd.DataFrame({'x': x, 'y': y})
+        mask_class_1 = data > 0.5
+        data[mask_class_1] = 1
+        data[~mask_class_1] = 0
+
+        # Testing validations
+        def expect_assertion_error(*params):
+            with pytest.raises(AssertionError):
+                pg.chi2_mcnemar(*params)
+        expect_assertion_error(1, 'x', 'y')  # Not a pd.DataFrame
+        expect_assertion_error(data, x, 'y')  # Not a string
+        expect_assertion_error(data, 'x', y)  # Not a string
+        expect_assertion_error(data, 'x', 'z')  # Not a column of data
+
+        # Testing NaN incompatibility
+        data.iloc[0, 0] = np.nan
+        with pytest.raises(ValueError):
+            pg.chi2_mcnemar(data, 'x', 'y')
+
+        # Testing invalid dichotomous value
+        data.iloc[0, 0] = 3
+        with pytest.raises(ValueError):
+            pg.chi2_mcnemar(data, 'x', 'y')

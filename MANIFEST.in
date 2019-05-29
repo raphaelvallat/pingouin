@@ -9,6 +9,7 @@ include pingouin/datasets/anova.csv
 include pingouin/datasets/anova2.csv
 include pingouin/datasets/anova2_unbalanced.csv
 include pingouin/datasets/chi2.csv
+include pingouin/datasets/chi2_mcnemar.csv
 include pingouin/datasets/circular.csv
 include pingouin/datasets/cochran.csv
 include pingouin/datasets/cronbach_alpha.csv
