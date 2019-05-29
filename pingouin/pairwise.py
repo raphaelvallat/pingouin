@@ -532,7 +532,7 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
     # from pingouin.external.qsturng import qsturng
     # crit = qsturng(1 - alpha, ng, df) / np.sqrt(2)
     pval = psturng(np.sqrt(2) * np.abs(tval), ng, df)
-    pval *= 0.5 if tail == 'one-sided' else 1
+    pval = pval * 0.5 if tail == 'one-sided' else pval
 
     # Uncorrected p-values
     # from scipy.stats import t
@@ -691,7 +691,7 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
 
     # Compute corrected p-values
     pval = psturng(np.sqrt(2) * np.abs(tval), ng, df)
-    pval *= 0.5 if tail == 'one-sided' else 1
+    pval = pval * 0.5 if tail == 'one-sided' else pval
 
     # Uncorrected p-values
     # from scipy.stats import t

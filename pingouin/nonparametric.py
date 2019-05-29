@@ -1,5 +1,6 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: May 2018
+import scipy
 import numpy as np
 import pandas as pd
 from pingouin import remove_na, remove_rm_na, _check_dataframe, _export_table
@@ -40,9 +41,8 @@ def mad(a, normalize=True, axis=0):
     >>> mad(a, normalize=False)
     2.0
     """
-    from scipy.stats import norm
     a = np.asarray(a)
-    c = norm.ppf(3 / 4.) if normalize else 1
+    c = scipy.stats.norm.ppf(3 / 4.) if normalize else 1
     center = np.apply_over_axes(np.median, a, axis)
     return np.median((np.fabs(a - center)) / c, axis=axis)
 
@@ -74,9 +74,8 @@ def madmedianrule(a):
     >>> madmedianrule(a)
     array([False, False, False, False, False,  True, False, False])
     """
-    from scipy.stats import chi2
     a = np.asarray(a)
-    k = np.sqrt(chi2.ppf(0.975, 1))
+    k = np.sqrt(scipy.stats.chi2.ppf(0.975, 1))
     return (np.fabs(a - np.median(a)) / mad(a)) > k
 
 
@@ -141,7 +140,6 @@ def mwu(x, y, tail='two-sided'):
          U-val    p-val    RBC   CLES
     MWU   97.0  0.00556  0.515  0.758
     """
-    from scipy.stats import mannwhitneyu
     x = np.asarray(x)
     y = np.asarray(y)
 
@@ -151,7 +149,8 @@ def mwu(x, y, tail='two-sided'):
     # Compute test
     if tail == 'one-sided':
         tail = 'less' if np.median(x) < np.median(y) else 'greater'
-    uval, pval = mannwhitneyu(x, y, use_continuity=True, alternative=tail)
+    uval, pval = scipy.stats.mannwhitneyu(x, y, use_continuity=True,
+                                          alternative=tail)
 
     # Effect size 1: common language effect size (McGraw and Wong 1992)
     diff = x[:, None] - y
@@ -209,6 +208,10 @@ def wilcoxon(x, y, tail='two-sided'):
     randomly selected observation from the first sample will be greater than a
     randomly selected observation from the second sample.
 
+    .. warning :: Versions of Pingouin below 0.2.6 gave wrong p-values for
+        the Wilcoxon test. This issue has been resolved in
+        Pingouin>=0.2.6. Make sure to always use the latest release.
+
     References
     ----------
     .. [1] Wilcoxon, F. (1945). Individual comparisons by ranking methods.
@@ -226,14 +229,13 @@ def wilcoxon(x, y, tail='two-sided'):
     1. Wilcoxon test on two related samples.
 
     >>> import numpy as np
-    >>> from pingouin import wilcoxon
+    >>> import pingouin as pg
     >>> x = [20, 22, 19, 20, 22, 18, 24, 20, 19, 24, 26, 13]
     >>> y = [38, 37, 33, 29, 14, 12, 20, 22, 17, 25, 26, 16]
-    >>> wilcoxon(x, y, tail='two-sided')
+    >>> pg.wilcoxon(x, y, tail='two-sided')
               W-val     p-val    RBC   CLES
-    Wilcoxon   20.5  0.070844  0.333  0.583
+    Wilcoxon   20.5  0.285765  0.333  0.583
     """
-    from scipy.stats import wilcoxon
     x = np.asarray(x)
     y = np.asarray(y)
 
@@ -241,8 +243,11 @@ def wilcoxon(x, y, tail='two-sided'):
     x, y = remove_na(x, y, paired=True)
 
     # Compute test
-    wval, pval = wilcoxon(x, y, zero_method='wilcox', correction=False)
-    pval *= .5 if tail == 'one-sided' else pval
+    # TODO: scipy 1.3.0 includes an alternative arg as for mannwhitney
+    # For now keeping this way to keep the compatibility with previous scipy
+    wval, pval = scipy.stats.wilcoxon(x, y, zero_method='wilcox',
+                                      correction=True)
+    pval = pval * .5 if tail == 'one-sided' else pval
 
     # Effect size 1: common language effect size (McGraw and Wong 1992)
     diff = x[:, None] - y
@@ -317,8 +322,6 @@ def kruskal(dv=None, between=None, data=None, detailed=False,
                  Source  ddof1       H     p-unc
     Kruskal  Hair color      3  10.589  0.014172
     """
-    from scipy.stats import chi2, rankdata, tiecorrect
-
     # Check data
     _check_dataframe(dv=dv, between=between, data=data,
                      effects='between')
@@ -335,7 +338,7 @@ def kruskal(dv=None, between=None, data=None, detailed=False,
     n = data[dv].size
 
     # Rank data, dealing with ties appropriately
-    data['rank'] = rankdata(data[dv])
+    data['rank'] = scipy.stats.rankdata(data[dv])
 
     # Find the total of rank per groups
     grp = data.groupby(between)['rank']
@@ -346,11 +349,11 @@ def kruskal(dv=None, between=None, data=None, detailed=False,
     H = (12 / (n * (n + 1)) * np.sum(sum_rk_grp**2 / n_per_grp)) - 3 * (n + 1)
 
     # Correct for ties
-    H /= tiecorrect(data['rank'].values)
+    H /= scipy.stats.tiecorrect(data['rank'].values)
 
     # Calculate DOF and p-value
     ddof1 = n_groups - 1
-    p_unc = chi2.sf(H, ddof1)
+    p_unc = scipy.stats.chi2.sf(H, ddof1)
 
     # Create output dataframe
     stats = pd.DataFrame({'Source': between,
@@ -427,8 +430,6 @@ def friedman(dv=None, within=None, subject=None, data=None,
                       Source  ddof1      Q     p-unc
     Friedman  Disgustingness      1  9.228  0.002384
     """
-    from scipy.stats import rankdata, chi2, find_repeats
-
     # Check data
     _check_dataframe(dv=dv, within=within, data=data, subject=subject,
                      effects='within')
@@ -451,7 +452,7 @@ def friedman(dv=None, within=None, subject=None, data=None,
     # Rank per subject
     ranked = np.zeros(X.shape)
     for i in range(n):
-        ranked[i] = rankdata(X[i, :])
+        ranked[i] = scipy.stats.rankdata(X[i, :])
 
     ssbn = (ranked.sum(axis=0)**2).sum()
 
@@ -461,7 +462,7 @@ def friedman(dv=None, within=None, subject=None, data=None,
     # Correct for ties
     ties = 0
     for i in range(n):
-        replist, repnum = find_repeats(X[i])
+        replist, repnum = scipy.stats.find_repeats(X[i])
         for t in repnum:
             ties += t * (t * t - 1)
 
@@ -470,7 +471,7 @@ def friedman(dv=None, within=None, subject=None, data=None,
 
     # Approximate the p-value
     ddof1 = k - 1
-    p_unc = chi2.sf(Q, ddof1)
+    p_unc = scipy.stats.chi2.sf(Q, ddof1)
 
     # Create output dataframe
     stats = pd.DataFrame({'Source': within,
@@ -558,8 +559,6 @@ def cochran(dv=None, within=None, subject=None, data=None,
             Source  dof      Q     p-unc
     cochran   Time    2  6.706  0.034981
     """
-    from scipy.stats import chi2
-
     # Check data
     _check_dataframe(dv=dv, within=within, data=data, subject=subject,
                      effects='within')
@@ -579,7 +578,7 @@ def cochran(dv=None, within=None, subject=None, data=None,
     # Q statistic and p-value
     q = (dof * (k * np.sum(grp.sum()**2) - grp.sum().sum()**2)) / \
         (k * grp.sum().sum() - np.sum(grp_s.sum()**2))
-    p_unc = chi2.sf(q, dof)
+    p_unc = scipy.stats.chi2.sf(q, dof)
 
     # Create output dataframe
     stats = pd.DataFrame({'Source': within,
