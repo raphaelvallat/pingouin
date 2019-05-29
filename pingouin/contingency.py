@@ -204,6 +204,8 @@ def chi2_mcnemar(data, x, y, correction=True):
         If strings are used, Pingouin will recognize them regardless of their
         uppercase/lowercase combinations.
 
+        .. warning:: Null values are not allowed.
+
     correction : bool
         Whether to apply the correction for continuity (Edwards, A. 1948).
 
@@ -297,6 +299,10 @@ def chi2_mcnemar(data, x, y, correction=True):
         'procedures must contain strings, only.'
     assert all(column in data.columns for column in (x, y)),\
         'columns are not in dataframe.'
+
+    for column in (x, y):
+        if data[column].isna().any():
+            raise ValueError('Null values are not allowed.')
 
     observed = dichotomous_crosstab(data, x, y)
     n1, n2 = observed.at[0, 1], observed.at[1, 0]
