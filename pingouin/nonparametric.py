@@ -132,13 +132,20 @@ def mwu(x, y, tail='two-sided'):
     Examples
     --------
     >>> import numpy as np
-    >>> from pingouin import mwu
+    >>> import pingouin as pg
     >>> np.random.seed(123)
     >>> x = np.random.uniform(low=0, high=1, size=20)
     >>> y = np.random.uniform(low=0.2, high=1.2, size=20)
-    >>> mwu(x, y, tail='two-sided')
+    >>> pg.mwu(x, y, tail='two-sided')
          U-val    p-val    RBC   CLES
     MWU   97.0  0.00556  0.515  0.758
+
+    Compare with SciPy
+
+    >>> import scipy
+    >>> scipy.stats.mannwhitneyu(x, y, use_continuity=True,
+    ...                          alternative='two-sided')
+    MannwhitneyuResult(statistic=97.0, pvalue=0.0055604599321374135)
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -235,6 +242,12 @@ def wilcoxon(x, y, tail='two-sided'):
     >>> pg.wilcoxon(x, y, tail='two-sided')
               W-val     p-val    RBC   CLES
     Wilcoxon   20.5  0.285765  0.333  0.583
+
+    Compare with SciPy
+
+    >>> import scipy
+    >>> scipy.stats.wilcoxon(x, y, correction=True)
+    WilcoxonResult(statistic=20.5, pvalue=0.2857652190231508)
     """
     x = np.asarray(x)
     y = np.asarray(y)
