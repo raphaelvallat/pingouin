@@ -88,6 +88,9 @@ class TestContingency(TestCase):
         expect_assertion_error(data, 'x', y)  # Not a string
         expect_assertion_error(data, 'x', 'z')  # Not a column of data
 
+        # Testing happy-day
+        pg.chi2_mcnemar(data, 'x', 'y')
+
         # Testing NaN incompatibility
         data.iloc[0, 0] = np.nan
         with pytest.raises(ValueError):
