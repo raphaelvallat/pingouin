@@ -352,25 +352,20 @@ def _check_dataframe(dv=None, between=None, within=None, subject=None,
 def _process_series(data, column):
     """Converts the values of a pd.DataFrame column into 0 or 1"""
     series = data[column]
-    if series.dtype == int:
-        return series
     if series.dtype == bool:
         return series.astype(int)
 
     def convert_elem(elem):
-        if (isinstance(elem, int) or isinstance(elem, float)) and\
-                elem in (0, 1):
-            return elem
-        elif isinstance(elem, bool):
+        if isinstance(elem, (int, float)) and elem in (0, 1):
             return int(elem)
-        elif isinstance(elem, str):
+        if isinstance(elem, str):
             lower = elem.lower()
             if lower in ('n', 'no', 'absent', 'false', 'f', 'negative'):
                 return 0
             elif lower in ('y', 'yes', 'present', 'true', 't', 'positive',
                            'p'):
                 return 1
-        raise ValueError('Invalid value to build a dichotomous contingency ' +
+        raise ValueError('Invalid value to build a 2x2 contingency '
                          'table on column {}: {}'.format(column, elem))
 
     return series.apply(convert_elem)
@@ -384,9 +379,14 @@ def dichotomous_crosstab(data, x, y):
     crosstab = pd.crosstab(_process_series(data, x), _process_series(data, y))
     shape = crosstab.shape
     if shape != (2, 2):
-        raise ValueError('Invalid contingency table format: {}'.format(shape))
-    crosstab.index, crosstab.columns = (0, 1), (0, 1)
-    crosstab.index.name, crosstab.columns.name = x, y
+        if shape == (2, 1):
+            crosstab.loc[:, int(not bool(crosstab.columns[0]))] = [0, 0]
+        elif shape == (1, 2):
+            crosstab.loc[int(not bool(crosstab.index[0])), :] = [0, 0]
+        else:  # shape = (1, 1) or shape = (>2, >2)
+            raise ValueError('Both series contain only one unique value. '
+                             'Cannot build 2x2 contingency table.')
+    crosstab = crosstab.sort_index(axis=0).sort_index(axis=1)
     return crosstab
 
 
