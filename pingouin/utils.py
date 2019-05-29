@@ -360,7 +360,7 @@ def _process_series(data, column):
     def convert_elem(elem):
         if (isinstance(elem, int) or isinstance(elem, float)) and\
                 elem in (0, 1):
-            return elem
+            return int(elem)
         elif isinstance(elem, bool):
             return int(elem)
         elif isinstance(elem, str):
@@ -384,9 +384,14 @@ def dichotomous_crosstab(data, x, y):
     crosstab = pd.crosstab(_process_series(data, x), _process_series(data, y))
     shape = crosstab.shape
     if shape != (2, 2):
-        raise ValueError('Invalid contingency table format: {}'.format(shape))
-    crosstab.index, crosstab.columns = (0, 1), (0, 1)
-    crosstab.index.name, crosstab.columns.name = x, y
+        if shape == (2, 1):
+            crosstab.loc[:, int(not bool(crosstab.columns[0]))] = [0, 0]
+        elif shape == (1, 2):
+            crosstab.loc[int(not bool(crosstab.index[0])), :] = [0, 0]
+        else:  # shape = (1, 1)
+            raise ValueError('Both series contain only one unique value. '
+                             'Cannot build 2x2 contingency table.')
+    crosstab = crosstab.sort_index(axis=0).sort_index(axis=1)
     return crosstab
 
 
