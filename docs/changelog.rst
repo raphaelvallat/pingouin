@@ -11,7 +11,7 @@ v0.2.6 (June 2019)
 
 **Bugfixes**
 
-a. Fixed major error in p-value for **Wilcoxon test** (:py:func:`pingouin.wilcoxon`), the p-values were inaccurate (smaller). Make sure to always use the latest release of Pingouin.
+a. Fixed **major error in two-sided p-value for Wilcoxon test** (:py:func:`pingouin.wilcoxon`), the p-values were accidentally squared, and therefore smaller. Make sure to always use the latest release of Pingouin.
 b. :py:func:`pingouin.wilcoxon` now uses the continuity correction by default (the documentation was saying that the correction was applied but it was not applied in the code.)
 c. The ``show_median`` argument of the :py:func:`pingouin.plot_shift` function was not working properly when the percentiles were different that the default parameters.
 
@@ -23,7 +23,7 @@ b. Added :py:func:`pingouin.power_chi2` function.
 **Enhancements**
 
 a. :py:func:`pingouin.linear_regression` now returns the residuals.
-b. Completely rewrote :py:func:`pingouin.normality` function: support pandas DataFrame (wide & long format), multiple methods & casewise removal of missing values.
+b. Completely rewrote :py:func:`pingouin.normality` function, which now support pandas DataFrame (wide & long format), multiple normality tests (:py:func:`scipy.stats.shapiro`, :py:func:`scipy.stats.normaltest`), and an automatic casewise removal of missing values.
 
 **Contributors**
 

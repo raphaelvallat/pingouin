@@ -215,9 +215,10 @@ def wilcoxon(x, y, tail='two-sided'):
     randomly selected observation from the first sample will be greater than a
     randomly selected observation from the second sample.
 
-    .. warning :: Versions of Pingouin below 0.2.6 gave wrong p-values for
-        the Wilcoxon test. This issue has been resolved in
-        Pingouin>=0.2.6. Make sure to always use the latest release.
+    .. warning :: Versions of Pingouin below 0.2.6 gave wrong two-sided
+        p-values for the Wilcoxon test. P-values were accidentally squared, and
+        therefore smaller. This issue has been resolved in Pingouin>=0.2.6.
+        Make sure to always use the latest release.
 
     References
     ----------
