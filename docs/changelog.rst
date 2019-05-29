@@ -15,6 +15,10 @@ a. Fixed **major error in two-sided p-value for Wilcoxon test** (:py:func:`pingo
 b. :py:func:`pingouin.wilcoxon` now uses the continuity correction by default (the documentation was saying that the correction was applied but it was not applied in the code.)
 c. The ``show_median`` argument of the :py:func:`pingouin.plot_shift` function was not working properly when the percentiles were different that the default parameters.
 
+**Dependencies**
+
+a. The current release of statsmodels (0.9.0) is not compatible with the newest release of Scipy (1.3.0). In order to avoid compatibility issues in the :py:func:`pingouin.ancova` and :py:func:`pingouin.anova` functions (which rely on statsmodels for certain cases), Pingouin will require SciPy < 1.3.0 until a new stable version of statsmodels is released.
+
 **New functions**
 
 a. Added :py:func:`pingouin.chi2` (Chi-squared) tests.
