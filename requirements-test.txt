@@ -1,7 +1,8 @@
-pytest==3.10.1
+pytest
 codecov
 pytest-cov
 pytest-sugar
+pytest-remotedata
 pytest-travis-fold
 openpyxl
 statsmodels
