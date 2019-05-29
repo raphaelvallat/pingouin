@@ -358,7 +358,8 @@ def _process_series(data, column):
         return series.astype(int)
 
     def convert_elem(elem):
-        if isinstance(elem, int):
+        if (isinstance(elem, int) or isinstance(elem, float)) and\
+                elem in (0, 1):
             return elem
         elif isinstance(elem, bool):
             return int(elem)
@@ -369,8 +370,6 @@ def _process_series(data, column):
             elif lower in ('y', 'yes', 'present', 'true', 't', 'positive',
                            'p'):
                 return 1
-        elif isinstance(elem, float) and (elem in (0, 1) or elem is np.nan):
-            return elem
         raise ValueError('Invalid value to build a dichotomous contingency ' +
                          'table on column {}: {}'.format(column, elem))
 
