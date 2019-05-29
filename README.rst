@@ -387,8 +387,8 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
 
 .. code-block:: python
 
-    data = pg.read_dataset('chi2')
-    expected, observed, stats = pg.chi2(data, x='sex', y='target')
+    data = pg.read_dataset('chi2_independence')
+    expected, observed, stats = pg.chi2_independence(data, x='sex', y='target')
     stats
 
 .. table:: Chi-squared tests summary

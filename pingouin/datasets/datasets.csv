@@ -3,7 +3,7 @@ ancova,Teaching method with family income as covariate,ANCOVA,www.real-statistic
 anova,Pain threshold per hair color,anova - pairwise_tukey,McClave and Dietrich 1991
 anova2,Fertilizer impact on the yield of crops,anova2,www.real-statistics.com
 anova2_unbalanced,Diet and exercise impact,anova2,http://onlinestatbook.com/2/analysis_of_variance/unequal.html
-chi2,Patients' attributes and heart conditions,chi2,https://archive.ics.uci.edu/ml/datasets/Heart+Disease
+chi2_independence,Patients' attributes and heart conditions,chi2_independence,https://archive.ics.uci.edu/ml/datasets/Heart+Disease
 chi2_mcnemar, Responses to 2 athlete's foot treatments, chi2_mcnemar, http://www.stat.purdue.edu/~tqin/system101/method/method_mcnemar_sas.htm (adapted)
 circular,Orientation tuning properties of three neurons,circular statistics,Berens 2009
 cochran,Energy level across three days,Cochran,www.real-statistics.com

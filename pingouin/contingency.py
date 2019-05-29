@@ -8,12 +8,12 @@ import warnings
 from .utils import dichotomous_crosstab
 
 
-__all__ = ['chi2', 'chi2_mcnemar']
+__all__ = ['chi2_independence', 'chi2_mcnemar']
 
 
-def chi2(data, x, y, correction=True):
+def chi2_independence(data, x, y, correction=True):
     """
-    Chi-squared tests between two categorical variables.
+    Chi-squared independence tests between two categorical variables.
 
     The test is computed for different values of :math:`\\lambda`: 1, 2/3, 0,
     -1/2, -1 and -2 (Cressie and Read, 1984).
@@ -82,7 +82,7 @@ def chi2(data, x, y, correction=True):
     heart disease.
 
     >>> import pingouin as pg
-    >>> data = pg.read_dataset('chi2')
+    >>> data = pg.read_dataset('chi2_independence')
     >>> data['sex'].value_counts(ascending=True)
     0     96
     1    207
@@ -91,7 +91,8 @@ def chi2(data, x, y, correction=True):
     If gender is not a good predictor for heart disease, we should expect the
     same 96:207 ratio across the target classes.
 
-    >>> expected, observed, stats = pg.chi2(data, x='sex', y='target')
+    >>> expected, observed, stats = pg.chi2_independence(data, x='sex',
+    ...                                                  y='target')
     >>> expected
     target          0           1
     sex

@@ -59,7 +59,7 @@ Contingency
 .. autosummary::
    :toctree: generated/
 
-    chi2
+    chi2_independence
     chi2_mcnemar
 
 Correlation and regression
