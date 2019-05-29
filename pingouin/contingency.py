@@ -5,6 +5,7 @@ from scipy.stats import power_divergence, binom, chi2 as sp_chi2
 import pandas as pd
 import numpy as np
 import warnings
+from .power import power_chi2
 from .utils import dichotomous_crosstab
 
 
@@ -43,6 +44,8 @@ def chi2_independence(data, x, y, correction=True):
                         divergence statistic
         * ``'chi2'``: The test statistic
         * ``'p'``: The p-value of the test
+        * ``'cramer'``: The Cramer's V effect size
+        * ``'power'``: The statistical power of the test
 
     Notes
     -----
@@ -110,14 +113,14 @@ def chi2_independence(data, x, y, correction=True):
     The proportion is lower on the class 0 and higher on the class 1. The
     tests should be sensitive to this difference.
 
-    >>> stats
-                     test  lambda    chi2  dof             p
-    0             pearson   1.000  22.717    1  1.876778e-06
-    1        cressie-read   0.667  22.931    1  1.678845e-06
-    2      log-likelihood   0.000  23.557    1  1.212439e-06
-    3       freeman-tukey  -0.500  24.220    1  8.595211e-07
-    4  mod-log-likelihood  -1.000  25.071    1  5.525544e-07
-    5              neyman  -2.000  27.458    1  1.605471e-07
+    >>> stats.round(3)
+                     test  lambda    chi2  dof    p  cramer  power
+    0             pearson   1.000  22.717  1.0  0.0   0.274  0.997
+    1        cressie-read   0.667  22.931  1.0  0.0   0.275  0.998
+    2      log-likelihood   0.000  23.557  1.0  0.0   0.279  0.998
+    3       freeman-tukey  -0.500  24.220  1.0  0.0   0.283  0.998
+    4  mod-log-likelihood  -1.000  25.071  1.0  0.0   0.288  0.999
+    5              neyman  -2.000  27.458  1.0  0.0   0.301  0.999
 
     Very low p-values indeed. The gender qualifies as a good predictor for the
     presence of heart disease on this dataset.
@@ -143,28 +146,33 @@ def chi2_independence(data, x, y, correction=True):
         if (df < 5).any(axis=None):
             warnings.warn('Low count on {} frequencies.'.format(name))
 
-    dof = expected.size - sum(expected.shape) + expected.ndim - 1
+    dof = float(expected.size - sum(expected.shape) + expected.ndim - 1)
 
     if dof == 1 and correction:
         # Adjust `observed` according to Yates' correction for continuity.
         observed = observed + 0.5 * np.sign(expected - observed)
 
     ddof = observed.size - 1 - dof
+    n = data.shape[0]
     stats = []
     names = ["pearson", "cressie-read", "log-likelihood",
              "freeman-tukey", "mod-log-likelihood", "neyman"]
 
     for name, lambda_ in zip(names, [1.0, 2 / 3, 0.0, -1 / 2, -1.0, -2.0]):
         if dof == 0:
-            chi2, p = 0.0, 1.0
+            chi2, p, cramer, power = 0.0, 1.0, np.nan, np.nan
         else:
             chi2, p = power_divergence(observed, expected, ddof=ddof,
                                        axis=None, lambda_=lambda_)
+            cramer = np.sqrt(chi2 / (n * dof))
+            power = power_chi2(dof=dof, w=cramer, n=n, alpha=0.05)
 
         stats.append({'test': name, 'lambda': round(lambda_, 3),
-                      'chi2': round(chi2, 3), 'dof': dof, 'p': p})
+                      'chi2': round(chi2, 3), 'dof': dof, 'p': p,
+                      'cramer': cramer, 'power': power})
 
-    stats = pd.DataFrame(stats)[['test', 'lambda', 'chi2', 'dof', 'p']]
+    stats = pd.DataFrame(stats)[['test', 'lambda', 'chi2', 'dof', 'p',
+                                 'cramer', 'power']]
     return expected, observed, stats
 
 

@@ -317,7 +317,7 @@ def homoscedasticity(*args, alpha=.05):
     # Test normality of data
     normal = np.zeros(k, dtype='bool')
     for j in range(k):
-        normal[j] = normality(args[j]).loc[0, 'normal']
+        normal[j] = normality(np.asarray(args[j])).loc[0, 'normal']
 
     if np.count_nonzero(normal) != normal.size:
         # print('Data are not normally distributed. Using Levene test.')
