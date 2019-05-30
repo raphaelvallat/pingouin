@@ -297,7 +297,7 @@ def chi2_mcnemar(data, x, y, correction=True):
 
     >>> stats
                test    chi2  dof         p
-    0         exact   8.000    1  0.000000
+    0         exact   8.000    1  0.000003
     1         mid-p   8.000    1  0.000002
     2  approximated  20.021    1  0.000008
     """
@@ -315,6 +315,11 @@ def chi2_mcnemar(data, x, y, correction=True):
     observed = dichotomous_crosstab(data, x, y)
     n1, n2 = observed.at[0, 1], observed.at[1, 0]
 
+    if (n1, n2) == (0, 0):
+        raise ValueError('McNemar\'s test does not work if the secondary ' +
+                         'diagonal of the observed data summary does not ' +
+                         'have values different from 0.')
+
     # Exact test
     chi2 = min(n1, n2)
     exact = {
@@ -329,8 +334,6 @@ def chi2_mcnemar(data, x, y, correction=True):
         'chi2': round(chi2, 3),
         'p': exact['p'] - binom.pmf(n2, n1 + n2, 0.5)
     }
-
-    exact['p'] = round(exact['p'], 3)
 
     # Approximated test
     chi2 = (abs(n1 - n2) - int(correction))**2 / (n1 + n2)

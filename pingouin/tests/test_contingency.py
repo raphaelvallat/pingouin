@@ -100,3 +100,8 @@ class TestContingency(TestCase):
         data.iloc[0, 0] = 3
         with pytest.raises(ValueError):
             pg.chi2_mcnemar(data, 'x', 'y')
+
+        # Testing error when b == 0 and c == 0
+        data = pd.DataFrame({'x':[0, 0, 0, 1, 1, 1], 'y':[0, 0, 0, 1, 1, 1]})
+        with pytest.raises(ValueError):
+            pg.chi2_mcnemar(data, 'x', 'y')
