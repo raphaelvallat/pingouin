@@ -84,11 +84,14 @@ class TestNonParametric(TestCase):
         assert np.allclose(p, summary['p-unc']['Kruskal'])
 
     def test_cochran(self):
-        """Test function cochran"""
+        """Test function cochran
+        http://www.real-statistics.com/anova-repeated-measures/cochrans-q-test/
+        """
         from pingouin import read_dataset
         df = read_dataset('cochran')
         st = cochran(dv='Energetic', within='Time', subject='Subject', data=df)
         assert st.loc['cochran', 'Q'] == 6.706
+        assert np.allclose(st.loc['cochran', 'p-unc'], 0.034981)
         cochran(dv='Energetic', within='Time', subject='Subject', data=df,
                 export_filename='test_export.csv')
         # With a NaN value
