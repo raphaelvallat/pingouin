@@ -43,6 +43,8 @@ class TestNonParametric(TestCase):
         wc_pg_1 = wilcoxon(x, y, tail='one-sided')
         assert wc_scp[0] == wc_pg.at['Wilcoxon', 'W-val']
         assert wc_scp[1] == wc_pg.at['Wilcoxon', 'p-val']
+        # Compare to R canprot::CLES
+        assert wc_pg.at['Wilcoxon', 'CLES'] == 0.536
         assert (wc_pg.at['Wilcoxon', 'p-val'] / 2) == wc_pg_1.at['Wilcoxon',
                                                                  'p-val']
 
