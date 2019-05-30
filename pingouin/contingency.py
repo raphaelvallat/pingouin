@@ -164,7 +164,8 @@ def chi2_independence(data, x, y, correction=True):
         else:
             chi2, p = power_divergence(observed, expected, ddof=ddof,
                                        axis=None, lambda_=lambda_)
-            cramer = np.sqrt(chi2 / (n * dof))
+            dof_cramer = min(expected.shape) - 1
+            cramer = np.sqrt(chi2 / (n * dof_cramer))
             power = power_chi2(dof=dof, w=cramer, n=n, alpha=0.05)
 
         stats.append({'test': name, 'lambda': round(lambda_, 3),

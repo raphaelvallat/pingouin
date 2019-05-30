@@ -1,9 +1,12 @@
 import pytest
 import numpy as np
 import pandas as pd
+import pingouin as pg
 from unittest import TestCase
 from scipy.stats import chi2_contingency
-import pingouin as pg
+
+df_ind = pg.read_dataset('chi2_independence')
+df_mcnemar = pg.read_dataset('chi2_mcnemar')
 
 
 class TestContingency(TestCase):
@@ -68,6 +71,25 @@ class TestContingency(TestCase):
         with pytest.warns(UserWarning):
             pg.chi2_independence(data, 'x', 'y')
 
+        # Comparing results with R
+        # 2 x 2 contingency table (dof = 1)
+        # >>> tbl = table(df$sex, df$target)
+        # >>> chisq.test(tbl, correct = TRUE)
+        # >>> cramersV(tbl)
+        _, _, stats = pg.chi2_independence(df_ind, 'sex', 'target')
+        assert stats.at[0, 'chi2'] == 22.717
+        assert stats.at[0, 'dof'] == 1
+        assert np.allclose(stats.at[0, 'p'], 1.877e-06)
+        assert round(stats.at[0, 'cramer'], 2) == 0.27
+
+        # 4 x 2 contingency table
+        _, _, stats = pg.chi2_independence(df_ind, 'cp', 'target')
+        assert stats.at[0, 'chi2'] == 81.686
+        assert stats.at[0, 'dof'] == 3.
+        assert stats.at[0, 'p'] < 2.2e-16
+        assert round(stats.at[0, 'cramer'], 3) == 0.519
+        assert np.allclose(stats.at[0, 'power'], 1.)
+
     def test_chi2_mcnemar(self):
         """Test function chi2_mcnemar."""
         # Setup
@@ -102,6 +124,15 @@ class TestContingency(TestCase):
             pg.chi2_mcnemar(data, 'x', 'y')
 
         # Testing error when b == 0 and c == 0
-        data = pd.DataFrame({'x':[0, 0, 0, 1, 1, 1], 'y':[0, 0, 0, 1, 1, 1]})
+        data = pd.DataFrame({'x': [0, 0, 0, 1, 1, 1], 'y': [0, 0, 0, 1, 1, 1]})
         with pytest.raises(ValueError):
             pg.chi2_mcnemar(data, 'x', 'y')
+
+        # Comparing results with R
+        # 2 x 2 contingency table (dof = 1)
+        # >>> tbl = table(df$treatment_X, df$treatment_Y)
+        # >>> mcnemar.test(tbl, correct = TRUE)
+        _, stats = pg.chi2_mcnemar(df_mcnemar, 'treatment_X', 'treatment_Y')
+        assert stats.at[2, 'chi2'] == 20.021
+        assert stats.at[2, 'dof'] == 1
+        assert np.allclose(stats.at[2, 'p'], 7.66e-06)
