@@ -43,8 +43,10 @@ class TestDistribution(TestCase):
 
     def test_homoscedasticity(self):
         """Test function test_homoscedasticity."""
-        homoscedasticity(data=[x, y], alpha=.05)
+        hl = homoscedasticity(data=[x, y], alpha=.05)
         homoscedasticity(data=[x, y], method='bartlett', alpha=.05)
+        hd = homoscedasticity(data={'x': x, 'y': y}, alpha=.05)
+        assert hl.equals(hd)
         # Wide-format DataFrame
         homoscedasticity(df_pivot)
         # Long-format
