@@ -3,7 +3,7 @@
 import numpy as np
 from scipy.integrate import quad
 
-__all__ = ["bayesfactor_ttest", "bayesfactor_pearson"]
+__all__ = ["bayesfactor_ttest", "bayesfactor_pearson", "bayesfactor_binom"]
 
 
 def _format_bf(bf, precision=3, trim='0'):
@@ -194,4 +194,75 @@ def bayesfactor_pearson(r, n):
     # JZS Bayes factor calculation
     integr = quad(fun, 0, np.inf, args=(r, n))[0]
     bf10 = np.sqrt((n / 2)) / gamma(1 / 2) * integr
+    return _format_bf(bf10)
+
+
+def bayesfactor_binom(k, n, p=.5):
+    """
+    Bayes factor of a binomial test with :math:`k` successes,
+    :math:`n` trials and base probability :math:`p`.
+
+    Parameters
+    ----------
+    k : int
+        Number of successes.
+    n : int
+        Number of trials.
+    p : float
+        Base probability of success (range from 0 to 1).
+
+    Returns
+    -------
+    bf10 : float
+        The Bayes Factor quantifies the evidence in favour of the
+        alternative hypothesis, where the null hypothesis is that
+        the random variable is binomially distributed with base probability
+        :math:`p`.
+
+    Notes
+    -----
+    Adapted from a Matlab code found at
+    https://github.com/anne-urai/Tools/blob/master/stats/BayesFactors/binombf.m
+
+    The Bayes Factor is approximated using the formula below:
+
+    .. math::
+
+        BF_{10} = \\frac{\\int_0^1 \\binom{n}{k}g^k(1-g)^{n-k}}
+        {\\binom{n}{k} p^k (1-p)^{n-k}}
+
+    References
+    ----------
+    .. [1] http://pcl.missouri.edu/bf-binomial
+
+    .. [2] https://en.wikipedia.org/wiki/Bayes_factor
+
+    Examples
+    --------
+    >>> import pingouin as pg
+    >>> bf = pg.bayesfactor_binom(k=16, n=20, p=0.5)
+    >>> print("Bayes Factor: %s" % bf)
+    Bayes Factor: 10.306
+
+    >>> bf = pg.bayesfactor_binom(k=10, n=20, p=0.5)
+    >>> print("Bayes Factor: %s" % bf)
+    Bayes Factor: 0.27
+
+    With a different base probability
+
+    >>> bf = pg.bayesfactor_binom(k=100, n=1000, p=0.1)
+    >>> print("Bayes Factor: %s" % bf)
+    Bayes Factor: 0.024
+    """
+    from scipy.special import comb
+    assert 0 < p < 1, 'p must be between 0 and 1.'
+    assert isinstance(k, int), 'k must be int.'
+    assert isinstance(n, int), 'n must be int.'
+    assert k <= n, 'k (successes) cannot be higher than n (trials).'
+
+    def fun(g, k, n, p):
+        return comb(n, k) * g**k * (1 - g)**(n - k)
+
+    integr = quad(fun, 0, 1, args=(k, n, p))[0]
+    bf10 = integr / (comb(n, k) * p**k * (1 - p)**(n - k))
     return _format_bf(bf10)

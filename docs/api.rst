@@ -32,6 +32,7 @@ Bayesian
 .. autosummary::
    :toctree: generated/
 
+    bayesfactor_binom
     bayesfactor_ttest
     bayesfactor_pearson
 

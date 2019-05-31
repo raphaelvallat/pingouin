@@ -1,7 +1,8 @@
 import numpy as np
 from unittest import TestCase
 from pingouin.parametric import ttest
-from pingouin.bayesian import bayesfactor_ttest, bayesfactor_pearson
+from pingouin.bayesian import (bayesfactor_ttest, bayesfactor_pearson,
+                               bayesfactor_binom)
 
 np.random.seed(1234)
 x = np.random.normal(size=100)
@@ -30,3 +31,13 @@ class TestBayesian(TestCase):
         assert float(bayesfactor_pearson(0.6, 20)) == 8.221
         assert float(bayesfactor_pearson(-0.6, 20)) == 8.221
         assert float(bayesfactor_pearson(0.6, 10)) == 1.278
+
+    def test_bayesfactor_binom(self):
+        """Test function bayesfactor_binom.
+        Compare to http://pcl.missouri.edu/bf-binomial.
+        """
+        def bf10(x):
+            return str(round(1 / float(x), 3))
+        assert bayesfactor_binom(16, 20) == bf10(0.09703159)
+        assert bayesfactor_binom(16, 20, 0.8) == bf10(4.582187)
+        assert bayesfactor_binom(100, 1000, 0.1) == bf10(42.05881)

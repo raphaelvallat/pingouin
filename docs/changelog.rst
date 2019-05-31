@@ -24,6 +24,7 @@ a. The current release of statsmodels (0.9.0) is not compatible with the newest 
 a. Added :py:func:`pingouin.chi2_independence` tests.
 b. Added :py:func:`pingouin.chi2_mcnemar` tests.
 c. Added :py:func:`pingouin.power_chi2` function.
+d. Added :py:func:`pingouin.bayesfactor_binom` function.
 
 **Enhancements**
 
