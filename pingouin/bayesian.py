@@ -34,6 +34,11 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
         measures) or independent.
     tail : string
         Specify whether the test is 'one-sided' or 'two-sided'
+
+        .. warning:: One-sided Bayes Factor (BF) are simply obtained by
+            doubling the two-sided BF, which is not exactly the same behavior
+            as R or JASP. Be extra careful when interpretating one-sided BF,
+            and if you can, always double-check your results.
     r : float
         Cauchy scale factor. Smaller values of r (e.g. 0.5), may be appropriate
         when small effect sizes are expected a priori; larger values of r are
@@ -69,7 +74,6 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
 
     References
     ----------
-
     .. [1] Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,
        2009. Bayesian t tests for accepting and rejecting the null hypothesis.
        Psychon. Bull. Rev. 16, 225–237. https://doi.org/10.3758/PBR.16.2.225
@@ -160,10 +164,11 @@ def bayesfactor_pearson(r, n):
     where **n** is the sample size and **r** is the Pearson correlation
     coefficient.
 
+    .. warning:: This function does not (yet) support directional, one-sided
+        test. It only returns the two-sided Bayes Factor.
 
     References
     ----------
-
     .. [1] Wetzels, R., Wagenmakers, E.-J., 2012. A default Bayesian
        hypothesis test for correlations and partial correlations.
        Psychon. Bull. Rev. 19, 1057–1064.
