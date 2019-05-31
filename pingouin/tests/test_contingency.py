@@ -12,7 +12,7 @@ data_ct = pd.DataFrame({'A': [0, 1, 0],
                         'B': [False, True, False],
                         'C': [1, 2, 3],
                         'D': ['No', 'Yes', 'No'],
-                        'E': [1., 1., 1.]})
+                        'E': ['No', 'No', 'No']})
 
 
 class TestContingency(TestCase):
@@ -148,24 +148,24 @@ class TestContingency(TestCase):
         # midp gives slightly different results
         # assert np.allclose(stats.at['mcnemar', 'p-mid'], 3.305e-06)
 
-        def test_dichotomize_series(self):
-            """Test function _dichotomize_series."""
-            # Integer
-            a = pg.contingency._dichotomize_series(data_ct, 'A').values
-            b = pg.contingency._dichotomize_series(data_ct, 'B').values
-            d = pg.contingency._dichotomize_series(data_ct, 'D').values
-            np.testing.assert_array_equal(a, b)
-            np.testing.assert_array_equal(b, d)
-            with pytest.raises(ValueError):
-                pg.contingency._dichotomize_series(data_ct, 'C')
+    def test_dichotomize_series(self):
+        """Test function _dichotomize_series."""
+        # Integer
+        a = pg.contingency._dichotomize_series(data_ct, 'A').values
+        b = pg.contingency._dichotomize_series(data_ct, 'B').values
+        d = pg.contingency._dichotomize_series(data_ct, 'D').values
+        np.testing.assert_array_equal(a, b)
+        np.testing.assert_array_equal(b, d)
+        with pytest.raises(ValueError):
+            pg.contingency._dichotomize_series(data_ct, 'C')
 
-        def test_dichotomous_crosstab(self):
-            """Test function dichotomous_crosstab."""
-            # Integer
-            d1 = pg.dichotomous_crosstab(data_ct, 'A', 'B')
-            d2 = pg.dichotomous_crosstab(data_ct, 'A', 'D')
-            assert d1.equals(d2)
-            pg.dichotomous_crosstab(data_ct, 'A', 'E')
-            pg.dichotomous_crosstab(data_ct, 'E', 'A')
-            with pytest.raises(ValueError):
-                pg.dichotomous_crosstab(data_ct, 'E', 'E')
+    def test_dichotomous_crosstab(self):
+        """Test function dichotomous_crosstab."""
+        # Integer
+        d1 = pg.dichotomous_crosstab(data_ct, 'A', 'B')
+        d2 = pg.dichotomous_crosstab(data_ct, 'A', 'D')
+        assert d1.equals(d2)
+        pg.dichotomous_crosstab(data_ct, 'A', 'E')
+        pg.dichotomous_crosstab(data_ct, 'E', 'A')
+        with pytest.raises(ValueError):
+            pg.dichotomous_crosstab(data_ct, 'E', 'E')
