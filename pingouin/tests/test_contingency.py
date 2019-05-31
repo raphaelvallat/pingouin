@@ -142,8 +142,8 @@ class TestContingency(TestCase):
         # midp gives slightly different results
         # assert np.allclose(stats.at['mcnemar', 'p-mid'], 3.305e-06)
 
-        def test_process_series(self):
-            """Test function _process_series."""
+        def test_dichotomize_series(self):
+            """Test function _dichotomize_series."""
             # Integer
             data = pd.DataFrame({'A': [0, 1, 0],
                                  'B': [False, True, False],
