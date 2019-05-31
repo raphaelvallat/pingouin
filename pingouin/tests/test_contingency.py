@@ -141,3 +141,29 @@ class TestContingency(TestCase):
         assert np.allclose(stats.at['mcnemar', 'p-exact'], 3.305e-06)
         # midp gives slightly different results
         # assert np.allclose(stats.at['mcnemar', 'p-mid'], 3.305e-06)
+
+        def test_process_series(self):
+            """Test function _process_series."""
+            # Integer
+            data = pd.DataFrame({'A': [0, 1, 0],
+                                 'B': [False, True, False],
+                                 'C': [1, 2, 3],
+                                 'D': ['No', 'Yes', 'No']})
+            a = pg.contingency._dichotomize_series(data, 'A').values
+            b = pg.contingency._dichotomize_series(data, 'B').values
+            d = pg.contingency._dichotomize_series(data, 'D').values
+            np.testing.assert_array_equal(a, b)
+            np.testing.assert_array_equal(b, d)
+            with pytest.raises(ValueError):
+                pg.contingency._dichotomize_series(data, 'C')
+
+        def test_dichotomous_crosstab(self):
+            """Test function dichotomous_crosstab."""
+            # Integer
+            d1 = pg.dichotomous_crosstab(data, 'A', 'B')
+            d2 = pg.dichotomous_crosstab(data, 'A', 'D')
+            assert d1.equals(d2)
+            pg.dichotomous_crosstab(data, 'A', 'E')
+            pg.dichotomous_crosstab(data, 'E', 'A')
+            with pytest.raises(ValueError):
+                pg.dichotomous_crosstab(data, 'E', 'E')

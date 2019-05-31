@@ -7,8 +7,7 @@ import pandas as pd
 
 __all__ = ["_perm_pval", "print_table", "_export_table", "_check_eftype",
            "remove_rm_na", "remove_na", "_flatten_list", "_check_dataframe",
-           "_is_sklearn_installed", "_is_statsmodels_installed",
-           "dichotomous_crosstab"]
+           "_is_sklearn_installed", "_is_statsmodels_installed"]
 
 
 def _perm_pval(bootstat, estimate, tail='two-sided'):
@@ -342,52 +341,6 @@ def _check_dataframe(dv=None, between=None, within=None, subject=None,
             if not isinstance(input, (str, list)):
                 raise ValueError('within and between must be specified when '
                                  'effects=interaction')
-
-
-###############################################################################
-# DICHOTOMOUS CONTINGENCY TABLES
-###############################################################################
-
-
-def _process_series(data, column):
-    """Converts the values of a pd.DataFrame column into 0 or 1"""
-    series = data[column]
-    if series.dtype == bool:
-        return series.astype(int)
-
-    def convert_elem(elem):
-        if isinstance(elem, (int, float)) and elem in (0, 1):
-            return int(elem)
-        if isinstance(elem, str):
-            lower = elem.lower()
-            if lower in ('n', 'no', 'absent', 'false', 'f', 'negative'):
-                return 0
-            elif lower in ('y', 'yes', 'present', 'true', 't', 'positive',
-                           'p'):
-                return 1
-        raise ValueError('Invalid value to build a 2x2 contingency '
-                         'table on column {}: {}'.format(column, elem))
-
-    return series.apply(convert_elem)
-
-
-def dichotomous_crosstab(data, x, y):
-    """
-    Generates a 2x2 contingency table from a pd.DataFrame that contains only
-    dichotomous entries, which are translated as 0 or 1.
-    """
-    crosstab = pd.crosstab(_process_series(data, x), _process_series(data, y))
-    shape = crosstab.shape
-    if shape != (2, 2):
-        if shape == (2, 1):
-            crosstab.loc[:, int(not bool(crosstab.columns[0]))] = [0, 0]
-        elif shape == (1, 2):
-            crosstab.loc[int(not bool(crosstab.index[0])), :] = [0, 0]
-        else:  # shape = (1, 1) or shape = (>2, >2)
-            raise ValueError('Both series contain only one unique value. '
-                             'Cannot build 2x2 contingency table.')
-    crosstab = crosstab.sort_index(axis=0).sort_index(axis=1)
-    return crosstab
 
 
 ###############################################################################

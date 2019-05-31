@@ -6,8 +6,7 @@ from unittest import TestCase
 from pingouin import read_dataset
 from pingouin.utils import (print_table, _perm_pval, _export_table,
                             remove_rm_na, _check_eftype, _check_dataframe,
-                            remove_na, _flatten_list, _process_series,
-                            dichotomous_crosstab, _is_sklearn_installed,
+                            remove_na, _flatten_list, _is_sklearn_installed,
                             _is_statsmodels_installed)
 
 # Dataset
@@ -160,31 +159,6 @@ class TestUtils(TestCase):
         with pytest.raises(ValueError):
             _check_dataframe(dv='Values', between='Group', within='Time',
                              effects='within', data=df)
-
-    def test_process_series(self):
-        """Test function _process_series."""
-        # Integer
-        data = pd.DataFrame({'A': [0, 1, 0],
-                             'B': [False, True, False],
-                             'C': [1, 2, 3],
-                             'D': ['No', 'Yes', 'No']})
-        np.testing.assert_array_equal(_process_series(data, 'A').values,
-                                      _process_series(data, 'B').values)
-        np.testing.assert_array_equal(_process_series(data, 'D').values,
-                                      _process_series(data, 'B').values,)
-        with pytest.raises(ValueError):
-            _process_series(data, 'C')
-
-    def test_dichotomous_crosstab(self):
-        """Test function dichotomous_crosstab."""
-        # Integer
-        d1 = dichotomous_crosstab(data, 'A', 'B')
-        d2 = dichotomous_crosstab(data, 'A', 'D')
-        assert d1.equals(d2)
-        dichotomous_crosstab(data, 'A', 'E')
-        dichotomous_crosstab(data, 'E', 'A')
-        with pytest.raises(ValueError):
-            dichotomous_crosstab(data, 'E', 'E')
 
     def _is_statsmodels_installed(self):
         """Test function _is_statsmodels_installed."""

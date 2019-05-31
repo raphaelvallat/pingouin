@@ -61,6 +61,7 @@ Contingency
 
     chi2_independence
     chi2_mcnemar
+    dichotomous_crosstab
 
 Correlation and regression
 --------------------------

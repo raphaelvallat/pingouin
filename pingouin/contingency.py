@@ -6,11 +6,14 @@ import pandas as pd
 import numpy as np
 import warnings
 from .power import power_chi2
-from .utils import dichotomous_crosstab
 
 
-__all__ = ['chi2_independence', 'chi2_mcnemar']
+__all__ = ['chi2_independence', 'chi2_mcnemar', 'dichotomous_crosstab']
 
+
+###############################################################################
+# CHI-SQUARED TESTS
+###############################################################################
 
 def chi2_independence(data, x, y, correction=True):
     """
@@ -201,19 +204,10 @@ def chi2_mcnemar(data, x, y, correction=True):
         the control group and in the test group, supposing that each pair
         contains a subject in each group.
 
-        Currently, Pingouin recognizes the following values as dichotomous
-        measurements:
+        The 2x2 crosstab is created using the
+        :py:func:`pingouin.dichotomous_crosstab` function.
 
-        * ``0``, ``0.0``, ``False``, ``'No'``, ``'N'``, ``'Absent'``,\
-        ``'False'``, ``'F'`` or ``'Negative'`` for negative cases;
-
-        * ``1``, ``1.0``, ``True``, ``'Yes'``, ``'Y'``, ``'Present'``,\
-        ``'True'``, ``'T'``, ``'Positive'`` or ``'P'``,  for positive cases;
-
-        If strings are used, Pingouin will recognize them regardless of their
-        uppercase/lowercase combinations.
-
-        .. warning:: Null values are not allowed.
+        .. warning:: Missing values are not allowed.
 
     correction : bool
         Whether to apply the correction for continuity (Edwards, A. 1948).
@@ -223,12 +217,13 @@ def chi2_mcnemar(data, x, y, correction=True):
     observed : pd.DataFrame
         The observed contingency table of frequencies.
     stats : pd.DataFrame
-        The tests summary, containing four columns:
+        The tests summary:
 
-        * ``'test'``: The test that was performed
         * ``'chi2'``: The test statistic
         * ``'dof'``: The degree of freedom
-        * ``'p'``: The p-value of the test
+        * ``'p-approx'``: The approximated p-value
+        * ``'p-exact'``: The exact p-value
+        * ``'p-mid'``: The mid-p-value
 
     Notes
     -----
@@ -293,8 +288,8 @@ def chi2_mcnemar(data, x, y, correction=True):
     0            20  40
     1             8  12
 
-    In this case, `c` seems to be a significantly greater than `b`. The tests
-    should be sensitive to this.
+    In this case, `c` (40) seems to be a significantly greater than `b` (8).
+    The McNemar test should be sensitive to this.
 
     >>> stats
                chi2  dof  p-approx   p-exact     p-mid
@@ -336,3 +331,85 @@ def chi2_mcnemar(data, x, y, correction=True):
     stats = pd.DataFrame(stats, index=['mcnemar'])
 
     return observed, stats
+
+
+###############################################################################
+# DICHOTOMOUS CONTINGENCY TABLES
+###############################################################################
+
+
+def _dichotomize_series(data, column):
+    """Converts the values of a pd.DataFrame column into 0 or 1"""
+    series = data[column]
+    if series.dtype == bool:
+        return series.astype(int)
+
+    def convert_elem(elem):
+        if isinstance(elem, (int, float)) and elem in (0, 1):
+            return int(elem)
+        if isinstance(elem, str):
+            lower = elem.lower()
+            if lower in ('n', 'no', 'absent', 'false', 'f', 'negative'):
+                return 0
+            elif lower in ('y', 'yes', 'present', 'true', 't', 'positive',
+                           'p'):
+                return 1
+        raise ValueError('Invalid value to build a 2x2 contingency '
+                         'table on column {}: {}'.format(column, elem))
+
+    return series.apply(convert_elem)
+
+
+def dichotomous_crosstab(data, x, y):
+    """
+    Generates a 2x2 contingency table from a :py:class:`pandas.DataFrame` that
+    contains only dichotomous entries, which are converted to 0 or 1.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Pandas dataframe
+    x, y : string
+        Column names in ``data``.
+
+        Currently, Pingouin recognizes the following values as dichotomous
+        measurements:
+
+        * ``0``, ``0.0``, ``False``, ``'No'``, ``'N'``, ``'Absent'``,\
+        ``'False'``, ``'F'`` or ``'Negative'`` for negative cases;
+
+        * ``1``, ``1.0``, ``True``, ``'Yes'``, ``'Y'``, ``'Present'``,\
+        ``'True'``, ``'T'``, ``'Positive'`` or ``'P'``,  for positive cases;
+
+        If strings are used, Pingouin will recognize them regardless of their
+        uppercase/lowercase combinations.
+
+    Returns
+    -------
+    crosstab : pd.DataFrame
+        The 2x2 crosstab. See :py:func:`pandas.crosstab` for more details.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> import pingouin as pg
+    >>> df = pd.DataFrame({'A': ['Yes', 'No', 'No'], 'B': [0., 1., 0.]})
+    >>> pg.dichotomous_crosstab(data=df, x='A', y='B')
+    B  0  1
+    A
+    0  1  1
+    1  1  0
+    """
+    crosstab = pd.crosstab(_dichotomize_series(data, x),
+                           _dichotomize_series(data, y))
+    shape = crosstab.shape
+    if shape != (2, 2):
+        if shape == (2, 1):
+            crosstab.loc[:, int(not bool(crosstab.columns[0]))] = [0, 0]
+        elif shape == (1, 2):
+            crosstab.loc[int(not bool(crosstab.index[0])), :] = [0, 0]
+        else:  # shape = (1, 1) or shape = (>2, >2)
+            raise ValueError('Both series contain only one unique value. '
+                             'Cannot build 2x2 contingency table.')
+    crosstab = crosstab.sort_index(axis=0).sort_index(axis=1)
+    return crosstab
