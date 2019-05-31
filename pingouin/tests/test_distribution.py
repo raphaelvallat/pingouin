@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from unittest import TestCase
 from pingouin.distribution import (gzscore, normality, anderson, epsilon,
@@ -10,6 +9,8 @@ from pingouin import read_dataset
 df = read_dataset('mixed_anova.csv')
 df_nan = df.copy()
 df_nan.iloc[[4, 15], 0] = np.nan
+df_pivot = df.pivot(index='Subject', columns='Time',
+                    values='Scores').reset_index(drop=True)
 
 # Create random normal variables
 np.random.seed(1234)
@@ -42,9 +43,12 @@ class TestDistribution(TestCase):
 
     def test_homoscedasticity(self):
         """Test function test_homoscedasticity."""
-        homoscedasticity(x, y, alpha=.05)
-        with pytest.raises(ValueError):
-            homoscedasticity(x)
+        homoscedasticity(data=[x, y], alpha=.05)
+        homoscedasticity(data=[x, y], method='bartlett', alpha=.05)
+        # Wide-format DataFrame
+        homoscedasticity(df_pivot)
+        # Long-format
+        homoscedasticity(df, dv='Scores', group='Time')
 
     def test_epsilon(self):
         """Test function epsilon."""
@@ -58,8 +62,6 @@ class TestDistribution(TestCase):
 
     def test_sphericity(self):
         """Test function test_sphericity."""
-        df_pivot = df.pivot(index='Subject', columns='Time',
-                            values='Scores').reset_index(drop=True)
         _, W, _, _, p = sphericity(df_pivot, method='mauchly')
         # Compare with ezANOVA
         assert np.round(W, 3) == 0.999

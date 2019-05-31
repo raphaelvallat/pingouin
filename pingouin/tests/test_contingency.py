@@ -8,11 +8,11 @@ from scipy.stats import chi2_contingency
 df_ind = pg.read_dataset('chi2_independence')
 df_mcnemar = pg.read_dataset('chi2_mcnemar')
 
-data_ct = pd.DataFrame({'A': [0, 1, 0],
-                        'B': [False, True, False],
-                        'C': [1, 2, 3],
-                        'D': ['No', 'Yes', 'No'],
-                        'E': ['No', 'No', 'No']})
+data_ct = pd.DataFrame({'A': [0, 1, 0, 0],
+                        'B': [False, True, False, False],
+                        'C': [1, 2, 3, 4],
+                        'D': ['No', 'Yes', 'No', 'No'],
+                        'E': ['y', 'y', 'y', 'y']})
 
 
 class TestContingency(TestCase):

@@ -218,34 +218,42 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
     return stats
 
 
-def homoscedasticity(*args, alpha=.05):
+def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
     """Test equality of variance.
 
     Parameters
     ----------
-    sample1, sample2,... : array_like
-        Array of sample data. May be different lengths.
+    data : dataframe, list or dict
+        Iterable. Can be either a list / dictionnary of iterables
+        or a wide- or long-format pandas dataframe.
+    dv : str
+        Dependent variable (only when ``data`` is a long-format dataframe).
+    group : str
+        Grouping variable (only when ``data`` is a long-format dataframe).
+    method : str
+        Statistical test. 'levene' (default) performs the Levene test
+        using :py:func:`scipy.stats.levene`, and 'bartlett' performs the
+        Bartlett test using :py:func:`scipy.stats.bartlett`.
+        The former is more robust to departure from normality.
+    alpha : float
+        Significance level.
 
     Returns
     -------
-    equal_var : boolean
-        True if data have equal variance.
-    p : float
-        P-value.
+    stats : dataframe
+        Pandas DataFrame with columns:
+
+        * ``'W/T'``: test statistic ('W' for Levene, 'T' for Bartlett)
+        * ``'pval'``: p-value
+        * ``'equal_var'``: True if ``data`` has equal variance
 
     See Also
     --------
-    normality : Test the univariate normality of one or more array(s).
+    normality : Univariate normality test.
     sphericity : Mauchly's test for sphericity.
 
     Notes
     -----
-    This function first tests if the data are normally distributed using the
-    Shapiro-Wilk test. If yes, then the homogeneity of variances is measured
-    using the Bartlett test. If the data are not normally distributed, the
-    Levene (1960) test, which is less sensitive to departure from
-    normality, is used.
-
     The **Bartlett** :math:`T` statistic is defined as:
 
     .. math::
@@ -284,6 +292,11 @@ def homoscedasticity(*args, alpha=.05):
 
     .. math:: W \\sim F(k-1, N-k)
 
+    .. warning:: Missing values are not supported for this function.
+        Make sure to remove them before using the
+        :py:meth:`pandas.DataFrame.dropna` or :py:func:`pingouin.remove_na`
+        functions.
+
     References
     ----------
     .. [1] Bartlett, M. S. (1937). Properties of sufficiency and statistical
@@ -298,35 +311,68 @@ def homoscedasticity(*args, alpha=.05):
 
     Examples
     --------
-    Test the homoscedasticity of two arrays.
+    1. Levene test on a wide-format dataframe
 
     >>> import numpy as np
-    >>> from pingouin import homoscedasticity
-    >>> np.random.seed(123)
-    >>> # Scale = standard deviation of the distribution.
-    >>> x = np.random.normal(loc=0, scale=1., size=100)
-    >>> y = np.random.normal(loc=0, scale=0.8,size=100)
-    >>> equal_var, p = homoscedasticity(x, y, alpha=.05)
-    >>> print(round(np.var(x), 3), round(np.var(y), 3), equal_var, p)
-    1.273 0.602 False 0.0
+    >>> import pingouin as pg
+    >>> data = pg.read_dataset('mediation')
+    >>> pg.homoscedasticity(data[['X', 'Y', 'M']])
+                W      pval  equal_var
+    levene  0.435  0.999997       True
+
+    2. Bartlett test using a list of iterables
+
+    >>> data = [[4, 8, 9, 20, 14], np.array([5, 8, 15, 45, 12])]
+    >>> pg.homoscedasticity(data, method="bartlett", alpha=.05)
+                  T      pval  equal_var
+    bartlett  2.874  0.090045       True
+
+    3. Long-format dataframe
+
+    >>> data = pg.read_dataset('rm_anova2')
+    >>> pg.homoscedasticity(data, dv='Performance', group='Time')
+                W      pval  equal_var
+    levene  3.192  0.079217       True
     """
-    k = len(args)
-    if k < 2:
-        raise ValueError("Must enter at least two input sample vectors.")
-
-    # Test normality of data
-    normal = np.zeros(k, dtype='bool')
-    for j in range(k):
-        normal[j] = normality(np.asarray(args[j])).loc[0, 'normal']
-
-    if np.count_nonzero(normal) != normal.size:
-        # print('Data are not normally distributed. Using Levene test.')
-        _, p = scipy.stats.levene(*args)
+    assert isinstance(data, (pd.DataFrame, list, dict))
+    assert method.lower() in ['levene', 'bartlett']
+    func = getattr(scipy.stats, method)
+    if isinstance(data, pd.DataFrame):
+        # Data is a Pandas DataFrame
+        if dv is None and group is None:
+            # Wide-format
+            # Get numeric data only
+            numdata = data._get_numeric_data()
+            assert numdata.shape[1] > 1, 'Data must have at least two columns.'
+            statistic, p = func(*numdata.values)
+        else:
+            # Long-format
+            assert group in data.columns
+            assert dv in data.columns
+            grp = data.groupby(group)[dv]
+            assert grp.ngroups > 1, 'Data must have at least two columns.'
+            statistic, p = func(*grp.apply(list))
+    elif isinstance(data, list):
+        # Check that list contains other list or np.ndarray
+        assert all(isinstance(el, (list, np.ndarray)) for el in data)
+        assert len(data) > 1, 'Data must have at least two iterables.'
+        statistic, p = func(*data)
     else:
-        _, p = scipy.stats.bartlett(*args)
+        # Data is a dict
+        assert all(isinstance(el, (list, np.ndarray)) for el in data.values())
+        assert len(data) > 1, 'Data must have at least two iterables.'
+        statistic, p = func(*data.values())
 
     equal_var = True if p > alpha else False
-    return equal_var, np.round(p, 3)
+    stat_name = 'W' if method.lower() == 'levene' else 'T'
+
+    stats = {
+        stat_name: round(statistic, 3),
+        'pval': p,
+        'equal_var': equal_var
+    }
+
+    return pd.DataFrame(stats, columns=stats.keys(), index=[method])
 
 
 def anderson(*args, dist='norm'):
@@ -518,7 +564,7 @@ def sphericity(data, method='mauchly', alpha=.05):
     See Also
     --------
     homoscedasticity : Test equality of variance.
-    normality : Test the univariate normality of one or more array(s).
+    normality : Univariate normality test.
 
     Notes
     -----

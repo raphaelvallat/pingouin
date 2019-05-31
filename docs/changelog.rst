@@ -29,6 +29,7 @@ c. Added :py:func:`pingouin.power_chi2` function.
 
 a. :py:func:`pingouin.linear_regression` now returns the residuals.
 b. Completely rewrote :py:func:`pingouin.normality` function, which now support pandas DataFrame (wide & long format), multiple normality tests (:py:func:`scipy.stats.shapiro`, :py:func:`scipy.stats.normaltest`), and an automatic casewise removal of missing values.
+c. Completely rewrote :py:func:`pingouin.homoscedasticity` function, which now support pandas DataFrame (wide & long format).
 
 **Contributors**
 
