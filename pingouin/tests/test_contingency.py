@@ -133,6 +133,11 @@ class TestContingency(TestCase):
         # >>> tbl = table(df$treatment_X, df$treatment_Y)
         # >>> mcnemar.test(tbl, correct = TRUE)
         _, stats = pg.chi2_mcnemar(df_mcnemar, 'treatment_X', 'treatment_Y')
-        assert stats.at[2, 'chi2'] == 20.021
-        assert stats.at[2, 'dof'] == 1
-        assert np.allclose(stats.at[2, 'p'], 7.66e-06)
+        assert stats.at['mcnemar', 'chi2'] == 20.021
+        assert stats.at['mcnemar', 'dof'] == 1
+        assert np.allclose(stats.at['mcnemar', 'p-approx'], 7.66e-06)
+        # Results are compared to the exact2x2 R package
+        # >>> exact2x2(tbl, paired = TRUE, midp = FALSE)
+        assert np.allclose(stats.at['mcnemar', 'p-exact'], 3.305e-06)
+        # midp gives slightly different results
+        # assert np.allclose(stats.at['mcnemar', 'p-mid'], 3.305e-06)

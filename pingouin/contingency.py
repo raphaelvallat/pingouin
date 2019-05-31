@@ -297,10 +297,8 @@ def chi2_mcnemar(data, x, y, correction=True):
     should be sensitive to this.
 
     >>> stats
-               test    chi2  dof         p
-    0         exact   8.000    1  0.000003
-    1         mid-p   8.000    1  0.000002
-    2  approximated  20.021    1  0.000008
+               chi2  dof  p-approx   p-exact     p-mid
+    mcnemar  20.021    1  0.000008  0.000003  0.000002
     """
     # Python code inspired by statsmodel's mcnemar
     assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
@@ -314,38 +312,27 @@ def chi2_mcnemar(data, x, y, correction=True):
             raise ValueError('Null values are not allowed.')
 
     observed = dichotomous_crosstab(data, x, y)
-    n1, n2 = observed.at[0, 1], observed.at[1, 0]
+    # Careful, the order of b and c is inverted compared to wikipedia
+    # because the colums / rows of the crosstab is [0, 1] and not [1, 0].
+    c, b = observed.at[0, 1], observed.at[1, 0]
+    d = min(b, c)
+    n = b + c
 
-    if (n1, n2) == (0, 0):
+    if (b, c) == (0, 0):
         raise ValueError('McNemar\'s test does not work if the secondary ' +
                          'diagonal of the observed data summary does not ' +
                          'have values different from 0.')
 
-    # Exact test
-    chi2 = min(n1, n2)
-    exact = {
-        'test': 'exact',
+    chi2 = (abs(b - c) - int(correction))**2 / n
+    pexact = min(1, 2 * binom.cdf(d, n, 0.5))
+    stats = {
         'chi2': round(chi2, 3),
-        'p': min(1, 2 * binom.cdf(chi2, n1 + n2, 0.5))
+        'dof': 1,
+        'p-approx': sp_chi2.sf(chi2, 1),
+        'p-exact': pexact,
+        'p-mid': pexact - binom.pmf(b, n, 0.5)
     }
 
-    # mid-p test
-    mid_p = {
-        'test': 'mid-p',
-        'chi2': round(chi2, 3),
-        'p': exact['p'] - binom.pmf(n2, n1 + n2, 0.5)
-    }
-
-    # Approximated test
-    chi2 = (abs(n1 - n2) - int(correction))**2 / (n1 + n2)
-    approximated = {
-        'test': 'approximated',
-        'chi2': round(chi2, 3),
-        'p': sp_chi2.sf(chi2, 1)
-    }
-
-    stats = pd.DataFrame([exact, mid_p, approximated])
-    stats['dof'] = 1
-    stats = stats[['test', 'chi2', 'dof', 'p']]
+    stats = pd.DataFrame(stats, index=['mcnemar'])
 
     return observed, stats
