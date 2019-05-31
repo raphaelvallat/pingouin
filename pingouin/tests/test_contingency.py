@@ -8,6 +8,12 @@ from scipy.stats import chi2_contingency
 df_ind = pg.read_dataset('chi2_independence')
 df_mcnemar = pg.read_dataset('chi2_mcnemar')
 
+data_ct = pd.DataFrame({'A': [0, 1, 0],
+                        'B': [False, True, False],
+                        'C': [1, 2, 3],
+                        'D': ['No', 'Yes', 'No'],
+                        'E': [1., 1., 1.]})
+
 
 class TestContingency(TestCase):
     """Test contingency.py."""
@@ -145,25 +151,21 @@ class TestContingency(TestCase):
         def test_dichotomize_series(self):
             """Test function _dichotomize_series."""
             # Integer
-            data = pd.DataFrame({'A': [0, 1, 0],
-                                 'B': [False, True, False],
-                                 'C': [1, 2, 3],
-                                 'D': ['No', 'Yes', 'No']})
-            a = pg.contingency._dichotomize_series(data, 'A').values
-            b = pg.contingency._dichotomize_series(data, 'B').values
-            d = pg.contingency._dichotomize_series(data, 'D').values
+            a = pg.contingency._dichotomize_series(data_ct, 'A').values
+            b = pg.contingency._dichotomize_series(data_ct, 'B').values
+            d = pg.contingency._dichotomize_series(data_ct, 'D').values
             np.testing.assert_array_equal(a, b)
             np.testing.assert_array_equal(b, d)
             with pytest.raises(ValueError):
-                pg.contingency._dichotomize_series(data, 'C')
+                pg.contingency._dichotomize_series(data_ct, 'C')
 
         def test_dichotomous_crosstab(self):
             """Test function dichotomous_crosstab."""
             # Integer
-            d1 = pg.dichotomous_crosstab(data, 'A', 'B')
-            d2 = pg.dichotomous_crosstab(data, 'A', 'D')
+            d1 = pg.dichotomous_crosstab(data_ct, 'A', 'B')
+            d2 = pg.dichotomous_crosstab(data_ct, 'A', 'D')
             assert d1.equals(d2)
-            pg.dichotomous_crosstab(data, 'A', 'E')
-            pg.dichotomous_crosstab(data, 'E', 'A')
+            pg.dichotomous_crosstab(data_ct, 'A', 'E')
+            pg.dichotomous_crosstab(data_ct, 'E', 'A')
             with pytest.raises(ValueError):
-                pg.dichotomous_crosstab(data, 'E', 'E')
+                pg.dichotomous_crosstab(data_ct, 'E', 'E')
