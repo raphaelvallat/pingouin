@@ -1,6 +1,7 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 import numpy as np
+from math import pi, exp, log
 from scipy.integrate import quad
 
 __all__ = ["bayesfactor_ttest", "bayesfactor_pearson", "bayesfactor_binom"]
@@ -40,10 +41,11 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
             as R or JASP. Be extra careful when interpretating one-sided BF,
             and if you can, always double-check your results.
     r : float
-        Cauchy scale factor. Smaller values of r (e.g. 0.5), may be appropriate
-        when small effect sizes are expected a priori; larger values of r are
-        appropriate when large effect sizes are expected (Rouder et al 2009).
-        The default is 0.707.
+        Cauchy scale factor. Smaller values of ``r`` (e.g. 0.5), may be
+        appropriate when small effect sizes are expected a priori; larger
+        values of ``r`` are appropriate when large effect sizes are
+        expected (Rouder et al 2009). The default is
+        :math:`\\sqrt{2} / 2 \\approx 0.707`.
 
     Returns
     -------
@@ -69,8 +71,9 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
         (1 + \\frac{t^2}{v(1 + Ngr^2)})^{-(v+1) / 2}(2\\pi)^{-1/2}g^
         {-3/2}e^{-1/2g}}{(1 + \\frac{t^2}{v})^{-(v+1) / 2}}
 
-    where **t** is the T-value, **v** the degrees of freedom, **N** the
-    sample size and **r** the Cauchy scale factor (i.e. prior on effect size).
+    where :math:`t` is the T-value, :math:`v` the degrees of freedom,
+    :math:`N` the sample size and :math:`r` the Cauchy scale factor
+    (= prior on effect size).
 
     References
     ----------
@@ -105,7 +108,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     def fun(g, t, n, r, df):
         return (1 + n * g * r**2)**(-.5) * (1 + t**2 / ((1 + n * g * r**2)
                                             * df))**(-(df + 1) / 2) *  \
-               (2 * np.pi)**(-.5) * g**(-3. / 2) * np.exp(-1 / (2 * g))
+               (2 * pi)**(-.5) * g**(-3. / 2) * exp(-1 / (2 * g))
 
     # Define n and degrees of freedom
     if one_sample or paired:
@@ -187,9 +190,9 @@ def bayesfactor_pearson(r, n):
 
     # Function to be integrated
     def fun(g, r, n):
-        return np.exp(((n - 2) / 2) * np.log(1 + g) + (-(n - 1) / 2)
-                      * np.log(1 + (1 - r**2) * g) + (-3 / 2)
-                      * np.log(g) + - n / (2 * g))
+        return exp(((n - 2) / 2) * log(1 + g) + (-(n - 1) / 2)
+                   * log(1 + (1 - r**2) * g) + (-3 / 2)
+                   * log(g) + - n / (2 * g))
 
     # JZS Bayes factor calculation
     integr = quad(fun, 0, np.inf, args=(r, n))[0]
