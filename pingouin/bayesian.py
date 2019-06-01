@@ -215,7 +215,7 @@ def bayesfactor_binom(k, n, p=.5):
     -------
     bf10 : float
         The Bayes Factor quantifies the evidence in favour of the
-        alternative hypothesis, where the null hypothesis is that
+        **alternative hypothesis**, where the null hypothesis is that
         the random variable is binomially distributed with base probability
         :math:`p`.
 
@@ -224,7 +224,7 @@ def bayesfactor_binom(k, n, p=.5):
     Adapted from a Matlab code found at
     https://github.com/anne-urai/Tools/blob/master/stats/BayesFactors/binombf.m
 
-    The Bayes Factor is approximated using the formula below:
+    The Bayes Factor is given by the formula below:
 
     .. math::
 
@@ -239,16 +239,39 @@ def bayesfactor_binom(k, n, p=.5):
 
     Examples
     --------
+    We want to determine if a coin if fair. After tossing the coin 200 times
+    in a row, we report 115 heads (hereafter referred to as "successes") and 85
+    tails ("failures"). The Bayes Factor can be easily computed using Pingouin:
+
     >>> import pingouin as pg
-    >>> bf = pg.bayesfactor_binom(k=16, n=20, p=0.5)
-    >>> print("Bayes Factor: %s" % bf)
-    Bayes Factor: 10.306
+    >>> bf = float(pg.bayesfactor_binom(k=115, n=200, p=0.5))
+    >>> # Note that Pingouin returns the BF-alt by default, formatted as a str.
+    >>> # BF-null is simply 1 / BF-alt
+    >>> print("BF-null: %.3f, BF-alt: %.3f" % (1 / bf, bf))
+    BF-null: 1.198, BF-alt: 0.835
 
-    >>> bf = pg.bayesfactor_binom(k=10, n=20, p=0.5)
-    >>> print("Bayes Factor: %s" % bf)
-    Bayes Factor: 0.27
+    Since the Bayes Factor of the null hypothesis ("the coin is fair") is
+    higher than the Bayes Factor of the alternative hypothesis
+    ("the coin is not fair"), we can conclude that there is more evidence to
+    support the fact that the coin is indeed fair. However, the strength of the
+    evidence in favor of the null hypothesis (1.198) is "barely worth
+    mentionning" according to Jeffreys's rule of thumb.
 
-    With a different base probability
+    Interestingly, a frequentist alternative to this test would give very
+    different results. It can be performed using the
+    :py:func:`scipy.stats.binom_test` function:
+
+    >>> from scipy.stats import binom_test
+    >>> pval = binom_test(115, 200, p=0.5)
+    >>> round(pval, 5)
+    0.04004
+
+    The binomial test rejects the null hypothesis that the coin is fair at the
+    5% significance level (p=0.04). Thus, whereas a frequentist hypothesis test
+    would yield significant results at the 5% significance level, the Bayes
+    factor does not find any evidence that the coin is unfair.
+
+    Last example using a different base probability of successes
 
     >>> bf = pg.bayesfactor_binom(k=100, n=1000, p=0.1)
     >>> print("Bayes Factor: %s" % bf)
