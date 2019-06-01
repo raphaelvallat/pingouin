@@ -254,15 +254,14 @@ def bayesfactor_binom(k, n, p=.5):
     >>> print("Bayes Factor: %s" % bf)
     Bayes Factor: 0.024
     """
-    from scipy.special import comb
+    from scipy.stats import binom
     assert 0 < p < 1, 'p must be between 0 and 1.'
     assert isinstance(k, int), 'k must be int.'
     assert isinstance(n, int), 'n must be int.'
     assert k <= n, 'k (successes) cannot be higher than n (trials).'
 
-    def fun(g, k, n, p):
-        return comb(n, k) * g**k * (1 - g)**(n - k)
+    def fun(g, k, n):
+        return binom.pmf(k, n, g)
 
-    integr = quad(fun, 0, 1, args=(k, n, p))[0]
-    bf10 = integr / (comb(n, k) * p**k * (1 - p)**(n - k))
+    bf10 = quad(fun, 0, 1, args=(k, n))[0] / binom.pmf(k, n, p)
     return _format_bf(bf10)
