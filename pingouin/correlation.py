@@ -328,7 +328,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
 
     Please note that rows with NaN are automatically removed.
 
-    If method='pearson', The JZS Bayes Factor is approximated using the
+    If ``method='pearson'``, The Bayes Factor is calculated using the
     :py:func:`pingouin.bayesfactor_pearson` function.
 
     References
@@ -361,15 +361,15 @@ def corr(x, y, tail='two-sided', method='pearson'):
     >>> # Compute Pearson correlation
     >>> from pingouin import corr
     >>> corr(x, y)
-              n      r         CI95%     r2  adj_r2     p-val   BF10  power
-    pearson  30  0.491  [0.16, 0.72]  0.242   0.185  0.005813  6.135  0.809
+              n      r         CI95%     r2  adj_r2     p-val  BF10  power
+    pearson  30  0.491  [0.16, 0.72]  0.242   0.185  0.005813  8.55  0.809
 
     2. Pearson correlation with two outliers
 
     >>> x[3], y[5] = 12, -8
     >>> corr(x, y)
-              n      r          CI95%     r2  adj_r2     p-val  BF10  power
-    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439148  0.19  0.121
+              n      r          CI95%     r2  adj_r2     p-val   BF10  power
+    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439148  0.302  0.121
 
     3. Spearman correlation
 
@@ -395,19 +395,19 @@ def corr(x, y, tail='two-sided', method='pearson'):
               n  outliers      r         CI95%     r2  adj_r2     p-val  power
     skipped  30         2  0.437  [0.09, 0.69]  0.191   0.131  0.020128  0.694
 
-    7. One-tailed Spearman correlation
+    7. One-tailed Pearson correlation
 
-    >>> corr(x, y, tail="one-sided", method='spearman')
-               n      r         CI95%     r2  adj_r2     p-val  power
-    spearman  30  0.401  [0.05, 0.67]  0.161   0.099  0.014017  0.726
+    >>> corr(x, y, tail="one-sided", method='pearson')
+              n      r          CI95%     r2  adj_r2     p-val   BF10  power
+    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.219574  0.467  0.194
 
     8. Using columns of a pandas dataframe
 
     >>> import pandas as pd
     >>> data = pd.DataFrame({'x': x, 'y': y})
     >>> corr(data['x'], data['y'])
-              n      r          CI95%     r2  adj_r2     p-val  BF10  power
-    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439148  0.19  0.121
+              n      r          CI95%     r2  adj_r2     p-val   BF10  power
+    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439148  0.302  0.121
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -464,9 +464,9 @@ def corr(x, y, tail='two-sided', method='pearson'):
         stats['outliers'] = sum(outliers)
 
     # Compute the BF10 for Pearson correlation only
-    if method == 'pearson' and nx < 1000:
+    if method == 'pearson':
         if r2 < 1:
-            stats['BF10'] = bayesfactor_pearson(r, nx)
+            stats['BF10'] = bayesfactor_pearson(r, nx, tail=tail)
         else:
             stats['BF10'] = str(np.inf)
 
@@ -570,7 +570,7 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     >>> df = pg.read_dataset('partial_corr')
     >>> pg.partial_corr(data=df, x='x', y='y', covar='cv1')
               n      r         CI95%     r2  adj_r2     p-val    BF10  power
-    pearson  30  0.568  [0.26, 0.77]  0.323   0.273  0.001055  28.695  0.925
+    pearson  30  0.568  [0.26, 0.77]  0.323   0.273  0.001055  37.773  0.925
 
     2. Spearman partial correlation with several covariates
 
@@ -600,7 +600,7 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
 
     >>> pg.partial_corr(data=df, x='x', y='y', x_covar=['cv1', 'cv2', 'cv3'])
               n      r         CI95%     r2  adj_r2     p-val   BF10  power
-    pearson  30  0.463  [0.12, 0.71]  0.215   0.156  0.009946  3.809  0.752
+    pearson  30  0.463  [0.12, 0.71]  0.215   0.156  0.009946  5.404  0.752
 
     6. Semi-partial on both``x`` and ``y`` controlling for different variables
 

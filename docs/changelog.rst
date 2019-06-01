@@ -31,10 +31,14 @@ d. Added :py:func:`pingouin.bayesfactor_binom` function.
 a. :py:func:`pingouin.linear_regression` now returns the residuals.
 b. Completely rewrote :py:func:`pingouin.normality` function, which now support pandas DataFrame (wide & long format), multiple normality tests (:py:func:`scipy.stats.shapiro`, :py:func:`scipy.stats.normaltest`), and an automatic casewise removal of missing values.
 c. Completely rewrote :py:func:`pingouin.homoscedasticity` function, which now support pandas DataFrame (wide & long format).
+d. Faster and more accurate algorithm in :py:func:`pingouin.bayesfactor_pearson` (same algorithm as JASP).
+e. Support for one-sided Bayes Factors in :py:func:`pingouin.bayesfactor_pearson`.
+
+Note that d. and e. also affect the behavior of the :py:func:`pingouin.corr` and :py:func:`pingouin.pairwise_corr` functions.
 
 **Contributors**
 
-* Raphael Vallat
+* `Raphael Vallat <https://raphaelvallat.com>`_
 * `Arthur Paulino <https://github.com/arthurpaulino>`_
 
 v0.2.5 (May 2019)

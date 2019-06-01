@@ -1,13 +1,15 @@
 import numpy as np
 from unittest import TestCase
+from scipy.stats import pearsonr
 from pingouin.parametric import ttest
-from pingouin.bayesian import (bayesfactor_ttest, bayesfactor_pearson,
-                               bayesfactor_binom)
+from pingouin.bayesian import bayesfactor_ttest, bayesfactor_binom
+from pingouin.bayesian import bayesfactor_pearson as bfp
 
 np.random.seed(1234)
 x = np.random.normal(size=100)
 y = np.random.normal(size=100)
 z = np.random.normal(loc=.5, size=100)
+v, w = np.random.multivariate_normal([0, 0], [[1, .8], [.8, 1]], 100).T
 
 
 class TestBayesian(TestCase):
@@ -15,8 +17,7 @@ class TestBayesian(TestCase):
 
     def test_bayesfactor_ttest(self):
         """Test function bayesfactor_ttest."""
-        bf = bayesfactor_ttest(3.5, 20, 20)
-        assert float(bf) == 26.743
+        assert float(bayesfactor_ttest(3.5, 20, 20)) == 26.743
         assert float(bayesfactor_ttest(3.5, 20)) == 17.185
         assert float(bayesfactor_ttest(3.5, 20, 1)) == 17.185
         # Compare against BayesFactor::testBF
@@ -28,13 +29,38 @@ class TestBayesian(TestCase):
 
     def test_bayesfactor_pearson(self):
         """Test function bayesfactor_pearson."""
-        assert float(bayesfactor_pearson(0.6, 20)) == 8.221
-        assert float(bayesfactor_pearson(-0.6, 20)) == 8.221
-        assert float(bayesfactor_pearson(0.6, 10)) == 1.278
+        # Compare the analytical solution to JASP / R (method='ly')
+        # Similar to JASP with kappa=1, or correlationBF with rscale='wide'
+        assert float(bfp(0.1, 83)) == 0.204
+        assert float(bfp(-0.1, 83)) == 0.204
+        assert float(bfp(0.1, 83, tail='one-sided')) == 0.332
+        assert float(bfp(0.1, 83, tail='greater')) == 0.332
+        assert float(bfp(0.1, 83, tail='pos')) == 0.332
+        assert float(bfp(0.1, 83, tail='less')) == 0.076
+        assert float(bfp(0.1, 83, tail='neg')) == 0.076
+        assert float(bfp(-0.1, 83, tail='one-sided')) == 0.332
+        assert float(bfp(-0.1, 83, tail='pos')) == 0.076
+
+        # Example 2. Compare with JASP.
+        r, _ = pearsonr(x, y)
+        n = 100
+        assert float(bfp(r, n)) == 0.174
+        assert float(bfp(r, n, tail='g')) == 0.275
+        assert float(bfp(r, n, tail='l')) == 0.073
+        r, _ = pearsonr(v, w)
+        assert float(bfp(r, n)) == 2.321e+22
+        assert float(bfp(r, n, tail='g')) == 4.643e+22
+        # assert float(bfp(r, n, tail='l')) == 1.677e-26
+
+        # Compare the integral solving method (Wetzels)
+        assert float(bfp(0.6, 20, method='wetzels')) == 8.221
+        assert float(bfp(-0.6, 20, method='wetzels')) == 8.221
+        assert float(bfp(0.6, 10, method='wetzels')) == 1.278
 
     def test_bayesfactor_binom(self):
         """Test function bayesfactor_binom.
         Compare to http://pcl.missouri.edu/bf-binomial.
+        See also docstring of the function for a comparison with Wikipedia.
         """
         def bf10(x):
             return str(round(1 / float(x), 3))

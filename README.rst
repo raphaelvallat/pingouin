@@ -41,7 +41,7 @@
 
 4. Linear/logistic regression and mediation analysis
 
-5. Bayes Factor of T-test and Pearson correlation
+5. Bayes Factors
 
 6. Multivariate tests
 
@@ -93,6 +93,7 @@ In addition, some functions require :
 
 * Statsmodels
 * Scikit-learn
+* Mpmath
 
 Pingouin is a Python 3 package and is currently tested for Python 3.5, 3.6 and 3.7. Pingouin does not work with Python 2.7.
 
@@ -167,7 +168,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
    ===  =====  ===========  =====  ========  =======  ======  ======
      n      r  CI95%           r2    adj_r2    p-val    BF10   power
    ===  =====  ===========  =====  ========  =======  ======  ======
-    30  0.595  [0.3  0.79]  0.354     0.306    0.001  54.222    0.95
+    30  0.595  [0.3  0.79]  0.354     0.306    0.001  69.723    0.95
    ===  =====  ===========  =====  ========  =======  ======  ======
 
 ------------
@@ -327,9 +328,9 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
   ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======  =======
   X    Y    method    tail         n      r  CI95%             r2    adj_r2      z    p-unc    BF10    power
   ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======  =======
-  X    Y    pearson   two-sided   30  0.366  [0.01 0.64]    0.134     0.070  0.384    0.047   1.006    0.525
-  X    Z    pearson   two-sided   30  0.251  [-0.12  0.56]  0.063    -0.006  0.256    0.181   0.344    0.272
-  Y    Z    pearson   two-sided   30  0.020  [-0.34  0.38]  0.000    -0.074  0.020    0.916   0.142    0.051
+  X    Y    pearson   two-sided   30  0.366  [0.01 0.64]    0.134     0.070  0.384    0.047   1.500    0.525
+  X    Z    pearson   two-sided   30  0.251  [-0.12  0.56]  0.063    -0.006  0.256    0.181   0.534    0.272
+  Y    Z    pearson   two-sided   30  0.020  [-0.34  0.38]  0.000    -0.074  0.020    0.916   0.228    0.051
   ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======  =======
 
 10. Convert between effect sizes

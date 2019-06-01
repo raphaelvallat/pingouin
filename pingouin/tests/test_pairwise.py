@@ -150,10 +150,6 @@ class TestPairwise(TestCase):
         pairwise_corr(data, columns=[['Age', 'IQ'], []])
         pairwise_corr(data, columns=['Age', 'Gender', 'IQ', 'Wrong'])
         pairwise_corr(data, columns=['Age', 'Gender', 'Wrong'])
-        # Test with more than 1000 samples (BF10 not computed)
-        data1500 = pd.concat([data, data, data], ignore_index=True)
-        pcor1500 = pairwise_corr(data1500, method='pearson')
-        assert 'BF10' not in pcor1500.keys()
         # Test with no good combinations
         with pytest.raises(ValueError):
             pairwise_corr(data, columns=['Gender', 'Gender'])

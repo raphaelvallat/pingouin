@@ -7,7 +7,8 @@ import pandas as pd
 
 __all__ = ["_perm_pval", "print_table", "_export_table", "_check_eftype",
            "remove_rm_na", "remove_na", "_flatten_list", "_check_dataframe",
-           "_is_sklearn_installed", "_is_statsmodels_installed"]
+           "_is_sklearn_installed", "_is_statsmodels_installed",
+           "_is_mpmath_installed"]
 
 
 def _perm_pval(bootstat, estimate, tail='two-sided'):
@@ -371,4 +372,17 @@ def _is_sklearn_installed(raise_error=False):
     if raise_error and not is_installed:  # pragma: no cover
         raise IOError("sklearn needs to be installed. Please use `pip "
                       "install scikit-learn`.")
+    return is_installed
+
+
+def _is_mpmath_installed(raise_error=False):
+    try:
+        import mpmath  # noqa
+        is_installed = True
+    except IOError:  # pragma: no cover
+        is_installed = False
+    # Raise error (if needed) :
+    if raise_error and not is_installed:  # pragma: no cover
+        raise IOError("mpmath needs to be installed. Please use `pip "
+                      "install mpmath`.")
     return is_installed

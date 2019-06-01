@@ -1,8 +1,9 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
+import warnings
 import numpy as np
-from math import pi, exp, log
 from scipy.integrate import quad
+from math import pi, exp, log, lgamma
 
 __all__ = ["bayesfactor_ttest", "bayesfactor_pearson", "bayesfactor_binom"]
 
@@ -54,6 +55,13 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
         The Bayes Factor quantifies the evidence in favour of the
         alternative hypothesis.
 
+    See also
+    --------
+    ttest : T-test
+    pairwise_ttest : Pairwise T-tests
+    bayesfactor_pearson : Bayes Factor of a correlation
+    bayesfactor_binom : Bayes Factor of a binomial test
+
     Notes
     -----
     Adapted from a Matlab code found at
@@ -67,13 +75,16 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
 
     .. math::
 
-        BF_{10} = \\frac{\\int_{0}^{\\infty}(1 + Ngr^2)^{-1/2}
+        \\text{BF}_{10} = \\frac{\\int_{0}^{\\infty}(1 + Ngr^2)^{-1/2}
         (1 + \\frac{t^2}{v(1 + Ngr^2)})^{-(v+1) / 2}(2\\pi)^{-1/2}g^
         {-3/2}e^{-1/2g}}{(1 + \\frac{t^2}{v})^{-(v+1) / 2}}
 
     where :math:`t` is the T-value, :math:`v` the degrees of freedom,
-    :math:`N` the sample size and :math:`r` the Cauchy scale factor
-    (= prior on effect size).
+    :math:`N` the sample size, :math:`r` the Cauchy scale factor
+    (= prior on effect size) and :math:`g` is is an auxiliary variable
+    that is integrated out numerically.
+
+    Results have been validated against JASP and the BayesFactor R package.
 
     References
     ----------
@@ -128,16 +139,30 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     return _format_bf(bf10)
 
 
-def bayesfactor_pearson(r, n):
+def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
     """
     Bayes Factor of a Pearson correlation.
 
     Parameters
     ----------
     r : float
-        Pearson correlation coefficient
+        Pearson correlation coefficient.
     n : int
-        Sample size
+        Sample size.
+    tail : str
+        Tail of the alternative hypothesis. Can be *'two-sided'*,
+        *'one-sided'*, *'greater'* or *'less'*. *'greater'* corresponds to a
+        positive correlation, *'less'* to a negative correlation.
+        If *'one-sided'*, the directionality is inferred based on the ``r``
+        value (= *'greater'* if ``r`` > 0, *'less'* if ``r`` < 0).
+    method : str
+        Method to compute the Bayes Factor. Can be *'ly'* (default) or
+        *'wetzels'*. The former has an exact analytical solution, while the
+        latter requires integral solving (and is therefore slower). *'wetzels'*
+        was the default in Pingouin <= 0.2.5. See notes for details.
+    kappa : float
+        Kappa factor. This is sometimes called the *rscale* parameter, and
+        is only used when ``method`` is *'ly'*.
 
     Returns
     -------
@@ -146,57 +171,145 @@ def bayesfactor_pearson(r, n):
         The Bayes Factor quantifies the evidence in favour of the alternative
         hypothesis.
 
+    See also
+    --------
+    corr : (Robust) correlation between two variables
+    pairwise_corr : Pairwise correlation between columns of a pandas DataFrame
+    bayesfactor_ttest : Bayes Factor of a T-test
+    bayesfactor_binom : Bayes Factor of a binomial test
+
     Notes
     -----
-    Adapted from a Matlab code found at
-    https://github.com/anne-urai/Tools/blob/master/stats/BayesFactors/corrbf.m
-
     If you would like to compute the Bayes Factor directly from the raw data
     instead of from the correlation coefficient, use the
     :py:func:`pingouin.corr` function.
 
-    The JZS Bayes Factor is approximated using the formula described in
-    ref [1]_:
+    The two-sided **Wetzels Bayes Factor** (also called *JZS Bayes Factor*)
+    is calculated using the equation 13 and associated R code of Wetzels &
+    Wagenmakers (2012):
 
     .. math::
 
-        BF_{10} = \\frac{\\sqrt{n/2}}{\\gamma(1/2)}*
+        \\text{BF}_{10}(n, r) = \\frac{\\sqrt{n/2}}{\\gamma(1/2)}*
         \\int_{0}^{\\infty}e((n-2)/2)*
         log(1+g)+(-(n-1)/2)log(1+(1-r^2)*g)+(-3/2)log(g)-n/2g
 
-    where **n** is the sample size and **r** is the Pearson correlation
-    coefficient.
+    where :math:`n` is the sample size, :math:`r` is the Pearson correlation
+    coefficient and :math:`g` is is an auxiliary variable that is integrated
+    out numerically. Since the Wetzels Bayes Factor requires solving an
+    integral, it is slower than the analytical solution described below.
 
-    .. warning:: This function does not (yet) support directional, one-sided
-        test. It only returns the two-sided Bayes Factor.
+    The two-sided **Ly Bayes Factor** (also called *Jeffreys
+    exact Bayes Factor*) is calculated using equation 25 of Ly et al, 2016:
+
+    .. math::
+
+        \\text{BF}_{10;k}(n, r) = \\frac{2^{\\frac{k-2}{k}}\\sqrt{\\pi}}
+        {\\beta(\\frac{1}{k}, \\frac{1}{k})} \\cdot
+        \\frac{\\Gamma(\\frac{2+k(n-1)}{2k})}{\\Gamma(\\frac{2+nk}{2k})}
+        \\cdot 2F_1(\\frac{n-1}{2}, \\frac{n-1}{2}, \\frac{2+nk}{2k}, r^2)
+
+    The one-sided version is described in eq. 27 and 28 of Ly et al, 2016.
+    Please take note that the one-sided test requires the
+    `mpmath <http://mpmath.org/>`_ package.
+
+    Results have been validated against JASP and the BayesFactor R package.
 
     References
     ----------
-    .. [1] Wetzels, R., Wagenmakers, E.-J., 2012. A default Bayesian
-       hypothesis test for correlations and partial correlations.
-       Psychon. Bull. Rev. 19, 1057–1064.
-       https://doi.org/10.3758/s13423-012-0295-x
+    .. [1] Ly, A., Verhagen, J. & Wagenmakers, E.-J. Harold Jeffreys’s default
+       Bayes factor hypothesis tests: Explanation, extension, and
+       application in psychology. J. Math. Psychol. 72, 19–32 (2016).
+
+    .. [2] Wetzels, R. & Wagenmakers, E.-J. A default Bayesian hypothesis test
+       for correlations and partial correlations. Psychon. Bull. Rev. 19,
+       1057–1064 (2012).
 
     Examples
     --------
     Bayes Factor of a Pearson correlation
 
     >>> from pingouin import bayesfactor_pearson
-    >>> bf = bayesfactor_pearson(0.6, 20)
+    >>> r, n = 0.6, 20
+    >>> bf = bayesfactor_pearson(r, n)
+    >>> print("Bayes Factor: %s" % bf)
+    Bayes Factor: 10.634
+
+    Compare to Wetzels method:
+
+    >>> bf = bayesfactor_pearson(r, n, method='wetzels')
     >>> print("Bayes Factor: %s" % bf)
     Bayes Factor: 8.221
+
+    One-sided test
+
+    >>> bf10pos = bayesfactor_pearson(r, n, tail='greater')
+    >>> bf10neg = bayesfactor_pearson(r, n, tail='less')
+    >>> print("BF-pos: %s, BF-neg: %s" % (bf10pos, bf10neg))
+    BF-pos: 21.185, BF-neg: 0.082
+
+    We can also only pass ``tail='one-sided'`` and Pingouin will automatically
+    infer the directionality of the test based on the ``r`` value.
+
+    >>> print("BF: %s" % bayesfactor_pearson(r, n, tail='one-sided'))
+    BF: 21.185
     """
-    from scipy.special import gamma
+    from scipy.special import gamma, betaln, hyp2f1
+    assert method.lower() in ['ly', 'wetzels'], 'Method not recognized.'
+    assert tail.lower() in ['two-sided', 'one-sided', 'greater', 'less',
+                            'g', 'l', 'positive', 'negative', 'pos', 'neg']
 
-    # Function to be integrated
-    def fun(g, r, n):
-        return exp(((n - 2) / 2) * log(1 + g) + (-(n - 1) / 2)
-                   * log(1 + (1 - r**2) * g) + (-3 / 2)
-                   * log(g) + - n / (2 * g))
+    if tail.lower() != 'two-sided' and method.lower() == 'wetzels':
+        warnings.warn("One-sided Bayes Factor are not supported by the "
+                      "Wetzels's method. Switching to method='ly'.")
+        method = 'ly'
 
-    # JZS Bayes factor calculation
-    integr = quad(fun, 0, np.inf, args=(r, n))[0]
-    bf10 = np.sqrt((n / 2)) / gamma(1 / 2) * integr
+    if method.lower() == 'wetzels':
+        # Wetzels & Wagenmakers, 2012. Integral solving
+
+        def fun(g, r, n):
+            return exp(((n - 2) / 2) * log(1 + g) + (-(n - 1) / 2)
+                       * log(1 + (1 - r**2) * g) + (-3 / 2)
+                       * log(g) + - n / (2 * g))
+
+        integr = quad(fun, 0, np.inf, args=(r, n))[0]
+        bf10 = np.sqrt((n / 2)) / gamma(1 / 2) * integr
+
+    else:
+        # Ly et al, 2016. Analytical solution.
+        k = kappa
+        lbeta = betaln(1 / k, 1 / k)
+        log_hyperterm = log(hyp2f1(((n - 1) / 2), ((n - 1) / 2),
+                                   ((n + 2 / k) / 2), r**2))
+        bf10 = exp((1 - 2 / k) * log(2) + 0.5 * log(pi) - lbeta
+                   + lgamma((n + 2 / k - 1) / 2) - lgamma((n + 2 / k) / 2) +
+                   log_hyperterm)
+
+        if tail.lower() != 'two-sided':
+            # Directional test.
+            # We need mpmath for the generalized hypergeometric function
+            from .utils import _is_mpmath_installed
+            _is_mpmath_installed(raise_error=True)
+            from mpmath import hyp3f2
+            hyper_term = float(hyp3f2(1, n / 2, n / 2, 3 / 2,
+                                      (2 + k * (n + 1)) / (2 * k),
+                                      r**2))
+            log_term = 2 * (lgamma(n / 2) - lgamma((n - 1) / 2)) - lbeta
+            C = 2**((3 * k - 2) / k) * k * r / (2 + (n - 1) * k) * \
+                exp(log_term) * hyper_term
+
+            bf10neg = bf10 - C
+            bf10pos = 2 * bf10 - bf10neg
+            if tail.lower() in ['one-sided']:
+                # Automatically find the directionality of the test based on r
+                bf10 = bf10pos if r >= 0 else bf10neg
+            elif tail.lower() in ['greater', 'g', 'positive', 'pos']:
+                # We expect the correlation to be positive
+                bf10 = bf10pos
+            else:
+                # We expect the correlation to be negative
+                bf10 = bf10neg
+
     return _format_bf(bf10)
 
 
@@ -221,6 +334,11 @@ def bayesfactor_binom(k, n, p=.5):
         **alternative hypothesis**, where the null hypothesis is that
         the random variable is binomially distributed with base probability
         :math:`p`.
+
+    See also
+    --------
+    bayesfactor_pearson : Bayes Factor of a correlation
+    bayesfactor_ttest : Bayes Factor of a T-test
 
     Notes
     -----

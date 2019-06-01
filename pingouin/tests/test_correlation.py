@@ -47,10 +47,6 @@ class TestCorrelation(TestCase):
         df = read_dataset('pairwise_corr')
         stats = corr(df['Neuroticism'], df['Extraversion'])
         assert np.isclose(1 / float(stats['BF10'].values), 1.478e-13)
-        # With more than 100 values to see if BF10 is computed
-        xx, yy = np.random.multivariate_normal(mean, cov, 1500).T
-        c1500 = corr(xx, yy)
-        assert 'BF10' not in c1500.keys()
 
     def test_partial_corr(self):
         """Test function partial_corr.

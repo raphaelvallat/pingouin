@@ -5,6 +5,7 @@ pytest-sugar
 pytest-remotedata
 pytest-travis-fold
 openpyxl
+mpmath
 statsmodels
 scikit-learn
 seaborn
