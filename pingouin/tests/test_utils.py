@@ -7,7 +7,7 @@ from pingouin import read_dataset
 from pingouin.utils import (print_table, _perm_pval, _export_table,
                             remove_rm_na, _check_eftype, _check_dataframe,
                             remove_na, _flatten_list, _is_sklearn_installed,
-                            _is_statsmodels_installed)
+                            _is_statsmodels_installed, _is_mpmath_installed)
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
@@ -161,3 +161,7 @@ class TestUtils(TestCase):
     def _is_sklearn_installed(self):
         """Test function _is_statsmodels_installed."""
         assert isinstance(_is_sklearn_installed(), bool)
+
+    def _is_mpmath_installed(self):
+        """Test function _is_mpmath_installed."""
+        assert isinstance(_is_mpmath_installed(), bool)
