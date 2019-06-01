@@ -1,4 +1,3 @@
-# Author: Arthur Paulino <arthurleonardo.ap@gmail.com>
 # Date: May 2019
 from scipy.stats.contingency import expected_freq
 from scipy.stats import power_divergence, binom, chi2 as sp_chi2
@@ -223,7 +222,6 @@ def chi2_mcnemar(data, x, y, correction=True):
         * ``'dof'``: The degree of freedom
         * ``'p-approx'``: The approximated p-value
         * ``'p-exact'``: The exact p-value
-        * ``'p-mid'``: The mid-p-value
 
     Notes
     -----
@@ -292,10 +290,10 @@ def chi2_mcnemar(data, x, y, correction=True):
     The McNemar test should be sensitive to this.
 
     >>> stats
-               chi2  dof  p-approx   p-exact     p-mid
-    mcnemar  20.021    1  0.000008  0.000003  0.000002
+               chi2  dof  p-approx   p-exact
+    mcnemar  20.021    1  0.000008  0.000003
     """
-    # Python code inspired by statsmodel's mcnemar
+    # Python code initially inspired by statsmodel's mcnemar
     assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
     assert all(isinstance(column, str) for column in (x, y)),\
         'procedures must contain strings, only.'
@@ -310,22 +308,21 @@ def chi2_mcnemar(data, x, y, correction=True):
     # Careful, the order of b and c is inverted compared to wikipedia
     # because the colums / rows of the crosstab is [0, 1] and not [1, 0].
     c, b = observed.at[0, 1], observed.at[1, 0]
-    d = min(b, c)
-    n = b + c
+    n_discordants = b + c
 
     if (b, c) == (0, 0):
         raise ValueError('McNemar\'s test does not work if the secondary ' +
                          'diagonal of the observed data summary does not ' +
                          'have values different from 0.')
 
-    chi2 = (abs(b - c) - int(correction))**2 / n
-    pexact = min(1, 2 * binom.cdf(d, n, 0.5))
+    chi2 = (abs(b - c) - int(correction))**2 / n_discordants
+    pexact = min(1, 2 * binom.cdf(min(b, c), n_discordants, 0.5))
     stats = {
         'chi2': round(chi2, 3),
         'dof': 1,
         'p-approx': sp_chi2.sf(chi2, 1),
         'p-exact': pexact,
-        'p-mid': pexact - binom.pmf(b, n, 0.5)
+        # 'p-mid': pexact - binom.pmf(b, n_discordants, 0.5)
     }
 
     stats = pd.DataFrame(stats, index=['mcnemar'])
