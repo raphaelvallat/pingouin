@@ -259,6 +259,11 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
     assert tail.lower() in ['two-sided', 'one-sided', 'greater', 'less',
                             'g', 'l', 'positive', 'negative', 'pos', 'neg']
 
+    # Wrong input
+    if not np.isfinite(r) or n < 2:
+        return str(np.nan)
+    assert -1 <= r <= 1, 'r must be between -1 and 1.'
+
     if tail.lower() != 'two-sided' and method.lower() == 'wetzels':
         warnings.warn("One-sided Bayes Factor are not supported by the "
                       "Wetzels's method. Switching to method='ly'.")

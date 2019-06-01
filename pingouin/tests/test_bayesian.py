@@ -46,6 +46,7 @@ class TestBayesian(TestCase):
         n = 100
         assert float(bfp(r, n)) == 0.174
         assert float(bfp(r, n, tail='g')) == 0.275
+        assert float(bfp(r, n, tail='g', method='wetzels')) == 0.275
         assert float(bfp(r, n, tail='l')) == 0.073
         r, _ = pearsonr(v, w)
         assert float(bfp(r, n)) == 2.321e+22
@@ -56,6 +57,12 @@ class TestBayesian(TestCase):
         assert float(bfp(0.6, 20, method='wetzels')) == 8.221
         assert float(bfp(-0.6, 20, method='wetzels')) == 8.221
         assert float(bfp(0.6, 10, method='wetzels')) == 1.278
+
+        # Wrong input
+        assert bfp(np.nan, 20) == 'nan'
+        assert bfp(0.8, 1) == 'nan'
+        assert bfp(np.inf, 1) == 'nan'
+        assert bfp(-1, 100) == 'inf'
 
     def test_bayesfactor_binom(self):
         """Test function bayesfactor_binom.
