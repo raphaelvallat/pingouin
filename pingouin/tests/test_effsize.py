@@ -3,8 +3,9 @@ import numpy as np
 import pytest
 
 from unittest import TestCase
-from pingouin.effsize import (compute_esci, convert_effsize, compute_effsize,
+from pingouin.effsize import (compute_esci, compute_effsize,
                               compute_effsize_from_t, compute_bootci)
+from pingouin.effsize import convert_effsize as cef
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
@@ -71,24 +72,33 @@ class TestEffsize(TestCase):
         assert bdist.size == 1500
 
     def test_convert_effsize(self):
-        """Test function convert_effsize"""
+        """Test function convert_effsize.
+        Compare to https://www.psychometrica.de/effect_size.html"""
+        # Cohen d
         d = .40
+        assert cef(d, 'cohen', 'none') == d
+        assert round(cef(d, 'cohen', 'r'), 4) == 0.1961
+        assert np.allclose(cef(1.002549, 'cohen', 'r'), 0.4481248)  # R
+        assert round(cef(d, 'cohen', 'eta-square'), 4) == 0.0385
+        assert round(cef(d, 'cohen', 'odds-ratio'), 4) == 2.0658
+        cef(d, 'cohen', 'hedges', nx=10, ny=10)
+        cef(d, 'cohen', 'r')
+        cef(d, 'cohen', 'hedges')
+        cef(d, 'cohen', 'glass')
+
+        # Correlation coefficient
         r = .65
-        convert_effsize(d, 'cohen', 'eta-square')
-        convert_effsize(d, 'cohen', 'hedges', nx=10, ny=10)
-        convert_effsize(d, 'cohen', 'r', nx=10, ny=10)
-        convert_effsize(r, 'r', 'cohen')
-        convert_effsize(d, 'cohen', 'r')
-        convert_effsize(d, 'cohen', 'hedges')
-        convert_effsize(d, 'cohen', 'glass')
-        convert_effsize(d, 'cohen', 'none')
+        assert cef(r, 'r', 'none') == r
+        assert round(cef(r, 'r', 'cohen'), 4) == 1.7107
+        assert np.allclose(cef(0.4481248, 'r', 'cohen'), 1.002549)
+        assert round(cef(r, 'r', 'eta-square'), 4) == 0.4225
+        assert round(cef(r, 'r', 'odds-ratio'), 4) == 22.2606
+
+        # Error
         with pytest.raises(ValueError):
-            convert_effsize(d, 'coucou', 'hibou')
+            cef(d, 'coucou', 'hibou')
         with pytest.raises(ValueError):
-            convert_effsize(d, 'AUC', 'eta-square')
-        # Compare with R
-        assert np.allclose(convert_effsize(1.002549, 'cohen', 'r'), 0.4481248)
-        assert np.allclose(convert_effsize(0.4481248, 'r', 'cohen'), 1.002549)
+            cef(d, 'AUC', 'eta-square')
 
     def test_compute_effsize(self):
         """Test function compute_effsize"""

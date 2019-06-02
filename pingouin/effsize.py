@@ -391,13 +391,14 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
         Desired effect size type.
         Available methods are ::
 
-        'none' : no effect size
         'cohen' : Unbiased Cohen d
         'hedges' : Hedges g
         'glass': Glass delta
         'eta-square' : Eta-square
         'odds-ratio' : Odds ratio
         'AUC' : Area Under the Curve
+        'none' : pass-through (return ``ef``)
+
     nx, ny : int, optional
         Length of vector x and y.
         nx and ny are required to convert to Hedges g
@@ -498,10 +499,12 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     if it not in ['r', 'cohen']:
         raise ValueError("Input type must be 'r' or 'cohen'")
 
-    if it == ot:
+    # Pass-through option
+    if it == ot or ot == 'none':
         return ef
 
-    d = (2 * ef) / np.sqrt(1 - ef**2) if it == 'r' else ef  # Rosenthal 1994
+    # Convert r to Cohen d (Rosenthal 1994)
+    d = (2 * ef) / np.sqrt(1 - ef**2) if it == 'r' else ef
 
     # Then convert to the desired output type
     if ot == 'cohen':
@@ -535,8 +538,6 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
         # Ruscio 2008
         from scipy.stats import norm
         return norm.cdf(d / np.sqrt(2))
-    else:
-        return None
 
 
 def compute_effsize(x, y, paired=False, eftype='cohen'):
