@@ -50,12 +50,15 @@ def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
     Bland-Altman plots are extensively used to evaluate the agreement among two
     different instruments or two measurements techniques. Bland-Altman plots
     allow identification of any systematic difference between the measurements
-    (i.e., fixed bias) or possible outliers. The mean difference is the
-    estimated bias, and the SD of the differences measures the random
-    fluctuations around this mean. If the mean value of the difference differs
-    significantly from 0 on the basis of a 1-sample t-test, this indicates
-    the presence of fixed bias. If there is a consistent bias, it can be
-    adjusted for by subtracting the mean difference from the new method.
+    (i.e., fixed bias) or possible outliers.
+
+    The mean difference is the estimated bias, and the SD of the differences
+    measures the random fluctuations around this mean. If the mean value of the
+    difference differs significantly from 0 on the basis of a 1-sample t-test,
+    this indicates the presence of fixed bias. If there is a consistent bias,
+    it can be adjusted for by subtracting the mean difference from the new
+    method.
+
     It is common to compute 95% limits of agreement for each comparison
     (average difference ± 1.96 standard deviation of the difference), which
     tells us how far apart measurements by 2 methods were more likely to be
@@ -66,7 +69,8 @@ def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
     or assessing repeatability, it is important to calculate confidence
     intervals for 95% limits of agreement.
 
-    The code is an adaptation of the Python package PyCompare by
+    The code is an adaptation of the Python package
+    `PyCompare <https://github.com/jaketmp/pyCompare>`_ by
     Jake TM Pearce. All credits goes to the original author. The present
     implementation is a simplified version; please refer to the original
     package for more advanced functionalities.
