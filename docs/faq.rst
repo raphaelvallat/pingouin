@@ -278,6 +278,34 @@ Others
 Pingouin is licensed under the GNU General Public License v3.0 (GPL-3), which is less permissive than the BSD or MIT licenses. The reason for this is that Pingouin borrows extensively from R packages, which are all licensed under the GPL-3.
 To read more about what you can do and cannot do with a GPL-3 license, please visit `tldrlegal.com <https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3)#summary>`_ or `choosealicense.com <https://choosealicense.com/licenses/>`_.
 
+.. ----------------------------- NEW RELEASES -----------------------------
+.. raw:: html
+
+          </div>
+        </div>
+      </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h5 class="panel-title">
+          <a data-toggle="collapse" href="#collapse_release">How can I be notified of new releases?</a>
+        </h5>
+      </div>
+      <div id="collapse_release" class="panel-collapse collapse">
+        <div class="panel-body">
+
+To be notified whenever a new release of Pingouin is available, you can click on "Watch releases" on the `GitHub <https://github.com/raphaelvallat/pingouin>`_ of Pingouin (see below).
+
+.. figure::  /pictures/github_watch_release.png
+  :align:   center
+
+Whenever a new release is out there, you can simply upgrade your version by typing the following line in a terminal window:
+
+.. code-block:: shell
+
+    pip install --upgrade pingouin
+
+
 .. ----------------------------- CITING PINGOUIN -----------------------------
 .. raw:: html
 
