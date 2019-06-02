@@ -263,8 +263,27 @@ No, the central idea behind Pingouin is that all data manipulations and descript
 Others
 ------
 
-.. ----------------------------- DATA FORMAT -----------------------------
+.. ----------------------------- LICENSE -----------------------------
 .. raw:: html
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h5 class="panel-title">
+          <a data-toggle="collapse" href="#collapse_license">Why is Pingouin licensed under the GNU-GPL v3?</a>
+        </h5>
+      </div>
+      <div id="collapse_license" class="panel-collapse collapse">
+        <div class="panel-body">
+
+Pingouin is licensed under the GNU General Public License v3.0 (GPL-3), which is less permissive than the BSD or MIT licenses. The reason for this is that Pingouin borrows extensively from R packages, which are all licensed under the GPL-3.
+To read more about what you can do and cannot do with a GPL-3 license, please visit `tldrlegal.com <https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3)#summary>`_ or `choosealicense.com <https://choosealicense.com/licenses/>`_.
+
+.. ----------------------------- CITING PINGOUIN -----------------------------
+.. raw:: html
+
+          </div>
+        </div>
+      </div>
 
     <div class="panel panel-default">
       <div class="panel-heading">
