@@ -34,6 +34,7 @@ c. Completely rewrote :py:func:`pingouin.homoscedasticity` function, which now s
 d. Faster and more accurate algorithm in :py:func:`pingouin.bayesfactor_pearson` (same algorithm as JASP).
 e. Support for one-sided Bayes Factors in :py:func:`pingouin.bayesfactor_pearson`.
 f. Better handling of required parameters in :py:func:`pingouin.qqplot`.
+g. The epsilon value for the interaction term in :py:func:`pingouin.rm_anova` are now computed using the Greenhouse-Geisser method instead of the lower bound. A warning message has been added to the documentation to alert the user that the value might slightly differ than from R or JASP.
 
 Note that d. and e. also affect the behavior of the :py:func:`pingouin.corr` and :py:func:`pingouin.pairwise_corr` functions.
 

@@ -185,7 +185,7 @@ class TestParametric(TestCase):
         assert aov.loc[2, "np2"] == 0.584
         assert aov.loc[0, "eps"] == 1.000
         assert aov.loc[1, "eps"] == 0.969
-        assert aov.loc[2, "eps"] == 0.500  # LOWER BOUND
+        assert aov.loc[2, "eps"] >= 0.500  # 0.5 is the lower bound
 
         # With missing values
         df2 = read_dataset('rm_missing')
@@ -193,7 +193,7 @@ class TestParametric(TestCase):
 
     def test_mixed_anova(self):
         """Test function anova.
-        Compare with JASP and ezANOVA"""
+        Compare with JASP and ezANOVA."""
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
                           between='Group', data=df, correction=True).round(3)
         # Compare with ezANOVA / JASP
