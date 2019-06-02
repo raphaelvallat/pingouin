@@ -671,8 +671,13 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
     Notes
     -----
     This function will estimate the bootstrap CI for the percentile difference
-    between X (fixed) and Y (resampled). If N is small, the CI of X -> Y and
-    Y -> X can vary.
+    between ``x`` (fixed) and ``y`` (resampled). Note that if :math:`N` is
+    small, the CI of ``x`` -> ``y`` and ``y`` -> ``x`` can vary.
+
+    .. warning:: The current implementation of this function is a
+        simplified (beta) version of the original R/Matlab function.
+        Expect important changes in this function in future releases of
+        Pingouin.
 
     References
     ----------
