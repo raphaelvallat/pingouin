@@ -347,11 +347,18 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
     ax : Matplotlib Axes instance
         Returns the Axes object with the plot for further tweaking.
 
+    Raises
+    ------
+    ValueError
+        If ``sparams`` does not contain the required parameters for ``dist``.
+        (e.g. :py:class:`scipy.stats.t` has a mandatory degrees of
+        freedom parameter *df*.)
+
     Notes
     -----
-    This function returns a scatter plot of the quantile of the sample data `x`
-    against the theoretical quantiles of the distribution given in `dist`
-    (default = 'norm').
+    This function returns a scatter plot of the quantile of the sample data
+    ``x`` against the theoretical quantiles of the distribution given in
+    ``dist`` (default = *'norm'*).
 
     The points plotted in a Q–Q plot are always non-decreasing when viewed
     from left to right. If the two distributions being compared are identical,
@@ -372,6 +379,10 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
     determination :math:`R^2`. Note that the intercept and slope of the
     linear regression between the quantiles gives a measure of the relative
     location and relative scale of the samples.
+
+    .. warning:: Be extra careful when using fancier distributions with several
+        parameters. If you can, always double-check your results with another
+        software or package.
 
     References
     ----------
@@ -429,6 +440,15 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
     x = np.asarray(x)
     x = x[~np.isnan(x)]  # NaN are automatically removed
 
+    # Check sparams: if single parameter, tuple becomes int
+    if not isinstance(sparams, (tuple, list)):
+        sparams = (sparams,)
+    # For fancier distributions, check that the required parameters are passed
+    if len(sparams) < dist.numargs:
+        raise ValueError("The following sparams are required for this "
+                         "distribution: %s. See scipy.stats.%s for details."
+                         % (dist.shapes, dist.name))
+
     # Extract quantiles and regression
     quantiles = stats.probplot(x, sparams=sparams, dist=dist, fit=False)
     theor, observed = quantiles[0], quantiles[1]
@@ -436,7 +456,7 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
     fit_params = dist.fit(x)
     loc = fit_params[-2]
     scale = fit_params[-1]
-    shape = fit_params[0] if len(fit_params) == 3 else None
+    shape = fit_params[:-2] if len(fit_params) > 2 else None
 
     # Observed values to observed quantiles
     if loc != 0 and scale != 1:
@@ -476,7 +496,7 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
         n = x.size
         P = _ppoints(n)
         crit = stats.norm.ppf(1 - (1 - confidence) / 2)
-        pdf = dist.pdf(theor) if shape is None else dist.pdf(theor, shape)
+        pdf = dist.pdf(theor) if shape is None else dist.pdf(theor, *shape)
         se = (slope / pdf) * np.sqrt(P * (1 - P) / n)
         upper = fit_val + crit * se
         lower = fit_val - crit * se

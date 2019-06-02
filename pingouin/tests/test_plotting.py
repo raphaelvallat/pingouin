@@ -1,3 +1,4 @@
+import pytest
 import matplotlib
 import numpy as np
 from scipy import stats
@@ -62,6 +63,9 @@ class TestPlotting(TestCase):
         # For lognormal distribution, the shape parameter must be specified
         ax = qqplot(x_ln, dist='lognorm', sparams=(1))
         assert isinstance(ax, matplotlib.axes.Axes)
+        # Error: required parameters are not specified
+        with pytest.raises(ValueError):
+            qqplot(x_ln, dist='lognorm', sparams=())
 
     def test_plot_paired(self):
         """Test plot_paired()"""

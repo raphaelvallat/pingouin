@@ -33,6 +33,7 @@ b. Completely rewrote :py:func:`pingouin.normality` function, which now support 
 c. Completely rewrote :py:func:`pingouin.homoscedasticity` function, which now support pandas DataFrame (wide & long format).
 d. Faster and more accurate algorithm in :py:func:`pingouin.bayesfactor_pearson` (same algorithm as JASP).
 e. Support for one-sided Bayes Factors in :py:func:`pingouin.bayesfactor_pearson`.
+f. Better handling of required parameters in :py:func:`pingouin.qqplot`.
 
 Note that d. and e. also affect the behavior of the :py:func:`pingouin.corr` and :py:func:`pingouin.pairwise_corr` functions.
 

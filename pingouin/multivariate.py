@@ -83,13 +83,12 @@ def multivariate_normality(X, alpha=.05):
     b = 1 / (np.sqrt(2)) * ((2 * p + 1) / 4)**(1 / (p + 4)) * \
         (n**(1 / (p + 4)))
 
+    hz = n * 4
     if np.linalg.matrix_rank(S) == p:
         hz = n * (1 / (n**2) * np.sum(np.sum(np.exp(-(b**2) / 2 * Djk))) - 2
                   * ((1 + (b**2))**(-p / 2)) * (1 / n)
                   * (np.sum(np.exp(-((b**2) / (2 * (1 + (b**2)))) * Dj)))
                   + ((1 + (2 * (b**2)))**(-p / 2)))
-    else:
-        hz = n * 4
 
     wb = (1 + b**2) * (1 + 3 * b**2)
     a = 1 + 2 * b**2
