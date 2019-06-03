@@ -505,6 +505,10 @@ def epsilon(data, correction='gg'):
     n = data.shape[0]
     k = data.shape[1]
 
+    # Epsilon is always 1 with only two repeated measures.
+    if k <= 2:
+        return 1.
+
     # Degrees of freedom
     if S.columns.nlevels == 1:
         dof = k - 1
@@ -654,6 +658,10 @@ def sphericity(data, method='mauchly', alpha=.05):
     S = data.cov()
     n = data.shape[0]
     k = data.shape[1]
+
+    # Sphericity is always met with only two repeated measures.
+    if k <= 1:
+        return True, np.nan, np.nan, 1, 1.
 
     # Degrees of freedom
     if S.columns.nlevels == 1:
