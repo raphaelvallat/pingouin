@@ -445,23 +445,25 @@ def epsilon(data, correction='gg'):
 
     Notes
     -----
-    The **lower bound** for epsilon is:
+    The **lower bound epsilon** is:
 
-    .. math:: lb = \\frac{1}{k - 1}
+    .. math:: lb = \\frac{1}{\\text{dof}},
 
-    where :math:`k` is the number of groups (= data.shape[1]).
+    where the degrees of freedom :math:`\\text{dof}` is the number of groups
+    :math:`k` minus 1 for one-way design and :math:`(k_1 - 1)(k_2 - 1)`
+    for two-way design
 
     The **Greenhouse-Geisser epsilon** is given by:
 
     .. math::
 
-        \\epsilon_{GG} = \\frac{k^2(\\overline{diag(S)} - \\overline{S})^2}
-        {(k-1)(\\sum_{i=1}^{k}\\sum_{j=1}^{k}s_{ij}^2 - 2k\\sum_{j=1}^{k}
-        \\overline{s_i}^2 + k^2\\overline{S}^2)}
+        \\epsilon_{GG} = \\frac{k^2(\\overline{\\text{diag}(S)} -
+        \\overline{S})^2}{(k-1)(\\sum_{i=1}^{k}\\sum_{j=1}^{k}s_{ij}^2 -
+        2k\\sum_{j=1}^{k}\\overline{s_i}^2 + k^2\\overline{S}^2)}
 
     where :math:`S` is the covariance matrix, :math:`\\overline{S}` the
-    grandmean of S and :math:`\\overline{diag(S)}` the mean of all the elements
-    on the diagonal of S (i.e. mean of the variances).
+    grandmean of S and :math:`\\overline{\\text{diag}(S)}` the mean of all the
+    elements on the diagonal of S (i.e. mean of the variances).
 
     The **Huynh-Feldt epsilon** is given by:
 
@@ -470,7 +472,12 @@ def epsilon(data, correction='gg'):
         \\epsilon_{HF} = \\frac{n(k-1)\\epsilon_{GG}-2}{(k-1)
         (n-1-(k-1)\\epsilon_{GG})}
 
-    where :math:`n` is the number of subjects.
+    where :math:`n` is the number of observations.
+
+    .. warning:: The Greenhouse-Geisser and Huynh-Feldt epsilon values of the
+        interaction in two-way design slightly differs than from R and JASP.
+        Please always make sure to double-check your results with another
+        software.
 
     References
     ----------
@@ -576,35 +583,37 @@ def sphericity(data, method='mauchly', alpha=.05):
 
     .. math::
 
-        W = \\frac{\\prod_{j=1}^{r-1} \\lambda_j}{(\\frac{1}{r-1}
-        \\cdot \\sum_{j=1}^{^{r-1}} \\lambda_j)^{r-1}}
+        W = \\frac{\\prod \\lambda_j}{(\\frac{1}{k-1} \\sum \\lambda_j)^{k-1}}
 
     where :math:`\\lambda_j` are the eigenvalues of the population
     covariance matrix (= double-centered sample covariance matrix) and
-    :math:`r` is the number of conditions.
+    :math:`k` is the number of conditions.
 
     From then, the :math:`W` statistic is transformed into a chi-square
     score using the number of observations per condition :math:`n`
 
-    .. math:: f = \\frac{2(r-1)^2+r+1}{6(r-1)(n-1)}
-    .. math:: \\chi_w^2 = (f-1)(n-1) log(W)
+    .. math:: f = \\frac{2(k-1)^2+k+1}{6(k-1)(n-1)}
+    .. math:: \\chi_w^2 = (f-1)(n-1) \\text{log}(W)
 
     The p-value is then approximated using a chi-square distribution:
 
-    .. math:: \\chi_w^2 \\sim \\chi^2(\\frac{r(r-1)}{2}-1)
+    .. math:: \\chi_w^2 \\sim \\chi^2(\\frac{k(k-1)}{2}-1)
 
     The **JNS** :math:`V` statistic is defined by:
 
     .. math::
 
-        V = \\frac{(\\sum_j^{r-1} \\lambda_j)^2}{\\sum_j^{r-1} \\lambda_j^2}
+        V = \\frac{(\\sum_j^{k-1} \\lambda_j)^2}{\\sum_j^{k-1} \\lambda_j^2}
 
-    .. math:: \\chi_v^2 = \\frac{n}{2}  (r-1)^2 (V - \\frac{1}{r-1})
+    .. math:: \\chi_v^2 = \\frac{n}{2}  (k-1)^2 (V - \\frac{1}{k-1})
 
     and the p-value approximated using a chi-square distribution
 
-    .. math:: \\chi_v^2 \\sim \\chi^2(\\frac{r(r-1)}{2}-1)
+    .. math:: \\chi_v^2 \\sim \\chi^2(\\frac{k(k-1)}{2}-1)
 
+    .. warning:: This function only works for one-way repeated measures design.
+        Sphericity test for the interaction term of a two-way repeated
+        measures ANOVA are not currently supported in Pingouin.
 
     References
     ----------

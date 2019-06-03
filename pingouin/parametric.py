@@ -292,9 +292,14 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         ``data`` is in long format).
     correction : string or boolean
         If True, also return the Greenhouse-Geisser corrected p-value.
-        If 'auto' (default), compute Mauchly's test of sphericity to determine
-        whether the p-values needs to be corrected
+
+        The default for one-way design is to compute Mauchly's test of
+        sphericity to determine whether the p-values needs to be corrected
         (see :py:func:`pingouin.sphericity`).
+
+        The default for two-way design is to return both the uncorrected and
+        Greenhouse-Geisser corrected p-values. Note that sphericity test for
+        two-way design are not currently implemented in Pingouin.
     detailed : boolean
         If True, return a full ANOVA table.
     export_filename : string
@@ -380,6 +385,11 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         two-way repeated measures ANOVA slightly differs than from R and JASP.
         Please always make sure to double-check your results with another
         software.
+
+    .. warning:: Sphericity tests for the interaction term of a two-way
+        repeated measures ANOVA are not currently supported in Pingouin.
+        Instead, please refer to the Greenhouse-Geisser epsilon value
+        (a value close to 1 indicates that sphericity is met.)
 
     References
     ----------
