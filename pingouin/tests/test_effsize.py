@@ -78,6 +78,7 @@ class TestEffsize(TestCase):
         d = .40
         assert cef(d, 'cohen', 'none') == d
         assert round(cef(d, 'cohen', 'r'), 4) == 0.1961
+        cef(d, 'cohen', 'r', nx=10, ny=12)  # When nx and ny are specified
         assert np.allclose(cef(1.002549, 'cohen', 'r'), 0.4481248)  # R
         assert round(cef(d, 'cohen', 'eta-square'), 4) == 0.0385
         assert round(cef(d, 'cohen', 'odds-ratio'), 4) == 2.0658
