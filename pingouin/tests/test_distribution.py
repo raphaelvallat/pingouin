@@ -18,6 +18,14 @@ x = np.random.normal(scale=1., size=100)
 y = np.random.normal(scale=0.8, size=100)
 z = np.random.normal(scale=0.9, size=100)
 
+# Two-way repeated measures (epsilon and sphericity)
+data = read_dataset('rm_anova2')
+idx, dv = 'Subject', 'Performance'
+within = ['Time', 'Metric']
+pa = data.pivot_table(index=idx, columns=within[0], values=dv)
+pb = data.pivot_table(index=idx, columns=within[1], values=dv)
+pab = data.pivot_table(index=idx, columns=within, values=dv)
+
 
 class TestDistribution(TestCase):
     """Test distribution.py."""
@@ -62,13 +70,6 @@ class TestDistribution(TestCase):
         # Compare with ezANOVA
         assert np.allclose([eps_gg, eps_hf, eps_lb], [0.9987509, 1, 0.5])
 
-        # Two-way repeated measures
-        data = read_dataset('rm_anova2')
-        idx, dv = 'Subject', 'Performance'
-        within = ['Time', 'Metric']
-        pa = data.pivot_table(index=idx, columns=within[0], values=dv)
-        pb = data.pivot_table(index=idx, columns=within[1], values=dv)
-        pab = data.pivot_table(index=idx, columns=within, values=dv)
         # Time has only two values so epsilon is one.
         assert epsilon(pa, 'lb') == epsilon(pa, 'gg') == epsilon(pa, 'hf')
         # Lower bound <= Greenhouse-Geisser <= Huynh-Feldt
@@ -83,13 +84,20 @@ class TestDistribution(TestCase):
         assert 0.6 < epsilon(pab) < .80  # Pingouin = .63, ez = .73
 
     def test_sphericity(self):
-        """Test function test_sphericity."""
+        """Test function test_sphericity.
+        Compare with ezANOVA."""
         _, W, _, _, p = sphericity(df_pivot, method='mauchly')
-        # Compare with ezANOVA
-        assert np.round(W, 3) == 0.999
+        assert W == 0.999
         assert np.round(p, 3) == 0.964
+        assert sphericity(pa)[0]  # Only two levels so sphericity = True
+        spher = sphericity(pb)
+        assert spher[0]
+        assert spher[1] == 0.968
+        assert spher[3] == 2
+        assert np.isclose(spher[4], 0.8784418)
         # JNS
         sphericity(df_pivot, method='jns')
+        sphericity(pab, method='jns')  # For coverage only
 
     def test_anderson(self):
         """Test function test_anderson."""
