@@ -498,14 +498,17 @@ def epsilon(data, correction='gg'):
     n = data.shape[0]
     k = data.shape[1]
 
+    # Degrees of freedom
+    if S.columns.nlevels == 1:
+        dof = k - 1
+    elif S.columns.nlevels == 2:
+        ka = S.columns.levels[0].size
+        kb = S.columns.levels[1].size
+        dof = (ka - 1) * (kb - 1)
+
     # Lower bound
     if correction == 'lb':
-        if S.columns.nlevels == 1:
-            return 1 / (k - 1)
-        elif S.columns.nlevels == 2:
-            ka = S.columns.levels[0].size
-            kb = S.columns.levels[1].size
-            return 1 / ((ka - 1) * (kb - 1))
+        return 1 / dof
 
     # Compute GGEpsilon
     # - Method 1
@@ -518,14 +521,15 @@ def epsilon(data, correction='gg'):
     eps = np.min([num / den, 1])
     # - Method 2
     # S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
-    # eig = np.linalg.eigvalsh(S_pop)[1:]
+    # eig = np.linalg.eigvalsh(S_pop)
+    # eig = eig[eig > 0]
     # V = eig.sum()**2 / np.sum(eig**2)
-    # eps = V / (k - 1)
+    # eps = np.min([V / (k - 1), 1])
 
     # Huynh-Feldt
     if correction == 'hf':
-        num = n * (k - 1) * eps - 2
-        den = (k - 1) * (n - 1 - (k - 1) * eps)
+        num = n * dof * eps - 2
+        den = dof * (n - 1 - dof * eps)
         eps = np.min([num / den, 1])
     return eps
 
@@ -635,43 +639,47 @@ def sphericity(data, method='mauchly', alpha=.05):
     2. JNS test for sphericity
 
     >>> sphericity(data, method='jns')
-    (False, 1.118, 6.176, 2, 0.04560424030751982)
+    (False, 1.118, 6.176, 2, 0.0456042403075203)
     """
-    S = data.cov().values
+    assert isinstance(data, pd.DataFrame), 'Data must be a pandas Dataframe.'
+    S = data.cov()
     n = data.shape[0]
-    p = data.shape[1]
-    d = p - 1
+    k = data.shape[1]
+
+    # Degrees of freedom
+    if S.columns.nlevels == 1:
+        d = k - 1
+    elif S.columns.nlevels == 2:
+        ka = S.columns.levels[0].size
+        kb = S.columns.levels[1].size
+        d = (ka - 1) * (kb - 1)
 
     # Estimate of the population covariance (= double-centered)
+    S = S.values
     S_pop = S - S.mean(0)[:, np.newaxis] - S.mean(1)[np.newaxis, :] + S.mean()
 
-    # p - 1 eigenvalues (sorted by ascending importance)
-    eig = np.linalg.eigvalsh(S_pop)[1:]
+    # Eigenvalues (sorted by ascending importance)
+    eig = np.linalg.eigvalsh(S_pop)
+    eig = eig[eig > 0.1]
 
     if method == 'jns':
-        # eps = epsilon(data, correction='gg')
-        # W = eps * d
-        W = eig.sum()**2 / np.square(eig).sum()
-        chi_sq = 0.5 * n * d ** 2 * (W - 1 / d)
+        eps = epsilon(data, correction='gg')
+        W = eps * d
+        # W = eig.sum()**2 / np.sum(eig**2)
+        chi_sq = 0.5 * n * d**2 * (W - 1 / d)
 
     if method == 'mauchly':
         # Mauchly's statistic
         W = np.product(eig) / (eig.sum() / d)**d
         # Chi-square
-        f = (2 * d**2 + p + 1) / (6 * d * (n - 1))
+        f = (2 * d**2 + (d + 1) + 1) / (6 * d * (n - 1))
         chi_sq = (f - 1) * (n - 1) * np.log(W)
 
     # Compute dof and pval
-    ddof = 0.5 * d * p - 1
-    # Ensure that dof is not zero
+    ddof = (d * (d + 1)) / 2 - 1
+    # Ensure that ddof is not zero
     ddof = 1 if ddof == 0 else ddof
     pval = scipy.stats.chi2.sf(chi_sq, ddof)
-
-    # Second order approximation
-    # pval2 = chi2.sf(chi_sq, ddof + 4)
-    # w2 = (d + 2) * (d - 1) * (d - 2) * (2 * d**3 + 6 * d * d + 3 * d + 2) / \
-    #      (288 * d * d * nr * nr * dd * dd)
-    # pval += w2 * (pval2 - pval)
 
     sphericity = True if pval > alpha else False
     return sphericity, np.round(W, 3), np.round(chi_sq, 3), int(ddof), pval

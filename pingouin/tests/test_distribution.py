@@ -62,6 +62,26 @@ class TestDistribution(TestCase):
         # Compare with ezANOVA
         assert np.allclose([eps_gg, eps_hf, eps_lb], [0.9987509, 1, 0.5])
 
+        # Two-way repeated measures
+        data = read_dataset('rm_anova2')
+        idx, dv = 'Subject', 'Performance'
+        within = ['Time', 'Metric']
+        pa = data.pivot_table(index=idx, columns=within[0], values=dv)
+        pb = data.pivot_table(index=idx, columns=within[1], values=dv)
+        pab = data.pivot_table(index=idx, columns=within, values=dv)
+        # Time has only two values so epsilon is one.
+        assert epsilon(pa, 'lb') == epsilon(pa, 'gg') == epsilon(pa, 'hf')
+        # Lower bound <= Greenhouse-Geisser <= Huynh-Feldt
+        assert epsilon(pb, 'lb') <= epsilon(pb, 'gg') <= epsilon(pb, 'hf')
+        assert epsilon(pab, 'lb') <= epsilon(pab, 'gg') <= epsilon(pab, 'hf')
+        # Lower bound == 0.5 for pb and pab
+        assert epsilon(pb, 'lb') == epsilon(pab, 'lb') == 0.5
+        assert np.allclose(epsilon(pb), 0.9691030)  # ez
+        assert np.allclose(epsilon(pb, correction='hf'), 1.0)  # ez
+        # The epsilon for the interaction gives different results than R or
+        # JASP.
+        assert 0.6 < epsilon(pab) < .80  # Pingouin = .63, ez = .73
+
     def test_sphericity(self):
         """Test function test_sphericity."""
         _, W, _, _, p = sphericity(df_pivot, method='mauchly')
