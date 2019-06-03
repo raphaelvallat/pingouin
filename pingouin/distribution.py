@@ -661,7 +661,7 @@ def sphericity(data, method='mauchly', alpha=.05):
     k = data.shape[1]
 
     # Sphericity is always met with only two repeated measures.
-    if k <= 1:
+    if k <= 2:
         return True, np.nan, np.nan, 1, 1.
 
     # Degrees of freedom
