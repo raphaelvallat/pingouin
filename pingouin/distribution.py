@@ -531,11 +531,12 @@ def epsilon(data, correction='gg'):
     den = (k - 1) * (ss_mat - 2 * k * ss_rows + k**2 * S_mean**2)
     eps = np.min([num / den, 1])
     # - Method 2
-    # S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
+    # Sv = S.values
+    # S_pop = Sv - Sv.mean(0)[:, None] - Sv.mean(1)[None, :] + Sv.mean()
     # eig = np.linalg.eigvalsh(S_pop)
-    # eig = eig[eig > 0]
+    # eig = eig[eig > 0.1]
     # V = eig.sum()**2 / np.sum(eig**2)
-    # eps = np.min([V / (k - 1), 1])
+    # eps = np.min([V / dof, 1])
 
     # Huynh-Feldt
     if correction == 'hf':

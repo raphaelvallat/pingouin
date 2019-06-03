@@ -97,7 +97,9 @@ class TestDistribution(TestCase):
         assert np.isclose(spher[4], 0.8784418)
         # JNS
         sphericity(df_pivot, method='jns')
-        sphericity(pab, method='jns')  # For coverage only
+        # For coverage only, sphericity test for two-way design are not yet
+        # supported.
+        sphericity(pab, method='jns')
 
     def test_anderson(self):
         """Test function test_anderson."""
