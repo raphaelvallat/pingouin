@@ -1,5 +1,5 @@
 import numpy as np
-
+import pandas as pd
 from unittest import TestCase
 from pingouin.distribution import (gzscore, normality, anderson, epsilon,
                                    homoscedasticity, sphericity)
@@ -25,6 +25,19 @@ within = ['Time', 'Metric']
 pa = data.pivot_table(index=idx, columns=within[0], values=dv)
 pb = data.pivot_table(index=idx, columns=within[1], values=dv)
 pab = data.pivot_table(index=idx, columns=within, values=dv)
+
+# Two-way repeated measures (3, 4)
+np.random.seed(123)
+dv = np.random.normal(scale=3, size=600)
+w1 = np.repeat(['P1', 'P2', 'P3'], 200)
+w2 = np.tile(np.repeat(['A', 'B', 'C', 'D'], 50), 3)
+subj = np.tile(np.tile(np.arange(50), 4), 3)
+df3 = pd.DataFrame({'dv': dv, 'within1': w1, 'within2': w2, 'subj': subj})
+idx, dv = 'subj', 'dv'
+within = ['within1', 'within2']
+pa1 = df3.pivot_table(index=idx, columns=within[0], values=dv)
+pb1 = df3.pivot_table(index=idx, columns=within[1], values=dv)
+pab1 = df3.pivot_table(index=idx, columns=within, values=dv)
 
 
 class TestDistribution(TestCase):
@@ -82,6 +95,12 @@ class TestDistribution(TestCase):
         # The epsilon for the interaction gives different results than R or
         # JASP.
         assert 0.6 < epsilon(pab) < .80  # Pingouin = .63, ez = .73
+        # Now with a (3, 4) two-way design
+        assert np.allclose(epsilon(pa1), 0.9963275)
+        assert np.allclose(epsilon(pa1, 'hf'), 1.)
+        assert np.allclose(epsilon(pb1), 0.9716288)
+        assert np.allclose(epsilon(pb1, 'hf'), 1.)
+        assert 0.8 < epsilon(pab1) < .90  # Pingouin = .822, ez = .856
 
     def test_sphericity(self):
         """Test function test_sphericity.
@@ -92,14 +111,19 @@ class TestDistribution(TestCase):
         assert sphericity(pa)[0]  # Only two levels so sphericity = True
         spher = sphericity(pb)
         assert spher[0]
-        assert spher[1] == 0.968
-        assert spher[3] == 2
-        assert np.isclose(spher[4], 0.8784418)
+        assert spher[1] == 0.968  # W
+        assert spher[3] == 2  # dof
+        assert np.isclose(spher[4], 0.8784418)  # P-value
         # JNS
         sphericity(df_pivot, method='jns')
         # For coverage only, sphericity test for two-way design are not yet
         # supported.
         sphericity(pab, method='jns')
+        # Now with a (3, 4) two-way design
+        spher = sphericity(pb1)
+        assert spher[0]
+        assert spher[1] == 0.958  # W
+        assert round(spher[4], 4) == 0.8436  # P-value
 
     def test_anderson(self):
         """Test function test_anderson."""
