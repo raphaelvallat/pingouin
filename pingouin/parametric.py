@@ -1114,7 +1114,6 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
         'MS' : Mean squares
         'F' : F-values
         'p-unc' : uncorrected p-values
-        'np2' : Partial eta-square effect sizes
 
     See Also
     --------
