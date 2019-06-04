@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 import pandas as pd
 from unittest import TestCase
@@ -25,6 +26,13 @@ within = ['Time', 'Metric']
 pa = data.pivot_table(index=idx, columns=within[0], values=dv)
 pb = data.pivot_table(index=idx, columns=within[1], values=dv)
 pab = data.pivot_table(index=idx, columns=within, values=dv)
+# pab_single is a multilevel dataframe with shape columns.levshape = (1, 3)
+pab_single = pab.xs('Pre', level=0, drop_level=False, axis=1)
+# Create a 3-level mutlilevel columns (to test ValueError)
+pab_3fac = pab_single.copy()
+old_idx = pab_single.columns.to_frame()
+old_idx.insert(0, 'new_level_name', [0, 0, 0])
+pab_3fac.columns = pd.MultiIndex.from_frame(old_idx)
 
 # Two-way repeated measures (3, 4)
 np.random.seed(123)
@@ -92,15 +100,20 @@ class TestDistribution(TestCase):
         assert epsilon(pb, 'lb') == epsilon(pab, 'lb') == 0.5
         assert np.allclose(epsilon(pb), 0.9691030)  # ez
         assert np.allclose(epsilon(pb, correction='hf'), 1.0)  # ez
-        # The epsilon for the interaction gives different results than R or
-        # JASP.
-        assert 0.6 < epsilon(pab) < .80  # Pingouin = .63, ez = .73
+        # Epsilon for the interaction (shape = (2, N))
+        assert np.allclose(epsilon(pab), 0.7271664)
+        assert np.allclose(epsilon(pab, 'hf'), 0.831161)
+        assert epsilon(pab) == epsilon(pab.swaplevel(axis=1))
+        assert epsilon(pab_single) == epsilon(pab_single.swaplevel(axis=1))
         # Now with a (3, 4) two-way design
         assert np.allclose(epsilon(pa1), 0.9963275)
         assert np.allclose(epsilon(pa1, 'hf'), 1.)
         assert np.allclose(epsilon(pb1), 0.9716288)
         assert np.allclose(epsilon(pb1, 'hf'), 1.)
         assert 0.8 < epsilon(pab1) < .90  # Pingouin = .822, ez = .856
+        # 3 repeated measures factor
+        with pytest.raises(ValueError):
+            epsilon(pab_3fac)
 
     def test_sphericity(self):
         """Test function test_sphericity.
@@ -116,14 +129,25 @@ class TestDistribution(TestCase):
         assert np.isclose(spher[4], 0.8784418)  # P-value
         # JNS
         sphericity(df_pivot, method='jns')
-        # For coverage only, sphericity test for two-way design are not yet
-        # supported.
-        sphericity(pab, method='jns')
+        # Two-way design of shape (2, N)
+        spher = sphericity(pab)
+        assert spher[1] == 0.625
+        assert spher[3] == 2
+        assert np.isclose(spher[4], 0.1523917)
+        assert sphericity(pab)[1] == sphericity(pab.swaplevel(axis=1))[1]
+        sphericity(pab_single)  # For coverage
         # Now with a (3, 4) two-way design
+        # First, main effect
         spher = sphericity(pb1)
         assert spher[0]
         assert spher[1] == 0.958  # W
         assert round(spher[4], 4) == 0.8436  # P-value
+        # And then interaction (ValueError)
+        with pytest.raises(ValueError):
+            sphericity(pab1)
+        # 3 repeated measures factor
+        with pytest.raises(ValueError):
+            sphericity(pab_3fac)
 
     def test_anderson(self):
         """Test function test_anderson."""

@@ -1,3 +1,4 @@
+import warnings
 import scipy.stats
 import numpy as np
 import pandas as pd
@@ -431,6 +432,9 @@ def epsilon(data, correction='gg'):
         DataFrame containing the repeated measurements.
         ``data`` must be in wide-format. To convert from wide to long format,
         use the :py:func:`pandas.pivot_table` function.
+
+        To test for an interaction term between two repeated measures factors,
+        ``data`` must have a two-levels :py:class:`pandas.MultiIndex` columns.
     correction : string
         Specify the epsilon version ::
 
@@ -474,10 +478,7 @@ def epsilon(data, correction='gg'):
 
     where :math:`n` is the number of observations.
 
-    .. warning:: The Greenhouse-Geisser and Huynh-Feldt epsilon values of the
-        interaction in two-way design slightly differs than from R and JASP.
-        Please always make sure to double-check your results with another
-        software.
+    Missing values are automatically removed from ``data`` (listwise deletion).
 
     References
     ----------
@@ -485,25 +486,84 @@ def epsilon(data, correction='gg'):
 
     Examples
     --------
-
     >>> import pandas as pd
-    >>> from pingouin import epsilon
+    >>> import pingouin as pg
     >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
     ...                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
     ...                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
-    >>> epsilon(data, correction='gg')
+    >>> pg.epsilon(data, correction='gg')
     0.5587754577585018
 
-    >>> epsilon(data, correction='hf')
+    >>> pg.epsilon(data, correction='hf')
     0.6223448311539781
 
-    >>> epsilon(data, correction='lb')
+    >>> pg.epsilon(data, correction='lb')
     0.5
+
+    Now, let's calculate the epsilon for an interaction between two repeated
+    measures factor, where one within-factor has two levels, and the other
+    within-factor has three levels:
+
+    >>> data = pg.read_dataset('rm_anova2')
+    >>> # We need to pivot from long-format to wide-format
+    >>> piv = data.pivot_table(index='Subject', columns=['Time', 'Metric'],
+    ...                        values='Performance')
+    >>> piv.head()
+    Time      Post                   Pre
+    Metric  Action Client Product Action Client Product
+    Subject
+    1           34     30      18     17     12      13
+    2           30     18       6     18     19      12
+    3           32     31      21     24     19      17
+    4           40     39      18     25     25      12
+    5           27     28      18     19     27      19
+
+    >>> pg.epsilon(piv)
+    0.727166420214127
     """
+    assert isinstance(data, pd.DataFrame), 'Data must be a pandas Dataframe.'
+
+    # Drop rows with missing values
+    data = data.dropna()
+
+    # Support for two-way factor of shape (2, N)
+    if data.columns.nlevels == 1:
+        # For code clarity only
+        pass
+    elif data.columns.nlevels == 2:
+        # We sort the multiindex so that the higher factor has fewer levels
+        # Make sure to use remove_unused_levels to get the "true" shape
+        levshape = data.columns.remove_unused_levels().levshape
+        data = data.reorder_levels(np.argsort(levshape), axis=1)
+        levshape = np.sort(levshape)
+        # The first factor can have only one level (see if .. below), however,
+        # the second factor must have at least two levels.
+        assert levshape[1] >= 2, 'Factor must have at least two levels.'
+        if levshape[0] == 1:
+            # Two factors but first factor has only one level (= one-way)
+            data = data.droplevel(level=0, axis=1)
+        elif levshape[0] == 2:
+            # One factor has only two-level, e.g. (2, N) or (N, 2)
+            # Let's make sure that the first factor is sorted
+            data = data.sort_index(level=0, axis=1)
+            # Now let's compute the difference matrix of the first level
+            # We end up with a one-way design. It is similar to applying
+            # a paired T-test to gain scores instead of using repeated measures
+            # on two time points. Here we have computed the gain scores.
+            data = data.groupby(level=1, axis=1).diff(axis=1).dropna(axis=1)
+            data = data.droplevel(level=0, axis=1)
+        else:
+            # Both factors have more than 2 levels -- differ from R / JASP
+            warnings.warn("Epsilon values might be innaccurate in "
+                          "two-way repeated measures design where each factor "
+                          "has more than 2 levels. Please double-check your "
+                          "results.")
+    else:
+        raise ValueError("Only one-way or two-way designs are supported.")
+
     # Covariance matrix
     S = data.cov()
-    n = data.shape[0]
-    k = data.shape[1]
+    n, k = data.shape
 
     # Epsilon is always 1 with only two repeated measures.
     if k <= 2:
@@ -511,10 +571,11 @@ def epsilon(data, correction='gg'):
 
     # Degrees of freedom
     if S.columns.nlevels == 1:
+        # One-way design
         dof = k - 1
-    elif S.columns.nlevels == 2:
-        ka = S.columns.levels[0].size
-        kb = S.columns.levels[1].size
+    else:
+        # Two-way design (>2, >2)
+        ka, kb = S.columns.levshape
         dof = (ka - 1) * (kb - 1)
 
     # Lower bound
@@ -522,7 +583,7 @@ def epsilon(data, correction='gg'):
         return 1 / dof
 
     # Compute GGEpsilon
-    # - Method 1
+    # - Method 1 (see real-statistics.com)
     mean_var = np.diag(S).mean()
     S_mean = S.mean().mean()
     ss_mat = (S**2).sum().sum()
@@ -555,11 +616,17 @@ def sphericity(data, method='mauchly', alpha=.05):
         DataFrame containing the repeated measurements.
         ``data`` must be in wide-format. To convert from wide to long format,
         use the :py:func:`pandas.pivot_table` function.
+
+        To test for an interaction term between two repeated measures factors,
+        ``data`` must have a two-levels :py:class:`pandas.MultiIndex` columns.
+        The current implementation only works if one of the two factors has
+        no more than 2 levels (e.g. factor1 = ['Pre', 'Post'] *
+        factor2 = ['A', 'B', 'C']).
     method : str
         Method to compute sphericity ::
 
         'jns' : John, Nagao and Sugiura test.
-        'mauchly' : Mauchly test.
+        'mauchly' : Mauchly test (default).
 
     alpha : float
         Significance level
@@ -569,11 +636,11 @@ def sphericity(data, method='mauchly', alpha=.05):
     spher : boolean
         True if data have the sphericity property.
     W : float
-        Test statistic
+        Test statistic.
     chi_sq : float
-        Chi-square statistic
+        Chi-square statistic.
     ddof : int
-        Degrees of freedom
+        Degrees of freedom.
     p : float
         P-value.
 
@@ -616,9 +683,7 @@ def sphericity(data, method='mauchly', alpha=.05):
 
     .. math:: \\chi_v^2 \\sim \\chi^2(\\frac{k(k-1)}{2}-1)
 
-    .. warning:: This function only works for one-way repeated measures design.
-        Sphericity test for the interaction term of a two-way repeated
-        measures ANOVA are not currently supported in Pingouin.
+    Missing values are automatically removed from ``data`` (listwise deletion).
 
     References
     ----------
@@ -643,61 +708,130 @@ def sphericity(data, method='mauchly', alpha=.05):
     1. Mauchly test for sphericity
 
     >>> import pandas as pd
-    >>> from pingouin import sphericity
+    >>> import pingouin as pg
     >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
     ...                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
     ...                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
-    >>> sphericity(data)
+    >>> pg.sphericity(data)
     (True, 0.21, 4.677, 2, 0.09649016283209666)
 
     2. JNS test for sphericity
 
-    >>> sphericity(data, method='jns')
+    >>> pg.sphericity(data, method='jns')
     (False, 1.118, 6.176, 2, 0.0456042403075203)
+
+    Now, let's test the sphericity for an interaction between two repeated
+    measures factor, where one within-factor has two levels, and the other
+    within-factor has three levels:
+
+    >>> data = pg.read_dataset('rm_anova2')
+    >>> # We need to pivot from long-format to wide-format
+    >>> piv = data.pivot_table(index='Subject', columns=['Time', 'Metric'],
+    ...                        values='Performance')
+    >>> piv.head()
+    Time      Post                   Pre
+    Metric  Action Client Product Action Client Product
+    Subject
+    1           34     30      18     17     12      13
+    2           30     18       6     18     19      12
+    3           32     31      21     24     19      17
+    4           40     39      18     25     25      12
+    5           27     28      18     19     27      19
+
+    >>> pg.sphericity(piv)
+    (True, 0.625, 3.763, 2, 0.15239168046050933)
     """
     assert isinstance(data, pd.DataFrame), 'Data must be a pandas Dataframe.'
-    S = data.cov()
-    n = data.shape[0]
-    k = data.shape[1]
+
+    # Remove rows with missing values in wide-format dataframe
+    data = data.dropna()
+
+    # Support for two-way factor of shape (2, N)
+    if data.columns.nlevels == 1:
+        # For code clarity only
+        pass
+    elif data.columns.nlevels == 2:
+        # We sort the multiindex so that the higher factor has fewer levels
+        data = data.reorder_levels(np.argsort(data.columns.levshape), axis=1)
+        levshape = data.columns.remove_unused_levels().levshape
+        if levshape[0] == 1:
+            # Two factors but first factor has only one level (= one-way)
+            data = data.droplevel(level=0, axis=1)
+        elif levshape[0] == 2:
+            # One factor has only two-level, e.g. (2, N) or (N, 2)
+            # Let's make sure that the first factor is sorted
+            data = data.sort_index(level=0, axis=1)
+            # Now let's compute the difference matrix of the first level
+            # We end up with a one-way design. It is similar to applying
+            # a paired T-test to gain scores instead of using repeated measures
+            # on two time points. Here we have computed the gain scores.
+            data = data.groupby(level=1, axis=1).diff(axis=1).dropna(axis=1)
+            data = data.droplevel(level=0, axis=1)
+        else:
+            # Both factors have more than 2 levels
+            raise ValueError("If using two-way repeated measures design, at "
+                             "least one factor must have exactly two levels. "
+                             "More complex designs are not yet supported.")
+            # ka = data.columns.levels[0].size
+            # kb = data.columns.levels[1].size
+            # d = (ka - 1) * (kb - 1)
+    else:
+        raise ValueError("Only one-way or two-way design are supported.")
+
+    # From here, we work only with one-way design
+    n, k = data.shape
+    d = k - 1
 
     # Sphericity is always met with only two repeated measures.
     if k <= 2:
         return True, np.nan, np.nan, 1, 1.
 
-    # Degrees of freedom
-    if S.columns.nlevels == 1:
-        d = k - 1
-    elif S.columns.nlevels == 2:
-        ka = S.columns.levels[0].size
-        kb = S.columns.levels[1].size
-        d = (ka - 1) * (kb - 1)
+    # Compute dof of the test
+    ddof = (d * (d + 1)) / 2 - 1
+    ddof = 1 if ddof == 0 else ddof
 
-    # Estimate of the population covariance (= double-centered)
-    S = S.values
-    S_pop = S - S.mean(0)[:, np.newaxis] - S.mean(1)[np.newaxis, :] + S.mean()
+    if method.lower() == 'mauchly':
+        # Method 1. Contrast matrix. Similar to R & Matlab implementation.
+        # Only works for one-way design or two-way design with shape (2, N).
+        # 1 - Compute the successive difference matrix Z.
+        #     (Note that the order of columns does not matter.)
+        # 2 - Find the contrast matrix that M so that data * M = Z
+        # 3 - Performs the QR decomposition of this matrix (= contrast matrix)
+        # 4 - Compute sample covariance matrix S
+        # 5 - Compute Mauchly's statistic
+        # Z = data.diff(axis=1).dropna(axis=1)
+        # M = np.linalg.lstsq(data, Z, rcond=None)[0]
+        # C, _ = np.linalg.qr(M)
+        # S = data.cov()
+        # A = C.T.dot(S).dot(C)
+        # logW = np.log(np.linalg.det(A)) - d * np.log(np.trace(A / d))
+        # W = np.exp(logW)
 
-    # Eigenvalues (sorted by ascending importance)
-    eig = np.linalg.eigvalsh(S_pop)
-    eig = eig[eig > 0.1]
+        # Method 2. Eigenvalue-based method. Faster.
+        # 1 - Estimate the population covariance (= double-centered)
+        # 2 - Calculate n-1 eigenvalues
+        # 3 - Compute Mauchly's statistic
+        S = data.cov().values  # values here, otherwise S.mean() != grandmean
+        S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
+        eig = np.linalg.eigvalsh(S_pop)[1:]
+        eig = eig[eig > 0.1]  # Additional check to remove very low eig
+        W = np.product(eig) / (eig.sum() / d)**d
+        logW = np.log(W)
 
-    if method == 'jns':
+        # Compute chi-square and p-value (adapted from the ezANOVA R package)
+        f = 1 - (2 * d**2 + d + 2) / (6 * d * (n - 1))
+        w2 = ((d + 2) * (d - 1) * (d - 2) * (2 * d**3 + 6 * d**2 + 3 * k + 2)
+              / (288 * ((n - 1) * d * f)**2))
+        chi_sq = -(n - 1) * f * logW
+        p1 = scipy.stats.chi2.sf(chi_sq, ddof)
+        p2 = scipy.stats.chi2.sf(chi_sq, ddof + 4)
+        pval = p1 + w2 * (p2 - p1)
+    else:
+        # Method = JNS
         eps = epsilon(data, correction='gg')
         W = eps * d
-        # W = eig.sum()**2 / np.sum(eig**2)
         chi_sq = 0.5 * n * d**2 * (W - 1 / d)
-
-    if method == 'mauchly':
-        # Mauchly's statistic
-        W = np.product(eig) / (eig.sum() / d)**d
-        # Chi-square
-        f = (2 * d**2 + (d + 1) + 1) / (6 * d * (n - 1))
-        chi_sq = (f - 1) * (n - 1) * np.log(W)
-
-    # Compute dof and pval
-    ddof = (d * (d + 1)) / 2 - 1
-    # Ensure that ddof is not zero
-    ddof = 1 if ddof == 0 else ddof
-    pval = scipy.stats.chi2.sf(chi_sq, ddof)
+        pval = scipy.stats.chi2.sf(chi_sq, ddof)
 
     sphericity = True if pval > alpha else False
     return sphericity, np.round(W, 3), np.round(chi_sq, 3), int(ddof), pval
