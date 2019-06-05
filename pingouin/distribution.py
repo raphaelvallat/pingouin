@@ -682,8 +682,8 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     if correction == 'lb':
         return 1 / dof
 
-    # Compute GGEpsilon
-    # - Method 1 (see real-statistics.com)
+    # Greenhouse-Geisser
+    # Method 1. Sums of squares. (see real-statistics.com)
     mean_var = np.diag(S).mean()
     S_mean = S.mean().mean()
     ss_mat = (S**2).sum().sum()
@@ -691,7 +691,8 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     num = (k * (mean_var - S_mean))**2
     den = (k - 1) * (ss_mat - 2 * k * ss_rows + k**2 * S_mean**2)
     eps = np.min([num / den, 1])
-    # - Method 2
+
+    # Method 2. Eigenvalues.
     # Sv = S.values
     # S_pop = Sv - Sv.mean(0)[:, None] - Sv.mean(1)[None, :] + Sv.mean()
     # eig = np.linalg.eigvalsh(S_pop)

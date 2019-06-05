@@ -383,7 +383,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
 
     .. warning:: The epsilon adjustement factor of the interaction in
         two-way repeated measures ANOVA where both factors have more than
-        three levels slightly differs than from R and JASP.
+        two levels slightly differs than from R and JASP.
         Please always make sure to double-check your results with another
         software.
 

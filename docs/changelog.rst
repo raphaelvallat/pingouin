@@ -6,6 +6,15 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
+v0.2.7 (July 2019)
+------------------
+
+**Enhancements**
+
+a. Added support for long-format dataframe in :py:func:`pingouin.sphericity` and :py:func:`pingouin.epsilon`.
+b. Added support for two within-factors interaction in :py:func:`pingouin.sphericity` and :py:func:`pingouin.epsilon` (for the former, granted that at least one of them has no more than two levels.)
+
+
 v0.2.6 (June 2019)
 ------------------
 
