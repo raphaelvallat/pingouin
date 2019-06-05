@@ -1,7 +1,9 @@
+import warnings
 import scipy.stats
 import numpy as np
 import pandas as pd
 from .utils import remove_na
+from .utils import _flatten_list as _fl
 
 __all__ = ["gzscore", "normality", "homoscedasticity", "anderson",
            "epsilon", "sphericity"]
@@ -421,16 +423,106 @@ def anderson(*args, dist='norm'):
         sig_level = float(sig_level)
     return from_dist, sig_level
 
+###############################################################################
+# REPEATED MEASURES
+###############################################################################
 
-def epsilon(data, correction='gg'):
+
+def _check_multilevel_rm(data, func='epsilon'):
+    """Check if data has multilevel columns for wide-format repeated measures.
+    ``func`` can be either epsilon or mauchly
+    """
+    # Support for two-way factor of shape (2, N)
+    if data.columns.nlevels == 1:
+        # For code clarity only
+        return data
+    elif data.columns.nlevels == 2:
+        # We sort the multiindex so that the higher factor has fewer levels
+        # Make sure to use remove_unused_levels to get the "true" shape
+        levshape = data.columns.remove_unused_levels().levshape
+        data = data.reorder_levels(np.argsort(levshape), axis=1)
+        levshape = np.sort(levshape)
+        # The first factor can have only one level (see if .. below), however,
+        # the second factor must have at least two levels.
+        assert levshape[1] >= 2, 'Factor must have at least two levels.'
+        if levshape[0] == 1:
+            # Two factors but first factor has only one level (= one-way)
+            data = data.droplevel(level=0, axis=1)
+        elif levshape[0] == 2:
+            # One factor has only two-level, e.g. (2, N) or (N, 2)
+            # Let's make sure that the first factor is sorted
+            data = data.sort_index(level=0, axis=1)
+            # Now let's compute the difference matrix of the first level
+            # We end up with a one-way design. It is similar to applying
+            # a paired T-test to gain scores instead of using repeated measures
+            # on two time points. Here we have computed the gain scores.
+            data = data.groupby(level=1, axis=1).diff(axis=1).dropna(axis=1)
+            data = data.droplevel(level=0, axis=1)
+        else:
+            # Both factors have more than 2 levels -- differ from R / JASP
+            if func == 'epsilon':
+                warnings.warn("Epsilon values might be innaccurate in "
+                              "two-way repeated measures design where each  "
+                              "factor has more than 2 levels. Please  "
+                              "double-check your results.")
+            else:
+                raise ValueError("If using two-way repeated measures design, "
+                                 "at least one factor must have exactly two "
+                                 "levels. More complex designs are not yet "
+                                 "supported.")
+        return data
+    else:
+        raise ValueError("Only one-way or two-way designs are supported.")
+
+
+def _long_to_wide_rm(data, dv=None, within=None, subject=None):
+    """Convert long-format dataframe to wide-format.
+    This internal function is used in pingouin.epsilon and pingouin.sphericity.
+    """
+    # Check arguments
+    assert isinstance(dv, str), 'dv must be a string.'
+    assert isinstance(subject, str), 'subject must be a string.'
+    assert isinstance(within, (str, list)), 'within must be a string or list.'
+    # Check that all columns are present
+    assert dv in data.columns, '%s not in data' % dv
+    assert data[dv].dtype.kind in 'bfi', '%s must be numeric' % dv
+    assert subject in data.columns, '%s not in data' % subject
+    assert not data[subject].isnull().any(), 'Cannot have NaN in %s' % subject
+    if isinstance(within, str):
+        within = [within]  # within = ['fac1'] or ['fac1', 'fac2']
+    for w in within:
+        assert w in data.columns, '%s not in data' % w
+    # Keep all relevant columns and reset index
+    data = data[_fl([subject, within, dv])]
+    # Convert to wide-format + collapse to the mean
+    data = pd.pivot_table(data, index=subject, values=dv, columns=within,
+                          aggfunc='mean', dropna=True)
+    return data
+
+
+def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     """Epsilon adjustement factor for repeated measures.
 
     Parameters
     ----------
     data : pd.DataFrame
         DataFrame containing the repeated measurements.
-        ``data`` must be in wide-format. To convert from wide to long format,
-        use the :py:func:`pandas.pivot_table` function.
+        Both wide and long-format dataframe are supported for this function.
+        To test for an interaction term between two repeated measures factors
+        with a wide-format dataframe, ``data`` must have a two-levels
+        :py:class:`pandas.MultiIndex` columns.
+    dv : string
+        Name of column containing the dependant variable (only required if
+        ``data`` is in long format).
+    within : string
+        Name of column containing the within factor (only required if ``data``
+        is in long format).
+        If ``within`` is a list with two strings, this function computes
+        the epsilon factor for the interaction between the two within-subject
+        factor.
+    subject : string
+        Name of column containing the subject identifier (only required if
+        ``data`` is in long format).
     correction : string
         Specify the epsilon version ::
 
@@ -442,6 +534,11 @@ def epsilon(data, correction='gg'):
     -------
     eps : float
         Epsilon adjustement factor.
+
+    See Also
+    --------
+    sphericity : Mauchly and JNS test for sphericity.
+    homoscedasticity : Test equality of variance.
 
     Notes
     -----
@@ -474,10 +571,7 @@ def epsilon(data, correction='gg'):
 
     where :math:`n` is the number of observations.
 
-    .. warning:: The Greenhouse-Geisser and Huynh-Feldt epsilon values of the
-        interaction in two-way design slightly differs than from R and JASP.
-        Please always make sure to double-check your results with another
-        software.
+    Missing values are automatically removed from ``data`` (listwise deletion).
 
     References
     ----------
@@ -485,25 +579,91 @@ def epsilon(data, correction='gg'):
 
     Examples
     --------
+    Using a wide-format dataframe
 
     >>> import pandas as pd
-    >>> from pingouin import epsilon
+    >>> import pingouin as pg
     >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
     ...                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
     ...                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
-    >>> epsilon(data, correction='gg')
-    0.5587754577585018
+    >>> gg = pg.epsilon(data, correction='gg')
+    >>> hf = pg.epsilon(data, correction='hf')
+    >>> lb = pg.epsilon(data, correction='lb')
+    >>> print(lb, gg, hf)
+    0.5 0.5587754577585018 0.6223448311539781
 
-    >>> epsilon(data, correction='hf')
-    0.6223448311539781
+    Now using a long-format dataframe
 
-    >>> epsilon(data, correction='lb')
-    0.5
+    >>> data = pg.read_dataset('rm_anova2')
+    >>> data.head()
+       Subject Time   Metric  Performance
+    0        1  Pre  Product           13
+    1        2  Pre  Product           12
+    2        3  Pre  Product           17
+    3        4  Pre  Product           12
+    4        5  Pre  Product           19
+
+    Let's first calculate the epsilon of the *Time* within-subject factor
+
+    >>> pg.epsilon(data, dv='Performance', subject='Subject',
+    ...            within='Time')
+    1.0
+
+    Since *Time* has only two levels (Pre and Post), the sphericity assumption
+    is necessarily met, and therefore the epsilon adjustement factor is 1.
+
+    The *Metric* factor, however, has three levels:
+
+    >>> pg.epsilon(data, dv='Performance', subject='Subject',
+    ...            within=['Metric'])
+    0.9691029584899856
+
+    The epsilon value is very close to 1, meaning that there is no major
+    violation of sphericity.
+
+    Now, let's calculate the epsilon for the interaction between the two
+    repeated measures factor:
+
+    >>> pg.epsilon(data, dv='Performance', subject='Subject',
+    ...            within=['Time', 'Metric'])
+    0.727166420214127
+
+    Alternatively, we could use a wide-format dataframe with two column
+    levels:
+
+    >>> # Pivot from long-format to wide-format
+    >>> piv = data.pivot_table(index='Subject', columns=['Time', 'Metric'],
+    ...                        values='Performance')
+    >>> piv.head()
+    Time      Post                   Pre
+    Metric  Action Client Product Action Client Product
+    Subject
+    1           34     30      18     17     12      13
+    2           30     18       6     18     19      12
+    3           32     31      21     24     19      17
+    4           40     39      18     25     25      12
+    5           27     28      18     19     27      19
+
+    >>> pg.epsilon(piv)
+    0.727166420214127
+
+    which gives the same epsilon value as the long-format dataframe.
     """
+    assert isinstance(data, pd.DataFrame), 'Data must be a pandas Dataframe.'
+
+    # If data is in long-format, convert to wide-format
+    if all([v is not None for v in [dv, within, subject]]):
+        data = _long_to_wide_rm(data, dv=dv, within=within, subject=subject)
+
+    # Drop rows with missing values
+    data = data.dropna()
+
+    # Support for two-way factor of shape (2, N)
+    data = _check_multilevel_rm(data, func='epsilon')
+
     # Covariance matrix
     S = data.cov()
-    n = data.shape[0]
-    k = data.shape[1]
+    n, k = data.shape
 
     # Epsilon is always 1 with only two repeated measures.
     if k <= 2:
@@ -511,10 +671,11 @@ def epsilon(data, correction='gg'):
 
     # Degrees of freedom
     if S.columns.nlevels == 1:
+        # One-way design
         dof = k - 1
-    elif S.columns.nlevels == 2:
-        ka = S.columns.levels[0].size
-        kb = S.columns.levels[1].size
+    else:
+        # Two-way design (>2, >2)
+        ka, kb = S.columns.levshape
         dof = (ka - 1) * (kb - 1)
 
     # Lower bound
@@ -522,7 +683,7 @@ def epsilon(data, correction='gg'):
         return 1 / dof
 
     # Compute GGEpsilon
-    # - Method 1
+    # - Method 1 (see real-statistics.com)
     mean_var = np.diag(S).mean()
     S_mean = S.mean().mean()
     ss_mat = (S**2).sum().sum()
@@ -546,20 +707,35 @@ def epsilon(data, correction='gg'):
     return eps
 
 
-def sphericity(data, method='mauchly', alpha=.05):
+def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
+               alpha=.05):
     """Mauchly and JNS test for sphericity.
 
     Parameters
     ----------
     data : pd.DataFrame
         DataFrame containing the repeated measurements.
-        ``data`` must be in wide-format. To convert from wide to long format,
-        use the :py:func:`pandas.pivot_table` function.
+        Both wide and long-format dataframe are supported for this function.
+        To test for an interaction term between two repeated measures factors
+        with a wide-format dataframe, ``data`` must have a two-levels
+        :py:class:`pandas.MultiIndex` columns.
+    dv : string
+        Name of column containing the dependant variable (only required if
+        ``data`` is in long format).
+    within : string
+        Name of column containing the within factor (only required if ``data``
+        is in long format).
+        If ``within`` is a list with two strings, this function computes
+        the epsilon factor for the interaction between the two within-subject
+        factor.
+    subject : string
+        Name of column containing the subject identifier (only required if
+        ``data`` is in long format).
     method : str
         Method to compute sphericity ::
 
         'jns' : John, Nagao and Sugiura test.
-        'mauchly' : Mauchly test.
+        'mauchly' : Mauchly test (default).
 
     alpha : float
         Significance level
@@ -569,16 +745,23 @@ def sphericity(data, method='mauchly', alpha=.05):
     spher : boolean
         True if data have the sphericity property.
     W : float
-        Test statistic
+        Test statistic.
     chi_sq : float
-        Chi-square statistic
+        Chi-square statistic.
     ddof : int
-        Degrees of freedom
+        Degrees of freedom.
     p : float
         P-value.
 
+    Raises
+    ------
+    ValueError
+        When testing for an interaction, if both within-subject factors have
+        more than 2 levels (not yet supported in Pingouin).
+
     See Also
     --------
+    epsilon : Epsilon adjustement factor for repeated measures.
     homoscedasticity : Test equality of variance.
     normality : Univariate normality test.
 
@@ -616,9 +799,7 @@ def sphericity(data, method='mauchly', alpha=.05):
 
     .. math:: \\chi_v^2 \\sim \\chi^2(\\frac{k(k-1)}{2}-1)
 
-    .. warning:: This function only works for one-way repeated measures design.
-        Sphericity test for the interaction term of a two-way repeated
-        measures ANOVA are not currently supported in Pingouin.
+    Missing values are automatically removed from ``data`` (listwise deletion).
 
     References
     ----------
@@ -640,64 +821,149 @@ def sphericity(data, method='mauchly', alpha=.05):
 
     Examples
     --------
-    1. Mauchly test for sphericity
+    Mauchly test for sphericity using a wide-format dataframe
 
     >>> import pandas as pd
-    >>> from pingouin import sphericity
+    >>> import pingouin as pg
     >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
     ...                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
     ...                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
-    >>> sphericity(data)
+    >>> pg.sphericity(data)
     (True, 0.21, 4.677, 2, 0.09649016283209666)
 
-    2. JNS test for sphericity
+    John, Nagao and Sugiura (JNS) test
 
-    >>> sphericity(data, method='jns')
+    >>> pg.sphericity(data, method='jns')
     (False, 1.118, 6.176, 2, 0.0456042403075203)
+
+    Now using a long-format dataframe
+
+    >>> data = pg.read_dataset('rm_anova2')
+    >>> data.head()
+       Subject Time   Metric  Performance
+    0        1  Pre  Product           13
+    1        2  Pre  Product           12
+    2        3  Pre  Product           17
+    3        4  Pre  Product           12
+    4        5  Pre  Product           19
+
+    Let's first test sphericity for the *Time* within-subject factor
+
+    >>> pg.sphericity(data, dv='Performance', subject='Subject',
+    ...            within='Time')
+    (True, nan, nan, 1, 1.0)
+
+    Since *Time* has only two levels (Pre and Post), the sphericity assumption
+    is necessarily met.
+
+    The *Metric* factor, however, has three levels:
+
+    >>> pg.sphericity(data, dv='Performance', subject='Subject',
+    ...            within=['Metric'])
+    (True, 0.968, 0.259, 2, 0.8784417991645136)
+
+    The p-value value is very large, and the test therefore indicates that
+    there is no violation of sphericity.
+
+    Now, let's calculate the epsilon for the interaction between the two
+    repeated measures factor. The current implementation in Pingouin only works
+    if at least one of the two within-subject factors has no more than two
+    levels.
+
+    >>> pg.sphericity(data, dv='Performance', subject='Subject',
+    ...            within=['Time', 'Metric'])
+    (True, 0.625, 3.763, 2, 0.15239168046050933)
+
+    Here again, there is no violation of sphericity acccording to Mauchly's
+    test.
+
+    Alternatively, we could use a wide-format dataframe with two column
+    levels:
+
+    >>> # Pivot from long-format to wide-format
+    >>> piv = data.pivot_table(index='Subject', columns=['Time', 'Metric'],
+    ...                        values='Performance')
+    >>> piv.head()
+    Time      Post                   Pre
+    Metric  Action Client Product Action Client Product
+    Subject
+    1           34     30      18     17     12      13
+    2           30     18       6     18     19      12
+    3           32     31      21     24     19      17
+    4           40     39      18     25     25      12
+    5           27     28      18     19     27      19
+
+    >>> pg.sphericity(piv)
+    (True, 0.625, 3.763, 2, 0.15239168046050933)
+
+    which gives the same output as the long-format dataframe.
     """
     assert isinstance(data, pd.DataFrame), 'Data must be a pandas Dataframe.'
-    S = data.cov()
-    n = data.shape[0]
-    k = data.shape[1]
+
+    # If data is in long-format, convert to wide-format
+    if all([v is not None for v in [dv, within, subject]]):
+        data = _long_to_wide_rm(data, dv=dv, within=within, subject=subject)
+
+    # Remove rows with missing values in wide-format dataframe
+    data = data.dropna()
+
+    # Support for two-way factor of shape (2, N)
+    data = _check_multilevel_rm(data, func='mauchly')
+
+    # From here, we work only with one-way design
+    n, k = data.shape
+    d = k - 1
 
     # Sphericity is always met with only two repeated measures.
     if k <= 2:
         return True, np.nan, np.nan, 1, 1.
 
-    # Degrees of freedom
-    if S.columns.nlevels == 1:
-        d = k - 1
-    elif S.columns.nlevels == 2:
-        ka = S.columns.levels[0].size
-        kb = S.columns.levels[1].size
-        d = (ka - 1) * (kb - 1)
+    # Compute dof of the test
+    ddof = (d * (d + 1)) / 2 - 1
+    ddof = 1 if ddof == 0 else ddof
 
-    # Estimate of the population covariance (= double-centered)
-    S = S.values
-    S_pop = S - S.mean(0)[:, np.newaxis] - S.mean(1)[np.newaxis, :] + S.mean()
+    if method.lower() == 'mauchly':
+        # Method 1. Contrast matrix. Similar to R & Matlab implementation.
+        # Only works for one-way design or two-way design with shape (2, N).
+        # 1 - Compute the successive difference matrix Z.
+        #     (Note that the order of columns does not matter.)
+        # 2 - Find the contrast matrix that M so that data * M = Z
+        # 3 - Performs the QR decomposition of this matrix (= contrast matrix)
+        # 4 - Compute sample covariance matrix S
+        # 5 - Compute Mauchly's statistic
+        # Z = data.diff(axis=1).dropna(axis=1)
+        # M = np.linalg.lstsq(data, Z, rcond=None)[0]
+        # C, _ = np.linalg.qr(M)
+        # S = data.cov()
+        # A = C.T.dot(S).dot(C)
+        # logW = np.log(np.linalg.det(A)) - d * np.log(np.trace(A / d))
+        # W = np.exp(logW)
 
-    # Eigenvalues (sorted by ascending importance)
-    eig = np.linalg.eigvalsh(S_pop)
-    eig = eig[eig > 0.1]
+        # Method 2. Eigenvalue-based method. Faster.
+        # 1 - Estimate the population covariance (= double-centered)
+        # 2 - Calculate n-1 eigenvalues
+        # 3 - Compute Mauchly's statistic
+        S = data.cov().values  # values here, otherwise S.mean() != grandmean
+        S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
+        eig = np.linalg.eigvalsh(S_pop)[1:]
+        eig = eig[eig > 0.1]  # Additional check to remove very low eig
+        W = np.product(eig) / (eig.sum() / d)**d
+        logW = np.log(W)
 
-    if method == 'jns':
+        # Compute chi-square and p-value (adapted from the ezANOVA R package)
+        f = 1 - (2 * d**2 + d + 2) / (6 * d * (n - 1))
+        w2 = ((d + 2) * (d - 1) * (d - 2) * (2 * d**3 + 6 * d**2 + 3 * k + 2)
+              / (288 * ((n - 1) * d * f)**2))
+        chi_sq = -(n - 1) * f * logW
+        p1 = scipy.stats.chi2.sf(chi_sq, ddof)
+        p2 = scipy.stats.chi2.sf(chi_sq, ddof + 4)
+        pval = p1 + w2 * (p2 - p1)
+    else:
+        # Method = JNS
         eps = epsilon(data, correction='gg')
         W = eps * d
-        # W = eig.sum()**2 / np.sum(eig**2)
         chi_sq = 0.5 * n * d**2 * (W - 1 / d)
-
-    if method == 'mauchly':
-        # Mauchly's statistic
-        W = np.product(eig) / (eig.sum() / d)**d
-        # Chi-square
-        f = (2 * d**2 + (d + 1) + 1) / (6 * d * (n - 1))
-        chi_sq = (f - 1) * (n - 1) * np.log(W)
-
-    # Compute dof and pval
-    ddof = (d * (d + 1)) / 2 - 1
-    # Ensure that ddof is not zero
-    ddof = 1 if ddof == 0 else ddof
-    pval = scipy.stats.chi2.sf(chi_sq, ddof)
+        pval = scipy.stats.chi2.sf(chi_sq, ddof)
 
     sphericity = True if pval > alpha else False
     return sphericity, np.round(W, 3), np.round(chi_sq, 3), int(ddof), pval

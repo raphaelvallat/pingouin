@@ -381,15 +381,17 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     the power of the ANOVA if many missing values are present. In that case,
     it might be better to use linear mixed effects models.
 
-    .. warning:: The Greenhouse-Geisser epsilon value of the interaction in
-        two-way repeated measures ANOVA slightly differs than from R and JASP.
+    .. warning:: The epsilon adjustement factor of the interaction in
+        two-way repeated measures ANOVA where both factors have more than
+        three levels slightly differs than from R and JASP.
         Please always make sure to double-check your results with another
         software.
 
     .. warning:: Sphericity tests for the interaction term of a two-way
         repeated measures ANOVA are not currently supported in Pingouin.
         Instead, please refer to the Greenhouse-Geisser epsilon value
-        (a value close to 1 indicates that sphericity is met.)
+        (a value close to 1 indicates that sphericity is met.) For more
+        details, see :py:func:`pingouin.sphericity`.
 
     References
     ----------

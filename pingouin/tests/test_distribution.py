@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 import pandas as pd
 from unittest import TestCase
@@ -25,6 +26,13 @@ within = ['Time', 'Metric']
 pa = data.pivot_table(index=idx, columns=within[0], values=dv)
 pb = data.pivot_table(index=idx, columns=within[1], values=dv)
 pab = data.pivot_table(index=idx, columns=within, values=dv)
+# pab_single is a multilevel dataframe with shape columns.levshape = (1, 3)
+pab_single = pab.xs('Pre', level=0, drop_level=False, axis=1)
+# Create a 3-level mutlilevel columns (to test ValueError)
+pab_3fac = pab_single.copy()
+old_idx = pab_single.columns.to_frame()
+old_idx.insert(0, 'new_level_name', [0, 0, 0])
+pab_3fac.columns = pd.MultiIndex.from_frame(old_idx)
 
 # Two-way repeated measures (3, 4)
 np.random.seed(123)
@@ -80,32 +88,59 @@ class TestDistribution(TestCase):
         eps_gg = epsilon(df_pivot)
         eps_hf = epsilon(df_pivot, correction='hf')
         eps_lb = epsilon(df_pivot, correction='lb')
+        # In long-format
+        eps_gg_rm = epsilon(df, subject='Subject', within='Time', dv='Scores')
+        eps_hf_rm = epsilon(df, subject='Subject', within='Time', dv='Scores',
+                            correction='hf')
+        assert np.isclose(eps_gg_rm, eps_gg)
+        assert np.isclose(eps_hf_rm, eps_hf)
         # Compare with ezANOVA
         assert np.allclose([eps_gg, eps_hf, eps_lb], [0.9987509, 1, 0.5])
 
         # Time has only two values so epsilon is one.
-        assert epsilon(pa, 'lb') == epsilon(pa, 'gg') == epsilon(pa, 'hf')
+        assert epsilon(pa, correction='lb') == epsilon(pa, correction='gg')
+        assert epsilon(pa, correction='gg') == epsilon(pa, correction='hf')
         # Lower bound <= Greenhouse-Geisser <= Huynh-Feldt
-        assert epsilon(pb, 'lb') <= epsilon(pb, 'gg') <= epsilon(pb, 'hf')
-        assert epsilon(pab, 'lb') <= epsilon(pab, 'gg') <= epsilon(pab, 'hf')
+        assert epsilon(pb, correction='lb') <= epsilon(pb, correction='gg')
+        assert epsilon(pb, correction='gg') <= epsilon(pb, correction='hf')
+        assert epsilon(pab, correction='lb') <= epsilon(pab, correction='gg')
+        assert epsilon(pab, correction='gg') <= epsilon(pab, correction='hf')
         # Lower bound == 0.5 for pb and pab
-        assert epsilon(pb, 'lb') == epsilon(pab, 'lb') == 0.5
+        assert epsilon(pb, correction='lb') == epsilon(pab, correction='lb')
         assert np.allclose(epsilon(pb), 0.9691030)  # ez
         assert np.allclose(epsilon(pb, correction='hf'), 1.0)  # ez
-        # The epsilon for the interaction gives different results than R or
-        # JASP.
-        assert 0.6 < epsilon(pab) < .80  # Pingouin = .63, ez = .73
+        # Epsilon for the interaction (shape = (2, N))
+        assert np.allclose(epsilon(pab), 0.7271664)
+        assert np.allclose(epsilon(pab, correction='hf'), 0.831161)
+        assert epsilon(pab) == epsilon(pab.swaplevel(axis=1))
+        assert epsilon(pab_single) == epsilon(pab_single.swaplevel(axis=1))
+        eps_gg_rm = epsilon(data, subject='Subject', dv='Performance',
+                            within=['Time', 'Metric'])
+        assert eps_gg_rm == epsilon(pab)
         # Now with a (3, 4) two-way design
         assert np.allclose(epsilon(pa1), 0.9963275)
-        assert np.allclose(epsilon(pa1, 'hf'), 1.)
+        assert np.allclose(epsilon(pa1, correction='hf'), 1.)
         assert np.allclose(epsilon(pb1), 0.9716288)
-        assert np.allclose(epsilon(pb1, 'hf'), 1.)
+        assert np.allclose(epsilon(pb1, correction='hf'), 1.)
         assert 0.8 < epsilon(pab1) < .90  # Pingouin = .822, ez = .856
+        eps_gg_rm = epsilon(df3, subject='subj', dv='dv',
+                            within=['within1', 'within2'])
+        assert eps_gg_rm == epsilon(pab1)
+        # With missing values
+        eps_gg_rm = epsilon(df_nan, subject='Subject', within='Time',
+                            dv='Scores')
+        # 3 repeated measures factor
+        with pytest.raises(ValueError):
+            epsilon(pab_3fac)
 
     def test_sphericity(self):
         """Test function test_sphericity.
         Compare with ezANOVA."""
         _, W, _, _, p = sphericity(df_pivot, method='mauchly')
+        assert W == 0.999
+        assert np.round(p, 3) == 0.964
+        _, W, _, _, p = sphericity(df, dv='Scores', subject='Subject',
+                                   within='Time')  # Long-format
         assert W == 0.999
         assert np.round(p, 3) == 0.964
         assert sphericity(pa)[0]  # Only two levels so sphericity = True
@@ -116,14 +151,40 @@ class TestDistribution(TestCase):
         assert np.isclose(spher[4], 0.8784418)  # P-value
         # JNS
         sphericity(df_pivot, method='jns')
-        # For coverage only, sphericity test for two-way design are not yet
-        # supported.
-        sphericity(pab, method='jns')
+        sphericity(df, dv='Scores', subject='Subject', within=['Time'],
+                   method='jns')
+        # Two-way design of shape (2, N)
+        spher = sphericity(pab)
+        assert spher[1] == 0.625
+        assert spher[3] == 2
+        assert np.isclose(spher[4], 0.1523917)
+        assert sphericity(pab)[1] == sphericity(pab.swaplevel(axis=1))[1]
+        spher_long = sphericity(data, subject='Subject', dv='Performance',
+                                within=['Time', 'Metric'])
+        assert spher_long[1] == 0.625
+        assert np.isclose(spher[4], spher_long[4])
+        sphericity(pab_single)  # For coverage
         # Now with a (3, 4) two-way design
+        # First, main effect
         spher = sphericity(pb1)
         assert spher[0]
         assert spher[1] == 0.958  # W
         assert round(spher[4], 4) == 0.8436  # P-value
+        spher2 = sphericity(df3, subject='subj', dv='dv', within=['within2'])
+        assert spher[1] == spher2[1]
+        assert spher[4] == spher2[4]
+        # And then interaction (ValueError)
+        with pytest.raises(ValueError):
+            sphericity(pab1)
+        # Same with long-format
+        with pytest.raises(ValueError):
+            sphericity(df3, subject='subj', dv='dv',
+                       within=['within1', 'within2'])
+        # 3 repeated measures factor
+        with pytest.raises(ValueError):
+            sphericity(pab_3fac)
+        # With missing values
+        sphericity(df_nan, subject='Subject', within='Time', dv='Scores')
 
     def test_anderson(self):
         """Test function test_anderson."""
