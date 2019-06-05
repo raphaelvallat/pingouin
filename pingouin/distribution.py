@@ -3,6 +3,7 @@ import scipy.stats
 import numpy as np
 import pandas as pd
 from .utils import remove_na
+from .utils import _flatten_list as _fl
 
 __all__ = ["gzscore", "normality", "homoscedasticity", "anderson",
            "epsilon", "sphericity"]
@@ -422,6 +423,10 @@ def anderson(*args, dist='norm'):
         sig_level = float(sig_level)
     return from_dist, sig_level
 
+###############################################################################
+# REPEATED MEASURES
+###############################################################################
+
 
 def _check_multilevel_rm(data, func='epsilon'):
     """Check if data has multilevel columns for wide-format repeated measures.
@@ -470,18 +475,54 @@ def _check_multilevel_rm(data, func='epsilon'):
         raise ValueError("Only one-way or two-way designs are supported.")
 
 
-def epsilon(data, correction='gg'):
+def _long_to_wide_rm(data, dv=None, within=None, subject=None):
+    """Convert long-format dataframe to wide-format.
+    This internal function is used in pingouin.epsilon and pingouin.sphericity.
+    """
+    # Check arguments
+    assert isinstance(dv, str), 'dv must be a string.'
+    assert isinstance(subject, str), 'subject must be a string.'
+    assert isinstance(within, (str, list)), 'within must be a string or list.'
+    # Check that all columns are present
+    assert dv in data.columns, '%s not in data' % dv
+    assert data[dv].dtype.kind in 'bfi', '%s must be numeric' % dv
+    assert subject in data.columns, '%s not in data' % subject
+    assert not data[subject].isnull().any(), 'Cannot have NaN in %s' % subject
+    if isinstance(within, str):
+        within = [within]  # within = ['fac1'] or ['fac1', 'fac2']
+    for w in within:
+        assert w in data.columns, '%s not in data' % w
+    # Keep all relevant columns and reset index
+    data = data[_fl([subject, within, dv])]
+    # Convert to wide-format + collapse to the mean
+    data = pd.pivot_table(data, index=subject, values=dv, columns=within,
+                          aggfunc='mean', dropna=True)
+    return data
+
+
+def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     """Epsilon adjustement factor for repeated measures.
 
     Parameters
     ----------
     data : pd.DataFrame
         DataFrame containing the repeated measurements.
-        ``data`` must be in wide-format. To convert from wide to long format,
-        use the :py:func:`pandas.pivot_table` function.
-
-        To test for an interaction term between two repeated measures factors,
-        ``data`` must have a two-levels :py:class:`pandas.MultiIndex` columns.
+        Both wide and long-format dataframe are supported for this function.
+        To test for an interaction term between two repeated measures factors
+        with a wide-format dataframe, ``data`` must have a two-levels
+        :py:class:`pandas.MultiIndex` columns.
+    dv : string
+        Name of column containing the dependant variable (only required if
+        ``data`` is in long format).
+    within : string
+        Name of column containing the within factor (only required if ``data``
+        is in long format).
+        If ``within`` is a list with two strings, this function computes
+        the epsilon factor for the interaction between the two within-subject
+        factor.
+    subject : string
+        Name of column containing the subject identifier (only required if
+        ``data`` is in long format).
     correction : string
         Specify the epsilon version ::
 
@@ -533,26 +574,59 @@ def epsilon(data, correction='gg'):
 
     Examples
     --------
+    Using a wide-format dataframe
+
     >>> import pandas as pd
     >>> import pingouin as pg
     >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
     ...                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
     ...                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
-    >>> pg.epsilon(data, correction='gg')
-    0.5587754577585018
+    >>> gg = pg.epsilon(data, correction='gg')
+    >>> hf = pg.epsilon(data, correction='hf')
+    >>> lb = pg.epsilon(data, correction='lb')
+    >>> print(lb, gg, hf)
+    0.5 0.5587754577585018 0.6223448311539781
 
-    >>> pg.epsilon(data, correction='hf')
-    0.6223448311539781
-
-    >>> pg.epsilon(data, correction='lb')
-    0.5
-
-    Now, let's calculate the epsilon for an interaction between two repeated
-    measures factor, where one within-factor has two levels, and the other
-    within-factor has three levels:
+    Now using a long-format dataframe
 
     >>> data = pg.read_dataset('rm_anova2')
-    >>> # We need to pivot from long-format to wide-format
+    >>> data.head()
+       Subject Time   Metric  Performance
+    0        1  Pre  Product           13
+    1        2  Pre  Product           12
+    2        3  Pre  Product           17
+    3        4  Pre  Product           12
+    4        5  Pre  Product           19
+
+    Let's first calculate the epsilon of the *Time* within-subject factor
+
+    >>> pg.epsilon(data, dv='Performance', subject='Subject',
+    ...            within='Time')
+    1.0
+
+    Since *Time* has only two levels (Pre and Post), the sphericity assumption
+    is necessarily met, and therefore the epsilon adjustement factor is 1.
+
+    The *Metric* factor, however, has three levels:
+
+    >>> pg.epsilon(data, dv='Performance', subject='Subject',
+    ...            within=['Metric'])
+    0.9691029584899856
+
+    The epsilon value is very close to 1, meaning that there is no major
+    violation of sphericity.
+
+    Now, let's calculate the epsilon for the interaction between the two
+    repeated measures factor:
+
+    >>> pg.epsilon(data, dv='Performance', subject='Subject',
+    ...            within=['Time', 'Metric'])
+    0.727166420214127
+
+    Alternatively, we could use a wide-format dataframe with two column
+    levels:
+
+    >>> # Pivot from long-format to wide-format
     >>> piv = data.pivot_table(index='Subject', columns=['Time', 'Metric'],
     ...                        values='Performance')
     >>> piv.head()
@@ -567,8 +641,14 @@ def epsilon(data, correction='gg'):
 
     >>> pg.epsilon(piv)
     0.727166420214127
+
+    which gives the same epsilon value as the long-format dataframe.
     """
     assert isinstance(data, pd.DataFrame), 'Data must be a pandas Dataframe.'
+
+    # If data is in long-format, convert to wide-format
+    if all([v is not None for v in [dv, within, subject]]):
+        data = _long_to_wide_rm(data, dv=dv, within=within, subject=subject)
 
     # Drop rows with missing values
     data = data.dropna()

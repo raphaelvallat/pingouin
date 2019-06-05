@@ -88,29 +88,47 @@ class TestDistribution(TestCase):
         eps_gg = epsilon(df_pivot)
         eps_hf = epsilon(df_pivot, correction='hf')
         eps_lb = epsilon(df_pivot, correction='lb')
+        # In long-format
+        eps_gg_rm = epsilon(df, subject='Subject', within='Time', dv='Scores')
+        eps_hf_rm = epsilon(df, subject='Subject', within='Time', dv='Scores',
+                            correction='hf')
+        assert np.isclose(eps_gg_rm, eps_gg)
+        assert np.isclose(eps_hf_rm, eps_hf)
         # Compare with ezANOVA
         assert np.allclose([eps_gg, eps_hf, eps_lb], [0.9987509, 1, 0.5])
 
         # Time has only two values so epsilon is one.
-        assert epsilon(pa, 'lb') == epsilon(pa, 'gg') == epsilon(pa, 'hf')
+        assert epsilon(pa, correction='lb') == epsilon(pa, correction='gg')
+        assert epsilon(pa, correction='gg') == epsilon(pa, correction='hf')
         # Lower bound <= Greenhouse-Geisser <= Huynh-Feldt
-        assert epsilon(pb, 'lb') <= epsilon(pb, 'gg') <= epsilon(pb, 'hf')
-        assert epsilon(pab, 'lb') <= epsilon(pab, 'gg') <= epsilon(pab, 'hf')
+        assert epsilon(pb, correction='lb') <= epsilon(pb, correction='gg')
+        assert epsilon(pb, correction='gg') <= epsilon(pb, correction='hf')
+        assert epsilon(pab, correction='lb') <= epsilon(pab, correction='gg')
+        assert epsilon(pab, correction='gg') <= epsilon(pab, correction='hf')
         # Lower bound == 0.5 for pb and pab
-        assert epsilon(pb, 'lb') == epsilon(pab, 'lb') == 0.5
+        assert epsilon(pb, correction='lb') == epsilon(pab, correction='lb')
         assert np.allclose(epsilon(pb), 0.9691030)  # ez
         assert np.allclose(epsilon(pb, correction='hf'), 1.0)  # ez
         # Epsilon for the interaction (shape = (2, N))
         assert np.allclose(epsilon(pab), 0.7271664)
-        assert np.allclose(epsilon(pab, 'hf'), 0.831161)
+        assert np.allclose(epsilon(pab, correction='hf'), 0.831161)
         assert epsilon(pab) == epsilon(pab.swaplevel(axis=1))
         assert epsilon(pab_single) == epsilon(pab_single.swaplevel(axis=1))
+        eps_gg_rm = epsilon(data, subject='Subject', dv='Performance',
+                            within=['Time', 'Metric'])
+        assert eps_gg_rm == epsilon(pab)
         # Now with a (3, 4) two-way design
         assert np.allclose(epsilon(pa1), 0.9963275)
-        assert np.allclose(epsilon(pa1, 'hf'), 1.)
+        assert np.allclose(epsilon(pa1, correction='hf'), 1.)
         assert np.allclose(epsilon(pb1), 0.9716288)
-        assert np.allclose(epsilon(pb1, 'hf'), 1.)
+        assert np.allclose(epsilon(pb1, correction='hf'), 1.)
         assert 0.8 < epsilon(pab1) < .90  # Pingouin = .822, ez = .856
+        eps_gg_rm = epsilon(df3, subject='subj', dv='dv',
+                            within=['within1', 'within2'])
+        assert eps_gg_rm == epsilon(pab1)
+        # With missing values
+        eps_gg_rm = epsilon(df_nan, subject='Subject', within='Time',
+                            dv='Scores')
         # 3 repeated measures factor
         with pytest.raises(ValueError):
             epsilon(pab_3fac)
