@@ -139,6 +139,10 @@ class TestDistribution(TestCase):
         _, W, _, _, p = sphericity(df_pivot, method='mauchly')
         assert W == 0.999
         assert np.round(p, 3) == 0.964
+        _, W, _, _, p = sphericity(df, dv='Scores', subject='Subject',
+                                   within='Time')  # Long-format
+        assert W == 0.999
+        assert np.round(p, 3) == 0.964
         assert sphericity(pa)[0]  # Only two levels so sphericity = True
         spher = sphericity(pb)
         assert spher[0]
@@ -147,12 +151,18 @@ class TestDistribution(TestCase):
         assert np.isclose(spher[4], 0.8784418)  # P-value
         # JNS
         sphericity(df_pivot, method='jns')
+        sphericity(df, dv='Scores', subject='Subject', within=['Time'],
+                   method='jns')
         # Two-way design of shape (2, N)
         spher = sphericity(pab)
         assert spher[1] == 0.625
         assert spher[3] == 2
         assert np.isclose(spher[4], 0.1523917)
         assert sphericity(pab)[1] == sphericity(pab.swaplevel(axis=1))[1]
+        spher_long = sphericity(data, subject='Subject', dv='Performance',
+                                within=['Time', 'Metric'])
+        assert spher_long[1] == 0.625
+        assert np.isclose(spher[4], spher_long[4])
         sphericity(pab_single)  # For coverage
         # Now with a (3, 4) two-way design
         # First, main effect
@@ -160,12 +170,21 @@ class TestDistribution(TestCase):
         assert spher[0]
         assert spher[1] == 0.958  # W
         assert round(spher[4], 4) == 0.8436  # P-value
+        spher2 = sphericity(df3, subject='subj', dv='dv', within=['within2'])
+        assert spher[1] == spher2[1]
+        assert spher[4] == spher2[4]
         # And then interaction (ValueError)
         with pytest.raises(ValueError):
             sphericity(pab1)
+        # Same with long-format
+        with pytest.raises(ValueError):
+            sphericity(df3, subject='subj', dv='dv',
+                       within=['within1', 'within2'])
         # 3 repeated measures factor
         with pytest.raises(ValueError):
             sphericity(pab_3fac)
+        # With missing values
+        sphericity(df_nan, subject='Subject', within='Time', dv='Scores')
 
     def test_anderson(self):
         """Test function test_anderson."""

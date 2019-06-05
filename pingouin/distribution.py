@@ -535,6 +535,11 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     eps : float
         Epsilon adjustement factor.
 
+    See Also
+    --------
+    sphericity : Mauchly and JNS test for sphericity.
+    homoscedasticity : Test equality of variance.
+
     Notes
     -----
     The **lower bound epsilon** is:
@@ -702,21 +707,30 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     return eps
 
 
-def sphericity(data, method='mauchly', alpha=.05):
+def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
+               alpha=.05):
     """Mauchly and JNS test for sphericity.
 
     Parameters
     ----------
     data : pd.DataFrame
         DataFrame containing the repeated measurements.
-        ``data`` must be in wide-format. To convert from wide to long format,
-        use the :py:func:`pandas.pivot_table` function.
-
-        To test for an interaction term between two repeated measures factors,
-        ``data`` must have a two-levels :py:class:`pandas.MultiIndex` columns.
-        The current implementation only works if one of the two factors has
-        no more than 2 levels (e.g. factor1 = ['Pre', 'Post'] *
-        factor2 = ['A', 'B', 'C']).
+        Both wide and long-format dataframe are supported for this function.
+        To test for an interaction term between two repeated measures factors
+        with a wide-format dataframe, ``data`` must have a two-levels
+        :py:class:`pandas.MultiIndex` columns.
+    dv : string
+        Name of column containing the dependant variable (only required if
+        ``data`` is in long format).
+    within : string
+        Name of column containing the within factor (only required if ``data``
+        is in long format).
+        If ``within`` is a list with two strings, this function computes
+        the epsilon factor for the interaction between the two within-subject
+        factor.
+    subject : string
+        Name of column containing the subject identifier (only required if
+        ``data`` is in long format).
     method : str
         Method to compute sphericity ::
 
@@ -739,8 +753,15 @@ def sphericity(data, method='mauchly', alpha=.05):
     p : float
         P-value.
 
+    Raises
+    ------
+    ValueError
+        When testing for an interaction, if both within-subject factors have
+        more than 2 levels (not yet supported in Pingouin).
+
     See Also
     --------
+    epsilon : Epsilon adjustement factor for repeated measures.
     homoscedasticity : Test equality of variance.
     normality : Univariate normality test.
 
@@ -800,7 +821,7 @@ def sphericity(data, method='mauchly', alpha=.05):
 
     Examples
     --------
-    1. Mauchly test for sphericity
+    Mauchly test for sphericity using a wide-format dataframe
 
     >>> import pandas as pd
     >>> import pingouin as pg
@@ -810,17 +831,56 @@ def sphericity(data, method='mauchly', alpha=.05):
     >>> pg.sphericity(data)
     (True, 0.21, 4.677, 2, 0.09649016283209666)
 
-    2. JNS test for sphericity
+    John, Nagao and Sugiura (JNS) test
 
     >>> pg.sphericity(data, method='jns')
     (False, 1.118, 6.176, 2, 0.0456042403075203)
 
-    Now, let's test the sphericity for an interaction between two repeated
-    measures factor, where one within-factor has two levels, and the other
-    within-factor has three levels:
+    Now using a long-format dataframe
 
     >>> data = pg.read_dataset('rm_anova2')
-    >>> # We need to pivot from long-format to wide-format
+    >>> data.head()
+       Subject Time   Metric  Performance
+    0        1  Pre  Product           13
+    1        2  Pre  Product           12
+    2        3  Pre  Product           17
+    3        4  Pre  Product           12
+    4        5  Pre  Product           19
+
+    Let's first test sphericity for the *Time* within-subject factor
+
+    >>> pg.sphericity(data, dv='Performance', subject='Subject',
+    ...            within='Time')
+    (True, nan, nan, 1, 1.0)
+
+    Since *Time* has only two levels (Pre and Post), the sphericity assumption
+    is necessarily met.
+
+    The *Metric* factor, however, has three levels:
+
+    >>> pg.sphericity(data, dv='Performance', subject='Subject',
+    ...            within=['Metric'])
+    (True, 0.968, 0.259, 2, 0.8784417991645136)
+
+    The p-value value is very large, and the test therefore indicates that
+    there is no violation of sphericity.
+
+    Now, let's calculate the epsilon for the interaction between the two
+    repeated measures factor. The current implementation in Pingouin only works
+    if at least one of the two within-subject factors has no more than two
+    levels.
+
+    >>> pg.sphericity(data, dv='Performance', subject='Subject',
+    ...            within=['Time', 'Metric'])
+    (True, 0.625, 3.763, 2, 0.15239168046050933)
+
+    Here again, there is no violation of sphericity acccording to Mauchly's
+    test.
+
+    Alternatively, we could use a wide-format dataframe with two column
+    levels:
+
+    >>> # Pivot from long-format to wide-format
     >>> piv = data.pivot_table(index='Subject', columns=['Time', 'Metric'],
     ...                        values='Performance')
     >>> piv.head()
@@ -835,8 +895,14 @@ def sphericity(data, method='mauchly', alpha=.05):
 
     >>> pg.sphericity(piv)
     (True, 0.625, 3.763, 2, 0.15239168046050933)
+
+    which gives the same output as the long-format dataframe.
     """
     assert isinstance(data, pd.DataFrame), 'Data must be a pandas Dataframe.'
+
+    # If data is in long-format, convert to wide-format
+    if all([v is not None for v in [dv, within, subject]]):
+        data = _long_to_wide_rm(data, dv=dv, within=within, subject=subject)
 
     # Remove rows with missing values in wide-format dataframe
     data = data.dropna()
