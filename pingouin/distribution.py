@@ -423,6 +423,53 @@ def anderson(*args, dist='norm'):
     return from_dist, sig_level
 
 
+def _check_multilevel_rm(data, func='epsilon'):
+    """Check if data has multilevel columns for wide-format repeated measures.
+    ``func`` can be either epsilon or mauchly
+    """
+    # Support for two-way factor of shape (2, N)
+    if data.columns.nlevels == 1:
+        # For code clarity only
+        return data
+    elif data.columns.nlevels == 2:
+        # We sort the multiindex so that the higher factor has fewer levels
+        # Make sure to use remove_unused_levels to get the "true" shape
+        levshape = data.columns.remove_unused_levels().levshape
+        data = data.reorder_levels(np.argsort(levshape), axis=1)
+        levshape = np.sort(levshape)
+        # The first factor can have only one level (see if .. below), however,
+        # the second factor must have at least two levels.
+        assert levshape[1] >= 2, 'Factor must have at least two levels.'
+        if levshape[0] == 1:
+            # Two factors but first factor has only one level (= one-way)
+            data = data.droplevel(level=0, axis=1)
+        elif levshape[0] == 2:
+            # One factor has only two-level, e.g. (2, N) or (N, 2)
+            # Let's make sure that the first factor is sorted
+            data = data.sort_index(level=0, axis=1)
+            # Now let's compute the difference matrix of the first level
+            # We end up with a one-way design. It is similar to applying
+            # a paired T-test to gain scores instead of using repeated measures
+            # on two time points. Here we have computed the gain scores.
+            data = data.groupby(level=1, axis=1).diff(axis=1).dropna(axis=1)
+            data = data.droplevel(level=0, axis=1)
+        else:
+            # Both factors have more than 2 levels -- differ from R / JASP
+            if func == 'epsilon':
+                warnings.warn("Epsilon values might be innaccurate in "
+                              "two-way repeated measures design where each  "
+                              "factor has more than 2 levels. Please  "
+                              "double-check your results.")
+            else:
+                raise ValueError("If using two-way repeated measures design, "
+                                 "at least one factor must have exactly two "
+                                 "levels. More complex designs are not yet "
+                                 "supported.")
+        return data
+    else:
+        raise ValueError("Only one-way or two-way designs are supported.")
+
+
 def epsilon(data, correction='gg'):
     """Epsilon adjustement factor for repeated measures.
 
@@ -527,39 +574,7 @@ def epsilon(data, correction='gg'):
     data = data.dropna()
 
     # Support for two-way factor of shape (2, N)
-    if data.columns.nlevels == 1:
-        # For code clarity only
-        pass
-    elif data.columns.nlevels == 2:
-        # We sort the multiindex so that the higher factor has fewer levels
-        # Make sure to use remove_unused_levels to get the "true" shape
-        levshape = data.columns.remove_unused_levels().levshape
-        data = data.reorder_levels(np.argsort(levshape), axis=1)
-        levshape = np.sort(levshape)
-        # The first factor can have only one level (see if .. below), however,
-        # the second factor must have at least two levels.
-        assert levshape[1] >= 2, 'Factor must have at least two levels.'
-        if levshape[0] == 1:
-            # Two factors but first factor has only one level (= one-way)
-            data = data.droplevel(level=0, axis=1)
-        elif levshape[0] == 2:
-            # One factor has only two-level, e.g. (2, N) or (N, 2)
-            # Let's make sure that the first factor is sorted
-            data = data.sort_index(level=0, axis=1)
-            # Now let's compute the difference matrix of the first level
-            # We end up with a one-way design. It is similar to applying
-            # a paired T-test to gain scores instead of using repeated measures
-            # on two time points. Here we have computed the gain scores.
-            data = data.groupby(level=1, axis=1).diff(axis=1).dropna(axis=1)
-            data = data.droplevel(level=0, axis=1)
-        else:
-            # Both factors have more than 2 levels -- differ from R / JASP
-            warnings.warn("Epsilon values might be innaccurate in "
-                          "two-way repeated measures design where each factor "
-                          "has more than 2 levels. Please double-check your "
-                          "results.")
-    else:
-        raise ValueError("Only one-way or two-way designs are supported.")
+    data = _check_multilevel_rm(data, func='epsilon')
 
     # Covariance matrix
     S = data.cov()
@@ -747,36 +762,7 @@ def sphericity(data, method='mauchly', alpha=.05):
     data = data.dropna()
 
     # Support for two-way factor of shape (2, N)
-    if data.columns.nlevels == 1:
-        # For code clarity only
-        pass
-    elif data.columns.nlevels == 2:
-        # We sort the multiindex so that the higher factor has fewer levels
-        data = data.reorder_levels(np.argsort(data.columns.levshape), axis=1)
-        levshape = data.columns.remove_unused_levels().levshape
-        if levshape[0] == 1:
-            # Two factors but first factor has only one level (= one-way)
-            data = data.droplevel(level=0, axis=1)
-        elif levshape[0] == 2:
-            # One factor has only two-level, e.g. (2, N) or (N, 2)
-            # Let's make sure that the first factor is sorted
-            data = data.sort_index(level=0, axis=1)
-            # Now let's compute the difference matrix of the first level
-            # We end up with a one-way design. It is similar to applying
-            # a paired T-test to gain scores instead of using repeated measures
-            # on two time points. Here we have computed the gain scores.
-            data = data.groupby(level=1, axis=1).diff(axis=1).dropna(axis=1)
-            data = data.droplevel(level=0, axis=1)
-        else:
-            # Both factors have more than 2 levels
-            raise ValueError("If using two-way repeated measures design, at "
-                             "least one factor must have exactly two levels. "
-                             "More complex designs are not yet supported.")
-            # ka = data.columns.levels[0].size
-            # kb = data.columns.levels[1].size
-            # d = (ka - 1) * (kb - 1)
-    else:
-        raise ValueError("Only one-way or two-way design are supported.")
+    data = _check_multilevel_rm(data, func='mauchly')
 
     # From here, we work only with one-way design
     n, k = data.shape
