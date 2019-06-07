@@ -20,6 +20,9 @@
 .. image:: https://codecov.io/gh/raphaelvallat/pingouin/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/raphaelvallat/pingouin
 
+.. image:: https://pepy.tech/badge/pingouin/month
+    :target: https://pepy.tech/badge/pingouin/month
+
 .. image:: http://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244/status.svg
     :target: http://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244
 
