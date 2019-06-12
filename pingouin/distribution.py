@@ -947,7 +947,7 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
         S = data.cov().values  # values here, otherwise S.mean() != grandmean
         S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
         eig = np.linalg.eigvalsh(S_pop)[1:]
-        eig = eig[eig > 0.1]  # Additional check to remove very low eig
+        eig = eig[eig > 0.001]  # Additional check to remove very low eig
         W = np.product(eig) / (eig.sum() / d)**d
         logW = np.log(W)
 
