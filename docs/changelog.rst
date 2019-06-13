@@ -78,7 +78,7 @@ c. :py:func:`pingouin.bayesfactor_ttest` and :py:func:`pingouin.bayesfactor_pear
 d. :py:func:`pingouin.pairwise_ttests` now returns the degrees of freedom (dof).
 e. Better rounding of float in :py:func:`pingouin.pairwise_ttests`.
 f. Support for wide-format data in :py:func:`pingouin.rm_anova`
-g. :py:func:`pingouin.ttest` now returns the confidence intervals around the T-values.
+g. :py:func:`pingouin.ttest` now returns the confidence intervals around the difference in means.
 
 **Missing values**
 

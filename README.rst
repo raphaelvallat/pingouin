@@ -63,7 +63,7 @@
 Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
 
 For example, the :code:`ttest_ind` function of SciPy returns only the T-value and the p-value. By contrast,
-the :code:`ttest` function of Pingouin returns the T-value, p-value, degrees of freedom, effect size (Cohen's d), 95% confidence intervals, statistical power and Bayes Factor (BF10) of the test.
+the :code:`ttest` function of Pingouin returns the T-value, the p-value, the degrees of freedom, the effect size (Cohen's d), the 95% confidence intervals of the difference in means, the statistical power and the Bayes Factor (BF10) of the test.
 
 Documentation
 =============

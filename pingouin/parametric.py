@@ -47,7 +47,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         'p-val' : p-value
         'dof' : degrees of freedom
         'cohen-d' : Cohen d effect size
-        'CI95%' : 95% confidence intervals of T value
+        'CI95%' : 95% confidence intervals of the difference in means
         'power' : achieved power of the test ( = 1 - type II error)
         'BF10' : Bayes Factor of the alternative hypothesis
 
@@ -216,7 +216,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     # ci = compute_esci(d, nx, ny, paired=paired, eftype='cohen',
     #                   confidence=.95)
 
-    # 95% confidence interval for the T-value
+    # 95% confidence interval for the difference in means
     # Compare to the t.test r function
     conf = 0.975 if tail == 'two-sided' else 0.95
     tcrit = t.ppf(conf, dof)
