@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 from unittest import TestCase
 from pingouin.power import (power_ttest, power_ttest2n, power_anova,
-                            power_corr, power_chi2)
+                            power_rm_anova, power_corr, power_chi2)
 
 
 class TestPower(TestCase):
@@ -96,6 +96,50 @@ class TestPower(TestCase):
         # Error
         with pytest.raises(ValueError):
             power_anova(eta=eta, k=2)
+
+    def test_power_rm_anova(self):
+        """Test function power_rm_anova.
+        Values are compared to GPower."""
+        eta = 0.20  # f = 0.5
+        eta2 = 0.058823529411764705  # f = 0.25 (default in GPower)
+
+        # Power
+        assert np.allclose(power_rm_anova(eta=eta, m=4, n=20, epsilon=1,
+                                          corr=0.5), 0.9998070)
+        assert np.allclose(power_rm_anova(eta=eta, m=3, n=20, epsilon=0.9,
+                                          corr=0.5), 0.9968277)
+        assert np.allclose(power_rm_anova(eta=eta2, m=3, n=10, epsilon=1,
+                                          corr=0.7), 0.5271828)
+        assert np.allclose(power_rm_anova(eta=eta2, m=2, n=18, epsilon=1,
+                                          corr=0.6), 0.6089353)
+
+        # Number of repeated measures
+        assert np.allclose(power_rm_anova(eta=eta2, n=30, power=0.9),
+                           3.9274700428)
+        assert np.allclose(power_rm_anova(eta=eta2, n=20, power=0.8),
+                           5.129210021)
+
+        # Sample size
+        assert np.ceil(power_rm_anova(eta=eta, m=3, power=0.80)) == 9
+        assert np.ceil(power_rm_anova(eta=eta2, m=4, power=0.80)) == 24
+        assert np.ceil(power_rm_anova(eta2, m=3, power=0.90, corr=0.8)) == 16
+        assert np.ceil(power_rm_anova(eta2, 3, power=0.90, epsilon=0.9)) == 39
+
+        # Effect size (eta-square)
+        assert np.allclose(power_rm_anova(n=20, m=3, power=0.80), 0.0800112)
+        assert np.allclose(power_rm_anova(n=20, m=2, power=0.90), 0.12747503)
+        assert np.allclose(power_rm_anova(n=50, m=4, power=0.95,
+                                          corr=0.7), 0.02576957)
+
+        # Alpha
+        assert np.allclose(power_rm_anova(eta=eta, m=3, n=50, power=0.95,
+                                          alpha=None), 3.652063e-9)
+        assert np.allclose(power_rm_anova(eta=eta2, m=2, n=100, power=0.95,
+                                          corr=0.6, alpha=None), 0.0001797)
+
+        # Error
+        with pytest.raises(ValueError):
+            power_rm_anova(eta=eta, m=2)
 
     def test_power_corr(self):
         """Test function power_corr.
