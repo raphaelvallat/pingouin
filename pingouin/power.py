@@ -646,6 +646,63 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05,
     >>> print('alpha: %.4f' % power_rm_anova(eta=0.1, n=20, m=4, power=0.80,
     ...                                   alpha=None))
     alpha: 0.0081
+
+    Let's take a more concrete example. First, we'll load a repeated measures
+    dataset in wide-format. Each row is an observation (e.g. a subject), and
+    each column a successive repeated measurements (e.g t=0, t=1, ...).
+
+    >>> import pingouin as pg
+    >>> data = pg.read_dataset('rm_anova_wide')
+    >>> data.head()
+       Before  1 week  2 week  3 week
+    0     4.3     5.3     4.8     6.3
+    1     3.9     2.3     5.6     4.3
+    2     4.5     2.6     4.1     NaN
+    3     5.1     4.2     6.0     6.3
+    4     3.8     3.6     4.8     6.8
+
+    Note that this dataset has some missing values. We'll simply delete any
+    row with one or more missing values, and then compute a repeated
+    measures ANOVA:
+
+    >>> data = data.dropna()
+    >>> pg.rm_anova(data)
+       Source  ddof1  ddof2      F     p-unc    np2    eps
+    0  Within      3     24  5.201  0.006557  0.394  0.694
+
+    The repeated measures ANOVA is significant at the 0.05 level. Now, we can
+    easily compute the power of the ANOVA with the information in the ANOVA
+    table:
+
+    >>> # n is the sample size and m is the number of repeated measures
+    >>> n, m = data.shape
+    >>> pg.power_rm_anova(eta=0.394, m=m, n=n, epsilon=0.694)
+    0.9976707714861207
+
+    Our ANOVA has a very high statistical power. However, to be even more
+    accurate in our power calculation, we should also fill in the average
+    correlation among repeated measurements. Since our dataframe is in
+    wide-format (with each column being a successive measurement), this can
+    be done by taking the mean of the superdiagonal of the correlation matrix,
+    which is similar to manually calculating the correlation between each
+    successive pairwise measurements and then taking the mean.
+    Since correlation coefficients are not normally distributed, we
+    use the *r-to-z* transform prior to averaging (:py:func:`numpy.arctanh`),
+    and then the *z-to-r* transform (:py:func:`numpy.tanh`) to convert back to
+    a correlation coefficient. This gives a more precise estimate of the mean.
+
+    >>> import numpy as np
+    >>> corr = np.diag(data.corr(), k=1)
+    >>> avgcorr = np.tanh(np.arctanh(corr).mean())
+    >>> avgcorr
+    -0.19955358859483566
+
+    In this example, we're using a fake dataset and the average correlation is
+    negative. However, it will most likely be positive with real data. Let's
+    now compute the final power of the repeated measures ANOVA:
+
+    >>> pg.power_rm_anova(eta=0.394, m=m, n=n, epsilon=0.694, corr=avgcorr)
+    0.8545404196391064
     """
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [eta, m, n, power, alpha]])
@@ -655,7 +712,7 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05,
 
     # Safety checks
     assert 0 < epsilon <= 1, 'epsilon must be between 0 and 1.'
-    assert 0 < corr < 1, 'corr must be between 0 and 1.'
+    assert -1 < corr < 1, 'corr must be between -1 and 1.'
     if eta is not None:
         eta = abs(eta)
         f_sq = eta / (1 - eta)
@@ -688,7 +745,7 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05,
 
         try:
             return brenth(_eval_m, 2, 100, args=(f_sq, n, power, alpha, corr))
-        except ValueError:
+        except ValueError:  # pragma: no cover
             return np.nan
 
     elif n is None:
@@ -699,7 +756,7 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05,
 
         try:
             return brenth(_eval_n, 5, 1e+6, args=(f_sq, m, power, alpha, corr))
-        except ValueError:
+        except ValueError:  # pragma: no cover
             return np.nan
 
     elif eta is None:

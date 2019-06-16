@@ -112,6 +112,8 @@ class TestPower(TestCase):
                                           corr=0.7), 0.5271828)
         assert np.allclose(power_rm_anova(eta=eta2, m=2, n=18, epsilon=1,
                                           corr=0.6), 0.6089353)
+        assert np.allclose(power_rm_anova(eta=eta2, m=3, n=10,
+                                          corr=-0.5), 0.13818)  # Negative corr
 
         # Number of repeated measures
         assert np.allclose(power_rm_anova(eta=eta2, n=30, power=0.9),
