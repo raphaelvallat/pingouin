@@ -6,7 +6,7 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
-v0.2.7 (July 2019)
+v0.2.7 (June 2019)
 ------------------
 
 **Dependencies**
