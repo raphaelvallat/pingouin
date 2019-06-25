@@ -9,6 +9,10 @@ What's new
 v0.2.7 (July 2019)
 ------------------
 
+**Dependencies**
+
+a. Pingouin now requires statsmodels>=0.10.0 (latest release June 2019) and is compatible with SciPy 1.3.0.
+
 **Enhancements**
 
 a. Added support for long-format dataframe in :py:func:`pingouin.sphericity` and :py:func:`pingouin.epsilon`.

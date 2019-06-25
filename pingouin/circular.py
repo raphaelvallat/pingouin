@@ -150,7 +150,7 @@ def circ_corrcl(x, y, tail='two-sided'):
     >>> y = [1.593, 1.291, -0.248, -2.892, 0.102]
     >>> r, pval = circ_corrcl(x, y)
     >>> print(r, pval)
-    0.109 0.9708899750629236
+    0.109 0.9708899750629237
     """
     from scipy.stats import pearsonr, chi2
     x = np.asarray(x)
