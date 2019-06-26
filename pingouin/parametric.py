@@ -55,7 +55,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     --------
     mwu : non-parametric independent T-test
     wilcoxon : non-parametric paired T-test
-    anova : One-way and two-way ANOVA
+    anova : One-way and N-way ANOVA
     rm_anova : One-way and two-way repeated measures ANOVA
     compute_effsize : Effect sizes
 
@@ -327,7 +327,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
 
     See Also
     --------
-    anova : One-way and two-way ANOVA
+    anova : One-way and N-way ANOVA
     mixed_anova : Two way mixed ANOVA
     friedman : Non-parametric one-way repeated measures ANOVA
 
@@ -738,9 +738,9 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
     return aov
 
 
-def anova(dv=None, between=None, data=None, detailed=False,
+def anova(dv=None, between=None, data=None, ss_type=2, detailed=False,
           export_filename=None):
-    """One-way and two-way ANOVA.
+    """One-way and *N*-way ANOVA.
 
     Parameters
     ----------
@@ -749,14 +749,20 @@ def anova(dv=None, between=None, data=None, detailed=False,
     between : string or list with two elements
         Name of column(s) in ``data`` containing the between-subject factor(s).
         If ``between`` is a single string, a one-way ANOVA is computed.
-        If ``between`` is a list with two elements
-        (e.g. ['Factor1', 'Factor2']), a two-way ANOVA is computed.
+        If ``between`` is a list with two or more elements, a *N*-way ANOVA is
+        performed.
+        Note that Pingouin will internally call statsmodels to calculate
+        ANOVA with 3 or more factors, or unbalanced two-way ANOVA.
     data : pandas DataFrame
         DataFrame. Note that this function can also directly be used as a
         Pandas method, in which case this argument is no longer needed.
+    ss_type : int
+        Specify how the sums of squares is calculated for *unbalanced* design
+        with 2 or more factors. Can be 1, 2 (default), or 3. This has no impact
+        on one-way design or N-way ANOVA with balanced data.
     detailed : boolean
         If True, return a detailed ANOVA table
-        (default True for two-way ANOVA).
+        (default True for N-way ANOVA).
     export_filename : string
         Filename (without extension) for the output file.
         If None, do not export the table.
@@ -828,10 +834,9 @@ def anova(dv=None, between=None, data=None, detailed=False,
     tested against R, Matlab and JASP.
 
     .. warning :: Versions of Pingouin below 0.2.5 gave wrong results for
-        **unbalanced two-way ANOVA**. This issue has been resolved in
-        Pingouin>=0.2.5. In such cases, a type II ANOVA is calculated via an
-        internal call to the statsmodels package. This latter package is
-        therefore required for two-way ANOVA with unequal sample sizes.
+        **unbalanced N-way ANOVA**. This issue has been resolved in
+        Pingouin>=0.2.5. In such cases, the ANOVA is calculated via an
+        internal call to the statsmodels package.
 
     References
     ----------
@@ -883,14 +888,37 @@ def anova(dv=None, between=None, data=None, detailed=False,
     0             Diet  390.625  1.0  390.625  7.423  0.034  0.553
     1         Exercise  180.625  1.0  180.625  3.432  0.113  0.364
     2  Diet * Exercise   15.625  1.0   15.625  0.297  0.605  0.047
-    3         residual  315.750  6.0   52.625    NaN    NaN    NaN
+    3         Residual  315.750  6.0   52.625    NaN    NaN    NaN
+
+    Three-way ANOVA, type 3 sums of squares (requires statsmodels)
+
+    >>> data = pg.read_dataset('anova3')
+    >>> data.anova(dv='Cholesterol', between=['Sex', 'Risk', 'Drug'],
+    ...            ss_type=3)
+                  Source      SS    DF      MS       F     p-unc    np2
+    0                Sex   2.075   1.0   2.075   2.462  0.123191  0.049
+    1               Risk  11.332   1.0  11.332  13.449  0.000613  0.219
+    2               Drug   0.816   2.0   0.408   0.484  0.619249  0.020
+    3         Sex * Risk   0.117   1.0   0.117   0.139  0.710541  0.003
+    4         Sex * Drug   2.564   2.0   1.282   1.522  0.228711  0.060
+    5        Risk * Drug   2.438   2.0   1.219   1.446  0.245485  0.057
+    6  Sex * Risk * Drug   1.844   2.0   0.922   1.094  0.343041  0.044
+    7           Residual  40.445  48.0   0.843     NaN       NaN    NaN
     """
     if isinstance(between, list):
-        if len(between) == 2:
-            return anova2(dv=dv, between=between, data=data,
-                          export_filename=export_filename)
+        if len(between) == 0:
+            raise ValueError('between is empty.')
         elif len(between) == 1:
             between = between[0]
+        elif len(between) == 2:
+            # Two factors with balanced design = Pingouin implementation
+            # Two factors with unbalanced design = statsmodels
+            return anova2(dv=dv, between=between, data=data,
+                          ss_type=ss_type, export_filename=export_filename)
+        elif len(between) > 2:
+            # 3 or more factors with (un)-balanced design = statsmodels
+            return anovan(dv=dv, between=between, data=data,
+                          ss_type=ss_type, export_filename=export_filename)
 
     # Check data
     _check_dataframe(dv=dv, between=between, data=data, effects='between')
@@ -961,58 +989,31 @@ def anova(dv=None, between=None, data=None, detailed=False,
     return aov
 
 
-def anova2(dv=None, between=None, data=None, export_filename=None):
-    """Two-way ANOVA.
+def anova2(dv=None, between=None, data=None, ss_type=2, export_filename=None):
+    """Two-way balanced ANOVA in pure Python + Pandas.
 
     This is an internal function. The main call to this function should be done
     by the :py:func:`pingouin.anova` function.
-
-    Parameters
-    ----------
-    dv : string
-        Name of column containing the dependant variable.
-    between : list of string
-        Name of column containing the two between factors. Must contain exactly
-        two values (e.g. ['factor1', 'factor2'])
-    data : pandas DataFrame
-        DataFrame
-    export_filename : string
-        Filename (without extension) for the output file.
-        If None, do not export the table.
-        By default, the file will be created in the current python console
-        directory. To change that, specify the filename with full path.
-
-    Returns
-    -------
-    aov : DataFrame
-        ANOVA summary ::
-
-        'Source' : Factor names
-        'SS' : Sums of squares
-        'DF' : Degrees of freedom
-        'MS' : Mean squares
-        'F' : F-values
-        'p-unc' : uncorrected p-values
-        'np2' : Partial eta-square effect sizes
     """
     # Validate the dataframe
     _check_dataframe(dv=dv, between=between, data=data, effects='between')
 
+    assert len(between) == 2, 'Must have exactly two between-factors variables'
     fac1, fac2 = between
 
     # Drop missing values
     data = data[[dv, fac1, fac2]].dropna()
+    assert data.shape[0] >= 5, 'Data must have at least 5 non-missing values.'
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
-
     grp_both = data.groupby(between)[dv]
-    ng1, ng2 = data[fac1].nunique(), data[fac2].nunique()
 
     if grp_both.count().nunique() == 1:
         # BALANCED DESIGN
         aov_fac1 = anova(data=data, dv=dv, between=fac1, detailed=True)
         aov_fac2 = anova(data=data, dv=dv, between=fac2, detailed=True)
+        ng1, ng2 = data[fac1].nunique(), data[fac2].nunique()
         # Sums of squares
         ss_fac1 = aov_fac1.loc[0, 'SS']
         ss_fac2 = aov_fac2.loc[0, 'SS']
@@ -1026,23 +1027,8 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
         df_resid = data[dv].size - (ng1 * ng2)
     else:
         # UNBALANCED DESIGN
-        import statsmodels.api as sm
-        from statsmodels.formula.api import ols
-        warnings.warn("Groups are unbalanced. Type II ANOVA will be computed "
-                      "using statsmodels")
-        formula = "%s ~ C(%s) * C(%s)" % (dv, fac1, fac2)
-        lm = ols(formula, data=data).fit()
-        sts = sm.stats.anova_lm(lm, typ=2)
-        # Sums of squares
-        ss_fac1 = sts.iloc[0, 0]
-        ss_fac2 = sts.iloc[1, 0]
-        ss_inter = sts.iloc[2, 0]
-        ss_resid = sts.iloc[3, 0]
-        # Degrees of freedom
-        df_fac1 = sts.iloc[0, 1]
-        df_fac2 = sts.iloc[1, 1]
-        df_inter = sts.iloc[2, 1]
-        df_resid = sts.iloc[3, 1]
+        return anovan(dv=dv, between=between, data=data, ss_type=ss_type,
+                      export_filename=export_filename)
 
     # Mean squares
     ms_fac1 = ss_fac1 / df_fac1
@@ -1087,6 +1073,80 @@ def anova2(dv=None, between=None, data=None, export_filename=None):
     return aov
 
 
+def anovan(dv=None, between=None, data=None, ss_type=2, export_filename=None):
+    """N-way ANOVA using statsmodels.
+
+    This is an internal function. The main call to this function should be done
+    by the :py:func:`pingouin.anova` function.
+    """
+    # Check that stasmodels is installed
+    from pingouin.utils import _is_statsmodels_installed
+    _is_statsmodels_installed(raise_error=True)
+    from statsmodels.api import stats
+    from statsmodels.formula.api import ols
+
+    # Validate the dataframe
+    _check_dataframe(dv=dv, between=between, data=data, effects='between')
+    all_cols = _flatten_list([dv, between])
+    bad_chars = [',', '(', ')', ':']
+    if not all([c not in v for c in bad_chars for v in all_cols]):
+        err_msg = "comma, bracket, and colon are not allowed in column names."
+        raise ValueError(err_msg)
+
+    # Drop missing values
+    data = data[all_cols].dropna()
+    assert data.shape[0] >= 5, 'Data must have at least 5 non-missing values.'
+
+    # Reset index (avoid duplicate axis error)
+    data = data.reset_index(drop=True)
+
+    # Create R-like formula
+    formula = dv + ' ~ '
+    for fac in between:
+        formula += 'C(' + fac + ', Sum) * '
+    formula = formula[:-3]  # Remove last * and space
+
+    # Fit using statsmodels
+    lm = ols(formula, data=data).fit()
+    aov = stats.anova_lm(lm, typ=ss_type)
+
+    # Convert to Pingouin-like dataframe
+    if ss_type == 1:
+        # statsmodels output is not exactly the same when ss_type = 1
+        aov = aov[['sum_sq', 'df', 'F', 'PR(>F)']]
+    if ss_type == 3:
+        # Remove intercept row
+        aov = aov.iloc[1:, :]
+
+    aov = aov.reset_index()
+    aov = aov.rename(columns={'index': 'Source', 'sum_sq': 'SS',
+                              'df': 'DF', 'PR(>F)': 'p-unc'})
+    aov['MS'] = aov['SS'] / aov['DF']
+    aov['np2'] = (aov['F'] * aov['DF']) / (aov['F'] * aov['DF'] +
+                                           aov.iloc[-1, 2])
+
+    def format_source(x):
+        for fac in between:
+            x = x.replace('C(%s, Sum)' % fac, fac)
+        return x.replace(':', ' * ')
+
+    aov['Source'] = aov['Source'].apply(format_source)
+
+    # Re-index and round
+    col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'np2']
+    aov = aov.reindex(columns=col_order)
+    aov[['SS', 'MS', 'F', 'np2']] = aov[['SS', 'MS', 'F', 'np2']].round(3)
+    aov.dropna(how='all', axis=1, inplace=True)
+
+    # Add formula to dataframe
+    aov.formula_ = formula
+
+    # Export to .csv
+    if export_filename is not None:
+        _export_table(aov, export_filename)
+    return aov
+
+
 def welch_anova(dv=None, between=None, data=None, export_filename=None):
     """One-way Welch ANOVA.
 
@@ -1119,7 +1179,7 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
 
     See Also
     --------
-    anova : One-way ANOVA
+    anova : One-way and N-way ANOVA
     rm_anova : One-way and two-way repeated measures ANOVA
     mixed_anova : Two way mixed ANOVA
     kruskal : Non-parametric one-way ANOVA
@@ -1295,7 +1355,7 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
 
     See Also
     --------
-    anova : One-way and two-way ANOVA
+    anova : One-way and N-way ANOVA
     rm_anova : One-way and two-way repeated measures ANOVA
 
     Notes
@@ -1470,7 +1530,7 @@ def ancova(dv=None, covar=None, between=None, data=None,
 
     See Also
     --------
-    anova : One-way and two-way ANOVA
+    anova : One-way and N-way ANOVA
 
     Examples
     --------

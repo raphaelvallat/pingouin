@@ -8,6 +8,8 @@ include pingouin/datasets/ancova.csv
 include pingouin/datasets/anova.csv
 include pingouin/datasets/anova2.csv
 include pingouin/datasets/anova2_unbalanced.csv
+include pingouin/datasets/anova3.csv
+include pingouin/datasets/anova3_unbalanced.csv
 include pingouin/datasets/chi2_independence.csv
 include pingouin/datasets/chi2_mcnemar.csv
 include pingouin/datasets/circular.csv

@@ -9,6 +9,7 @@ import pingouin as pg
 from unittest import TestCase
 
 df = pg.read_dataset('mixed_anova')
+df_aov3 = pg.read_dataset('anova3_unbalanced')
 data = pg.read_dataset('mediation')
 
 
@@ -22,6 +23,14 @@ class TestParametric(TestCase):
         aov = df.anova(dv='Scores', between='Group', detailed=True)
         assert aov.equals(pg.anova(dv='Scores', between='Group', detailed=True,
                                    data=df))
+        aov3_ss1 = df_aov3.anova(dv='Cholesterol', between=['Sex', 'Drug'],
+                                 ss_type=1)
+        aov3_ss2 = df_aov3.anova(dv='Cholesterol', between=['Sex', 'Drug'],
+                                 ss_type=2)
+        aov3_ss2_pg = pg.anova(dv='Cholesterol', between=['Sex', 'Drug'],
+                               data=df_aov3, ss_type=2)
+        assert not aov3_ss1.equals(aov3_ss2)
+        assert aov3_ss2.equals(aov3_ss2_pg)
 
         # Test the Welch ANOVA (Pandas)
         aov = df.welch_anova(dv='Scores', between='Group')

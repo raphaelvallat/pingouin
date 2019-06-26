@@ -15,10 +15,11 @@ __all__ = ['pcorr']
 
 
 # ANOVA
-def _anova(self, dv=None, between=None, detailed=False, export_filename=None):
+def _anova(self, dv=None, between=None, ss_type=2, detailed=False,
+           export_filename=None):
     """Return one-way and two-way ANOVA."""
-    aov = anova(data=self, dv=dv, between=between, detailed=detailed,
-                export_filename=export_filename)
+    aov = anova(data=self, dv=dv, between=between, ss_type=ss_type,
+                detailed=detailed, export_filename=export_filename)
     return aov
 
 

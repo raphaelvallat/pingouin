@@ -1,5 +1,5 @@
+import pytest
 import numpy as np
-
 from unittest import TestCase
 from pingouin.parametric import (ttest, anova, rm_anova, mixed_anova,
                                  ancova, welch_anova)
@@ -79,6 +79,9 @@ class TestParametric(TestCase):
         assert aov.loc[0, 'F'] == 4.359
         assert aov.loc[0, 'p-unc'] == 0.025
         assert aov.loc[0, 'np2'] == 0.501
+        # Error: between is an empty list
+        with pytest.raises(ValueError):
+            anova(dv='Pain threshold', between=[], data=df_pain)
         # Two-way ANOVA with balanced design
         df_aov2 = read_dataset('anova2')
         aov2 = anova(dv="Yield", between=["Blend", "Crop"],
@@ -115,6 +118,7 @@ class TestParametric(TestCase):
         assert aov2.loc[2, 'np2'] == 0.047
         # Two-way ANOVA with unbalanced design and missing values
         df_aov2.loc[9, 'Scores'] = np.nan
+        # Type 2
         aov2 = anova(dv="Scores", between=["Diet", "Exercise"],
                      data=df_aov2).round(3)
         assert aov2.loc[0, 'F'] == 10.403
@@ -126,6 +130,83 @@ class TestParametric(TestCase):
         assert aov2.loc[0, 'np2'] == 0.675
         assert aov2.loc[1, 'np2'] == 0.508
         assert aov2.loc[2, 'np2'] == 0.132
+        aov2_ss1 = anova(dv="Scores", between=["Diet", "Exercise"],
+                         ss_type=1, data=df_aov2).round(3)
+        assert not aov2.equals(aov2_ss1)
+
+        # Three-way ANOVA using statsmodels
+        # Balanced
+        df_aov3 = read_dataset('anova3')
+        aov3_ss1 = anova(dv="Cholesterol", between=['Sex', 'Risk', 'Drug'],
+                         ss_type=1, data=df_aov3,
+                         export_filename='test_export.csv').round(3)
+        aov3_ss2 = anova(dv="Cholesterol", between=['Sex', 'Risk', 'Drug'],
+                         ss_type=2, data=df_aov3).round(3)
+        aov3_ss3 = anova(dv="Cholesterol", between=['Sex', 'Risk', 'Drug'],
+                         ss_type=3, data=df_aov3).round(3)
+        # Check that type 1 == type 2 == type 3
+        assert aov3_ss1.equals(aov3_ss2)
+        assert aov3_ss2.equals(aov3_ss3)
+        # Compare with JASP
+        np.testing.assert_array_equal(aov3_ss1.loc[:, 'F'],
+                                      [2.462, 13.449, 0.484, 0.139, 1.522,
+                                       1.446, 1.094, np.nan])
+        np.testing.assert_array_equal(aov3_ss1.loc[:, 'np2'],
+                                      [0.049, 0.219, 0.020, 0.003, 0.060,
+                                       0.057, 0.044, np.nan])
+        np.testing.assert_array_equal(aov3_ss1.loc[:, 'p-unc'],
+                                      [0.123, 0.001, 0.619, 0.711, 0.229,
+                                       0.245, 0.343, np.nan])
+        # Unbalanced
+        df_aov3 = read_dataset('anova3_unbalanced')
+        aov3_ss1 = anova(dv="Cholesterol", between=['Sex', 'Risk', 'Drug'],
+                         ss_type=1, data=df_aov3).round(3)
+        aov3_ss2 = anova(dv="Cholesterol", between=['Sex', 'Risk', 'Drug'],
+                         ss_type=2, data=df_aov3).round(3)
+        aov3_ss3 = anova(dv="Cholesterol", between=['Sex', 'Risk', 'Drug'],
+                         ss_type=3, data=df_aov3).round(3)
+        # Compare with JASP
+        # Type 1
+        np.testing.assert_array_equal(aov3_ss1.loc[:, 'F'],
+                                      [4.155, 15.166, 0.422, 0.085, 0.859,
+                                       1.170, 0.505, np.nan])
+        np.testing.assert_array_equal(aov3_ss1.loc[:, 'np2'],
+                                      [0.068, 0.210, 0.015, 0.001, 0.029,
+                                       0.039, 0.017, np.nan])
+        np.testing.assert_array_equal(aov3_ss1.loc[:, 'p-unc'],
+                                      [0.046, 0., 0.658, 0.772, 0.429,
+                                       0.318, 0.606, np.nan])
+        np.testing.assert_array_equal(aov3_ss1.loc[:, 'Source'],
+                                      ['Sex', 'Risk', 'Drug', 'Sex * Risk',
+                                       'Sex * Drug', 'Risk * Drug',
+                                       'Sex * Risk * Drug', 'Residual'])
+        # Type 2
+        np.testing.assert_array_equal(aov3_ss2.loc[:, 'F'],
+                                      [3.759, 15.169, 0.429, 0.099, 0.739,
+                                       1.170, 0.505, np.nan])
+        np.testing.assert_array_equal(aov3_ss2.loc[:, 'np2'],
+                                      [0.062, 0.210, 0.015, 0.002, 0.025,
+                                       0.039, 0.017, np.nan])
+        np.testing.assert_array_equal(aov3_ss2.loc[:, 'p-unc'],
+                                      [0.057, 0., 0.653, 0.754, 0.482,
+                                       0.318, 0.606, np.nan])
+
+        # Type 3
+        np.testing.assert_array_equal(aov3_ss3.loc[:, 'F'],
+                                      [3.910, 15.555, 0.484, 0.079, 0.750,
+                                       1.060, 0.505, np.nan])
+        np.testing.assert_array_equal(aov3_ss3.loc[:, 'np2'],
+                                      [0.064, 0.214, 0.017, 0.001, 0.026,
+                                       0.036, 0.017, np.nan])
+        np.testing.assert_array_equal(aov3_ss3.loc[:, 'p-unc'],
+                                      [0.053, 0., 0.619, 0.779, 0.477,
+                                       0.353, 0.606, np.nan])
+
+        # Error: invalid char in column names
+        df_aov3['Sex:'] = np.random.normal(size=df_aov3.shape[0])
+        with pytest.raises(ValueError):
+            anova(dv='Cholesterol', between=['Sex:', 'Risk', 'Drug'],
+                  data=df_aov3)
 
     def test_welch_anova(self):
         """Test function welch_anova."""
