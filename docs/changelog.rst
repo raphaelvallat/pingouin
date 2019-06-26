@@ -11,8 +11,8 @@ v0.2.8 (July 2019)
 
 **Enhancements**
 
-a. :py:func:`pingouin.anova` now three or more between factors (with statsmodels). One-way ANOVA and balanced two-way ANOVA are computed in pure Pingouin (Python + Pandas) style, while ANOVA with three or more factors, or unbalanced two-way ANOVA are computed using statsmodels.
-b. Added ss_type to :py:func:`pingouin.anova` for unbalanced N-way design.
+a. :py:func:`pingouin.anova` now works with three or more between factors (requiring statsmodels). One-way ANOVA and balanced two-way ANOVA are computed in pure Pingouin (Python + Pandas) style, while ANOVA with three or more factors, or unbalanced two-way ANOVA are computed using statsmodels.
+b. :py:func:`pingouin.anova` now accepts different sums of squares calculation method for unbalanced N-way design (type 1, 2, or 3).
 
 v0.2.7 (June 2019)
 ------------------
