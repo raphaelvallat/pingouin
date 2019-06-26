@@ -305,6 +305,23 @@ Whenever a new release is out there, you can simply upgrade your version by typi
 
     pip install --upgrade pingouin
 
+.. ----------------------------- DONATION -----------------------------
+.. raw:: html
+
+          </div>
+        </div>
+      </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h5 class="panel-title">
+          <a data-toggle="collapse" href="#collapse_donate">I am not a programmer, how can I contribute to Pingouin?</a>
+        </h5>
+      </div>
+      <div id="collapse_donate" class="panel-collapse collapse">
+        <div class="panel-body">
+
+There are many ways to contribute to Pingouin, even if you are not a programmer, for example, reporting bugs or results that are inconsistent with other statistical softwares, improving the documentation and examples, or, even `buying the developpers a coffee <https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=K2FZVJGCKYPAG&currency_code=USD&source=url>`_!
 
 .. ----------------------------- CITING PINGOUIN -----------------------------
 .. raw:: html

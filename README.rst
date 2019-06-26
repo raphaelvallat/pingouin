@@ -444,7 +444,7 @@ The functions that are currently supported as pandas method are:
 Development
 ===========
 
-Pingouin was created and is maintained by `Raphael Vallat <https://raphaelvallat.github.io>`_. Contributions are more than welcome so feel free to contact me, open an issue or submit a pull request!
+Pingouin was created and is maintained by `Raphael Vallat <https://raphaelvallat.github.io>`_, mostly during his spare time. Contributions are more than welcome so feel free to contact me, open an issue or submit a pull request!
 
 To see the code or report a bug, please visit the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
 
