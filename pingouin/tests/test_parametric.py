@@ -85,7 +85,7 @@ class TestParametric(TestCase):
         # Two-way ANOVA with balanced design
         df_aov2 = read_dataset('anova2')
         aov2 = anova(dv="Yield", between=["Blend", "Crop"],
-                     data=df_aov2).round(3)
+                     export_filename='test_export.csv', data=df_aov2).round(3)
         assert aov2.loc[0, 'MS'] == 2.042
         assert aov2.loc[1, 'MS'] == 1368.292
         assert aov2.loc[2, 'MS'] == 1180.042
@@ -271,6 +271,11 @@ class TestParametric(TestCase):
         # With missing values
         df2 = read_dataset('rm_missing')
         df2.rm_anova(dv='BOLD', within=['Session', 'Time'], subject='Subj')
+
+        # Error: more than two factors
+        with pytest.raises(ValueError):
+            df2.rm_anova(dv='BOLD', within=['Session', 'Time', 'Wrong'],
+                         subject='Subj')
 
     def test_mixed_anova(self):
         """Test function anova.

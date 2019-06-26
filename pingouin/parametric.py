@@ -440,11 +440,15 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     1           Error  209.952  92   2.282       -            -      -   -
     """
     if isinstance(within, list):
-        if len(within) == 2:
+        assert len(within) > 0, 'Within is empty.'
+        if len(within) == 1:
+            within = within[0]
+        elif len(within) == 2:
             return rm_anova2(dv=dv, within=within, data=data, subject=subject,
                              export_filename=export_filename)
-        elif len(within) == 1:
-            within = within[0]
+        else:
+            raise ValueError('Repeated measures ANOVA with more than three '
+                             'factors are not yet supported.')
 
     # Check data format
     if all([v is None for v in [dv, within, subject]]):
@@ -878,7 +882,7 @@ def anova(dv=None, between=None, data=None, ss_type=2, detailed=False,
     0         Blend     2.042   1     2.042  0.004  0.952  0.000
     1          Crop  2736.583   2  1368.292  2.525  0.108  0.219
     2  Blend * Crop  2360.083   2  1180.042  2.178  0.142  0.195
-    3      residual  9753.250  18   541.847    NaN    NaN    NaN
+    3      Residual  9753.250  18   541.847    NaN    NaN    NaN
 
     Two-way ANOVA with unbalanced design (requires statsmodels)
 
@@ -915,7 +919,7 @@ def anova(dv=None, between=None, data=None, ss_type=2, detailed=False,
             # Two factors with unbalanced design = statsmodels
             return anova2(dv=dv, between=between, data=data,
                           ss_type=ss_type, export_filename=export_filename)
-        elif len(between) > 2:
+        else:
             # 3 or more factors with (un)-balanced design = statsmodels
             return anovan(dv=dv, between=between, data=data,
                           ss_type=ss_type, export_filename=export_filename)
@@ -1053,7 +1057,7 @@ def anova2(dv=None, between=None, data=None, ss_type=2, export_filename=None):
 
     # Create output dataframe
     aov = pd.DataFrame({'Source': [fac1, fac2, fac1 + ' * ' + fac2,
-                                   'residual'],
+                                   'Residual'],
                         'SS': np.round([ss_fac1, ss_fac2, ss_inter,
                                         ss_resid], 3),
                         'DF': [df_fac1, df_fac2, df_inter, df_resid],
