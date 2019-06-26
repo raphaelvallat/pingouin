@@ -85,7 +85,7 @@ class TestParametric(TestCase):
         # Two-way ANOVA with balanced design
         df_aov2 = read_dataset('anova2')
         aov2 = anova(dv="Yield", between=["Blend", "Crop"],
-                     export_filename='test_export.csv', data=df_aov2).round(3)
+                     data=df_aov2).round(3)
         assert aov2.loc[0, 'MS'] == 2.042
         assert aov2.loc[1, 'MS'] == 1368.292
         assert aov2.loc[2, 'MS'] == 1180.042
@@ -99,6 +99,9 @@ class TestParametric(TestCase):
         assert aov2.loc[0, 'np2'] == 0.000
         assert aov2.loc[1, 'np2'] == 0.219
         assert aov2.loc[2, 'np2'] == 0.195
+        # Export
+        anova(dv="Yield", between=["Blend", "Crop"],
+              export_filename='test_export.csv', data=df_aov2)
         # Two-way ANOVA with unbalanced design
         df_aov2 = read_dataset('anova2_unbalanced')
         aov2 = df_aov2.anova(dv="Scores", export_filename='test_export.csv',
