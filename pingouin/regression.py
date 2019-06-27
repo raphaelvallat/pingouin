@@ -14,9 +14,9 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
 
     Parameters
     ----------
-    X : np.array or list
+    X : pd.DataFrame, np.array or list
         Predictor(s). Shape = (n_samples, n_features) or (n_samples,).
-    y : np.array or list
+    y : pd.Series, np.array or list
         Dependent variable. Shape = (n_samples).
     add_intercept : bool
         If False, assume that the data are already centered. If True, add a
@@ -160,12 +160,11 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     else:
         names = []
 
-    assert 0 < alpha < 1
-    assert y.ndim == 1, 'y must be one-dimensional.'
-
     # Convert input to numpy array
     X = np.asarray(X)
     y = np.asarray(y)
+    assert y.ndim == 1, 'y must be one-dimensional.'
+    assert 0 < alpha < 1
 
     if X.ndim == 1:
         # Convert to (n_samples, n_features) shape
@@ -177,8 +176,10 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
         y = np.squeeze(y)
     y_gd = np.isfinite(y).all()
     X_gd = np.isfinite(X).all()
-    assert y_gd, 'Target (y) contains NaN or Inf. Please remove them.'
-    assert X_gd, 'Predictors (X) contain NaN or Inf. Please remove them.'
+    assert y_gd, ("Target (y) contains NaN or Inf. Please remove them "
+                  "manually or use remove_na=True.")
+    assert X_gd, ("Predictors (X) contain NaN or Inf. Please remove them "
+                  "manually or use remove_na=True.")
 
     # Check that X and y have same length
     assert y.shape[0] == X.shape[0], 'X and y must have same number of samples'
@@ -222,13 +223,15 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
 
     # LEAST-SQUARE REGRESSION + STATISTICS
     # Compute beta coefficient and predictions
+    n, p = X.shape[0], X.shape[1]
+    assert n >= 3, 'At least three valid samples are required in X.'
+    assert p >= 1, 'X must have at least one valid column.'
     coef, ss_res, _, _ = np.linalg.lstsq(X, y, rcond=None)
     if coef_only:
         return coef
     ss_res = np.squeeze(ss_res)
     pred = np.dot(X, coef)
     resid = y - pred
-    n, p = X.shape[0], X.shape[1]
     # Degrees of freedom should not include the intercept
     dof = n - p if add_intercept else n - p - 1
     # Compute mean squared error, variance and SE
