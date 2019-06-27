@@ -10,6 +10,9 @@ from scipy.stats import linregress
 from sklearn.linear_model import LinearRegression
 
 df = read_dataset('mediation')
+df['Zero'] = 0
+df['One'] = 1
+df['Two'] = 2
 df_nan = df.copy()
 df_nan.loc[1, 'M'] = np.nan
 df_nan.loc[10, 'X'] = np.nan
@@ -24,6 +27,7 @@ class TestRegression(TestCase):
 
         # Simple regression
         lm = linear_regression(df['X'], df['Y'])  # Pingouin
+        linear_regression(df['X'], df['Y'], add_intercept=False)
         sc = linregress(df['X'].values, df['Y'].values)  # SciPy
         assert_equal(lm['names'].values, ['Intercept', 'X'])
         assert_almost_equal(lm['coef'][1], sc.slope)
@@ -64,6 +68,32 @@ class TestRegression(TestCase):
 
         # With missing values
         linear_regression(df_nan[['X', 'M']], df_nan['Y'], remove_na=True)
+
+        # With columns with only one unique value
+        lm1 = linear_regression(df[['X', 'M', 'One']], df['Y'])
+        lm2 = linear_regression(df[['X', 'M', 'One']], df['Y'],
+                                add_intercept=False)
+        assert lm1.shape[0] == 3
+        assert lm2.shape[0] == 3
+        assert np.isclose(lm1.at[0, 'r2'], lm2.at[0, 'r2'])
+
+        # With zero-only column
+        lm1 = linear_regression(df[['X', 'M', 'Zero', 'One']], df['Y'])
+        lm2 = linear_regression(df[['X', 'M', 'Zero', 'One']], df['Y'].values,
+                                add_intercept=False)
+        lm3 = linear_regression(df[['X', 'Zero', 'M', 'Zero']].values,
+                                df['Y'], add_intercept=False)
+        assert np.array_equal(lm1.loc[:, 'names'], ['Intercept', 'X', 'M'])
+        assert np.array_equal(lm2.loc[:, 'names'], ['X', 'M', 'One'])
+        assert np.array_equal(lm3.loc[:, 'names'], ['x1', 'x3'])
+
+        # With duplicate columns
+        lm1 = linear_regression(df[['X', 'One', 'Zero', 'M', 'M', 'X']],
+                                df['Y'])
+        lm2 = linear_regression(df[['X', 'One', 'Zero', 'M', 'M', 'X']].values,
+                                df['Y'], add_intercept=False)
+        assert np.array_equal(lm1.loc[:, 'names'], ['Intercept', 'X', 'M'])
+        assert np.array_equal(lm2.loc[:, 'names'], ['x1', 'x2', 'x4'])
 
     def test_logistic_regression(self):
         """Test function logistic_regression."""

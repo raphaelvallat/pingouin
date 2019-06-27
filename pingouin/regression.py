@@ -1,3 +1,4 @@
+import itertools
 import numpy as np
 import pandas as pd
 from scipy.stats import t, norm
@@ -190,6 +191,36 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
         X = np.column_stack((np.ones(X.shape[0]), X))
         names.insert(0, "Intercept")
 
+    # FINAL CHECKS BEFORE RUNNING LEAST SQUARES REGRESSION
+    # 1. Let's remove the column with only zero, otherwise the regression fails
+    n_nonzero = np.count_nonzero(X, axis=0)
+    idx_zero = np.flatnonzero(n_nonzero == 0)  # Find columns that are only 0
+    if len(idx_zero):
+        X = np.delete(X, idx_zero, 1)
+        names = np.delete(names, idx_zero)
+
+    # 2. We also want to make sure that there is no more than one column
+    # (= Intercept) with only one unique value, otherwise the regression fails
+    # This is equivalent, but much faster, to pd.DataFrame(X).nunique()
+    nunique = np.apply_along_axis(lambda x: len(np.unique(x)), 0, X)
+    idx_unique = np.flatnonzero(nunique == 1)
+    if len(idx_unique) > 1:
+        # Houston, we have a problem!
+        # We remove all but the first "Intercept" column.
+        X = np.delete(X, idx_unique[1:], 1)
+        names = np.delete(names, idx_unique[1:])
+
+    # 3. Finally, we want to remove duplicate columns
+    if X.shape[1] > 1:
+        idx_duplicate = []
+        for pair in itertools.combinations(range(X.shape[1]), 2):
+            if np.array_equal(X[:, pair[0]], X[:, pair[1]]):
+                idx_duplicate.append(pair[1])
+        if len(idx_duplicate):
+            X = np.delete(X, idx_duplicate, 1)
+            names = np.delete(names, idx_duplicate)
+
+    # LEAST-SQUARE REGRESSION + STATISTICS
     # Compute beta coefficient and predictions
     coef, ss_res, _, _ = np.linalg.lstsq(X, y, rcond=None)
     if coef_only:
@@ -197,7 +228,6 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     ss_res = np.squeeze(ss_res)
     pred = np.dot(X, coef)
     resid = y - pred
-
     n, p = X.shape[0], X.shape[1]
     # Degrees of freedom should not include the intercept
     dof = n - p if add_intercept else n - p - 1
