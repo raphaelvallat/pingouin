@@ -137,6 +137,12 @@ class TestRegression(TestCase):
         c = logistic_regression(df[['X', 'One', 'M', 'Zero']], df['Ybin'])
         assert np.array_equal(c.loc[:, 'names'], ['Intercept', 'X', 'M'])
 
+        # With duplicate columns
+        c = logistic_regression(df[['X', 'M', 'X']], df['Ybin'])
+        assert np.array_equal(c.loc[:, 'names'], ['Intercept', 'X', 'M'])
+        c = logistic_regression(df[['X', 'X', 'X']], df['Ybin'])
+        assert np.array_equal(c.loc[:, 'names'], ['Intercept', 'X'])
+
         # Error: dependent variable is not binary
         with pytest.raises(ValueError):
             y[3] = 2

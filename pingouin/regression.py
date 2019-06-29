@@ -109,6 +109,10 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     is a pandas DataFrame or :code:`stats['residuals']` if ``stats`` is a
     dict.
 
+    Note that Pingouin will automatically remove any duplicate columns
+    from :math:`X`, as well as any column with only one unique value
+    (constant), excluding the intercept.
+
     Results have been compared against sklearn, statsmodels and JASP.
 
     Examples
@@ -344,7 +348,8 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     Note that the first coefficient is always the constant term (intercept) of
     the model. Scikit-learn will automatically add the intercept
     to your predictor(s) matrix, therefore, :math:`X` should not include a
-    constant term.
+    constant term. Pingouin will remove any constant term (e.g column with only
+    one unique value), or duplicate columns from :math:`X`.
 
     Results have been compared against statsmodels and JASP.
 
@@ -444,6 +449,16 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     if len(idx_unique):
         X = np.delete(X, idx_unique, 1)
         names = np.delete(names, idx_unique).tolist()
+
+    # Finally, we want to remove duplicate columns
+    if X.shape[1] > 1:
+        idx_duplicate = []
+        for pair in itertools.combinations(range(X.shape[1]), 2):
+            if np.array_equal(X[:, pair[0]], X[:, pair[1]]):
+                idx_duplicate.append(pair[1])
+        if len(idx_duplicate):
+            X = np.delete(X, idx_duplicate, 1)
+            names = np.delete(names, idx_duplicate).tolist()
 
     # Initialize and fit
     if 'solver' not in kwargs:
