@@ -22,16 +22,23 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
         If False, assume that the data are already centered. If True, add a
         constant term to the model. In this case, the first value in the
         output dict is the intercept of the model.
+
+        .. note:: It is generally recommanded to include a constant term
+            (intercept) to the model to limit the bias and force the residual
+            mean to equal zero. Note that intercept coefficient and p-values
+            are however rarely meaningful.
     coef_only : bool
         If True, return only the regression coefficients.
     alpha : float
         Alpha value used for the confidence intervals.
-        CI = [alpha / 2 ; 1 - alpha / 2]
+        :math:`\\text{CI} = [\\alpha / 2 ; 1 - \\alpha / 2]`
     as_dataframe : bool
         If True, returns a pandas DataFrame. If False, returns a dictionnary.
     remove_na : bool
         If True, apply a listwise deletion of missing values (i.e. the entire
-        row is removed).
+        row is removed). Default is False, which will raise an error if missing
+        values are present in either the predictor(s) or dependent
+        variable.
 
     Returns
     -------
@@ -49,10 +56,19 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
         'CI[97.5%]' : upper confidence interval
         'residuals' : residuals (only if as_dataframe is False)
 
+    See also
+    --------
+    logistic_regression, mediation_analysis, corr
+
     Notes
     -----
-    The beta coefficients of the regression are estimated using the
-    :py:func:`numpy.linalg.lstsq` function.
+    The :math:`\\beta` coefficients are estimated using an ordinary least
+    squares (OLS) regression, as implemented in the
+    :py:func:`numpy.linalg.lstsq` function. The OLS method minimizes
+    the sum of squared residuals, and leads to a closed-form expression for
+    the estimated :math:`\\beta`:
+
+    .. math:: \\hat{\\beta} = (X^TX)^{-1} X^Ty
 
     It is generally recommanded to include a constant term (intercept) to the
     model to limit the bias and force the residual mean to equal zero.
@@ -61,26 +77,29 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     The standard error of the estimates is a measure of the accuracy of the
     prediction defined as:
 
-    .. math:: se = \\sqrt{MSE \\cdot (X^TX)^{-1}}
+    .. math:: \\sigma = \\sqrt{\\text{MSE} \\cdot (X^TX)^{-1}}
 
-    where :math:`MSE` is the mean squared error,
+    where :math:`\\text{MSE}` is the mean squared error,
 
-    .. math:: MSE = \\frac{\\sum{(true - pred)^2}}{n - p - 1}
+    .. math::
 
-    :math:`p` is the total number of explanatory variables in the model
+        \\text{MSE} = \\frac{SS_{\\text{resid}}}{n - p - 1}
+         = \\frac{\\sum{(\\text{true} - \\text{pred})^2}}{n - p - 1}
+
+    :math:`p` is the total number of predictor variables in the model
     (excluding the intercept) and :math:`n` is the sample size.
 
-    Using the coefficients and the standard errors, the T-values can be
-    obtained:
+    Using the :math:`\\beta` coefficients and the standard errors,
+    the T-values can be obtained:
 
-    .. math:: T = \\frac{coef}{se}
+    .. math:: T = \\frac{\\beta}{\\sigma}
 
-    and the p-values can then be approximated using a T-distribution
-    with :math:`n - p - 1` degrees of freedom.
+    and the p-values approximated using a T-distribution with
+    :math:`n - p - 1` degrees of freedom.
 
     The coefficient of determination (:math:`R^2`) is defined as:
 
-    .. math:: R^2 = 1 - (\\frac{SS_{resid}}{SS_{total}})
+    .. math:: R^2 = 1 - (\\frac{SS_{\\text{resid}}}{SS_{\\text{total}}})
 
     The adjusted :math:`R^2` is defined as:
 
@@ -91,10 +110,6 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     dict.
 
     Results have been compared against sklearn, statsmodels and JASP.
-
-    This function will return an error if missing values are present in either
-    the target or predictor(s) variables. Please remove them before runing
-    the function.
 
     Examples
     --------
@@ -288,14 +303,17 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         If True, return only the regression coefficients.
     alpha : float
         Alpha value used for the confidence intervals.
-        CI = [alpha / 2 ; 1 - alpha / 2]
+        math:`\\text{CI} = [\\alpha / 2 ; 1 - \\alpha / 2]`
     as_dataframe : bool
         If True, returns a pandas DataFrame. If False, returns a dictionnary.
     remove_na : bool
         If True, apply a listwise deletion of missing values (i.e. the entire
-        row is removed).
+        row is removed). Default is False, which will raise an error if missing
+        values are present in either the predictor(s) or dependent
+        variable.
     **kwargs : optional
-        Optional arguments passed to sklearn.linear_model.LogisticRegression.
+        Optional arguments passed to
+        :py:class:`sklearn.linear_model.LogisticRegression`.
 
     Returns
     -------
@@ -310,21 +328,25 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         'CI[2.5%]' : lower confidence interval
         'CI[97.5%]' : upper confidence interval
 
+    See also
+    --------
+    linear_regression
+
     Notes
     -----
     This is a wrapper around the
     :py:class:`sklearn.linear_model.LogisticRegression` class.
 
-    Results have been compared against statsmodels and JASP.
+    The calculation of the p-values and confidence interval is adapted from a
+    code found at
+    https://gist.github.com/rspeare/77061e6e317896be29c6de9a85db301d
 
     Note that the first coefficient is always the constant term (intercept) of
-    the model.
+    the model. Scikit-learn will automatically add the intercept
+    to your predictor(s) matrix, therefore, :math:`X` should not include a
+    constant term.
 
-    This function will not run if NaN values are either present in the target
-    or predictors variables. Please remove them before runing the function.
-
-    Adapted from a code found at
-    https://gist.github.com/rspeare/77061e6e317896be29c6de9a85db301d
+    Results have been compared against statsmodels and JASP.
 
     Examples
     --------
@@ -363,11 +385,12 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     >>> logistic_regression(X, y, coef_only=True)
     array([-0.34933805, -0.0226106 , -0.39453532])
 
-    4. Passing custom parameters to sklearn
+    5. Passing custom parameters to sklearn
 
-    >>> lom = logistic_regression(X, y, solver='sag', max_iter=10000)
+    >>> lom = logistic_regression(X, y, solver='sag', max_iter=10000,
+    ...                           random_state=42)
     >>> print(lom['coef'].values)
-    [-0.34941889 -0.02261911 -0.39451064]
+    [-0.34942862 -0.02261937 -0.39449608]
     """
     # Check that sklearn is installed
     from pingouin.utils import _is_sklearn_installed
@@ -382,12 +405,11 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     else:
         names = []
 
-    assert 0 < alpha < 1
-    assert y.ndim == 1, 'y must be one-dimensional.'
-
     # Convert to numpy array
     X = np.asarray(X)
     y = np.asarray(y)
+    assert y.ndim == 1, 'y must be one-dimensional.'
+    assert 0 < alpha < 1, 'alpha must be between 0 and 1.'
 
     # Add axis if only one-dimensional array
     if X.ndim == 1:
@@ -399,8 +421,10 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         y = np.squeeze(y)
     y_gd = np.isfinite(y).all()
     X_gd = np.isfinite(X).all()
-    assert y_gd, 'Target variable contains NaN or Inf. Please remove them.'
-    assert X_gd, 'Predictors contains NaN or Inf. Please remove them.'
+    assert y_gd, ("Target (y) contains NaN or Inf. Please remove them "
+                  "manually or use remove_na=True.")
+    assert X_gd, ("Predictors (X) contain NaN or Inf. Please remove them "
+                  "manually or use remove_na=True.")
 
     # Check that X and y have same length
     assert y.shape[0] == X.shape[0], 'X and y must have same number of samples'
@@ -412,8 +436,14 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     if not names:
         names = ['x' + str(i + 1) for i in range(X.shape[1])]
 
-    # Add intercept in names
-    names.insert(0, "Intercept")
+    # We also want to make sure that there is no column
+    # with only one unique value, otherwise the regression fails
+    # This is equivalent, but much faster, to pd.DataFrame(X).nunique()
+    nunique = np.apply_along_axis(lambda x: len(np.unique(x)), 0, X)
+    idx_unique = np.flatnonzero(nunique == 1)
+    if len(idx_unique):
+        X = np.delete(X, idx_unique, 1)
+        names = np.delete(names, idx_unique).tolist()
 
     # Initialize and fit
     if 'solver' not in kwargs:
@@ -427,6 +457,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         return coef
 
     # Design matrix -- add intercept
+    names.insert(0, "Intercept")
     X_design = np.column_stack((np.ones(X.shape[0]), X))
     n, p = X_design.shape
 
@@ -434,7 +465,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     denom = (2 * (1 + np.cosh(lom.decision_function(X))))
     denom = np.tile(denom, (p, 1)).T
     fim = np.dot((X_design / denom).T, X_design)
-    crao = np.linalg.inv(fim)
+    crao = np.linalg.pinv(fim)
 
     # Standard error and Z-scores
     se = np.sqrt(np.diag(crao))
@@ -552,7 +583,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
         in all regressions.
     alpha : float
         Significance threshold. Used to determine the confidence interval,
-        CI = [ alpha / 2 ; 1 -  alpha / 2]
+        :math:`\\text{CI} = [\\alpha / 2 ; 1 - \\alpha / 2]`.
     n_boot : int
         Number of bootstrap iterations for confidence intervals and p-values
         estimation. The greater, the slower.
@@ -576,6 +607,10 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
         'CI[97.5%]' : upper confidence interval
         'pval' : two-sided p-values
         'sig' : statistical significance
+
+    See also
+    --------
+    linear_regression, logistic_regression
 
     Notes
     -----

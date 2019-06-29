@@ -131,6 +131,13 @@ class TestRegression(TestCase):
         logistic_regression(X, y, solver='sag', C=10, max_iter=10000)
         logistic_regression(X, y, solver='sag', multi_class='auto')
 
+        # With one column that has only one unique value
+        c = logistic_regression(df[['One', 'X']], df['Ybin'])
+        assert np.array_equal(c.loc[:, 'names'], ['Intercept', 'X'])
+        c = logistic_regression(df[['X', 'One', 'M', 'Zero']], df['Ybin'])
+        assert np.array_equal(c.loc[:, 'names'], ['Intercept', 'X', 'M'])
+
+        # Error: dependent variable is not binary
         with pytest.raises(ValueError):
             y[3] = 2
             logistic_regression(X, y)
