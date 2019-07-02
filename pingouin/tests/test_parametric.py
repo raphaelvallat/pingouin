@@ -340,7 +340,8 @@ class TestParametric(TestCase):
         # With one covariate, missing values and unbalanced design
         df.loc[[1, 2], 'Scores'] = np.nan
         aov = ancova(data=df, dv='Scores', covar=['Income'],
-                     between='Method').round(3)
+                     between='Method',
+                     export_filename='test_export.csv').round(3)
         assert aov.loc[0, 'F'] == 3.147
         assert aov.loc[1, 'F'] == 19.781
         assert aov.loc[2, 'DF'] == 29
