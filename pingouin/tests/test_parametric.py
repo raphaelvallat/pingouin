@@ -355,6 +355,3 @@ class TestParametric(TestCase):
         ancova(data=df, dv='Scores', covar=['Income', 'BMI'],
                between='Method', export_filename='test_export.csv')
         ancova(data=df, dv='Scores', covar=['Income'], between='Method')
-        aov, bw = ancova(data=df, dv='Scores', covar='Income',
-                         between='Method', export_filename='test_export.csv',
-                         return_bw=True)

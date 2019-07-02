@@ -730,17 +730,20 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     from pingouin import ancova, power_corr
     # Safety checks
     assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame'
-    assert x in data, 'The %s column is not in data.' % x
-    assert y in data, 'The %s column is not in data.' % y
-    assert subject in data, 'The %s column is not in data.' % subject
+    assert x in data.columns, 'The %s column is not in data.' % x
+    assert y in data.columns, 'The %s column is not in data.' % y
+    assert data[x].dtype.kind in 'bfi', '%s must be numeric.' % x
+    assert data[y].dtype.kind in 'bfi', '%s must be numeric.' % y
+    assert subject in data.columns, 'The %s column is not in data.' % subject
     if data[subject].nunique() < 3:
         raise ValueError('rm_corr requires at least 3 unique subjects.')
+
     # Remove missing values
     data = data[[x, y, subject]].dropna(axis=0)
 
     # Using PINGOUIN
-    aov, bw = ancova(dv=y, covar=x, between=subject, data=data,
-                     return_bw=True)
+    aov = ancova(dv=y, covar=x, between=subject, data=data)
+    bw = aov.bw_  # Beta within parameter
     sign = np.sign(bw)
     dof = int(aov.loc[2, 'DF'])
     n = dof + 2

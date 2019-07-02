@@ -1485,7 +1485,7 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
 
 
 def ancova(dv=None, covar=None, between=None, data=None,
-           export_filename=None, return_bw=False):
+           export_filename=None):
     """ANCOVA with one or more covariate(s).
 
     Parameters
@@ -1503,8 +1503,6 @@ def ancova(dv=None, covar=None, between=None, data=None,
         If None, do not export the table.
         By default, the file will be created in the current python console
         directory. To change that, specify the filename with full path.
-    return_bw : bool
-        If True, return beta within parameter (used for the rm_corr function)
 
     Returns
     -------
@@ -1561,8 +1559,8 @@ def ancova(dv=None, covar=None, between=None, data=None,
     """
     # Safety checks
     assert isinstance(data, pd.DataFrame)
-    assert dv in data, '%s is not in data.' % dv
-    assert between in data, '%s is not in data.' % between
+    assert dv in data.columns, '%s is not in data.' % dv
+    assert between in data.columns, '%s is not in data.' % between
     assert isinstance(covar, (str, list)), 'covar must be a str or a list.'
 
     # Drop missing values
@@ -1577,7 +1575,7 @@ def ancova(dv=None, covar=None, between=None, data=None,
             covar = covar[0]
 
     # Assert that covariate is numeric
-    assert data[covar].dtype.kind in 'fi'
+    assert data[covar].dtype.kind in 'fi', 'Covariate must be numeric.'
 
     def linreg(x, y):
         return np.corrcoef(x, y)[0, 1] * np.std(y, ddof=1) / np.std(x, ddof=1)
@@ -1591,7 +1589,7 @@ def ancova(dv=None, covar=None, between=None, data=None,
         ss[i] = ((dt_covar - dt_covar.mean())**2).sum()
         slopes[i] = linreg(dt_covar, data[data[between] == b][dv].values)
     ss_slopes = ss * slopes
-    bw = ss_slopes.sum() / ss.sum()
+    bw = np.nansum(ss_slopes) / np.sum(ss)
     bt = linreg(data[covar], data[dv])
 
     # Run the ANOVA
@@ -1605,7 +1603,7 @@ def ancova(dv=None, covar=None, between=None, data=None,
     ss_t = ss_t_dv - bt**2 * ss_t_covar
     ss_w = aov_dv.loc[1, 'SS'] - bw**2 * aov_covar.loc[1, 'SS']
     ss_b = ss_t - ss_w
-    ss_c = ss_slopes.sum() * bw
+    ss_c = np.nansum(ss_slopes) * bw
     # DOF
     df_c = 1
     df_b = aov_dv.loc[0, 'DF']
@@ -1633,10 +1631,9 @@ def ancova(dv=None, covar=None, between=None, data=None,
     if export_filename is not None:
         _export_table(aov, export_filename)
 
-    if return_bw:
-        return aov, bw
-    else:
-        return aov
+    # Add bw as an attribute (for rm_corr function)
+    aov.bw_ = bw
+    return aov
 
 
 def ancovan(dv=None, covar=None, between=None, data=None,
