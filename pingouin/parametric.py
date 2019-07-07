@@ -145,14 +145,14 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
     >>> ttest(pre, post, paired=True, tail='one-sided').round(2)
-               T  dof       tail  p-val           CI95%  cohen-d   BF10  power
-    T-test -2.31    4  one-sided   0.04  [-1.35, -0.05]     0.25  3.122   0.12
+               T  dof  tail  p-val          CI95%  cohen-d   BF10  power
+    T-test -2.31    4  less   0.04  [-inf, -0.05]     0.25  3.122   0.12
 
     3. Testing that ``x`` has a larger mean than ``y`` (``tail = 'greater'``)
 
     >>> ttest(pre, post, paired=True, tail='greater').round(2)
                T  dof     tail  p-val         CI95%  cohen-d  BF10  power
-    T-test -2.31    4  greater   0.96  [-1.35, inf]     0.25  0.32   0.12
+    T-test -2.31    4  greater   0.96  [-1.35, inf]     0.25  0.32   0.02
 
     4. Testing that ``x`` has a smaller mean than ``y`` (``tail = 'less'``)
 
@@ -231,13 +231,14 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     # - Two-sided: default returned by SciPy
     # - One-sided: 0.5 * two-sided
     # - Greater / less: (1 - one-sided) or one-sided depending on the means
-    pval_1s = pval / 2
     if tail == 'one-sided':
-        pval = pval_1s
-    elif tail == 'greater':
-        pval = pval_1s if tval > 0 else 1 - pval_1s
+        # Automatically decide which tail to use based on the T-value
+        tail = 'greater' if tval > 0 else 'less'
+
+    if tail == 'greater':
+        pval = pval / 2 if tval > 0 else 1 - pval / 2
     elif tail == 'less':
-        pval = pval_1s if tval < 0 else 1 - pval_1s
+        pval = pval / 2 if tval < 0 else 1 - pval / 2
 
     # Effect size
     d = compute_effsize(x, y, paired=paired, eftype='cohen')
@@ -257,23 +258,23 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         ci[0] = -np.inf
 
     # Achieved power
-    tail_binary = 'two-sided' if tail == 'two-sided' else 'one-sided'
     if ny == 1:
         # One-sample
         power = power_ttest(d=d, n=nx, power=None, alpha=0.05,
-                            contrast='one-sample', tail=tail_binary)
+                            contrast='one-sample', tail=tail)
     if ny > 1 and paired is True:
         # Paired two-sample
         power = power_ttest(d=d, n=nx, power=None, alpha=0.05,
-                            contrast='paired', tail=tail_binary)
+                            contrast='paired', tail=tail)
     elif ny > 1 and paired is False:
         # Independent two-samples
         if nx == ny:
             # Equal sample sizes
             power = power_ttest(d=d, n=nx, power=None, alpha=0.05,
-                                contrast='two-samples', tail=tail_binary)
+                                contrast='two-samples', tail=tail)
         else:
             # Unequal sample sizes
+            tail_binary = 'two-sided' if tail == 'two-sided' else 'one-sided'
             power = power_ttest2n(nx, ny, d=d, power=None, alpha=0.05,
                                   tail=tail_binary)
 

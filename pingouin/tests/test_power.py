@@ -12,18 +12,34 @@ class TestPower(TestCase):
         """Test function power_ttest.
         Values are compared to the pwr R package."""
         # ONE-SAMPLE / PAIRED
-        # One-sided (e.g. = alternative = 'Greater' in R)
+        # Alternative = 'greater'
         assert np.allclose(power_ttest(d=0.5, n=20, contrast='one-sample',
-                                       tail='one-sided'), 0.6951493)
+                                       tail='greater'), 0.6951493)
         assert np.allclose(power_ttest(d=0.5, n=20, contrast='paired',
-                                       tail='one-sided'), 0.6951493)
+                                       tail='greater'), 0.6951493)
         assert np.allclose(power_ttest(d=0.5, power=0.80,
                                        contrast='one-sample',
-                                       tail='one-sided'), 26.13753)
+                                       tail='greater'), 26.13753)
         assert np.allclose(power_ttest(n=20, power=0.80, contrast='one-sample',
-                                       tail='one-sided'), 0.5769185)
+                                       tail='greater'), 0.5769185)
         assert np.allclose(power_ttest(d=0.5, n=20, power=0.80, alpha=None,
-                                       tail='one-sided',
+                                       tail='greater',
+                                       contrast='one-sample'),
+                           0.09004593, rtol=1e-03)
+        # Alternative = 'less'
+        assert np.allclose(power_ttest(d=0.5, n=20, contrast='one-sample',
+                                       tail='less'), 7.083752e-05)
+        assert np.allclose(power_ttest(d=-0.5, n=20, contrast='one-sample',
+                                       tail='less'), 0.6951493)
+        assert np.allclose(power_ttest(d=0.5, n=20, contrast='paired',
+                                       tail='less'), 7.083752e-05)
+        assert np.allclose(power_ttest(d=-0.5, power=0.80,
+                                       contrast='one-sample',
+                                       tail='less'), 26.13753)
+        assert np.allclose(power_ttest(n=20, power=0.80, contrast='one-sample',
+                                       tail='less'), -0.5769185)
+        assert np.allclose(power_ttest(d=-0.5, n=20, power=0.80, alpha=None,
+                                       tail='less',
                                        contrast='one-sample'),
                            0.09004593, rtol=1e-03)
         # Two-sided
@@ -38,15 +54,25 @@ class TestPower(TestCase):
                            rtol=1e-02)
 
         # TWO-SAMPLES
-        # One-sided (e.g. = alternative = 'Greater' in R)
+        # Alternative = 'greater'
         assert np.allclose(power_ttest(d=0.5, n=20,
-                                       tail='one-sided'), 0.4633743)
+                                       tail='greater'), 0.4633743)
         assert np.allclose(power_ttest(d=0.5, power=0.80,
-                                       tail='one-sided'), 50.1508)
+                                       tail='greater'), 50.1508)
         assert np.allclose(power_ttest(n=20, power=0.80,
-                                       tail='one-sided'), 0.8006879)
+                                       tail='greater'), 0.8006879)
         assert np.allclose(power_ttest(d=0.5, n=20, power=0.80, alpha=None,
-                                       tail='one-sided'),
+                                       tail='greater'),
+                           0.2315111, rtol=1e-01)
+        # Alternative = 'less'
+        assert np.allclose(power_ttest(d=-0.5, n=20,
+                                       tail='less'), 0.4633743)
+        assert np.allclose(power_ttest(d=-0.5, power=0.80,
+                                       tail='less'), 50.1508)
+        assert np.allclose(power_ttest(n=20, power=0.80,
+                                       tail='less'), -0.8006879)
+        assert np.allclose(power_ttest(d=-0.5, n=20, power=0.80, alpha=None,
+                                       tail='less'),
                            0.2315111, rtol=1e-01)
         # Two-sided
         assert np.allclose(power_ttest(d=0.5, n=20), 0.337939, rtol=1e-03)

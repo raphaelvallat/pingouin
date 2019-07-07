@@ -32,7 +32,8 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
         Can be "one-sample", "two-samples" or "paired".
         Note that "one-sample" and "paired" have the same behavior.
     tail : str
-        Indicates whether the test is "two-sided" or "one-sided".
+        Indicates the alternative of the test. Can be either `'two-sided'`,
+        `'greater'` or `'less'`.
 
     Notes
     -----
@@ -105,7 +106,7 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
 
     2. Compute required sample size given ``d``, ``power`` and ``alpha``
 
-    >>> print('n: %.4f' % power_ttest(d=0.5, power=0.80, tail='one-sided'))
+    >>> print('n: %.4f' % power_ttest(d=0.5, power=0.80, tail='greater'))
     n: 50.1508
 
     3. Compute achieved ``d`` given ``n``, ``power`` and ``alpha`` level
@@ -117,42 +118,60 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
     4. Compute achieved alpha level given ``d``, ``n`` and ``power``
 
     >>> print('alpha: %.4f' % power_ttest(d=0.5, n=20, power=0.80, alpha=None))
-    alpha: 0.4630
+    alpha: 0.4430
+
+    5. One-sided tests
+
+    >>> from pingouin import power_ttest
+    >>> print('power: %.4f' % power_ttest(d=0.5, n=20, tail='greater'))
+    power: 0.4634
+
+    >>> print('power: %.4f' % power_ttest(d=0.5, n=20, tail='less'))
+    power: 0.0007
     """
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [d, n, power, alpha]])
     if n_none != 1:
         raise ValueError('Exactly one of n, d, power, and alpha must be None.')
 
+    # Check tails
+    possible_tails = ['two-sided', 'greater', 'less']
+    assert tail in possible_tails, 'Invalid tail argument.'
+
     # Safety checks
     assert contrast.lower() in ['one-sample', 'paired', 'two-samples']
-    if d is not None:
+    tsample = 2 if contrast.lower() == 'two-samples' else 1
+    tside = 2 if tail == 'two-sided' else 1
+    if d is not None and tside == 2:
         d = abs(d)
     if alpha is not None:
         assert 0 < alpha <= 1
-        # For simplicity
-        alpha = alpha / 2 if tail == 'two-sided' else alpha
     if power is not None:
         assert 0 < power <= 1
 
-    if contrast.lower() in ['one-sample', 'paired']:
-
-        # One-sample or paired T-test
+    if tail == 'less':
 
         def func(d, n, power, alpha):
-            nc = d * np.sqrt(n)
-            dof = n - 1
-            tcrit = stats.t.ppf(1 - alpha, dof)
-            return stats.nct.sf(tcrit, dof, nc)
+            dof = (n - 1) * tsample
+            nc = d * np.sqrt(n / tsample)
+            tcrit = stats.t.ppf(alpha / tside, dof)
+            return stats.nct.cdf(tcrit, dof, nc)
 
-    else:
-
-        # Independent two-sample T-test
+    elif tail == 'two-sided':
 
         def func(d, n, power, alpha):
-            nc = d * np.sqrt(n / 2)
-            dof = 2 * n - 2
-            tcrit = stats.t.ppf(1 - alpha, dof)
+            dof = (n - 1) * tsample
+            nc = d * np.sqrt(n / tsample)
+            tcrit = stats.t.ppf(1 - alpha / tside, dof)
+            return (stats.nct.sf(tcrit, dof, nc) +
+                    stats.nct.cdf(-tcrit, dof, nc))
+
+    elif tail == 'greater':
+
+        def func(d, n, power, alpha):
+            dof = (n - 1) * tsample
+            nc = d * np.sqrt(n / tsample)
+            tcrit = stats.t.ppf(1 - alpha / tside, dof)
             return stats.nct.sf(tcrit, dof, nc)
 
     # Evaluate missing variable
@@ -173,12 +192,18 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
 
     elif d is None:
         # Compute achieved d given sample size, power and alpha level
+        if tail == 'two-sided':
+            b0, b1 = 1e-07, 10
+        elif tail == 'less':
+            b0, b1 = -10, 5
+        else:
+            b0, b1 = -5, 10
 
         def _eval_d(d, n, power, alpha):
             return func(d, n, power, alpha) - power
 
         try:
-            return brenth(_eval_d, 1e-07, 10, args=(n, power, alpha))
+            return brenth(_eval_d, b0, b1, args=(n, power, alpha))
         except ValueError:  # pragma: no cover
             return np.nan
 
@@ -189,11 +214,7 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
             return func(d, n, power, alpha) - power
 
         try:
-            alpha = brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(d, n, power))
-            if tail == 'one-sided':
-                return alpha
-            else:
-                return 2 * alpha
+            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(d, n, power))
         except ValueError:  # pragma: no cover
             return np.nan
 

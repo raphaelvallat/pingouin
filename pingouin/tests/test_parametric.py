@@ -56,7 +56,7 @@ class TestParametric(TestCase):
         assert tt.loc['T-test', 'T'] == 5.175
         assert tt.loc['T-test', 'dof'] == 5
         assert round(tt.loc['T-test', 'p-val'], 3) == 0.002
-        np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [3.05, 6.95])
+        np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [3.05, np.inf])
         # - Two-sample equal variances, tail = 'greater'
         tt = ttest(a, b, paired=False, tail='greater')
         assert tt.loc['T-test', 'tail'] == 'greater'
