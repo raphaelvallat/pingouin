@@ -286,10 +286,18 @@ def wilcoxon(x, y, tail='two-sided'):
     Parameters
     ----------
     x, y : array_like
-        First and second set of observations. x and y must be related (e.g
-        repeated measures).
+        First and second set of observations. ``x`` and ``y`` must be
+        related (e.g repeated measures) and, therefore, have the same number
+        of samples. Note that a listwise deletion of missing values
+        is automatically applied.
     tail : string
-        Specify whether to return 'one-sided' or 'two-sided' p-value.
+        Specify whether to return `'one-sided'` or `'two-sided'` p-value.
+        Can also be `'greater'` or `'less'` to specify the direction of the
+        test. If ``tail='one-sided'``, the alternative of the test will be
+        automatically detected by looking at the sign of the median of the
+        differences between ``x`` and ``y``.
+        For instance, if ``np.median(x - y) > 0`` and ``tail='one-sided'``,
+        Pingouin will automatically set ``tail='greater'`` and vice versa.
 
     Returns
     -------
@@ -301,10 +309,15 @@ def wilcoxon(x, y, tail='two-sided'):
         'RBC'   : matched pairs rank-biserial correlation (effect size)
         'CLES'  : common language effect size
 
+    See also
+    --------
+    scipy.stats.wilcoxon, mwu
+
     Notes
     -----
     The Wilcoxon signed-rank test tests the null hypothesis that two related
-    paired samples come from the same distribution.
+    paired samples come from the same distribution. In particular, it tests
+    whether the distribution of the differences x - y is symmetric about zero.
     A continuity correction is applied by default
     (see :py:func:`scipy.stats.wilcoxon` for details).
 
@@ -335,7 +348,7 @@ def wilcoxon(x, y, tail='two-sided'):
 
     Examples
     --------
-    1. Wilcoxon test on two related samples.
+    Wilcoxon test on two related samples.
 
     >>> import numpy as np
     >>> import pingouin as pg
@@ -350,6 +363,30 @@ def wilcoxon(x, y, tail='two-sided'):
     >>> import scipy
     >>> scipy.stats.wilcoxon(x, y, correction=True)
     WilcoxonResult(statistic=20.5, pvalue=0.2857652190231508)
+
+    One-sided tail: one can either manually specify the alternative hypothesis
+
+    >>> pg.wilcoxon(x, y, tail='greater')
+              W-val     p-val    RBC   CLES
+    Wilcoxon   20.5  0.876244  0.333  0.583
+
+    >>> pg.wilcoxon(x, y, tail='less')
+              W-val     p-val    RBC   CLES
+    Wilcoxon   20.5  0.142883  0.333  0.583
+
+    Or simply leave it to Pingouin, using the `'one-sided'` argument, in which
+    case Pingouin will look at the sign of the median of the differences
+    between ``x`` and ``y`` and ajust the tail based on that:
+
+    >>> np.median(np.array(x) - np.array(y))
+    -1.5
+
+    The median is negative, so Pingouin will test for the alternative
+    hypothesis that the median of the differences is negative (= less than 0).
+
+    >>> pg.wilcoxon(x, y, tail='one-sided')  # Equivalent to tail = 'less'
+              W-val     p-val    RBC   CLES
+    Wilcoxon   20.5  0.142883  0.333  0.583
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -357,12 +394,16 @@ def wilcoxon(x, y, tail='two-sided'):
     # Remove NA
     x, y = remove_na(x, y, paired=True)
 
+    # Check tails
+    possible_tails = ['two-sided', 'one-sided', 'greater', 'less']
+    assert tail in possible_tails, 'Invalid tail argument.'
+    if tail == 'one-sided':
+        # Detect the direction of the test based on the median
+        tail = 'less' if np.median(x - y) < 0 else 'greater'
+
     # Compute test
-    # TODO: scipy 1.3.0 includes an alternative arg as for mannwhitney
-    # For now keeping this way to keep the compatibility with previous scipy
     wval, pval = scipy.stats.wilcoxon(x, y, zero_method='wilcox',
-                                      correction=True)
-    pval = pval * .5 if tail == 'one-sided' else pval
+                                      correction=True, alternative=tail)
 
     # Effect size 1: common language effect size (McGraw and Wong 1992)
     diff = x[:, None] - y

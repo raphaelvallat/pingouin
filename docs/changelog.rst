@@ -19,6 +19,7 @@ a. :py:func:`pingouin.anova` now works with three or more between factors (requi
 b. :py:func:`pingouin.anova` now accepts different sums of squares calculation method for unbalanced N-way design (type 1, 2, or 3).
 c. :py:func:`pingouin.linear_regression` now includes several safety checks to remove duplicate predictors, predictors with only zeros, and predictors with only one unique value (excluding the intercept).
 d. :py:func:`pingouin.mad` now automatically removes missing values and can calculate the mad over the entire array using ``axis=None`` if array is multidimensional.
+e. Better handling of alternative hypotheses in :py:func:`pingouin.wilcoxon`.
 
 v0.2.7 (June 2019)
 ------------------
