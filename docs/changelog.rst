@@ -22,8 +22,7 @@ d. :py:func:`pingouin.mad` now automatically removes missing values and can calc
 e. Better handling of alternative hypotheses in :py:func:`pingouin.wilcoxon`.
 f. Better handling of alternative hypotheses in :py:func:`pingouin.bayesfactor_ttest` (support for 'greater' and 'less').
 g. Better handling of alternative hypotheses in :py:func:`pingouin.ttest` (support for 'greater' and 'less'). This is also taken into account when calculating the Bayes Factor and power of the test.
-h. Better handling of alternative hypotheses in :py:func:`pingouin.power_ttest` (support for 'greater' and 'less', and removed 'one-sided').
-
+h. Better handling of alternative hypotheses in :py:func:`pingouin.power_ttest` and :py:func:`pingouin.power_ttest2n` (support for 'greater' and 'less', and removed 'one-sided').
 
 v0.2.7 (June 2019)
 ------------------

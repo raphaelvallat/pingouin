@@ -89,14 +89,24 @@ class TestPower(TestCase):
         """Test function power_ttest2n.
         Values are compared to the pwr R package."""
         # TWO-SAMPLES
-        # One-sided (e.g. = alternative = 'Greater' in R)
+        # alternative = 'greater'
         assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5,
-                                         tail='one-sided'), 0.4463552)
+                                         tail='greater'), 0.4463552)
         assert np.allclose(power_ttest2n(nx=20, ny=18, power=0.80,
-                                         tail='one-sided'), 0.8234684)
+                                         tail='greater'), 0.8234684)
         assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5, power=0.80,
-                                         alpha=None, tail='one-sided'),
+                                         alpha=None, tail='greater'),
                            0.2444025, rtol=1e-01)
+        # alternative = 'less'
+        assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5,
+                                         tail='less'), 0.0008011104)
+        assert np.allclose(power_ttest2n(nx=20, ny=18, d=-0.5,
+                                         tail='less'), 0.4463552)
+        assert np.allclose(power_ttest2n(nx=20, ny=18, power=0.80,
+                                         tail='less'), -0.8234684)
+        assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5, power=0.80,
+                                         alpha=None, tail='less'),
+                           0.989896, rtol=1e-01)
         # Two-sided
         assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5),
                            0.3223224, rtol=1e-03)

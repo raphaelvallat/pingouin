@@ -29,8 +29,8 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
         Significance level (type I error probability).
         The default is 0.05.
     contrast : str
-        Can be "one-sample", "two-samples" or "paired".
-        Note that "one-sample" and "paired" have the same behavior.
+        Can be `"one-sample"`, `"two-samples"` or `"paired"`.
+        Note that `"one-sample"` and `"paired"` have the same behavior.
     tail : str
         Indicates the alternative of the test. Can be either `'two-sided'`,
         `'greater'` or `'less'`.
@@ -134,11 +134,9 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
     if n_none != 1:
         raise ValueError('Exactly one of n, d, power, and alpha must be None.')
 
-    # Check tails
+    # Safety checks
     possible_tails = ['two-sided', 'greater', 'less']
     assert tail in possible_tails, 'Invalid tail argument.'
-
-    # Safety checks
     assert contrast.lower() in ['one-sample', 'paired', 'two-samples']
     tsample = 2 if contrast.lower() == 'two-samples' else 1
     tside = 2 if tail == 'two-sided' else 1
@@ -166,7 +164,7 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
             return (stats.nct.sf(tcrit, dof, nc) +
                     stats.nct.cdf(-tcrit, dof, nc))
 
-    elif tail == 'greater':
+    else:  # Tail = greater
 
         def func(d, n, power, alpha):
             dof = (n - 1) * tsample
@@ -238,7 +236,8 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
         Significance level (type I error probability).
         The default is 0.05.
     tail : str
-        Indicates whether the test is "two-sided" or "one-sided".
+        Indicates the alternative of the test. Can be either `'two-sided'`,
+        `'greater'` or `'less'`.
 
     Notes
     -----
@@ -290,7 +289,7 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
 
     >>> from pingouin import power_ttest2n
     >>> print('power: %.4f' % power_ttest2n(nx=20, ny=15, d=0.5,
-    ...                                     tail='one-sided'))
+    ...                                     tail='greater'))
     power: 0.4164
 
     3. Compute achieved ``d`` given ``n``, ``power`` and ``alpha`` level
@@ -302,7 +301,7 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
 
     >>> print('alpha: %.4f' % power_ttest2n(nx=20, ny=15, d=0.5,
     ...                                     power=0.80, alpha=None))
-    alpha: 0.5366
+    alpha: 0.5000
     """
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [d, power, alpha]])
@@ -310,21 +309,40 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
         raise ValueError('Exactly one of d, power, and alpha must be None')
 
     # Safety checks
-    if d is not None:
+    possible_tails = ['two-sided', 'greater', 'less']
+    assert tail in possible_tails, 'Invalid tail argument.'
+    tside = 2 if tail == 'two-sided' else 1
+    if d is not None and tside == 2:
         d = abs(d)
     if alpha is not None:
         assert 0 < alpha <= 1
-        # For simplicity
-        alpha = alpha / 2 if tail == 'two-sided' else alpha
     if power is not None:
         assert 0 < power <= 1
 
-    # Independent two-sample T-test
-    def func(d, nx, ny, power, alpha):
-        nc = d * np.sqrt((nx * ny) / (nx + ny))
-        dof = nx + ny - 2
-        tcrit = stats.t.ppf(1 - alpha, dof)
-        return stats.nct.sf(tcrit, dof, nc)
+    if tail == 'less':
+
+        def func(d, nx, ny, power, alpha):
+            dof = nx + ny - 2
+            nc = d * (1 / np.sqrt(1 / nx + 1 / ny))
+            tcrit = stats.t.ppf(alpha / tside, dof)
+            return stats.nct.cdf(tcrit, dof, nc)
+
+    elif tail == 'two-sided':
+
+        def func(d, nx, ny, power, alpha):
+            dof = nx + ny - 2
+            nc = d * (1 / np.sqrt(1 / nx + 1 / ny))
+            tcrit = stats.t.ppf(1 - alpha / tside, dof)
+            return (stats.nct.sf(tcrit, dof, nc) +
+                    stats.nct.cdf(-tcrit, dof, nc))
+
+    else:  # Tail = greater
+
+        def func(d, nx, ny, power, alpha):
+            dof = nx + ny - 2
+            nc = d * (1 / np.sqrt(1 / nx + 1 / ny))
+            tcrit = stats.t.ppf(1 - alpha / tside, dof)
+            return stats.nct.sf(tcrit, dof, nc)
 
     # Evaluate missing variable
     if power is None:
@@ -333,12 +351,18 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
 
     elif d is None:
         # Compute achieved d given sample size, power and alpha level
+        if tail == 'two-sided':
+            b0, b1 = 1e-07, 10
+        elif tail == 'less':
+            b0, b1 = -10, 5
+        else:
+            b0, b1 = -5, 10
 
         def _eval_d(d, nx, ny, power, alpha):
             return func(d, nx, ny, power, alpha) - power
 
         try:
-            return brenth(_eval_d, 1e-07, 10, args=(nx, ny, power, alpha))
+            return brenth(_eval_d, b0, b1, args=(nx, ny, power, alpha))
         except ValueError:  # pragma: no cover
             return np.nan
 
@@ -349,12 +373,8 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
             return func(d, nx, ny, power, alpha) - power
 
         try:
-            alpha = brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(d, nx, ny,
-                                                                power))
-            if tail == 'one-sided':
-                return alpha
-            else:
-                return 2 * alpha
+            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(d, nx, ny,
+                                                               power))
         except ValueError:  # pragma: no cover
             return np.nan
 

@@ -274,9 +274,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
                                 contrast='two-samples', tail=tail)
         else:
             # Unequal sample sizes
-            tail_binary = 'two-sided' if tail == 'two-sided' else 'one-sided'
             power = power_ttest2n(nx, ny, d=d, power=None, alpha=0.05,
-                                  tail=tail_binary)
+                                  tail=tail)
 
     # Bayes factor
     bf = bayesfactor_ttest(tval, nx, ny, paired=paired, tail=tail, r=r)
