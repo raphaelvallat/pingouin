@@ -9,6 +9,10 @@ What's new
 v0.2.8 (July 2019)
 ------------------
 
+**Dependencies**
+
+a. Pingouin now requires SciPy >= 1.3.0 (better handling of tails in :py:func:`pingouin.wilcoxon` function) and Pandas >= 0.24 (fixes a minor bug with 2-way within factor interaction in :py:func:`pingouin.epsilon` with previous version)
+
 **Enhancements**
 
 a. :py:func:`pingouin.anova` now works with three or more between factors (requiring statsmodels). One-way ANOVA and balanced two-way ANOVA are computed in pure Pingouin (Python + Pandas) style, while ANOVA with three or more factors, or unbalanced two-way ANOVA are computed using statsmodels.

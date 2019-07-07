@@ -20,8 +20,8 @@ PACKAGE_DATA = {'pingouin.data.icons': ['*.svg']}
 
 INSTALL_REQUIRES = [
     'numpy>=1.15',
-    'scipy>=1.2',
-    'pandas>=0.23',
+    'scipy>=1.3',
+    'pandas>=0.24',
     'matplotlib>=3.0.2',
     'seaborn>=0.9.0',
     'statsmodels>=0.10.0'

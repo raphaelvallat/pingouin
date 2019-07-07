@@ -87,8 +87,8 @@ Dependencies
 The main dependencies of Pingouin are :
 
 * NumPy (>= 1.15)
-* SciPy (>= 1.1.0)
-* Pandas (>= 0.23)
+* SciPy (>= 1.3.0)
+* Pandas (>= 0.24)
 * Matplotlib (>= 3.0.2)
 * Seaborn (>= 0.9.0)
 
