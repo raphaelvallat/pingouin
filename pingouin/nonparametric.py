@@ -11,21 +11,38 @@ __all__ = ["mad", "madmedianrule", "mwu", "wilcoxon", "kruskal", "friedman",
 
 def mad(a, normalize=True, axis=0):
     """
-    Median Absolute Deviation along given axis of an array.
+    Median Absolute Deviation (MAD) along given axis of an array.
 
     Parameters
     ----------
     a : array-like
         Input array.
     normalize : boolean.
-        If True, scale by a normalization constant (~0.67)
-    axis : int, optional
-        The defaul is 0. Can also be None.
+        If True, scale by a normalization constant (~0.67) to ensure
+        consistency with the standard deviation for normally distributed data.
+    axis : int or None, optional
+        Axis along which the MAD is computed. Default is 0.
+        Can also be None to compute the MAD over the entire array.
 
     Returns
     -------
     mad : float
         mad = median(abs(a - median(a))) / c
+
+    See also
+    --------
+    madmedianrule, numpy.std
+
+    Notes
+    -----
+    The median absolute deviation (MAD) computes the median over the
+    absolute deviations from the median. It is a measure of dispersion similar
+    to the standard deviation, but is more robust to outliers.
+
+    SciPy 1.3 and higher includes a similar function:
+    :py:func:`scipy.stats.median_absolute_deviation`.
+
+    Please note that missing values are automatically removed.
 
     References
     ----------
@@ -40,11 +57,37 @@ def mad(a, normalize=True, axis=0):
 
     >>> mad(a, normalize=False)
     2.0
+
+    2D arrays with missing values (axis handling example)
+
+    >>> import numpy as np
+    >>> np.random.seed(123)
+    >>> w = np.random.normal(size=(5, 10))
+    >>> w[3, 2] = np.nan
+    >>> mad(w)  # Axis = 0 (default) = iterate over the columns
+    array([0.60304023, 2.35057834, 0.90350696, 1.28599837, 1.16024152,
+           0.38653752, 1.92564066, 1.2480913 , 0.42580373, 1.69814622])
+
+    >>> mad(w, axis=1)  # Axis = 1 = iterate over the rows
+    array([1.32639022, 1.19295036, 1.41198672, 0.78020689, 1.01531254])
+
+    >>> mad(w, axis=None)  # Axis = None = over the entire array
+    1.1607762457644006
+
+    Compare with Scipy >= 1.3
+
+    >>> from scipy.stats import median_absolute_deviation
+    >>> median_absolute_deviation(w, axis=None, nan_policy='omit')
+    1.1607745088260824
     """
     a = np.asarray(a)
+    if axis is None:
+        # Calculate the MAD over the entire array
+        a = np.ravel(a)
+        axis = 0
     c = scipy.stats.norm.ppf(3 / 4.) if normalize else 1
-    center = np.apply_over_axes(np.median, a, axis)
-    return np.median((np.fabs(a - center)) / c, axis=axis)
+    center = np.apply_over_axes(np.nanmedian, a, axis)
+    return np.nanmedian((np.fabs(a - center)) / c, axis=axis)
 
 
 def madmedianrule(a):
@@ -60,6 +103,10 @@ def madmedianrule(a):
     outliers: boolean (same shape as a)
         Boolean array indicating whether each sample is an outlier (True) or
         not (False).
+
+    See also
+    --------
+    mad
 
     Notes
     -----
