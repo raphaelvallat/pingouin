@@ -55,7 +55,13 @@ class TestNonParametric(TestCase):
         # Similar to R: wilcox.test(df$x, df$y, paired = FALSE, exact = FALSE)
         assert mwu_scp[0] == mwu_pg.at['MWU', 'U-val']
         assert mwu_scp[1] == mwu_pg.at['MWU', 'p-val']
-        mwu(x, y, tail='one-sided')
+        # One-sided
+        assert np.median(x) > np.median(y)  # Tail = greater, x > y
+        assert (mwu(x, y, tail='one-sided').at['MWU', 'p-val'] ==
+                mwu(x, y, tail='greater').at['MWU', 'p-val'])
+        assert (mwu(x, y, tail='less').at['MWU', 'p-val'] ==
+                scipy.stats.mannwhitneyu(x, y, use_continuity=True,
+                                         alternative='less')[1])
 
     def test_wilcoxon(self):
         """Test function wilcoxon"""

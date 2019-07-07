@@ -151,9 +151,16 @@ def mwu(x, y, tail='two-sided'):
     Parameters
     ----------
     x, y : array_like
-        First and second set of observations. x and y must be independent.
+        First and second set of observations. ``x`` and ``y`` must be
+        independent.
     tail : string
-        Specify whether to return 'one-sided' or 'two-sided' p-value.
+        Specify whether to return `'one-sided'` or `'two-sided'` p-value.
+        Can also be `'greater'` or `'less'` to specify the direction of the
+        test. If ``tail='one-sided'``, the alternative of the test will be
+        automatically detected by comparing the medians of ``x`` and ``y``.
+        For instance, if median(``x``) < median(``y``) and
+        ``tail='one-sided'``, Pingouin will automatically set ``tail='less'``,
+        and vice versa.
 
     Returns
     -------
@@ -165,17 +172,23 @@ def mwu(x, y, tail='two-sided'):
         'RBC'   : rank-biserial correlation (effect size)
         'CLES'  : common language effect size
 
+    See also
+    --------
+    scipy.stats.mannwhitneyu, wilcoxon, ttest
+
     Notes
     -----
-    mwu tests the hypothesis that data in x and y are samples from continuous
-    distributions with equal medians. The test assumes that x and y
-    are independent. This test corrects for ties and by default
-    uses a continuity correction (see :py:func:`scipy.stats.mannwhitneyu`
-    for details).
+    The Mann–Whitney U test (also called Wilcoxon rank-sum test) is a
+    non-parametric test of the null hypothesis that it is equally likely that
+    a randomly selected value from one sample will be less than or greater
+    than a randomly selected value from a second sample. The test assumes
+    that the two samples are independent. This test corrects for ties and by
+    default uses a continuity correction
+    (see :py:func:`scipy.stats.mannwhitneyu` for details).
 
-    The rank biserial correlation is the difference between the proportion of
-    favorable evidence minus the proportion of unfavorable evidence
-    (see Kerby 2014).
+    The rank biserial correlation effect size is the difference between the
+    proportion of favorable evidence minus the proportion of unfavorable
+    evidence (see Kerby 2014).
 
     The common language effect size is the probability (from 0 to 1) that a
     randomly selected observation from the first sample will be greater than a
@@ -211,6 +224,25 @@ def mwu(x, y, tail='two-sided'):
     >>> scipy.stats.mannwhitneyu(x, y, use_continuity=True,
     ...                          alternative='two-sided')
     MannwhitneyuResult(statistic=97.0, pvalue=0.0055604599321374135)
+
+    One-sided tail: one can either manually specify the alternative hypothesis
+
+    >>> pg.mwu(x, y, tail='greater')
+         U-val     p-val    RBC   CLES
+    MWU   97.0  0.997442  0.515  0.758
+
+    >>> pg.mwu(x, y, tail='less')
+         U-val    p-val    RBC   CLES
+    MWU   97.0  0.00278  0.515  0.758
+
+    Or simply leave it to Pingouin, using the `'one-sided'` argument, in which
+    case Pingouin will compare the medians of ``x`` and ``y`` and ajust the
+    tail based on that:
+
+    >>> # Since np.median(x) < np.median(y), this is equivalent to tail='less'
+    >>> pg.mwu(x, y, tail='one-sided')
+         U-val    p-val    RBC   CLES
+    MWU   97.0  0.00278  0.515  0.758
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -218,9 +250,13 @@ def mwu(x, y, tail='two-sided'):
     # Remove NA
     x, y = remove_na(x, y, paired=False)
 
-    # Compute test
+    # Check tails
+    possible_tails = ['two-sided', 'one-sided', 'greater', 'less']
+    assert tail in possible_tails, 'Invalid tail argument.'
     if tail == 'one-sided':
+        # Detect the direction of the test based on the median
         tail = 'less' if np.median(x) < np.median(y) else 'greater'
+
     uval, pval = scipy.stats.mannwhitneyu(x, y, use_continuity=True,
                                           alternative=tail)
 
