@@ -57,6 +57,18 @@ class TestParametric(TestCase):
         assert tt.loc['T-test', 'dof'] == 5
         assert round(tt.loc['T-test', 'p-val'], 3) == 0.002
         np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [3.05, 6.95])
+        # - Two-sample equal variances, tail = 'greater'
+        tt = ttest(a, b, paired=False, tail='greater')
+        assert tt.loc['T-test', 'tail'] == 'greater'
+        assert round(tt.loc['T-test', 'p-val'], 4) == 0.9913
+        assert float(tt.loc['T-test', 'BF10']) < 1
+        np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [-5.73, np.inf])
+        # tail = 'less'
+        tt = ttest(a, b, paired=False, tail='less')
+        assert tt.loc['T-test', 'tail'] == 'less'
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.00874
+        assert float(tt.loc['T-test', 'BF10']) > 1
+        np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [-np.inf, -1.27])
 
     def test_anova(self):
         """Test function anova.

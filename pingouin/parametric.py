@@ -19,13 +19,16 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     x : array_like
         First set of observations.
     y : array_like or float
-        Second set of observations. If y is a single value, a one-sample T-test
-        is computed.
+        Second set of observations. If ``y`` is a single value, a one-sample
+        T-test is computed.
     paired : boolean
         Specify whether the two observations are related (i.e. repeated
         measures) or independent.
     tail : string
-        Specify whether to return two-sided or one-sided p-value.
+        Specify whether to return `'two-sided'` or `'one-sided'` p-value (the
+        latter simply being half the former). Can also be `'greater'` or
+        `'less'` to specify the direction of the test. `'greater'` tests
+        the alternative that ``x`` has a larger mean than ``y``.
     correction : string or boolean
         For unpaired two sample T-tests, specify whether or not to correct for
         unequal variances using Welch separate variances T-test. If 'auto', it
@@ -62,7 +65,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     Notes
     -----
     Missing values are automatically removed from the data. If ``x`` and
-    ``y`` are paired, the entire row is removed.
+    ``y`` are paired, the entire row is removed (= listwise deletion).
 
     The **two-sample T-test for unpaired data** is defined as:
 
@@ -137,7 +140,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
               T  dof       tail  p-val          CI95%  cohen-d   BF10  power
     T-test  1.4    4  two-sided   0.23  [-1.68, 5.08]     0.62  0.766   0.19
 
-    2. Paired two-sample T-test (one-tailed).
+    2. Paired two-sample T-test (one-sided).
 
     >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
@@ -145,21 +148,33 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
                T  dof       tail  p-val           CI95%  cohen-d   BF10  power
     T-test -2.31    4  one-sided   0.04  [-1.35, -0.05]     0.25  3.122   0.12
 
-    3. Paired two-sample T-test with missing values.
+    3. Testing that ``x`` has a larger mean than ``y`` (``tail = 'greater'``)
+
+    >>> ttest(pre, post, paired=True, tail='greater').round(2)
+               T  dof     tail  p-val         CI95%  cohen-d  BF10  power
+    T-test -2.31    4  greater   0.96  [-1.35, inf]     0.25  0.32   0.12
+
+    4. Testing that ``x`` has a smaller mean than ``y`` (``tail = 'less'``)
+
+    >>> ttest(pre, post, paired=True, tail='less').round(2)
+               T  dof  tail  p-val          CI95%  cohen-d   BF10  power
+    T-test -2.31    4  less   0.04  [-inf, -0.05]     0.25  3.122   0.12
+
+    5. Paired two-sample T-test with missing values.
 
     >>> import numpy as np
     >>> pre = [5.5, 2.4, np.nan, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
     >>> stats = ttest(pre, post, paired=True)
 
-    4. Independent two-sample T-test (equal sample size).
+    6. Independent two-sample T-test (equal sample size).
 
     >>> np.random.seed(123)
     >>> x = np.random.normal(loc=7, size=20)
     >>> y = np.random.normal(loc=4, size=20)
     >>> stats = ttest(x, y, correction='auto')
 
-    5. Independent two-sample T-test (unequal sample size).
+    7. Independent two-sample T-test (unequal sample size).
 
     >>> np.random.seed(123)
     >>> x = np.random.normal(loc=7, size=20)
@@ -170,6 +185,11 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     from scipy.stats.stats import (_unequal_var_ttest_denom,
                                    _equal_var_ttest_denom)
     from pingouin import (power_ttest, power_ttest2n, compute_effsize)
+
+    # Check tails
+    possible_tails = ['two-sided', 'one-sided', 'greater', 'less']
+    assert tail in possible_tails, 'Invalid tail argument.'
+
     x = np.asarray(x)
     y = np.asarray(y)
 
@@ -207,7 +227,17 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
             tval, pval = ttest_ind(x, y, equal_var=True)
             _, se = _equal_var_ttest_denom(vx, nx, vy, ny)
 
-    pval = pval / 2 if tail == 'one-sided' else pval
+    # Tail of the test
+    # - Two-sided: default returned by SciPy
+    # - One-sided: 0.5 * two-sided
+    # - Greater / less: (1 - one-sided) or one-sided depending on the means
+    pval_1s = pval / 2
+    if tail == 'one-sided':
+        pval = pval_1s
+    elif tail == 'greater':
+        pval = pval_1s if tval > 0 else 1 - pval_1s
+    elif tail == 'less':
+        pval = pval_1s if tval < 0 else 1 - pval_1s
 
     # Effect size
     d = compute_effsize(x, y, paired=paired, eftype='cohen')
@@ -221,26 +251,31 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     conf = 0.975 if tail == 'two-sided' else 0.95
     tcrit = t.ppf(conf, dof)
     ci = np.array([tval - tcrit, tval + tcrit]) * se
+    if tail == 'greater':
+        ci[1] = np.inf
+    elif tail == 'less':
+        ci[0] = -np.inf
 
     # Achieved power
+    tail_binary = 'two-sided' if tail == 'two-sided' else 'one-sided'
     if ny == 1:
         # One-sample
         power = power_ttest(d=d, n=nx, power=None, alpha=0.05,
-                            contrast='one-sample', tail=tail)
+                            contrast='one-sample', tail=tail_binary)
     if ny > 1 and paired is True:
         # Paired two-sample
         power = power_ttest(d=d, n=nx, power=None, alpha=0.05,
-                            contrast='paired', tail=tail)
+                            contrast='paired', tail=tail_binary)
     elif ny > 1 and paired is False:
         # Independent two-samples
         if nx == ny:
             # Equal sample sizes
             power = power_ttest(d=d, n=nx, power=None, alpha=0.05,
-                                contrast='two-samples', tail=tail)
+                                contrast='two-samples', tail=tail_binary)
         else:
             # Unequal sample sizes
             power = power_ttest2n(nx, ny, d=d, power=None, alpha=0.05,
-                                  tail=tail)
+                                  tail=tail_binary)
 
     # Bayes factor
     bf = bayesfactor_ttest(tval, nx, ny, paired=paired, tail=tail, r=r)

@@ -35,7 +35,8 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
         Specify whether the two observations are related (i.e. repeated
         measures) or independent.
     tail : string
-        Specify whether the test is 'one-sided' or 'two-sided'
+        Specify whether the test is 'one-sided'` or `'two-sided'`. Can also be
+        `'greater'` or `'less'` to specify the direction of the test.
 
         .. warning:: One-sided Bayes Factor (BF) are simply obtained by
             doubling the two-sided BF, which is not exactly the same behavior
@@ -112,7 +113,18 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     >>> bf = bayesfactor_ttest(3.5, 20, tail='one-sided')
     >>> print("Bayes Factor: %s (one-sample)" % bf)
     Bayes Factor: 34.369 (one-sample)
+
+    4. Now specify the direction of the test
+
+    >>> tval = -3.5
+    >>> bf_greater = bayesfactor_ttest(tval, 20, tail='greater')
+    >>> bf_less = bayesfactor_ttest(tval, 20, tail='less')
+    >>> print("BF10-greater: %s | BF10-less: %s" % (bf_greater, bf_less))
+    BF10-greater: 0.029 | BF10-less: 34.369
     """
+    # Check tails
+    possible_tails = ['two-sided', 'one-sided', 'greater', 'less']
+    assert tail in possible_tails, 'Invalid tail argument.'
     one_sample = True if ny is None or ny == 1 else False
 
     # Function to be integrated
@@ -134,7 +146,11 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     bf10 = 1 / ((1 + t**2 / df)**(-(df + 1) / 2) / integr)
 
     # Tail
-    bf10 = bf10 * (1 / 0.5) if tail == 'one-sided' else bf10
+    tail_binary = 'two-sided' if tail == 'two-sided' else 'one-sided'
+    bf10 = bf10 * (1 / 0.5) if tail_binary == 'one-sided' else bf10
+    # Now check the direction of the test
+    if (tail == 'greater' and t < 0) or (tail == 'less' and t > 0):
+        bf10 = 1 / bf10
 
     return _format_bf(bf10)
 

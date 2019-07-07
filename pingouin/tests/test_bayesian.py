@@ -26,6 +26,11 @@ class TestBayesian(TestCase):
         assert ttest(x, y, paired=True).at['T-test', 'BF10'] == '0.135'
         assert int(float(ttest(x, z).at['T-test', 'BF10'])) == 1290
         assert int(float(ttest(x, z, paired=True).at['T-test', 'BF10'])) == 420
+        # Now check the alternative tails
+        assert float(bayesfactor_ttest(3.5, 20, 20, tail='greater')) > 1
+        assert float(bayesfactor_ttest(3.5, 20, 20, tail='less')) < 1
+        assert float(bayesfactor_ttest(-3.5, 20, 20, tail='greater')) < 1
+        assert float(bayesfactor_ttest(-3.5, 20, 20, tail='less')) > 1
 
     def test_bayesfactor_pearson(self):
         """Test function bayesfactor_pearson."""
