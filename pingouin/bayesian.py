@@ -35,7 +35,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
         Specify whether the two observations are related (i.e. repeated
         measures) or independent.
     tail : string
-        Specify whether the test is 'one-sided'` or `'two-sided'`. Can also be
+        Specify whether the test is `'one-sided'` or `'two-sided'`. Can also be
         `'greater'` or `'less'` to specify the direction of the test.
 
         .. warning:: One-sided Bayes Factor (BF) are simply obtained by

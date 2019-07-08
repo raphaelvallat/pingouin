@@ -25,10 +25,12 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         Specify whether the two observations are related (i.e. repeated
         measures) or independent.
     tail : string
-        Specify whether to return `'two-sided'` or `'one-sided'` p-value (the
-        latter simply being half the former). Can also be `'greater'` or
-        `'less'` to specify the direction of the test. `'greater'` tests
-        the alternative that ``x`` has a larger mean than ``y``.
+        Specify whether the alternative hypothesis is `'two-sided'` or
+        `'one-sided'`. Can also be `'greater'` or `'less'` to specify the
+        direction of the test. `'greater'` tests the alternative that ``x``
+        has a larger mean than ``y``. If tail is `'one-sided'`, Pingouin will
+        automatically infer the one-sided alternative hypothesis based on the
+        test statistic.
     correction : string or boolean
         For unpaired two sample T-tests, specify whether or not to correct for
         unequal variances using Welch separate variances T-test. If 'auto', it
@@ -56,11 +58,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     See also
     --------
-    mwu : non-parametric independent T-test
-    wilcoxon : non-parametric paired T-test
-    anova : One-way and N-way ANOVA
-    rm_anova : One-way and two-way repeated measures ANOVA
-    compute_effsize : Effect sizes
+    mwu, wilcoxon, anova, rm_anova, pairwise_ttests, compute_effsize
 
     Notes
     -----
@@ -140,7 +138,9 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
               T  dof       tail  p-val          CI95%  cohen-d   BF10  power
     T-test  1.4    4  two-sided   0.23  [-1.68, 5.08]     0.62  0.766   0.19
 
-    2. Paired two-sample T-test (one-sided).
+    2. Paired T-test. Since tail is `'one-sided'`, Pingouin will
+    automatically infer the alternative hypothesis based on the T-value. In
+    the example below, the T-value is negative so the tail is set to `'less'`..
 
     >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
@@ -148,33 +148,34 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
                T  dof  tail  p-val          CI95%  cohen-d   BF10  power
     T-test -2.31    4  less   0.04  [-inf, -0.05]     0.25  3.122   0.12
 
-    3. Testing that ``x`` has a larger mean than ``y`` (``tail = 'greater'``)
-
-    >>> ttest(pre, post, paired=True, tail='greater').round(2)
-               T  dof     tail  p-val         CI95%  cohen-d  BF10  power
-    T-test -2.31    4  greater   0.96  [-1.35, inf]     0.25  0.32   0.02
-
-    4. Testing that ``x`` has a smaller mean than ``y`` (``tail = 'less'``)
+    ..which is indeed equivalent to directly testing that ``x`` has a
+    smaller mean than ``y`` (``tail = 'less'``)
 
     >>> ttest(pre, post, paired=True, tail='less').round(2)
                T  dof  tail  p-val          CI95%  cohen-d   BF10  power
     T-test -2.31    4  less   0.04  [-inf, -0.05]     0.25  3.122   0.12
 
-    5. Paired two-sample T-test with missing values.
+    3. Now testing the opposite alternative hypothesis (``tail = 'greater'``)
+
+    >>> ttest(pre, post, paired=True, tail='greater').round(2)
+               T  dof     tail  p-val         CI95%  cohen-d  BF10  power
+    T-test -2.31    4  greater   0.96  [-1.35, inf]     0.25  0.32   0.02
+
+    4. Paired T-test with missing values.
 
     >>> import numpy as np
     >>> pre = [5.5, 2.4, np.nan, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
     >>> stats = ttest(pre, post, paired=True)
 
-    6. Independent two-sample T-test (equal sample size).
+    5. Independent two-sample T-test (equal sample size).
 
     >>> np.random.seed(123)
     >>> x = np.random.normal(loc=7, size=20)
     >>> y = np.random.normal(loc=4, size=20)
     >>> stats = ttest(x, y, correction='auto')
 
-    7. Independent two-sample T-test (unequal sample size).
+    6. Independent two-sample T-test (unequal sample size).
 
     >>> np.random.seed(123)
     >>> x = np.random.normal(loc=7, size=20)

@@ -774,7 +774,7 @@ def _dcorr(y, n2, A, dcov2_xx):
     return np.sqrt(dcov2_xy) / np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
 
 
-def distance_corr(x, y, tail='upper', n_boot=1000, seed=None):
+def distance_corr(x, y, tail='greater', n_boot=1000, seed=None):
     """Distance correlation between two arrays.
 
     Statistical significance (p-value) is evaluated with a permutation test.
@@ -788,8 +788,8 @@ def distance_corr(x, y, tail='upper', n_boot=1000, seed=None):
     tail : str
         Tail for p-value ::
 
-        'upper' : one-sided (upper tail)
-        'lower' : one-sided (lower tail)
+        'greater' : one-sided (upper tail)
+        'less' : one-sided (lower tail)
         'two-sided' : two-sided
 
     n_boot : int or None
@@ -873,7 +873,7 @@ def distance_corr(x, y, tail='upper', n_boot=1000, seed=None):
     >>> distance_corr(a, b, n_boot=None)
     0.8799633012275321
     """
-    assert tail in ['upper', 'lower', 'two-sided'], 'Wrong tail argument.'
+    assert tail in ['greater', 'less', 'two-sided'], 'Wrong tail argument.'
     x = np.asarray(x)
     y = np.asarray(y)
     # Check for NaN values

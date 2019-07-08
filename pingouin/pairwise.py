@@ -69,7 +69,12 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     alpha : float
         Significance level
     tail : string
-        Indicates whether to return the 'two-sided' or 'one-sided' p-values
+        Specify whether the alternative hypothesis is `'two-sided'` or
+        `'one-sided'`. Can also be `'greater'` or `'less'` to specify the
+        direction of the test. `'greater'` tests the alternative that ``x``
+        has a larger mean than ``y``. If tail is `'one-sided'`, Pingouin will
+        automatically infer the one-sided alternative hypothesis of the test
+        based on the test statistic.
     padjust : string
         Method used for testing and adjustment of pvalues.
         Available methods are ::
@@ -118,6 +123,10 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         'hedges' : Hedges effect size
         'CLES' : Common language effect size
 
+    See also
+    --------
+    ttest, mwu, wilcoxon, compute_effsize, multicomp
+
     Notes
     -----
     Data are expected to be in long-format. If your data is in wide-format,
@@ -147,12 +156,6 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     and remove the missing values before using this function.
 
     This function has been tested against the `pairwise.t.test` R function.
-
-    See Also
-    --------
-    ttest : T-test.
-    wilcoxon : Non-parametric test for paired samples.
-    mwu : Non-parametric test for independent samples.
 
     Examples
     --------
@@ -191,7 +194,7 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     _check_dataframe(dv=dv, between=between, within=within, subject=subject,
                      effects='all', data=data)
 
-    if tail not in ['one-sided', 'two-sided']:
+    if tail not in ['one-sided', 'two-sided', 'greater', 'less']:
         raise ValueError('Tail not recognized')
 
     if not isinstance(alpha, float):
@@ -822,11 +825,11 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     Examples
     --------
-    1. One-tailed spearman correlation corrected for multiple comparisons
+    1. One-sided spearman correlation corrected for multiple comparisons
 
     >>> from pingouin import pairwise_corr, read_dataset
     >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
-    >>> pairwise_corr(data, method='spearman', tail='two-sided',
+    >>> pairwise_corr(data, method='spearman', tail='one-sided',
     ...               padjust='bonf')  # doctest: +SKIP
 
     2. Robust two-sided correlation with uncorrected p-values

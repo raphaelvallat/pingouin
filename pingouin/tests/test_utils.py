@@ -42,15 +42,15 @@ class TestUtils(TestCase):
         np.random.seed(123)
         bootstat = np.random.normal(size=1000)
         x = -2
-        up = _perm_pval(bootstat, x, tail='upper')
-        low = _perm_pval(bootstat, x, tail='lower')
+        up = _perm_pval(bootstat, x, tail='greater')
+        low = _perm_pval(bootstat, x, tail='less')
         two = _perm_pval(bootstat, x, tail='two-sided')
         assert up > low
         assert up + low == 1
         assert low < two < up
         x = 2.5
-        up = _perm_pval(bootstat, x, tail='upper')
-        low = _perm_pval(bootstat, x, tail='lower')
+        up = _perm_pval(bootstat, x, tail='greater')
+        low = _perm_pval(bootstat, x, tail='less')
         two = _perm_pval(bootstat, x, tail='two-sided')
         assert low > up
         assert up + low == 1
