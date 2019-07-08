@@ -187,8 +187,8 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     >>> posthocs = pairwise_ttests(dv='Scores', between=['Group', 'Time'],
     ...                            data=df)
     '''
-    from pingouin.parametric import ttest
-    from pingouin.nonparametric import wilcoxon, mwu
+    from .parametric import ttest
+    from .nonparametric import wilcoxon, mwu
 
     # Safety checks
     _check_dataframe(dv=dv, between=between, within=within, subject=subject,

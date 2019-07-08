@@ -7,9 +7,6 @@ from pingouin.pairwise import (pairwise_ttests, pairwise_corr, pairwise_tukey,
                                pairwise_gameshowell)
 from pingouin import read_dataset
 
-# Dataset for pairwise_ttests
-df = read_dataset('mixed_anova.csv')
-
 
 class TestPairwise(TestCase):
     """Test pairwise.py."""
@@ -17,6 +14,7 @@ class TestPairwise(TestCase):
     def test_pairwise_ttests(self):
         """Test function pairwise_ttests.
         Tested against the pairwise.t.test R function."""
+        df = read_dataset('mixed_anova.csv')
         # Within + Between + Within * Between
         pairwise_ttests(dv='Scores', within='Time', between='Group',
                         subject='Subject', data=df, alpha=.01)
@@ -85,6 +83,45 @@ class TestPairwise(TestCase):
         pairwise_ttests(dv='DesireToKill',
                         within=['Disgustingness', 'Frighteningness'],
                         subject='Subject', padjust='holm', data=df2)
+
+        # Compare with JASP tail argument
+        df = read_dataset('pairwise_ttests')
+        # 1. Within
+        # 1.1 Parametric
+        # 1.1.1 Tail is greater
+        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+                             data=df, tail='greater')
+        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                      [0.907, 0.941, 0.405])
+        assert all(pt.loc[:, 'BF10'].astype(float) < 1)
+        # 1.1.2 Tail is less
+        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+                             data=df, tail='less')
+        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                      [0.093, 0.059, 0.595])
+        assert sum(pt.loc[:, 'BF10'].astype(float) > 1) == 2
+        # 1.1.3 Tail is one-sided: smallest p-value
+        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+                             data=df, tail='one-sided')
+        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                      [0.093, 0.059, 0.405])
+
+        # 1.2 Non-parametric
+        # 1.2.1 Tail is greater
+        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+                             parametric=False, data=df, tail='greater')
+        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                      [0.910, 0.951, 0.482])
+        # 1.2.2 Tail is less
+        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+                             parametric=False, data=df, tail='less')
+        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                      [0.108, 0.060, 0.554])
+        # 1.2.3 Tail is one-sided: smallest p-value
+        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+                             parametric=False, data=df, tail='one-sided')
+        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                      [0.108, 0.060, 0.482])
 
     def test_pairwise_tukey(self):
         """Test function pairwise_tukey"""
