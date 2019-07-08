@@ -149,7 +149,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     tail_binary = 'two-sided' if tail == 'two-sided' else 'one-sided'
     bf10 = bf10 * (1 / 0.5) if tail_binary == 'one-sided' else bf10
     # Now check the direction of the test
-    if (tail == 'greater' and t < 0) or (tail == 'less' and t > 0):
+    if ((tail == 'greater' and t < 0) or (tail == 'less' and t > 0)) and bf10 > 1:  # noqa
         bf10 = 1 / bf10
 
     return _format_bf(bf10)
