@@ -53,6 +53,7 @@ class TestNonParametric(TestCase):
                                            alternative='two-sided')
         mwu_pg = mwu(x, y, tail='two-sided')
         # Similar to R: wilcox.test(df$x, df$y, paired = FALSE, exact = FALSE)
+        # Note that the RBC value are compared to JASP in test_pairwise.py
         assert mwu_scp[0] == mwu_pg.at['MWU', 'U-val']
         assert mwu_scp[1] == mwu_pg.at['MWU', 'p-val']
         # One-sided
@@ -74,6 +75,7 @@ class TestNonParametric(TestCase):
         assert wc_scp[0] == wc_pg.at['Wilcoxon', 'W-val']
         assert wc_scp[1] == wc_pg.at['Wilcoxon', 'p-val']
         # Compare to R canprot::CLES
+        # Note that the RBC value are compared to JASP in test_pairwise.py
         assert wc_pg.at['Wilcoxon', 'CLES'] == 0.536
         assert (wc_pg.at['Wilcoxon', 'p-val'] / 2) == wc_pg_1.at['Wilcoxon',
                                                                  'p-val']

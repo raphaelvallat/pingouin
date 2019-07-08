@@ -84,7 +84,7 @@ class TestPairwise(TestCase):
                         within=['Disgustingness', 'Frighteningness'],
                         subject='Subject', padjust='holm', data=df2)
 
-        # Compare with JASP tail argument
+        # Compare with JASP tail / parametric argument
         df = read_dataset('pairwise_ttests')
         # 1. Within
         # 1.1 Parametric
@@ -122,6 +122,53 @@ class TestPairwise(TestCase):
                              parametric=False, data=df, tail='one-sided')
         np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
                                       [0.108, 0.060, 0.482])
+
+        # Compare the RBC value for wilcoxon
+        from pingouin.nonparametric import wilcoxon
+        x = df[df['Drug'] == 'A']['Scores'].values
+        y = df[df['Drug'] == 'B']['Scores'].values
+        assert -0.6 < wilcoxon(x, y).at['Wilcoxon', 'RBC'] < -0.4
+        x = df[df['Drug'] == 'B']['Scores'].values
+        y = df[df['Drug'] == 'C']['Scores'].values
+        assert wilcoxon(x, y).at['Wilcoxon', 'RBC'].round(3) == 0.030
+
+        # 2. Between
+        # 2.1 Parametric
+        # 2.1.1 Tail is greater
+        pt = pairwise_ttests(dv='Scores', between='Gender',
+                             data=df, tail='greater')
+        assert pt.loc[0, 'p-unc'].round(3) == 0.068
+        assert float(pt.loc[0, 'BF10']) > 1
+        # 2.1.2 Tail is less
+        pt = pairwise_ttests(dv='Scores', between='Gender',
+                             data=df, tail='less')
+        assert pt.loc[0, 'p-unc'].round(3) == 0.932
+        assert float(pt.loc[0, 'BF10']) < 1
+        # 2.1.3 Tail is one-sided: smallest p-value
+        pt = pairwise_ttests(dv='Scores', between='Gender',
+                             data=df, tail='one-sided')
+        assert pt.loc[0, 'p-unc'].round(3) == 0.068
+        assert float(pt.loc[0, 'BF10']) > 1
+
+        # 2.2 Non-parametric
+        # 2.2.1 Tail is greater
+        pt = pairwise_ttests(dv='Scores', between='Gender',
+                             parametric=False, data=df, tail='greater')
+        assert pt.loc[0, 'p-unc'].round(3) == 0.105
+        # 2.2.2 Tail is less
+        pt = pairwise_ttests(dv='Scores', between='Gender',
+                             parametric=False, data=df, tail='less')
+        assert pt.loc[0, 'p-unc'].round(3) == 0.901
+        # 2.2.3 Tail is one-sided: smallest p-value
+        pt = pairwise_ttests(dv='Scores', between='Gender',
+                             parametric=False, data=df, tail='one-sided')
+        assert pt.loc[0, 'p-unc'].round(3) == 0.105
+
+        # Compare the RBC value for MWU
+        from pingouin.nonparametric import mwu
+        x = df[df['Gender'] == 'M']['Scores'].values
+        y = df[df['Gender'] == 'F']['Scores'].values
+        assert abs(mwu(x, y).at['MWU', 'RBC']) == 0.252
 
     def test_pairwise_tukey(self):
         """Test function pairwise_tukey"""

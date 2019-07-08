@@ -215,8 +215,8 @@ def mwu(x, y, tail='two-sided'):
     >>> x = np.random.uniform(low=0, high=1, size=20)
     >>> y = np.random.uniform(low=0.2, high=1.2, size=20)
     >>> pg.mwu(x, y, tail='two-sided')
-         U-val    p-val    RBC   CLES
-    MWU   97.0  0.00556  0.515  0.758
+         U-val       tail    p-val    RBC   CLES
+    MWU   97.0  two-sided  0.00556  0.515  0.758
 
     Compare with SciPy
 
@@ -228,12 +228,12 @@ def mwu(x, y, tail='two-sided'):
     One-sided tail: one can either manually specify the alternative hypothesis
 
     >>> pg.mwu(x, y, tail='greater')
-         U-val     p-val    RBC   CLES
-    MWU   97.0  0.997442  0.515  0.758
+         U-val     tail     p-val    RBC   CLES
+    MWU   97.0  greater  0.997442  0.515  0.758
 
     >>> pg.mwu(x, y, tail='less')
-         U-val    p-val    RBC   CLES
-    MWU   97.0  0.00278  0.515  0.758
+         U-val  tail    p-val    RBC   CLES
+    MWU   97.0  less  0.00278  0.515  0.758
 
     Or simply leave it to Pingouin, using the `'one-sided'` argument, in which
     case Pingouin will compare the medians of ``x`` and ``y`` and select the
@@ -241,8 +241,8 @@ def mwu(x, y, tail='two-sided'):
 
     >>> # Since np.median(x) < np.median(y), this is equivalent to tail='less'
     >>> pg.mwu(x, y, tail='one-sided')
-         U-val    p-val    RBC   CLES
-    MWU   97.0  0.00278  0.515  0.758
+         U-val  tail    p-val    RBC   CLES
+    MWU   97.0  less  0.00278  0.515  0.758
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -270,11 +270,12 @@ def mwu(x, y, tail='two-sided'):
     # Fill output DataFrame
     stats = pd.DataFrame({}, index=['MWU'])
     stats['U-val'] = round(uval, 3)
+    stats['tail'] = tail
     stats['p-val'] = pval
     stats['RBC'] = round(rbc, 3)
     stats['CLES'] = round(cles, 3)
 
-    col_order = ['U-val', 'p-val', 'RBC', 'CLES']
+    col_order = ['U-val', 'tail', 'p-val', 'RBC', 'CLES']
     stats = stats.reindex(columns=col_order)
     return stats
 
@@ -355,8 +356,8 @@ def wilcoxon(x, y, tail='two-sided'):
     >>> x = [20, 22, 19, 20, 22, 18, 24, 20, 19, 24, 26, 13]
     >>> y = [38, 37, 33, 29, 14, 12, 20, 22, 17, 25, 26, 16]
     >>> pg.wilcoxon(x, y, tail='two-sided')
-              W-val     p-val    RBC   CLES
-    Wilcoxon   20.5  0.285765  0.333  0.583
+              W-val       tail     p-val    RBC   CLES
+    Wilcoxon   20.5  two-sided  0.285765 -0.379  0.583
 
     Compare with SciPy
 
@@ -367,12 +368,12 @@ def wilcoxon(x, y, tail='two-sided'):
     One-sided tail: one can either manually specify the alternative hypothesis
 
     >>> pg.wilcoxon(x, y, tail='greater')
-              W-val     p-val    RBC   CLES
-    Wilcoxon   20.5  0.876244  0.333  0.583
+              W-val     tail     p-val    RBC   CLES
+    Wilcoxon   20.5  greater  0.876244 -0.379  0.583
 
     >>> pg.wilcoxon(x, y, tail='less')
-              W-val     p-val    RBC   CLES
-    Wilcoxon   20.5  0.142883  0.333  0.583
+              W-val  tail     p-val    RBC   CLES
+    Wilcoxon   20.5  less  0.142883 -0.379  0.583
 
     Or simply leave it to Pingouin, using the `'one-sided'` argument, in which
     case Pingouin will look at the sign of the median of the differences
@@ -385,8 +386,8 @@ def wilcoxon(x, y, tail='two-sided'):
     hypothesis that the median of the differences is negative (= less than 0).
 
     >>> pg.wilcoxon(x, y, tail='one-sided')  # Equivalent to tail = 'less'
-              W-val     p-val    RBC   CLES
-    Wilcoxon   20.5  0.142883  0.333  0.583
+              W-val  tail     p-val    RBC   CLES
+    Wilcoxon   20.5  less  0.142883 -0.379  0.583
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -410,20 +411,23 @@ def wilcoxon(x, y, tail='two-sided'):
     cles = max((diff < 0).sum(), (diff > 0).sum()) / diff.size
 
     # Effect size 2: matched-pairs rank biserial correlation (Kerby 2014)
-    rank = np.arange(x.size, 0, -1)
-    rsum = rank.sum()
-    fav = rank[np.sign(y - x) > 0].sum()
-    unfav = rank[np.sign(y - x) < 0].sum()
-    rbc = fav / rsum - unfav / rsum
+    d = x - y
+    d = d[d != 0]
+    r = scipy.stats.rankdata(abs(d))
+    rsum = r.sum()
+    r_plus = np.sum((d > 0) * r)
+    r_minus = np.sum((d < 0) * r)
+    rbc = r_plus / rsum - r_minus / rsum
 
     # Fill output DataFrame
     stats = pd.DataFrame({}, index=['Wilcoxon'])
     stats['W-val'] = round(wval, 3)
+    stats['tail'] = tail
     stats['p-val'] = pval
     stats['RBC'] = round(rbc, 3)
     stats['CLES'] = round(cles, 3)
 
-    col_order = ['W-val', 'p-val', 'RBC', 'CLES']
+    col_order = ['W-val', 'tail', 'p-val', 'RBC', 'CLES']
     stats = stats.reindex(columns=col_order)
     return stats
 

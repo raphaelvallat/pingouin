@@ -23,6 +23,7 @@ e. Better handling of alternative hypotheses in :py:func:`pingouin.wilcoxon`.
 f. Better handling of alternative hypotheses in :py:func:`pingouin.bayesfactor_ttest` (support for 'greater' and 'less').
 g. Better handling of alternative hypotheses in :py:func:`pingouin.ttest` (support for 'greater' and 'less'). This is also taken into account when calculating the Bayes Factor and power of the test.
 h. Better handling of alternative hypotheses in :py:func:`pingouin.power_ttest` and :py:func:`pingouin.power_ttest2n` (support for 'greater' and 'less', and removed 'one-sided').
+i. Implemented a new method to calculate the matched pair rank biserial correlation effect size for :py:func:`pingouin.wilcoxon`, which gives results almost identical to JASP.
 
 v0.2.7 (June 2019)
 ------------------
