@@ -292,12 +292,12 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
     ...                                     tail='greater'))
     power: 0.4164
 
-    3. Compute achieved ``d`` given ``n``, ``power`` and ``alpha`` level
+    2. Compute achieved ``d`` given ``n``, ``power`` and ``alpha`` level
 
     >>> print('d: %.4f' % power_ttest2n(nx=20, ny=15, power=0.80, alpha=0.05))
     d: 0.9859
 
-    4. Compute achieved alpha level given``d``, ``n`` and ``power``
+    3. Compute achieved alpha level given ``d``, ``n`` and ``power``
 
     >>> print('alpha: %.4f' % power_ttest2n(nx=20, ny=15, d=0.5,
     ...                                     power=0.80, alpha=None))

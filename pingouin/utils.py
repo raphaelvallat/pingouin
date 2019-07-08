@@ -22,9 +22,8 @@ def _perm_pval(bootstat, estimate, tail='two-sided'):
     estimate : float or int
         Point estimate.
     tail : str
-        'greater': one-sided p-value (upper tail)
-        'less': one-sided p-value (lower tail)
-        'two-sided': two-sided p-value
+        Tail for p-value. Can be either `'two-sided'` (default), or `'greater'`
+        or `'less'` for directional tests.
 
     Returns
     -------

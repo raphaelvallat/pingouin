@@ -236,8 +236,8 @@ def mwu(x, y, tail='two-sided'):
     MWU   97.0  0.00278  0.515  0.758
 
     Or simply leave it to Pingouin, using the `'one-sided'` argument, in which
-    case Pingouin will compare the medians of ``x`` and ``y`` and ajust the
-    tail based on that:
+    case Pingouin will compare the medians of ``x`` and ``y`` and select the
+    most appropriate tail based on that:
 
     >>> # Since np.median(x) < np.median(y), this is equivalent to tail='less'
     >>> pg.mwu(x, y, tail='one-sided')

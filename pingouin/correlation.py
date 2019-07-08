@@ -783,15 +783,13 @@ def distance_corr(x, y, tail='greater', n_boot=1000, seed=None):
     ----------
     x, y : np.ndarray
         1D or 2D input arrays, shape (n_samples, n_features).
-        x and y must have the same number of samples and must not
+        ``x`` and ``y`` must have the same number of samples and must not
         contain missing values.
     tail : str
-        Tail for p-value ::
-
-        'greater' : one-sided (upper tail)
-        'less' : one-sided (lower tail)
-        'two-sided' : two-sided
-
+        Tail for p-value. Can be either `'two-sided'` (default), or `'greater'`
+        or `'less'` for directional tests. To be consistent
+        with the original R implementation, the default is to calculate the
+        one-sided `'greater'` p-value.
     n_boot : int or None
         Number of bootstrap to perform.
         If None, no bootstrapping is performed and the function
@@ -835,9 +833,7 @@ def distance_corr(x, y, tail='greater', n_boot=1000, seed=None):
     Note that by contrast to Pearson's correlation, the distance correlation
     cannot be negative, i.e :math:`0 \\leq \\text{dCor} \\leq 1`.
 
-    Results have been tested against the 'energy' R package. To be consistent
-    with this latter, only the one-sided p-value is computed, i.e. the upper
-    tail of the T-statistic.
+    Results have been tested against the 'energy' R package.
 
     References
     ----------
