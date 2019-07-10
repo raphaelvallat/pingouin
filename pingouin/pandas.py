@@ -6,12 +6,14 @@ Authors
 """
 import numpy as np
 import pandas as pd
+from pingouin.multicomp import multicomp
 from pingouin.correlation import partial_corr
 from pingouin.parametric import (anova, welch_anova, rm_anova, mixed_anova)
 from pingouin.pairwise import (pairwise_corr, pairwise_ttests)
 from pingouin.regression import mediation_analysis
 
-__all__ = ['pcorr']
+
+__all__ = ['pcorr', 'rcorr']
 
 
 # ANOVA
@@ -163,6 +165,162 @@ def pcorr(self):
 
 
 pd.DataFrame.pcorr = pcorr
+
+
+# Correlation matrix with p-values and sample size.
+def rcorr(self, method='pearson', upper='pval', decimals=3, padjust=None,
+          stars=True, pval_stars={0.001: '***', 0.01: '**', 0.05: '*'}):
+    """
+    Correlation matrix of a dataframe (with p-values and/or sample size).
+
+    This method is a faster, but less exhaustive, matrix-version of the
+    :py:func:`pingouin.pairwise_corr` function. It is based on the
+    :py:func:`pandas.DataFrame.corr` method. Missing values are automatically
+    removed from each pairwise correlation.
+
+    Parameters
+    ----------
+    self : :py:class:`pandas.DataFrame`
+        Input dataframe.
+    method : str
+        Correlation method. Can be either 'pearson' or 'spearman'.
+    upper : str
+        If 'pval', the upper triangle of the output correlation matrix shows
+        the p-values. If 'n', the upper triangle is the sample size used in
+        each pairwise correlation.
+    decimals : int
+        Number of decimals to display in the output correlation matrix.
+    padjust : string or None
+        Method used for adjustment of pvalues.
+        Available methods are ::
+
+        'none' : no correction
+        'bonferroni' : one-step Bonferroni correction
+        'holm' : step-down method using Bonferroni adjustments
+        'fdr_bh' : Benjamini/Hochberg FDR correction
+        'fdr_by' : Benjamini/Yekutieli FDR correction
+    stars : boolean
+        If True, only significant p-values are displayed as stars using the
+        pre-defined thresholds of ``pval_stars``. If False, all the raw
+        p-values are displayed.
+    pval_stars : dict
+        Significance thresholds. Default is 3 stars for p-values < 0.001,
+        2 stars for p-values < 0.01 and 1 star for p-values < 0.05.
+
+    Returns
+    -------
+    rcorr : :py:class:`pandas.DataFrame`
+        Correlation matrix, of type str.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> import pingouin as pg
+    >>> # Load an example dataset of personality dimensions
+    >>> df = pg.read_dataset('pairwise_corr').iloc[:, 1:]
+    >>> # Add some missing values
+    >>> df.iloc[[2, 5, 20], 2] = np.nan
+    >>> df.iloc[[1, 4, 10], 3] = np.nan
+    >>> df.head().round(2)
+       Neuroticism  Extraversion  Openness  Agreeableness  Conscientiousness
+    0         2.48          4.21      3.94           3.96               3.46
+    1         2.60          3.19      3.96            NaN               3.23
+    2         2.81          2.90       NaN           2.75               3.50
+    3         2.90          3.56      3.52           3.17               2.79
+    4         3.02          3.33      4.02            NaN               2.85
+
+    >>> # Correlation matrix on the four first columns
+    >>> df.iloc[:, 0:4].rcorr()
+                  Neuroticism Extraversion Openness Agreeableness
+    Neuroticism             -          ***                     **
+    Extraversion        -0.35            -      ***
+    Openness            -0.01        0.265        -           ***
+    Agreeableness      -0.134        0.054    0.161             -
+
+    >>> # Spearman correlation and Holm adjustement for multiple comparisons
+    >>> df.iloc[:, 0:4].rcorr(method='spearman', padjust='holm')
+                  Neuroticism Extraversion Openness Agreeableness
+    Neuroticism             -          ***                     **
+    Extraversion       -0.325            -      ***
+    Openness           -0.027         0.24        -           ***
+    Agreeableness       -0.15         0.06    0.173             -
+
+    >>> # Compare with the pg.pairwise_corr function
+    >>> pairwise = df.iloc[:, 0:4].pairwise_corr(method='spearman',
+    ...                                          padjust='holm')
+    >>> pairwise[['X', 'Y', 'r', 'p-corr']].round(3)  # Do not show all columns
+                  X              Y      r  p-corr
+    0   Neuroticism   Extraversion -0.325   0.000
+    1   Neuroticism       Openness -0.027   0.543
+    2   Neuroticism  Agreeableness -0.150   0.002
+    3  Extraversion       Openness  0.240   0.000
+    4  Extraversion  Agreeableness  0.060   0.358
+    5      Openness  Agreeableness  0.173   0.000
+
+    >>> # Display the raw p-values with four decimals
+    >>> df.iloc[:, [0, 1, 3]].rcorr(stars=False, decimals=4)
+                  Neuroticism Extraversion Agreeableness
+    Neuroticism             -       0.0000        0.0028
+    Extraversion      -0.3501            -        0.2305
+    Agreeableness      -0.134       0.0539             -
+
+    >>> # With the sample size on the upper triangle instead of the p-values
+    >>> df.iloc[:, [0, 1, 2]].rcorr(upper='n')
+                 Neuroticism Extraversion Openness
+    Neuroticism            -          500      497
+    Extraversion       -0.35            -      497
+    Openness           -0.01        0.265        -
+    """
+    from numpy import triu_indices_from as tif
+    from numpy import format_float_positional as ffp
+    from scipy.stats import pearsonr, spearmanr
+
+    # Safety check
+    assert isinstance(pval_stars, dict), 'pval_stars must be a dictionnary.'
+    assert isinstance(decimals, int), 'decimals must be an int.'
+    assert method in ['pearson', 'spearman'], 'Method is not recognized.'
+    assert upper in ['pval', 'n'], 'upper must be either `pval` or `n`.'
+    mat = self.corr(method=method).round(decimals)
+    if upper == 'n':
+        mat_upper = self.corr(method=lambda x, y: len(x)).astype(int)
+    else:
+        if method == 'pearson':
+            mat_upper = self.corr(method=lambda x, y: pearsonr(x, y)[1])
+        else:
+            # Method = 'spearman'
+            mat_upper = self.corr(method=lambda x, y: spearmanr(x, y)[1])
+
+        if padjust is not None:
+            pvals = mat_upper.values[tif(mat, k=1)]
+            mat_upper.values[tif(mat, k=1)] = multicomp(pvals, alpha=0.05,
+                                                        method=padjust)[1]
+
+    # Convert r to text
+    mat = mat.astype(str)
+    np.fill_diagonal(mat.values, '-')  # Inplace modification of the diagonal
+
+    if upper == 'pval':
+
+        def replace_pval(x):
+            for key, value in pval_stars.items():
+                if x < key:
+                    return value
+            return ''
+
+        if stars:
+            # Replace p-values by stars
+            mat_upper = mat_upper.applymap(replace_pval)
+        else:
+            mat_upper = mat_upper.applymap(lambda x: ffp(x,
+                                                         precision=decimals))
+
+    # Replace upper triangle by p-values or n
+    mat.values[tif(mat, k=1)] = mat_upper.values[tif(mat, k=1)]
+    return mat
+
+
+pd.DataFrame.rcorr = rcorr
 
 
 # Mediation analysis
