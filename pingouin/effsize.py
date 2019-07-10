@@ -247,7 +247,13 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
     >>> print(stat, ci)
     1.6787441193290351 [1.21 2.16]
 
-    4. Bootstrapped confidence interval using a custom function
+    4. Bootstrapped confidence interval using a custom univariate function
+
+    >>> from scipy.stats import skew
+    >>> skew(x), pg.compute_bootci(x, func=skew, n_boot=10000, seed=123)
+    (-0.08244607271328411, array([-1.03,  0.77]))
+
+    5. Bootstrapped confidence interval using a custom bivariate function
 
     >>> stat = np.sum(np.exp(x) / np.exp(y))
     >>> ci = pg.compute_bootci(x, y, func=lambda x, y: np.sum(np.exp(x)
@@ -255,7 +261,8 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
     >>> print(stat, ci)
     26.80405184881793 [12.76 45.15]
 
-    5. Get the bootstrapped distribution around a Pearson correlation
+
+    6. Get the bootstrapped distribution around a Pearson correlation
 
     >>> ci, bstat = pg.compute_bootci(x, y, return_dist=True)
     >>> print(bstat.size)

@@ -35,19 +35,62 @@ class TestEffsize(TestCase):
         assert np.allclose(ci, [-0.91, -0.24])
 
     def test_compute_boot_esci(self):
-        """Test function compute_bootci"""
-        # Compare with Matlab
+        """Test function compute_bootci
+        Compare with Matlab bootci function
+        """
+        # This is the `lawdata` dataset in Matlab
+        # >>> load lawdata
+        # >>> x_m = gpa;
+        # >>> y_m = lsat;
         x_m = [3.39, 3.3, 2.81, 3.03, 3.44, 3.07, 3.0, 3.43, 3.36, 3.13,
                3.12, 2.74, 2.76, 2.88, 2.96]
         y_m = [576, 635, 558, 578, 666, 580, 555, 661, 651, 605, 653, 575,
                545, 572, 594]
-        ci = compute_bootci(x_m, y_m, method='norm', seed=123, decimals=2)
+        # 1. bootci around a pearson correlation coefficient
+        # Matlab: bootci(n_boot, {@corr, x_m, y_m}, 'type', 'norm');
+        ci = compute_bootci(x_m, y_m, method='norm', seed=123)
         assert ci[0] == 0.52 and ci[1] == 1.05
-        ci = compute_bootci(x_m, y_m, method='per', seed=123, decimals=2)
+        ci = compute_bootci(x_m, y_m, method='per', seed=123)
         assert ci[0] == 0.45 and ci[1] == 0.96
-        ci = compute_bootci(x_m, y_m, method='cper', seed=123, decimals=2)
+        ci = compute_bootci(x_m, y_m, method='cper', seed=123)
         assert ci[0] == 0.39 and ci[1] == 0.95
-        # Test all combinations
+        # 2. Univariate function: mean
+        ci_n = compute_bootci(x_m, func='mean', method='norm', seed=42)
+        ci_p = compute_bootci(x_m, func='mean', method='per', seed=42)
+        ci_c = compute_bootci(x_m, func='mean', method='cper', seed=42)
+        assert ci_n[0] == 2.98 and ci_n[1] == 3.21
+        assert ci_p[0] == 2.98 and ci_p[1] == 3.21
+        assert ci_c[0] == 2.98 and round(ci_c[1], 1) == 3.2
+
+        # 3. Univariate custom function: skewness
+        from scipy.stats import skew
+        n_boot = 10000
+        ci_n = compute_bootci(x_m, func=skew, method='norm', n_boot=n_boot,
+                              decimals=1, seed=42)
+        ci_p = compute_bootci(x_m, func=skew, method='per', n_boot=n_boot,
+                              decimals=1, seed=42)
+        ci_c = compute_bootci(x_m, func=skew, method='cper', n_boot=n_boot,
+                              decimals=1, seed=42)
+        assert ci_n[0] == -0.7 and ci_n[1] == 0.8
+        assert ci_p[0] == -0.7 and ci_p[1] == 0.8
+        assert ci_c[0] == -0.7 and ci_c[1] == 0.8
+
+        # 4. Bivariate custom function: paired T-test
+        from scipy.stats import ttest_rel
+        ci_n = compute_bootci(x_m, y_m, func=lambda x, y: ttest_rel(x, y)[0],
+                              method='norm', n_boot=n_boot, decimals=0,
+                              seed=42)
+        ci_p = compute_bootci(x_m, y_m, func=lambda x, y: ttest_rel(x, y)[0],
+                              method='per', n_boot=n_boot, decimals=0,
+                              seed=42)
+        ci_c = compute_bootci(x_m, y_m, func=lambda x, y: ttest_rel(x, y)[0],
+                              method='cper', n_boot=n_boot, decimals=0,
+                              seed=42)
+        assert ci_n[0] == -69 and ci_n[1] == -35
+        assert ci_p[0] == -79 and ci_p[1] == -48
+        assert ci_c[0] == -68 and ci_c[1] == -47
+
+        # 5. Test all combinations
         from itertools import product
         methods = ['norm', 'per', 'cper']
         funcs = ['spearman', 'pearson', 'cohen', 'hedges']
