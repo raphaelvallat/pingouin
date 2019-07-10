@@ -493,6 +493,7 @@ The functions that are currently supported as pandas method are:
 * :py:func:`pingouin.pairwise_corr`
 * :py:func:`pingouin.partial_corr`
 * :py:func:`pingouin.pcorr`
+* :py:func:`pingouin.rcorr`
 * :py:func:`pingouin.mediation_analysis`
 
 

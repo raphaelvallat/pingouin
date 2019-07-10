@@ -727,7 +727,7 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
 
 def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
                   method='pearson', padjust='none', export_filename=None):
-    '''Pairwise (partial) correlations between columns of a pandas dataframe.
+    """Pairwise (partial) correlations between columns of a pandas dataframe.
 
     Parameters
     ----------
@@ -811,6 +811,10 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     Factor is only computed when the sample size is less than 1000
     (and method='pearson').
 
+    A faster alternative to get the r-values and p-values in a matrix format is
+    to use the :py:func:`pingouin.rcorr` function, which works directly as a
+    :py:class:`pandas.DataFrame` method (see example below).
+
     This function also works with two-dimensional multi-index columns. In this
     case, columns must be list(s) of tuple(s). See the Jupyter notebook
     for more details:
@@ -855,14 +859,22 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     >>> pcor = pairwise_corr(data, covar='Neuroticism')  # One covariate
     >>> pcor = pairwise_corr(data, covar=['Neuroticism', 'Openness'])  # Two
 
-    7. Pairwise partial correlation matrix (only the r-values)
+    7. Pairwise partial correlation matrix using :py:func:`pingouin.pcorr`
 
     >>> data[['Neuroticism', 'Openness', 'Extraversion']].pcorr()
                   Neuroticism  Openness  Extraversion
     Neuroticism      1.000000  0.092097     -0.360421
     Openness         0.092097  1.000000      0.281312
     Extraversion    -0.360421  0.281312      1.000000
-    '''
+
+    8. Correlation matrix with p-values using :py:func:`pingouin.rcorr`
+
+    >>> data[['Neuroticism', 'Openness', 'Extraversion']].rcorr()
+                 Neuroticism Openness Extraversion
+    Neuroticism            -                   ***
+    Openness           -0.01        -          ***
+    Extraversion       -0.35    0.267            -
+    """
     from pingouin.correlation import corr, partial_corr
 
     if tail not in ['one-sided', 'two-sided']:

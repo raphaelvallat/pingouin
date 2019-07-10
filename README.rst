@@ -439,6 +439,7 @@ The functions that are currently supported as pandas method are:
 * `pingouin.pairwise_corr <https://pingouin-stats.org/generated/pingouin.pairwise_corr.html#pingouin.pairwise_corr>`_
 * `pingouin.partial_corr <https://pingouin-stats.org/generated/pingouin.partial_corr.html#pingouin.partial_corr>`_
 * `pingouin.pcorr <https://pingouin-stats.org/generated/pingouin.pcorr.html#pingouin.pcorr>`_
+* `pingouin.rcorr <https://pingouin-stats.org/generated/pingouin.rcorr.html#pingouin.rcorr>`_
 * `pingouin.mediation_analysis <https://pingouin-stats.org/generated/pingouin.mediation_analysis.html#pingouin.mediation_analysis>`_
 
 Development

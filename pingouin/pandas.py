@@ -171,7 +171,8 @@ pd.DataFrame.pcorr = pcorr
 def rcorr(self, method='pearson', upper='pval', decimals=3, padjust=None,
           stars=True, pval_stars={0.001: '***', 0.01: '**', 0.05: '*'}):
     """
-    Correlation matrix of a dataframe (with p-values and/or sample size).
+    Correlation matrix of a dataframe with p-values and/or sample size on the
+    upper triangle (:py:class:`pandas.DataFrame` method).
 
     This method is a faster, but less exhaustive, matrix-version of the
     :py:func:`pingouin.pairwise_corr` function. It is based on the

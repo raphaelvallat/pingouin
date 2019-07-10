@@ -10,6 +10,7 @@ from unittest import TestCase
 
 df = pg.read_dataset('mixed_anova')
 df_aov3 = pg.read_dataset('anova3_unbalanced')
+df_corr = pg.read_dataset('pairwise_corr').iloc[:, 1:]
 data = pg.read_dataset('mediation')
 
 
@@ -81,6 +82,22 @@ class TestParametric(TestCase):
         corrs = data[['X', 'Y', 'M']].pcorr()
         corrs2 = data.partial_corr(x='X', y='Y', covar='M')
         assert round(corrs.loc['X', 'Y'], 3) == corrs2.loc['pearson', 'r']
+
+        # Test rcorr (correlation matrix with p-values)
+        # We compare against Pingouin pairwise_corr function
+        corrs = df_corr.rcorr(method='spearman', padjust='holm')
+        corrs2 = df_corr.pairwise_corr(method='spearman', padjust='holm')
+        assert corrs.loc['Neuroticism', 'Agreeableness'] == '**'
+        assert (corrs.loc['Agreeableness', 'Neuroticism'] ==
+                str(corrs2.loc[2, 'r']))
+        corrs = df_corr.rcorr(method='spearman', padjust='holm', stars=False,
+                              decimals=4)
+        assert (corrs.loc['Neuroticism', 'Agreeableness'] ==
+                str(corrs2.loc[2, 'p-corr'].round(4)))
+        corrs = df_corr.rcorr(upper='n')
+        corrs2 = df_corr.pairwise_corr()
+        assert corrs.loc['Extraversion', 'Openness'] == corrs2.loc[4, 'n']
+        assert corrs.loc['Openness', 'Extraversion'] == str(corrs2.loc[4, 'r'])
 
         # Test mediation analysis
         med = data.mediation_analysis(x='X', m='M', y='Y', seed=42, n_boot=500)
