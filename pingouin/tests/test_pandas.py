@@ -100,6 +100,7 @@ class TestParametric(TestCase):
         # Method = spearman does not work with Python 3.5 on Travis?
         # Instead it seems to return the Pearson correlation!
         df_corr.rcorr(method='spearman')
+        df_corr.rcorr()
 
         # Test mediation analysis
         med = data.mediation_analysis(x='X', m='M', y='Y', seed=42, n_boot=500)
