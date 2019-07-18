@@ -22,6 +22,7 @@ ANOVA and T-test
     epsilon
     mixed_anova
     welch_anova
+    tost
     ttest
 
 Bayesian

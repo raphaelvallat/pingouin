@@ -16,12 +16,13 @@ a. Pingouin now requires SciPy >= 1.3.0 (better handling of tails in :py:func:`p
 **New functions**
 
 a. Added :py:func:`pingouin.rcorr` Pandas method to calculate a correlation matrix with r-values on the lower triangle and p-values (or sample size) on the upper triangle.
+b. Added :py:func:`pingouin.tost` function to calculate the two one-sided test (TOST) for equivalence. See `PR51 <https://github.com/raphaelvallat/pingouin/pull/51>`_ by Antoine Weill--Duflos.
 
 **Enhancements**
 
 a. :py:func:`pingouin.anova` now works with three or more between factors (requiring statsmodels). One-way ANOVA and balanced two-way ANOVA are computed in pure Pingouin (Python + Pandas) style, while ANOVA with three or more factors, or unbalanced two-way ANOVA are computed using statsmodels.
 b. :py:func:`pingouin.anova` now accepts different sums of squares calculation method for unbalanced N-way design (type 1, 2, or 3).
-c. :py:func:`pingouin.linear_regression` now includes several safety checks to remove duplicate predictors, predictors with only zeros, and predictors with only one unique value (excluding the intercept).
+c. :py:func:`pingouin.linear_regression` now includes several safety checks to remove duplicate predictors, predictors with only zeros, and predictors with only one unique value (excluding the intercept). This comes at the cost, however, of longer computation time, which is evident when using the :py:func:`pingouin.mediation_analysis` function.
 d. :py:func:`pingouin.mad` now automatically removes missing values and can calculate the mad over the entire array using ``axis=None`` if array is multidimensional.
 e. Better handling of alternative hypotheses in :py:func:`pingouin.wilcoxon`.
 f. Better handling of alternative hypotheses in :py:func:`pingouin.bayesfactor_ttest` (support for 'greater' and 'less').

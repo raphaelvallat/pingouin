@@ -4,11 +4,13 @@ import numpy as np
 import pandas as pd
 from pingouin.parametric import ttest
 from pingouin.nonparametric import wilcoxon, mwu
+
+
 __all__ = ["tost"]
 
 
 def tost(x, y, paired=False, parametric=True, bound=0.3, correction=False):
-    """T-test.
+    """Two one-sided test (TOST) for equivalence.
 
     Parameters
     ----------
@@ -25,10 +27,10 @@ def tost(x, y, paired=False, parametric=True, bound=0.3, correction=False):
         If False, use :py:func:`pingouin.wilcoxon` or :py:func:`pingouin.mwu`
         for paired or unpaired samples, respectively.
     bound : float
-        Magnitude of region of similarity
+        Magnitude of region of similarity (epsilon).
     correction : auto or boolean
         Specify whether or not to correct for unequal variances using Welch
-        separate variances T-test
+        separate variances T-test. This only applies if ``parametric`` is True.
 
     Returns
     -------
@@ -39,10 +41,22 @@ def tost(x, y, paired=False, parametric=True, bound=0.3, correction=False):
         'lower' : lower interval p-value
         'p-val' : TOST p-value
 
+    See also
+    --------
+    ttest, mwu, wilcoxon
+
+    References
+    ----------
+    .. [1] Schuirmann, D.L. 1981. On hypothesis testing to determine if the
+           mean of a normal distribution is contained in a known interval.
+           Biometrics 37 617.
+
+    .. [2] https://cran.r-project.org/web/packages/equivalence/equivalence.pdf
+
     Examples
     --------
-
     1. TOST with a region of similarity of 1
+
     >>> import pingouin as pg
     >>> a = [4, 7, 8, 6, 3, 2]
     >>> b = [6, 8, 7, 10, 11, 9]
@@ -50,62 +64,56 @@ def tost(x, y, paired=False, parametric=True, bound=0.3, correction=False):
              upper     lower     p-val
     TOST  0.965097  0.002216  0.965097
 
-    2. non parametric, paired, TOST with a region of similarity of 10
-    >>> import pingouin as pg
+    2. Non parametric paired TOST
+
     >>> a = [4, 7, 8, 6, 3, 2, 4, 7, 8, 6, 3, 2, 4, 7, 8, 6, 3, 2]
     >>> b = [6, 8, 7, 10, 11, 9, 6, 8, 7, 10, 11, 9, 6, 8, 7, 10, 11, 9]
-    >>> pg.tost(a,b,bound=10,paired=True,parametric=False)
-             upper     lower     p-val
-    TOST  0.000103  0.000103  0.000103
-
+    >>> pg.tost(a, b, paired=True, parametric=False)
+             upper    lower     p-val
+    TOST  0.001117  0.00028  0.001117
     """
+    x = np.asarray(x)
+    y = np.asarray(y)
     if parametric:
-        df_ttesta = ttest(list(np.asarray(y) + bound), x, paired=paired,
-                          tail='one-sided', correction=correction)
-        df_ttestb = ttest(list(np.asarray(x) + bound), y, paired=paired,
-                          tail='one-sided', correction=correction)
-        if df_ttestb.loc['T-test', 'T'] < 0:
-            df_ttestb.loc['T-test', 'p-val'] = 1 - df_ttestb.loc['T-test',
-                                                                 'p-val']
-        if df_ttesta.loc['T-test', 'T'] < 0:
-            df_ttesta.loc['T-test', 'p-val'] = 1 - df_ttesta.loc['T-test',
-                                                                 'p-val']
-        if df_ttestb.loc['T-test', 'p-val'] >= df_ttesta.loc['T-test',
-                                                             'p-val']:
-            pval = df_ttestb.loc['T-test', 'p-val']
-            lpval = df_ttesta.loc['T-test', 'p-val']
+        df_ttesta = ttest(y + bound, x, paired=paired, tail='one-sided',
+                          correction=correction)
+        df_ttestb = ttest(x + bound, y, paired=paired, tail='one-sided',
+                          correction=correction)
+        if df_ttestb.at['T-test', 'T'] < 0:
+            df_ttestb.at['T-test', 'p-val'] = 1 - df_ttestb.at['T-test',
+                                                               'p-val']
+        if df_ttesta.at['T-test', 'T'] < 0:
+            df_ttesta.at['T-test', 'p-val'] = 1 - df_ttesta.at['T-test',
+                                                               'p-val']
+        if df_ttestb.at['T-test', 'p-val'] >= df_ttesta.at['T-test',
+                                                           'p-val']:
+            pval = df_ttestb.at['T-test', 'p-val']
+            lpval = df_ttesta.at['T-test', 'p-val']
         else:
-            pval = df_ttesta.loc['T-test', 'p-val']
-            lpval = df_ttestb.loc['T-test', 'p-val']
+            pval = df_ttesta.at['T-test', 'p-val']
+            lpval = df_ttestb.at['T-test', 'p-val']
     else:
         if paired:
-            df_ttesta = wilcoxon(list(np.asarray(y) + bound), x,
-                                 tail='greater')
-            df_ttestb = wilcoxon(list(np.asarray(x) + bound), y,
-                                 tail='greater')
-            if df_ttestb.loc['Wilcoxon', 'p-val'] >= df_ttesta.loc['Wilcoxon',
-                                                                   'p-val']:
-                pval = df_ttestb.loc['Wilcoxon', 'p-val']
-                lpval = df_ttesta.loc['Wilcoxon', 'p-val']
+            df_ttesta = wilcoxon(y + bound, x, tail='one-sided')
+            df_ttestb = wilcoxon(x + bound, y, tail='one-sided')
+            if df_ttestb.at['Wilcoxon', 'p-val'] >= df_ttesta.at['Wilcoxon',
+                                                                 'p-val']:
+                pval = df_ttestb.at['Wilcoxon', 'p-val']
+                lpval = df_ttesta.at['Wilcoxon', 'p-val']
             else:
-                pval = df_ttesta.loc['Wilcoxon', 'p-val']
-                lpval = df_ttestb.loc['Wilcoxon', 'p-val']
+                pval = df_ttesta.at['Wilcoxon', 'p-val']
+                lpval = df_ttestb.at['Wilcoxon', 'p-val']
         else:
-            df_ttesta = mwu(list(np.asarray(y) + bound), x, tail='greater')
-            df_ttestb = mwu(list(np.asarray(x) + bound), y, tail='greater')
-            if df_ttestb.loc['MWU', 'p-val'] >= df_ttesta.loc['MWU',
-                                                              'p-val']:
-                pval = df_ttestb.loc['MWU', 'p-val']
-                lpval = df_ttesta.loc['MWU', 'p-val']
+            df_ttesta = mwu(y + bound, x, tail='one-sided')
+            df_ttestb = mwu(x + bound, y, tail='one-sided')
+            if df_ttestb.at['MWU', 'p-val'] >= df_ttesta.at['MWU', 'p-val']:
+                pval = df_ttestb.at['MWU', 'p-val']
+                lpval = df_ttesta.at['MWU', 'p-val']
             else:
-                pval = df_ttesta.loc['MWU', 'p-val']
-                lpval = df_ttestb.loc['MWU', 'p-val']
+                pval = df_ttesta.at['MWU', 'p-val']
+                lpval = df_ttestb.at['MWU', 'p-val']
+
+    # Create output dataframe
     stats = {'p-val': pval, 'upper': pval, 'lower': lpval}
-
-    # Convert to dataframe
     stats = pd.DataFrame.from_records(stats, index=['TOST'])
-
-    col_order = ['upper', 'lower', 'p-val']
-    stats = stats.reindex(columns=col_order)
-    stats.dropna(how='all', axis=1, inplace=True)
-    return stats
+    return stats[['upper', 'lower', 'p-val']]

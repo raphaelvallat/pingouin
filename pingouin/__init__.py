@@ -4,6 +4,7 @@ from .bayesian import *
 from .datasets import *
 from .distribution import *
 from .effsize import *
+from .equivalence import *
 from .multicomp import *
 from .multivariate import *
 from .parametric import *
