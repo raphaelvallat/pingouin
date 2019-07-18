@@ -277,9 +277,12 @@ def wilcoxon(x, y, tail='two-sided'):
     # Compute test
     # TODO: scipy 1.3.0 includes an alternative arg as for mannwhitney
     # For now keeping this way to keep the compatibility with previous scipy
+    # Changed for TOST
+    if tail == 'one-sided':
+        tail = 'less' if np.median(x) < np.median(y) else 'greater'
     wval, pval = scipy.stats.wilcoxon(x, y, zero_method='wilcox',
-                                      correction=True)
-    pval = pval * .5 if tail == 'one-sided' else pval
+                                      correction=True, alternative=tail)
+    #pval = pval * .5 if tail == 'one-sided' else pval
 
     # Effect size 1: common language effect size (McGraw and Wong 1992)
     diff = x[:, None] - y
