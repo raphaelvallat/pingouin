@@ -19,9 +19,6 @@ class TestEquivalence(TestCase):
         a = np.random.normal(scale=1., size=600)
         assert np.less(tost(a, a, bound=1).loc['TOST', 'p-val'], 0.05)
         assert np.greater(tost(a,  list(np.asarray(a) + 25), bound=1).loc['TOST', 'p-val'], 0.5)
-        P1 = np.random.normal(6, 2, 400)
-        P2 = np.random.normal(3, 2, 400)
-        assert round(tost(P1, P2, bound=3).loc['TOST', 'p-val'],3) == 0.153
         a = [4, 7, 8, 6, 3, 2]
         b = [6, 8, 7, 10, 11, 9]
         assert round(tost(a,b,bound=10).loc['TOST', 'p-val'],3) == 0.000
