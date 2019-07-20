@@ -297,7 +297,6 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     col_order = ['T', 'dof', 'tail', 'p-val', 'CI95%', 'cohen-d', 'BF10',
                  'power']
     stats = stats.reindex(columns=col_order)
-    stats.dropna(how='all', axis=1, inplace=True)
     return stats
 
 
