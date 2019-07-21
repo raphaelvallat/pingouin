@@ -2,29 +2,30 @@
 # Date: July 2019
 import numpy as np
 import pandas as pd
-from pingouin.parametric import ttest
+from .parametric import ttest
 
 
 __all__ = ["tost"]
 
 
 def tost(x, y, bound=1, paired=False, correction=False):
-    """Two one-sided test (TOST) for equivalence.
+    """Two One-Sided Test (TOST) for equivalence.
 
     Parameters
     ----------
     x, y : array_like
         First and second set of observations. ``x`` and ``y`` should have the
-        same units. One sample tests are not yet supported.
+        same units. If ``y`` is a single value (e.g. 0), a one-sample test is
+        performed.
     bound : float
-        Magnitude of region of similarity (epsilon). Note that this should be
-        expressed in the same unit as ``x`` and ``y``.
+        Magnitude of region of similarity (a.k.a epsilon). Note that this
+        should be expressed in the same unit as ``x`` and ``y``.
     paired : boolean
         Specify whether the two observations are related (i.e. repeated
         measures) or independent.
     correction : auto or boolean
         Specify whether or not to correct for unequal variances using Welch
-        separate variances T-test. This only applies if ``parametric`` is True.
+        separate variances T-test. This only applies if ``paired`` is False.
 
     Returns
     -------
@@ -32,9 +33,8 @@ def tost(x, y, bound=1, paired=False, correction=False):
         TOST summary ::
 
         'bound' : bound (= epsilon, or equivalence margin)
-        'upper' : upper interval p-value
-        'lower' : lower interval p-value
-        'p-val' : TOST p-value
+        'dof' : degrees of freedom
+        'pval' : TOST p-value
 
     See also
     --------
@@ -50,25 +50,25 @@ def tost(x, y, bound=1, paired=False, correction=False):
 
     Examples
     --------
-    1. TOST with a region of similarity of 1 (default)
+    1. Independent two-sample TOST with a region of similarity of 1 (default)
 
     >>> import pingouin as pg
     >>> a = [4, 7, 8, 6, 3, 2]
     >>> b = [6, 8, 7, 10, 11, 9]
     >>> pg.tost(a, b)
-          bound  dof     p-val
+          bound  dof      pval
     TOST      1   10  0.965097
 
-    2. Paired TOST with a different equivalent region
+    2. Paired TOST with a different region of similarity
 
     >>> pg.tost(a, b, bound=0.5, paired=True)
-          bound  dof     p-val
+          bound  dof      pval
     TOST    0.5    5  0.954854
 
     3. One sample TOST
 
     >>> pg.tost(a, y=0, bound=4)
-          bound  dof     p-val
+          bound  dof      pval
     TOST      4    5  0.825967
     """
     x = np.asarray(x)
@@ -83,5 +83,5 @@ def tost(x, y, bound=1, paired=False, correction=False):
     pval = max(df_a.at['T-test', 'p-val'], df_b.at['T-test', 'p-val'])
 
     # Create output dataframe
-    stats = {'bound': bound, 'dof': df_a.at['T-test', 'dof'], 'p-val': pval}
+    stats = {'bound': bound, 'dof': df_a.at['T-test', 'dof'], 'pval': pval}
     return pd.DataFrame.from_records(stats, index=['TOST'])
