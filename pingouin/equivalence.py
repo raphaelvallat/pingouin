@@ -56,20 +56,20 @@ def tost(x, y, bound=1, paired=False, correction=False):
     >>> a = [4, 7, 8, 6, 3, 2]
     >>> b = [6, 8, 7, 10, 11, 9]
     >>> pg.tost(a, b)
-          bound     p-val
-    TOST      1  0.965097
+          bound  dof     p-val
+    TOST      1   10  0.965097
 
     2. Paired TOST with a different equivalent region
 
     >>> pg.tost(a, b, bound=0.5, paired=True)
-          bound     p-val
-    TOST    0.5  0.954854
+          bound  dof     p-val
+    TOST    0.5    5  0.954854
 
     3. One sample TOST
 
     >>> pg.tost(a, y=0, bound=4)
-          bound     p-val
-    TOST      4  0.825967
+          bound  dof     p-val
+    TOST      4    5  0.825967
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -83,5 +83,5 @@ def tost(x, y, bound=1, paired=False, correction=False):
     pval = max(df_a.at['T-test', 'p-val'], df_b.at['T-test', 'p-val'])
 
     # Create output dataframe
-    stats = {'bound': bound, 'p-val': pval}
+    stats = {'bound': bound, 'dof': df_a.at['T-test', 'dof'], 'p-val': pval}
     return pd.DataFrame.from_records(stats, index=['TOST'])

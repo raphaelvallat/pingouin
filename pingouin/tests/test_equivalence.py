@@ -16,10 +16,10 @@ class TestEquivalence(TestCase):
         a = np.random.normal(scale=1., size=600)
         b = a + 25
         # Simple safety check
-        assert np.less(tost(a, a).at['TOST', 'p-val'], 0.05)
-        assert np.less(tost(a, a, paired=True).at['TOST', 'p-val'], 0.05)
-        assert np.greater(tost(a, b).at['TOST', 'p-val'], 0.5)
-        assert np.greater(tost(a, b, paired=True).at['TOST', 'p-val'], 0.5)
+        assert tost(a, a).at['TOST', 'p-val'] < 0.05
+        assert tost(a, a, paired=True).at['TOST', 'p-val'] < 0.05
+        assert tost(a, b).at['TOST', 'p-val'] > 0.5
+        assert tost(a, b, paired=True).at['TOST', 'p-val'] > 0.5
 
         # Check all arguments with good data
         a = np.array([4, 7, 8, 6, 3, 2])
@@ -29,14 +29,25 @@ class TestEquivalence(TestCase):
         tost(a, b, paired=True).equals(tost(b, a, paired=True))
 
         # Compare with R
-        # WARNING: One-sample test yield slightly different results!
         # R: tost(a, b, epsilon = 1, var.equal = TRUE)
-        assert np.isclose(tost(a, b, bound=1).at['TOST', 'p-val'], 0.9650974)
+        assert tost(a, b).at['TOST', 'dof'] == 10
+        assert np.isclose(tost(a, b).at['TOST', 'p-val'], 0.9650974)
+
         # R: tost(a, b)
+        assert tost(a, b, correction=True).at['TOST', 'dof'] == 9.49
         assert np.isclose(tost(a, b, bound=1,
                           correction=True).at['TOST', 'p-val'], 0.9643479)
         assert np.isclose(tost(a, b, bound=10).at['TOST', 'p-val'], 0.00017933)
-        assert np.isclose(tost(a, b, bound=1, correction=True,
-                          paired=True).at['TOST', 'p-val'], 0.9293826)
-        assert np.isclose(tost(a, b, bound=2, correction=False,
-                          paired=True).at['TOST', 'p-val'], 0.8286101)
+
+        # Paired
+        assert tost(a, b, paired=True).at['TOST', 'dof'] == 5
+        assert np.isclose(tost(a, b, paired=True).at['TOST', 'p-val'],
+                          0.9293826)
+        assert np.isclose(tost(a, b, bound=2, paired=True).at['TOST', 'p-val'],
+                          0.8286101)
+
+        # One-sample test yield slightly different results than the equivalence
+        # package. Not sure to understand why, but I think it has to do with
+        # the way that they estimate the p-value of the one-sample test.
+        assert tost(a, 0).at['TOST', 'p-val'] > tost(a, 5).at['TOST', 'p-val']
+        assert tost(a, 5, bound=3).at['TOST', 'p-val'] < 0.5
