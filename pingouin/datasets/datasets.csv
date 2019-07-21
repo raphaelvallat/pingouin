@@ -14,6 +14,7 @@ cronbach_wide_missing,Questionnaire rating (binary) in wide format and with miss
 icc,Wine quality rating by 4 judges,intraclass_corr,www.real-statistics.com
 mediation,Mediation analysis,linear_regression - mediation,https://data.library.virginia.edu/introduction-to-mediation-analysis/
 mixed_anova,Memory scores in two groups at three time points,mixed_anova,Pingouin
+mixed_anova_unbalanced,Memory scores in three groups at four time points,mixed_anova,Pingouin
 multivariate,Multivariate health outcomes in drug and placebo conditions,multivariate statistics,www.real-statistics.com
 pairwise_corr,Big 5 personality traits,corr - pairwise_corr,Dolan et al 2009
 pairwise_ttests,Scores at 3 time points per gender,pairwise_ttests,Pingouin

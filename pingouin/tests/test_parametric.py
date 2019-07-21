@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+from numpy.testing import assert_array_equal as array_equal
 from unittest import TestCase
 from pingouin.parametric import (ttest, anova, rm_anova, mixed_anova,
                                  ancova, welch_anova)
@@ -104,19 +105,12 @@ class TestParametric(TestCase):
         df_aov2 = read_dataset('anova2')
         aov2 = anova(dv="Yield", between=["Blend", "Crop"],
                      data=df_aov2).round(3)
-        assert aov2.loc[0, 'MS'] == 2.042
-        assert aov2.loc[1, 'MS'] == 1368.292
-        assert aov2.loc[2, 'MS'] == 1180.042
-        assert aov2.loc[3, 'MS'] == 541.847
-        assert aov2.loc[0, 'F'] == 0.004
-        assert aov2.loc[1, 'F'] == 2.525
-        assert aov2.loc[2, 'F'] == 2.178
-        assert aov2.loc[0, 'p-unc'] == 0.952
-        assert aov2.loc[1, 'p-unc'] == 0.108
-        assert aov2.loc[2, 'p-unc'] == 0.142
-        assert aov2.loc[0, 'np2'] == 0.000
-        assert aov2.loc[1, 'np2'] == 0.219
-        assert aov2.loc[2, 'np2'] == 0.195
+        array_equal(aov2.loc[:, 'MS'].values, [2.042, 1368.292, 1180.042,
+                                               541.847])
+        array_equal(aov2.loc[[0, 1, 2], 'F'].values, [0.004, 2.525, 2.178])
+        array_equal(aov2.loc[[0, 1, 2], 'p-unc'].values, [0.952, 0.108, 0.142])
+        array_equal(aov2.loc[[0, 1, 2], 'np2'].values, [0.000, 0.219, 0.195])
+
         # Export
         anova(dv="Yield", between=["Blend", "Crop"],
               export_filename='test_export.csv', data=df_aov2)
@@ -124,33 +118,21 @@ class TestParametric(TestCase):
         df_aov2 = read_dataset('anova2_unbalanced')
         aov2 = df_aov2.anova(dv="Scores", export_filename='test_export.csv',
                              between=["Diet", "Exercise"]).round(3)
-        assert aov2.loc[0, 'MS'] == 390.625
-        assert aov2.loc[1, 'MS'] == 180.625
-        assert aov2.loc[2, 'MS'] == 15.625
-        assert aov2.loc[3, 'MS'] == 52.625
-        assert aov2.loc[0, 'F'] == 7.423
-        assert aov2.loc[1, 'F'] == 3.432
-        assert aov2.loc[2, 'F'] == 0.297
-        assert aov2.loc[0, 'p-unc'] == 0.034
-        assert aov2.loc[1, 'p-unc'] == 0.113
-        assert aov2.loc[2, 'p-unc'] == 0.605
-        assert aov2.loc[0, 'np2'] == 0.553
-        assert aov2.loc[1, 'np2'] == 0.364
-        assert aov2.loc[2, 'np2'] == 0.047
+        array_equal(aov2.loc[:, 'MS'].values, [390.625, 180.625, 15.625,
+                                               52.625])
+        array_equal(aov2.loc[[0, 1, 2], 'F'].values, [7.423, 3.432, 0.297])
+        array_equal(aov2.loc[[0, 1, 2], 'p-unc'].values, [0.034, 0.113, 0.605])
+        array_equal(aov2.loc[[0, 1, 2], 'np2'].values, [0.553, 0.364, 0.047])
+
         # Two-way ANOVA with unbalanced design and missing values
         df_aov2.loc[9, 'Scores'] = np.nan
         # Type 2
         aov2 = anova(dv="Scores", between=["Diet", "Exercise"],
                      data=df_aov2).round(3)
-        assert aov2.loc[0, 'F'] == 10.403
-        assert aov2.loc[1, 'F'] == 5.167
-        assert aov2.loc[2, 'F'] == 0.761
-        assert aov2.loc[0, 'p-unc'] == 0.023
-        assert aov2.loc[1, 'p-unc'] == 0.072
-        assert aov2.loc[2, 'p-unc'] == 0.423
-        assert aov2.loc[0, 'np2'] == 0.675
-        assert aov2.loc[1, 'np2'] == 0.508
-        assert aov2.loc[2, 'np2'] == 0.132
+        array_equal(aov2.loc[[0, 1, 2], 'F'].values, [10.403, 5.167, 0.761])
+        array_equal(aov2.loc[[0, 1, 2], 'p-unc'].values, [0.023, 0.072, 0.423])
+        array_equal(aov2.loc[[0, 1, 2], 'np2'].values, [0.675, 0.508, 0.132])
+        # Type 1
         aov2_ss1 = anova(dv="Scores", between=["Diet", "Exercise"],
                          ss_type=1, data=df_aov2).round(3)
         assert not aov2.equals(aov2_ss1)
@@ -169,15 +151,12 @@ class TestParametric(TestCase):
         assert aov3_ss1.equals(aov3_ss2)
         assert aov3_ss2.equals(aov3_ss3)
         # Compare with JASP
-        np.testing.assert_array_equal(aov3_ss1.loc[:, 'F'],
-                                      [2.462, 13.449, 0.484, 0.139, 1.522,
-                                       1.446, 1.094, np.nan])
-        np.testing.assert_array_equal(aov3_ss1.loc[:, 'np2'],
-                                      [0.049, 0.219, 0.020, 0.003, 0.060,
-                                       0.057, 0.044, np.nan])
-        np.testing.assert_array_equal(aov3_ss1.loc[:, 'p-unc'],
-                                      [0.123, 0.001, 0.619, 0.711, 0.229,
-                                       0.245, 0.343, np.nan])
+        array_equal(aov3_ss1.loc[:, 'F'], [2.462, 13.449, 0.484, 0.139, 1.522,
+                                           1.446, 1.094, np.nan])
+        array_equal(aov3_ss1.loc[:, 'np2'], [0.049, 0.219, 0.020, 0.003, 0.060,
+                                             0.057, 0.044, np.nan])
+        array_equal(aov3_ss1.loc[:, 'p-unc'], [0.123, 0.001, 0.619, 0.711,
+                                               0.229, 0.245, 0.343, np.nan])
         # Unbalanced
         df_aov3 = read_dataset('anova3_unbalanced')
         aov3_ss1 = anova(dv="Cholesterol", between=['Sex', 'Risk', 'Drug'],
@@ -188,40 +167,31 @@ class TestParametric(TestCase):
                          ss_type=3, data=df_aov3).round(3)
         # Compare with JASP
         # Type 1
-        np.testing.assert_array_equal(aov3_ss1.loc[:, 'F'],
-                                      [4.155, 15.166, 0.422, 0.085, 0.859,
-                                       1.170, 0.505, np.nan])
-        np.testing.assert_array_equal(aov3_ss1.loc[:, 'np2'],
-                                      [0.068, 0.210, 0.015, 0.001, 0.029,
-                                       0.039, 0.017, np.nan])
-        np.testing.assert_array_equal(aov3_ss1.loc[:, 'p-unc'],
-                                      [0.046, 0., 0.658, 0.772, 0.429,
-                                       0.318, 0.606, np.nan])
-        np.testing.assert_array_equal(aov3_ss1.loc[:, 'Source'],
-                                      ['Sex', 'Risk', 'Drug', 'Sex * Risk',
-                                       'Sex * Drug', 'Risk * Drug',
-                                       'Sex * Risk * Drug', 'Residual'])
+        array_equal(aov3_ss1.loc[:, 'F'], [4.155, 15.166, 0.422, 0.085, 0.859,
+                                           1.170, 0.505, np.nan])
+        array_equal(aov3_ss1.loc[:, 'np2'], [0.068, 0.210, 0.015, 0.001, 0.029,
+                                             0.039, 0.017, np.nan])
+        array_equal(aov3_ss1.loc[:, 'p-unc'], [0.046, 0., 0.658, 0.772, 0.429,
+                                               0.318, 0.606, np.nan])
+        array_equal(aov3_ss1.loc[:, 'Source'],
+                    ['Sex', 'Risk', 'Drug', 'Sex * Risk',
+                     'Sex * Drug', 'Risk * Drug', 'Sex * Risk * Drug',
+                     'Residual'])
         # Type 2
-        np.testing.assert_array_equal(aov3_ss2.loc[:, 'F'],
-                                      [3.759, 15.169, 0.429, 0.099, 0.739,
-                                       1.170, 0.505, np.nan])
-        np.testing.assert_array_equal(aov3_ss2.loc[:, 'np2'],
-                                      [0.062, 0.210, 0.015, 0.002, 0.025,
-                                       0.039, 0.017, np.nan])
-        np.testing.assert_array_equal(aov3_ss2.loc[:, 'p-unc'],
-                                      [0.057, 0., 0.653, 0.754, 0.482,
-                                       0.318, 0.606, np.nan])
+        array_equal(aov3_ss2.loc[:, 'F'], [3.759, 15.169, 0.429, 0.099, 0.739,
+                                           1.170, 0.505, np.nan])
+        array_equal(aov3_ss2.loc[:, 'np2'], [0.062, 0.210, 0.015, 0.002, 0.025,
+                                             0.039, 0.017, np.nan])
+        array_equal(aov3_ss2.loc[:, 'p-unc'], [0.057, 0., 0.653, 0.754, 0.482,
+                                               0.318, 0.606, np.nan])
 
         # Type 3
-        np.testing.assert_array_equal(aov3_ss3.loc[:, 'F'],
-                                      [3.910, 15.555, 0.484, 0.079, 0.750,
-                                       1.060, 0.505, np.nan])
-        np.testing.assert_array_equal(aov3_ss3.loc[:, 'np2'],
-                                      [0.064, 0.214, 0.017, 0.001, 0.026,
-                                       0.036, 0.017, np.nan])
-        np.testing.assert_array_equal(aov3_ss3.loc[:, 'p-unc'],
-                                      [0.053, 0., 0.619, 0.779, 0.477,
-                                       0.353, 0.606, np.nan])
+        array_equal(aov3_ss3.loc[:, 'F'], [3.910, 15.555, 0.484, 0.079, 0.750,
+                                           1.060, 0.505, np.nan])
+        array_equal(aov3_ss3.loc[:, 'np2'], [0.064, 0.214, 0.017, 0.001, 0.026,
+                                             0.036, 0.017, np.nan])
+        array_equal(aov3_ss3.loc[:, 'p-unc'], [0.053, 0., 0.619, 0.779, 0.477,
+                                               0.353, 0.606, np.nan])
 
         # Error: invalid char in column names
         df_aov3['Sex:'] = np.random.normal(size=df_aov3.shape[0])
@@ -276,15 +246,9 @@ class TestParametric(TestCase):
         aov = rm_anova(data=data, subject='Subject', within=['Time', 'Metric'],
                        dv='Performance',
                        export_filename='test_export.csv').round(3)
-        assert aov.loc[0, "MS"] == 828.817
-        assert aov.loc[1, "MS"] == 682.617
-        assert aov.loc[2, "MS"] == 112.217
-        assert aov.loc[0, "F"] == 33.852
-        assert aov.loc[1, "F"] == 26.959
-        assert aov.loc[2, "F"] == 12.632
-        assert aov.loc[0, "np2"] == 0.790
-        assert aov.loc[1, "np2"] == 0.750
-        assert aov.loc[2, "np2"] == 0.584
+        array_equal(aov.loc[:, 'MS'].values, [828.817, 682.617, 112.217])
+        array_equal(aov.loc[:, 'F'].values, [33.852, 26.959, 12.632])
+        array_equal(aov.loc[:, 'np2'].values, [0.790, 0.750, 0.584])
         assert aov.loc[0, "eps"] == 1.000
         assert aov.loc[1, "eps"] == 0.969
         assert aov.loc[2, "eps"] >= 0.500  # 0.5 is the lower bound
@@ -301,50 +265,54 @@ class TestParametric(TestCase):
     def test_mixed_anova(self):
         """Test function anova.
         Compare with JASP and ezANOVA."""
+        # Balanced design, two groups, three within factors
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
                           between='Group', data=df, correction=True).round(3)
-        # Compare with ezANOVA / JASP
-        assert aov.loc[0, 'SS'] == 5.460
-        assert aov.loc[1, 'SS'] == 7.628
-        assert aov.loc[2, 'SS'] == 5.168
-        assert aov.loc[0, 'F'] == 5.052
-        assert aov.loc[1, 'F'] == 4.027
-        assert aov.loc[2, 'F'] == 2.728
-        assert aov.loc[0, 'np2'] == 0.080
-        assert aov.loc[1, 'np2'] == 0.065
-        assert aov.loc[2, 'np2'] == 0.045
+        array_equal(aov.loc[:, 'SS'].values, [5.460, 7.628, 5.168])
+        array_equal(aov.loc[:, 'DF1'].values, [1, 2, 2])
+        array_equal(aov.loc[:, 'DF2'].values, [58, 116, 116])
+        array_equal(aov.loc[:, 'F'].values, [5.052, 4.027, 2.728])
+        array_equal(aov.loc[:, 'np2'].values, [0.080, 0.065, 0.045])
         assert aov.loc[1, 'eps'] == 0.999
         assert aov.loc[1, 'W-spher'] == 0.999
         assert round(aov.loc[1, 'p-GG-corr'], 2) == 0.02
+
         # With missing values
         df_nan2 = df_nan.copy()
         df_nan2.iloc[158, 0] = np.nan
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
                           between='Group', data=df_nan2, correction=True,
                           export_filename='test_export.csv').round(3)
-        # Compare with ezANOVA / JASP
-        assert aov.loc[0, 'F'] == 5.692
-        assert aov.loc[1, 'F'] == 3.053
-        assert aov.loc[2, 'F'] == 3.501
-        assert aov.loc[0, 'np2'] == 0.094
-        assert aov.loc[1, 'np2'] == 0.053
-        assert aov.loc[2, 'np2'] == 0.060
+        array_equal(aov.loc[:, 'F'].values, [5.692, 3.053, 3.501])
+        array_equal(aov.loc[:, 'np2'].values, [0.094, 0.053, 0.060])
         assert aov.loc[1, 'eps'] == 0.997
         assert aov.loc[1, 'W-spher'] == 0.996
+
         # Unbalanced group
         df_unbalanced = df[df["Subject"] <= 54]
         aov = mixed_anova(data=df_unbalanced, dv='Scores',
                           subject='Subject', within='Time', between='Group',
                           correction=True).round(3)
-        # Compare with ezANOVA / JASP
-        assert aov.loc[0, 'F'] == 3.561
-        assert aov.loc[1, 'F'] == 2.421
-        assert aov.loc[2, 'F'] == 1.827
-        assert aov.loc[0, 'np2'] == 0.063
-        assert aov.loc[1, 'np2'] == 0.044
-        assert aov.loc[2, 'np2'] == 0.033
+        array_equal(aov.loc[:, 'F'].values, [3.561, 2.421, 1.827])
+        array_equal(aov.loc[:, 'np2'].values, [0.063, 0.044, 0.033])
         assert aov.loc[1, 'eps'] == 1.  # JASP = 0.998
         assert aov.loc[1, 'W-spher'] == 1.  # JASP = 0.998
+
+        # With three groups and four time points, unbalanced
+        df_unbalanced = read_dataset('mixed_anova_unbalanced.csv')
+        aov = mixed_anova(data=df_unbalanced, dv='Scores', subject='Subject',
+                          correction=True, within='Time',
+                          between='Group').round(3)
+        array_equal(aov.loc[:, 'DF1'].values, [2, 3, 6])
+        array_equal(aov.loc[:, 'DF2'].values, [23, 69, 69])
+        array_equal(aov.loc[:, 'F'].values, [2.302, 1.707, 0.888])
+        array_equal(aov.loc[:, 'p-unc'].values,
+                    np.round([1.225913e-01, 1.736066e-01, 5.087900e-01], 3))
+        # Check correction: values are very slightly different than ezANOVA
+        assert np.isclose(aov.at[1, 'eps'], 0.925374, atol=0.001)
+        assert np.isclose(aov.at[1, 'p-GG-corr'], 0.1779205, atol=0.01)
+        assert np.isclose(aov.at[1, 'W-spher'], 0.8850318, atol=0.01)
+        assert np.isclose(aov.at[1, 'p-spher'], 0.7535238, atol=0.1)
 
     def test_ancova(self):
         """Test function ancovan.
