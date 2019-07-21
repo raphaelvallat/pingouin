@@ -18,11 +18,15 @@ class TestEquivalence(TestCase):
         assert np.greater(tost(a, a + 25, bound=1).at['TOST', 'p-val'], 0.5)
         a = [4, 7, 8, 6, 3, 2]
         b = [6, 8, 7, 10, 11, 9]
-        assert round(tost(a, b, bound=10).at['TOST', 'p-val'], 3) == 0.000
-        assert round(tost(a, b, bound=10,
-                          parametric=False).at['TOST', 'p-val'], 3) == 0.003
-        assert round(tost(a, b, bound=10, parametric=False,
-                          paired=True).at['TOST', 'p-val'], 3) == 0.018
+        # Check all arguments
+        tost(a, b)
+        tost(b, a)
+        tost(a, b, paired=True)
+        tost(b, a, paired=True)
+        tost(a, b, parametric=False)
+        tost(b, a, parametric=False)
+        tost(a, b, paired=True, parametric=False)
+        tost(b, a, paired=True, parametric=False)
 
         # Compare with R
         # R: tost(a, b, epsilon = 1, var.equal = TRUE)

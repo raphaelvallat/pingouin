@@ -74,44 +74,41 @@ def tost(x, y, paired=False, parametric=True, bound=0.3, correction=False):
     """
     x = np.asarray(x)
     y = np.asarray(y)
+    assert isinstance(bound, (int, float)), 'bound must be int or float.'
     if parametric:
-        df_ttesta = ttest(y + bound, x, paired=paired, tail='one-sided',
-                          correction=correction)
-        df_ttestb = ttest(x + bound, y, paired=paired, tail='one-sided',
-                          correction=correction)
-        if df_ttestb.at['T-test', 'T'] < 0:
-            df_ttestb.at['T-test', 'p-val'] = 1 - df_ttestb.at['T-test',
-                                                               'p-val']
-        if df_ttesta.at['T-test', 'T'] < 0:
-            df_ttesta.at['T-test', 'p-val'] = 1 - df_ttesta.at['T-test',
-                                                               'p-val']
-        if df_ttestb.at['T-test', 'p-val'] >= df_ttesta.at['T-test',
-                                                           'p-val']:
-            pval = df_ttestb.at['T-test', 'p-val']
-            lpval = df_ttesta.at['T-test', 'p-val']
+        df_a = ttest(y + bound, x, paired=paired, tail='one-sided',
+                     correction=correction)
+        df_b = ttest(x + bound, y, paired=paired, tail='one-sided',
+                     correction=correction)
+        if df_a.at['T-test', 'T'] < 0:
+            df_a.at['T-test', 'p-val'] = 1 - df_a.at['T-test', 'p-val']
+        if df_b.at['T-test', 'T'] < 0:
+            df_b.at['T-test', 'p-val'] = 1 - df_b.at['T-test', 'p-val']
+        if df_b.at['T-test', 'p-val'] >= df_a.at['T-test', 'p-val']:
+            pval = df_b.at['T-test', 'p-val']
+            lpval = df_a.at['T-test', 'p-val']
         else:
-            pval = df_ttesta.at['T-test', 'p-val']
-            lpval = df_ttestb.at['T-test', 'p-val']
+            pval = df_a.at['T-test', 'p-val']
+            lpval = df_b.at['T-test', 'p-val']
     else:
         if paired:
-            df_ttesta = wilcoxon(y + bound, x, tail='one-sided')
-            df_ttestb = wilcoxon(x + bound, y, tail='one-sided')
-            if df_ttestb.at['Wilcoxon', 'p-val'] >= df_ttesta.at['Wilcoxon',
-                                                                 'p-val']:
-                pval = df_ttestb.at['Wilcoxon', 'p-val']
-                lpval = df_ttesta.at['Wilcoxon', 'p-val']
+            df_a = wilcoxon(y + bound, x, tail='one-sided')
+            df_b = wilcoxon(x + bound, y, tail='one-sided')
+            if df_b.at['Wilcoxon', 'p-val'] >= df_a.at['Wilcoxon', 'p-val']:
+                pval = df_b.at['Wilcoxon', 'p-val']
+                lpval = df_a.at['Wilcoxon', 'p-val']
             else:
-                pval = df_ttesta.at['Wilcoxon', 'p-val']
-                lpval = df_ttestb.at['Wilcoxon', 'p-val']
+                pval = df_a.at['Wilcoxon', 'p-val']
+                lpval = df_b.at['Wilcoxon', 'p-val']
         else:
-            df_ttesta = mwu(y + bound, x, tail='one-sided')
-            df_ttestb = mwu(x + bound, y, tail='one-sided')
-            if df_ttestb.at['MWU', 'p-val'] >= df_ttesta.at['MWU', 'p-val']:
-                pval = df_ttestb.at['MWU', 'p-val']
-                lpval = df_ttesta.at['MWU', 'p-val']
+            df_a = mwu(y + bound, x, tail='one-sided')
+            df_b = mwu(x + bound, y, tail='one-sided')
+            if df_b.at['MWU', 'p-val'] >= df_a.at['MWU', 'p-val']:
+                pval = df_b.at['MWU', 'p-val']
+                lpval = df_a.at['MWU', 'p-val']
             else:
-                pval = df_ttesta.at['MWU', 'p-val']
-                lpval = df_ttestb.at['MWU', 'p-val']
+                pval = df_a.at['MWU', 'p-val']
+                lpval = df_b.at['MWU', 'p-val']
 
     # Create output dataframe
     stats = {'p-val': pval, 'upper': pval, 'lower': lpval}
