@@ -51,6 +51,12 @@ class TestParametric(TestCase):
         assert tt.loc['T-test', 'dof'] == 5
         assert round(tt.loc['T-test', 'p-val'], 5) == 0.05833
         np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [-7.18, 0.18])
+        # When the two arrays are identical
+        tt = ttest(a, a, paired=True)
+        assert str(tt.loc['T-test', 'T']) == str(np.nan)
+        assert str(tt.loc['T-test', 'p-val']) == str(np.nan)
+        assert tt.loc['T-test', 'cohen-d'] == 0.
+        assert tt.loc['T-test', 'BF10'] == str(np.nan)
         # - One sample one-sided
         tt = ttest(a, y=0, paired=False, correction=False, tail='one-sided')
         assert tt.loc['T-test', 'T'] == 5.175

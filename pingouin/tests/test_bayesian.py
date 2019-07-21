@@ -31,6 +31,8 @@ class TestBayesian(TestCase):
         assert float(bayesfactor_ttest(3.5, 20, 20, tail='less')) < 1
         assert float(bayesfactor_ttest(-3.5, 20, 20, tail='greater')) < 1
         assert float(bayesfactor_ttest(-3.5, 20, 20, tail='less')) > 1
+        # Check with wrong T-value
+        assert bayesfactor_ttest(np.nan, 20, paired=True) == 'nan'
 
     def test_bayesfactor_pearson(self):
         """Test function bayesfactor_pearson."""

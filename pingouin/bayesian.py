@@ -127,6 +127,11 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     assert tail in possible_tails, 'Invalid tail argument.'
     one_sample = True if ny is None or ny == 1 else False
 
+    # Check T-value
+    assert isinstance(t, (int, float)), 'The T-value must be a int or a float.'
+    if not np.isfinite(t):
+        return str(np.nan)
+
     # Function to be integrated
     def fun(g, t, n, r, df):
         return (1 + n * g * r**2)**(-.5) * (1 + t**2 / ((1 + n * g * r**2)

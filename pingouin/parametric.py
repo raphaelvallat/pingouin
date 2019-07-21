@@ -196,7 +196,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     if x.size != y.size and paired:
         warnings.warn("x and y have unequal sizes. Switching to "
-                      "paired == False.")
+                      "paired == False. Check your data.")
         paired = False
 
     # Remove rows with missing values
@@ -210,7 +210,12 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         se = np.sqrt(x.var(ddof=1) / nx)
     if ny > 1 and paired is True:
         # Case paired two samples T-test
-        tval, pval = ttest_rel(x, y)
+        # Do not compute if two arrays are identical (avoid SciPy warning)
+        if np.array_equal(x, y):
+            warnings.warn("x and y are equals. Cannot compute T or p-value.")
+            tval, pval = np.nan, np.nan
+        else:
+            tval, pval = ttest_rel(x, y)
         dof = nx - 1
         se = np.sqrt(np.var(x - y, ddof=1) / nx)
         bf = bayesfactor_ttest(tval, nx, ny, paired=True, r=r)
