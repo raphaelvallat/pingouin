@@ -17,19 +17,19 @@ class TestEquivalence(TestCase):
         b = a + 25
         # Simple safety check
         assert np.less(tost(a, a).at['TOST', 'p-val'], 0.05)
-        assert np.greater(tost(a, b).at['TOST', 'p-val'], 0.5)
         assert np.less(tost(a, a, paired=True).at['TOST', 'p-val'], 0.05)
+        assert np.greater(tost(a, b).at['TOST', 'p-val'], 0.5)
         assert np.greater(tost(a, b, paired=True).at['TOST', 'p-val'], 0.5)
 
         # Check all arguments with good data
-        a = [4, 7, 8, 6, 3, 2]
-        b = [6, 8, 7, 10, 11, 9]
-        tost(a, b)
-        tost(b, a)
-        tost(a, b, paired=True)
-        tost(b, a, paired=True)
+        a = np.array([4, 7, 8, 6, 3, 2])
+        b = np.array([6, 8, 7, 10, 11, 9])
+        tost(a, b).equals(tost(b, a))
+        tost(a, b).equals(tost(-1 * a, -1 * b))
+        tost(a, b, paired=True).equals(tost(b, a, paired=True))
 
         # Compare with R
+        # WARNING: One-sample test yield slightly different results!
         # R: tost(a, b, epsilon = 1, var.equal = TRUE)
         assert np.isclose(tost(a, b, bound=1).at['TOST', 'p-val'], 0.9650974)
         # R: tost(a, b)

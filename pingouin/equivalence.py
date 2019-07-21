@@ -56,36 +56,32 @@ def tost(x, y, bound=1, paired=False, correction=False):
     >>> a = [4, 7, 8, 6, 3, 2]
     >>> b = [6, 8, 7, 10, 11, 9]
     >>> pg.tost(a, b)
-          bound     upper     lower     p-val
-    TOST      1  0.965097  0.002216  0.965097
+          bound     p-val
+    TOST      1  0.965097
 
     2. Paired TOST with a different equivalent region
 
     >>> pg.tost(a, b, bound=0.5, paired=True)
-          bound     upper     lower     p-val
-    TOST    0.5  0.954854  0.019138  0.954854
+          bound     p-val
+    TOST    0.5  0.954854
+
+    3. One sample TOST
+
+    >>> pg.tost(a, y=0, bound=4)
+          bound     p-val
+    TOST      4  0.825967
     """
     x = np.asarray(x)
     y = np.asarray(y)
     assert isinstance(bound, (int, float)), 'bound must be int or float.'
 
-    # Run the T-tests
-    df_a = ttest(y + bound, x, paired=paired, tail='one-sided',
-                 correction=correction)
-    df_b = ttest(x + bound, y, paired=paired, tail='one-sided',
-                 correction=correction)
-    if df_a.at['T-test', 'T'] < 0:
-        df_a.at['T-test', 'p-val'] = 1 - df_a.at['T-test', 'p-val']
-    if df_b.at['T-test', 'T'] < 0:
-        df_b.at['T-test', 'p-val'] = 1 - df_b.at['T-test', 'p-val']
-    if df_b.at['T-test', 'p-val'] >= df_a.at['T-test', 'p-val']:
-        pval = df_b.at['T-test', 'p-val']
-        lpval = df_a.at['T-test', 'p-val']
-    else:
-        pval = df_a.at['T-test', 'p-val']
-        lpval = df_b.at['T-test', 'p-val']
+    # T-tests
+    df_a = ttest(x + bound, y, paired=paired, correction=correction,
+                 tail='greater')
+    df_b = ttest(x - bound, y, paired=paired, correction=correction,
+                 tail='less')
+    pval = max(df_a.at['T-test', 'p-val'], df_b.at['T-test', 'p-val'])
 
     # Create output dataframe
-    stats = {'p-val': pval, 'upper': pval, 'lower': lpval, 'bound': bound}
-    stats = pd.DataFrame.from_records(stats, index=['TOST'])
-    return stats[['bound', 'upper', 'lower', 'p-val']]
+    stats = {'bound': bound, 'p-val': pval}
+    return pd.DataFrame.from_records(stats, index=['TOST'])
