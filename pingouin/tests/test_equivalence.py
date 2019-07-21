@@ -10,23 +10,24 @@ class TestEquivalence(TestCase):
 
     def test_tost(self):
         """Test function tost.
-        Compare to R package equivalence (function tost)
+        Compare to R package equivalence (function `tost`).
         """
         np.random.seed(1234)
         a = np.random.normal(scale=1., size=600)
-        assert np.less(tost(a, a, bound=1).at['TOST', 'p-val'], 0.05)
-        assert np.greater(tost(a, a + 25, bound=1).at['TOST', 'p-val'], 0.5)
+        b = a + 25
+        # Simple safety check
+        assert np.less(tost(a, a).at['TOST', 'p-val'], 0.05)
+        assert np.greater(tost(a, b).at['TOST', 'p-val'], 0.5)
+        assert np.less(tost(a, a, paired=True).at['TOST', 'p-val'], 0.05)
+        assert np.greater(tost(a, b, paired=True).at['TOST', 'p-val'], 0.5)
+
+        # Check all arguments with good data
         a = [4, 7, 8, 6, 3, 2]
         b = [6, 8, 7, 10, 11, 9]
-        # Check all arguments
         tost(a, b)
         tost(b, a)
         tost(a, b, paired=True)
         tost(b, a, paired=True)
-        tost(a, b, parametric=False)
-        tost(b, a, parametric=False)
-        tost(a, b, paired=True, parametric=False)
-        tost(b, a, paired=True, parametric=False)
 
         # Compare with R
         # R: tost(a, b, epsilon = 1, var.equal = TRUE)
