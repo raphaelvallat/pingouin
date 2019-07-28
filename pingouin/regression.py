@@ -465,6 +465,8 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         kwargs['solver'] = 'lbfgs'
     if 'multi_class' not in kwargs:
         kwargs['multi_class'] = 'auto'
+    if 'C' not in kwargs:
+        kwargs['C'] = 1e9
     lom = LogisticRegression(**kwargs)
     lom.fit(X, y)
     coef = np.append(lom.intercept_, lom.coef_)
