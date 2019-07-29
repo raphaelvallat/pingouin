@@ -307,7 +307,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         If True, return only the regression coefficients.
     alpha : float
         Alpha value used for the confidence intervals.
-        math:`\\text{CI} = [\\alpha / 2 ; 1 - \\alpha / 2]`
+        :math:`\\text{CI} = [\\alpha / 2 ; 1 - \\alpha / 2]`
     as_dataframe : bool
         If True, returns a pandas DataFrame. If False, returns a dictionnary.
     remove_na : bool
@@ -339,9 +339,9 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     Notes
     -----
     This is a wrapper around the
-    :py:class:`sklearn.linear_model.LogisticRegression` class. However,
-    Pingouin disables regularization by default. This can be modified by
-    changing the `penalty` argument.
+    :py:class:`sklearn.linear_model.LogisticRegression` class. Note that
+    Pingouin automatically disables the l2 regularization applied by
+    scikit-learn. This can be modified by changing the `penalty` argument.
 
     The calculation of the p-values and confidence interval is adapted from a
     code found at
@@ -353,7 +353,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     constant term. Pingouin will remove any constant term (e.g column with only
     one unique value), or duplicate columns from :math:`X`.
 
-    Results have been compared against statsmodels and JASP.
+    Results have been compared against statsmodels, R, and JASP.
 
     Examples
     --------
@@ -367,8 +367,8 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     >>> lom = logistic_regression(x, y)
     >>> lom.round(2)
            names  coef    se     z  pval  CI[2.5%]  CI[97.5%]
-    0  Intercept -0.27  0.37 -0.73  0.46     -0.99       0.45
-    1         x1  0.06  0.32  0.19  0.85     -0.56       0.68
+    0  Intercept -0.27  0.37 -0.74  0.46     -1.00       0.45
+    1         x1  0.07  0.32  0.21  0.84     -0.55       0.68
 
     2. Multiple binary logistic regression
 
@@ -377,7 +377,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     >>> X = np.column_stack((x, z))
     >>> lom = logistic_regression(X, y)
     >>> print(lom['coef'].values)
-    [-0.34933805 -0.0226106  -0.39453532]
+    [-0.36736745 -0.04374684 -0.47829392]
 
     3. Using a Pandas DataFrame
 
@@ -385,19 +385,19 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
     >>> lom = logistic_regression(df[['x', 'z']], df['y'])
     >>> print(lom['coef'].values)
-    [-0.34933805 -0.0226106  -0.39453532]
+    [-0.36736745 -0.04374684 -0.47829392]
 
     4. Return only the coefficients
 
     >>> logistic_regression(X, y, coef_only=True)
-    array([-0.34933805, -0.0226106 , -0.39453532])
+    array([-0.36736745, -0.04374684, -0.47829392])
 
     5. Passing custom parameters to sklearn
 
     >>> lom = logistic_regression(X, y, solver='sag', max_iter=10000,
     ...                           random_state=42)
     >>> print(lom['coef'].values)
-    [-0.34942862 -0.02261937 -0.39449608]
+    [-0.36751796 -0.04367056 -0.47841908]
     """
     # Check that sklearn is installed
     from pingouin.utils import _is_sklearn_installed
@@ -718,11 +718,11 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
 
     >>> mediation_analysis(data=df, x='X', m='Mbin', y='Y', seed=42)
            path    coef      se      pval  CI[2.5%]  CI[97.5%]  sig
-    0  Mbin ~ X -0.0205  0.1159  0.859392   -0.2476     0.2066   No
+    0  Mbin ~ X -0.0208  0.1159  0.857510   -0.2479     0.2063   No
     1  Y ~ Mbin -0.1354  0.4118  0.743076   -0.9525     0.6818   No
     2     Total  0.3961  0.1112  0.000567    0.1755     0.6167  Yes
     3    Direct  0.3956  0.1117  0.000614    0.1739     0.6173  Yes
-    4  Indirect  0.0023  0.0495  0.960000   -0.0715     0.1441   No
+    4  Indirect  0.0023  0.0503  0.960000   -0.0724     0.1464   No
 
     4. Mediation analysis with covariates
 
