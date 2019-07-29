@@ -104,7 +104,7 @@ class TestRegression(TestCase):
         # Reproduce in jupyter notebook with rpy2 using
         # %load_ext rpy2.ipython (in a separate cell)
         # Together in one cell below
-        # %%R -i df     
+        # %%R -i df
         # summary(glm(Ybin ~ X, data=df, family=binomial))
         assert_equal(np.round(lom['coef'], 4), [1.3191, -0.1995])
         assert_equal(np.round(lom['se'], 4), [0.7582, 0.1211])
@@ -119,12 +119,18 @@ class TestRegression(TestCase):
         lom = logistic_regression(X, y)  # Pingouin
         # Compare against R
         # summary(glm(Ybin ~ X+M, data=df, family=binomial))
-        assert_equal(np.round(lom['coef'].values, 4), [1.3276, -0.1960, -0.0060])
-        assert_equal(np.round(lom['se'].values, 4), [0.7784, 0.1408, 0.1253])
-        assert_equal(np.round(lom['z'].values, 4), [1.7056, -1.3926, -0.0476])
-        assert_equal(np.round(lom['pval'].values, 4), [0.0881, 0.1637, 0.9620])
-        assert_equal(np.round(lom['CI[2.5%]'].values, 4), [-.1980, -.4719, -.2516])
-        assert_equal(np.round(lom['CI[97.5%]'].values, 4), [2.8531, 0.0799, 0.2397])
+        assert_equal(np.round(lom['coef'].values, 4),
+                     [1.3276, -0.1960, -0.0060])
+        assert_equal(np.round(lom['se'].values, 4),
+                     [0.7784, 0.1408, 0.1253])
+        assert_equal(np.round(lom['z'].values, 4),
+                     [1.7056, -1.3926, -0.0476])
+        assert_equal(np.round(lom['pval'].values, 4),
+                     [0.0881, 0.1637, 0.9620])
+        assert_equal(np.round(lom['CI[2.5%]'].values, 4),
+                     [-.1980, -.4719, -.2516])
+        assert_equal(np.round(lom['CI[97.5%]'].values, 4),
+                     [2.8531, 0.0799, 0.2397])
 
         # Test other arguments
         c = logistic_regression(df[['X', 'M']], df['Ybin'], coef_only=True)
@@ -134,12 +140,15 @@ class TestRegression(TestCase):
         logistic_regression(df_nan[['X', 'M']], df_nan['Ybin'], remove_na=True)
 
         # Test **kwargs
-        logistic_regression(X, y, solver='sag', C=10, max_iter=10000, penalty="l2")
+        logistic_regression(X, y, solver='sag', C=10, max_iter=10000,
+                            penalty="l2")
         logistic_regression(X, y, solver='sag', multi_class='auto')
 
-        # Test regularization coefficients are strictly closer to 0 than unregularized
+        # Test regularization coefficients are strictly closer to 0 than
+        # unregularized
         c = logistic_regression(df['X'], df['Ybin'], coef_only=True)
-        c_reg = logistic_regression(df['X'], df['Ybin'], coef_only=True, penalty='l2')
+        c_reg = logistic_regression(df['X'], df['Ybin'], coef_only=True,
+                                    penalty='l2')
         assert all(np.abs(c - 0) > np.abs(c_reg - 0))
 
         # With one column that has only one unique value

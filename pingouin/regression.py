@@ -339,7 +339,9 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     Notes
     -----
     This is a wrapper around the
-    :py:class:`sklearn.linear_model.LogisticRegression` class. However, Pingouin disables regularization by default. This can be modified by changing the `penalty` argument. 
+    :py:class:`sklearn.linear_model.LogisticRegression` class. However,
+    Pingouin disables regularization by default. This can be modified by
+    changing the `penalty` argument.
 
     The calculation of the p-values and confidence interval is adapted from a
     code found at
@@ -349,7 +351,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     the model. Scikit-learn will automatically add the intercept
     to your predictor(s) matrix, therefore, :math:`X` should not include a
     constant term. Pingouin will remove any constant term (e.g column with only
-    one unique value), or duplicate columns from :math:`X`. 
+    one unique value), or duplicate columns from :math:`X`.
 
     Results have been compared against statsmodels and JASP.
 
