@@ -116,21 +116,15 @@ class TestRegression(TestCase):
         # Multiple predictors
         X = df[['X', 'M']].values
         y = df['Ybin'].values
-        lom = logistic_regression(X, y)  # Pingouin
+        lom = logistic_regression(X, y).round(4)  # Pingouin
         # Compare against R
         # summary(glm(Ybin ~ X+M, data=df, family=binomial))
-        assert_equal(np.round(lom['coef'].values, 4),
-                     [1.3276, -0.1960, -0.0060])
-        assert_equal(np.round(lom['se'].values, 4),
-                     [0.7784, 0.1408, 0.1253])
-        assert_equal(np.round(lom['z'].values, 4),
-                     [1.7056, -1.3926, -0.0476])
-        assert_equal(np.round(lom['pval'].values, 4),
-                     [0.0881, 0.1637, 0.9620])
-        assert_equal(np.round(lom['CI[2.5%]'].values, 4),
-                     [-.1980, -.4719, -.2516])
-        assert_equal(np.round(lom['CI[97.5%]'].values, 4),
-                     [2.8531, 0.0799, 0.2397])
+        assert_equal(lom['coef'].values, [1.3276, -0.1960, -0.0060])
+        assert_equal(lom['se'].values, [0.7784, 0.1408, 0.1253])
+        assert_equal(lom['z'].values, [1.7056, -1.3926, -0.0476])
+        assert_equal(lom['pval'].values, [0.0881, 0.1637, 0.9620])
+        assert_equal(lom['CI[2.5%]'].values, [-.1980, -.4719, -.2516])
+        assert_equal(lom['CI[97.5%]'].values, [2.8531, 0.0799, 0.2397])
 
         # Test other arguments
         c = logistic_regression(df[['X', 'M']], df['Ybin'], coef_only=True)
@@ -174,11 +168,8 @@ class TestRegression(TestCase):
         ma = mediation_analysis(data=df, x='X', m='M', y='Y', n_boot=500)
 
         # Compare against R package mediation
-        assert ma['coef'][0] == 0.5610
-        assert ma['coef'][1] == 0.6542
-        assert ma['coef'][2] == 0.3961
-        assert ma['coef'][3] == 0.0396
-        assert ma['coef'][4] == 0.3565
+        assert_equal(ma['coef'].values,
+                     [0.5610, 0.6542, 0.3961, 0.0396, 0.3565])
 
         _, dist = mediation_analysis(data=df, x='X', m='M', y='Y', n_boot=1000,
                                      return_dist=True)
