@@ -222,8 +222,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     # 2. We also want to make sure that there is no more than one column
     # (= Intercept) with only one unique value, otherwise the regression fails
     # This is equivalent, but much faster, to pd.DataFrame(X).nunique()
-    nunique = np.apply_along_axis(lambda x: len(np.unique(x)), 0, X)
-    idx_unique = np.flatnonzero(nunique == 1)
+    idx_unique = np.where(np.all(X == X[0, :], axis=0))[0]
     if len(idx_unique) > 1:
         # Houston, we have a problem!
         # We remove all but the first "Intercept" column.
@@ -266,7 +265,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
 
     # Compute T and p-values
     T = coef / beta_se
-    pval = np.array([2 * t.sf(np.abs(i), dof) for i in T])
+    pval = 2 * t.sf(np.fabs(T), dof)
 
     # Compute confidence intervals
     crit = t.ppf(1 - alpha / 2, dof)
@@ -284,7 +283,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
              ul_name: ul}
 
     if as_dataframe:
-        stats = pd.DataFrame.from_dict(stats)
+        stats = pd.DataFrame(stats)
         stats.residuals_ = 0  # Trick to avoid Pandas warning
         stats.residuals_ = resid  # Residuals is a hidden attribute
     else:
@@ -446,8 +445,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     # We also want to make sure that there is no column
     # with only one unique value, otherwise the regression fails
     # This is equivalent, but much faster, to pd.DataFrame(X).nunique()
-    nunique = np.apply_along_axis(lambda x: len(np.unique(x)), 0, X)
-    idx_unique = np.flatnonzero(nunique == 1)
+    idx_unique = np.where(np.all(X == X[0, :], axis=0))[0]
     if len(idx_unique):
         X = np.delete(X, idx_unique, 1)
         names = np.delete(names, idx_unique).tolist()
@@ -491,7 +489,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     z_scores = coef / se
 
     # Two-tailed p-values
-    pval = np.array([2 * norm.sf(abs(z)) for z in z_scores])
+    pval = 2 * norm.sf(np.fabs(z_scores))
 
     # Confidence intervals
     crit = norm.ppf(1 - alpha / 2)
@@ -506,7 +504,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     stats = {'names': names, 'coef': coef, 'se': se, 'z': z_scores,
              'pval': pval, ll_name: ll, ul_name: ul}
     if as_dataframe:
-        return pd.DataFrame.from_dict(stats)
+        return pd.DataFrame(stats)
     else:
         return stats
 
