@@ -40,7 +40,7 @@ import sphinx_bootstrap_theme
 # ones.
 sys.path.insert(0, os.path.abspath('sphinxext'))
 extensions = [
-              # 'sphinx.ext.mathjax',
+              'sphinx.ext.mathjax',
               'sphinx.ext.doctest',
               'sphinx.ext.viewcode',
               'sphinx.ext.githubpages',
@@ -107,38 +107,25 @@ todo_include_todos = False
 
 # -- Options for HTML output ----------------------------------------------
 
-# Read the doc theme
-# html_theme = "sphinx_rtd_theme"
-# html_theme_path = ["_themes", ]
-# html_theme_options = {
-#     'canonical_url': '',
-#     'analytics_id': '',
-#     'logo_only': False,
-#     'display_version': True,
-#     'prev_next_buttons_location': 'bottom',
-#     'collapse_navigation': False,
-#     'sticky_navigation': True,
-#     'navigation_depth': 4,
-#     'includehidden': True,
-#     'titles_only': False
-# }
-
 # Bootstrap theme
 html_theme = 'bootstrap'
 html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_theme_options = {
     'source_link_position': "footer",
+    # 'navbar_title': ' ',  # we replace this with an image
     'bootswatch_theme': "readable",
     'navbar_sidebarrel': False,
-    'nosidebar': True,
+    # 'nosidebar': True,
+    # 'navbar_site_name': "",
     'navbar_pagenav': False,
     'bootstrap_version': "3",
+    'navbar_class': "navbar",
     'navbar_links': [
                      ("Functions", "api"),
                      ("Guidelines", "guidelines"),
-                     ("Examples", "examples"),
                      ("FAQ", "faq"),
-                     ("What's new", "changelog")
+                     ("What's new", "changelog"),
+                     ("Contribute", "contributing")
                      ],
 
     }
@@ -219,4 +206,5 @@ intersphinx_mapping = {'numpy': ('http://docs.scipy.org/doc/numpy/', None),
                        'matplotlib': ('http://matplotlib.org/', None),
                        'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
                        'statsmodels': ('http://www.statsmodels.org/stable/', None),
-                       'seaborn': ('https://seaborn.pydata.org/', None)}
+                       'seaborn': ('https://seaborn.pydata.org/', None),
+                       'sklearn': ('http://scikit-learn.org/stable', None)}

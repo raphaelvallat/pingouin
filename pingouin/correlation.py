@@ -4,13 +4,12 @@ import pandas as pd
 from scipy.stats import pearsonr, spearmanr, kendalltau
 from pingouin.power import power_corr
 from pingouin.effsize import compute_esci
-from pingouin.utils import _remove_na, _perm_pval
+from pingouin.utils import remove_na, _perm_pval
 from pingouin.bayesian import bayesfactor_pearson
 from scipy.spatial.distance import pdist, squareform
 
 
-__all__ = ["corr", "partial_corr", "rm_corr", "intraclass_corr",
-           "distance_corr"]
+__all__ = ["corr", "partial_corr", "rm_corr", "distance_corr"]
 
 
 def skipped(x, y, method='spearman'):
@@ -329,7 +328,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
 
     Please note that rows with NaN are automatically removed.
 
-    If method='pearson', The JZS Bayes Factor is approximated using the
+    If ``method='pearson'``, The Bayes Factor is calculated using the
     :py:func:`pingouin.bayesfactor_pearson` function.
 
     References
@@ -362,15 +361,15 @@ def corr(x, y, tail='two-sided', method='pearson'):
     >>> # Compute Pearson correlation
     >>> from pingouin import corr
     >>> corr(x, y)
-              n      r         CI95%     r2  adj_r2     p-val   BF10  power
-    pearson  30  0.491  [0.16, 0.72]  0.242   0.185  0.005813  6.135  0.809
+              n      r         CI95%     r2  adj_r2     p-val  BF10  power
+    pearson  30  0.491  [0.16, 0.72]  0.242   0.185  0.005813  8.55  0.809
 
     2. Pearson correlation with two outliers
 
     >>> x[3], y[5] = 12, -8
     >>> corr(x, y)
-              n      r          CI95%     r2  adj_r2     p-val  BF10  power
-    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439148  0.19  0.121
+              n      r          CI95%     r2  adj_r2     p-val   BF10  power
+    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439148  0.302  0.121
 
     3. Spearman correlation
 
@@ -396,19 +395,19 @@ def corr(x, y, tail='two-sided', method='pearson'):
               n  outliers      r         CI95%     r2  adj_r2     p-val  power
     skipped  30         2  0.437  [0.09, 0.69]  0.191   0.131  0.020128  0.694
 
-    7. One-tailed Spearman correlation
+    7. One-tailed Pearson correlation
 
-    >>> corr(x, y, tail="one-sided", method='spearman')
-               n      r         CI95%     r2  adj_r2     p-val  power
-    spearman  30  0.401  [0.05, 0.67]  0.161   0.099  0.014017  0.726
+    >>> corr(x, y, tail="one-sided", method='pearson')
+              n      r          CI95%     r2  adj_r2     p-val   BF10  power
+    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.219574  0.467  0.194
 
     8. Using columns of a pandas dataframe
 
     >>> import pandas as pd
     >>> data = pd.DataFrame({'x': x, 'y': y})
     >>> corr(data['x'], data['y'])
-              n      r          CI95%     r2  adj_r2     p-val  BF10  power
-    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439148  0.19  0.121
+              n      r          CI95%     r2  adj_r2     p-val   BF10  power
+    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439148  0.302  0.121
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -418,7 +417,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
         raise ValueError('x and y must have the same length.')
 
     # Remove NA
-    x, y = _remove_na(x, y, paired=True)
+    x, y = remove_na(x, y, paired=True)
     nx = x.size
 
     # Compute correlation coefficient
@@ -465,11 +464,11 @@ def corr(x, y, tail='two-sided', method='pearson'):
         stats['outliers'] = sum(outliers)
 
     # Compute the BF10 for Pearson correlation only
-    if method == 'pearson' and nx < 1000:
+    if method == 'pearson':
         if r2 < 1:
-            stats['BF10'] = round(bayesfactor_pearson(r, nx), 3)
+            stats['BF10'] = bayesfactor_pearson(r, nx, tail=tail)
         else:
-            stats['BF10'] = np.inf
+            stats['BF10'] = str(np.inf)
 
     # Convert to DataFrame
     stats = pd.DataFrame.from_records(stats, index=[method])
@@ -481,21 +480,33 @@ def corr(x, y, tail='two-sided', method='pearson'):
     return stats[col_order]
 
 
-def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
-                 method='pearson'):
-    """Partial correlation.
+def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
+                 y_covar=None, tail='two-sided', method='pearson'):
+    """Partial and semi-partial correlation.
 
     Parameters
     ----------
     data : pd.DataFrame
-        Dataframe
+        Dataframe. Note that this function can also directly be used as a
+        :py:class:`pandas.DataFrame` method, in which case this argument is
+        no longer needed.
     x, y : string
-        x and y. Must be names of columns in data.
+        x and y. Must be names of columns in ``data``.
     covar : string or list
-        Covariate(s). Must be a names of columns in data. Use a list if there
-        are more than one covariate.
+        Covariate(s). Must be a names of columns in ``data``. Use a list if
+        there are two or more covariates.
+    x_covar : string or list
+        Covariate(s) for the ``x`` variable. This is used to compute
+        semi-partial correlation (i.e. the effect of ``x_covar`` is removed
+        from ``x`` but not from ``y``). Note that you cannot specify both
+        ``covar`` and ``x_covar``.
+    y_covar : string or list
+        Covariate(s) for the ``y`` variable. This is used to compute
+        semi-partial correlation (i.e. the effect of ``y_covar`` is removed
+        from ``y`` but not from ``x``). Note that you cannot specify both
+        ``covar`` and ``y_covar``.
     tail : string
-        Specify whether to return 'one-sided' or 'two-sided' p-value.
+        Specify whether to return the 'one-sided' or 'two-sided' p-value.
     method : string
         Specify which method to use for the computation of the correlation
         coefficient. Available methods are ::
@@ -524,66 +535,99 @@ def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
 
     Notes
     -----
-    Partial correlation is a measure of the strength and direction of a
-    linear relationship between two continuous variables whilst controlling
-    for the effect of one or more other continuous variables
-    (also known as covariates or control variables).
+    From [4]_:
 
-    Inspired from a code found at:
-    https://gist.github.com/fabianp/9396204419c7b638d38f
+    “With *partial correlation*, we find the correlation between :math:`x`
+    and :math:`y` holding :math:`C` constant for both :math:`x` and
+    :math:`y`. Sometimes, however, we want to hold :math:`C` constant for
+    just :math:`x` or just :math:`y`. In that case, we compute a
+    *semi-partial correlation*. A partial correlation is computed between
+    two residuals. A semi-partial correlation is computed between one
+    residual and another raw (or unresidualized) variable.”
 
-    Rows with NaN are automatically removed from data.
+    Note that if you are not interested in calculating the statistics and
+    p-values but only the partial correlation matrix, a (faster)
+    alternative is to use the :py:func:`pingouin.pcorr` method (see example 4).
 
-    Results have been tested against the ppcor R package.
+    Rows with missing values are automatically removed from data. Results have
+    been tested against the `ppcor` R package.
 
     References
     ----------
-
     .. [1] https://en.wikipedia.org/wiki/Partial_correlation
 
     .. [2] https://cran.r-project.org/web/packages/ppcor/index.html
+
+    .. [3] https://gist.github.com/fabianp/9396204419c7b638d38f
+
+    .. [4] http://faculty.cas.usf.edu/mbrannick/regression/Partial.html
 
     Examples
     --------
     1. Partial correlation with one covariate
 
-    >>> import numpy as np
-    >>> import pandas as pd
-    >>> from pingouin import partial_corr
-    >>> # Generate random correlated samples
-    >>> np.random.seed(123)
-    >>> mean, cov = [4, 6, 2], [(1, .5, .3), (.5, 1, .2), (.3, .2, 1)]
-    >>> x, y, z = np.random.multivariate_normal(mean, cov, size=30).T
-    >>> # Append in a dataframe
-    >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
-    >>> # Partial correlation of x and y controlling for z
-    >>> partial_corr(data=df, x='x', y='y', covar='z')
+    >>> import pingouin as pg
+    >>> df = pg.read_dataset('partial_corr')
+    >>> pg.partial_corr(data=df, x='x', y='y', covar='cv1')
               n      r         CI95%     r2  adj_r2     p-val    BF10  power
-    pearson  30  0.568  [0.26, 0.77]  0.323   0.273  0.001055  28.695  0.925
+    pearson  30  0.568  [0.26, 0.77]  0.323   0.273  0.001055  37.773  0.925
 
     2. Spearman partial correlation with several covariates
 
-    >>> # Add new random columns to the dataframe of the first example
-    >>> np.random.seed(123)
-    >>> df['w'] = np.random.normal(size=30)
-    >>> df['v'] = np.random.normal(size=30)
-    >>> # Partial correlation of x and y controlling for z, w and v
-    >>> partial_corr(data=df, x='x', y='y', covar=['z', 'w', 'v'],
-    ...              method='spearman')
+    >>> # Partial correlation of x and y controlling for cv1, cv2 and cv3
+    >>> pg.partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'],
+    ...                 method='spearman')
                n      r         CI95%     r2  adj_r2     p-val  power
     spearman  30  0.491  [0.16, 0.72]  0.242   0.185  0.005817  0.809
+
+    3. As a pandas method
+
+    >>> df.partial_corr(x='x', y='y', covar=['cv1'], method='spearman')
+               n      r         CI95%     r2  adj_r2     p-val  power
+    spearman  30  0.568  [0.26, 0.77]  0.323   0.273  0.001049  0.925
+
+    4. Partial correlation matrix (returns only the correlation coefficients)
+
+    >>> df.pcorr().round(3)
+             x      y    cv1    cv2    cv3
+    x    1.000  0.493 -0.095  0.130 -0.385
+    y    0.493  1.000 -0.007  0.104 -0.002
+    cv1 -0.095 -0.007  1.000 -0.241 -0.470
+    cv2  0.130  0.104 -0.241  1.000 -0.118
+    cv3 -0.385 -0.002 -0.470 -0.118  1.000
+
+    5. Semi-partial correlation on ``x``
+
+    >>> pg.partial_corr(data=df, x='x', y='y', x_covar=['cv1', 'cv2', 'cv3'])
+              n      r         CI95%     r2  adj_r2     p-val   BF10  power
+    pearson  30  0.463  [0.12, 0.71]  0.215   0.156  0.009946  5.404  0.752
+
+    6. Semi-partial on both``x`` and ``y`` controlling for different variables
+
+    >>> pg.partial_corr(data=df, x='x', y='y', x_covar='cv1',
+    ...                 y_covar=['cv2', 'cv3'], method='spearman')
+               n      r         CI95%     r2  adj_r2     p-val  power
+    spearman  30  0.429  [0.08, 0.68]  0.184   0.123  0.018092  0.676
     """
     from pingouin.utils import _flatten_list
     # Check arguments
-    assert isinstance(x, (str, tuple)), 'x must be a string.'
-    assert isinstance(y, (str, tuple)), 'y must be a string.'
-    assert isinstance(covar, (str, list)), 'covar must be a string or a list.'
     assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
     assert data.shape[0] > 2, 'Data must have at least 3 samples.'
+    assert isinstance(x, (str, tuple)), 'x must be a string.'
+    assert isinstance(y, (str, tuple)), 'y must be a string.'
+    assert isinstance(covar, (str, list, type(None)))
+    assert isinstance(x_covar, (str, list, type(None)))
+    assert isinstance(y_covar, (str, list, type(None)))
+    if covar is not None and (x_covar is not None or y_covar is not None):
+        raise ValueError('Cannot specify both covar and {x,y}_covar.')
     # Check that columns exist
-    col = _flatten_list([x, y, covar])
+    col = _flatten_list([x, y, covar, x_covar, y_covar])
     if isinstance(covar, str):
         covar = [covar]
+    if isinstance(x_covar, str):
+        x_covar = [x_covar]
+    if isinstance(y_covar, str):
+        y_covar = [y_covar]
     assert all([c in data for c in col]), 'columns are not in dataframe.'
     # Check that columns are numeric
     assert all([data[c].dtype.kind in 'bfi' for c in col])
@@ -592,21 +636,28 @@ def partial_corr(data=None, x=None, y=None, covar=None, tail='two-sided',
     data = data[col].dropna()
     assert data.shape[0] > 2, 'Data must have at least 3 non-NAN samples.'
 
-    # Standardize
+    # Standardize (= no need for an intercept in least-square regression)
     C = (data[col] - data[col].mean(axis=0)) / data[col].std(axis=0)
 
-    # Covariates
-    cvar = np.atleast_2d(C[covar].values)
-
-    # Compute beta
-    beta_x = np.linalg.lstsq(cvar, C[y].values, rcond=None)[0]
-    beta_y = np.linalg.lstsq(cvar, C[x].values, rcond=None)[0]
-
-    # Compute residuals
-    res_x = C[x].values - np.dot(cvar, beta_y)
-    res_y = C[y].values - np.dot(cvar, beta_x)
-
-    # Partial correlation = corr between these residuals
+    if covar is not None:
+        # PARTIAL CORRELATION
+        cvar = np.atleast_2d(C[covar].values)
+        beta_x = np.linalg.lstsq(cvar, C[x].values, rcond=None)[0]
+        beta_y = np.linalg.lstsq(cvar, C[y].values, rcond=None)[0]
+        res_x = C[x].values - np.dot(cvar, beta_x)
+        res_y = C[y].values - np.dot(cvar, beta_y)
+    else:
+        # SEMI-PARTIAL CORRELATION
+        # Initialize "fake" residuals
+        res_x, res_y = data[x].values, data[y].values
+        if x_covar is not None:
+            cvar = np.atleast_2d(C[x_covar].values)
+            beta_x = np.linalg.lstsq(cvar, C[x].values, rcond=None)[0]
+            res_x = C[x].values - np.dot(cvar, beta_x)
+        if y_covar is not None:
+            cvar = np.atleast_2d(C[y_covar].values)
+            beta_y = np.linalg.lstsq(cvar, C[y].values, rcond=None)[0]
+            res_y = C[y].values - np.dot(cvar, beta_y)
     return corr(res_x, res_y, method=method, tail=tail)
 
 
@@ -616,168 +667,98 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     Parameters
     ----------
     data : pd.DataFrame
-        Dataframe containing the variables
+        Dataframe.
     x, y : string
-        Name of columns in data containing the two dependent variables
+        Name of columns in ``data`` containing the two dependent variables.
     subject : string
-        Name of column in data containing the subject indicator
+        Name of column in ``data`` containing the subject indicator.
     tail : string
         Specify whether to return 'one-sided' or 'two-sided' p-value.
 
     Returns
     -------
-    r : float
-        Repeated measures correlation coefficient
-    p : float
-        P-value
-    dof : int
-        Degrees of freedom
+    stats : pandas DataFrame
+        Test summary ::
+
+        'r' : Repeated measures correlation coefficient
+        'dof' : Degrees of freedom
+        'pval' : one or two tailed p-value
+        'CI95' : 95% parametric confidence intervals
+        'power' : achieved power of the test (= 1 - type II error).
 
     Notes
     -----
-    Repeated measures correlation [1]_ is a statistical technique
+    Repeated measures correlation (rmcorr) is a statistical technique
     for determining the common within-individual association for paired
     measures assessed on two or more occasions for multiple individuals.
 
+    From Bakdash and Marusich (2017):
+
+        "Rmcorr accounts for non-independence among observations using analysis
+        of covariance (ANCOVA) to statistically adjust for inter-individual
+        variability. By removing measured variance between-participants,
+        rmcorr provides the best linear fit for each participant using parallel
+        regression lines (the same slope) with varying intercepts.
+        Like a Pearson correlation coefficient, the rmcorr coefficient
+        is bounded by − 1 to 1 and represents the strength of the linear
+        association between two variables."
+
     Results have been tested against the `rmcorr` R package.
 
-    Please note that NaN are automatically removed from the dataframe.
+    Please note that NaN are automatically removed from the dataframe
+    (listwise deletion).
 
     References
     ----------
-
     .. [1] Bakdash, J.Z., Marusich, L.R., 2017. Repeated Measures Correlation.
-       Front. Psychol. 8, 456. https://doi.org/10.3389/fpsyg.2017.00456
+           Front. Psychol. 8, 456. https://doi.org/10.3389/fpsyg.2017.00456
+
+    .. [2] Bland, J. M., & Altman, D. G. (1995). Statistics notes: Calculating
+           correlation coefficients with repeated observations:
+           Part 1—correlation within subjects. Bmj, 310(6977), 446.
+
+    .. [3] https://github.com/cran/rmcorr
 
     Examples
     --------
-    1. Repeated measures correlation
-
-    >>> from pingouin import rm_corr, read_dataset
-    >>> df = read_dataset('rm_corr')
-    >>> rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
-    (-0.507, 0.0008470789034072481, 38)
+    >>> import pingouin as pg
+    >>> df = pg.read_dataset('rm_corr')
+    >>> pg.rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
+                 r  dof      pval           CI95%  power
+    rm_corr -0.507   38  0.000847  [-0.71, -0.23]   0.93
     """
+    from pingouin import ancova, power_corr
     # Safety checks
     assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame'
-    assert x in data, 'The %s column is not in data.' % x
-    assert y in data, 'The %s column is not in data.' % y
-    assert subject in data, 'The %s column is not in data.' % subject
+    assert x in data.columns, 'The %s column is not in data.' % x
+    assert y in data.columns, 'The %s column is not in data.' % y
+    assert data[x].dtype.kind in 'bfi', '%s must be numeric.' % x
+    assert data[y].dtype.kind in 'bfi', '%s must be numeric.' % y
+    assert subject in data.columns, 'The %s column is not in data.' % subject
     if data[subject].nunique() < 3:
         raise ValueError('rm_corr requires at least 3 unique subjects.')
-    # Remove Nans
+
+    # Remove missing values
     data = data[[x, y, subject]].dropna(axis=0)
 
-    # Using STATSMODELS
-    # from pingouin.utils import _is_statsmodels_installed
-    # _is_statsmodels_installed(raise_error=True)
-    # from statsmodels.api import stats
-    # from statsmodels.formula.api import ols
-    # # ANCOVA model
-    # formula = y + ' ~ ' + 'C(' + subject + ') + ' + x
-    # model = ols(formula, data=data).fit()
-    # table = stats.anova_lm(model, typ=3)
-    # # Extract the sign of the correlation and dof
-    # sign = np.sign(model.params[x])
-    # dof = int(table.loc['Residual', 'df'])
-    # # Extract correlation coefficient from sum of squares
-    # ssfactor = table.loc[x, 'sum_sq']
-    # sserror = table.loc['Residual', 'sum_sq']
-    # rm = sign * np.sqrt(ssfactor / (ssfactor + sserror))
-    # # Extract p-value
-    # pval = table.loc[x, 'PR(>F)']
-    # pval *= 0.5 if tail == 'one-sided' else 1
-
     # Using PINGOUIN
-    from pingouin import ancova
-    aov, bw = ancova(dv=y, covar=x, between=subject, data=data,
-                     return_bw=True)
+    aov = ancova(dv=y, covar=x, between=subject, data=data)
+    bw = aov.bw_  # Beta within parameter
     sign = np.sign(bw)
     dof = int(aov.loc[2, 'DF'])
+    n = dof + 2
     ssfactor = aov.loc[1, 'SS']
     sserror = aov.loc[2, 'SS']
     rm = sign * np.sqrt(ssfactor / (ssfactor + sserror))
     pval = aov.loc[1, 'p-unc']
-    pval *= 0.5 if tail == 'one-sided' else 1
-
-    return np.round(rm, 3), pval, dof
-
-
-def intraclass_corr(data=None, groups=None, raters=None, scores=None, ci=.95):
-    """Intra-class correlation coefficient.
-
-    Parameters
-    ----------
-    data : pd.DataFrame
-        Dataframe containing the variables
-    groups : string
-        Name of column in data containing the groups.
-    raters : string
-        Name of column in data containing the raters (scorers).
-    scores : string
-        Name of column in data containing the scores (ratings).
-    ci : float
-        Confidence interval
-
-    Returns
-    -------
-    icc : float
-        Intraclass correlation coefficient
-    ci : list
-        Lower and upper confidence intervals
-
-    Notes
-    -----
-    The intraclass correlation (ICC) assesses the reliability of ratings by
-    comparing the variability of different ratings of the same subject to the
-    total variation across all ratings and all subjects. The ratings are
-    quantitative (e.g. Likert scale).
-
-    Inspired from:
-    http://www.real-statistics.com/reliability/intraclass-correlation/
-
-    Examples
-    --------
-    1. ICC of wine quality assessed by 4 judges.
-
-    >>> from pingouin import intraclass_corr, read_dataset
-    >>> data = read_dataset('icc')
-    >>> intraclass_corr(data, 'Wine', 'Judge', 'Scores')
-    (0.727525596259691, array([0.434, 0.927]))
-    """
-    from pingouin import anova
-    from scipy.stats import f
-
-    # Check dataframe
-    if any(v is None for v in [data, groups, raters, scores]):
-        raise ValueError('Data, groups, raters and scores must be specified')
-    if not isinstance(data, pd.DataFrame):
-        raise ValueError('Data must be a pandas dataframe.')
-    # Check that scores is a numeric variable
-    if data[scores].dtype.kind not in 'fi':
-        raise ValueError('Scores must be numeric.')
-    # Check that data are fully balanced
-    if data.groupby(raters)[scores].count().nunique() > 1:
-        raise ValueError('Data must be balanced.')
-
-    # Extract sizes
-    k = data[raters].nunique()
-    # n = data[groups].nunique()
-
-    # ANOVA and ICC
-    aov = anova(dv=scores, data=data, between=groups, detailed=True)
-    icc = (aov.loc[0, 'MS'] - aov.loc[1, 'MS']) / \
-          (aov.loc[0, 'MS'] + (k - 1) * aov.loc[1, 'MS'])
-
-    # Confidence interval
-    alpha = 1 - ci
-    df_num, df_den = aov.loc[0, 'DF'], aov.loc[1, 'DF']
-    f_lower = aov.loc[0, 'F'] / f.isf(alpha / 2, df_num, df_den)
-    f_upper = aov.loc[0, 'F'] * f.isf(alpha / 2, df_den, df_num)
-    lower = (f_lower - 1) / (f_lower + k - 1)
-    upper = (f_upper - 1) / (f_upper + k - 1)
-
-    return icc, np.round([lower, upper], 3)
+    pval = pval * 0.5 if tail == 'one-sided' else pval
+    ci = compute_esci(stat=rm, nx=n, eftype='pearson').tolist()
+    pwr = power_corr(r=rm, n=n, tail=tail)
+    # Convert to Dataframe
+    stats = pd.DataFrame({"r": round(rm, 3), "dof": int(dof),
+                          "pval": pval, "CI95%": str(ci),
+                          "power": round(pwr, 3)}, index=["rm_corr"])
+    return stats
 
 
 def _dcorr(y, n2, A, dcov2_xx):
@@ -793,7 +774,7 @@ def _dcorr(y, n2, A, dcov2_xx):
     return np.sqrt(dcov2_xy) / np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
 
 
-def distance_corr(x, y, tail='upper', n_boot=1000, seed=None):
+def distance_corr(x, y, tail='greater', n_boot=1000, seed=None):
     """Distance correlation between two arrays.
 
     Statistical significance (p-value) is evaluated with a permutation test.
@@ -802,15 +783,13 @@ def distance_corr(x, y, tail='upper', n_boot=1000, seed=None):
     ----------
     x, y : np.ndarray
         1D or 2D input arrays, shape (n_samples, n_features).
-        x and y must have the same number of samples and must not
+        ``x`` and ``y`` must have the same number of samples and must not
         contain missing values.
     tail : str
-        Tail for p-value ::
-
-        'upper' : one-sided (upper tail)
-        'lower' : one-sided (lower tail)
-        'two-sided' : two-sided
-
+        Tail for p-value. Can be either `'two-sided'` (default), or `'greater'`
+        or `'less'` for directional tests. To be consistent
+        with the original R implementation, the default is to calculate the
+        one-sided `'greater'` p-value.
     n_boot : int or None
         Number of bootstrap to perform.
         If None, no bootstrapping is performed and the function
@@ -854,9 +833,7 @@ def distance_corr(x, y, tail='upper', n_boot=1000, seed=None):
     Note that by contrast to Pearson's correlation, the distance correlation
     cannot be negative, i.e :math:`0 \\leq \\text{dCor} \\leq 1`.
 
-    Results have been tested against the 'energy' R package. To be consistent
-    with this latter, only the one-sided p-value is computed, i.e. the upper
-    tail of the T-statistic.
+    Results have been tested against the 'energy' R package.
 
     References
     ----------
@@ -892,7 +869,7 @@ def distance_corr(x, y, tail='upper', n_boot=1000, seed=None):
     >>> distance_corr(a, b, n_boot=None)
     0.8799633012275321
     """
-    assert tail in ['upper', 'lower', 'two-sided'], 'Wrong tail argument.'
+    assert tail in ['greater', 'less', 'two-sided'], 'Wrong tail argument.'
     x = np.asarray(x)
     y = np.asarray(y)
     # Check for NaN values

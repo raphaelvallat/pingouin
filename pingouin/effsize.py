@@ -2,7 +2,7 @@
 # Date: April 2018
 import warnings
 import numpy as np
-from pingouin.utils import _check_eftype, _remove_na
+from pingouin.utils import _check_eftype, remove_na
 # from pingouin.distribution import homoscedasticity
 
 
@@ -10,8 +10,8 @@ __all__ = ["compute_esci", "compute_bootci", "convert_effsize",
            "compute_effsize", "compute_effsize_from_t"]
 
 
-def compute_esci(stat=None, nx=None, ny=None, eftype='cohen', confidence=.95,
-                 decimals=2):
+def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
+                 confidence=.95, decimals=2):
     """Parametric confidence intervals around a Cohen d or a
     correlation coefficient.
 
@@ -22,6 +22,9 @@ def compute_esci(stat=None, nx=None, ny=None, eftype='cohen', confidence=.95,
         Cohen-type effect size (Cohen d or Hedges g).
     nx, ny : int
         Length of vector x and y.
+    paired : bool
+        Indicates if the effect size was estimated from a paired sample.
+        This is only relevant for cohen or hedges effect size.
     eftype : string
         Effect size type. Must be 'r' (correlation) or 'cohen'
         (Cohen d or Hedges g).
@@ -77,6 +80,12 @@ def compute_esci(stat=None, nx=None, ny=None, eftype='cohen', confidence=.95,
 
     where :math:`n_x` and :math:`n_y` are the sample sizes of the two groups.
 
+    In one-sample test or paired test, this becomes:
+
+    .. math::
+
+        se = \\sqrt{\\frac{1}{n_x} + \\frac{d^2}{2 \\cdot n_x}}
+
     The lower and upper confidence intervals are then given by:
 
     .. math:: ci_d = d \\pm crit \\cdot se
@@ -118,17 +127,17 @@ def compute_esci(stat=None, nx=None, ny=None, eftype='cohen', confidence=.95,
     >>> print(stat, ci)
     0.1537753990658328 [-0.68  0.99]
     """
+    from scipy.stats import norm
     # Safety check
     assert eftype.lower() in['r', 'pearson', 'spearman', 'cohen',
                              'd', 'g', 'hedges']
-    assert stat is not None and nx is not None and ny is not None
+    assert stat is not None and nx is not None
     assert isinstance(confidence, float)
     assert 0 < confidence < 1
 
     # Note that we are using a normal dist and not a T dist:
     # from scipy.stats import t
     # crit = np.abs(t.ppf((1 - confidence) / 2), dof)
-    from scipy.stats import norm
     crit = np.abs(norm.ppf((1 - confidence) / 2))
 
     if eftype.lower() in ['r', 'pearson', 'spearman']:
@@ -139,7 +148,12 @@ def compute_esci(stat=None, nx=None, ny=None, eftype='cohen', confidence=.95,
         # Transform back to r
         ci = np.tanh(ci_z)
     else:
-        se = np.sqrt(((nx + ny) / (nx * ny)) + (stat**2) / (2 * (nx + ny)))
+        if ny == 1 or paired:
+            # One sample or paired
+            se = np.sqrt(1 / nx + stat**2 / (2 * nx))
+        else:
+            # Two-sample test
+            se = np.sqrt(((nx + ny) / (nx * ny)) + (stat**2) / (2 * (nx + ny)))
         ci = np.array([stat - crit * se, stat + crit * se])
     return np.round(ci, decimals)
 
@@ -233,7 +247,13 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
     >>> print(stat, ci)
     1.6787441193290351 [1.21 2.16]
 
-    4. Bootstrapped confidence interval using a custom function
+    4. Bootstrapped confidence interval using a custom univariate function
+
+    >>> from scipy.stats import skew
+    >>> skew(x), pg.compute_bootci(x, func=skew, n_boot=10000, seed=123)
+    (-0.08244607271328411, array([-1.03,  0.77]))
+
+    5. Bootstrapped confidence interval using a custom bivariate function
 
     >>> stat = np.sum(np.exp(x) / np.exp(y))
     >>> ci = pg.compute_bootci(x, y, func=lambda x, y: np.sum(np.exp(x)
@@ -241,7 +261,8 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
     >>> print(stat, ci)
     26.80405184881793 [12.76 45.15]
 
-    5. Get the bootstrapped distribution around a Pearson correlation
+
+    6. Get the bootstrapped distribution around a Pearson correlation
 
     >>> ci, bstat = pg.compute_bootci(x, y, return_dist=True)
     >>> print(bstat.size)
@@ -377,13 +398,14 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
         Desired effect size type.
         Available methods are ::
 
-        'none' : no effect size
         'cohen' : Unbiased Cohen d
         'hedges' : Hedges g
         'glass': Glass delta
         'eta-square' : Eta-square
         'odds-ratio' : Odds ratio
         'AUC' : Area Under the Curve
+        'none' : pass-through (return ``ef``)
+
     nx, ny : int, optional
         Length of vector x and y.
         nx and ny are required to convert to Hedges g
@@ -484,10 +506,12 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     if it not in ['r', 'cohen']:
         raise ValueError("Input type must be 'r' or 'cohen'")
 
-    if it == ot:
+    # Pass-through option
+    if it == ot or ot == 'none':
         return ef
 
-    d = (2 * ef) / np.sqrt(1 - ef**2) if it == 'r' else ef  # Rosenthal 1994
+    # Convert r to Cohen d (Rosenthal 1994)
+    d = (2 * ef) / np.sqrt(1 - ef**2) if it == 'r' else ef
 
     # Then convert to the desired output type
     if ot == 'cohen':
@@ -521,8 +545,6 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
         # Ruscio 2008
         from scipy.stats import norm
         return norm.cdf(d / np.sqrt(2))
-    else:
-        return None
 
 
 def compute_effsize(x, y, paired=False, eftype='cohen'):
@@ -566,7 +588,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
     Missing values are automatically removed from the data. If ``x`` and ``y``
     are paired, the entire row is removed.
 
-    If ``x`` and ``y`` are independent, the Cohen's is:
+    If ``x`` and ``y`` are independent, the Cohen's d is:
 
     .. math::
 
@@ -574,7 +596,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         {\\sqrt{\\frac{(n_{1} - 1)\\sigma_{1}^{2} + (n_{2} - 1)
         \\sigma_{2}^{2}}{n1 + n2 - 2}}}
 
-    If ``x`` and ``y`` are paired, the Cohen d-avg is computed:
+    If ``x`` and ``y`` are paired, the Cohen :math:`d_{avg}` is computed:
 
     .. math::
 
@@ -651,16 +673,14 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
                       "paired == False.")
         paired = False
 
-    # Remove NA
-    x, y = _remove_na(x, y, paired=paired)
-    nx = x.size
-    ny = y.size
+    # Remove rows with missing values
+    x, y = remove_na(x, y, paired=paired)
+    nx, ny = x.size, y.size
 
     if ny == 1:
         # Case 1: One-sample Test
         d = (x.mean() - y) / x.std(ddof=1)
         return d
-
     if eftype.lower() == 'glass':
         # Find group with lowest variance
         sd_control = np.min([x.std(ddof=1), y.std(ddof=1)])

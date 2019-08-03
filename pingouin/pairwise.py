@@ -6,7 +6,7 @@ from itertools import combinations, product
 from pingouin.parametric import anova
 from pingouin.multicomp import multicomp
 from pingouin.effsize import compute_effsize, convert_effsize
-from pingouin.utils import _remove_rm_na, _export_table, _check_dataframe
+from pingouin.utils import remove_rm_na, _export_table, _check_dataframe
 
 __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
            "pairwise_corr"]
@@ -15,7 +15,7 @@ __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
 def _append_stats_dataframe(stats, x, y, xlabel, ylabel, alpha, paired, tail,
                             df_ttest, ef, eftype, time=np.nan):
     # Create empty columns
-    for f in ['CLES', 'T', 'BF10', 'U-val', 'W-val']:
+    for f in ['CLES', 'T', 'BF10', 'U-val', 'W-val', 'dof']:
         if f not in df_ttest.keys():
             df_ttest[f] = np.nan
     stats = stats.append({
@@ -32,6 +32,7 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, alpha, paired, tail,
         'T': df_ttest['T'].iloc[0],
         'U': df_ttest['U-val'].iloc[0],
         'W': df_ttest['W-val'].iloc[0],
+        'dof': df_ttest['dof'].iloc[0],
         'p-unc': df_ttest['p-val'].iloc[0],
         'BF10': df_ttest['BF10'].iloc[0],
         'efsize': ef,
@@ -59,7 +60,8 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         Name of column containing the subject identifier. Compulsory for
         contrast including a within-subject factor.
     data : pandas DataFrame
-        DataFrame
+        DataFrame. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
     parametric : boolean
         If True (default), use the parametric :py:func:`ttest` function.
         If False, use :py:func:`pingouin.wilcoxon` or :py:func:`pingouin.mwu`
@@ -67,7 +69,12 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     alpha : float
         Significance level
     tail : string
-        Indicates whether to return the 'two-sided' or 'one-sided' p-values
+        Specify whether the alternative hypothesis is `'two-sided'` or
+        `'one-sided'`. Can also be `'greater'` or `'less'` to specify the
+        direction of the test. `'greater'` tests the alternative that ``x``
+        has a larger mean than ``y``. If tail is `'one-sided'`, Pingouin will
+        automatically infer the one-sided alternative hypothesis of the test
+        based on the test statistic.
     padjust : string
         Method used for testing and adjustment of pvalues.
         Available methods are ::
@@ -108,6 +115,7 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         'T' : T-values (only if parametric=True)
         'U' : Mann-Whitney U value (only if parametric=False and unpaired data)
         'W' : Wilcoxon W value (only if parametric=False and paired data)
+        'dof' : degrees of freedom (only if parametric=True)
         'p-unc' : Uncorrected p-values
         'p-corr' : Corrected p-values
         'p-adjust' : p-values correction method
@@ -115,8 +123,16 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         'hedges' : Hedges effect size
         'CLES' : Common language effect size
 
+    See also
+    --------
+    ttest, mwu, wilcoxon, compute_effsize, multicomp
+
     Notes
     -----
+    Data are expected to be in long-format. If your data is in wide-format,
+    you can use the :py:func:`pandas.melt` function to convert from wide to
+    long format.
+
     If ``between`` or ``within`` is a list (e.g. ['col1', 'col2']),
     the function returns 1) the pairwise T-tests between each values of the
     first column, 2) the pairwise T-tests between each values of the second
@@ -133,11 +149,13 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     If both ``between`` and ``within`` are specified, the function return
     within + between + within * between.
 
-    See Also
-    --------
-    ttest : T-test.
-    wilcoxon : Non-parametric test for paired samples.
-    mwu : Non-parametric test for independent samples.
+    Missing values in repeated measurements are automatically removed using the
+    :py:func:`pingouin.remove_rm_na` function. However, you should be very
+    careful since it can result in undesired values removal (especially for the
+    interaction effect). We strongly recommend that you preprocess your data
+    and remove the missing values before using this function.
+
+    This function has been tested against the `pairwise.t.test` R function.
 
     Examples
     --------
@@ -151,30 +169,32 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
 
     >>> post_hocs = pairwise_ttests(dv='Scores', within='Time',
     ...                             subject='Subject', data=df)
-    >>> print(post_hocs)
+    >>> print(post_hocs)  # doctest: +SKIP
 
     3. Non-parametric pairwise paired test (wilcoxon)
 
     >>> pairwise_ttests(dv='Scores', within='Time', subject='Subject',
-    ...                 data=df, parametric=False)
+    ...                 data=df, parametric=False)  # doctest: +SKIP
 
     4. Within + Between + Within * Between with corrected p-values
 
-    >>> pairwise_ttests(dv='Scores', within='Time', subject='Subject',
-    ...                 between='Group', padjust='bonf', data=df)
+    >>> posthocs = pairwise_ttests(dv='Scores', within='Time',
+    ...                            subject='Subject', between='Group',
+    ...                            padjust='bonf', data=df)
 
     5. Between1 + Between2 + Between1 * Between2
 
-    >>> pairwise_ttests(dv='Scores', between=['Group', 'Time'], data=df)
+    >>> posthocs = pairwise_ttests(dv='Scores', between=['Group', 'Time'],
+    ...                            data=df)
     '''
-    from pingouin.parametric import ttest
-    from pingouin.nonparametric import wilcoxon, mwu
+    from .parametric import ttest
+    from .nonparametric import wilcoxon, mwu
 
     # Safety checks
     _check_dataframe(dv=dv, between=between, within=within, subject=subject,
                      effects='all', data=data)
 
-    if tail not in ['one-sided', 'two-sided']:
+    if tail not in ['one-sided', 'two-sided', 'greater', 'less']:
         raise ValueError('Tail not recognized')
 
     if not isinstance(alpha, float):
@@ -226,8 +246,8 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         col = within if contrast == 'simple_within' else between
         # Remove NAN in repeated measurements
         if contrast == 'simple_within' and data[dv].isnull().values.any():
-            data = _remove_rm_na(dv=dv, within=within, subject=subject,
-                                 data=data)
+            data = remove_rm_na(dv=dv, within=within, subject=subject,
+                                data=data)
         # Extract effects
         labels = data[col].unique().tolist()
         for l in labels:
@@ -362,10 +382,13 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     stats['Paired'] = stats['Paired'].astype(bool)
     stats['Parametric'] = parametric
 
+    # Round effect size and CLES
+    stats[['efsize', 'CLES']] = stats[['efsize', 'CLES']].round(3)
+
     # Reorganize column order
     col_order = ['Contrast', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
-                 'std(B)', 'Paired', 'Parametric', 'T', 'U', 'W', 'tail',
-                 'p-unc', 'p-corr', 'p-adjust', 'BF10', 'CLES',
+                 'std(B)', 'Paired', 'Parametric', 'T', 'U', 'W', 'dof',
+                 'tail', 'p-unc', 'p-corr', 'p-adjust', 'BF10', 'CLES',
                  'efsize']
 
     if return_desc is False:
@@ -489,7 +512,7 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
 
     >>> from pingouin import pairwise_tukey, read_dataset
     >>> df = read_dataset('anova')
-    >>> pairwise_tukey(dv='Pain threshold', between='Hair color', data=df)
+    >>> pt = pairwise_tukey(dv='Pain threshold', between='Hair color', data=df)
     '''
     from pingouin.external.qsturng import psturng
 
@@ -512,7 +535,7 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
     # from pingouin.external.qsturng import qsturng
     # crit = qsturng(1 - alpha, ng, df) / np.sqrt(2)
     pval = psturng(np.sqrt(2) * np.abs(tval), ng, df)
-    pval *= 0.5 if tail == 'one-sided' else 1
+    pval = pval * 0.5 if tail == 'one-sided' else pval
 
     # Uncorrected p-values
     # from scipy.stats import t
@@ -643,7 +666,7 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
     >>> from pingouin import pairwise_gameshowell, read_dataset
     >>> df = read_dataset('anova')
     >>> pairwise_gameshowell(dv='Pain threshold', between='Hair color',
-    ...                      data=df)
+    ...                      data=df)  # doctest: +SKIP
     '''
     from pingouin.external.qsturng import psturng
 
@@ -671,7 +694,7 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
 
     # Compute corrected p-values
     pval = psturng(np.sqrt(2) * np.abs(tval), ng, df)
-    pval *= 0.5 if tail == 'one-sided' else 1
+    pval = pval * 0.5 if tail == 'one-sided' else pval
 
     # Uncorrected p-values
     # from scipy.stats import t
@@ -704,12 +727,13 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
 
 def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
                   method='pearson', padjust='none', export_filename=None):
-    '''Pairwise (partial) correlations between columns of a pandas dataframe.
+    """Pairwise (partial) correlations between columns of a pandas dataframe.
 
     Parameters
     ----------
     data : pandas DataFrame
-        DataFrame
+        DataFrame. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
     columns : list or str
         Column names in data ::
 
@@ -787,44 +811,70 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     Factor is only computed when the sample size is less than 1000
     (and method='pearson').
 
-    This functio also works with two-dimensional multi-index columns. In this
+    A faster alternative to get the r-values and p-values in a matrix format is
+    to use the :py:func:`pingouin.rcorr` function, which works directly as a
+    :py:class:`pandas.DataFrame` method (see example below).
+
+    This function also works with two-dimensional multi-index columns. In this
     case, columns must be list(s) of tuple(s). See the Jupyter notebook
     for more details:
     https://github.com/raphaelvallat/pingouin/blob/master/notebooks/04_Correlations.ipynb
 
+    If ``covar`` is specified, this function will compute the pairwise partial
+    correlation between the variables. If you are only interested in computing
+    the partial correlation matrix (i.e. the raw pairwise partial correlation
+    coefficient matrix, without the p-values, sample sizes, etc), a better
+    alternative is to use the :py:func:`pingouin.pcorr` function (see
+    example 7).
 
     Examples
     --------
-    1. One-tailed spearman correlation corrected for multiple comparisons
+    1. One-sided spearman correlation corrected for multiple comparisons
 
     >>> from pingouin import pairwise_corr, read_dataset
     >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
-    >>> pairwise_corr(data, method='spearman', tail='two-sided',
-    ...               padjust='bonf')
+    >>> pairwise_corr(data, method='spearman', tail='one-sided',
+    ...               padjust='bonf')  # doctest: +SKIP
 
     2. Robust two-sided correlation with uncorrected p-values
 
-    >>> pairwise_corr(data, columns=['Openness', 'Extraversion',
-    ...                              'Neuroticism'], method='percbend')
+    >>> pcor = pairwise_corr(data, columns=['Openness', 'Extraversion',
+    ...                                     'Neuroticism'], method='percbend')
 
-    3. Export the results to a .csv file
+    3. One-versus-all pairwise correlations
 
-    >>> pairwise_corr(data, export_filename='pairwise_corr.csv')
+    >>> pairwise_corr(data, columns=['Neuroticism'])  # doctest: +SKIP
 
-    4. One-versus-all pairwise correlations
+    4. Pairwise correlations between two lists of columns (cartesian product)
 
-    >>> pairwise_corr(data, columns=['Neuroticism'])
+    >>> columns = [['Neuroticism', 'Extraversion'], ['Openness']]
+    >>> pairwise_corr(data, columns)   # doctest: +SKIP
 
-    5. Pairwise correlations between two lists of columns (cartesian product)
+    5. As a Pandas method
 
-    >>> pairwise_corr(data, columns=[['Neuroticism', 'Extraversion'],
-    ...                              ['Openness', 'Agreeableness'])
+    >>> pcor = data.pairwise_corr(covar='Neuroticism', method='spearman')
 
     6. Pairwise partial correlation
 
-    >>> pairwise_corr(data, covar='Neuroticism')  # With one covariate
-    >>> pairwise_corr(data, covar=['Neuroticism', 'Openness'])  # 2 covariates
-    '''
+    >>> pcor = pairwise_corr(data, covar='Neuroticism')  # One covariate
+    >>> pcor = pairwise_corr(data, covar=['Neuroticism', 'Openness'])  # Two
+
+    7. Pairwise partial correlation matrix using :py:func:`pingouin.pcorr`
+
+    >>> data[['Neuroticism', 'Openness', 'Extraversion']].pcorr()
+                  Neuroticism  Openness  Extraversion
+    Neuroticism      1.000000  0.092097     -0.360421
+    Openness         0.092097  1.000000      0.281312
+    Extraversion    -0.360421  0.281312      1.000000
+
+    8. Correlation matrix with p-values using :py:func:`pingouin.rcorr`
+
+    >>> data[['Neuroticism', 'Openness', 'Extraversion']].rcorr()
+                 Neuroticism Openness Extraversion
+    Neuroticism            -                   ***
+    Openness           -0.01        -          ***
+    Extraversion       -0.35    0.267            -
+    """
     from pingouin.correlation import corr, partial_corr
 
     if tail not in ['one-sided', 'two-sided']:
@@ -962,8 +1012,8 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     # Force conversion to numeric
     stats = stats.astype({'r': float, 'r2': float, 'adj_r2': float,
-                          'n': int, 'p-val': float, 'BF10': float,
-                          'outliers': float, 'power': float})
+                          'n': int, 'p-val': float, 'outliers': float,
+                          'power': float})
 
     # Multiple comparisons
     stats = stats.rename(columns={'p-val': 'p-unc'})

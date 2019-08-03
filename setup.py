@@ -15,15 +15,16 @@ MAINTAINER = 'Raphael Vallat'
 MAINTAINER_EMAIL = 'raphaelvallat9@gmail.com'
 URL = 'https://pingouin-stats.org/index.html'
 DOWNLOAD_URL = 'https://github.com/raphaelvallat/pingouin/'
-VERSION = '0.2.4'
+VERSION = '0.2.8'
 PACKAGE_DATA = {'pingouin.data.icons': ['*.svg']}
 
 INSTALL_REQUIRES = [
     'numpy>=1.15',
-    'scipy>=1.1',
-    'pandas>=0.23',
+    'scipy>=1.3',
+    'pandas>=0.24',
     'matplotlib>=3.0.2',
     'seaborn>=0.9.0',
+    'statsmodels>=0.10.0'
 ]
 
 PACKAGES = [

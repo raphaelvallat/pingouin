@@ -7,7 +7,7 @@
 # Journal of Statistical Software, Articles 31 (10): 1–21.
 import numpy as np
 from scipy.stats import circmean
-from pingouin import _remove_na
+from pingouin import remove_na
 
 __all__ = ["circ_axial", "circ_corrcc", "circ_corrcl", "circ_mean", "circ_r",
            "circ_rayleigh", "circ_vtest"]
@@ -96,17 +96,19 @@ def circ_corrcc(x, y, tail='two-sided'):
         raise ValueError('x and y must have the same length.')
 
     # Remove NA
-    x, y = _remove_na(x, y, paired=True)
+    x, y = remove_na(x, y, paired=True)
     n = x.size
 
     # Compute correlation coefficient
     x_sin = np.sin(x - circmean(x))
     y_sin = np.sin(y - circmean(y))
+    # Similar to np.corrcoef(x_sin, y_sin)[0][1]
     r = np.sum(x_sin * y_sin) / np.sqrt(np.sum(x_sin**2) * np.sum(y_sin**2))
 
     # Compute T- and p-values
     tval = np.sqrt((n * (x_sin**2).mean() * (y_sin**2).mean())
                    / np.mean(x_sin**2 * y_sin**2)) * r
+
     # Approximately distributed as a standard normal
     pval = 2 * norm.sf(abs(tval))
     pval = pval / 2 if tail == 'one-sided' else pval
@@ -148,7 +150,7 @@ def circ_corrcl(x, y, tail='two-sided'):
     >>> y = [1.593, 1.291, -0.248, -2.892, 0.102]
     >>> r, pval = circ_corrcl(x, y)
     >>> print(r, pval)
-    0.109 0.9708899750629236
+    0.109 0.9708899750629237
     """
     from scipy.stats import pearsonr, chi2
     x = np.asarray(x)
@@ -159,7 +161,7 @@ def circ_corrcl(x, y, tail='two-sided'):
         raise ValueError('x and y must have the same length.')
 
     # Remove NA
-    x, y = _remove_na(x, y, paired=True)
+    x, y = remove_na(x, y, paired=True)
     n = x.size
 
     # Compute correlation coefficent for sin and cos independently
@@ -203,9 +205,12 @@ def circ_mean(alpha, w=None, axis=0):
     1.012962445838065
     """
     alpha = np.array(alpha)
-    w = np.array(w) if w is not None else np.ones(alpha.shape)
-    if alpha.size is not w.size:
-        raise ValueError("Input dimensions do not match")
+    if isinstance(w, (list, np.ndarray)):
+        w = np.array(w)
+        if alpha.shape != w.shape:
+            raise ValueError("w must have the same shape as alpha.")
+    else:
+        w = np.ones_like(alpha)
     return np.angle(np.multiply(w, np.exp(1j * alpha)).sum(axis=axis))
 
 

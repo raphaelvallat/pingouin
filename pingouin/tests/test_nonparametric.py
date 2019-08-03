@@ -1,3 +1,4 @@
+import scipy
 import numpy as np
 import pandas as pd
 from unittest import TestCase
@@ -8,6 +9,7 @@ np.random.seed(1234)
 x = np.random.normal(size=100)
 y = np.random.normal(size=100)
 z = np.random.normal(size=100)
+w = np.random.normal(size=(5, 10))
 
 
 class TestNonParametric(TestCase):
@@ -15,10 +17,29 @@ class TestNonParametric(TestCase):
 
     def test_mad(self):
         """Test function mad."""
+        from scipy.stats import median_absolute_deviation as mad_scp
         a = [1.2, 3, 4.5, 2.4, 5, 6.7, 0.4]
         # Compare to Matlab
         assert mad(a, normalize=False) == 1.8
         assert np.round(mad(a), 3) == np.round(1.8 * 1.4826, 3)
+        # Axes handling -- Compare to SciPy
+        assert np.allclose(mad_scp(w), mad(w))  # Axis = 0
+        assert np.allclose(mad_scp(w, axis=1), mad(w, axis=1))
+        assert np.allclose(mad_scp(w, axis=None), mad(w, axis=None))
+        # Missing values
+        # Note that in Scipy 1.3.0, mad(axis=0/1) does not work properly
+        # if data contains NaN, even when passing (nan_policy='omit')
+        wnan = w.copy()
+        wnan[3, 2] = np.nan
+        assert np.allclose(mad_scp(wnan, axis=None, nan_policy='omit'),
+                           mad(wnan, axis=None))
+        assert mad(wnan, axis=0).size == wnan.shape[1]
+        assert mad(wnan, axis=1).size == wnan.shape[0]
+        # Now we make sure that `w` and `wnan` returns almost the same results,
+        # i.e. except for the row/column with missing values
+        assert np.allclose(mad(w, axis=None), mad(wnan, axis=None), atol=1e-02)
+        assert sum(mad(w, axis=0) == mad(wnan, axis=0)) == 9
+        assert sum(mad(w, axis=1) == mad(wnan, axis=1)) == 4
 
     def test_madmedianrule(self):
         """Test function madmedianrule."""
@@ -28,13 +49,36 @@ class TestNonParametric(TestCase):
 
     def test_mwu(self):
         """Test function mwu"""
-        mwu(x, y, tail='one-sided')
-        mwu(x, y, tail='two-sided')
+        mwu_scp = scipy.stats.mannwhitneyu(x, y, use_continuity=True,
+                                           alternative='two-sided')
+        mwu_pg = mwu(x, y, tail='two-sided')
+        # Similar to R: wilcox.test(df$x, df$y, paired = FALSE, exact = FALSE)
+        # Note that the RBC value are compared to JASP in test_pairwise.py
+        assert mwu_scp[0] == mwu_pg.at['MWU', 'U-val']
+        assert mwu_scp[1] == mwu_pg.at['MWU', 'p-val']
+        # One-sided
+        assert np.median(x) > np.median(y)  # Tail = greater, x > y
+        assert (mwu(x, y, tail='one-sided').at['MWU', 'p-val'] ==
+                mwu(x, y, tail='greater').at['MWU', 'p-val'])
+        assert (mwu(x, y, tail='less').at['MWU', 'p-val'] ==
+                scipy.stats.mannwhitneyu(x, y, use_continuity=True,
+                                         alternative='less')[1])
 
     def test_wilcoxon(self):
         """Test function wilcoxon"""
-        wilcoxon(x, y, tail='one-sided')
-        wilcoxon(x, y, tail='two-sided')
+        # R: wilcox.test(df$x, df$y, paired = TRUE, exact = FALSE)
+        # The V value is slightly different between SciPy and R
+        # The p-value, however, is almost identical
+        wc_scp = scipy.stats.wilcoxon(x, y, correction=True)
+        wc_pg = wilcoxon(x, y, tail='two-sided')
+        wc_pg_1 = wilcoxon(x, y, tail='one-sided')
+        assert wc_scp[0] == wc_pg.at['Wilcoxon', 'W-val']
+        assert wc_scp[1] == wc_pg.at['Wilcoxon', 'p-val']
+        # Compare to R canprot::CLES
+        # Note that the RBC value are compared to JASP in test_pairwise.py
+        assert wc_pg.at['Wilcoxon', 'CLES'] == 0.536
+        assert (wc_pg.at['Wilcoxon', 'p-val'] / 2) == wc_pg_1.at['Wilcoxon',
+                                                                 'p-val']
 
     def test_friedman(self):
         """Test function friedman"""
@@ -55,24 +99,27 @@ class TestNonParametric(TestCase):
 
     def test_kruskal(self):
         """Test function kruskal"""
-        x[10] = np.nan
-        df = pd.DataFrame({'DV': np.r_[x, y, z],
+        x_nan = x.copy()
+        x_nan[10] = np.nan
+        df = pd.DataFrame({'DV': np.r_[x_nan, y, z],
                            'Group': np.repeat(['A', 'B', 'C'], 100)})
         kruskal(data=df, dv='DV', between='Group')
         summary = kruskal(data=df, dv='DV', between='Group',
                           export_filename='test_export.csv')
         # Compare with SciPy built-in function
-        from scipy import stats
-        H, p = stats.kruskal(x, y, z, nan_policy='omit')
+        H, p = scipy.stats.kruskal(x_nan, y, z, nan_policy='omit')
         assert np.allclose(np.round(H, 3), summary['H']['Kruskal'])
         assert np.allclose(p, summary['p-unc']['Kruskal'])
 
     def test_cochran(self):
-        """Test function cochran"""
+        """Test function cochran
+        http://www.real-statistics.com/anova-repeated-measures/cochrans-q-test/
+        """
         from pingouin import read_dataset
         df = read_dataset('cochran')
         st = cochran(dv='Energetic', within='Time', subject='Subject', data=df)
         assert st.loc['cochran', 'Q'] == 6.706
+        assert np.allclose(st.loc['cochran', 'p-unc'], 0.034981)
         cochran(dv='Energetic', within='Time', subject='Subject', data=df,
                 export_filename='test_export.csv')
         # With a NaN value

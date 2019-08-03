@@ -1,32 +1,44 @@
+import itertools
 import numpy as np
 import pandas as pd
 from scipy.stats import t, norm
+from pingouin.utils import remove_na as rm_na
 from pingouin.utils import _flatten_list as _fl
 
 __all__ = ['linear_regression', 'logistic_regression', 'mediation_analysis']
 
 
 def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
-                      as_dataframe=True):
+                      as_dataframe=True, remove_na=False):
     """(Multiple) Linear regression.
 
     Parameters
     ----------
-    X : np.array or list
+    X : pd.DataFrame, np.array or list
         Predictor(s). Shape = (n_samples, n_features) or (n_samples,).
-    y : np.array or list
+    y : pd.Series, np.array or list
         Dependent variable. Shape = (n_samples).
     add_intercept : bool
         If False, assume that the data are already centered. If True, add a
         constant term to the model. In this case, the first value in the
         output dict is the intercept of the model.
+
+        .. note:: It is generally recommanded to include a constant term
+            (intercept) to the model to limit the bias and force the residual
+            mean to equal zero. Note that intercept coefficient and p-values
+            are however rarely meaningful.
     coef_only : bool
         If True, return only the regression coefficients.
     alpha : float
         Alpha value used for the confidence intervals.
-        CI = [alpha / 2 ; 1 - alpha / 2]
+        :math:`\\text{CI} = [\\alpha / 2 ; 1 - \\alpha / 2]`
     as_dataframe : bool
         If True, returns a pandas DataFrame. If False, returns a dictionnary.
+    remove_na : bool
+        If True, apply a listwise deletion of missing values (i.e. the entire
+        row is removed). Default is False, which will raise an error if missing
+        values are present in either the predictor(s) or dependent
+        variable.
 
     Returns
     -------
@@ -42,11 +54,21 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
         'adj_r2' : adjusted R2
         'CI[2.5%]' : lower confidence interval
         'CI[97.5%]' : upper confidence interval
+        'residuals' : residuals (only if as_dataframe is False)
+
+    See also
+    --------
+    logistic_regression, mediation_analysis, corr
 
     Notes
     -----
-    The beta coefficients of the regression are estimated using the
-    :py:func:`numpy.linalg.lstsq` function.
+    The :math:`\\beta` coefficients are estimated using an ordinary least
+    squares (OLS) regression, as implemented in the
+    :py:func:`numpy.linalg.lstsq` function. The OLS method minimizes
+    the sum of squared residuals, and leads to a closed-form expression for
+    the estimated :math:`\\beta`:
+
+    .. math:: \\hat{\\beta} = (X^TX)^{-1} X^Ty
 
     It is generally recommanded to include a constant term (intercept) to the
     model to limit the bias and force the residual mean to equal zero.
@@ -55,35 +77,43 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     The standard error of the estimates is a measure of the accuracy of the
     prediction defined as:
 
-    .. math:: se = \\sqrt{MSE \\cdot (X^TX)^{-1}}
+    .. math:: \\sigma = \\sqrt{\\text{MSE} \\cdot (X^TX)^{-1}}
 
-    where :math:`MSE` is the mean squared error,
+    where :math:`\\text{MSE}` is the mean squared error,
 
-    .. math:: MSE = \\frac{\\sum{(true - pred)^2}}{n - p - 1}
+    .. math::
 
-    :math:`p` is the total number of explanatory variables in the model
+        \\text{MSE} = \\frac{SS_{\\text{resid}}}{n - p - 1}
+         = \\frac{\\sum{(\\text{true} - \\text{pred})^2}}{n - p - 1}
+
+    :math:`p` is the total number of predictor variables in the model
     (excluding the intercept) and :math:`n` is the sample size.
 
-    Using the coefficients and the standard errors, the T-values can be
-    obtained:
+    Using the :math:`\\beta` coefficients and the standard errors,
+    the T-values can be obtained:
 
-    .. math:: T = \\frac{coef}{se}
+    .. math:: T = \\frac{\\beta}{\\sigma}
 
-    and the p-values can then be approximated using a T-distribution
-    with :math:`n - p - 1` degrees of freedom.
+    and the p-values approximated using a T-distribution with
+    :math:`n - p - 1` degrees of freedom.
 
     The coefficient of determination (:math:`R^2`) is defined as:
 
-    .. math:: R^2 = 1 - (\\frac{SS_{resid}}{SS_{total}})
+    .. math:: R^2 = 1 - (\\frac{SS_{\\text{resid}}}{SS_{\\text{total}}})
 
     The adjusted :math:`R^2` is defined as:
 
     .. math:: \\overline{R}^2 = 1 - (1 - R^2) \\frac{n - 1}{n - p - 1}
 
-    Results have been compared against sklearn, statsmodels and JASP.
+    The residuals can be accessed via :code:`stats.residuals_` if ``stats``
+    is a pandas DataFrame or :code:`stats['residuals']` if ``stats`` is a
+    dict.
 
-    This function will not run if NaN values are either present in the target
-    or predictors variables. Please remove them before runing the function.
+    Note that Pingouin will automatically remove any duplicate columns
+    from :math:`X`, as well as any column with only one unique value
+    (constant), excluding the intercept.
+
+    Results have been compared against sklearn, statsmodels and JASP.
 
     Examples
     --------
@@ -109,7 +139,15 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     >>> print(lm['coef'].values)
     [4.54123324 0.36628301 0.17709451]
 
-    3. Using a Pandas DataFrame
+    3. Get the residuals
+
+    >>> np.round(lm.residuals_, 2)
+    array([ 1.18, -1.17,  1.32,  0.76, -1.25,  0.34, -1.54, -0.2 ,  0.36,
+           -0.39,  0.69,  1.39,  0.2 , -1.14, -0.21, -1.68,  0.67, -0.69,
+            0.62,  0.92, -1.  ,  0.64, -0.21, -0.78,  1.08, -0.03, -1.3 ,
+            0.64,  0.81, -0.04])
+
+    4. Using a Pandas DataFrame
 
     >>> import pandas as pd
     >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
@@ -117,14 +155,21 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     >>> print(lm['coef'].values)
     [4.54123324 0.36628301 0.17709451]
 
-    4. No intercept and return coef only
+    5. No intercept and return coef only
 
     >>> linear_regression(X, y, add_intercept=False, coef_only=True)
     array([ 1.40935593, -0.2916508 ])
 
-    5. Return a dictionnary instead of a DataFrame
+    6. Return a dictionnary instead of a DataFrame
 
     >>> lm_dict = linear_regression(X, y, as_dataframe=False)
+
+    7. Remove missing values
+
+    >>> X[4, 1] = np.nan
+    >>> y[7] = np.nan
+    >>> linear_regression(X, y, remove_na=True, coef_only=True)
+    array([4.64069731, 0.35455398, 0.1888135 ])
     """
     # Extract names if X is a Dataframe or Series
     if isinstance(X, pd.DataFrame):
@@ -134,21 +179,26 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     else:
         names = []
 
-    assert 0 < alpha < 1
-
     # Convert input to numpy array
     X = np.asarray(X)
     y = np.asarray(y)
+    assert y.ndim == 1, 'y must be one-dimensional.'
+    assert 0 < alpha < 1
 
     if X.ndim == 1:
         # Convert to (n_samples, n_features) shape
         X = X[..., np.newaxis]
 
     # Check for NaN / Inf
+    if remove_na:
+        X, y = rm_na(X, y[..., np.newaxis], paired=True, axis='rows')
+        y = np.squeeze(y)
     y_gd = np.isfinite(y).all()
     X_gd = np.isfinite(X).all()
-    assert y_gd, 'Target (y) contains NaN or Inf. Please remove them.'
-    assert X_gd, 'Predictors (X) contain NaN or Inf. Please remove them.'
+    assert y_gd, ("Target (y) contains NaN or Inf. Please remove them "
+                  "manually or use remove_na=True.")
+    assert X_gd, ("Predictors (X) contain NaN or Inf. Please remove them "
+                  "manually or use remove_na=True.")
 
     # Check that X and y have same length
     assert y.shape[0] == X.shape[0], 'X and y must have same number of samples'
@@ -161,15 +211,46 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
         X = np.column_stack((np.ones(X.shape[0]), X))
         names.insert(0, "Intercept")
 
+    # FINAL CHECKS BEFORE RUNNING LEAST SQUARES REGRESSION
+    # 1. Let's remove the column with only zero, otherwise the regression fails
+    n_nonzero = np.count_nonzero(X, axis=0)
+    idx_zero = np.flatnonzero(n_nonzero == 0)  # Find columns that are only 0
+    if len(idx_zero):
+        X = np.delete(X, idx_zero, 1)
+        names = np.delete(names, idx_zero)
+
+    # 2. We also want to make sure that there is no more than one column
+    # (= Intercept) with only one unique value, otherwise the regression fails
+    # This is equivalent, but much faster, to pd.DataFrame(X).nunique()
+    nunique = np.apply_along_axis(lambda x: len(np.unique(x)), 0, X)
+    idx_unique = np.flatnonzero(nunique == 1)
+    if len(idx_unique) > 1:
+        # Houston, we have a problem!
+        # We remove all but the first "Intercept" column.
+        X = np.delete(X, idx_unique[1:], 1)
+        names = np.delete(names, idx_unique[1:])
+
+    # 3. Finally, we want to remove duplicate columns
+    if X.shape[1] > 1:
+        idx_duplicate = []
+        for pair in itertools.combinations(range(X.shape[1]), 2):
+            if np.array_equal(X[:, pair[0]], X[:, pair[1]]):
+                idx_duplicate.append(pair[1])
+        if len(idx_duplicate):
+            X = np.delete(X, idx_duplicate, 1)
+            names = np.delete(names, idx_duplicate)
+
+    # LEAST-SQUARE REGRESSION + STATISTICS
     # Compute beta coefficient and predictions
-    coef = np.linalg.lstsq(X, y, rcond=None)[0]
+    n, p = X.shape[0], X.shape[1]
+    assert n >= 3, 'At least three valid samples are required in X.'
+    assert p >= 1, 'X must have at least one valid column.'
+    coef, ss_res, _, _ = np.linalg.lstsq(X, y, rcond=None)
     if coef_only:
         return coef
+    ss_res = np.squeeze(ss_res)
     pred = np.dot(X, coef)
-    resid = np.square(y - pred)
-    ss_res = resid.sum()
-
-    n, p = X.shape[0], X.shape[1]
+    resid = y - pred
     # Degrees of freedom should not include the intercept
     dof = n - p if add_intercept else n - p - 1
     # Compute mean squared error, variance and SE
@@ -203,13 +284,16 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
              ul_name: ul}
 
     if as_dataframe:
-        return pd.DataFrame.from_dict(stats)
+        stats = pd.DataFrame.from_dict(stats)
+        stats.residuals_ = 0  # Trick to avoid Pandas warning
+        stats.residuals_ = resid  # Residuals is a hidden attribute
     else:
-        return stats
+        stats['residuals'] = resid
+    return stats
 
 
 def logistic_regression(X, y, coef_only=False, alpha=0.05,
-                        as_dataframe=True, **kwargs):
+                        as_dataframe=True, remove_na=False, **kwargs):
     """(Multiple) Binary logistic regression.
 
     Parameters
@@ -223,11 +307,17 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         If True, return only the regression coefficients.
     alpha : float
         Alpha value used for the confidence intervals.
-        CI = [alpha / 2 ; 1 - alpha / 2]
+        math:`\\text{CI} = [\\alpha / 2 ; 1 - \\alpha / 2]`
     as_dataframe : bool
         If True, returns a pandas DataFrame. If False, returns a dictionnary.
+    remove_na : bool
+        If True, apply a listwise deletion of missing values (i.e. the entire
+        row is removed). Default is False, which will raise an error if missing
+        values are present in either the predictor(s) or dependent
+        variable.
     **kwargs : optional
-        Optional arguments passed to sklearn.linear_model.LogisticRegression
+        Optional arguments passed to
+        :py:class:`sklearn.linear_model.LogisticRegression`.
 
     Returns
     -------
@@ -242,20 +332,26 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         'CI[2.5%]' : lower confidence interval
         'CI[97.5%]' : upper confidence interval
 
+    See also
+    --------
+    linear_regression
+
     Notes
     -----
-    This is a wrapper around the sklearn.linear_model.LogisticRegression class.
+    This is a wrapper around the
+    :py:class:`sklearn.linear_model.LogisticRegression` class. However, Pingouin disables regularization by default. This can be modified by changing the `penalty` argument. 
 
-    Results have been compared against statsmodels and JASP.
+    The calculation of the p-values and confidence interval is adapted from a
+    code found at
+    https://gist.github.com/rspeare/77061e6e317896be29c6de9a85db301d
 
     Note that the first coefficient is always the constant term (intercept) of
-    the model.
+    the model. Scikit-learn will automatically add the intercept
+    to your predictor(s) matrix, therefore, :math:`X` should not include a
+    constant term. Pingouin will remove any constant term (e.g column with only
+    one unique value), or duplicate columns from :math:`X`. 
 
-    This function will not run if NaN values are either present in the target
-    or predictors variables. Please remove them before runing the function.
-
-    Adapted from a code found at
-    https://gist.github.com/rspeare/77061e6e317896be29c6de9a85db301d
+    Results have been compared against statsmodels and JASP.
 
     Examples
     --------
@@ -294,11 +390,12 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     >>> logistic_regression(X, y, coef_only=True)
     array([-0.34933805, -0.0226106 , -0.39453532])
 
-    4. Passing custom parameters to sklearn
+    5. Passing custom parameters to sklearn
 
-    >>> lom = logistic_regression(X, y, solver='sag', max_iter=10000)
+    >>> lom = logistic_regression(X, y, solver='sag', max_iter=10000,
+    ...                           random_state=42)
     >>> print(lom['coef'].values)
-    [-0.34941889 -0.02261911 -0.39451064]
+    [-0.34942862 -0.02261937 -0.39449608]
     """
     # Check that sklearn is installed
     from pingouin.utils import _is_sklearn_installed
@@ -313,39 +410,63 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     else:
         names = []
 
-    assert 0 < alpha < 1
-
     # Convert to numpy array
     X = np.asarray(X)
     y = np.asarray(y)
-
-    if np.unique(y).size != 2:
-        raise ValueError('Dependent variable must be binary.')
+    assert y.ndim == 1, 'y must be one-dimensional.'
+    assert 0 < alpha < 1, 'alpha must be between 0 and 1.'
 
     # Add axis if only one-dimensional array
     if X.ndim == 1:
         X = X[..., np.newaxis]
 
     # Check for NaN /  Inf
+    if remove_na:
+        X, y = rm_na(X, y[..., np.newaxis], paired=True, axis='rows')
+        y = np.squeeze(y)
     y_gd = np.isfinite(y).all()
     X_gd = np.isfinite(X).all()
-    assert y_gd, 'Target variable contains NaN or Inf. Please remove them.'
-    assert X_gd, 'Predictors contains NaN or Inf. Please remove them.'
+    assert y_gd, ("Target (y) contains NaN or Inf. Please remove them "
+                  "manually or use remove_na=True.")
+    assert X_gd, ("Predictors (X) contain NaN or Inf. Please remove them "
+                  "manually or use remove_na=True.")
 
     # Check that X and y have same length
     assert y.shape[0] == X.shape[0], 'X and y must have same number of samples'
 
+    # Check that y is binary
+    if np.unique(y).size != 2:
+        raise ValueError('Dependent variable must be binary.')
+
     if not names:
         names = ['x' + str(i + 1) for i in range(X.shape[1])]
 
-    # Add intercept in names
-    names.insert(0, "Intercept")
+    # We also want to make sure that there is no column
+    # with only one unique value, otherwise the regression fails
+    # This is equivalent, but much faster, to pd.DataFrame(X).nunique()
+    nunique = np.apply_along_axis(lambda x: len(np.unique(x)), 0, X)
+    idx_unique = np.flatnonzero(nunique == 1)
+    if len(idx_unique):
+        X = np.delete(X, idx_unique, 1)
+        names = np.delete(names, idx_unique).tolist()
+
+    # Finally, we want to remove duplicate columns
+    if X.shape[1] > 1:
+        idx_duplicate = []
+        for pair in itertools.combinations(range(X.shape[1]), 2):
+            if np.array_equal(X[:, pair[0]], X[:, pair[1]]):
+                idx_duplicate.append(pair[1])
+        if len(idx_duplicate):
+            X = np.delete(X, idx_duplicate, 1)
+            names = np.delete(names, idx_duplicate).tolist()
 
     # Initialize and fit
     if 'solver' not in kwargs:
         kwargs['solver'] = 'lbfgs'
     if 'multi_class' not in kwargs:
         kwargs['multi_class'] = 'auto'
+    if 'penalty' not in kwargs:
+        kwargs['penalty'] = 'none'
     lom = LogisticRegression(**kwargs)
     lom.fit(X, y)
     coef = np.append(lom.intercept_, lom.coef_)
@@ -353,6 +474,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         return coef
 
     # Design matrix -- add intercept
+    names.insert(0, "Intercept")
     X_design = np.column_stack((np.ones(X.shape[0]), X))
     n, p = X_design.shape
 
@@ -360,7 +482,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     denom = (2 * (1 + np.cosh(lom.decision_function(X))))
     denom = np.tile(denom, (p, 1)).T
     fim = np.dot((X_design / denom).T, X_design)
-    crao = np.linalg.inv(fim)
+    crao = np.linalg.pinv(fim)
 
     # Standard error and Z-scores
     se = np.sqrt(np.diag(crao))
@@ -478,7 +600,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
         in all regressions.
     alpha : float
         Significance threshold. Used to determine the confidence interval,
-        CI = [ alpha / 2 ; 1 -  alpha / 2]
+        :math:`\\text{CI} = [\\alpha / 2 ; 1 - \\alpha / 2]`.
     n_boot : int
         Number of bootstrap iterations for confidence intervals and p-values
         estimation. The greater, the slower.
@@ -502,6 +624,10 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
         'CI[97.5%]' : upper confidence interval
         'pval' : two-sided p-values
         'sig' : statistical significance
+
+    See also
+    --------
+    linear_regression, logistic_regression
 
     Notes
     -----
@@ -527,6 +653,11 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     models, mediators may be and often are correlated, but nothing in the
     model allows one mediator to causally influence another."
     (Hayes and Rockwood 2017)
+
+    This function wll only work well if the outcome variable is continuous.
+    It does not support binary or ordinal outcome variable. For more
+    advanced mediation models, please refer to the `lavaan` or `mediation` R
+    packages, or the PROCESS macro for SPSS.
 
     The two-sided p-value of the indirect effect is computed using the
     bootstrap distribution, as in the mediation R package. However, the p-value
@@ -556,7 +687,9 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
 
     .. [4] https://cran.r-project.org/web/packages/mediation/mediation.pdf
 
-    .. [5] https://github.com/rmill040/pymediation
+    .. [5] http://lavaan.ugent.be/tutorial/mediation.html
+
+    .. [6] https://github.com/rmill040/pymediation
 
     Examples
     --------
@@ -566,8 +699,8 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     >>> df = read_dataset('mediation')
     >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05, seed=42)
            path    coef      se          pval  CI[2.5%]  CI[97.5%]  sig
-    0    X -> M  0.5610  0.0945  4.391362e-08    0.3735     0.7485  Yes
-    1    M -> Y  0.6542  0.0858  1.612674e-11    0.4838     0.8245  Yes
+    0     M ~ X  0.5610  0.0945  4.391362e-08    0.3735     0.7485  Yes
+    1     Y ~ M  0.6542  0.0858  1.612674e-11    0.4838     0.8245  Yes
     2     Total  0.3961  0.1112  5.671128e-04    0.1755     0.6167  Yes
     3    Direct  0.0396  0.1096  7.187429e-01   -0.1780     0.2572   No
     4  Indirect  0.3565  0.0833  0.000000e+00    0.2198     0.5377  Yes
@@ -582,20 +715,20 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     3. Mediation analysis with a binary mediator variable
 
     >>> mediation_analysis(data=df, x='X', m='Mbin', y='Y', seed=42)
-            path    coef      se      pval  CI[2.5%]  CI[97.5%]  sig
-    0  X -> Mbin -0.0205  0.1159  0.859392   -0.2476     0.2066   No
-    1  Mbin -> Y -0.1354  0.4118  0.743076   -0.9525     0.6818   No
-    2      Total  0.3961  0.1112  0.000567    0.1755     0.6167  Yes
-    3     Direct  0.3956  0.1117  0.000614    0.1739     0.6173  Yes
-    4   Indirect  0.0023  0.0495  0.960000   -0.0715     0.1441   No
+           path    coef      se      pval  CI[2.5%]  CI[97.5%]  sig
+    0  Mbin ~ X -0.0205  0.1159  0.859392   -0.2476     0.2066   No
+    1  Y ~ Mbin -0.1354  0.4118  0.743076   -0.9525     0.6818   No
+    2     Total  0.3961  0.1112  0.000567    0.1755     0.6167  Yes
+    3    Direct  0.3956  0.1117  0.000614    0.1739     0.6173  Yes
+    4  Indirect  0.0023  0.0495  0.960000   -0.0715     0.1441   No
 
     4. Mediation analysis with covariates
 
     >>> mediation_analysis(data=df, x='X', m='M', y='Y',
     ...                    covar=['Mbin', 'Ybin'], seed=42)
            path    coef      se          pval  CI[2.5%]  CI[97.5%]  sig
-    0    X -> M  0.5594  0.0968  9.394635e-08    0.3672     0.7516  Yes
-    1    M -> Y  0.6660  0.0861  1.017261e-11    0.4951     0.8368  Yes
+    0     M ~ X  0.5594  0.0968  9.394635e-08    0.3672     0.7516  Yes
+    1     Y ~ M  0.6660  0.0861  1.017261e-11    0.4951     0.8368  Yes
     2     Total  0.4204  0.1129  3.324252e-04    0.1962     0.6446  Yes
     3    Direct  0.0645  0.1104  5.608583e-01   -0.1548     0.2837   No
     4  Indirect  0.3559  0.0865  0.000000e+00    0.2093     0.5530  Yes
@@ -604,10 +737,10 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
 
     >>> mediation_analysis(data=df, x='X', m=['M', 'Mbin'], y='Y', seed=42)
                 path    coef      se          pval  CI[2.5%]  CI[97.5%]  sig
-    0         X -> M  0.5610  0.0945  4.391362e-08    0.3735     0.7485  Yes
-    1      X -> Mbin -0.0051  0.0290  8.592408e-01   -0.0626     0.0523   No
-    2         M -> Y  0.6537  0.0863  2.118163e-11    0.4824     0.8250  Yes
-    3      Mbin -> Y -0.0640  0.3282  8.456998e-01   -0.7154     0.5873   No
+    0          M ~ X  0.5610  0.0945  4.391362e-08    0.3735     0.7485  Yes
+    1       Mbin ~ X -0.0051  0.0290  8.592408e-01   -0.0626     0.0523   No
+    2          Y ~ M  0.6537  0.0863  2.118163e-11    0.4824     0.8250  Yes
+    3       Y ~ Mbin -0.0640  0.3282  8.456998e-01   -0.7154     0.5873   No
     4          Total  0.3961  0.1112  5.671128e-04    0.1755     0.6167  Yes
     5         Direct  0.0395  0.1102  7.206301e-01   -0.1792     0.2583   No
     6     Indirect M  0.3563  0.0845  0.000000e+00    0.2148     0.5385  Yes
@@ -667,7 +800,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
         else:
             sxm[j] = logistic_regression(X_val, M_val[:, idx],
                                          alpha=alpha).loc[[1], cols]
-        sxm[j].loc[1, 'names'] = 'X -> %s' % j
+        sxm[j].loc[1, 'names'] = '%s ~ X' % j
     sxm = pd.concat(sxm, ignore_index=True)
 
     # Y ~ M + covar
@@ -681,7 +814,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     direct = linear_regression(XM_val, y_val, alpha=alpha).loc[[1], cols]
 
     # Rename paths
-    smy['names'] = smy['names'].apply(lambda x: '%s -> Y' % x)
+    smy['names'] = smy['names'].apply(lambda x: 'Y ~ %s' % x)
     direct.loc[1, 'names'] = 'Direct'
     sxy.loc[1, 'names'] = 'Total'
 

@@ -18,6 +18,9 @@
 .. image:: https://codecov.io/gh/raphaelvallat/pingouin/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/raphaelvallat/pingouin
 
+.. image:: https://pepy.tech/badge/pingouin/month
+    :target: https://pepy.tech/badge/pingouin/month
+
 .. image:: http://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244/status.svg
     :target: http://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244
 
@@ -29,44 +32,49 @@
 .. figure::  /pictures/logo_pingouin.png
   :align:   center
 
-**Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy.
+**Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy. Some of its main features are listed below. For a full list of available functions, please refer to the `API documentation <https://pingouin-stats.org/api.html>`_.
 
-1. ANOVAs: one- and two-ways, repeated measures, mixed, ancova
+1. ANOVAs: N-ways, repeated measures, mixed, ancova
 
-2. Pairwise post-hocs tests (parametric and non-parametric)
+2. Pairwise post-hocs tests (parametric and non-parametric) and pairwise correlations
 
-3. Robust correlations, partial correlation, distance correlation, repeated measures correlation and intraclass correlation
+3. Robust, partial, distance and repeated measures correlations
 
 4. Linear/logistic regression and mediation analysis
 
-5. Bayes Factor of T-test and Pearson correlation
+5. Bayes Factors
 
-6. Tests for sphericity, normality and homoscedasticity
+6. Multivariate tests
 
-7. Effect sizes and power analysis
+7. Reliability and consistency
 
-8. Parametric/bootstrapped confidence intervals around an effect size or a correlation coefficient
+8. Effect sizes and power analysis
 
-9. Circular statistics
+9. Parametric/bootstrapped confidence intervals around an effect size or a correlation coefficient
 
-10. Plotting: Bland-Altman plot, Q-Q plot, paired plot, robust correlation...
+10. Circular statistics
 
-Pingouin is designed for users who want **simple yet exhaustive statistical functions**.
+11. Chi-squared tests
 
-For example, the :py:func:`scipy.stats.ttest_ind` function returns only the T-value and the p-value. By contrast,
-the :py:func:`pingouin.ttest` function returns the T-value, p-value, degrees of freedom, effect size (Cohen's d), statistical power and Bayes Factor (BF10) of the test.
+12. Plotting: Bland-Altman plot, Q-Q plot, paired plot, robust correlation...
+
+Pingouin is designed for users who want **simple yet exhaustive stats functions**.
+
+For example, the :code:`ttest_ind` function of SciPy returns only the T-value and the p-value. By contrast,
+the :code:`ttest` function of Pingouin returns the T-value, the p-value, the degrees of freedom, the effect size (Cohen's d), the 95% confidence intervals of the difference in means, the statistical power and the Bayes Factor (BF10) of the test.
+
+***********************
 
 Installation
 ============
 
-Dependencies
-------------
+Pingouin is a Python 3 package and is currently tested for Python 3.5, 3.6 and 3.7. It will **not** work with Python 2.7.
 
 The main dependencies of Pingouin are :
 
 * NumPy (>= 1.15)
-* SciPy (>= 1.1.0)
-* Pandas (>= 0.23)
+* SciPy (>= 1.3.0)
+* Pandas (>= 0.24)
 * Matplotlib (>= 3.0.2)
 * Seaborn (>= 0.9.0)
 
@@ -74,11 +82,7 @@ In addition, some functions require :
 
 * Statsmodels
 * Scikit-learn
-
-Pingouin is a Python 3 package and is currently tested for Python 3.5, 3.6 and 3.7. Note that Pingouin does not work with Python 2.7.
-
-User installation
------------------
+* Mpmath
 
 Pingouin can be easily installed using pip
 
@@ -92,32 +96,32 @@ or conda
 
   conda install -c conda-forge pingouin
 
-New releases are frequent so always make sure that you have the latest version:
+Pingouin is under heavy development and it is likely that bugs/mistakes will be discovered in future releases. Please always make sure that you are using the latest version of Pingouin (new releases are `frequent <https://pingouin-stats.org/changelog.html>`_, i.e. about one per month).
+
+To be notified whenever a new release of Pingouin is available, you can click on "Watch releases" on the `GitHub <https://github.com/raphaelvallat/pingouin>`_ of Pingouin (see below).
+
+.. figure::  /pictures/github_watch_release.png
+  :align:   center
+
+Whenever a new release is out there, you can upgrade your version by typing the following line in a terminal window:
 
 .. code-block:: shell
 
-  pip install --upgrade pingouin
+    pip install --upgrade pingouin
 
-GitHub repository
------------------
-
-* Link to the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
-
-Chat
-====
-
-If you have questions, please ask them in the public `Gitter chat <https://gitter.im/pingouin-stats/Lobby>`_
-
-.. image:: https://badges.gitter.im/owner/repo.png
-    :target: https://gitter.im/pingouin-stats/Lobby
+***********************
 
 Quick start
-============
+===========
 
-Click on the link below and navigate to the notebooks/ folder to run a collection of interactive Jupyter notebooks showing the main functionalities of Pingouin. No need to install Pingouin beforehand, the notebooks run in a Binder environment.
+* If you have *questions*, please ask them in the public `Gitter chat <https://gitter.im/pingouin-stats/Lobby>`_.
 
-.. image:: https://mybinder.org/badge.svg
-    :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
+* If you want to *report a bug*, please open an issue on the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
+
+* If you want to see *Pingouin in action*, please click on the link below and navigate to the *notebooks/* folder to open a collection of interactive Jupyter notebooks.
+
+  .. image:: https://mybinder.org/badge.svg
+      :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
 
 10 minutes to Pingouin
 ----------------------
@@ -140,11 +144,11 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 .. table:: Output
    :widths: auto
 
-   =======  =======  =====  =========  =========  =======  ======
-         T    p-val    dof  tail         cohen-d    power    BF10
-   =======  =======  =====  =========  =========  =======  ======
-    -3.401    0.001     58  two-sided      0.878    0.917  26.155
-   =======  =======  =====  =========  =========  =======  ======
+   ======  =====  =========  =======  =============  =========  ======  =======
+        T    dof  tail         p-val  CI95%            cohen-d    BF10    power
+   ======  =====  =========  =======  =============  =========  ======  =======
+   -3.401     58  two-sided    0.001  [-1.68 -0.43]      0.878  26.155    0.917
+   ======  =====  =========  =======  =============  =========  ======  =======
 
 ------------
 
@@ -161,7 +165,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
    ===  =====  ===========  =====  ========  =======  ======  ======
      n      r  CI95%           r2    adj_r2    p-val    BF10   power
    ===  =====  ===========  =====  ========  =======  ======  ======
-    30  0.595  [0.3  0.79]  0.354     0.306    0.001  54.222    0.95
+    30  0.595  [0.3  0.79]  0.354     0.306    0.001  69.723    0.95
    ===  =====  ===========  =====  ========  =======  ======  ======
 
 ------------
@@ -190,15 +194,24 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 4. Test the normality of the data
 #################################
 
+The :py:func:`pingouin.normality` function works with lists, arrays, or pandas DataFrame in wide or long-format.
+
 .. code-block:: python
 
-   # Return a boolean (true if normal) and the associated p-value
-   print(pg.normality(x, y))                                 # Univariate normality
+   print(pg.normality(x))                                    # Univariate normality
    print(pg.multivariate_normality(np.column_stack((x, y)))) # Multivariate normality
+
+.. table:: Output
+   :widths: auto
+
+   =====  ======  ========
+      W    pval   normal
+   =====  ======  ========
+   0.615   0.000  False
+   =====  ======  ========
 
 .. parsed-literal::
 
-   (array([False,  True]), array([0., 0.552]))
    (False, 0.00018)
 
 ------------
@@ -274,13 +287,13 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 .. table:: Output
   :widths: auto
 
-  ==========  =======  =======  ========  ============  ======  =========  =======  ========  ==========  ======  ======  ========
-  Contrast    A        B        Paired    Parametric         T  tail         p-unc    p-corr  p-adjust      BF10    CLES    hedges
-  ==========  =======  =======  ========  ============  ======  =========  =======  ========  ==========  ======  ======  ========
-  Time        August   January  True      True          -1.740  two-sided    0.087     0.131  fdr_bh       0.582   0.585    -0.328
-  Time        August   June     True      True          -2.743  two-sided    0.008     0.024  fdr_bh       4.232   0.644    -0.485
-  Time        January  June     True      True          -1.024  two-sided    0.310     0.310  fdr_bh       0.232   0.571    -0.170
-  ==========  =======  =======  ========  ============  ======  =========  =======  ========  ==========  ======  ======  ========
+  ==========  =======  =======  ========  ============  ======  ======  =========  =======  ========  ==========  ======  ======  ========
+  Contrast    A        B        Paired    Parametric         T     dof  tail         p-unc    p-corr  p-adjust      BF10    CLES    hedges
+  ==========  =======  =======  ========  ============  ======  ======  =========  =======  ========  ==========  ======  ======  ========
+  Time        August   January  True      True          -1.740  59.000  two-sided    0.087     0.131  fdr_bh       0.582   0.585    -0.328
+  Time        August   June     True      True          -2.743  59.000  two-sided    0.008     0.024  fdr_bh       4.232   0.644    -0.485
+  Time        January  June     True      True          -1.024  59.000  two-sided    0.310     0.310  fdr_bh       0.232   0.571    -0.170
+  ==========  =======  =======  ========  ============  ======  ======  =========  =======  ========  ==========  ======  ======  ========
 
 ------------
 
@@ -325,9 +338,9 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
   ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======  =======
   X    Y    method    tail         n      r  CI95%             r2    adj_r2      z    p-unc    BF10    power
   ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======  =======
-  X    Y    pearson   two-sided   30  0.366  [0.01 0.64]    0.134     0.070  0.384    0.047   1.006    0.525
-  X    Z    pearson   two-sided   30  0.251  [-0.12  0.56]  0.063    -0.006  0.256    0.181   0.344    0.272
-  Y    Z    pearson   two-sided   30  0.020  [-0.34  0.38]  0.000    -0.074  0.020    0.916   0.142    0.051
+  X    Y    pearson   two-sided   30  0.366  [0.01 0.64]    0.134     0.070  0.384    0.047   1.500    0.525
+  X    Z    pearson   two-sided   30  0.251  [-0.12  0.56]  0.063    -0.006  0.256    0.181   0.534    0.272
+  Y    Z    pearson   two-sided   30  0.020  [-0.34  0.38]  0.000    -0.074  0.020    0.916   0.228    0.051
   ===  ===  ========  =========  ===  =====  =============  =====  ========  =====  =======  ======  =======
 
 11. Convert between effect sizes
@@ -370,17 +383,40 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 .. table:: Mediation summary
   :widths: auto
 
-  ========  ======  ==========  ===========  ======  =====
-  path        coef    CI[2.5%]    CI[97.5%]    pval  sig
-  ========  ======  ==========  ===========  ======  =====
-  X -> M     0.103      -0.051        0.256   0.181  No
-  M -> Y     0.018      -0.332        0.369   0.916  No
-  X -> Y     0.136       0.002        0.269   0.047  Yes
-  Direct     0.143       0.003        0.283   0.046  Yes
-  Indirect  -0.007      -0.070        0.029   0.898  No
-  ========  ======  ==========  ===========  ======  =====
+  ========  ======  =====  ======  ==========  ===========  =====
+  path        coef     se    pval    CI[2.5%]    CI[97.5%]  sig
+  ========  ======  =====  ======  ==========  ===========  =====
+  Z ~ X      0.103  0.075   0.181      -0.051        0.256  No
+  Y ~ Z      0.018  0.171   0.916      -0.332        0.369  No
+  Total      0.136  0.065   0.047       0.002        0.269  Yes
+  Direct     0.143  0.068   0.046       0.003        0.283  Yes
+  Indirect  -0.007  0.025   0.898      -0.070        0.029  No
+  ========  ======  =====  ======  ==========  ===========  =====
 
-14. Bland-Altman plot
+14. Contingency analysis
+########################
+
+.. code-block:: python
+
+    data = pg.read_dataset('chi2_independence')
+    expected, observed, stats = pg.chi2_independence(data, x='sex', y='target')
+    stats
+
+.. table:: Chi-squared tests summary
+  :widths: auto
+
+  ==================  ========  ======  =====  =====  ========  =======
+  test                  lambda    chi2    dof      p    cramer    power
+  ==================  ========  ======  =====  =====  ========  =======
+  pearson                1.000  22.717  1.000  0.000     0.274    0.997
+  cressie-read           0.667  22.931  1.000  0.000     0.275    0.998
+  log-likelihood         0.000  23.557  1.000  0.000     0.279    0.998
+  freeman-tukey         -0.500  24.220  1.000  0.000     0.283    0.998
+  mod-log-likelihood    -1.000  25.071  1.000  0.000     0.288    0.999
+  neyman                -2.000  27.458  1.000  0.000     0.301    0.999
+  ==================  ========  ======  =====  =====  ========  =======
+
+15. Bland-Altman plot
 #####################
 
 .. plot::
@@ -392,7 +428,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
     x, y = np.random.multivariate_normal(mean, cov, 30).T
     ax = pg.plot_blandaltman(x, y)
 
-15. Plot achieved power of a paired T-test
+16. Plot achieved power of a paired T-test
 ##########################################
 
 Plot the curve of achieved power given the effect size (Cohen d) and the sample size of a paired T-test.
@@ -416,7 +452,7 @@ Plot the curve of achieved power given the effect size (Cohen d) and the sample 
     plt.title('Achieved power of a paired T-test')
     sns.despine()
 
-16. Paired plot
+17. Paired plot
 ###############
 
 .. plot::
@@ -427,23 +463,46 @@ Plot the curve of achieved power given the effect size (Cohen d) and the sample 
     ax = pg.plot_paired(data=df, dv='Scores', within='Time', subject='Subject', dpi=150)
     ax.set_title("Effect of meditation on school performance")
 
-Contents
-========
+Integration with Pandas
+-----------------------
 
-.. toctree::
-   :maxdepth: 1
+Several functions of Pingouin can be used directly as :py:class:`pandas.DataFrame` methods. Try for yourself with the code below:
 
-   api
-   guidelines
-   faq
-   changelog
-   examples
+.. code-block:: python
 
+  import pingouin as pg
+
+  # Example 1 | ANOVA
+  df = pg.read_dataset('mixed_anova')
+  df.anova(dv='Scores', between='Group', detailed=True)
+
+  # Example 2 | Pairwise correlations
+  data = pg.read_dataset('mediation')
+  data.pairwise_corr(columns=['X', 'M', 'Y'], covar=['Mbin'])
+
+  # Example 3 | Partial correlation matrix
+  data.pcorr()
+
+The functions that are currently supported as pandas method are:
+
+* :py:func:`pingouin.anova`
+* :py:func:`pingouin.rm_anova`
+* :py:func:`pingouin.mixed_anova`
+* :py:func:`pingouin.welch_anova`
+* :py:func:`pingouin.pairwise_ttests`
+* :py:func:`pingouin.pairwise_corr`
+* :py:func:`pingouin.partial_corr`
+* :py:func:`pingouin.pcorr`
+* :py:func:`pingouin.rcorr`
+* :py:func:`pingouin.mediation_analysis`
+
+
+***********************
 
 Development
 ===========
 
-Pingouin was created and is maintained by `Raphael Vallat <https://raphaelvallat.github.io>`_. Contributions are more than welcome so feel free to contact me, open an issue or submit a pull request!
+Pingouin was created and is maintained by `Raphael Vallat <https://raphaelvallat.github.io>`_, mostly during his spare time. Contributions are more than welcome so feel free to contact me, open an issue or submit a pull request!
 
 To see the code or report a bug, please visit the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
 
@@ -454,6 +513,7 @@ Contributors
 
 - Nicolas Legrand
 - `Richard Höchenberger <http://hoechenberger.net/>`_
+- `Arthur Paulino <https://github.com/arthurpaulino>`_
 
 How to cite Pingouin?
 =====================

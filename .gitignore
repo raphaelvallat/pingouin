@@ -105,3 +105,6 @@ desktop.ini
 examples/mixed_anova.csv
 .pytest_cache/v/cache/nodeids
 pain_anova.csv
+
+# R
+.Rhistory

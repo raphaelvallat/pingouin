@@ -6,6 +6,126 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
+v0.2.8 (July 2019)
+------------------
+
+**Dependencies**
+
+a. Pingouin now requires SciPy >= 1.3.0 (better handling of tails in :py:func:`pingouin.wilcoxon` function) and Pandas >= 0.24 (fixes a minor bug with 2-way within factor interaction in :py:func:`pingouin.epsilon` with previous version)
+
+**New functions**
+
+a. Added :py:func:`pingouin.rcorr` Pandas method to calculate a correlation matrix with r-values on the lower triangle and p-values (or sample size) on the upper triangle.
+b. Added :py:func:`pingouin.tost` function to calculate the two one-sided test (TOST) for equivalence. See `PR51 <https://github.com/raphaelvallat/pingouin/pull/51>`_ by Antoine Weill--Duflos.
+
+**Enhancements**
+
+a. :py:func:`pingouin.anova` now works with three or more between factors (requiring statsmodels). One-way ANOVA and balanced two-way ANOVA are computed in pure Pingouin (Python + Pandas) style, while ANOVA with three or more factors, or unbalanced two-way ANOVA are computed using statsmodels.
+b. :py:func:`pingouin.anova` now accepts different sums of squares calculation method for unbalanced N-way design (type 1, 2, or 3).
+c. :py:func:`pingouin.linear_regression` now includes several safety checks to remove duplicate predictors, predictors with only zeros, and predictors with only one unique value (excluding the intercept). This comes at the cost, however, of longer computation time, which is evident when using the :py:func:`pingouin.mediation_analysis` function.
+d. :py:func:`pingouin.mad` now automatically removes missing values and can calculate the mad over the entire array using ``axis=None`` if array is multidimensional.
+e. Better handling of alternative hypotheses in :py:func:`pingouin.wilcoxon`.
+f. Better handling of alternative hypotheses in :py:func:`pingouin.bayesfactor_ttest` (support for 'greater' and 'less').
+g. Better handling of alternative hypotheses in :py:func:`pingouin.ttest` (support for 'greater' and 'less'). This is also taken into account when calculating the Bayes Factor and power of the test.
+h. Better handling of alternative hypotheses in :py:func:`pingouin.power_ttest` and :py:func:`pingouin.power_ttest2n` (support for 'greater' and 'less', and removed 'one-sided').
+i. Implemented a new method to calculate the matched pair rank biserial correlation effect size for :py:func:`pingouin.wilcoxon`, which gives results almost identical to JASP.
+
+v0.2.7 (June 2019)
+------------------
+
+**Dependencies**
+
+a. Pingouin now requires statsmodels>=0.10.0 (latest release June 2019) and is compatible with SciPy 1.3.0.
+
+**Enhancements**
+
+a. Added support for long-format dataframe in :py:func:`pingouin.sphericity` and :py:func:`pingouin.epsilon`.
+b. Added support for two within-factors interaction in :py:func:`pingouin.sphericity` and :py:func:`pingouin.epsilon` (for the former, granted that at least one of them has no more than two levels.)
+
+**New functions**
+
+a. Added :py:func:`pingouin.power_rm_anova` function.
+
+v0.2.6 (June 2019)
+------------------
+
+**Bugfixes**
+
+a. Fixed **major error in two-sided p-value for Wilcoxon test** (:py:func:`pingouin.wilcoxon`), the p-values were accidentally squared, and therefore smaller. Make sure to always use the latest release of Pingouin.
+b. :py:func:`pingouin.wilcoxon` now uses the continuity correction by default (the documentation was saying that the correction was applied but it was not applied in the code.)
+c. The ``show_median`` argument of the :py:func:`pingouin.plot_shift` function was not working properly when the percentiles were different that the default parameters.
+
+**Dependencies**
+
+a. The current release of statsmodels (0.9.0) is not compatible with the newest release of Scipy (1.3.0). In order to avoid compatibility issues in the :py:func:`pingouin.ancova` and :py:func:`pingouin.anova` functions (which rely on statsmodels for certain cases), Pingouin will require SciPy < 1.3.0 until a new stable version of statsmodels is released.
+
+**New functions**
+
+a. Added :py:func:`pingouin.chi2_independence` tests.
+b. Added :py:func:`pingouin.chi2_mcnemar` tests.
+c. Added :py:func:`pingouin.power_chi2` function.
+d. Added :py:func:`pingouin.bayesfactor_binom` function.
+
+**Enhancements**
+
+a. :py:func:`pingouin.linear_regression` now returns the residuals.
+b. Completely rewrote :py:func:`pingouin.normality` function, which now support pandas DataFrame (wide & long format), multiple normality tests (:py:func:`scipy.stats.shapiro`, :py:func:`scipy.stats.normaltest`), and an automatic casewise removal of missing values.
+c. Completely rewrote :py:func:`pingouin.homoscedasticity` function, which now support pandas DataFrame (wide & long format).
+d. Faster and more accurate algorithm in :py:func:`pingouin.bayesfactor_pearson` (same algorithm as JASP).
+e. Support for one-sided Bayes Factors in :py:func:`pingouin.bayesfactor_pearson`.
+f. Better handling of required parameters in :py:func:`pingouin.qqplot`.
+g. The epsilon value for the interaction term in :py:func:`pingouin.rm_anova` are now computed using the Greenhouse-Geisser method instead of the lower bound. A warning message has been added to the documentation to alert the user that the value might slightly differ than from R or JASP.
+
+Note that d. and e. also affect the behavior of the :py:func:`pingouin.corr` and :py:func:`pingouin.pairwise_corr` functions.
+
+**Contributors**
+
+* `Raphael Vallat <https://raphaelvallat.com>`_
+* `Arthur Paulino <https://github.com/arthurpaulino>`_
+
+v0.2.5 (May 2019)
+-----------------
+
+**MAJOR BUG FIXES**
+
+a. Fixed error in p-values for **one-sample one-sided T-test** (:py:func:`pingouin.ttest`), the two-sided p-value was divided by 4 and not by 2, resulting in inaccurate (smaller) one-sided p-values.
+b. Fixed global error for **unbalanced two-way ANOVA** (:py:func:`pingouin.anova`), the sums of squares were wrong, and as a consequence so were the F and p-values. In case of unbalanced design, Pingouin now computes a type II sums of squares via a call to the statsmodels package.
+c. The epsilon factor for the interaction term in two-way repeated measures ANOVA (:py:func:`pingouin.rm_anova`) is now computed using the lower bound approach. This is more conservative than the Greenhouse-Geisser approach and therefore give (slightly) higher p-values. The reason for choosing this is that the Greenhouse-Geisser values for the interaction term differ than the ones returned by R and JASP. This will be hopefully fixed in future releases.
+
+**New functions**
+
+a. Added :py:func:`pingouin.multivariate_ttest` (Hotelling T-squared) test.
+b. Added :py:func:`pingouin.cronbach_alpha` function.
+c. Added :py:func:`pingouin.plot_shift` function.
+d. Several functions of pandas can now be directly used as :py:class:`pandas.DataFrame` methods.
+e. Added :py:func:`pingouin.pcorr` method to compute the partial Pearson correlation matrix of a :py:class:`pandas.DataFrame` (similar to the pcor function in the ppcor package).
+f. The :py:func:`pingouin.partial_corr` now supports semi-partial correlation.
+
+**Enhancements**
+
+a. The :py:func:`pingouin.rm_corr` function now returns a :py:class:`pandas.DataFrame` with the r-value, degrees of freedom, p-value, confidence intervals and power.
+b. :py:func:`pingouin.compute_esci` now works for paired and one-sample Cohen d.
+c. :py:func:`pingouin.bayesfactor_ttest` and :py:func:`pingouin.bayesfactor_pearson` now return a formatted str and not a float.
+d. :py:func:`pingouin.pairwise_ttests` now returns the degrees of freedom (dof).
+e. Better rounding of float in :py:func:`pingouin.pairwise_ttests`.
+f. Support for wide-format data in :py:func:`pingouin.rm_anova`
+g. :py:func:`pingouin.ttest` now returns the confidence intervals around the difference in means.
+
+**Missing values**
+
+a. :py:func:`pingouin.remove_na` and :py:func:`pingouin.remove_rm_na` are now external function documented in the API.
+b. :py:func:`pingouin.remove_rm_na` now works with multiple within-factors.
+c. :py:func:`pingouin.remove_na` now works with 2D arrays.
+d. Removed the `remove_na` argument in :py:func:`pingouin.rm_anova` and :py:func:`pingouin.mixed_anova`, an automatic listwise deletion of missing values is applied (same behavior as JASP). Note that this was also the default behavior of Pingouin, but the user could also specify not to remove the missing values, which most likely returned inaccurate results.
+e. The :py:func:`pingouin.ancova` function now applies an automatic listwise deletion of missing values.
+f. Added `remove_na` argument (default = False) in :py:func:`pingouin.linear_regression` and :py:func:`pingouin.logistic_regression` functions
+g. Missing values are automatically removed in the :py:func:`pingouin.anova` function.
+
+**Contributors**
+
+* Raphael Vallat
+* Nicolas Legrand
+
 v0.2.4 (April 2019)
 -------------------
 

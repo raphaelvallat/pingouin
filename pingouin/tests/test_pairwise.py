@@ -7,15 +7,14 @@ from pingouin.pairwise import (pairwise_ttests, pairwise_corr, pairwise_tukey,
                                pairwise_gameshowell)
 from pingouin import read_dataset
 
-# Dataset for pairwise_ttests
-df = read_dataset('mixed_anova.csv')
-
 
 class TestPairwise(TestCase):
     """Test pairwise.py."""
 
     def test_pairwise_ttests(self):
-        """Test function pairwise_ttests"""
+        """Test function pairwise_ttests.
+        Tested against the pairwise.t.test R function."""
+        df = read_dataset('mixed_anova.csv')
         # Within + Between + Within * Between
         pairwise_ttests(dv='Scores', within='Time', between='Group',
                         subject='Subject', data=df, alpha=.01)
@@ -23,14 +22,22 @@ class TestPairwise(TestCase):
                         subject='Subject', data=df, padjust='fdr_bh',
                         return_desc=True)
         # Simple within
-        pairwise_ttests(dv='Scores', within='Time', subject='Subject',
-                        data=df, return_desc=True)
+        # In R:
+        # >>> pairwise.t.test(df$Scores, df$Time, pool.sd = FALSE,
+        # ...                 p.adjust.method = 'holm', paired = TRUE)
+        pt = pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+                             data=df, return_desc=True, padjust='holm')
+        np.testing.assert_array_equal(pt.loc[:, 'p-corr'].round(3),
+                                      [0.174, 0.024, 0.310])
+        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                      [0.087, 0.008, 0.310])
         pairwise_ttests(dv='Scores', within='Time', subject='Subject',
                         data=df, parametric=False, return_desc=True)
         # Simple between
-        pairwise_ttests(dv='Scores', between='Group',
-                        data=df, padjust='bonf', tail='one-sided',
-                        effsize='cohen', export_filename='test_export.csv')
+        # In R:
+        # >>> pairwise.t.test(df$Scores, df$Group, pool.sd = FALSE)
+        pt = pairwise_ttests(dv='Scores', between='Group', data=df).round(3)
+        assert pt.loc[0, 'p-unc'] == 0.023
         pairwise_ttests(dv='Scores', between='Group',
                         data=df, padjust='bonf', tail='one-sided',
                         effsize='cohen', parametric=False,
@@ -76,6 +83,92 @@ class TestPairwise(TestCase):
         pairwise_ttests(dv='DesireToKill',
                         within=['Disgustingness', 'Frighteningness'],
                         subject='Subject', padjust='holm', data=df2)
+
+        # Compare with JASP tail / parametric argument
+        df = read_dataset('pairwise_ttests')
+        # 1. Within
+        # 1.1 Parametric
+        # 1.1.1 Tail is greater
+        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+                             data=df, tail='greater')
+        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                      [0.907, 0.941, 0.405])
+        assert all(pt.loc[:, 'BF10'].astype(float) < 1)
+        # 1.1.2 Tail is less
+        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+                             data=df, tail='less')
+        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                      [0.093, 0.059, 0.595])
+        assert sum(pt.loc[:, 'BF10'].astype(float) > 1) == 2
+        # 1.1.3 Tail is one-sided: smallest p-value
+        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+                             data=df, tail='one-sided')
+        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                      [0.093, 0.059, 0.405])
+
+        # 1.2 Non-parametric
+        # 1.2.1 Tail is greater
+        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+                             parametric=False, data=df, tail='greater')
+        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                      [0.910, 0.951, 0.482])
+        # 1.2.2 Tail is less
+        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+                             parametric=False, data=df, tail='less')
+        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                      [0.108, 0.060, 0.554])
+        # 1.2.3 Tail is one-sided: smallest p-value
+        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+                             parametric=False, data=df, tail='one-sided')
+        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                      [0.108, 0.060, 0.482])
+
+        # Compare the RBC value for wilcoxon
+        from pingouin.nonparametric import wilcoxon
+        x = df[df['Drug'] == 'A']['Scores'].values
+        y = df[df['Drug'] == 'B']['Scores'].values
+        assert -0.6 < wilcoxon(x, y).at['Wilcoxon', 'RBC'] < -0.4
+        x = df[df['Drug'] == 'B']['Scores'].values
+        y = df[df['Drug'] == 'C']['Scores'].values
+        assert wilcoxon(x, y).at['Wilcoxon', 'RBC'].round(3) == 0.030
+
+        # 2. Between
+        # 2.1 Parametric
+        # 2.1.1 Tail is greater
+        pt = pairwise_ttests(dv='Scores', between='Gender',
+                             data=df, tail='greater')
+        assert pt.loc[0, 'p-unc'].round(3) == 0.068
+        assert float(pt.loc[0, 'BF10']) > 1
+        # 2.1.2 Tail is less
+        pt = pairwise_ttests(dv='Scores', between='Gender',
+                             data=df, tail='less')
+        assert pt.loc[0, 'p-unc'].round(3) == 0.932
+        assert float(pt.loc[0, 'BF10']) < 1
+        # 2.1.3 Tail is one-sided: smallest p-value
+        pt = pairwise_ttests(dv='Scores', between='Gender',
+                             data=df, tail='one-sided')
+        assert pt.loc[0, 'p-unc'].round(3) == 0.068
+        assert float(pt.loc[0, 'BF10']) > 1
+
+        # 2.2 Non-parametric
+        # 2.2.1 Tail is greater
+        pt = pairwise_ttests(dv='Scores', between='Gender',
+                             parametric=False, data=df, tail='greater')
+        assert pt.loc[0, 'p-unc'].round(3) == 0.105
+        # 2.2.2 Tail is less
+        pt = pairwise_ttests(dv='Scores', between='Gender',
+                             parametric=False, data=df, tail='less')
+        assert pt.loc[0, 'p-unc'].round(3) == 0.901
+        # 2.2.3 Tail is one-sided: smallest p-value
+        pt = pairwise_ttests(dv='Scores', between='Gender',
+                             parametric=False, data=df, tail='one-sided')
+        assert pt.loc[0, 'p-unc'].round(3) == 0.105
+
+        # Compare the RBC value for MWU
+        from pingouin.nonparametric import mwu
+        x = df[df['Gender'] == 'M']['Scores'].values
+        y = df[df['Gender'] == 'F']['Scores'].values
+        assert abs(mwu(x, y).at['MWU', 'RBC']) == 0.252
 
     def test_pairwise_tukey(self):
         """Test function pairwise_tukey"""
@@ -141,10 +234,6 @@ class TestPairwise(TestCase):
         pairwise_corr(data, columns=[['Age', 'IQ'], []])
         pairwise_corr(data, columns=['Age', 'Gender', 'IQ', 'Wrong'])
         pairwise_corr(data, columns=['Age', 'Gender', 'Wrong'])
-        # Test with more than 1000 samples (BF10 not computed)
-        data1500 = pd.concat([data, data, data], ignore_index=True)
-        pcor1500 = pairwise_corr(data1500, method='pearson')
-        assert 'BF10' not in pcor1500.keys()
         # Test with no good combinations
         with pytest.raises(ValueError):
             pairwise_corr(data, columns=['Gender', 'Gender'])

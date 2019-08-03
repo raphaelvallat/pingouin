@@ -8,7 +8,6 @@ Functions
 .. contents:: Table of Contents
    :depth: 2
 
-
 ANOVA and T-test
 ----------------
 
@@ -23,6 +22,7 @@ ANOVA and T-test
     epsilon
     mixed_anova
     welch_anova
+    tost
     ttest
 
 Bayesian
@@ -33,6 +33,7 @@ Bayesian
 .. autosummary::
    :toctree: generated/
 
+    bayesfactor_binom
     bayesfactor_ttest
     bayesfactor_pearson
 
@@ -52,6 +53,18 @@ Circular
     circ_rayleigh
     circ_vtest
 
+Contingency
+-----------
+
+.. _contingency:
+
+.. autosummary::
+   :toctree: generated/
+
+    chi2_independence
+    chi2_mcnemar
+    dichotomous_crosstab
+
 Correlation and regression
 --------------------------
 
@@ -63,9 +76,10 @@ Correlation and regression
     corr
     pairwise_corr
     partial_corr
+    pcorr
+    rcorr
     distance_corr
     rm_corr
-    intraclass_corr
     linear_regression
     logistic_regression
     mediation_analysis
@@ -82,7 +96,6 @@ Distribution
     gzscore
     homoscedasticity
     normality
-    multivariate_normality
     sphericity
 
 Effect sizes
@@ -116,6 +129,17 @@ Multiple comparisons and post-hoc tests
     holm
     fdr
 
+Multivariate tests
+------------------
+
+.. _multivar:
+
+.. autosummary::
+   :toctree: generated/
+
+    multivariate_normality
+    multivariate_ttest
+
 Non-parametric
 --------------
 
@@ -141,6 +165,8 @@ Others
      :toctree: generated/
 
       print_table
+      remove_na
+      remove_rm_na
       read_dataset
       list_dataset
 
@@ -154,6 +180,7 @@ Plotting
 
       plot_blandaltman
       plot_paired
+      plot_shift
       plot_skipped_corr
       qqplot
 
@@ -166,6 +193,19 @@ Power analysis
      :toctree: generated/
 
       power_anova
+      power_rm_anova
+      power_chi2
       power_corr
       power_ttest
       power_ttest2n
+
+Reliability and consistency
+---------------------------
+
+.. _reliability:
+
+.. autosummary::
+     :toctree: generated/
+
+      cronbach_alpha
+      intraclass_corr
