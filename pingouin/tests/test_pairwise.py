@@ -60,9 +60,6 @@ class TestPairwise(TestCase):
         with pytest.raises(ValueError):
             pairwise_ttests(dv='Scores', between='Group', data=df,
                             tail='wrong')
-        # Wrong alpha argument
-        with pytest.raises(ValueError):
-            pairwise_ttests(dv='Scores', between='Group', data=df, alpha='.05')
 
         # Both multiple between and multiple within
         with pytest.raises(ValueError):
@@ -70,13 +67,35 @@ class TestPairwise(TestCase):
                             within=['Time', 'Group'], subject='Subject',
                             data=df)
 
-        # Missing values
-        df.iloc[[10, 15], 0] = np.nan
-        pairwise_ttests(dv='Scores', within='Time', subject='Subject', data=df)
         # Wrong input argument
         df['Group'] = 'Control'
         with pytest.raises(ValueError):
             pairwise_ttests(dv='Scores', between='Group', data=df)
+
+        # Missing values in repeated measurements
+        # 1. Parametric
+        df = read_dataset('pairwise_ttests_missing')
+        st = pairwise_ttests(dv='Value', within='Condition', subject='Subject',
+                             data=df, nan_policy='listwise')
+        np.testing.assert_array_equal(st['dof'].values, [7, 7, 7])
+        st2 = pairwise_ttests(dv='Value', within='Condition', data=df,
+                              subject='Subject', nan_policy='pairwise')
+        np.testing.assert_array_equal(st2['dof'].values, [8, 7, 8])
+        # 2. Non-parametric
+        st = pairwise_ttests(dv='Value', within='Condition', subject='Subject',
+                             data=df, parametric=False, nan_policy='listwise')
+        np.testing.assert_array_equal(st['W'].values, [9, 3, 12])
+        st2 = pairwise_ttests(dv='Value', within='Condition', data=df,
+                              subject='Subject', nan_policy='pairwise',
+                              parametric=False)
+        # Tested against a simple for loop on combinations
+        np.testing.assert_array_equal(st2['W'].values, [9, 3, 21])
+
+        with pytest.raises(ValueError):
+            # Unbalanced design in repeated measurements
+            df_unbalanced = df.iloc[1:, :].copy()
+            pairwise_ttests(data=df_unbalanced, dv='Value', within='Condition',
+                            subject='Subject')
 
         # Two within factors from other datasets and with NaN values
         df2 = read_dataset('rm_anova')

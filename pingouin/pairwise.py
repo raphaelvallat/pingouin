@@ -44,8 +44,8 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, alpha, paired, tail,
 
 def pairwise_ttests(dv=None, between=None, within=None, subject=None,
                     data=None, parametric=True, alpha=.05, tail='two-sided',
-                    padjust='none', effsize='hedges', return_desc=False,
-                    export_filename=None):
+                    padjust='none', effsize='hedges', nan_policy='listwise',
+                    return_desc=False, export_filename=None):
     '''Pairwise T-tests.
 
     Parameters
@@ -94,6 +94,10 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         'eta-square' : Eta-square
         'odds-ratio' : Odds ratio
         'AUC' : Area Under the Curve
+    nan_policy : string
+        Can be `'listwise'` for listwise deletion of missing values in repeated
+        measures design (= complete-case analysis) or `'pairwise'` for the
+        more liberal pairwise deletion (= available-case analysis).
     return_desc : boolean
         If True, append group means and std to the output dataframe
     export_filename : string
@@ -149,11 +153,11 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     If both ``between`` and ``within`` are specified, the function return
     within + between + within * between.
 
-    Missing values in repeated measurements are automatically removed using the
-    :py:func:`pingouin.remove_rm_na` function. However, you should be very
-    careful since it can result in undesired values removal (especially for the
-    interaction effect). We strongly recommend that you preprocess your data
-    and remove the missing values before using this function.
+    Missing values in repeated measurements are automatically removed using a
+    listwise (default) or pairwise deletion strategy. However, you should be
+    very careful since it can result in undesired values removal (especially
+    for the interaction effect). We strongly recommend that you preprocess
+    your data and remove the missing values before using this function.
 
     This function has been tested against the `pairwise.t.test` R function.
 
@@ -197,8 +201,8 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     if tail not in ['one-sided', 'two-sided', 'greater', 'less']:
         raise ValueError('Tail not recognized')
 
-    if not isinstance(alpha, float):
-        raise ValueError('Alpha must be float')
+    assert isinstance(alpha, float), 'alpha must be float.'
+    assert nan_policy in ['listwise', 'pairwise']
 
     # Check if we have multiple between or within factors
     multiple_between = False
@@ -246,8 +250,26 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         col = within if contrast == 'simple_within' else between
         # Remove NAN in repeated measurements
         if contrast == 'simple_within' and data[dv].isnull().values.any():
-            data = remove_rm_na(dv=dv, within=within, subject=subject,
-                                data=data)
+            # Only if nan_policy == 'listwise'. For pairwise deletion,
+            # missing values will be removed directly in the lower-level
+            # functions (e.g. pg.ttest)
+            if nan_policy == 'listwise':
+                data = remove_rm_na(dv=dv, within=within, subject=subject,
+                                    data=data)
+            else:
+                # The `remove_rm_na` also aggregate other repeated measures
+                # factor using the mean. Here, we ensure this behavior too.
+                data = data.groupby([subject, within])[dv].mean().reset_index()
+            # Now we check that subjects are present in all conditions
+            # For example, if we have four subjects and 3 conditions,
+            # and if subject 2 have missing data at the third condition,
+            # we still need a row with missing values for this subject.
+            if data.groupby(within)[subject].count().nunique() != 1:
+                raise ValueError("Repeated measures dataframe is not balanced."
+                                 " `Subjects` must have the same number of "
+                                 "elements in all conditions, "
+                                 "even when missing values are present.")
+
         # Extract effects
         labels = data[col].unique().tolist()
         for l in labels:

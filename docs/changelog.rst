@@ -13,6 +13,10 @@ v0.2.9 (August 2019)
 
 a. Disabled default l2 regularization of coefficients in :py:func:`pingouin.logistic_regression`. As pointed out by Eshin Jolly in `PR54 <https://github.com/raphaelvallat/pingouin/pull/54>`_, scikit-learn automatically applies a penalization of coefficients, which in turn makes the estimation of standard errors and p-values not totally correct/interpretable. This regularization behavior is now disabled, resulting in the same behavior as R ``glm(..., family=binomial)``.
 
+**Enhancements**
+
+a. Added support for pairwise deletion in :py:func:`pingouin.pairwise_ttests` (default is listwise deletion), using the ``nan_policy`` argument.
+
 **Contributors**
 
 * `Raphael Vallat <https://raphaelvallat.com>`_
