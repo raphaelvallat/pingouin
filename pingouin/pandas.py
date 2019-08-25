@@ -55,14 +55,14 @@ pd.DataFrame.rm_anova = _rm_anova
 # Post-hoc tests corrected for multiple-comparisons
 def _pairwise_ttests(self, dv=None, between=None, within=None, subject=None,
                      parametric=True, alpha=.05, tail='two-sided',
-                     padjust='none', effsize='hedges', return_desc=False,
-                     export_filename=None):
+                     padjust='none', effsize='hedges', nan_policy='listwise',
+                     return_desc=False, export_filename=None):
     """Post-hoc tests."""
     posthoc = pairwise_ttests(data=self, dv=dv, between=between,
                               within=within, subject=subject,
                               parametric=parametric, alpha=alpha, tail=tail,
                               padjust=padjust, effsize=effsize,
-                              return_desc=return_desc,
+                              nan_policy=nan_policy, return_desc=return_desc,
                               export_filename=export_filename)
     return posthoc
 
