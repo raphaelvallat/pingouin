@@ -271,7 +271,7 @@ def remove_rm_na(data=None, dv=None, within=None, subject=None,
 # ARGUMENTS CHECK
 ###############################################################################
 
-def _flatten_list(x):
+def _flatten_list(x, include_tuple=False):
     """Flatten an arbitrarily nested list into a new list.
 
     This can be useful to select pandas DataFrame columns.
@@ -288,14 +288,27 @@ def _flatten_list(x):
     >>> x = ['Xaa', 'Xbb', 'Xcc']
     >>> _flatten_list(x)
     ['Xaa', 'Xbb', 'Xcc']
+
+    >>> x = ['Xaa', ('Xbb', 'Xcc')]
+    >>> _flatten_list(x)
+    ['Xaa', ('Xbb', 'Xcc')]
+
+    >>> _flatten_list(x, include_tuple=True)
+    ['Xaa', 'Xbb', 'Xcc']
     """
     result = []
     # Remove None
     x = list(filter(None.__ne__, x))
     for el in x:
         x_is_iter = isinstance(x, collections.Iterable)
-        if x_is_iter and not isinstance(el, (str, tuple)):
-            result.extend(_flatten_list(el))
+        if x_is_iter:
+            if not isinstance(el, (str, tuple)):
+                result.extend(_flatten_list(el))
+            else:
+                if isinstance(el, tuple) and include_tuple:
+                    result.extend(_flatten_list(el))
+                else:
+                    result.append(el)
         else:
             result.append(el)
     return result

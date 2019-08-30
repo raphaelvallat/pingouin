@@ -7,7 +7,8 @@ from itertools import combinations, product
 from pingouin.parametric import anova
 from pingouin.multicomp import multicomp
 from pingouin.effsize import compute_effsize, convert_effsize
-from pingouin.utils import remove_rm_na, _export_table, _check_dataframe
+from pingouin.utils import (remove_rm_na, _export_table, _check_dataframe,
+                            _flatten_list)
 
 __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
            "pairwise_corr"]
@@ -378,8 +379,13 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             comb_fac2 = list(combinations(labels_fac2, 2))
 
             # Pairwise comparisons
-            combs = np.array(list(product(labels_fac1, comb_fac2)))
-            ncombs = len(combs)
+            combs_list = list(product(labels_fac1, comb_fac2))
+            ncombs = len(combs_list)
+            # np.array(combs_list) does not work because of tuples
+            # we therefore need to flatten the tupple
+            combs = np.zeros(shape=(ncombs, 3), dtype=object)
+            for i in range(ncombs):
+                combs[i] = _flatten_list(combs_list[i], include_tuple=True)
 
             # Append empty rows
             idxiter = np.arange(nrows, nrows + ncombs)
@@ -390,12 +396,12 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             stats.loc[idxiter, 'Time'] = combs[:, 0]
             stats.loc[idxiter, 'Paired'] = paired
             stats.loc[idxiter, 'Tail'] = tail
-            stats.loc[idxiter, 'A'] = [c[0] for c in combs[:, 1]]
-            stats.loc[idxiter, 'B'] = [c[1] for c in combs[:, 1]]
+            stats.loc[idxiter, 'A'] = combs[:, 1]
+            stats.loc[idxiter, 'B'] = combs[:, 2]
 
             for i, comb in enumerate(combs):
                 ic = nrows + i  # Take into account previous rows
-                fac1, (col1, col2) = comb
+                fac1, col1, col2 = comb
                 x = grp_both.get_group((fac1, col1)).to_numpy()
                 y = grp_both.get_group((fac1, col2)).to_numpy()
                 ef = np.round(compute_effsize(x=x, y=y, eftype=effsize,
