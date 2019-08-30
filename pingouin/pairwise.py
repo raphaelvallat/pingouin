@@ -2,6 +2,7 @@
 # Date: April 2018
 import numpy as np
 import pandas as pd
+import pandas_flavor as pf
 from itertools import combinations, product
 from pingouin.parametric import anova
 from pingouin.multicomp import multicomp
@@ -42,14 +43,18 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, alpha, paired, tail,
     return stats
 
 
-def pairwise_ttests(dv=None, between=None, within=None, subject=None,
-                    data=None, parametric=True, alpha=.05, tail='two-sided',
+@pf.register_dataframe_method
+def pairwise_ttests(data=None, dv=None, between=None, within=None,
+                    subject=None, parametric=True, alpha=.05, tail='two-sided',
                     padjust='none', effsize='hedges', nan_policy='listwise',
                     return_desc=False, export_filename=None):
     '''Pairwise T-tests.
 
     Parameters
     ----------
+    data : pandas DataFrame
+        DataFrame. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
     dv : string
         Name of column containing the dependant variable.
     between : string or list with 2 elements
@@ -59,9 +64,6 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
     subject : string
         Name of column containing the subject identifier. Compulsory for
         contrast including a within-subject factor.
-    data : pandas DataFrame
-        DataFrame. Note that this function can also directly be used as a
-        Pandas method, in which case this argument is no longer needed.
     parametric : boolean
         If True (default), use the parametric :py:func:`ttest` function.
         If False, use :py:func:`pingouin.wilcoxon` or :py:func:`pingouin.mwu`
@@ -749,6 +751,7 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
     return stats
 
 
+@pf.register_dataframe_method
 def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
                   method='pearson', padjust='none', nan_policy='pairwise',
                   export_filename=None):

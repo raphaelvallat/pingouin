@@ -89,6 +89,7 @@ The main dependencies of Pingouin are :
 * NumPy (>= 1.15)
 * SciPy (>= 1.3.0)
 * Pandas (>= 0.24)
+* Pandas-flavor (>= 0.1.2)
 * Matplotlib (>= 3.0.2)
 * Seaborn (>= 0.9.0)
 
@@ -432,6 +433,7 @@ Several functions of Pingouin can be used directly as pandas DataFrame methods. 
 The functions that are currently supported as pandas method are:
 
 * `pingouin.anova <https://pingouin-stats.org/generated/pingouin.anova.html#pingouin.anova>`_
+* `pingouin.ancova <https://pingouin-stats.org/generated/pingouin.ancova.html#pingouin.ancova>`_
 * `pingouin.rm_anova <https://pingouin-stats.org/generated/pingouin.rm_anova.html#pingouin.rm_anova>`_
 * `pingouin.mixed_anova <https://pingouin-stats.org/generated/pingouin.mixed_anova.html#pingouin.mixed_anova>`_
 * `pingouin.welch_anova <https://pingouin-stats.org/generated/pingouin.welch_anova.html#pingouin.welch_anova>`_

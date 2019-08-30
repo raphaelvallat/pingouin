@@ -1,9 +1,9 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
-# Date: April 2018
 import warnings
 import numpy as np
 import pandas as pd
 from scipy.stats import f
+import pandas_flavor as pf
 from pingouin import (_check_dataframe, remove_rm_na, remove_na, _flatten_list,
                       _export_table, bayesfactor_ttest, epsilon, sphericity)
 
@@ -45,7 +45,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     Returns
     -------
-    stats : pandas DataFrame
+    stats : :py:class:`pandas.DataFrame
         T-test summary ::
 
         'T' : T-value
@@ -305,13 +305,14 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     return stats
 
 
+@pf.register_dataframe_method
 def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
              detailed=False, export_filename=None):
     """One-way and two-way repeated measures ANOVA.
 
     Parameters
     ----------
-    data : pandas DataFrame
+    data : :py:class:`pandas.DataFrame`
         DataFrame. Note that this function can also directly be used as a
         :py:class:`pandas.DataFrame` method, in which case this argument is no
         longer needed.
@@ -633,7 +634,7 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
         (e.g. ['Time', 'Treatment'])
     subject : string
         Name of column containing the subject identifier.
-    data : pandas DataFrame
+    data : :py:class:`pandas.DataFrame`
         DataFrame
     export_filename : string
         Filename (without extension) for the output file.
@@ -782,12 +783,16 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
     return aov
 
 
-def anova(dv=None, between=None, data=None, ss_type=2, detailed=False,
+@pf.register_dataframe_method
+def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
           export_filename=None):
     """One-way and *N*-way ANOVA.
 
     Parameters
     ----------
+    data : :py:class:`pandas.DataFrame`
+        DataFrame. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
     dv : string
         Name of column in ``data`` containing the dependent variable.
     between : string or list with two elements
@@ -797,9 +802,6 @@ def anova(dv=None, between=None, data=None, ss_type=2, detailed=False,
         performed.
         Note that Pingouin will internally call statsmodels to calculate
         ANOVA with 3 or more factors, or unbalanced two-way ANOVA.
-    data : pandas DataFrame
-        DataFrame. Note that this function can also directly be used as a
-        Pandas method, in which case this argument is no longer needed.
     ss_type : int
         Specify how the sums of squares is calculated for *unbalanced* design
         with 2 or more factors. Can be 1, 2 (default), or 3. This has no impact
@@ -1191,7 +1193,8 @@ def anovan(dv=None, between=None, data=None, ss_type=2, export_filename=None):
     return aov
 
 
-def welch_anova(dv=None, between=None, data=None, export_filename=None):
+@pf.register_dataframe_method
+def welch_anova(data=None, dv=None, between=None, export_filename=None):
     """One-way Welch ANOVA.
 
     Parameters
@@ -1200,7 +1203,7 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
         Name of column containing the dependant variable.
     between : string
         Name of column containing the between factor.
-    data : pandas DataFrame
+    data : :py:class:`pandas.DataFrame`
         DataFrame. Note that this function can also directly be used as a
         Pandas method, in which case this argument is no longer needed.
     export_filename : string
@@ -1353,12 +1356,16 @@ def welch_anova(dv=None, between=None, data=None, export_filename=None):
     return aov
 
 
-def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
+@pf.register_dataframe_method
+def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
                 correction='auto', export_filename=None):
     """Mixed-design (split-plot) ANOVA.
 
     Parameters
     ----------
+    data : :py:class:`pandas.DataFrame`
+        DataFrame. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
     dv : string
         Name of column containing the dependant variable.
     within : string
@@ -1367,9 +1374,6 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
         Name of column containing the subject identifier.
     between : string
         Name of column containing the between factor.
-    data : pandas DataFrame
-        DataFrame. Note that this function can also directly be used as a
-        Pandas method, in which case this argument is no longer needed.
     correction : string or boolean
         If True, return Greenhouse-Geisser corrected p-value.
         If 'auto' (default), compute Mauchly's test of sphericity to determine
@@ -1524,20 +1528,21 @@ def mixed_anova(dv=None, within=None, subject=None, between=None, data=None,
     return aov
 
 
-def ancova(dv=None, covar=None, between=None, data=None,
-           export_filename=None):
+@pf.register_dataframe_method
+def ancova(data=None, dv=None, between=None, covar=None, export_filename=None):
     """ANCOVA with one or more covariate(s).
 
     Parameters
     ----------
+    data : :py:class:`pandas.DataFrame`
+        DataFrame. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
     dv : string
         Name of column containing the dependant variable.
-    covar : string or list
-        Name(s) of column(s) containing the covariate.
     between : string
         Name of column containing the between factor.
-    data : pandas DataFrame
-        DataFrame
+    covar : string or list
+        Name(s) of column(s) containing the covariate.
     export_filename : string
         Filename (without extension) for the output file.
         If None, do not export the table.
@@ -1691,7 +1696,7 @@ def ancovan(dv=None, covar=None, between=None, data=None,
         Name(s) of columns containing the covariates.
     between : string
         Name of column containing the between factor.
-    data : pandas DataFrame
+    data : :py:class:`pandas.DataFrame`
         DataFrame
     export_filename : string
         Filename (without extension) for the output file.

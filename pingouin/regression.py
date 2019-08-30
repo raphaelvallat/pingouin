@@ -2,6 +2,7 @@ import itertools
 import numpy as np
 import pandas as pd
 from scipy.stats import t, norm
+import pandas_flavor as pf
 from pingouin.utils import remove_na as rm_na
 from pingouin.utils import _flatten_list as _fl
 
@@ -577,6 +578,7 @@ def _pval_from_bootci(boot, estimate):
     return min(out, 1)
 
 
+@pf.register_dataframe_method
 def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
                        alpha=0.05, n_boot=500, seed=None, return_dist=False):
     """Mediation analysis using a bias-correct non-parametric bootstrap method.

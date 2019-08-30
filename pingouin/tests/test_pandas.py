@@ -10,12 +10,13 @@ from unittest import TestCase
 
 df = pg.read_dataset('mixed_anova')
 df_aov3 = pg.read_dataset('anova3_unbalanced')
+df_anc = pg.read_dataset('ancova')
 df_corr = pg.read_dataset('pairwise_corr').iloc[:, 1:]
 data = pg.read_dataset('mediation')
 
 
 class TestParametric(TestCase):
-    """Test parametric.py."""
+    """Test pandas methods"""
 
     def test_pandas(self):
         """Test pandas method.
@@ -37,6 +38,12 @@ class TestParametric(TestCase):
         aov = df.welch_anova(dv='Scores', between='Group')
         assert aov.equals(pg.welch_anova(dv='Scores', between='Group',
                                          data=df))
+
+        # Test the ANCOVA
+        aov = df_anc.ancova(dv='Scores', covar='Income',
+                            between='Method').round(3)
+        assert aov.equals(pg.ancova(data=df_anc, dv='Scores', covar='Income',
+                          between='Method').round(3))
 
         # Test the repeated measures ANOVA (Pandas)
         aov = df.rm_anova(dv='Scores', within='Time', subject='Subject',
