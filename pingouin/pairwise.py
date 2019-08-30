@@ -437,18 +437,18 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     return stats
 
 
-def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
+def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
                    tail='two-sided', effsize='hedges'):
     '''Pairwise Tukey-HSD post-hoc test.
 
     Parameters
     ----------
+    data : pandas DataFrame
+        DataFrame
     dv : string
         Name of column containing the dependant variable.
     between: string
         Name of column containing the between factor.
-    data : pandas DataFrame
-        DataFrame
     alpha : float
         Significance level
     tail : string
@@ -538,7 +538,7 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
 
     >>> from pingouin import pairwise_tukey, read_dataset
     >>> df = read_dataset('anova')
-    >>> pt = pairwise_tukey(dv='Pain threshold', between='Hair color', data=df)
+    >>> pt = pairwise_tukey(data=df, dv='Pain threshold', between='Hair color')
     '''
     from pingouin.external.qsturng import psturng
 
@@ -591,18 +591,18 @@ def pairwise_tukey(dv=None, between=None, data=None, alpha=.05,
     return stats
 
 
-def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
+def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
                          tail='two-sided', effsize='hedges'):
     '''Pairwise Games-Howell post-hoc test.
 
     Parameters
     ----------
+    data : pandas DataFrame
+        DataFrame
     dv : string
         Name of column containing the dependant variable.
     between: string
         Name of column containing the between factor.
-    data : pandas DataFrame
-        DataFrame
     alpha : float
         Significance level
     tail : string
@@ -691,8 +691,8 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
 
     >>> from pingouin import pairwise_gameshowell, read_dataset
     >>> df = read_dataset('anova')
-    >>> pairwise_gameshowell(dv='Pain threshold', between='Hair color',
-    ...                      data=df)  # doctest: +SKIP
+    >>> pairwise_gameshowell(data=df, dv='Pain threshold',
+    ...                      between='Hair color')  # doctest: +SKIP
     '''
     from pingouin.external.qsturng import psturng
 

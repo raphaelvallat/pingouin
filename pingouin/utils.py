@@ -190,12 +190,14 @@ def remove_na(x, y=None, paired=False, axis='rows'):
     return x, y
 
 
-def remove_rm_na(dv=None, within=None, subject=None, data=None,
+def remove_rm_na(data=None, dv=None, within=None, subject=None,
                  aggregate='mean'):
     """Remove missing values in long-format repeated-measures dataframe.
 
     Parameters
     ----------
+    data : dataframe
+        Long-format dataframe.
     dv : string or list
         Dependent variable(s), from which the missing values should be removed.
         If ``dv`` is not specified, all the columns in the dataframe are
@@ -204,8 +206,6 @@ def remove_rm_na(dv=None, within=None, subject=None, data=None,
         Within-subject factor(s).
     subject : string
         Subject identifier.
-    data : dataframe
-        Long-format dataframe.
     aggregate : string
         Aggregation method if there are more within-factors in the data than
         specified in the ``within`` argument. Can be `mean`, `median`, `sum`,
@@ -310,8 +310,8 @@ def _check_eftype(eftype):
         return False
 
 
-def _check_dataframe(dv=None, between=None, within=None, subject=None,
-                     effects=None, data=None):
+def _check_dataframe(data=None, dv=None, between=None, within=None,
+                     subject=None, effects=None,):
     """Check dataframe"""
     # Check that data is a dataframe
     if not isinstance(data, pd.DataFrame):

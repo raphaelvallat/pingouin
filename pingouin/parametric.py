@@ -618,7 +618,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     return aov
 
 
-def rm_anova2(dv=None, within=None, subject=None, data=None,
+def rm_anova2(data=None, dv=None, within=None, subject=None,
               export_filename=None):
     """Two-way repeated measures ANOVA.
 
@@ -627,6 +627,8 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
 
     Parameters
     ----------
+    data : :py:class:`pandas.DataFrame`
+        DataFrame
     dv : string
         Name of column containing the dependant variable.
     within : list
@@ -634,8 +636,6 @@ def rm_anova2(dv=None, within=None, subject=None, data=None,
         (e.g. ['Time', 'Treatment'])
     subject : string
         Name of column containing the subject identifier.
-    data : :py:class:`pandas.DataFrame`
-        DataFrame
     export_filename : string
         Filename (without extension) for the output file.
         If None, do not export the table.
@@ -1035,7 +1035,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
     return aov
 
 
-def anova2(dv=None, between=None, data=None, ss_type=2, export_filename=None):
+def anova2(data=None, dv=None, between=None, ss_type=2, export_filename=None):
     """Two-way balanced ANOVA in pure Python + Pandas.
 
     This is an internal function. The main call to this function should be done
@@ -1119,7 +1119,7 @@ def anova2(dv=None, between=None, data=None, ss_type=2, export_filename=None):
     return aov
 
 
-def anovan(dv=None, between=None, data=None, ss_type=2, export_filename=None):
+def anovan(data=None, dv=None, between=None, ss_type=2, export_filename=None):
     """N-way ANOVA using statsmodels.
 
     This is an internal function. The main call to this function should be done
@@ -1681,7 +1681,7 @@ def ancova(data=None, dv=None, between=None, covar=None, export_filename=None):
     return aov
 
 
-def ancovan(dv=None, covar=None, between=None, data=None,
+def ancovan(data=None, dv=None, covar=None, between=None,
             export_filename=None):
     """ANCOVA with n covariates.
 
@@ -1690,14 +1690,14 @@ def ancovan(dv=None, covar=None, between=None, data=None,
 
     Parameters
     ----------
+    data : :py:class:`pandas.DataFrame`
+        DataFrame
     dv : string
         Name of column containing the dependant variable.
     covar : string
         Name(s) of columns containing the covariates.
     between : string
         Name of column containing the between factor.
-    data : :py:class:`pandas.DataFrame`
-        DataFrame
     export_filename : string
         Filename (without extension) for the output file.
         If None, do not export the table.

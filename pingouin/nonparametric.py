@@ -432,18 +432,18 @@ def wilcoxon(x, y, tail='two-sided'):
     return stats
 
 
-def kruskal(dv=None, between=None, data=None, detailed=False,
+def kruskal(data=None, dv=None, between=None, detailed=False,
             export_filename=None):
     """Kruskal-Wallis H-test for independent samples.
 
     Parameters
     ----------
+    data : pandas DataFrame
+        DataFrame
     dv : string
         Name of column containing the dependant variable.
     between : string
         Name of column containing the between factor.
-    data : pandas DataFrame
-        DataFrame
     export_filename : string
         Filename (without extension) for the output file.
         If None, do not export the table.
@@ -478,7 +478,7 @@ def kruskal(dv=None, between=None, data=None, detailed=False,
 
     >>> from pingouin import kruskal, read_dataset
     >>> df = read_dataset('anova')
-    >>> kruskal(dv='Pain threshold', between='Hair color', data=df)
+    >>> kruskal(data=df, dv='Pain threshold', between='Hair color')
                  Source  ddof1       H     p-unc
     Kruskal  Hair color      3  10.589  0.014172
     """
@@ -533,20 +533,20 @@ def kruskal(dv=None, between=None, data=None, detailed=False,
     return stats
 
 
-def friedman(dv=None, within=None, subject=None, data=None,
+def friedman(data=None, dv=None, within=None, subject=None,
              export_filename=None):
     """Friedman test for repeated measurements.
 
     Parameters
     ----------
+    data : pandas DataFrame
+        DataFrame
     dv : string
         Name of column containing the dependant variable.
     within : string
         Name of column containing the within-subject factor.
     subject : string
         Name of column containing the subject identifier.
-    data : pandas DataFrame
-        DataFrame
     export_filename : string
         Filename (without extension) for the output file.
         If None, do not export the table.
@@ -585,8 +585,8 @@ def friedman(dv=None, within=None, subject=None, data=None,
 
     >>> from pingouin import friedman, read_dataset
     >>> df = read_dataset('rm_anova')
-    >>> friedman(dv='DesireToKill', within='Disgustingness',
-    ...          subject='Subject', data=df)
+    >>> friedman(data=df, dv='DesireToKill', within='Disgustingness',
+    ...          subject='Subject')
                       Source  ddof1      Q     p-unc
     Friedman  Disgustingness      1  9.228  0.002384
     """
@@ -651,21 +651,21 @@ def friedman(dv=None, within=None, subject=None, data=None,
     return stats
 
 
-def cochran(dv=None, within=None, subject=None, data=None,
+def cochran(data=None, dv=None, within=None, subject=None,
             export_filename=None):
     """Cochran Q test. Special case of the Friedman test when the dependant
     variable is binary.
 
     Parameters
     ----------
+    data : pandas DataFrame
+        DataFrame
     dv : string
         Name of column containing the binary dependant variable.
     within : string
         Name of column containing the within-subject factor.
     subject : string
         Name of column containing the subject identifier.
-    data : pandas DataFrame
-        DataFrame
     export_filename : string
         Filename (without extension) for the output file.
         If None, do not export the table.
@@ -704,7 +704,6 @@ def cochran(dv=None, within=None, subject=None, data=None,
 
     References
     ----------
-
     .. [1] Cochran, W.G., 1950. The comparison of percentages in matched
        samples. Biometrika 37, 256–266.
        https://doi.org/10.1093/biomet/37.3-4.256
@@ -715,7 +714,7 @@ def cochran(dv=None, within=None, subject=None, data=None,
 
     >>> from pingouin import cochran, read_dataset
     >>> df = read_dataset('cochran')
-    >>> cochran(dv='Energetic', within='Time', subject='Subject', data=df)
+    >>> cochran(data=df, dv='Energetic', within='Time', subject='Subject')
             Source  dof      Q     p-unc
     cochran   Time    2  6.706  0.034981
     """
