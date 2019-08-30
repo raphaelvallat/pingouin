@@ -22,6 +22,8 @@ d. The first argument of the :py:func:`pingouin.anova`, :py:func:`pingouin.ancov
 e. The :py:func:`pingouin.ancova` can now directly be used a Pandas method, e.g. ``data.ancova(...)``
 f. The ``remove_na`` argument of :py:func:`pingouin.cronbach_alpha` has been replaced with ``nan_policy`` (`'pairwise'`, or `'listwise'`).
 g. Added the ``interaction`` boolean argument to :py:func:`pingouin.pairwise_ttests`, useful if one is only interested in the main effects.
+h. :py:func:`pingouin.pairwise_ttests` output does not include the ``CLES`` column by default anymore. Users must explicitly pass ``effsize='CLES'``.
+i. Internal code refactoring of the :py:func:`pingouin.pairwise_ttests` (to speed up computation and improve memory usage).
 
 **Contributors**
 

@@ -66,11 +66,6 @@ class TestPairwise(TestCase):
                                           parametric=False).round(3)
         assert ptw.drop(columns=['Group']).iloc[0:4, :].equals(ptw_no_inter)
 
-        # Wrong tail argument
-        with pytest.raises(ValueError):
-            pairwise_ttests(dv='Scores', between='Group', data=df,
-                            tail='wrong')
-
         # Both multiple between and multiple within
         with pytest.raises(ValueError):
             pairwise_ttests(dv='Scores', between=['Time', 'Group'],
@@ -94,12 +89,12 @@ class TestPairwise(TestCase):
         # 2. Non-parametric
         st = pairwise_ttests(dv='Value', within='Condition', subject='Subject',
                              data=df, parametric=False, nan_policy='listwise')
-        np.testing.assert_array_equal(st['W'].values, [9, 3, 12])
+        np.testing.assert_array_equal(st['W-val'].values, [9, 3, 12])
         st2 = pairwise_ttests(dv='Value', within='Condition', data=df,
                               subject='Subject', nan_policy='pairwise',
                               parametric=False)
         # Tested against a simple for loop on combinations
-        np.testing.assert_array_equal(st2['W'].values, [9, 3, 21])
+        np.testing.assert_array_equal(st2['W-val'].values, [9, 3, 21])
 
         with pytest.raises(ValueError):
             # Unbalanced design in repeated measurements

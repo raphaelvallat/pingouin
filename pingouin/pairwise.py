@@ -64,9 +64,11 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         'cohen' : Unbiased Cohen d
         'hedges' : Hedges g
         'glass': Glass delta
+        'r' : Pearson correlation coefficient
         'eta-square' : Eta-square
         'odds-ratio' : Odds ratio
         'AUC' : Area Under the Curve
+        'CLES' : Common Language Effect Size
     nan_policy : string
         Can be `'listwise'` for listwise deletion of missing values in repeated
         measures design (= complete-case analysis) or `'pairwise'` for the
@@ -97,16 +99,15 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         'Paired' : indicates whether the two measurements are paired or not
         'Parametric' : indicates if (non)-parametric tests were used
         'Tail' : indicate whether the p-values are one-sided or two-sided
-        'T' : T-values (only if parametric=True)
-        'U' : Mann-Whitney U value (only if parametric=False and unpaired data)
-        'W' : Wilcoxon W value (only if parametric=False and paired data)
+        'T' : T statistic (only if parametric=True)
+        'U-val' : Mann-Whitney U stat (if parametric=False and unpaired data)
+        'W-val' : Wilcoxon W stat (if parametric=False and paired data)
         'dof' : degrees of freedom (only if parametric=True)
         'p-unc' : Uncorrected p-values
         'p-corr' : Corrected p-values
         'p-adjust' : p-values correction method
         'BF10' : Bayes Factor
-        'hedges' : Hedges effect size
-        'CLES' : Common language effect size
+        'hedges' : effect size (or any effect size defined in ``effsize``)
 
     See also
     --------
@@ -185,9 +186,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     _check_dataframe(dv=dv, between=between, within=within, subject=subject,
                      effects='all', data=data)
 
-    if tail not in ['one-sided', 'two-sided', 'greater', 'less']:
-        raise ValueError('Tail not recognized')
-
+    assert tail in ['one-sided', 'two-sided', 'greater', 'less']
     assert isinstance(alpha, float), 'alpha must be float.'
     assert nan_policy in ['listwise', 'pairwise']
 
@@ -230,8 +229,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     # Reorganize column order
     col_order = ['Contrast', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
                  'std(B)', 'Paired', 'Parametric', 'T', 'U-val', 'W-val',
-                 'dof', 'tail', 'p-unc', 'p-corr', 'p-adjust', 'BF10',
-                 'efsize']
+                 'dof', 'Tail', 'p-unc', 'p-corr', 'p-adjust', 'BF10',
+                 effsize]
 
     if contrast in ['simple_within', 'simple_between']:
         # OPTION A: SIMPLE MAIN EFFECTS, WITHIN OR BETWEEN
@@ -260,7 +259,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                                  "even when missing values are present.")
 
         # Extract effects
-        labels = data[col].unique().tolist()
+        grp_col = data.groupby(col, sort=False)[dv]
+        labels = grp_col.groups.keys()
         # Number and labels of possible comparisons
         if len(labels) >= 2:
             combs = list(combinations(labels, 2))
@@ -270,13 +270,19 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         else:
             raise ValueError('Columns must have at least two unique values.')
 
-        # Groupby object
-        grp_col = data.groupby(col)[dv]
-
         # Initialize dataframe
-        stats = pd.DataFrame({'Contrast': col, 'A': A, 'B': B, 'tail': tail,
+        stats = pd.DataFrame({'Contrast': col, 'A': A, 'B': B, 'Tail': tail,
                               'Paired': paired},
                              index=range(len(combs)), columns=col_order)
+
+        # Force dtype (default dtype is str)
+        cols_float = ['mean(A)', 'mean(B)', 'std(A)', 'std(B)', 'T', 'U-val',
+                      'W-val', 'dof', 'p-unc', 'p-corr', effsize]
+        cols_bool = ['Parametric', 'Paired']
+        for c in cols_float:
+            stats[c] = stats[c].astype(np.float64)
+        for c in cols_bool:
+            stats[c] = stats[c].astype(bool)
 
         for i in range(stats.shape[0]):
             col1, col2 = stats.loc[i, 'A'], stats.loc[i, 'B']
@@ -285,8 +291,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             if parametric:
                 stat_name = 'T'
                 df_ttest = ttest(x, y, paired=paired, tail=tail)
-                stats.loc[i, ['BF10', 'dof']] = df_ttest.loc['T-test',
-                                                             ['BF10', 'dof']]
+                stats.loc[i, 'BF10'] = df_ttest.loc['T-test', 'BF10']
+                stats.loc[i, 'dof'] = df_ttest.loc['T-test', 'dof']
             else:
                 if paired:
                     stat_name = 'W-val'
@@ -305,10 +311,9 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                                                     np.nanmean(y),
                                                     np.nanstd(x),
                                                     np.nanstd(y)], 3)
-            cols_infer = [stat_name, 'efsize', 'p-unc']
-            stats.loc[i, cols_infer] = [df_ttest[stat_name].iloc[0],
-                                        ef,
-                                        df_ttest['p-val'].iloc[0]]
+            stats.loc[i, stat_name] = df_ttest[stat_name].iloc[0]
+            stats.loc[i, 'p-unc'] = df_ttest['p-val'].iloc[0]
+            stats.loc[i, effsize] = ef
 
         # Multiple comparisons
         padjust = None if stats['p-unc'].size <= 1 else padjust
@@ -361,41 +366,45 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                                                  return_desc=return_desc),
                                  ignore_index=True, sort=False)
 
-        # Rename effect size to generic name
-        stats.rename(columns={effsize: 'efsize'}, inplace=True)
-
         # Then compute the interaction between the factors
         if interaction:
             nrows = stats.shape[0]
-            ddic = {}
-            labels_fac1 = data[factors[0]].unique().tolist()
-            labels_fac2 = data[factors[1]].unique().tolist()
-            comb_fac1 = list(combinations(labels_fac1, 2))
+            grp_fac1 = data.groupby(factors[0], sort=False)[dv]
+            grp_fac2 = data.groupby(factors[1], sort=False)[dv]
+            grp_both = data.groupby(factors, sort=False)[dv]
+            labels_fac1 = grp_fac1.groups.keys()
+            labels_fac2 = grp_fac2.groups.keys()
+            # comb_fac1 = list(combinations(labels_fac1, 2))
             comb_fac2 = list(combinations(labels_fac2, 2))
-            lc_fac1 = len(comb_fac1)
-            lc_fac2 = len(comb_fac2)
-
-            for lw in labels_fac1:
-                for l in labels_fac2:
-                    tmp = data.loc[data[factors[0]] == lw]
-                    ddic[lw, l] = tmp.loc[tmp[factors[1]] == l, dv].values
 
             # Pairwise comparisons
-            combs = list(product(labels_fac1, comb_fac2))
+            combs = np.array(list(product(labels_fac1, comb_fac2)))
+            ncombs = len(combs)
+
+            # Append empty rows
+            idxiter = np.arange(nrows, nrows + ncombs)
+            stats = stats.append(pd.DataFrame(columns=stats.columns,
+                                 index=idxiter), ignore_index=True)
+            # Update other columns
+            stats.loc[idxiter, 'Contrast'] = factors[0] + ' * ' + factors[1]
+            stats.loc[idxiter, 'Time'] = combs[:, 0]
+            stats.loc[idxiter, 'Paired'] = paired
+            stats.loc[idxiter, 'Tail'] = tail
+            stats.loc[idxiter, 'A'] = [c[0] for c in combs[:, 1]]
+            stats.loc[idxiter, 'B'] = [c[1] for c in combs[:, 1]]
+
             for i, comb in enumerate(combs):
                 ic = nrows + i  # Take into account previous rows
                 fac1, (col1, col2) = comb
-                x = ddic.get((fac1, col1))
-                y = ddic.get((fac1, col2))
-                stats.loc[ic, ['A', 'B']] = [col1, col2]
+                x = grp_both.get_group((fac1, col1)).to_numpy()
+                y = grp_both.get_group((fac1, col2)).to_numpy()
                 ef = np.round(compute_effsize(x=x, y=y, eftype=effsize,
                                               paired=paired), 3)
                 if parametric:
                     stat_name = 'T'
                     df_ttest = ttest(x, y, paired=paired, tail=tail)
-                    stats.loc[ic, ['BF10', 'dof']] = df_ttest.loc['T-test',
-                                                                  ['BF10',
-                                                                   'dof']]
+                    stats.loc[ic, 'BF10'] = df_ttest.loc['T-test', 'BF10']
+                    stats.loc[ic, 'dof'] = df_ttest.loc['T-test', 'dof']
                 else:
                     if paired:
                         stat_name = 'W-val'
@@ -411,35 +420,23 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                                                          np.nanmean(y),
                                                          np.nanstd(x),
                                                          np.nanstd(y)], 3)
-                cols_infer = [stat_name, 'efsize', 'p-unc']
-                stats.loc[ic, cols_infer] = [df_ttest[stat_name].iloc[0],
-                                             ef, df_ttest['p-val'].iloc[0]]
-                stats.loc[ic, 'Time'] = fac1
-                stats.loc[ic, 'Paired'] = paired
-                stats.loc[ic, 'tail'] = tail
-
-            # Update the Contrast columns
-            txt_inter = factors[0] + ' * ' + factors[1]
-            idxitr = np.arange(lc_fac1 + lc_fac2, stats.shape[0]).tolist()
-            stats.loc[idxitr, 'Contrast'] = txt_inter
+                stats.loc[ic, stat_name] = df_ttest[stat_name].iloc[0]
+                stats.loc[ic, 'p-unc'] = df_ttest['p-val'].iloc[0]
+                stats.loc[ic, effsize] = ef
 
             # Multi-comparison columns
             if padjust is not None and padjust.lower() != 'none':
-                _, pcor = multicomp(stats.loc[idxitr, 'p-unc'].values,
+                _, pcor = multicomp(stats.loc[idxiter, 'p-unc'].values,
                                     alpha=alpha, method=padjust)
-                stats.loc[idxitr, 'p-corr'] = pcor
-                stats.loc[idxitr, 'p-adjust'] = padjust
+                stats.loc[idxiter, 'p-corr'] = pcor
+                stats.loc[idxiter, 'p-adjust'] = padjust
 
     # ---------------------------------------------------------------------
-    # Add parametric
-    stats['Parametric'] = stats['Parametric'].astype(bool)
+    # Append parametric columns
+    stats['Parametric'] = parametric
 
     # Reorder and drop empty columns
-    stats = stats.reindex(columns=col_order)
-    stats.dropna(how='all', axis=1, inplace=True)
-
-    # Rename effect size column
-    stats.rename(columns={'efsize': effsize}, inplace=True)
+    stats = stats.reindex(columns=col_order).dropna(how='all', axis=1)
 
     # Rename Time columns
     if (contrast in ['multiple_within', 'multiple_between', 'within_between']
