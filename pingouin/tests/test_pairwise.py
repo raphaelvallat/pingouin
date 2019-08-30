@@ -229,8 +229,6 @@ class TestPairwise(TestCase):
         # Check with a subset of columns
         pairwise_corr(data=data, columns=['Neuroticism', 'Extraversion'])
         with pytest.raises(ValueError):
-            pairwise_corr(data=data, tail='wrong')
-        with pytest.raises(ValueError):
             pairwise_corr(data=data, columns='wrong')
         # Check with non-numeric columns
         data['test'] = 'test'
@@ -268,9 +266,14 @@ class TestPairwise(TestCase):
         with pytest.raises(ValueError):
             pairwise_corr(data, columns=['Neuroticism', 'Age'], covar='Age')
         # Partial pairwise with missing values
-        data.loc[4, 'Age'] = np.nan
-        data.loc[10, 'Neuroticism'] = np.nan
+        data.loc[[4, 5, 8, 20, 22], 'Age'] = np.nan
+        data.loc[[10, 12], 'Neuroticism'] = np.nan
+        pairwise_corr(data)
         pairwise_corr(data, covar='Age')
+        # Listwise deletion
+        assert (pairwise_corr(data, covar='Age',
+                              nan_policy='listwise')['n'].nunique() == 1)
+        assert pairwise_corr(data, nan_policy='listwise')['n'].nunique() == 1
         ######################################################################
         # MultiIndex columns
         from numpy.random import random as rdm
@@ -304,3 +307,14 @@ class TestPairwise(TestCase):
         pairwise_corr(data, covar=[('Psycho', 'Anxiety')])
         pairwise_corr(data, columns=[('Behavior', 'Rating')],
                       covar=[('Psycho', 'Anxiety')])
+        # With missing values
+        data.iloc[2, [2, 3]] = np.nan
+        data.iloc[[1, 4], [1, 4]] = np.nan
+        assert pairwise_corr(data, nan_policy='listwise')['n'].nunique() == 1
+        assert pairwise_corr(data, nan_policy='pairwise')['n'].nunique() == 3
+        assert (pairwise_corr(data, columns=[('Behavior', 'Rating')],
+                covar=[('Psycho', 'Anxiety')],
+                nan_policy='listwise')['n'].nunique() == 1)
+        assert (pairwise_corr(data, columns=[('Behavior', 'Rating')],
+                covar=[('Psycho', 'Anxiety')],
+                nan_policy='pairwise')['n'].nunique() == 2)

@@ -16,6 +16,7 @@ a. Disabled default l2 regularization of coefficients in :py:func:`pingouin.logi
 **Enhancements**
 
 a. Added support for pairwise deletion in :py:func:`pingouin.pairwise_ttests` (default is listwise deletion), using the ``nan_policy`` argument.
+b. Added support for listwise deletion in :py:func:`pingouin.pairwise_corr` (default is pairwise deletion), using the ``nan_policy`` argument.
 
 **Contributors**
 

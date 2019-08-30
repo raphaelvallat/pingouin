@@ -98,6 +98,8 @@ def pairwise_ttests(dv=None, between=None, within=None, subject=None,
         Can be `'listwise'` for listwise deletion of missing values in repeated
         measures design (= complete-case analysis) or `'pairwise'` for the
         more liberal pairwise deletion (= available-case analysis).
+
+        .. versionadded:: 0.2.9
     return_desc : boolean
         If True, append group means and std to the output dataframe
     export_filename : string
@@ -748,7 +750,8 @@ def pairwise_gameshowell(dv=None, between=None, data=None, alpha=.05,
 
 
 def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
-                  method='pearson', padjust='none', export_filename=None):
+                  method='pearson', padjust='none', nan_policy='pairwise',
+                  export_filename=None):
     """Pairwise (partial) correlations between columns of a pandas dataframe.
 
     Parameters
@@ -793,6 +796,12 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
         'holm' : step-down method using Bonferroni adjustments
         'fdr_bh' : Benjamini/Hochberg FDR correction
         'fdr_by' : Benjamini/Yekutieli FDR correction
+    nan_policy : string
+        Can be `'listwise'` for listwise deletion of missing values
+        (= complete-case analysis) or `'pairwise'` (default) for the more
+        liberal pairwise deletion (= available-case analysis).
+
+        .. versionadded:: 0.2.9
     export_filename : string
         Filename (without extension) for the output file.
         If None, do not export the table.
@@ -822,7 +831,8 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     Notes
     -----
     Please refer to the :py:func:`pingouin.corr()` function for a description
-    of the different methods. NaN are automatically removed from the data.
+    of the different methods. NaN are automatically removed from the data using
+    a pairwise deletion.
 
     This function is more flexible and gives a much more detailed
     output than the :py:func:`pandas.DataFrame.corr()` method (i.e. p-values,
@@ -899,8 +909,9 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     """
     from pingouin.correlation import corr, partial_corr
 
-    if tail not in ['one-sided', 'two-sided']:
-        raise ValueError('Tail not recognized')
+    # Check arguments
+    assert tail in ['one-sided', 'two-sided']
+    assert nan_policy in ['listwise', 'pairwise']
 
     # Keep only numeric columns
     data = data._get_numeric_data()
@@ -1011,6 +1022,13 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
                              "that the specified columns and covar exist in "
                              "the dataframe, are numeric, and contains at "
                              "least two unique values.")
+
+    # Listwise deletion of missing values
+    if nan_policy == 'listwise':
+        all_cols = np.unique(stats[['X', 'Y']].values).tolist()
+        if covar is not None:
+            all_cols.extend(covar)
+        data = data[all_cols].dropna()
 
     # Compute pairwise correlations and fill dataframe
     dvs = ['n', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'power']
