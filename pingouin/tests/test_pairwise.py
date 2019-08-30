@@ -44,17 +44,27 @@ class TestPairwise(TestCase):
                         export_filename='test_export.csv')
 
         # Two between factors
-        pairwise_ttests(dv='Scores', between=['Time', 'Group'], data=df,
-                        padjust='holm')
+        pt = pairwise_ttests(dv='Scores', between=['Time', 'Group'], data=df,
+                             padjust='holm').round(3)
         pairwise_ttests(dv='Scores', between=['Time', 'Group'], data=df,
                         padjust='holm', parametric=False)
+        # .. with no interaction
+        pt_no_inter = df.pairwise_ttests(dv='Scores',
+                                         between=['Time', 'Group'],
+                                         interaction=False,
+                                         padjust='holm').round(3)
+        assert pt.drop(columns=['Time']).iloc[0:4, :].equals(pt_no_inter)
 
         # Two within subject factors
-        pairwise_ttests(dv='Scores', within=['Group', 'Time'],
-                        subject='Subject', data=df, padjust='bonf')
-        pairwise_ttests(dv='Scores', within=['Group', 'Time'],
-                        subject='Subject', data=df, padjust='bonf',
-                        parametric=False)
+        ptw = pairwise_ttests(data=df, dv='Scores', within=['Group', 'Time'],
+                              subject='Subject', padjust='bonf',
+                              parametric=False).round(3)
+        ptw_no_inter = df.pairwise_ttests(dv='Scores',
+                                          within=['Group', 'Time'],
+                                          subject='Subject', padjust='bonf',
+                                          interaction=False,
+                                          parametric=False).round(3)
+        assert ptw.drop(columns=['Group']).iloc[0:4, :].equals(ptw_no_inter)
 
         # Wrong tail argument
         with pytest.raises(ValueError):

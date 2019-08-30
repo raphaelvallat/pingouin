@@ -47,7 +47,8 @@ def _append_stats_dataframe(stats, x, y, xlabel, ylabel, alpha, paired, tail,
 def pairwise_ttests(data=None, dv=None, between=None, within=None,
                     subject=None, parametric=True, alpha=.05, tail='two-sided',
                     padjust='none', effsize='hedges', nan_policy='listwise',
-                    return_desc=False, export_filename=None):
+                    return_desc=False, interaction=True,
+                    export_filename=None):
     '''Pairwise T-tests.
 
     Parameters
@@ -104,6 +105,12 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         .. versionadded:: 0.2.9
     return_desc : boolean
         If True, append group means and std to the output dataframe
+    interaction : boolean
+        If there are multiple factors and ``interaction`` is True (default),
+        Pingouin will also calculate T-tests for the interaction term (see
+        Notes).
+
+        .. versionadded:: 0.2.9
     export_filename : string
         Filename (without extension) for the output file.
         If None, do not export the table.
@@ -146,7 +153,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     first column, 2) the pairwise T-tests between each values of the second
     column and 3) the interaction between col1 and col2. The interaction is
     dependent of the order of the list, so ['col1', 'col2'] will not yield the
-    same results as ['col2', 'col1'].
+    same results as ['col2', 'col1'], and will only be calculated if
+    ``interaction=True``.
 
     In other words, if ``between`` is a list with two elements, the output
     model is between1 + between2 + between1 * between2.
@@ -194,6 +202,11 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
     >>> posthocs = pairwise_ttests(dv='Scores', between=['Group', 'Time'],
     ...                            data=df)
+
+    6. Between1 + Between2, no interaction
+
+    >>> posthocs = df.pairwise_ttests(dv='Scores', between=['Group', 'Time'],
+    ...                               interaction=False)
     '''
     from .parametric import ttest
     from .nonparametric import wilcoxon, mwu
@@ -359,50 +372,51 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         stats.rename(columns={effsize: 'efsize'}, inplace=True)
 
         # Then compute the interaction between the factors
-        labels_fac1 = data[factors[0]].unique().tolist()
-        labels_fac2 = data[factors[1]].unique().tolist()
-        comb_fac1 = list(combinations(labels_fac1, 2))
-        comb_fac2 = list(combinations(labels_fac2, 2))
-        lc_fac1 = len(comb_fac1)
-        lc_fac2 = len(comb_fac2)
+        if interaction:
+            labels_fac1 = data[factors[0]].unique().tolist()
+            labels_fac2 = data[factors[1]].unique().tolist()
+            comb_fac1 = list(combinations(labels_fac1, 2))
+            comb_fac2 = list(combinations(labels_fac2, 2))
+            lc_fac1 = len(comb_fac1)
+            lc_fac2 = len(comb_fac2)
 
-        for lw in labels_fac1:
-            for l in labels_fac2:
-                tmp = data.loc[data[factors[0]] == lw]
-                ddic[lw, l] = tmp.loc[tmp[factors[1]] == l, dv].values
+            for lw in labels_fac1:
+                for l in labels_fac2:
+                    tmp = data.loc[data[factors[0]] == lw]
+                    ddic[lw, l] = tmp.loc[tmp[factors[1]] == l, dv].values
 
-        # Pairwise comparisons
-        combs = list(product(labels_fac1, comb_fac2))
-        for comb in combs:
-            fac1, (col1, col2) = comb
-            x = ddic.get((fac1, col1))
-            y = ddic.get((fac1, col2))
-            if parametric:
-                df_ttest = ttest(x, y, paired=paired, tail=tail)
-                # Compute exact CLES
-                df_ttest['CLES'] = compute_effsize(x, y, paired=paired,
-                                                   eftype='CLES')
-            else:
-                if paired:
-                    df_ttest = wilcoxon(x, y, tail=tail)
+            # Pairwise comparisons
+            combs = list(product(labels_fac1, comb_fac2))
+            for comb in combs:
+                fac1, (col1, col2) = comb
+                x = ddic.get((fac1, col1))
+                y = ddic.get((fac1, col2))
+                if parametric:
+                    df_ttest = ttest(x, y, paired=paired, tail=tail)
+                    # Compute exact CLES
+                    df_ttest['CLES'] = compute_effsize(x, y, paired=paired,
+                                                       eftype='CLES')
                 else:
-                    df_ttest = mwu(x, y, tail=tail)
-            ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
-            stats = _append_stats_dataframe(stats, x, y, col1, col2,
-                                            alpha, paired, tail, df_ttest, ef,
-                                            effsize, fac1)
+                    if paired:
+                        df_ttest = wilcoxon(x, y, tail=tail)
+                    else:
+                        df_ttest = mwu(x, y, tail=tail)
+                ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
+                stats = _append_stats_dataframe(stats, x, y, col1, col2,
+                                                alpha, paired, tail, df_ttest,
+                                                ef, effsize, fac1)
 
-        # Update the Contrast columns
-        txt_inter = factors[0] + ' * ' + factors[1]
-        idxitr = np.arange(lc_fac1 + lc_fac2, stats.shape[0]).tolist()
-        stats.loc[idxitr, 'Contrast'] = txt_inter
+            # Update the Contrast columns
+            txt_inter = factors[0] + ' * ' + factors[1]
+            idxitr = np.arange(lc_fac1 + lc_fac2, stats.shape[0]).tolist()
+            stats.loc[idxitr, 'Contrast'] = txt_inter
 
-        # Multi-comparison columns
-        if padjust is not None and padjust.lower() != 'none':
-            _, pcor = multicomp(stats.loc[idxitr, 'p-unc'].values,
-                                alpha=alpha, method=padjust)
-            stats.loc[idxitr, 'p-corr'] = pcor
-            stats.loc[idxitr, 'p-adjust'] = padjust
+            # Multi-comparison columns
+            if padjust is not None and padjust.lower() != 'none':
+                _, pcor = multicomp(stats.loc[idxitr, 'p-unc'].values,
+                                    alpha=alpha, method=padjust)
+                stats.loc[idxitr, 'p-corr'] = pcor
+                stats.loc[idxitr, 'p-adjust'] = padjust
 
     # ---------------------------------------------------------------------
     stats['Paired'] = stats['Paired'].astype(bool)
@@ -419,7 +433,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
     if return_desc is False:
         stats.drop(columns=['mean(A)', 'mean(B)', 'std(A)', 'std(B)'],
-                   inplace=True)
+                   errors='ignore', inplace=True)
 
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
@@ -428,7 +442,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     stats.rename(columns={'efsize': effsize}, inplace=True)
 
     # Rename Time columns
-    if contrast in ['multiple_within', 'multiple_between', 'within_between']:
+    if (contrast in ['multiple_within', 'multiple_between', 'within_between']
+       and interaction):
         stats['Time'].fillna('-', inplace=True)
         stats.rename(columns={'Time': factors[0]}, inplace=True)
 
