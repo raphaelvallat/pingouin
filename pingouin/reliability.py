@@ -6,7 +6,7 @@ __all__ = ["cronbach_alpha", "intraclass_corr"]
 
 
 def cronbach_alpha(data=None, items=None, scores=None, subject=None,
-                   remove_na=False, ci=.95):
+                   nan_policy='pairwise', ci=.95):
     """Cronbach's alpha reliability measure.
 
     Parameters
@@ -19,11 +19,12 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
         Column in ``data`` with the scores (long-format only).
     subject : str
         Column in ``data`` with the subject identifier (long-format only).
-    remove_na : bool
-        If True, remove the entire rows that contain missing values
-        (= listwise deletion). If False, only pairwise missing values are
-        removed when computing the covariance matrix. For more details, please
-        refer to the :py:meth:`pandas.DataFrame.cov` method.
+    nan_policy : bool
+        If `'listwise'`, remove the entire rows that contain missing values
+        (= listwise deletion). If `'pairwise'` (default), only pairwise
+        missing values are removed when computing the covariance matrix.
+        For more details, please refer to the :py:meth:`pandas.DataFrame.cov`
+        method.
     ci : float
         Confidence interval (.95 = 95%)
 
@@ -104,7 +105,7 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     After listwise deletion of missing values (remove the entire rows)
 
     >>> # In R: psych:alpha(data, use="complete.obs")
-    >>> pg.cronbach_alpha(data=data, remove_na=True)
+    >>> pg.cronbach_alpha(data=data, nan_policy='listwise')
     (0.801695, array([0.581, 0.933]))
 
     After imputing the missing values with the median of each column
@@ -121,6 +122,7 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     """
     # Safety check
     assert isinstance(data, pd.DataFrame), 'data must be a dataframe.'
+    assert nan_policy in ['pairwise', 'listwise']
 
     if all([v is not None for v in [items, scores, subject]]):
         # Data in long-format: we first convert to a wide format
@@ -132,7 +134,7 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     assert n >= 2, 'At least two raters/subjects are required.'
     err = 'All columns must be numeric.'
     assert all([data[c].dtype.kind in 'bfi' for c in data.columns]), err
-    if data.isna().any().any() and remove_na:
+    if data.isna().any().any() and nan_policy == 'listwise':
         # In R = psych:alpha(data, use="complete.obs")
         data = data.dropna(axis=0, how='any')
 

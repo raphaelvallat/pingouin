@@ -45,8 +45,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
     Returns
     -------
-    stats : :py:class:`pandas.DataFrame
-        T-test summary ::
+    stats : :py:class:`pandas.DataFrame`
+        T-test summary::
 
         'T' : T-value
         'p-val' : p-value
@@ -795,7 +795,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
         Pandas method, in which case this argument is no longer needed.
     dv : string
         Name of column in ``data`` containing the dependent variable.
-    between : string or list with two elements
+    between : string or list with *N* elements
         Name of column(s) in ``data`` containing the between-subject factor(s).
         If ``between`` is a single string, a one-way ANOVA is computed.
         If ``between`` is a list with two or more elements, a *N*-way ANOVA is

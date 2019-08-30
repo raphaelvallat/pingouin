@@ -25,15 +25,15 @@ class TestReliability(TestCase):
         # With missing values
         df.loc[2, 'Scores'] = np.nan
         cronbach_alpha(data=df, items='Items', scores='Scores',
-                       subject='Subj', remove_na=False)
+                       subject='Subj')
         # In R = psych:alpha(data, use="complete.obs")
         cronbach_alpha(data=df, items='Items', scores='Scores',
-                       subject='Subj', remove_na=True)
+                       subject='Subj', nan_policy='listwise')
         # Wide format
         data = read_dataset('cronbach_wide_missing')
         alpha, _ = cronbach_alpha(data=data)
         assert np.round(alpha, 2) == .73
-        alpha, _ = cronbach_alpha(data=data, remove_na=True)
+        alpha, _ = cronbach_alpha(data=data, nan_policy='listwise')
         assert np.round(alpha, 2) == .80
 
     def test_intraclass_corr(self):
