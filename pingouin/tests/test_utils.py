@@ -36,7 +36,8 @@ class TestUtils(TestCase):
         np.testing.assert_array_equal(_flatten_list(x), x)
         # With tuples
         xt = ['Xaa', ('Xbb', 'Xcc')]
-        np.testing.assert_array_equal(_flatten_list(xt), xt)
+        fl = _flatten_list(xt)
+        assert fl == xt
         np.testing.assert_array_equal(_flatten_list(xt, include_tuple=True), x)
 
     def test_perm_pval(self):
