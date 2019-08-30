@@ -13,36 +13,6 @@ __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
            "pairwise_corr"]
 
 
-def _append_stats_dataframe(stats, x, y, xlabel, ylabel, alpha, paired, tail,
-                            df_ttest, ef, eftype, time=np.nan):
-    # Create empty columns
-    for f in ['CLES', 'T', 'BF10', 'U-val', 'W-val', 'dof']:
-        if f not in df_ttest.keys():
-            df_ttest[f] = np.nan
-    stats = stats.append({
-        'A': xlabel,
-        'B': ylabel,
-        'mean(A)': np.round(np.nanmean(x), 3),
-        'mean(B)': np.round(np.nanmean(y), 3),
-        # Use ddof=1 for unibiased estimator (pandas default)
-        'std(A)': np.round(np.nanstd(x, ddof=1), 3),
-        'std(B)': np.round(np.nanstd(y, ddof=1), 3),
-        'Paired': paired,
-        'tail': tail,
-        # 'Alpha': alpha,
-        'T': df_ttest['T'].iloc[0],
-        'U': df_ttest['U-val'].iloc[0],
-        'W': df_ttest['W-val'].iloc[0],
-        'dof': df_ttest['dof'].iloc[0],
-        'p-unc': df_ttest['p-val'].iloc[0],
-        'BF10': df_ttest['BF10'].iloc[0],
-        'efsize': ef,
-        'CLES': df_ttest['CLES'].iloc[0],
-        # 'eftype': eftype,
-        'Time': time}, ignore_index=True, sort=False)
-    return stats
-
-
 @pf.register_dataframe_method
 def pairwise_ttests(data=None, dv=None, between=None, within=None,
                     subject=None, parametric=True, alpha=.05, tail='two-sided',
@@ -257,9 +227,11 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         contrast = 'within_between'
         assert all([between in data.keys(), within in data.keys()])
 
-    # Initialize empty variables
-    stats = pd.DataFrame([])
-    ddic = {}
+    # Reorganize column order
+    col_order = ['Contrast', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
+                 'std(B)', 'Paired', 'Parametric', 'T', 'U-val', 'W-val',
+                 'dof', 'tail', 'p-unc', 'p-corr', 'p-adjust', 'BF10',
+                 'efsize']
 
     if contrast in ['simple_within', 'simple_between']:
         # OPTION A: SIMPLE MAIN EFFECTS, WITHIN OR BETWEEN
@@ -289,34 +261,54 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
         # Extract effects
         labels = data[col].unique().tolist()
-        for l in labels:
-            ddic[l] = data.loc[data[col] == l, dv].values
         # Number and labels of possible comparisons
         if len(labels) >= 2:
             combs = list(combinations(labels, 2))
+            combs = np.array(combs)
+            A = combs[:, 0]
+            B = combs[:, 1]
         else:
             raise ValueError('Columns must have at least two unique values.')
-        # Initialize vectors
-        for comb in combs:
-            col1, col2 = comb
-            x = ddic.get(col1)
-            y = ddic.get(col2)
+
+        # Groupby object
+        grp_col = data.groupby(col)[dv]
+
+        # Initialize dataframe
+        stats = pd.DataFrame({'Contrast': col, 'A': A, 'B': B, 'tail': tail,
+                              'Paired': paired},
+                             index=range(len(combs)), columns=col_order)
+
+        for i in range(stats.shape[0]):
+            col1, col2 = stats.loc[i, 'A'], stats.loc[i, 'B']
+            x = grp_col.get_group(col1).to_numpy()
+            y = grp_col.get_group(col2).to_numpy()
             if parametric:
+                stat_name = 'T'
                 df_ttest = ttest(x, y, paired=paired, tail=tail)
-                # Compute exact CLES
-                df_ttest['CLES'] = compute_effsize(x, y, paired=paired,
-                                                   eftype='CLES')
+                stats.loc[i, ['BF10', 'dof']] = df_ttest.loc['T-test',
+                                                             ['BF10', 'dof']]
             else:
                 if paired:
+                    stat_name = 'W-val'
                     df_ttest = wilcoxon(x, y, tail=tail)
                 else:
+                    stat_name = 'U-val'
                     df_ttest = mwu(x, y, tail=tail)
+
             # Compute Hedges / Cohen
-            ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
-            stats = _append_stats_dataframe(stats, x, y, col1, col2, alpha,
-                                            paired, tail, df_ttest, ef,
-                                            effsize)
-            stats['Contrast'] = col
+            ef = np.round(compute_effsize(x=x, y=y, eftype=effsize,
+                                          paired=paired), 3)
+
+            if return_desc:
+                cols_desc = ['mean(A)', 'mean(B)', 'std(A)', 'std(B)']
+                stats.loc[i, cols_desc] = np.round([np.nanmean(x),
+                                                    np.nanmean(y),
+                                                    np.nanstd(x),
+                                                    np.nanstd(y)], 3)
+            cols_infer = [stat_name, 'efsize', 'p-unc']
+            stats.loc[i, cols_infer] = [df_ttest[stat_name].iloc[0],
+                                        ef,
+                                        df_ttest['p-val'].iloc[0]]
 
         # Multiple comparisons
         padjust = None if stats['p-unc'].size <= 1 else padjust
@@ -354,6 +346,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             # eft = ['within', 'between']
             paired = False
 
+        stats = pd.DataFrame()
         for i, f in enumerate(factors):
             stats = stats.append(pairwise_ttests(dv=dv,
                                                  between=fbt[i],
@@ -373,6 +366,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
         # Then compute the interaction between the factors
         if interaction:
+            nrows = stats.shape[0]
+            ddic = {}
             labels_fac1 = data[factors[0]].unique().tolist()
             labels_fac2 = data[factors[1]].unique().tolist()
             comb_fac1 = list(combinations(labels_fac1, 2))
@@ -387,24 +382,41 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
             # Pairwise comparisons
             combs = list(product(labels_fac1, comb_fac2))
-            for comb in combs:
+            for i, comb in enumerate(combs):
+                ic = nrows + i  # Take into account previous rows
                 fac1, (col1, col2) = comb
                 x = ddic.get((fac1, col1))
                 y = ddic.get((fac1, col2))
+                stats.loc[ic, ['A', 'B']] = [col1, col2]
+                ef = np.round(compute_effsize(x=x, y=y, eftype=effsize,
+                                              paired=paired), 3)
                 if parametric:
+                    stat_name = 'T'
                     df_ttest = ttest(x, y, paired=paired, tail=tail)
-                    # Compute exact CLES
-                    df_ttest['CLES'] = compute_effsize(x, y, paired=paired,
-                                                       eftype='CLES')
+                    stats.loc[ic, ['BF10', 'dof']] = df_ttest.loc['T-test',
+                                                                  ['BF10',
+                                                                   'dof']]
                 else:
                     if paired:
+                        stat_name = 'W-val'
                         df_ttest = wilcoxon(x, y, tail=tail)
                     else:
+                        stat_name = 'U-val'
                         df_ttest = mwu(x, y, tail=tail)
-                ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
-                stats = _append_stats_dataframe(stats, x, y, col1, col2,
-                                                alpha, paired, tail, df_ttest,
-                                                ef, effsize, fac1)
+
+                # Append to stats
+                if return_desc:
+                    cols_desc = ['mean(A)', 'mean(B)', 'std(A)', 'std(B)']
+                    stats.loc[ic, cols_desc] = np.round([np.nanmean(x),
+                                                         np.nanmean(y),
+                                                         np.nanstd(x),
+                                                         np.nanstd(y)], 3)
+                cols_infer = [stat_name, 'efsize', 'p-unc']
+                stats.loc[ic, cols_infer] = [df_ttest[stat_name].iloc[0],
+                                             ef, df_ttest['p-val'].iloc[0]]
+                stats.loc[ic, 'Time'] = fac1
+                stats.loc[ic, 'Paired'] = paired
+                stats.loc[ic, 'tail'] = tail
 
             # Update the Contrast columns
             txt_inter = factors[0] + ' * ' + factors[1]
@@ -419,22 +431,10 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                 stats.loc[idxitr, 'p-adjust'] = padjust
 
     # ---------------------------------------------------------------------
-    stats['Paired'] = stats['Paired'].astype(bool)
-    stats['Parametric'] = parametric
+    # Add parametric
+    stats['Parametric'] = stats['Parametric'].astype(bool)
 
-    # Round effect size and CLES
-    stats[['efsize', 'CLES']] = stats[['efsize', 'CLES']].round(3)
-
-    # Reorganize column order
-    col_order = ['Contrast', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
-                 'std(B)', 'Paired', 'Parametric', 'T', 'U', 'W', 'dof',
-                 'tail', 'p-unc', 'p-corr', 'p-adjust', 'BF10', 'CLES',
-                 'efsize']
-
-    if return_desc is False:
-        stats.drop(columns=['mean(A)', 'mean(B)', 'std(A)', 'std(B)'],
-                   errors='ignore', inplace=True)
-
+    # Reorder and drop empty columns
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
 
