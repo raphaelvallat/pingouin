@@ -32,7 +32,7 @@ class TestParametric(TestCase):
         aov3_ss2_pg = pg.anova(dv='Cholesterol', between=['Sex', 'Drug'],
                                data=df_aov3, ss_type=2)
         assert not aov3_ss1.equals(aov3_ss2)
-        assert aov3_ss2.equals(aov3_ss2_pg)
+        assert aov3_ss2.round(3).equals(aov3_ss2_pg.round(3))
 
         # Test the Welch ANOVA (Pandas)
         aov = df.welch_anova(dv='Scores', between='Group')

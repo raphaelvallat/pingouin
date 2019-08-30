@@ -22,7 +22,6 @@ d. The first argument of the :py:func:`pingouin.anova`, :py:func:`pingouin.ancov
 e. The :py:func:`pingouin.ancova` can now directly be used a Pandas method, e.g. ``data.ancova(...)``
 f. The ``remove_na`` argument of :py:func:`pingouin.cronbach_alpha` has been replaced with ``nan_policy`` (`'pairwise'`, or `'listwise'`).
 
-
 **Contributors**
 
 * `Raphael Vallat <https://raphaelvallat.com>`_
