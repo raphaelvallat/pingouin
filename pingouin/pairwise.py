@@ -286,14 +286,14 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             stats[c] = stats[c].astype(bool)
 
         for i in range(stats.shape[0]):
-            col1, col2 = stats.loc[i, 'A'], stats.loc[i, 'B']
+            col1, col2 = stats.at[i, 'A'], stats.at[i, 'B']
             x = grp_col.get_group(col1).to_numpy()
             y = grp_col.get_group(col2).to_numpy()
             if parametric:
                 stat_name = 'T'
                 df_ttest = ttest(x, y, paired=paired, tail=tail)
-                stats.loc[i, 'BF10'] = df_ttest.loc['T-test', 'BF10']
-                stats.loc[i, 'dof'] = df_ttest.loc['T-test', 'dof']
+                stats.at[i, 'BF10'] = df_ttest.at['T-test', 'BF10']
+                stats.at[i, 'dof'] = df_ttest.at['T-test', 'dof']
             else:
                 if paired:
                     stat_name = 'W-val'
@@ -312,9 +312,9 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                                                     np.nanmean(y),
                                                     np.nanstd(x),
                                                     np.nanstd(y)], 3)
-            stats.loc[i, stat_name] = df_ttest[stat_name].iloc[0]
-            stats.loc[i, 'p-unc'] = df_ttest['p-val'].iloc[0]
-            stats.loc[i, effsize] = ef
+            stats.at[i, stat_name] = df_ttest[stat_name].iat[0]
+            stats.at[i, 'p-unc'] = df_ttest['p-val'].iat[0]
+            stats.at[i, effsize] = ef
 
         # Multiple comparisons
         padjust = None if stats['p-unc'].size <= 1 else padjust
@@ -409,8 +409,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                 if parametric:
                     stat_name = 'T'
                     df_ttest = ttest(x, y, paired=paired, tail=tail)
-                    stats.loc[ic, 'BF10'] = df_ttest.loc['T-test', 'BF10']
-                    stats.loc[ic, 'dof'] = df_ttest.loc['T-test', 'dof']
+                    stats.at[ic, 'BF10'] = df_ttest.at['T-test', 'BF10']
+                    stats.at[ic, 'dof'] = df_ttest.at['T-test', 'dof']
                 else:
                     if paired:
                         stat_name = 'W-val'
@@ -426,9 +426,9 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                                                          np.nanmean(y),
                                                          np.nanstd(x),
                                                          np.nanstd(y)], 3)
-                stats.loc[ic, stat_name] = df_ttest[stat_name].iloc[0]
-                stats.loc[ic, 'p-unc'] = df_ttest['p-val'].iloc[0]
-                stats.loc[ic, effsize] = ef
+                stats.at[ic, stat_name] = df_ttest[stat_name].iat[0]
+                stats.at[ic, 'p-unc'] = df_ttest['p-val'].iat[0]
+                stats.at[ic, effsize] = ef
 
             # Multi-comparison columns
             if padjust is not None and padjust.lower() != 'none':

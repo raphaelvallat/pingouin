@@ -27,10 +27,10 @@ class TestPairwise(TestCase):
         # ...                 p.adjust.method = 'holm', paired = TRUE)
         pt = pairwise_ttests(dv='Scores', within='Time', subject='Subject',
                              data=df, return_desc=True, padjust='holm')
-        np.testing.assert_array_equal(pt.loc[:, 'p-corr'].round(3),
-                                      [0.174, 0.024, 0.310])
-        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
-                                      [0.087, 0.008, 0.310])
+        np.testing.assert_array_equal(np.sort(pt.loc[:, 'p-corr'].round(3)),
+                                      np.sort([0.174, 0.024, 0.310]))
+        np.testing.assert_array_equal(np.sort(pt.loc[:, 'p-unc'].round(3)),
+                                      np.sort([0.087, 0.008, 0.310]))
         pairwise_ttests(dv='Scores', within='Time', subject='Subject',
                         data=df, parametric=False, return_desc=True)
         # Simple between
