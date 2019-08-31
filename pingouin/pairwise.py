@@ -272,23 +272,26 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             raise ValueError('Columns must have at least two unique values.')
 
         # Initialize dataframe
-        stats = pd.DataFrame({'Contrast': col, 'A': A, 'B': B, 'Tail': tail,
-                              'Paired': paired},
-                             index=range(len(combs)), columns=col_order)
+        stats = pd.DataFrame(dtype=np.float64, index=range(len(combs)),
+                             columns=col_order)
 
-        # Force dtype (default dtype is str)
-        cols_float = ['mean(A)', 'mean(B)', 'std(A)', 'std(B)', 'T', 'U-val',
-                      'W-val', 'dof', 'p-unc', 'p-corr', effsize]
+        # Force dtype conversion
+        cols_str = ['Contrast', 'Time', 'A', 'B', 'Tail', 'p-adjust', 'BF10']
         cols_bool = ['Parametric', 'Paired']
-        for c in cols_float:
-            stats[c] = stats[c].astype(np.float64)
-        for c in cols_bool:
-            stats[c] = stats[c].astype(bool)
+        stats[cols_str] = stats[cols_str].astype(object)
+        stats[cols_bool] = stats[cols_bool].astype(bool)
+
+        # Fill str columns
+        stats.loc[:, 'A'] = A
+        stats.loc[:, 'B'] = B
+        stats.loc[:, 'Contrast'] = col
+        stats.loc[:, 'Tail'] = tail
+        stats.loc[:, 'Paired'] = paired
 
         for i in range(stats.shape[0]):
             col1, col2 = stats.at[i, 'A'], stats.at[i, 'B']
-            x = grp_col.get_group(col1)
-            y = grp_col.get_group(col2)
+            x = grp_col.get_group(col1).to_numpy(dtype=np.float64)
+            y = grp_col.get_group(col2).to_numpy(dtype=np.float64)
             if parametric:
                 stat_name = 'T'
                 df_ttest = ttest(x, y, paired=paired, tail=tail)
@@ -307,11 +310,10 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                                           paired=paired), 3)
 
             if return_desc:
-                cols_desc = ['mean(A)', 'mean(B)', 'std(A)', 'std(B)']
-                stats.loc[i, cols_desc] = np.round([np.nanmean(x),
-                                                    np.nanmean(y),
-                                                    np.nanstd(x),
-                                                    np.nanstd(y)], 3)
+                stats.at[i, 'mean(A)'] = np.round(np.nanmean(x), 3)
+                stats.at[i, 'mean(B)'] = np.round(np.nanmean(y), 3)
+                stats.at[i, 'std(A)'] = np.round(np.nanstd(x), 3)
+                stats.at[i, 'std(B)'] = np.round(np.nanstd(y), 3)
             stats.at[i, stat_name] = df_ttest[stat_name].iat[0]
             stats.at[i, 'p-unc'] = df_ttest['p-val'].iat[0]
             stats.at[i, effsize] = ef
@@ -402,8 +404,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             for i, comb in enumerate(combs):
                 ic = nrows + i  # Take into account previous rows
                 fac1, col1, col2 = comb
-                x = grp_both.get_group((fac1, col1))
-                y = grp_both.get_group((fac1, col2))
+                x = grp_both.get_group((fac1, col1)).to_numpy(dtype=np.float64)
+                y = grp_both.get_group((fac1, col2)).to_numpy(dtype=np.float64)
                 ef = np.round(compute_effsize(x=x, y=y, eftype=effsize,
                                               paired=paired), 3)
                 if parametric:
@@ -421,11 +423,10 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
                 # Append to stats
                 if return_desc:
-                    cols_desc = ['mean(A)', 'mean(B)', 'std(A)', 'std(B)']
-                    stats.loc[ic, cols_desc] = np.round([np.nanmean(x),
-                                                         np.nanmean(y),
-                                                         np.nanstd(x),
-                                                         np.nanstd(y)], 3)
+                    stats.at[ic, 'mean(A)'] = np.round(np.nanmean(x), 3)
+                    stats.at[ic, 'mean(B)'] = np.round(np.nanmean(y), 3)
+                    stats.at[ic, 'std(A)'] = np.round(np.nanstd(x), 3)
+                    stats.at[ic, 'std(B)'] = np.round(np.nanstd(y), 3)
                 stats.at[ic, stat_name] = df_ttest[stat_name].iat[0]
                 stats.at[ic, 'p-unc'] = df_ttest['p-val'].iat[0]
                 stats.at[ic, effsize] = ef
@@ -439,10 +440,11 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
     # ---------------------------------------------------------------------
     # Append parametric columns
-    stats['Parametric'] = parametric
+    stats.loc[:, 'Parametric'] = parametric
 
     # Reorder and drop empty columns
-    stats = stats.reindex(columns=col_order).dropna(how='all', axis=1)
+    stats = stats[np.array(col_order)[np.isin(col_order, stats.columns)]]
+    stats = stats.dropna(how='all', axis=1)
 
     # Rename Time columns
     if (contrast in ['multiple_within', 'multiple_between', 'within_between']

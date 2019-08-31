@@ -297,11 +297,10 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
              'BF10': bf}
 
     # Convert to dataframe
-    stats = pd.DataFrame.from_records(stats, index=['T-test'])
-
     col_order = ['T', 'dof', 'tail', 'p-val', 'CI95%', 'cohen-d', 'BF10',
                  'power']
-    stats = stats.reindex(columns=col_order)
+    stats = pd.DataFrame.from_records(stats, columns=col_order,
+                                      index=['T-test'])
     return stats
 
 
