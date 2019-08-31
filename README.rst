@@ -99,7 +99,7 @@ In addition, some functions require :
 * Scikit-learn
 * Mpmath
 
-Pingouin is a Python 3 package and is currently tested for Python 3.5, 3.6 and 3.7. Pingouin does not work with Python 2.7.
+Pingouin is a Python 3 package and is currently tested for Python 3.6 and 3.7. Pingouin does not work with Python 2.7.
 
 User installation
 -----------------

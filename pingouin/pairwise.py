@@ -287,8 +287,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
         for i in range(stats.shape[0]):
             col1, col2 = stats.at[i, 'A'], stats.at[i, 'B']
-            x = grp_col.get_group(col1).to_numpy()
-            y = grp_col.get_group(col2).to_numpy()
+            x = grp_col.get_group(col1)
+            y = grp_col.get_group(col2)
             if parametric:
                 stat_name = 'T'
                 df_ttest = ttest(x, y, paired=paired, tail=tail)
@@ -402,8 +402,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             for i, comb in enumerate(combs):
                 ic = nrows + i  # Take into account previous rows
                 fac1, col1, col2 = comb
-                x = grp_both.get_group((fac1, col1)).to_numpy()
-                y = grp_both.get_group((fac1, col2)).to_numpy()
+                x = grp_both.get_group((fac1, col1))
+                y = grp_both.get_group((fac1, col2))
                 ef = np.round(compute_effsize(x=x, y=y, eftype=effsize,
                                               paired=paired), 3)
                 if parametric:
