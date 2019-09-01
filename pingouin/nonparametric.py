@@ -808,11 +808,7 @@ def harrelldavis(x, quantile=0.5):
     >>> harrelldavis(x, quantile=0.5)
     -0.04991656842939151
     """
-    # Security check
-    if isinstance(x, list):
-        x = np.asarray(x)
-    if len(x.shape) > 1:
-        raise ValueError('x must be a 1d array')
+    x = np.asarray(x)
     if isinstance(quantile, float):
         quantile = [quantile]
 
