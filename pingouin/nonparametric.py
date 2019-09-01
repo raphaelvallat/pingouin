@@ -6,7 +6,7 @@ import pandas as pd
 from pingouin import remove_na, remove_rm_na, _check_dataframe, _export_table
 
 __all__ = ["mad", "madmedianrule", "mwu", "wilcoxon", "kruskal", "friedman",
-           "cochran"]
+           "cochran", "harrelldavis"]
 
 
 def mad(a, normalize=True, axis=0):
@@ -751,3 +751,84 @@ def cochran(dv=None, within=None, subject=None, data=None,
     if export_filename is not None:
         _export_table(stats, export_filename)
     return stats
+
+
+def harrelldavis(x, quantile=0.5):
+    """Harrell-Davis estimate of the :math:`q^{th}` quantile of the data.
+
+    Parameters
+    ----------
+    x : array_like
+        Vector containing the data.
+    quantile : float or list of floats
+        Quantile or sequence of quantiles to compute, must be between 0 and 1.
+        Default is ``0.5``.
+
+    Returns
+    -------
+    y : float or list of floats
+        The estimated quantiles. If ``quantile`` is a single quntile, will
+        return a float, otherwise will compute each quantile separately and
+        returns a list of floats.
+
+    Notes
+    -----
+    The Harrell-Davis method [1] estimates the :math:`q^{th}` quantile by a
+    linear combination of  the  order statistics. Results have been tested
+    against the Matlab implementation proposed by [2]. This method is also used
+    to measure the confidence intervals of the difference between quantiles of
+    two groups, as implemented in the shift function [3].
+
+    See Also
+    --------
+    plot_shift : Shift function.
+
+    References
+    ----------
+    .. [1] Frank E. Harrell, C. E. Davis, A new distribution-free quantile
+       estimator, Biometrika, Volume 69, Issue 3, December 1982, Pages
+       635–640, https://doi.org/10.1093/biomet/69.3.635
+
+    .. [2] https://github.com/GRousselet/matlab_stats/blob/master/hd.m
+
+    .. [3] Rousselet, G. A., Pernet, C. R. and Wilcox, R. R. (2017). Beyond
+       differences in means: robust graphical methods to compare two groups
+       in neuroscience. Eur J Neurosci, 46: 1738-1748.
+       https://doi.org/doi:10.1111/ejn.13610
+
+    Examples
+    --------
+    Estimate the 0.5 quantile (i.e median) of 100 observation picked from a
+    normal distribution with ``mean=0`` and ``std=1``.
+
+    >>> import numpy as np
+    >>> np.random.seed(123)
+    >>> from pingouin.nonparametric import harrelldavis
+    >>> x = np.random.normal(0, 1, 100)
+    >>> harrelldavis(x, quantile=0.5)
+    -0.04991656842939151
+    """
+    # Security check
+    if isinstance(x, list):
+        x = np.asarray(x)
+    if len(x.shape) > 1:
+        raise ValueError('x must be a 1d array')
+    if isinstance(quantile, float):
+        quantile = [quantile]
+
+    y = []
+    for q in quantile:
+        # Harrell-Davis estimate of the qth quantile
+        n = len(x)
+        m1 = (n + 1) * q
+        m2 = (n + 1) * (1 - q)
+        vec = np.arange(n)
+        w = (scipy.stats.beta.cdf((vec + 1) / n, m1, m2) -
+             scipy.stats.beta.cdf((vec) / n, m1, m2))
+        x = np.sort(x)
+        y.append((w * x).sum())  # Store results
+
+    if len(y) == 1:
+        y = y[0]  # Return a float instead of a list if n quantile is 1
+
+    return y
