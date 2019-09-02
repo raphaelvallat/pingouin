@@ -133,3 +133,4 @@ class TestNonParametric(TestCase):
              306, 376, 428, 515, 666, 1310, 2611]
         assert harrelldavis(a, quantile=0.5) == 271.72120054908913
         harrelldavis(x=x, quantile=np.arange(0.1, 1, 0.1))
+        assert harrelldavis(a, [0.25, 0.5, 0.75])[1] == 271.72120054908913

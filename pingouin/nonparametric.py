@@ -753,22 +753,25 @@ def cochran(data=None, dv=None, within=None, subject=None,
 
 
 def harrelldavis(x, quantile=0.5):
-    """Harrell-Davis estimate of the :math:`q^{th}` quantile of the data.
+    """Harrell-Davis robust estimate of the :math:`q^{th}` quantile of the
+    data.
+
+    .. versionadded:: 0.2.9
 
     Parameters
     ----------
     x : array_like
-        Vector containing the data.
-    quantile : float or list of floats
+        Data, must be a one-dimensional vector.
+    quantile : float or array_like
         Quantile or sequence of quantiles to compute, must be between 0 and 1.
         Default is ``0.5``.
 
     Returns
     -------
-    y : float or list of floats
-        The estimated quantiles. If ``quantile`` is a single quntile, will
+    y : float or array_like
+        The estimated quantile(s). If ``quantile`` is a single quantile, will
         return a float, otherwise will compute each quantile separately and
-        returns a list of floats.
+        returns an array of floats.
 
     Notes
     -----
@@ -801,29 +804,36 @@ def harrelldavis(x, quantile=0.5):
     normal distribution with ``mean=0`` and ``std=1``.
 
     >>> import numpy as np
+    >>> import pingouin as pg
     >>> np.random.seed(123)
-    >>> from pingouin.nonparametric import harrelldavis
     >>> x = np.random.normal(0, 1, 100)
-    >>> harrelldavis(x, quantile=0.5)
+    >>> pg.harrelldavis(x, quantile=0.5)
     -0.04991656842939151
+
+    Several quantiles at once
+
+    >>> pg.harrelldavis(x, quantile=[0.25, 0.5, 0.75])
+    array([-0.84133224, -0.04991657,  0.95897233])
     """
-    x = np.asarray(x)
+    x = np.sort(np.asarray(x))
+    assert x.ndim == 1, 'Only 1D array are supported for this function.'
+    n = x.size
+    vec = np.arange(n)
     if isinstance(quantile, float):
         quantile = [quantile]
 
     y = []
     for q in quantile:
         # Harrell-Davis estimate of the qth quantile
-        n = len(x)
         m1 = (n + 1) * q
         m2 = (n + 1) * (1 - q)
-        vec = np.arange(n)
         w = (scipy.stats.beta.cdf((vec + 1) / n, m1, m2) -
              scipy.stats.beta.cdf((vec) / n, m1, m2))
-        x = np.sort(x)
         y.append((w * x).sum())  # Store results
 
     if len(y) == 1:
         y = y[0]  # Return a float instead of a list if n quantile is 1
+    else:
+        y = np.array(y)
 
     return y

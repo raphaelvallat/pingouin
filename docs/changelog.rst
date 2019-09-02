@@ -24,11 +24,13 @@ f. The ``remove_na`` argument of :py:func:`pingouin.cronbach_alpha` has been rep
 g. Added the ``interaction`` boolean argument to :py:func:`pingouin.pairwise_ttests`, useful if one is only interested in the main effects.
 h. :py:func:`pingouin.pairwise_ttests` output does not include the ``CLES`` column by default anymore. Users must explicitly pass ``effsize='CLES'``.
 i. Internal code refactoring of the :py:func:`pingouin.pairwise_ttests` (to speed up computation and improve memory usage).
+j. Added :py:func:`pingouin.harrelldavis`, a robust quantile estimation method (to be used in a future version of the :py:func:`pingouin.plot_shift` function.)
 
 **Contributors**
 
 * `Raphael Vallat <https://raphaelvallat.com>`_
 * `Eshin Jolly <http://eshinjolly.com/>`_
+* Nicolas Legrand
 
 
 v0.2.8 (July 2019)
