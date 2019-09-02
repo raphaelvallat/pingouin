@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from unittest import TestCase
 from pingouin.nonparametric import (mad, madmedianrule, mwu, wilcoxon,
-                                    kruskal, friedman, cochran)
+                                    kruskal, friedman, cochran, harrelldavis)
 
 np.random.seed(1234)
 x = np.random.normal(size=100)
@@ -125,3 +125,11 @@ class TestNonParametric(TestCase):
         # With a NaN value
         df.loc[2, 'Energetic'] = np.nan
         cochran(dv='Energetic', within='Time', subject='Subject', data=df)
+
+    def test_harrelldavis(self):
+        """Test Harrel-Davis estimation of :math:`q^{th}` quantile.
+        """
+        a = [77, 87, 88, 114, 151, 210, 219, 246, 253, 262, 296, 299,
+             306, 376, 428, 515, 666, 1310, 2611]
+        assert harrelldavis(a, quantile=0.5) == 271.72120054908913
+        harrelldavis(x=x, quantile=np.arange(0.1, 1, 0.1))

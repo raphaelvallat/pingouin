@@ -155,6 +155,7 @@ Non-parametric
     madmedianrule
     mwu
     wilcoxon
+    harrelldavis
 
 Others
 ------
