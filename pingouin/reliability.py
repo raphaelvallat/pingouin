@@ -234,14 +234,14 @@ def intraclass_corr(data=None, items=None, raters=None, scores=None, ci=.95):
 
     # ANOVA and ICC
     aov = anova(dv=scores, data=data, between=items, detailed=True)
-    icc = (aov.loc[0, 'MS'] - aov.loc[1, 'MS']) / \
-          (aov.loc[0, 'MS'] + (k - 1) * aov.loc[1, 'MS'])
+    icc = (aov.at[0, 'MS'] - aov.at[1, 'MS']) / \
+          (aov.at[0, 'MS'] + (k - 1) * aov.at[1, 'MS'])
 
     # Confidence interval
     alpha = 1 - ci
-    df_num, df_den = aov.loc[0, 'DF'], aov.loc[1, 'DF']
-    f_lower = aov.loc[0, 'F'] / f.isf(alpha / 2, df_num, df_den)
-    f_upper = aov.loc[0, 'F'] * f.isf(alpha / 2, df_den, df_num)
+    df_num, df_den = aov.at[0, 'DF'], aov.at[1, 'DF']
+    f_lower = aov.at[0, 'F'] / f.isf(alpha / 2, df_num, df_den)
+    f_upper = aov.at[0, 'F'] * f.isf(alpha / 2, df_den, df_num)
     lower = (f_lower - 1) / (f_lower + k - 1)
     upper = (f_upper - 1) / (f_upper + k - 1)
 

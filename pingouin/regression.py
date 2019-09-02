@@ -802,7 +802,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
         else:
             sxm[j] = logistic_regression(X_val, M_val[:, idx],
                                          alpha=alpha).loc[[1], cols]
-        sxm[j].loc[1, 'names'] = '%s ~ X' % j
+        sxm[j].at[1, 'names'] = '%s ~ X' % j
     sxm = pd.concat(sxm, ignore_index=True)
 
     # Y ~ M + covar
@@ -817,8 +817,8 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
 
     # Rename paths
     smy['names'] = smy['names'].apply(lambda x: 'Y ~ %s' % x)
-    direct.loc[1, 'names'] = 'Direct'
-    sxy.loc[1, 'names'] = 'Total'
+    direct.at[1, 'names'] = 'Direct'
+    sxy.at[1, 'names'] = 'Total'
 
     # Concatenate and create sig column
     stats = pd.concat((sxm, smy, sxy, direct), ignore_index=True)

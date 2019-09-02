@@ -1060,14 +1060,14 @@ def anova2(data=None, dv=None, between=None, ss_type=2, export_filename=None):
         aov_fac2 = anova(data=data, dv=dv, between=fac2, detailed=True)
         ng1, ng2 = data[fac1].nunique(), data[fac2].nunique()
         # Sums of squares
-        ss_fac1 = aov_fac1.loc[0, 'SS']
-        ss_fac2 = aov_fac2.loc[0, 'SS']
+        ss_fac1 = aov_fac1.at[0, 'SS']
+        ss_fac2 = aov_fac2.at[0, 'SS']
         ss_tot = ((data[dv] - data[dv].mean())**2).sum()
         ss_resid = np.sum(grp_both.apply(lambda x: (x - x.mean())**2))
         ss_inter = ss_tot - (ss_resid + ss_fac1 + ss_fac2)
         # Degrees of freedom
-        df_fac1 = aov_fac1.loc[0, 'DF']
-        df_fac2 = aov_fac2.loc[0, 'DF']
+        df_fac1 = aov_fac1.at[0, 'DF']
+        df_fac2 = aov_fac2.at[0, 'DF']
         df_inter = (ng1 - 1) * (ng2 - 1)
         df_resid = data[dv].size - (ng1 * ng2)
     else:
@@ -1455,17 +1455,17 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     # sst = residuals within + residuals between
     sst = grp.apply(lambda x: (x - x.mean())**2).sum()
     # Interaction
-    ssinter = sstotal - (sst + mtime.loc[0, 'SS'] + mbetw.loc[0, 'SS'])
-    sswg = mtime.loc[1, 'SS'] - ssinter
-    sseb = sstotal - (mtime.loc[0, 'SS'] + mbetw.loc[0, 'SS'] + sswg + ssinter)
+    ssinter = sstotal - (sst + mtime.at[0, 'SS'] + mbetw.at[0, 'SS'])
+    sswg = mtime.at[1, 'SS'] - ssinter
+    sseb = sstotal - (mtime.at[0, 'SS'] + mbetw.at[0, 'SS'] + sswg + ssinter)
 
     # DEGREES OF FREEDOM
     n_obs = data.groupby(within)[dv].count().max()
-    dftime = mtime.loc[0, 'DF']
-    dfbetween = mbetw.loc[0, 'DF']
+    dftime = mtime.at[0, 'DF']
+    dfbetween = mbetw.at[0, 'DF']
     dfeb = n_obs - data.groupby(between)[dv].count().count()
     dfwg = dftime * dfeb
-    dfinter = mtime.loc[0, 'DF'] * mbetw.loc[0, 'DF']
+    dfinter = mtime.at[0, 'DF'] * mbetw.at[0, 'DF']
 
     # MEAN SQUARES
     mseb = sseb / dfeb
@@ -1473,8 +1473,8 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     msinter = ssinter / dfinter
 
     # F VALUES
-    fbetween = mbetw.loc[0, 'MS'] / mseb
-    ftime = mtime.loc[0, 'MS'] / mswg
+    fbetween = mbetw.at[0, 'MS'] / mseb
+    ftime = mtime.at[0, 'MS'] / mswg
     finter = msinter / mswg
 
     # P-values
@@ -1492,9 +1492,9 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
                     ignore_index=True)
     # Update values
     aov.rename(columns={'DF': 'DF1'}, inplace=True)
-    aov.loc[0, 'F'], aov.loc[1, 'F'] = fbetween, ftime
-    aov.loc[0, 'p-unc'], aov.loc[1, 'p-unc'] = pbetween, ptime
-    aov.loc[0, 'np2'], aov.loc[1, 'np2'] = npsq_between, npsq_time
+    aov.at[0, 'F'], aov.at[1, 'F'] = fbetween, ftime
+    aov.at[0, 'p-unc'], aov.at[1, 'p-unc'] = pbetween, ptime
+    aov.at[0, 'np2'], aov.at[1, 'np2'] = npsq_between, npsq_time
     aov = aov.append({'Source': 'Interaction',
                       'SS': ssinter,
                       'DF1': dfinter,
@@ -1507,7 +1507,7 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     aov['SS'] = aov['SS'].round(3)
     aov['MS'] = aov['MS'].round(3)
     aov['DF2'] = [dfeb, dfwg, dfwg]
-    aov['eps'] = [np.nan, mtime.loc[0, 'eps'], np.nan]
+    aov['eps'] = [np.nan, mtime.at[0, 'eps'], np.nan]
     col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc',
                  'p-GG-corr', 'np2', 'eps', 'sphericity', 'W-spher',
                  'p-spher']
@@ -1641,17 +1641,17 @@ def ancova(data=None, dv=None, between=None, covar=None, export_filename=None):
     aov_covar = anova(data=data, dv=covar, between=between, detailed=True)
 
     # Create full ANCOVA
-    ss_t_dv = aov_dv.loc[0, 'SS'] + aov_dv.loc[1, 'SS']
-    ss_t_covar = aov_covar.loc[0, 'SS'] + aov_covar.loc[1, 'SS']
+    ss_t_dv = aov_dv.at[0, 'SS'] + aov_dv.at[1, 'SS']
+    ss_t_covar = aov_covar.at[0, 'SS'] + aov_covar.at[1, 'SS']
     # Sums of squares
     ss_t = ss_t_dv - bt**2 * ss_t_covar
-    ss_w = aov_dv.loc[1, 'SS'] - bw**2 * aov_covar.loc[1, 'SS']
+    ss_w = aov_dv.at[1, 'SS'] - bw**2 * aov_covar.at[1, 'SS']
     ss_b = ss_t - ss_w
     ss_c = np.nansum(ss_slopes) * bw
     # DOF
     df_c = 1
-    df_b = aov_dv.loc[0, 'DF']
-    df_w = aov_dv.loc[1, 'DF'] - 1
+    df_b = aov_dv.at[0, 'DF']
+    df_w = aov_dv.at[1, 'DF'] - 1
     # Mean squares
     ms_c = ss_c / df_c
     ms_b = ss_b / df_b
@@ -1733,7 +1733,7 @@ def ancovan(data=None, dv=None, covar=None, between=None,
     aov.rename(columns={'index': 'Source', 'sum_sq': 'SS',
                         'df': 'DF', 'PR(>F)': 'p-unc'}, inplace=True)
 
-    aov.loc[0, 'Source'] = between
+    aov.at[0, 'Source'] = between
 
     aov['DF'] = aov['DF'].astype(int)
     aov[['SS', 'F']] = aov[['SS', 'F']].round(3)

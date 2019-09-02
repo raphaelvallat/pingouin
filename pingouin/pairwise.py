@@ -650,14 +650,13 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
         'B' : Name of second measurement
         'mean(A)' : Mean of first measurement
         'mean(B)' : Mean of second measurement
-        'diff' : Mean difference
-        'SE' : Standard error
+        'diff' : Mean difference (= mean(A) - mean(B))
+        'se' : Standard error
         'tail' : indicate whether the p-values are one-sided or two-sided
         'T' : T-values
         'df' : adjusted degrees of freedom
         'pval' : Games-Howell corrected p-values
-        'efsize' : effect sizes
-        'eftype' : type of effect size
+        'hedges' : effect size (or any effect size defined in ``effsize``)
 
     Notes
     -----
@@ -761,15 +760,14 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
                          'mean(A)': gmeans[g1],
                          'mean(B)': gmeans[g2],
                          'diff': mn,
-                         'SE': se,
+                         'se': se,
                          'tail': tail,
                          'T': tval,
                          'df': df,
                          'pval': pval,
-                         'efsize': ef,
-                         'eftype': effsize,
+                         effsize: ef,
                          })
-    col_round = ['mean(A)', 'mean(B)', 'diff', 'SE', 'T', 'df', 'efsize']
+    col_round = ['mean(A)', 'mean(B)', 'diff', 'se', 'T', 'df', effsize]
     stats[col_round] = stats[col_round].round(3)
     return stats
 
@@ -1061,7 +1059,7 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     dvs_out = dvs + ['outliers']
     dvs_bf10 = dvs + ['BF10']
     for i in range(stats.shape[0]):
-        col1, col2 = stats.loc[i, 'X'], stats.loc[i, 'Y']
+        col1, col2 = stats.at[i, 'X'], stats.at[i, 'Y']
         if covar is None:
             cor_st = corr(data[col1].values, data[col2].values, tail=tail,
                           method=method)
@@ -1101,8 +1099,7 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
                  'BF10', 'power']
 
     # Reorder columns and remove empty ones
-    stats = stats.reindex(columns=col_order)
-    stats = stats.dropna(how='all', axis=1)
+    stats = stats.reindex(columns=col_order).dropna(how='all', axis=1)
 
     # Add covariates names if present
     if covar is not None:
