@@ -492,6 +492,7 @@ The functions that are currently supported as pandas method are:
 * :py:func:`pingouin.mixed_anova`
 * :py:func:`pingouin.welch_anova`
 * :py:func:`pingouin.pairwise_ttests`
+* :py:func:`pingouin.pairwise_tukey`
 * :py:func:`pingouin.pairwise_corr`
 * :py:func:`pingouin.partial_corr`
 * :py:func:`pingouin.pcorr`

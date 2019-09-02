@@ -61,6 +61,11 @@ class TestParametric(TestCase):
                                                 padjust='fdr_bh',
                                                 effsize='hedges', data=df))
 
+        # Pairwise Tukey
+        tukey = df.pairwise_tukey(dv='Scores', between='Group')
+        assert tukey.equals(pg.pairwise_tukey(data=df, dv='Scores',
+                                              between='Group'))
+
         # Test two-way mixed ANOVA
         aov = df.mixed_anova(dv='Scores', between='Group', within='Time',
                              subject='Subject', correction=False)

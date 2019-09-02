@@ -438,6 +438,7 @@ The functions that are currently supported as pandas method are:
 * `pingouin.mixed_anova <https://pingouin-stats.org/generated/pingouin.mixed_anova.html#pingouin.mixed_anova>`_
 * `pingouin.welch_anova <https://pingouin-stats.org/generated/pingouin.welch_anova.html#pingouin.welch_anova>`_
 * `pingouin.pairwise_ttests <https://pingouin-stats.org/generated/pingouin.pairwise_ttests.html#pingouin.pairwise_ttests>`_
+* `pingouin.pairwise_ttests <https://pingouin-stats.org/generated/pingouin.pairwise_tukey.html#pingouin.pairwise_tukey>`_
 * `pingouin.pairwise_corr <https://pingouin-stats.org/generated/pingouin.pairwise_corr.html#pingouin.pairwise_corr>`_
 * `pingouin.partial_corr <https://pingouin-stats.org/generated/pingouin.partial_corr.html#pingouin.partial_corr>`_
 * `pingouin.pcorr <https://pingouin-stats.org/generated/pingouin.pcorr.html#pingouin.pcorr>`_

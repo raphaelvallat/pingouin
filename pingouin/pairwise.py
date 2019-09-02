@@ -457,6 +457,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     return stats
 
 
+@pf.register_dataframe_method
 def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
                    tail='two-sided', effsize='hedges'):
     '''Pairwise Tukey-HSD post-hoc test.
@@ -464,7 +465,8 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
     Parameters
     ----------
     data : pandas DataFrame
-        DataFrame
+        DataFrame. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
     dv : string
         Name of column containing the dependant variable.
     between: string
@@ -480,9 +482,11 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
         'cohen' : Unbiased Cohen d
         'hedges' : Hedges g
         'glass': Glass delta
+        'r' : Pearson correlation coefficient
         'eta-square' : Eta-square
         'odds-ratio' : Odds ratio
         'AUC' : Area Under the Curve
+        'CLES' : Common Language Effect Size
 
     Returns
     -------
@@ -493,17 +497,17 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
         'B' : Name of second measurement
         'mean(A)' : Mean of first measurement
         'mean(B)' : Mean of second measurement
-        'diff' : Mean difference
-        'SE' : Standard error
+        'diff' : Mean difference (= mean(A) - mean(B))
+        'se' : Standard error
         'tail' : indicate whether the p-values are one-sided or two-sided
         'T' : T-values
         'p-tukey' : Tukey-HSD corrected p-values
-        'efsize' : effect sizes
-        'eftype' : type of effect size
+        'hedges' : effect size (or any effect size defined in ``effsize``)
 
     Notes
     -----
     Tukey HSD post-hoc is best for balanced one-way ANOVA.
+
     It has been proven to be conservative for one-way ANOVA with unequal
     sample sizes. However, it is not robust if the groups have unequal
     variances, in which case the Games-Howell test is more adequate.
@@ -564,12 +568,12 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
 
     # First compute the ANOVA
     aov = anova(dv=dv, data=data, between=between, detailed=True)
-    df = aov.loc[1, 'DF']
-    ng = aov.loc[0, 'DF'] + 1
+    df = aov.at[1, 'DF']
+    ng = aov.at[0, 'DF'] + 1
     grp = data.groupby(between)[dv]
     n = grp.count().values
     gmeans = grp.mean().values
-    gvar = aov.loc[1, 'MS'] / n
+    gvar = aov.at[1, 'MS'] / n
 
     # Pairwise combinations
     g1, g2 = np.array(list(combinations(np.arange(ng), 2))).T
@@ -596,17 +600,16 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
     stats = pd.DataFrame({
                          'A': np.unique(data[between])[g1],
                          'B': np.unique(data[between])[g2],
-                         'mean(A)': gmeans[g1],
-                         'mean(B)': gmeans[g2],
-                         'diff': mn,
-                         'SE': np.round(se, 3),
+                         'mean(A)': np.round(gmeans[g1], 3),
+                         'mean(B)': np.round(gmeans[g2], 3),
+                         'diff': np.round(mn, 3),
+                         'se': np.round(se, 3),
                          'tail': tail,
                          'T': np.round(tval, 3),
                          # 'alpha': alpha,
                          # 'crit': np.round(crit, 3),
                          'p-tukey': pval,
-                         'efsize': np.round(ef, 3),
-                         'eftype': effsize,
+                         effsize: np.round(ef, 3),
                          })
     return stats
 
