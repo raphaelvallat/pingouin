@@ -60,6 +60,8 @@ def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
         Second circular variable (expressed in radians)
     tail : string
         Specify whether to return 'one-sided' or 'two-sided' p-value.
+    correction_uniform : bool
+        Use correction for uniform marginals
 
     Returns
     -------
@@ -67,23 +69,31 @@ def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
         Correlation coefficient
     pval : float
         Uncorrected p-value
-    correction_uniform : bool
-        Use correction for uniform marginals
 
     Notes
     -----
     Adapted from the CircStats MATLAB toolbox (Berens 2009).
 
-    Use the np.deg2rad function to convert angles from degrees to radians.
+    Use the :py:func:`numpy.deg2rad` function to convert angles from degrees
+    to radians.
 
     Please note that NaN are automatically removed.
-g
-    If the correction parameter is True, an alternative equation from
+
+    If the ``correction_uniform`` is True, an alternative equation from
     Jammalamadaka & Sengupta (2001, p. 177) is used.
-    If the marginal distribution of x or y is uniform, the mean is not well
-    defined, which leads to wrong estimates of the circular correlation.
-    The alternative equation corrects for this by choosing the means in a way
-    that maximizes the postitive or negative correlation.
+    If the marginal distribution of ``x`` or ``y`` is uniform, the mean is
+    not well defined, which leads to wrong estimates of the circular
+    correlation. The alternative equation corrects for this by choosing the
+    means in a way that maximizes the postitive or negative correlation.
+
+    References
+    ----------
+    .. [1] Berens, P. (2009). CircStat: A MATLAB Toolbox for Circular
+           Statistics. Journal of Statistical Software, Articles, 31(10), 1–21.
+           https://doi.org/10.18637/jss.v031.i10
+
+    .. [2] Jammalamadaka, S. R., & Sengupta, A. (2001). Topics in circular
+           statistics (Vol. 5). world scientific.
 
     Examples
     --------
@@ -95,6 +105,12 @@ g
     >>> r, pval = circ_corrcc(x, y)
     >>> print(r, pval)
     0.942 0.06579836070349088
+
+    With the correction for uniform marginals
+
+    >>> r, pval = circ_corrcc(x, y, correction_uniform=True)
+    >>> print(r, pval)
+    0.547 0.28585306869206784
     """
     from scipy.stats import norm
     x = np.asarray(x)
@@ -114,7 +130,8 @@ g
 
     if not correction_uniform:
         # Similar to np.corrcoef(x_sin, y_sin)[0][1]
-        r = np.sum(x_sin * y_sin) / np.sqrt(np.sum(x_sin**2) * np.sum(y_sin**2))
+        r = np.sum(x_sin * y_sin) / np.sqrt(np.sum(x_sin**2) *
+                                            np.sum(y_sin**2))
     else:
         r_minus = np.abs(np.sum(np.exp((x - y) * 1j)))
         r_plus = np.abs(np.sum(np.exp((x + y) * 1j)))

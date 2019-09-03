@@ -34,13 +34,14 @@ d. Added Sidak one-step correction to :py:func:`pingouin.multicomp` (``method='s
 a. Added support for pairwise deletion in :py:func:`pingouin.pairwise_ttests` (default is listwise deletion), using the ``nan_policy`` argument.
 b. Added support for listwise deletion in :py:func:`pingouin.pairwise_corr` (default is pairwise deletion), using the ``nan_policy`` argument.
 c. Added the ``interaction`` boolean argument to :py:func:`pingouin.pairwise_ttests`, useful if one is only interested in the main effects.
+d. Added ``correction_uniform`` boolean argument to :py:func:`pingouin.circ_corrcc`. See `PR64 <https://github.com/raphaelvallat/pingouin/pull/64>`_ by Dominik Straub.
 
 **Contributors**
 
 * `Raphael Vallat <https://raphaelvallat.com>`_
 * `Eshin Jolly <http://eshinjolly.com/>`_
 * Nicolas Legrand
-
+* Dominik Straub
 
 v0.2.8 (July 2019)
 ------------------

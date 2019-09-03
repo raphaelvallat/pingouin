@@ -28,6 +28,8 @@ class TestCircular(TestCase):
         assert np.round(pval, 3) == 0.066
         _, pval2 = circ_corrcc(x, y, tail='one-sided')
         assert pval2 == pval / 2
+        # With correction for uniform marginals
+        circ_corrcc(x, y, correction_uniform=True)
         # Wrong argument
         with pytest.raises(ValueError):
             circ_corrcc(x, [0.52, 1.29, 2.87])
