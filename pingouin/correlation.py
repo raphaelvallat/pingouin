@@ -750,7 +750,8 @@ def rcorr(self, method='pearson', upper='pval', decimals=3, padjust=None,
         Available methods are ::
 
         'none' : no correction
-        'bonferroni' : one-step Bonferroni correction
+        'bonf' : one-step Bonferroni correction
+        'sidak' : one-step Sidak correction
         'holm' : step-down method using Bonferroni adjustments
         'fdr_bh' : Benjamini/Hochberg FDR correction
         'fdr_by' : Benjamini/Yekutieli FDR correction

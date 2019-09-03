@@ -54,7 +54,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         Available methods are ::
 
         'none' : no correction
-        'bonferroni' : one-step Bonferroni correction
+        'bonf' : one-step Bonferroni correction
+        'sidak' : one-step Sidak correction
         'holm' : step-down method using Bonferroni adjustments
         'fdr_bh' : Benjamini/Hochberg FDR correction
         'fdr_by' : Benjamini/Yekutieli FDR correction
@@ -816,7 +817,8 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
         Available methods are ::
 
         'none' : no correction
-        'bonferroni' : one-step Bonferroni correction
+        'bonf' : one-step Bonferroni correction
+        'sidak' : one-step Sidak correction
         'holm' : step-down method using Bonferroni adjustments
         'fdr_bh' : Benjamini/Hochberg FDR correction
         'fdr_by' : Benjamini/Yekutieli FDR correction

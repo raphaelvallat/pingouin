@@ -125,9 +125,6 @@ Multiple comparisons and post-hoc tests
     pairwise_tukey
     pairwise_gameshowell
     multicomp
-    bonf
-    holm
-    fdr
 
 Multivariate tests
 ------------------

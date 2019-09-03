@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 from numpy.testing import assert_array_almost_equal, assert_array_equal
 from unittest import TestCase
-from pingouin.multicomp import fdr, bonf, holm, multicomp
+from pingouin.multicomp import fdr, bonf, holm, sidak, multicomp
 
 pvals = [.52, .12, .0001, .03, .14]
 pvals2 = [.52, .12, .10, .30, .14]
@@ -70,6 +70,20 @@ class TestMulticomp(TestCase):
         assert_array_almost_equal(pval_corr, [1, 1, 0.001, 0.27, 1, 1, np.nan,
                                               .9, 1., 1.])
 
+    def test_sidak(self):
+        """Test function sidak
+        Compare to statsmodels function.
+        """
+        reject, pval_corr = sidak(pvals)
+        assert_array_equal(reject, [False, False, True, False, False])
+        assert_array_almost_equal(pval_corr, [9.74519603e-01, 4.72268083e-01,
+                                              4.99900010e-04, 1.41265974e-01,
+                                              5.29572982e-01])
+        # With NaN values
+        _, pval_corr = sidak(pvals2_NA)
+        assert_array_almost_equal(pval_corr, [0.94691584, np.nan, 0.3439,
+                                              0.7599, 0.45299184])
+
     def test_holm(self):
         """Test function holm.
         Compare to the p.adjust R function.
@@ -97,11 +111,10 @@ class TestMulticomp(TestCase):
         reject, pvals_corr = multicomp(pvals, method='fdr_by')
         reject, pvals_corr = multicomp(pvals, method='h')
         reject, pvals_corr = multicomp(pvals, method='b')
+        reject, pvals_corr = multicomp(pvals, method='sidak')
         reject, pvals_corr = multicomp(pvals, method='none')
         assert_array_equal(pvals, pvals_corr)
         reject, pvals_corr = multicomp(pvals2, method='holm')
         # Wrong arguments
         with pytest.raises(ValueError):
             reject, pvals_corr = multicomp(pvals, method='wrong')
-        with pytest.raises(ValueError):
-            reject, pvals_corr = multicomp(pvals=0)

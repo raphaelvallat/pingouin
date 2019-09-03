@@ -13,22 +13,27 @@ v0.2.9 (September 2019)
 
 a. Disabled default l2 regularization of coefficients in :py:func:`pingouin.logistic_regression`. As pointed out by Eshin Jolly in `PR54 <https://github.com/raphaelvallat/pingouin/pull/54>`_, scikit-learn automatically applies a penalization of coefficients, which in turn makes the estimation of standard errors and p-values not totally correct/interpretable. This regularization behavior is now disabled, resulting in the same behavior as R ``glm(..., family=binomial)``.
 
+**Code and dependencies**
+
+a. Pandas methods are now internally defined using the `pandas_flavor package <https://github.com/Zsailer/pandas_flavor>`_ package.
+b. Internal code refactoring of the :py:func:`pingouin.pairwise_ttests` (to slightly speed up computation and improve memory usage).
+c. The first argument of the :py:func:`pingouin.anova`, :py:func:`pingouin.ancova`, :py:func:`pingouin.welch_anova`, :py:func:`pingouin.pairwise_ttests`, :py:func:`pingouin.pairwise_tukey`, :py:func:`pingouin.pairwise_gameshowell`, :py:func:`pingouin.welch_anova`, :py:func:`pingouin.kruskal`, :py:func:`pingouin.friedman`, :py:func:`pingouin.cochran`, :py:func:`pingouin.remove_rm_na` functions is now ``data`` instead of ``dv`` (to be consistent with other Pingouin functions). This will cause error if the user runs previous Pingouin code with positional-only arguments. As a general rule, you should always pass keywords (explicit) arguments (read more `here <https://treyhunner.com/2018/04/keyword-arguments-in-python/>`_).
+d. For clarity, :py:func:`pingouin.fdr`, :py:func:`pingouin.bonf`, :py:func:`pingouin.sidak`, :py:func:`pingouin.holm` have been deprecated from the API and must be called via :py:func:`pingouin.multicomp`.
+e. :py:func:`pingouin.pairwise_ttests` output does not include the ``CLES`` column by default anymore. Users must explicitly pass ``effsize='CLES'``.
+f. The ``remove_na`` argument of :py:func:`pingouin.cronbach_alpha` has been replaced with ``nan_policy`` (`'pairwise'`, or `'listwise'`).
+
 **New functions**
 
 a. Added :py:func:`pingouin.harrelldavis`, a robust quantile estimation method (to be used in a future version of the :py:func:`pingouin.plot_shift` function). See `PR63 <https://github.com/raphaelvallat/pingouin/pull/63>`_ by Nicolas Legrand.
 b. The :py:func:`pingouin.ancova` can now directly be used a Pandas method, e.g. ``data.ancova(...)``.
 c. The :py:func:`pingouin.pairwise_tukey` can now directly be used a Pandas method, e.g. ``data.pairwise_tukey(...)``.
+d. Added Sidak one-step correction to :py:func:`pingouin.multicomp` (``method='sidak'``).
 
 **Enhancements**
 
 a. Added support for pairwise deletion in :py:func:`pingouin.pairwise_ttests` (default is listwise deletion), using the ``nan_policy`` argument.
 b. Added support for listwise deletion in :py:func:`pingouin.pairwise_corr` (default is pairwise deletion), using the ``nan_policy`` argument.
-c. Pandas methods are now internally defined using the `pandas_flavor package <https://github.com/Zsailer/pandas_flavor>`_ package.
-d. The first argument of the :py:func:`pingouin.anova`, :py:func:`pingouin.ancova`, :py:func:`pingouin.welch_anova`, :py:func:`pingouin.pairwise_ttests`, :py:func:`pingouin.pairwise_tukey`, :py:func:`pingouin.pairwise_gameshowell`, :py:func:`pingouin.welch_anova`, :py:func:`pingouin.kruskal`, :py:func:`pingouin.friedman`, :py:func:`pingouin.cochran`, :py:func:`pingouin.remove_rm_na` functions is now ``data`` instead of ``dv`` (to be consistent with other Pingouin functions). This will cause error if the user runs previous Pingouin code with positional-only arguments. As a general rule, you should always pass keywords (explicit) arguments (read more `here <https://treyhunner.com/2018/04/keyword-arguments-in-python/>`_).
-e. The ``remove_na`` argument of :py:func:`pingouin.cronbach_alpha` has been replaced with ``nan_policy`` (`'pairwise'`, or `'listwise'`).
-f. Added the ``interaction`` boolean argument to :py:func:`pingouin.pairwise_ttests`, useful if one is only interested in the main effects.
-g. :py:func:`pingouin.pairwise_ttests` output does not include the ``CLES`` column by default anymore. Users must explicitly pass ``effsize='CLES'``.
-h. Internal code refactoring of the :py:func:`pingouin.pairwise_ttests` (to slightly speed up computation and improve memory usage).
+c. Added the ``interaction`` boolean argument to :py:func:`pingouin.pairwise_ttests`, useful if one is only interested in the main effects.
 
 **Contributors**
 
