@@ -49,7 +49,7 @@ def circ_axial(alpha, n):
     return np.remainder(alpha * n, 2 * np.pi)
 
 
-def circ_corrcc(x, y, tail='two-sided'):
+def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
     """Correlation coefficient between two circular variables.
 
     Parameters
@@ -67,6 +67,8 @@ def circ_corrcc(x, y, tail='two-sided'):
         Correlation coefficient
     pval : float
         Uncorrected p-value
+    correction_uniform : bool
+        Use correction for uniform marginals
 
     Notes
     -----
@@ -75,6 +77,13 @@ def circ_corrcc(x, y, tail='two-sided'):
     Use the np.deg2rad function to convert angles from degrees to radians.
 
     Please note that NaN are automatically removed.
+g
+    If the correction parameter is True, an alternative equation from
+    Jammalamadaka & Sengupta (2001, p. 177) is used.
+    If the marginal distribution of x or y is uniform, the mean is not well
+    defined, which leads to wrong estimates of the circular correlation.
+    The alternative equation corrects for this by choosing the means in a way
+    that maximizes the postitive or negative correlation.
 
     Examples
     --------
@@ -102,8 +111,15 @@ def circ_corrcc(x, y, tail='two-sided'):
     # Compute correlation coefficient
     x_sin = np.sin(x - circmean(x))
     y_sin = np.sin(y - circmean(y))
-    # Similar to np.corrcoef(x_sin, y_sin)[0][1]
-    r = np.sum(x_sin * y_sin) / np.sqrt(np.sum(x_sin**2) * np.sum(y_sin**2))
+
+    if not correction_uniform:
+        # Similar to np.corrcoef(x_sin, y_sin)[0][1]
+        r = np.sum(x_sin * y_sin) / np.sqrt(np.sum(x_sin**2) * np.sum(y_sin**2))
+    else:
+        r_minus = np.abs(np.sum(np.exp((x - y) * 1j)))
+        r_plus = np.abs(np.sum(np.exp((x + y) * 1j)))
+        denom = 2 * np.sqrt(np.sum(x_sin ** 2) * np.sum(y_sin ** 2))
+        r = (r_minus - r_plus) / denom
 
     # Compute T- and p-values
     tval = np.sqrt((n * (x_sin**2).mean() * (y_sin**2).mean())
