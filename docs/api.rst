@@ -179,6 +179,7 @@ Plotting
       plot_blandaltman
       plot_paired
       plot_shift
+      plot_rm_corr
       plot_skipped_corr
       qqplot
 

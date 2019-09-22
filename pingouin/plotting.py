@@ -15,7 +15,7 @@ import matplotlib.transforms as transforms
 sns.set(style='ticks', context='notebook')
 
 __all__ = ["plot_blandaltman", "plot_skipped_corr", "qqplot", "plot_paired",
-           "plot_shift"]
+           "plot_shift", "plot_rm_corr"]
 
 
 def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
@@ -845,3 +845,119 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
     plt.tight_layout()
 
     return fig
+
+
+def plot_rm_corr(data=None, x=None, y=None, subject=None, legend=True,
+                 kwargs_facetgrid=dict(height=4, aspect=1)):
+    """Plot a repeated measures correlation.
+
+    Parameters
+    ----------
+    data : :py:class:`pandas.DataFrame`
+        Dataframe.
+    x, y : string
+        Name of columns in ``data`` containing the two dependent variables.
+    subject : string
+        Name of column in ``data`` containing the subject indicator.
+    legend : boolean
+        If True, add legend to plot. Legend will show all the unique values in
+        ``subject``.
+    kwargs_facetgrid : dict
+        Optional keyword argument passed to :py:class:`seaborn.FacetGrid`
+
+    Returns
+    -------
+    g : :py:class:`seaborn.FacetGrid`
+        Seaborn FacetGrid.
+
+    See also
+    --------
+    rm_corr
+
+    Notes
+    -----
+    Repeated measures correlation (rmcorr) is a statistical technique
+    for determining the common within-individual association for paired
+    measures assessed on two or more occasions for multiple individuals.
+
+    Results have been tested against the `rmcorr` R package. Note that this
+    function requires the statsmodels Python package.
+
+    Missing values are automatically removed from the ``data``
+    (listwise deletion).
+
+    References
+    ----------
+    .. [1] Bakdash, J.Z., Marusich, L.R., 2017. Repeated Measures Correlation.
+           Front. Psychol. 8, 456. https://doi.org/10.3389/fpsyg.2017.00456
+
+    .. [2] Bland, J. M., & Altman, D. G. (1995). Statistics notes: Calculating
+           correlation coefficients with repeated observations:
+           Part 1—correlation within subjects. Bmj, 310(6977), 446.
+
+    .. [3] https://github.com/cran/rmcorr
+
+    Examples
+    --------
+    Default repeated mesures correlation plot
+
+    .. plot::
+
+        >>> import pingouin as pg
+        >>> df = pg.read_dataset('rm_corr')
+        >>> g = pg.plot_rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
+
+    With some tweakings
+
+    .. plot::
+
+        >>> import pingouin as pg
+        >>> import seaborn as sns
+        >>> df = pg.read_dataset('rm_corr')
+        >>> sns.set(style='darkgrid', font_scale=1.2)
+        >>> g = pg.plot_rm_corr(data=df, x='pH', y='PacO2',
+        ...                     subject='Subject', legend=False,
+        ...                     kwargs_facetgrid=dict(height=4.5, aspect=1.5,
+        ...                                           palette='Spectral'))
+    """
+    # Check that stasmodels is installed
+    from pingouin.utils import _is_statsmodels_installed
+    _is_statsmodels_installed(raise_error=True)
+    from statsmodels.formula.api import ols
+
+    # Safety check (duplicated from pingouin.rm_corr)
+    assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame'
+    assert x in data.columns, 'The %s column is not in data.' % x
+    assert y in data.columns, 'The %s column is not in data.' % y
+    assert data[x].dtype.kind in 'bfi', '%s must be numeric.' % x
+    assert data[y].dtype.kind in 'bfi', '%s must be numeric.' % y
+    assert subject in data.columns, 'The %s column is not in data.' % subject
+    if data[subject].nunique() < 3:
+        raise ValueError('rm_corr requires at least 3 unique subjects.')
+
+    # Remove missing values
+    data = data[[x, y, subject]].dropna(axis=0)
+
+    # Calculate rm_corr
+    # rmc = pg.rm_corr(data=data, x=x, y=y, subject=subject)
+
+    # Fit ANCOVA model
+    formula = y + ' ~ C(' + subject + ') + ' + x
+    model = ols(formula, data=data).fit()
+
+    # Fitted values
+    data['pred'] = model.fittedvalues
+
+    # Define color palette
+    if 'palette' not in kwargs_facetgrid:
+        kwargs_facetgrid['palette'] = sns.hls_palette(data[subject].nunique())
+
+    # Start plot
+    g = sns.FacetGrid(data, hue=subject, **kwargs_facetgrid)
+    g = g.map(sns.regplot, x, "pred", scatter=False, ci=None, truncate=True)
+    g = g.map(sns.scatterplot, x, y)
+
+    if legend:
+        g.add_legend()
+
+    return g

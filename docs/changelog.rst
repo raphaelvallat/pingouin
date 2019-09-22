@@ -6,6 +6,14 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
+v0.3.0 (dev)
+------------
+
+**New functions**
+
+a. Added :py:func:`pingouin.plot_rm_corr` to plot a repeated measures correlation
+
+
 v0.2.9 (September 2019)
 -----------------------
 

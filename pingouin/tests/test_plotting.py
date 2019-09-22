@@ -2,11 +2,12 @@ import pytest
 import matplotlib
 import numpy as np
 from scipy import stats
+import seaborn as sns
 import matplotlib.pyplot as plt
 from unittest import TestCase
 from pingouin import read_dataset
 from pingouin.plotting import (plot_blandaltman, plot_skipped_corr, _ppoints,
-                               qqplot, plot_paired, plot_shift)
+                               qqplot, plot_paired, plot_shift, plot_rm_corr)
 
 
 class TestPlotting(TestCase):
@@ -90,3 +91,11 @@ class TestPlotting(TestCase):
         plot_shift(x, y)
         plot_shift(x, y, n_boot=100, percentiles=[5, 55, 95], ci=0.68,
                    show_median=False, seed=456, violin=False)
+
+    def test_plot_rm_corr(self):
+        """Test plot_shift()."""
+        df = read_dataset('rm_corr')
+        g = plot_rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
+        g = plot_rm_corr(data=df, x='pH', y='PacO2', subject='Subject',
+                         legend=False)
+        assert isinstance(g, sns.FacetGrid)

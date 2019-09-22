@@ -901,6 +901,10 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
         'CI95' : 95% parametric confidence intervals
         'power' : achieved power of the test (= 1 - type II error).
 
+    See also
+    --------
+    plot_rm_corr
+
     Notes
     -----
     Repeated measures correlation (rmcorr) is a statistical technique
@@ -941,6 +945,14 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     >>> pg.rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
                  r  dof      pval           CI95%  power
     rm_corr -0.507   38  0.000847  [-0.71, -0.23]   0.93
+
+    Now plot using the :py:func:`pingouin.plot_rm_corr` function:
+
+    .. plot::
+
+        >>> import pingouin as pg
+        >>> df = pg.read_dataset('rm_corr')
+        >>> g = pg.plot_rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
     """
     from pingouin import ancova, power_corr
     # Safety checks
