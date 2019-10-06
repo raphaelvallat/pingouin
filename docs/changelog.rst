@@ -12,6 +12,7 @@ v0.3.0 (dev)
 **New functions**
 
 a. Added :py:func:`pingouin.plot_rm_corr` to plot a repeated measures correlation
+b. Added the ``relimp`` argument to :py:func:`pingouin.linear_regression` to return the relative importance (= contribution) of each individual predictor to the :math:`R^2` of the full model.
 
 
 v0.2.9 (September 2019)

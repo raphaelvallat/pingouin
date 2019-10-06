@@ -1,8 +1,9 @@
 import itertools
 import numpy as np
 import pandas as pd
-from scipy.stats import t, norm
 import pandas_flavor as pf
+from scipy.stats import t, norm
+from scipy.linalg import pinv, pinvh
 from pingouin.utils import remove_na as rm_na
 from pingouin.utils import _flatten_list as _fl
 
@@ -10,7 +11,7 @@ __all__ = ['linear_regression', 'logistic_regression', 'mediation_analysis']
 
 
 def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
-                      as_dataframe=True, remove_na=False):
+                      as_dataframe=True, remove_na=False, relimp=False):
     """(Multiple) Linear regression.
 
     Parameters
@@ -40,22 +41,41 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
         row is removed). Default is False, which will raise an error if missing
         values are present in either the predictor(s) or dependent
         variable.
+    relimp : bool
+        If True, returns the relative importance (= contribution) of
+        predictors. This is irrelevant when the predictors are uncorrelated:
+        the total :math:`R^2` of the model is simply the sum of each univariate
+        regression :math:`R^2`-values. However, this does not apply when
+        predictors are correlated. Instead, the total :math:`R^2` of the model
+        is partitioned by averaging over all combinations of predictors,
+        as done in the `relaimpo
+        <https://cran.r-project.org/web/packages/relaimpo/relaimpo.pdf>`_
+        R package (``calc.relimp(type="lmg")``).
+
+        .. warning:: The computation time roughly doubles for each
+            additional predictor and therefore this can be extremely slow for
+            models with more than 12-15 predictors.
+
+        .. versionadded:: 0.3.0
 
     Returns
     -------
     stats : dataframe or dict
-        Linear regression summary::
+        Linear regression summary:
 
-        'names' : name of variable(s) in the model (e.g. x1, x2...)
-        'coef' : regression coefficients
-        'se' : standard error of the estimate
-        'T' : T-values
-        'pval' : p-values
-        'r2' : coefficient of determination (R2)
-        'adj_r2' : adjusted R2
-        'CI[2.5%]' : lower confidence interval
-        'CI[97.5%]' : upper confidence interval
-        'residuals' : residuals (only if as_dataframe is False)
+        * ``'names'``: name of variable(s) in the model (e.g. x1, x2...)
+        * ``'coef'``: regression coefficients
+        * ``'se'``: standard error of the estimate
+        * ``'T'``: T-values
+        * ``'pval'``: p-values
+        * ``'r2'``: coefficient of determination (:math:`R^2`)
+        * ``'adj_r2'``: adjusted :math:`R^2`
+        * ``'CI[2.5%]'``: lower confidence interval
+        * ``'CI[97.5%]'``: upper confidence interval
+        * ``'residuals'``: residuals (only if ``as_dataframe=False``)
+        * ``'relimp'``: relative contribution of each predictor to the final\
+                        :math:`R^2` (only if ``relimp=True``).
+        * ``'relimp_perc'``: percent relative contribution
 
     See also
     --------
@@ -109,6 +129,14 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     The residuals can be accessed via :code:`stats.residuals_` if ``stats``
     is a pandas DataFrame or :code:`stats['residuals']` if ``stats`` is a
     dict.
+
+    The relative importance (``relimp``) column is a partitioning of the
+    total :math:`R^2` of the model into individual :math:`R^2` contribution.
+    This is calculated by taking the average over average contributions in
+    models of different sizes. For more details, please refer to
+    `Groemping et al. 2006 <http://dx.doi.org/10.18637/jss.v017.i01>`_
+    and the R package `relaimpo
+    <https://cran.r-project.org/web/packages/relaimpo/relaimpo.pdf>`_.
 
     Note that Pingouin will automatically remove any duplicate columns
     from :math:`X`, as well as any column with only one unique value
@@ -171,6 +199,26 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     >>> y[7] = np.nan
     >>> linear_regression(X, y, remove_na=True, coef_only=True)
     array([4.64069731, 0.35455398, 0.1888135 ])
+
+    8. Get the relative importance of predictors
+
+    >>> lm = linear_regression(X, y, remove_na=True, relimp=True)
+    >>> lm[['names', 'relimp', 'relimp_perc']]
+               names    relimp  relimp_perc
+    0  Intercept       NaN          NaN
+    1         x1  0.217265    82.202201
+    2         x2  0.047041    17.797799
+
+    The ``relimp`` column is a partitioning of the total :math:`R^2` of the
+    model into individual contribution. Therefore, it sums to the :math:`R^2`
+    of the full model. The ``relimp_perc`` is normalized to sum to 100%. See
+    `Groemping 2006 <https://www.jstatsoft.org/article/view/v017i01>`_
+    for more details.
+
+    >>> lm[['relimp', 'relimp_perc']].sum()
+    relimp           0.264305
+    relimp_perc    100.000000
+    dtype: float64
     """
     # Extract names if X is a Dataframe or Series
     if isinstance(X, pd.DataFrame):
@@ -283,6 +331,20 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
              'pval': pval, 'r2': r2, 'adj_r2': adj_r2, ll_name: ll,
              ul_name: ul}
 
+    # Relative importance
+    if relimp:
+        data = pd.concat([pd.DataFrame(y, columns=['y']),
+                          pd.DataFrame(X, columns=names)], sort=False, axis=1)
+        if 'Intercept' in names:
+            # Intercept is the first column
+            reli = _relimp(data.drop(columns=['Intercept']).cov())
+            reli['names'] = ['Intercept'] + reli['names']
+            reli['relimp'] = np.insert(reli['relimp'], 0, np.nan)
+            reli['relimp_perc'] = np.insert(reli['relimp_perc'], 0, np.nan)
+        else:
+            reli = _relimp(data.cov())
+        stats.update(reli)
+
     if as_dataframe:
         stats = pd.DataFrame(stats)
         stats.residuals_ = 0  # Trick to avoid Pandas warning
@@ -290,6 +352,89 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     else:
         stats['residuals'] = resid
     return stats
+
+
+def _relimp(S):
+    """Relative importance of predictors in multiple regression.
+
+    This is an internal function. This function should only be used with a low
+    number of predictors. Indeed, the computation time roughly doubles for each
+    additional predictor.
+
+    Parameters
+    ----------
+    S : pd.DataFrame
+        Covariance matrix. The target variable MUST be the FIRST column,
+        followed by the predictors (excluding the intercept).
+    """
+    assert isinstance(S, pd.DataFrame)
+    cols = S.columns.tolist()
+    target, predictors = cols[0], cols[1:]
+    npred = len(predictors)
+
+    # Define indices of columns: .iloc is faster than .loc
+    target_int = 0
+    predictors_int = np.arange(1, npred + 1)
+
+    # Calculate total sum of squares and beta coefficients
+    ss_tot = S.at[target, target]
+    betas = (np.linalg.pinv(S.iloc[predictors_int, predictors_int])
+             @ S.iloc[predictors_int, target_int])
+    r2_full = betas @ S.iloc[target_int, predictors_int] / ss_tot
+
+    # Pre-computed SSreg dictionnary
+    ss_reg_precomp = {}
+
+    # Start looping over predictors
+    all_preds = []
+    for pred in predictors_int:
+        loo = np.setdiff1d(predictors_int, pred)
+        r2_seq_mean = []
+        # Loop over number of predictors
+        for k in np.arange(0, npred - 1):
+            r2_seq = []
+            # Loop over combinations of predictors
+            for p in itertools.combinations(loo, int(k)):
+                p = list(p)
+                p_with = p + [pred]
+
+                # To avoid calculating several times the same values
+                # we use a trick here: we save the first calculation
+                # to a dictionnary where the key is the sorted string
+                # (hence the order does not matter)
+                if str(sorted(p)) in ss_reg_precomp.keys():
+                    ss_reg_without = ss_reg_precomp[str(sorted(p))]
+                else:
+                    S_without = S.iloc[p, target_int]
+                    ss_reg_without = pinv(S.iloc[p, p]) @ S_without @ S_without
+                    ss_reg_precomp[str(sorted(p))] = ss_reg_without
+
+                S_with = S.iloc[p_with, target_int]
+                ss_reg_with = (pinvh(S.iloc[p_with, p_with]) @ S_with
+                               @ S_with)
+                ss_reg_precomp[str(sorted(p_with))] = ss_reg_with
+
+                # Calculate R^2
+                r2_diff = (ss_reg_with - ss_reg_without) / ss_tot
+                # Append the difference
+                r2_seq.append(r2_diff)
+
+            # First averaging
+            r2_seq_mean.append(np.mean(r2_seq))
+
+        # When Sk(r) = S
+        ss_reg = (np.linalg.pinv(S.iloc[loo, loo]) @ S.iloc[loo, target_int]
+                  @ S.iloc[target_int, loo])
+        r2_without = ss_reg / ss_tot
+        r2_seq = r2_full - r2_without
+        r2_seq_mean.append(r2_seq)
+        all_preds.append(np.mean(r2_seq_mean))
+
+    stats_relimp = {'names': predictors,
+                    'relimp': all_preds,
+                    'relimp_perc': all_preds / sum(all_preds) * 100}
+
+    return stats_relimp
 
 
 def logistic_regression(X, y, coef_only=False, alpha=0.05,

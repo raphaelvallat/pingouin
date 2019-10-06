@@ -95,6 +95,19 @@ class TestRegression(TestCase):
         assert np.array_equal(lm1.loc[:, 'names'], ['Intercept', 'X', 'M'])
         assert np.array_equal(lm2.loc[:, 'names'], ['x1', 'x2', 'x4'])
 
+        # Relative importance
+        lm = linear_regression(df[['X', 'M']], df['Y'], relimp=True)
+        np.testing.assert_almost_equal(lm.loc[[1, 2], 'relimp'],
+                                       [0.05778011, 0.31521913])
+        np.testing.assert_almost_equal(lm.loc[[1, 2], 'relimp_perc'],
+                                       [15.49068, 84.50932], decimal=4)
+        lm = linear_regression(df[['X', 'M']], df['Y'], add_intercept=False,
+                               as_dataframe=False, relimp=True)
+        np.testing.assert_almost_equal(lm['relimp'],
+                                       [0.05778011, 0.31521913])
+        np.testing.assert_almost_equal(lm['relimp_perc'],
+                                       [15.49068, 84.50932], decimal=4)
+
     def test_logistic_regression(self):
         """Test function logistic_regression."""
 
