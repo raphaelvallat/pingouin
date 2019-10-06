@@ -6,7 +6,7 @@ from pingouin.regression import (linear_regression, logistic_regression,
                                  mediation_analysis, _pval_from_bootci)
 from pingouin import read_dataset
 
-from scipy.stats import linregress
+from scipy.stats import linregress, zscore
 from sklearn.linear_model import LinearRegression
 
 df = read_dataset('mediation')
@@ -96,17 +96,41 @@ class TestRegression(TestCase):
         assert np.array_equal(lm2.loc[:, 'names'], ['x1', 'x2', 'x4'])
 
         # Relative importance
+        # Compare to R package relaimpo
+        # >>> data <- read.csv('mediation.csv')
+        # >>> lm1 <- lm(Y ~ X + M, data = data)
+        # >>> calc.relimp(lm1, type=c("lmg"))
         lm = linear_regression(df[['X', 'M']], df['Y'], relimp=True)
         np.testing.assert_almost_equal(lm.loc[[1, 2], 'relimp'],
                                        [0.05778011, 0.31521913])
         np.testing.assert_almost_equal(lm.loc[[1, 2], 'relimp_perc'],
                                        [15.49068, 84.50932], decimal=4)
-        lm = linear_regression(df[['X', 'M']], df['Y'], add_intercept=False,
+        # Now we make sure that relimp_perc sums to 100% and relimp sums to r2
+        assert np.isclose(lm['relimp_perc'].sum(), 100.)
+        assert np.isclose(lm['relimp'].sum(), lm.at[0, 'r2'])
+        # 2 predictors, no intercept
+        # Careful here, the sum of relimp is always the R^2 of the model
+        # INCLUDING the intercept. Therefore, if the data are not normalized
+        # and we set add_intercept to false, the sum of relimp will be
+        # higher than the linear regression model.
+        # A workaround is to standardize our data before:
+        df_z = df[['X', 'M', 'Y']].apply(zscore)
+        lm = linear_regression(df_z[['X', 'M']], df_z['Y'],
+                               add_intercept=False,
                                as_dataframe=False, relimp=True)
         np.testing.assert_almost_equal(lm['relimp'],
-                                       [0.05778011, 0.31521913])
+                                       [0.05778011, 0.31521913], decimal=4)
         np.testing.assert_almost_equal(lm['relimp_perc'],
                                        [15.49068, 84.50932], decimal=4)
+        assert np.isclose(np.sum(lm['relimp']), lm['r2'])
+        # 3 predictors + intercept
+        lm = linear_regression(df[['X', 'M', 'Ybin']], df['Y'], relimp=True)
+        np.testing.assert_almost_equal(lm.loc[[1, 2, 3], 'relimp'],
+                                       [0.06010737, 0.31724368, 0.01217479])
+        np.testing.assert_almost_equal(lm.loc[[1, 2, 3], 'relimp_perc'],
+                                       [15.43091, 81.44355, 3.12554],
+                                       decimal=4)
+        assert np.isclose(lm['relimp'].sum(), lm.at[0, 'r2'])
 
     def test_logistic_regression(self):
         """Test function logistic_regression."""

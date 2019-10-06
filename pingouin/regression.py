@@ -369,15 +369,17 @@ def _relimp(S):
     """
     assert isinstance(S, pd.DataFrame)
     cols = S.columns.tolist()
-    target, predictors = cols[0], cols[1:]
-    npred = len(predictors)
 
     # Define indices of columns: .iloc is faster than .loc
+    predictors = cols[1:]
+    npred = len(predictors)
     target_int = 0
     predictors_int = np.arange(1, npred + 1)
 
     # Calculate total sum of squares and beta coefficients
-    ss_tot = S.at[target, target]
+    # Note that the R^2 that we calculate below is always the R^2 of the model
+    # INCLUDING the intercept!
+    ss_tot = S.iat[target_int, target_int]
     betas = (np.linalg.pinv(S.iloc[predictors_int, predictors_int])
              @ S.iloc[predictors_int, target_int])
     r2_full = betas @ S.iloc[target_int, predictors_int] / ss_tot
@@ -423,8 +425,8 @@ def _relimp(S):
             r2_seq_mean.append(np.mean(r2_seq))
 
         # When Sk(r) = S
-        ss_reg = (np.linalg.pinv(S.iloc[loo, loo]) @ S.iloc[loo, target_int]
-                  @ S.iloc[target_int, loo])
+        S_without = S.iloc[loo, target_int]
+        ss_reg = np.linalg.pinv(S.iloc[loo, loo]) @ S_without @ S_without
         r2_without = ss_reg / ss_tot
         r2_seq = r2_full - r2_without
         r2_seq_mean.append(r2_seq)
