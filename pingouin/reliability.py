@@ -155,46 +155,78 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     return round(cronbach, 6), np.round([lower, upper], 3)
 
 
-def intraclass_corr(data=None, items=None, raters=None, scores=None, ci=.95):
-    """Intra-class correlation coefficient.
+def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
+                    nan_policy='raise'):
+    """Intraclass correlation.
 
     Parameters
     ----------
-    data : pd.DataFrame
-        Dataframe containing the variables
-    items : string
-        Name of column in data containing the items (targets).
+    data : :py:class:`pandas.DataFrame`
+        Long-format dataframe. Data must be fully balanced.
+    targets : string
+        Name of column in ``data`` containing the targets.
     raters : string
-        Name of column in data containing the raters (scorers).
-    scores : string
-        Name of column in data containing the scores (ratings).
-    ci : float
-        Confidence interval
+        Name of column in ``data`` containing the raters.
+    ratings : string
+        Name of column in ``data`` containing the ratings.
+    nan_policy : str
+        Defines how to handle when input contains missing values (nan).
+        'raise' (default) throws an error, 'omit' performs the calculations
+        after deleting target(s) with one or more missing values (= listwise
+        deletion).
+
+        .. versionadded:: 0.3.0
 
     Returns
     -------
-    icc : float
-        Intraclass correlation coefficient
-    ci : list
-        Lower and upper confidence intervals
+    stats : :py:class:`pandas.DataFrame`
+        Output dataframe:
+
+        * ``'Type'``: ICC type
+        * ``'Description'``: description of the ICC
+        * ``'ICC'``: intraclass correlation
+        * ``'F'``: F statistic
+        * ``'df1'``: numerator degree of freedom
+        * ``'df2'``: denominator degree of freedom
+        * ``'pval'``: p-value
+        * ``'CI95%'``: 95% confidence intervals around the ICC
 
     Notes
     -----
     The intraclass correlation (ICC) assesses the reliability of ratings by
     comparing the variability of different ratings of the same subject to the
-    total variation across all ratings and all subjects. The ratings are
-    quantitative (e.g. Likert scale).
+    total variation across all ratings and all subjects.
 
     Shrout and Fleiss (1979) describe six cases of reliability of ratings done
-    by :math:`k` raters on :math:`n` targets. Pingouin only returns ICC1,
-    which consider that each target is rated by a different rater and the
-    raters are selected at random. (This is a one-way ANOVA
-    fixed effects model and is found by (MSB - MSW)/(MSB + (nr - 1) * MSW)).
-    ICC1 is sensitive to differences in means between raters and is a measure
-    of absolute agreement.
+    by :math:`k` raters on :math:`n` targets. Pingouin returns all six cases
+    with corresponding F and p-values, as well as 95% confidence intervals.
+
+    From the documentation of the ICC function in the R package psych:
+
+    - **ICC1**: Each target is rated by a different rater and the raters are
+      selected at random. This is a one-way ANOVA fixed effects model.
+
+    - **ICC2**: A random sample of :math:`k` raters rate each target. The
+      measure is one of absolute agreement in the ratings. ICC1 is sensitive
+      to differences in means between raters and is a measure of absolute
+      agreement.
+
+    - **ICC3**: A fixed set of :math:`k` raters rate each target. There is no
+      generalization to a larger population of raters. ICC2 and ICC3 remove
+      mean differences between raters, but are sensitive to interactions.
+      The difference between ICC2 and ICC3 is whether raters are seen as fixed
+      or random effects.
+
+    Then, for each of these cases, the reliability can either be estimated for
+    a single rating or for the average of :math:`k` ratings. The 1 rating case
+    is equivalent to the average intercorrelation, while the :math:`k` rating
+    case is equivalent to the Spearman Brown adjusted reliability.
+    **ICC1k**, **ICC2k**, **ICC3K** reflect the means of :math:`k` raters.
 
     This function has been tested against the ICC function of the R psych
-    package.
+    package. Note however that contrarily to the R implementation, the
+    current implementation does not use linear mixed effect but regular ANOVA,
+    which means that it only works with complete-case data (no missing values).
 
     References
     ----------
@@ -208,41 +240,134 @@ def intraclass_corr(data=None, items=None, raters=None, scores=None, ci=.95):
 
     Examples
     --------
-    ICC of wine quality assessed by 4 judges.
+    ICCs of wine quality assessed by 4 judges.
 
     >>> import pingouin as pg
     >>> data = pg.read_dataset('icc')
-    >>> pg.intraclass_corr(data=data, items='Wine', raters='Judge',
-    ...                    scores='Scores', ci=.95)
-    (0.727526, array([0.434, 0.927]))
+    >>> icc = pg.intraclass_corr(data=data, targets='Wine', raters='Judge',
+    ...                          ratings='Scores')
+    >>> icc # doctest: +SKIP
+        Type              Description    ICC  ...  df2      pval         CI95%
+    0   ICC1   Single raters absolute  0.728  ...   24  0.000002  [0.43, 0.93]
+    1   ICC2     Single random raters  0.728  ...   21  0.000005  [0.43, 0.93]
+    2   ICC3      Single fixed raters  0.730  ...   21  0.000005  [0.43, 0.93]
+    3  ICC1k  Average raters absolute  0.914  ...   24  0.000002  [0.75, 0.98]
+    4  ICC2k    Average random raters  0.914  ...   21  0.000005  [0.75, 0.98]
+    5  ICC3k     Average fixed raters  0.915  ...   21  0.000005  [0.75, 0.98]
     """
     from pingouin import anova
 
-    # Check dataframe
-    if any(v is None for v in [data, items, raters, scores]):
-        raise ValueError('Data, items, raters and scores must be specified')
-    assert isinstance(data, pd.DataFrame), 'Data must be a pandas dataframe.'
-    # Check that scores is a numeric variable
-    assert data[scores].dtype.kind in 'fi', 'Scores must be numeric.'
+    # Safety check
+    assert isinstance(data, pd.DataFrame), 'data must be a dataframe.'
+    assert all([v is not None for v in [targets, raters, ratings]])
+    assert all([v in data.columns for v in [targets, raters, ratings]])
+    assert nan_policy in ['omit', 'raise']
+
+    # Convert data to wide-format
+    data = data.pivot_table(index=targets, columns=raters, values=ratings)
+
+    # Listwise deletion of missing values
+    nan_present = data.isna().any().any()
+    if nan_present:
+        if nan_policy == 'omit':
+            data = data.dropna(axis=0, how='any')
+        else:
+            raise ValueError("Missing values are present in data. Please "
+                             "remove them manually or use nan_policy='omit'.")
+
+    # Back to long-format
+    # data_wide = data.copy()  # Optional, for PCA
+    data = data.reset_index().melt(id_vars=targets, value_name=ratings)
+
+    # Check that ratings is a numeric variable
+    assert data[ratings].dtype.kind in 'bfi', 'Ratings must be numeric.'
     # Check that data are fully balanced
-    if data.groupby(raters)[scores].count().nunique() > 1:
+    if data.groupby(raters)[ratings].count().nunique() > 1:
         raise ValueError('Data must be balanced.')
 
     # Extract sizes
     k = data[raters].nunique()
-    # n = data[groups].nunique()
+    n = data[targets].nunique()
 
-    # ANOVA and ICC
-    aov = anova(dv=scores, data=data, between=items, detailed=True)
-    icc = (aov.at[0, 'MS'] - aov.at[1, 'MS']) / \
-          (aov.at[0, 'MS'] + (k - 1) * aov.at[1, 'MS'])
+    # Two-way ANOVA
+    with np.errstate(invalid='ignore'):
+        aov = anova(dv=ratings, between=[targets, raters], data=data,
+                    ss_type=2)
 
-    # Confidence interval
-    alpha = 1 - ci
-    df_num, df_den = aov.at[0, 'DF'], aov.at[1, 'DF']
-    f_lower = aov.at[0, 'F'] / f.isf(alpha / 2, df_num, df_den)
-    f_upper = aov.at[0, 'F'] * f.isf(alpha / 2, df_den, df_num)
-    lower = (f_lower - 1) / (f_lower + k - 1)
-    upper = (f_upper - 1) / (f_upper + k - 1)
+    # Extract mean squares
+    msb = aov.at[0, 'MS']
+    msw = (aov.at[1, 'SS'] + aov.at[2, 'SS']) / (aov.at[1, 'DF'] +
+                                                 aov.at[2, 'DF'])
+    msj = aov.at[1, 'MS']
+    mse = aov.at[2, 'MS']
 
-    return round(icc, 6), np.round([lower, upper], 3)
+    # Calculate ICCs
+    icc1 = (msb - msw) / (msb + (k - 1) * msw)
+    icc2 = (msb - mse) / (msb + (k - 1) * mse + k * (msj - mse) / n)
+    icc3 = (msb - mse) / (msb + (k - 1) * mse)
+    icc1k = (msb - msw) / msb
+    icc2k = (msb - mse) / (msb + (msj - mse) / n)
+    icc3k = (msb - mse) / msb
+
+    # Calculate F, df, and p-values
+    f1k = msb / msw
+    df1 = n - 1
+    df1kd = n * (k - 1)
+    p1k = f.sf(f1k, df1, df1kd)
+
+    f2k = f3k = msb / mse
+    df2kd = (n - 1) * (k - 1)
+    p2k = f.sf(f2k, df1, df2kd)
+
+    # Create output dataframe
+    stats = {
+        'Type': ['ICC1', 'ICC2', 'ICC3', 'ICC1k', 'ICC2k', 'ICC3k'],
+        'Description': ['Single raters absolute', 'Single random raters',
+                        'Single fixed raters', 'Average raters absolute',
+                        'Average random raters', 'Average fixed raters'],
+        'ICC': np.round([icc1, icc2, icc3, icc1k, icc2k, icc3k], 3),
+        'F': np.round([f1k, f2k, f2k, f1k, f2k, f2k], 3),
+        'df1': n - 1,
+        'df2': [df1kd, df2kd, df2kd, df1kd, df2kd, df2kd],
+        'pval': [p1k, p2k, p2k, p1k, p2k, p2k]
+    }
+
+    stats = pd.DataFrame(stats)
+
+    # Calculate confidence intervals
+    alpha = 0.05
+    # Case 1 and 3
+    f1l = f1k / f.ppf(1 - alpha / 2, df1, df1kd)
+    f1u = f1k * f.ppf(1 - alpha / 2, df1kd, df1)
+    l1 = (f1l - 1) / (f1l + (k - 1))
+    u1 = (f1u - 1) / (f1u + (k - 1))
+    f3l = f3k / f.ppf(1 - alpha / 2, df1, df2kd)
+    f3u = f3k * f.ppf(1 - alpha / 2, df2kd, df1)
+    l3 = (f3l - 1) / (f3l + (k - 1))
+    u3 = (f3u - 1) / (f3u + (k - 1))
+    # Case 2
+    fj = msj / mse
+    vn = df2kd * ((k * icc2 * fj + n * (1 + (k - 1) * icc2) - k * icc2))**2
+    vd = df1 * k**2 * icc2**2 * fj**2 + \
+        (n * (1 + (k - 1) * icc2) - k * icc2)**2
+    v = vn / vd
+    f2u = f.ppf(1 - alpha / 2, n - 1, v)
+    f2l = f.ppf(1 - alpha / 2, v, n - 1)
+    l2 = n * (msb - f2u * mse) / (f2u * (k * msj + (k * n - k - n) * mse) +
+                                  n * msb)
+    u2 = n * (f2l * msb - mse) / (k * msj + (k * n - k - n) * mse + n * f2l *
+                                  msb)
+
+    # Round the confidence intervals
+    def list_round(x, decimals=2):
+        for i, xi in enumerate(x):
+            x[i] = np.round(xi, decimals).tolist()
+        return x
+
+    stats['CI95%'] = list_round([[l1, u1], [l2, u2], [l3, u3],
+                                 [1 - 1 / f1l, 1 - 1 / f1u],
+                                 [l2 * k / (1 + l2 * (k - 1)),
+                                  u2 * k / (1 + u2 * (k - 1))],
+                                 [1 - 1 / f3l, 1 - 1 / f3u]])
+
+    return stats
