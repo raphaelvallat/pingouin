@@ -752,8 +752,8 @@ def cochran(data=None, dv=None, within=None, subject=None,
     return stats
 
 
-def harrelldavis(x, quantile=0.5):
-    """Harrell-Davis robust estimate of the :math:`q^{th}` quantile of the
+def harrelldavis(x, quantile=0.5, axis=-1):
+    """Harrell-Davis robust estimate of the :math:`q^{th}` quantile(s) of the
     data.
 
     .. versionadded:: 0.2.9
@@ -761,10 +761,13 @@ def harrelldavis(x, quantile=0.5):
     Parameters
     ----------
     x : array_like
-        Data, must be a one-dimensional vector.
+        Data, must be a one or two-dimensional vector.
     quantile : float or array_like
         Quantile or sequence of quantiles to compute, must be between 0 and 1.
         Default is ``0.5``.
+    axis : int
+        Axis along which the MAD is computed. Default is the last axis (-1).
+        Can be either 0, 1 or -1.
 
     Returns
     -------
@@ -814,10 +817,32 @@ def harrelldavis(x, quantile=0.5):
 
     >>> pg.harrelldavis(x, quantile=[0.25, 0.5, 0.75])
     array([-0.84133224, -0.04991657,  0.95897233])
+
+    On the last axis of a 2D vector (default)
+
+    >>> np.random.seed(123)
+    >>> x = np.random.normal(0, 1, (10, 100))
+    >>> pg.harrelldavis(x, quantile=[0.25, 0.5, 0.75])
+    array([[-0.84133224, -0.52346777, -0.81801193, -0.74611216, -0.64928321,
+            -0.48565262, -0.64332799, -0.8178394 , -0.70058282, -0.73088088],
+           [-0.04991657,  0.02932655, -0.08905073, -0.1860034 ,  0.06970415,
+             0.15129817,  0.00430958, -0.13784786, -0.08648077, -0.14407123],
+           [ 0.95897233,  0.49543002,  0.57712236,  0.48620599,  0.85899005,
+             0.7903462 ,  0.76558585,  0.62528436,  0.60421847,  0.52620286]])
+
+    On the first axis
+
+    >>> pg.harrelldavis(x, quantile=[0.5], axis=0).shape
+    (100,)
     """
-    x = np.sort(np.asarray(x))
-    assert x.ndim == 1, 'Only 1D array are supported for this function.'
-    n = x.size
+    x = np.asarray(x)
+    assert x.ndim <= 2, 'Only 1D or 2D array are supported for this function.'
+    assert axis in [0, 1, -1], 'Axis must be 0, 1 or -1.'
+
+    # Sort the input array
+    x = np.sort(x, axis=axis)
+
+    n = x.shape[axis]
     vec = np.arange(n)
     if isinstance(quantile, float):
         quantile = [quantile]
@@ -829,7 +854,10 @@ def harrelldavis(x, quantile=0.5):
         m2 = (n + 1) * (1 - q)
         w = (scipy.stats.beta.cdf((vec + 1) / n, m1, m2) -
              scipy.stats.beta.cdf((vec) / n, m1, m2))
-        y.append((w * x).sum())  # Store results
+        if axis != 0:
+            y.append((w * x).sum(axis))
+        else:
+            y.append((w[..., None] * x).sum(axis))  # Store results
 
     if len(y) == 1:
         y = y[0]  # Return a float instead of a list if n quantile is 1

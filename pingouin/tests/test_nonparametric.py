@@ -134,3 +134,14 @@ class TestNonParametric(TestCase):
         assert harrelldavis(a, quantile=0.5) == 271.72120054908913
         harrelldavis(x=x, quantile=np.arange(0.1, 1, 0.1))
         assert harrelldavis(a, [0.25, 0.5, 0.75])[1] == 271.72120054908913
+        # Test multiple axis
+        p = np.random.normal(0, 1, (10, 100))
+
+        def func(a, axes):
+            return harrelldavis(a, [0.25, 0.75], axes)
+
+        np.testing.assert_array_almost_equal(harrelldavis(p, [0.25, 0.75], 0),
+                                             np.apply_over_axes(func, p, 0))
+
+        np.testing.assert_array_almost_equal(harrelldavis(p, [0.25, 0.75], -1),
+                                             np.apply_over_axes(func, p, 1))

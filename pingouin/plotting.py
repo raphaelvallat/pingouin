@@ -724,7 +724,7 @@ def plot_shift(x, y, paired=False, n_boot=1000,
         ...                     show_median=False, seed=456, violin=False)
     """
     from pingouin.regression import _bca
-    from pingouin.nonparametric import harrelldavis
+    from pingouin.nonparametric import harrelldavis as hd
 
     # Safety check
     x = np.asarray(x)
@@ -742,23 +742,21 @@ def plot_shift(x, y, paired=False, n_boot=1000,
         assert nx == ny, 'x and y must have the same size when paired=True.'
 
     # Robust percentile
-    x_per = harrelldavis(x, percentiles)
-    y_per = harrelldavis(y, percentiles)
+    x_per = hd(x, percentiles)
+    y_per = hd(y, percentiles)
     delta = x_per - y_per
 
     # Compute bootstrap distribution of differences
     rng = np.random.RandomState(seed)
     if paired:
         bootsam = rng.choice(np.arange(nx), size=(nx, n_boot), replace=True)
-        bootstat = (
-            np.apply_along_axis(harrelldavis, 0, x[bootsam], percentiles) -
-            np.apply_along_axis(harrelldavis, 0, y[bootsam], percentiles))
+        bootstat = (hd(x[bootsam], percentiles, axis=0) -
+                    hd(y[bootsam], percentiles, axis=0))
     else:
         x_list = rng.choice(x, size=(nx, n_boot), replace=True)
         y_list = rng.choice(y, size=(ny, n_boot), replace=True)
-        bootstat = (
-            np.apply_along_axis(harrelldavis, 0, x_list, percentiles) -
-            np.apply_along_axis(harrelldavis, 0, y_list, percentiles))
+        bootstat = (hd(x_list, percentiles, axis=0) -
+                    hd(y_list, percentiles, axis=0))
 
     # Find upper and lower confidence interval for each quantiles
     # Bias-corrected confidence interval
