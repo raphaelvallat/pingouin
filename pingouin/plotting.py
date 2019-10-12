@@ -641,7 +641,8 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
     return ax
 
 
-def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
+def plot_shift(x, y, paired=False, n_boot=1000,
+               percentiles=np.arange(10, 100, 10),
                ci=.95, seed=None, show_median=True, violin=True):
     """Shift plot.
 
@@ -650,7 +651,12 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
     Parameters
     ----------
     x, y : array_like
-        First and second set of observations. x and y must be independent.
+        First and second set of observations.
+    paired : bool
+        Specify whether ``x`` and ``y`` are related (i.e. repeated
+        measures) or independent.
+
+        .. versionadded:: 0.3.0
     n_boot : int
         Number of bootstrap iterations. The higher, the better, the slower.
     percentiles: array_like
@@ -660,11 +666,11 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
         Confidence level (0.95 = 95%).
     seed : int or None
         Random seed for generating bootstrap samples, can be integer or
-        None (default).
+        None for no seed (default).
     show_median: boolean
-        If True, show the median with black lines. Defaut set to True.
+        If True (default), show the median with black lines.
     violin: boolean
-        If True, plot the density of X and Y distributions.
+        If True (default), plot the density of X and Y distributions.
         Defaut set to True.
 
     Returns
@@ -672,16 +678,15 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
     fig : matplotlib Figure instance
         Matplotlib Figure. To get the individual axes, use fig.axes.
 
+    See also
+    --------
+    harrelldavis
+
     Notes
     -----
-    This function will estimate the bootstrap CI for the percentile difference
-    between ``x`` (fixed) and ``y`` (resampled). Note that if :math:`N` is
-    small, the CI of ``x`` -> ``y`` and ``y`` -> ``x`` can vary.
-
-    .. warning:: The current implementation of this function is a
-        simplified (beta) version of the original R/Matlab function.
-        Expect important changes in this function in future releases of
-        Pingouin.
+    Computes a shift function for two (in)dependent groups using the robust
+    Harrell-Davis quantile estimator in conjunction with bias-corrected
+    bootstrap confidence intervals.
 
     References
     ----------
@@ -712,15 +717,19 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
         >>> import numpy as np
         >>> import pingouin as pg
         >>> np.random.seed(42)
-        >>> x = np.random.normal(5.5, 2, 50)
-        >>> y = np.random.normal(6, 1.5, 50)
-        >>> fig = pg.plot_shift(x, y, n_boot=2000, percentiles=[5, 55, 95],
+        >>> x = np.random.normal(5.5, 2, 30)
+        >>> y = np.random.normal(6, 1.5, 30)
+        >>> fig = pg.plot_shift(x, y, paired=True, n_boot=2000,
+        ...                     percentiles=[25, 50, 75],
         ...                     show_median=False, seed=456, violin=False)
     """
+    from pingouin.regression import _bca
+    from pingouin.nonparametric import harrelldavis
+
     # Safety check
     x = np.asarray(x)
     y = np.asarray(y)
-    percentiles = np.asarray(percentiles)
+    percentiles = np.asarray(percentiles) / 100  # Convert to 0 - 1 range
     assert x.ndim == 1, 'x must be 1D.'
     assert y.ndim == 1, 'y must be 1D.'
     nx, ny = x.size, y.size
@@ -729,21 +738,40 @@ def plot_shift(x, y, n_boot=1000, percentiles=np.arange(10, 100, 10),
     assert nx >= 10, 'x must have at least 10 samples.'
     assert ny >= 10, 'y must have at least 10 samples.'
     assert 0 < ci < 1, 'ci must be between 0 and 1.'
+    if paired:
+        assert nx == ny, 'x and y must have the same size when paired=True.'
 
-    x_per = np.percentile(x, percentiles)
-    y_per = np.percentile(y, percentiles)
+    # Robust percentile
+    x_per = harrelldavis(x, percentiles)
+    y_per = harrelldavis(y, percentiles)
+    delta = x_per - y_per
 
-    # Compute bootstrap CI
+    # Compute bootstrap distribution of differences
     rng = np.random.RandomState(seed)
-    bootsam = rng.choice(y, size=(n_boot, ny), replace=True)
-    bootstat = np.swapaxes(np.percentile(bootsam, percentiles, axis=1), 1, 0)
-    bootstat -= x_per
+    if paired:
+        bootsam = rng.choice(np.arange(nx), size=(nx, n_boot), replace=True)
+        bootstat = (
+            np.apply_along_axis(harrelldavis, 0, x[bootsam], percentiles) -
+            np.apply_along_axis(harrelldavis, 0, y[bootsam], percentiles))
+    else:
+        x_list = rng.choice(x, size=(nx, n_boot), replace=True)
+        y_list = rng.choice(y, size=(ny, n_boot), replace=True)
+        bootstat = (
+            np.apply_along_axis(harrelldavis, 0, x_list, percentiles) -
+            np.apply_along_axis(harrelldavis, 0, y_list, percentiles))
 
     # Find upper and lower confidence interval for each quantiles
-    ci *= 100
-    upper = np.percentile(bootstat, ci + (100 - ci) / 2, axis=0)
-    lower = np.percentile(bootstat, (100 - ci) / 2, axis=0)
-    median_per = np.median(bootstat, axis=0)
+    # Bias-corrected confidence interval
+    lower, median_per, upper = [], [], []
+    for i, d in enumerate(delta):
+        ci = _bca(bootstat[i, :], d, n_boot)
+        median_per.append(_bca(bootstat[i, :], d, n_boot, alpha=1)[0])
+        lower.append(ci[0])
+        upper.append(ci[1])
+
+    lower = np.asarray(lower)
+    median_per = np.asarray(median_per)
+    upper = np.asarray(upper)
 
     # Create long-format dataFrame for use with Seaborn
     data = pd.DataFrame({'value': np.concatenate([x, y]),

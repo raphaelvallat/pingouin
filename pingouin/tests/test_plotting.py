@@ -91,6 +91,7 @@ class TestPlotting(TestCase):
         plot_shift(x, y)
         plot_shift(x, y, n_boot=100, percentiles=[5, 55, 95], ci=0.68,
                    show_median=False, seed=456, violin=False)
+        plot_shift(x, y, paired=True, n_boot=100, percentiles=[25, 75])
 
     def test_plot_rm_corr(self):
         """Test plot_shift()."""
