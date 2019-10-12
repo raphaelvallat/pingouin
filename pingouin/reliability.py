@@ -272,8 +272,9 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
         if nan_policy == 'omit':
             data = data.dropna(axis=0, how='any')
         else:
-            raise ValueError("Missing values are present in data. Please "
-                             "remove them manually or use nan_policy='omit'.")
+            raise ValueError("Either missing values are present in data or "
+                             "data are unbalanced. Please remove them "
+                             "manually or use nan_policy='omit'.")
 
     # Back to long-format
     # data_wide = data.copy()  # Optional, for PCA
@@ -282,8 +283,9 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
     # Check that ratings is a numeric variable
     assert data[ratings].dtype.kind in 'bfi', 'Ratings must be numeric.'
     # Check that data are fully balanced
-    if data.groupby(raters)[ratings].count().nunique() > 1:
-        raise ValueError('Data must be balanced.')
+    # This behavior is ensured by the long-to-wide-to-long transformation
+    # Unbalanced data will result in rows with missing values.
+    # assert data.groupby(raters)[ratings].count().nunique() == 1
 
     # Extract sizes
     k = data[raters].nunique()
