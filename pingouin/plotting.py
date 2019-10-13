@@ -873,7 +873,7 @@ def plot_shift(x, y, paired=False, n_boot=1000,
     return fig
 
 
-def plot_rm_corr(data=None, x=None, y=None, subject=None, legend=True,
+def plot_rm_corr(data=None, x=None, y=None, subject=None, legend=False,
                  kwargs_facetgrid=dict(height=4, aspect=1)):
     """Plot a repeated measures correlation.
 
@@ -942,7 +942,7 @@ def plot_rm_corr(data=None, x=None, y=None, subject=None, legend=True,
         >>> df = pg.read_dataset('rm_corr')
         >>> sns.set(style='darkgrid', font_scale=1.2)
         >>> g = pg.plot_rm_corr(data=df, x='pH', y='PacO2',
-        ...                     subject='Subject', legend=False,
+        ...                     subject='Subject', legend=True,
         ...                     kwargs_facetgrid=dict(height=4.5, aspect=1.5,
         ...                                           palette='Spectral'))
     """
