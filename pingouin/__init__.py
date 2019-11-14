@@ -18,4 +18,4 @@ from .regression import *
 from .plotting import *
 from .contingency import *
 
-__version__ = "0.2.9"
+__version__ = "0.3.0"

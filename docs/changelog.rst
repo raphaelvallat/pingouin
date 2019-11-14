@@ -6,16 +6,17 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
-v0.3.0 (dev)
-------------
+v0.3.0 (November 2019)
+----------------------
 
 **New functions**
 
 a. Added :py:func:`pingouin.plot_rm_corr` to plot a repeated measures correlation
 
 **Enhancements**
+
 a. Added the ``relimp`` argument to :py:func:`pingouin.linear_regression` to return the relative importance (= contribution) of each individual predictor to the :math:`R^2` of the full model.
-b. Complete refactoring of :py:func:`pingouin.intraclass_corr` to closely match the R implementation in the psych package. Pingouin now returns the 6 types of ICC, together with F values, p-values, degrees of freedom and confidence intervals.
+b. Complete refactoring of :py:func:`pingouin.intraclass_corr` to closely match the R implementation in the `psych <https://cran.r-project.org/web/packages/psych/psych.pdf>`_ package. Pingouin now returns the 6 types of ICC, together with F values, p-values, degrees of freedom and confidence intervals.
 c. The :py:func:`pingouin.plot_shift` now 1) uses the Harrel-Davis robust quantile estimator in conjunction with a bias-corrected bootstrap confidence intervals, and 2) support paired samples.
 d. Added the ``axis`` argument to :py:func:`pingouin.harrelldavis` to support 2D arrays.
 
