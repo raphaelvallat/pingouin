@@ -744,19 +744,19 @@ def plot_shift(x, y, paired=False, n_boot=1000,
     # Robust percentile
     x_per = hd(x, percentiles)
     y_per = hd(y, percentiles)
-    delta = x_per - y_per
+    delta = y_per - x_per
 
     # Compute bootstrap distribution of differences
     rng = np.random.RandomState(seed)
     if paired:
         bootsam = rng.choice(np.arange(nx), size=(nx, n_boot), replace=True)
-        bootstat = (hd(x[bootsam], percentiles, axis=0) -
-                    hd(y[bootsam], percentiles, axis=0))
+        bootstat = (hd(y[bootsam], percentiles, axis=0) -
+                    hd(x[bootsam], percentiles, axis=0))
     else:
         x_list = rng.choice(x, size=(nx, n_boot), replace=True)
         y_list = rng.choice(y, size=(ny, n_boot), replace=True)
-        bootstat = (hd(x_list, percentiles, axis=0) -
-                    hd(y_list, percentiles, axis=0))
+        bootstat = (hd(y_list, percentiles, axis=0) -
+                    hd(x_list, percentiles, axis=0))
 
     # Find upper and lower confidence interval for each quantiles
     # Bias-corrected confidence interval
