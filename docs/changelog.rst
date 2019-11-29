@@ -13,7 +13,7 @@ v0.3.1 (dev)
 
 a. Fixed a bug in which missing values were removed from all columns in the dataframe in :py:func:`pingouin.kruskal`, even columns that were unrelated. See https://github.com/raphaelvallat/pingouin/issues/74.
 b. The :py:func:`pingouin.power_corr` function now throws a warning and return a np.nan when the sample size is too low (and not an error like in previous version). This is to improve compatibility with the :py:func:`pingouin.pairwise_corr` function.
-c. Fixed quantile direction (and label) in the :py:func:`pingouin.plot_shift` function. In v0.3.0, the quantile subplot was incorrectly labelled as Y - X, but it was in fact calculating X - Y. See https://github.com/raphaelvallat/pingouin/issues/73
+c. Fixed quantile direction in the :py:func:`pingouin.plot_shift` function. In v0.3.0, the quantile subplot was incorrectly labelled as Y - X, but it was in fact calculating X - Y. See https://github.com/raphaelvallat/pingouin/issues/73
 
 v0.3.0 (November 2019)
 ----------------------
