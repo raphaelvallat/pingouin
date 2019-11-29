@@ -1,5 +1,6 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
+import warnings
 import numpy as np
 from scipy import stats
 from scipy.optimize import brenth
@@ -863,7 +864,6 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
 
     References
     ----------
-
     .. [1] Cohen, J. (1988). Statistical power analysis for the behavioral
            sciences (2nd ed.). Hillsdale,NJ: Lawrence Erlbaum.
 
@@ -908,7 +908,10 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
     if power is not None:
         assert 0 < power <= 1
     if n is not None:
-        assert n > 4
+        if n <= 4:
+            warnings.warn("Sample size is too small to estimate power "
+                          "(n <= 4). Returning NaN.")
+            return np.nan
 
     # Define main function
     if tail == 'two-sided':
@@ -1033,7 +1036,6 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
 
     References
     ----------
-
     .. [1] Cohen, J. (1988). Statistical power analysis for the behavioral
            sciences (2nd ed.). Hillsdale,NJ: Lawrence Erlbaum.
 

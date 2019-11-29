@@ -198,9 +198,12 @@ class TestPower(TestCase):
         assert np.allclose(power_corr(n=20, power=0.80, tail='one-sided'),
                            0.5286949)
 
-        # Error
+        # Error & Warning
         with pytest.raises(ValueError):
             power_corr(r=0.5)
+        with pytest.warns(UserWarning):
+            power_corr(r=0.5, n=4)
+            power_corr(power=0.80, n=4)
 
     def test_power_chi2(self):
         """Test function power_chi2.
