@@ -6,6 +6,13 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
+v0.3.1 (dev)
+------------
+
+**Bugfixes**
+
+a. Fixed a bug in which missing values were removed from all columns in the dataframe in :py:func:`pingouin.kruskal`, even columns that were unrelated. See https://github.com/raphaelvallat/pingouin/issues/74.
+
 v0.3.0 (November 2019)
 ----------------------
 

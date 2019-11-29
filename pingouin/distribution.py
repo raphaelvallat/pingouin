@@ -655,6 +655,8 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     if all([v is not None for v in [dv, within, subject]]):
         data = _long_to_wide_rm(data, dv=dv, within=within, subject=subject)
 
+    # From now on we assume that data is in wide-format and contains only
+    # the relevant columns.
     # Drop rows with missing values
     data = data.dropna()
 
@@ -905,6 +907,8 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
     if all([v is not None for v in [dv, within, subject]]):
         data = _long_to_wide_rm(data, dv=dv, within=within, subject=subject)
 
+    # From now on we assume that data is in wide-format and contains only
+    # the relevant columns.
     # Remove rows with missing values in wide-format dataframe
     data = data.dropna()
 

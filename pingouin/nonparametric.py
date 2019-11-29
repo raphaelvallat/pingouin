@@ -487,7 +487,7 @@ def kruskal(data=None, dv=None, between=None, detailed=False,
                      effects='between')
 
     # Remove NaN values
-    data = data.dropna()
+    data = data[[dv, between]].dropna()
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
