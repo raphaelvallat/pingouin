@@ -6,8 +6,8 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
-v0.3.1 (dev)
-------------
+v0.3.1 (December 2019)
+----------------------
 
 **Bugfixes**
 
