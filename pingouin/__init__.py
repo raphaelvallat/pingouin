@@ -18,4 +18,9 @@ from .regression import *
 from .plotting import *
 from .contingency import *
 
+# Version of the package
 __version__ = "0.3.1"
+
+# Warn if a newer version of Pingouin is available
+from outdated import warn_if_outdated
+warn_if_outdated("pingouin", __version__)

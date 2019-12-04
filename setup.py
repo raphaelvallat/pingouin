@@ -25,7 +25,8 @@ INSTALL_REQUIRES = [
     'matplotlib>=3.0.2',
     'seaborn>=0.9.0',
     'statsmodels>=0.10.0',
-    'pandas_flavor>=0.1.2'
+    'pandas_flavor>=0.1.2',
+    'outdated',
 ]
 
 PACKAGES = [

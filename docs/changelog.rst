@@ -6,6 +6,13 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
+v0.3.2 (dev)
+------------
+
+**Enhancements**
+
+a. Upon loading, Pingouin will now use the `outdated <https://github.com/alexmojaki/outdated>`_ package to check and warn the user if a newer stable version is available.
+
 v0.3.1 (December 2019)
 ----------------------
 

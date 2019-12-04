@@ -78,6 +78,7 @@ The main dependencies of Pingouin are :
 * Pandas-flavor (>= 0.1.2)
 * Matplotlib (>= 3.0.2)
 * Seaborn (>= 0.9.0)
+* `Outdated <https://github.com/alexmojaki/outdated>`_
 
 In addition, some functions require :
 
