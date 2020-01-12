@@ -567,6 +567,8 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
     '''
     from pingouin.external.qsturng import psturng
 
+    assert tail in ['one-sided', 'two-sided']
+
     # First compute the ANOVA
     aov = anova(dv=dv, data=data, between=between, detailed=True)
     df = aov.at[1, 'DF']

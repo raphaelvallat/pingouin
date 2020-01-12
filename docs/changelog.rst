@@ -12,6 +12,7 @@ v0.3.2 (dev)
 **Enhancements**
 
 a. Upon loading, Pingouin will now use the `outdated <https://github.com/alexmojaki/outdated>`_ package to check and warn the user if a newer stable version is available.
+b. Fixed a minor bug which caused the :py:func:`pingouin.plot_rm_corr` to throw an error if any of the input variables started with a number (because of Patsy formula formatting).
 
 v0.3.1 (December 2019)
 ----------------------

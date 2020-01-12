@@ -968,7 +968,11 @@ def plot_rm_corr(data=None, x=None, y=None, subject=None, legend=False,
     # rmc = pg.rm_corr(data=data, x=x, y=y, subject=subject)
 
     # Fit ANCOVA model
-    formula = y + ' ~ C(' + subject + ') + ' + x
+    # https://patsy.readthedocs.io/en/latest/builtins-reference.html
+    # C marks the data as categorical
+    # Q allows to quote variable that do not meet Python variable name rule
+    # e.g. if variable is "weight.in.kg" or "2A"
+    formula = "Q('%s') ~ C(Q('%s')) + Q('%s')" % (y, subject, x)
     model = ols(formula, data=data).fit()
 
     # Fitted values
