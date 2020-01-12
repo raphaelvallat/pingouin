@@ -13,6 +13,7 @@ v0.3.2 (dev)
 
 a. Upon loading, Pingouin will now use the `outdated <https://github.com/alexmojaki/outdated>`_ package to check and warn the user if a newer stable version is available.
 b. Fixed a minor bug which caused the :py:func:`pingouin.plot_rm_corr` to throw an error if any of the input variables started with a number (because of Patsy formula formatting).
+c. Added a check in :py:func:`pingouin.mixed_anova` to ensure that the ``subject`` variable should have a unique range or set of values for each between-subject group defined in the ``between`` variable, e.g. group1 = [1, 2, 3, 4, 5] and group2 = [6, 7, 8, 9, 10]. The function will throw an error if there are one or more overlapping subject IDs between groups (e.g. group1 = [1, 2, 3, 4, 5], group2 = [1, 2, 3, 4, 5]).
 
 v0.3.1 (December 2019)
 ----------------------

@@ -1443,6 +1443,15 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
         data = remove_rm_na(dv=dv, within=within, subject=subject,
                             data=data[[subject, within, between, dv]])
 
+    # Check that subject IDs do not overlap between groups: the subject ID
+    # should have a unique range / set of values for each between-subject
+    # group e.g. group1= 1 --> 20 and group2 = 21 --> 40.
+    if not (data.groupby([subject, within])[between].nunique() == 1).all():
+        raise ValueError("Subject IDs cannot overlap between groups: each "
+                         "group in `%s` must have a unique set of "
+                         "subject IDs, \ne.g. group1 = [1, 2, 3, ..., 10] "
+                         "and group2 = [11, 12, 13, ..., 20]" % between)
+
     # SUMS OF SQUARES
     grandmean = data[dv].mean()
     # Extract main effects of time and between

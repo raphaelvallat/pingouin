@@ -314,6 +314,20 @@ class TestParametric(TestCase):
         assert np.isclose(aov.at[1, 'W-spher'], 0.8850318, atol=0.01)
         assert np.isclose(aov.at[1, 'p-spher'], 0.7535238, atol=0.1)
 
+        # With overlapping subject IDs in the between-subject groups
+        df_overlap = df.copy()
+        df_overlap['Subject'] = (df_overlap.groupby(['Group'])['Subject']
+                                 .apply(lambda x: x - x.min()))
+        with pytest.raises(ValueError):
+            mixed_anova(dv='Scores', within='Time', subject='Subject',
+                        between='Group', data=df_overlap)
+
+        df_overlap = df.copy()
+        df_overlap['Subject'] = df_overlap['Subject'].replace(57, 3)
+        with pytest.raises(ValueError):
+            mixed_anova(dv='Scores', within='Time', subject='Subject',
+                        between='Group', data=df_overlap)
+
     def test_ancova(self):
         """Test function ancovan.
         Compare with JASP."""
