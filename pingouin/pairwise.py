@@ -7,8 +7,7 @@ from itertools import combinations, product
 from pingouin.parametric import anova
 from pingouin.multicomp import multicomp
 from pingouin.effsize import compute_effsize, convert_effsize
-from pingouin.utils import (remove_rm_na, _export_table, _check_dataframe,
-                            _flatten_list)
+from pingouin.utils import remove_rm_na, _check_dataframe, _flatten_list
 
 __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
            "pairwise_corr"]
@@ -18,8 +17,7 @@ __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
 def pairwise_ttests(data=None, dv=None, between=None, within=None,
                     subject=None, parametric=True, alpha=.05, tail='two-sided',
                     padjust='none', effsize='hedges', nan_policy='listwise',
-                    return_desc=False, interaction=True,
-                    export_filename=None):
+                    return_desc=False, interaction=True):
     '''Pairwise T-tests.
 
     Parameters
@@ -85,11 +83,6 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         Notes).
 
         .. versionadded:: 0.2.9
-    export_filename : string
-        Filename (without extension) for the output file.
-        If None, do not export the table.
-        By default, the file will be created in the current python console
-        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -453,8 +446,6 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         stats['Time'].fillna('-', inplace=True)
         stats.rename(columns={'Time': factors[0]}, inplace=True)
 
-    if export_filename is not None:
-        _export_table(stats, export_filename)
     return stats
 
 
@@ -777,8 +768,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
 
 @pf.register_dataframe_method
 def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
-                  method='pearson', padjust='none', nan_policy='pairwise',
-                  export_filename=None):
+                  method='pearson', padjust='none', nan_policy='pairwise'):
     """Pairwise (partial) correlations between columns of a pandas dataframe.
 
     Parameters
@@ -830,11 +820,6 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
         liberal pairwise deletion (= available-case analysis).
 
         .. versionadded:: 0.2.9
-    export_filename : string
-        Filename (without extension) for the output file.
-        If None, do not export the table.
-        By default, the file will be created in the current python console
-        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -1109,6 +1094,4 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     if covar is not None:
         stats.insert(loc=3, column='covar', value=str(covar))
 
-    if export_filename is not None:
-        _export_table(stats, export_filename)
     return stats

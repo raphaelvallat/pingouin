@@ -3,7 +3,7 @@
 import scipy
 import numpy as np
 import pandas as pd
-from pingouin import remove_na, remove_rm_na, _check_dataframe, _export_table
+from pingouin import remove_na, remove_rm_na, _check_dataframe
 
 __all__ = ["mad", "madmedianrule", "mwu", "wilcoxon", "kruskal", "friedman",
            "cochran", "harrelldavis"]
@@ -432,8 +432,7 @@ def wilcoxon(x, y, tail='two-sided'):
     return stats
 
 
-def kruskal(data=None, dv=None, between=None, detailed=False,
-            export_filename=None):
+def kruskal(data=None, dv=None, between=None, detailed=False):
     """Kruskal-Wallis H-test for independent samples.
 
     Parameters
@@ -444,11 +443,6 @@ def kruskal(data=None, dv=None, between=None, detailed=False,
         Name of column containing the dependant variable.
     between : string
         Name of column containing the between factor.
-    export_filename : string
-        Filename (without extension) for the output file.
-        If None, do not export the table.
-        By default, the file will be created in the current python console
-        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -527,14 +521,10 @@ def kruskal(data=None, dv=None, between=None, detailed=False,
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
 
-    # Export to .csv
-    if export_filename is not None:
-        _export_table(stats, export_filename)
     return stats
 
 
-def friedman(data=None, dv=None, within=None, subject=None,
-             export_filename=None):
+def friedman(data=None, dv=None, within=None, subject=None):
     """Friedman test for repeated measurements.
 
     Parameters
@@ -547,11 +537,6 @@ def friedman(data=None, dv=None, within=None, subject=None,
         Name of column containing the within-subject factor.
     subject : string
         Name of column containing the subject identifier.
-    export_filename : string
-        Filename (without extension) for the output file.
-        If None, do not export the table.
-        By default, the file will be created in the current python console
-        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -645,14 +630,10 @@ def friedman(data=None, dv=None, within=None, subject=None,
     stats = stats.reindex(columns=col_order)
     stats.dropna(how='all', axis=1, inplace=True)
 
-    # Export to .csv
-    if export_filename is not None:
-        _export_table(stats, export_filename)
     return stats
 
 
-def cochran(data=None, dv=None, within=None, subject=None,
-            export_filename=None):
+def cochran(data=None, dv=None, within=None, subject=None):
     """Cochran Q test. Special case of the Friedman test when the dependant
     variable is binary.
 
@@ -666,11 +647,6 @@ def cochran(data=None, dv=None, within=None, subject=None,
         Name of column containing the within-subject factor.
     subject : string
         Name of column containing the subject identifier.
-    export_filename : string
-        Filename (without extension) for the output file.
-        If None, do not export the table.
-        By default, the file will be created in the current python console
-        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -746,9 +722,6 @@ def cochran(data=None, dv=None, within=None, subject=None,
                           'p-unc': p_unc,
                           }, index=['cochran'])
 
-    # Export to .csv
-    if export_filename is not None:
-        _export_table(stats, export_filename)
     return stats
 
 

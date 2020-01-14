@@ -4,8 +4,8 @@ import pytest
 
 from unittest import TestCase
 from pingouin import read_dataset
-from pingouin.utils import (print_table, _perm_pval, _export_table,
-                            remove_rm_na, _check_eftype, _check_dataframe,
+from pingouin.utils import (print_table, _perm_pval, remove_rm_na,
+                            _check_eftype, _check_dataframe,
                             remove_na, _flatten_list, _is_sklearn_installed,
                             _is_statsmodels_installed, _is_mpmath_installed)
 
@@ -59,10 +59,6 @@ class TestUtils(TestCase):
         assert low > up
         assert up + low == 1
         assert up < two < low
-
-    def test_export_table(self):
-        """Test function export_table."""
-        _export_table(df, fname='test_export')
 
     def test_remove_na(self):
         """Test function remove_na."""

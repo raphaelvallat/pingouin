@@ -5,7 +5,7 @@ import pandas as pd
 from scipy.stats import f
 import pandas_flavor as pf
 from pingouin import (_check_dataframe, remove_rm_na, remove_na, _flatten_list,
-                      _export_table, bayesfactor_ttest, epsilon, sphericity)
+                      bayesfactor_ttest, epsilon, sphericity)
 
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova",
            "ancova"]
@@ -306,7 +306,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
 @pf.register_dataframe_method
 def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
-             detailed=False, export_filename=None):
+             detailed=False):
     """One-way and two-way repeated measures ANOVA.
 
     Parameters
@@ -342,11 +342,6 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         two-way design are not currently implemented in Pingouin.
     detailed : boolean
         If True, return a full ANOVA table.
-    export_filename : string
-        Filename (without extension) for the output file.
-        If None, do not export the table.
-        By default, the file will be created in the current python console
-        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -484,8 +479,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         if len(within) == 1:
             within = within[0]
         elif len(within) == 2:
-            return rm_anova2(dv=dv, within=within, data=data, subject=subject,
-                             export_filename=export_filename)
+            return rm_anova2(dv=dv, within=within, data=data, subject=subject)
         else:
             raise ValueError('Repeated measures ANOVA with more than three '
                              'factors are not yet supported.')
@@ -611,14 +605,10 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
-    # Export to .csv
-    if export_filename is not None:
-        _export_table(aov, export_filename)
     return aov
 
 
-def rm_anova2(data=None, dv=None, within=None, subject=None,
-              export_filename=None):
+def rm_anova2(data=None, dv=None, within=None, subject=None):
     """Two-way repeated measures ANOVA.
 
     This is an internal function. The main call to this function should be done
@@ -635,11 +625,6 @@ def rm_anova2(data=None, dv=None, within=None, subject=None,
         (e.g. ['Time', 'Treatment'])
     subject : string
         Name of column containing the subject identifier.
-    export_filename : string
-        Filename (without extension) for the output file.
-        If None, do not export the table.
-        By default, the file will be created in the current python console
-        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -776,15 +761,11 @@ def rm_anova2(data=None, dv=None, within=None, subject=None,
                                                 'np2']].round(3)
 
     aov = aov.reindex(columns=col_order)
-    # Export to .csv
-    if export_filename is not None:
-        _export_table(aov, export_filename)
     return aov
 
 
 @pf.register_dataframe_method
-def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
-          export_filename=None):
+def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
     """One-way and *N*-way ANOVA.
 
     Parameters
@@ -808,11 +789,6 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
     detailed : boolean
         If True, return a detailed ANOVA table
         (default True for N-way ANOVA).
-    export_filename : string
-        Filename (without extension) for the output file.
-        If None, do not export the table.
-        By default, the file will be created in the current python console
-        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -958,12 +934,10 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
         elif len(between) == 2:
             # Two factors with balanced design = Pingouin implementation
             # Two factors with unbalanced design = statsmodels
-            return anova2(dv=dv, between=between, data=data,
-                          ss_type=ss_type, export_filename=export_filename)
+            return anova2(dv=dv, between=between, data=data, ss_type=ss_type)
         else:
             # 3 or more factors with (un)-balanced design = statsmodels
-            return anovan(dv=dv, between=between, data=data,
-                          ss_type=ss_type, export_filename=export_filename)
+            return anovan(dv=dv, between=between, data=data, ss_type=ss_type)
 
     # Check data
     _check_dataframe(dv=dv, between=between, data=data, effects='between')
@@ -1028,13 +1002,10 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
-    # Export to .csv
-    if export_filename is not None:
-        _export_table(aov, export_filename)
     return aov
 
 
-def anova2(data=None, dv=None, between=None, ss_type=2, export_filename=None):
+def anova2(data=None, dv=None, between=None, ss_type=2):
     """Two-way balanced ANOVA in pure Python + Pandas.
 
     This is an internal function. The main call to this function should be done
@@ -1072,8 +1043,7 @@ def anova2(data=None, dv=None, between=None, ss_type=2, export_filename=None):
         df_resid = data[dv].size - (ng1 * ng2)
     else:
         # UNBALANCED DESIGN
-        return anovan(dv=dv, between=between, data=data, ss_type=ss_type,
-                      export_filename=export_filename)
+        return anovan(dv=dv, between=between, data=data, ss_type=ss_type)
 
     # Mean squares
     ms_fac1 = ss_fac1 / df_fac1
@@ -1112,13 +1082,10 @@ def anova2(data=None, dv=None, between=None, ss_type=2, export_filename=None):
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
-    # Export to .csv
-    if export_filename is not None:
-        _export_table(aov, export_filename)
     return aov
 
 
-def anovan(data=None, dv=None, between=None, ss_type=2, export_filename=None):
+def anovan(data=None, dv=None, between=None, ss_type=2):
     """N-way ANOVA using statsmodels.
 
     This is an internal function. The main call to this function should be done
@@ -1185,15 +1152,11 @@ def anovan(data=None, dv=None, between=None, ss_type=2, export_filename=None):
 
     # Add formula to dataframe
     aov.formula_ = formula
-
-    # Export to .csv
-    if export_filename is not None:
-        _export_table(aov, export_filename)
     return aov
 
 
 @pf.register_dataframe_method
-def welch_anova(data=None, dv=None, between=None, export_filename=None):
+def welch_anova(data=None, dv=None, between=None):
     """One-way Welch ANOVA.
 
     Parameters
@@ -1205,11 +1168,6 @@ def welch_anova(data=None, dv=None, between=None, export_filename=None):
     data : :py:class:`pandas.DataFrame`
         DataFrame. Note that this function can also directly be used as a
         Pandas method, in which case this argument is no longer needed.
-    export_filename : string
-        Filename (without extension) for the output file.
-        If None, do not export the table.
-        By default, the file will be created in the current python console
-        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -1306,8 +1264,7 @@ def welch_anova(data=None, dv=None, between=None, export_filename=None):
 
     >>> from pingouin import welch_anova, read_dataset
     >>> df = read_dataset('anova')
-    >>> aov = welch_anova(dv='Pain threshold', between='Hair color',
-    ...                   data=df, export_filename='pain_anova.csv')
+    >>> aov = welch_anova(dv='Pain threshold', between='Hair color', data=df)
     >>> aov
            Source  ddof1  ddof2     F     p-unc
     0  Hair color      3   8.33  5.89  0.018813
@@ -1348,16 +1305,12 @@ def welch_anova(data=None, dv=None, between=None, export_filename=None):
     col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc']
     aov = aov.reindex(columns=col_order)
     aov[['F', 'ddof2']] = aov[['F', 'ddof2']].round(3)
-
-    # Export to .csv
-    if export_filename is not None:
-        _export_table(aov, export_filename)
     return aov
 
 
 @pf.register_dataframe_method
 def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
-                correction='auto', export_filename=None):
+                correction='auto'):
     """Mixed-design (split-plot) ANOVA.
 
     Parameters
@@ -1377,11 +1330,6 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
         If True, return Greenhouse-Geisser corrected p-value.
         If 'auto' (default), compute Mauchly's test of sphericity to determine
         whether the p-values needs to be corrected.
-    export_filename : string
-        Filename (without extension) for the output file.
-        If None, do not export the table.
-        By default, the file will be created in the current python console
-        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -1529,15 +1477,11 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
 
     # Round
     aov[['F', 'eps', 'np2']] = aov[['F', 'eps', 'np2']].round(3)
-
-    # Export to .csv
-    if export_filename is not None:
-        _export_table(aov, export_filename)
     return aov
 
 
 @pf.register_dataframe_method
-def ancova(data=None, dv=None, between=None, covar=None, export_filename=None):
+def ancova(data=None, dv=None, between=None, covar=None):
     """ANCOVA with one or more covariate(s).
 
     Parameters
@@ -1551,11 +1495,6 @@ def ancova(data=None, dv=None, between=None, covar=None, export_filename=None):
         Name of column containing the between factor.
     covar : string or list
         Name(s) of column(s) containing the covariate.
-    export_filename : string
-        Filename (without extension) for the output file.
-        If None, do not export the table.
-        By default, the file will be created in the current python console
-        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -1622,8 +1561,7 @@ def ancova(data=None, dv=None, between=None, covar=None, export_filename=None):
     # Check the number of covariates
     if isinstance(covar, list):
         if len(covar) > 1:
-            return ancovan(dv=dv, covar=covar, between=between, data=data,
-                           export_filename=export_filename)
+            return ancovan(dv=dv, covar=covar, between=between, data=data)
         else:
             covar = covar[0]
 
@@ -1680,17 +1618,12 @@ def ancova(data=None, dv=None, between=None, covar=None, export_filename=None):
                         'p-unc': [p_b, p_c, np.nan],
                         })
 
-    # Export to .csv
-    if export_filename is not None:
-        _export_table(aov, export_filename)
-
     # Add bw as an attribute (for rm_corr function)
     aov.bw_ = bw
     return aov
 
 
-def ancovan(data=None, dv=None, covar=None, between=None,
-            export_filename=None):
+def ancovan(data=None, dv=None, covar=None, between=None):
     """ANCOVA with n covariates.
 
     This is an internal function. The main call to this function should be done
@@ -1706,11 +1639,6 @@ def ancovan(data=None, dv=None, covar=None, between=None,
         Name(s) of columns containing the covariates.
     between : string
         Name of column containing the between factor.
-    export_filename : string
-        Filename (without extension) for the output file.
-        If None, do not export the table.
-        By default, the file will be created in the current python console
-        directory. To change that, specify the filename with full path.
 
     Returns
     -------
@@ -1746,9 +1674,4 @@ def ancovan(data=None, dv=None, covar=None, between=None,
 
     aov['DF'] = aov['DF'].astype(int)
     aov[['SS', 'F']] = aov[['SS', 'F']].round(3)
-
-    # Export to .csv
-    if export_filename is not None:
-        _export_table(aov, export_filename)
-
     return aov

@@ -306,8 +306,7 @@ The :py:func:`pingouin.normality` function works with lists, arrays, or pandas D
 
   # Compute the two-way mixed ANOVA and export to a .csv file
   aov = pg.mixed_anova(data=df, dv='Scores', between='Group', within='Time',
-                       subject='Subject', correction=False,
-                       export_filename='mixed_anova.csv')
+                       subject='Subject', correction=False)
   pg.print_table(aov)
 
 .. table:: Output

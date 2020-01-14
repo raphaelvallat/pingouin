@@ -40,8 +40,7 @@ class TestPairwise(TestCase):
         assert pt.loc[0, 'p-unc'] == 0.023
         pairwise_ttests(dv='Scores', between='Group',
                         data=df, padjust='bonf', tail='one-sided',
-                        effsize='cohen', parametric=False,
-                        export_filename='test_export.csv')
+                        effsize='cohen', parametric=False)
 
         # Two between factors
         pt = pairwise_ttests(dv='Scores', between=['Time', 'Group'], data=df,
@@ -228,9 +227,6 @@ class TestPairwise(TestCase):
         # Correct for multiple comparisons
         pairwise_corr(data=data, method='spearman', tail='one-sided',
                       padjust='bonf')
-        # Export
-        pairwise_corr(data=data, method='spearman', tail='one-sided',
-                      export_filename='test_export.csv')
         # Check with a subset of columns
         pairwise_corr(data=data, columns=['Neuroticism', 'Extraversion'])
         with pytest.raises(ValueError):

@@ -84,7 +84,7 @@ class TestParametric(TestCase):
         # Pain dataset
         df_pain = read_dataset('anova')
         aov = anova(dv='Pain threshold', between='Hair color', data=df_pain,
-                    detailed=True, export_filename='test_export.csv')
+                    detailed=True)
         anova(dv='Pain threshold', between=['Hair color'], data=df_pain)
         # Compare with JASP
         assert np.allclose(aov.loc[0, 'F'], 6.791)
@@ -111,13 +111,10 @@ class TestParametric(TestCase):
         array_equal(aov2.loc[[0, 1, 2], 'p-unc'].values, [0.952, 0.108, 0.142])
         array_equal(aov2.loc[[0, 1, 2], 'np2'].values, [0.000, 0.219, 0.195])
 
-        # Export
-        anova(dv="Yield", between=["Blend", "Crop"],
-              export_filename='test_export.csv', data=df_aov2)
         # Two-way ANOVA with unbalanced design
         df_aov2 = read_dataset('anova2_unbalanced')
-        aov2 = df_aov2.anova(dv="Scores", export_filename='test_export.csv',
-                             between=["Diet", "Exercise"]).round(3)
+        aov2 = df_aov2.anova(dv="Scores", between=["Diet", "Exercise"]
+                             ).round(3)
         array_equal(aov2.loc[:, 'MS'].values, [390.625, 180.625, 15.625,
                                                52.625])
         array_equal(aov2.loc[[0, 1, 2], 'F'].values, [7.423, 3.432, 0.297])
@@ -141,8 +138,7 @@ class TestParametric(TestCase):
         # Balanced
         df_aov3 = read_dataset('anova3')
         aov3_ss1 = anova(dv="Cholesterol", between=['Sex', 'Risk', 'Drug'],
-                         ss_type=1, data=df_aov3,
-                         export_filename='test_export.csv').round(3)
+                         ss_type=1, data=df_aov3).round(3)
         aov3_ss2 = anova(dv="Cholesterol", between=['Sex', 'Risk', 'Drug'],
                          ss_type=2, data=df_aov3).round(3)
         aov3_ss3 = anova(dv="Cholesterol", between=['Sex', 'Risk', 'Drug'],
@@ -204,7 +200,7 @@ class TestParametric(TestCase):
         # Pain dataset
         df_pain = read_dataset('anova')
         aov = welch_anova(dv='Pain threshold', between='Hair color',
-                          data=df_pain, export_filename='test_export.csv')
+                          data=df_pain)
         # Compare with R oneway.test function
         assert aov.loc[0, 'ddof1'] == 3
         assert np.allclose(aov.loc[0, 'ddof2'], 8.330)
@@ -227,8 +223,7 @@ class TestParametric(TestCase):
 
         rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
                  correction=True, detailed=True)
-        rm_anova(dv='Scores', within=['Time'], subject='Subject', data=df_nan,
-                 export_filename='test_export.csv')
+        rm_anova(dv='Scores', within=['Time'], subject='Subject', data=df_nan)
         # Using a wide dataframe with NaN and compare with JASP
         data = read_dataset('rm_anova_wide')
         aov = data.rm_anova(detailed=True, correction=True)
@@ -244,8 +239,7 @@ class TestParametric(TestCase):
         Compare with JASP."""
         data = read_dataset('rm_anova2')
         aov = rm_anova(data=data, subject='Subject', within=['Time', 'Metric'],
-                       dv='Performance',
-                       export_filename='test_export.csv').round(3)
+                       dv='Performance').round(3)
         array_equal(aov.loc[:, 'MS'].values, [828.817, 682.617, 112.217])
         array_equal(aov.loc[:, 'F'].values, [33.852, 26.959, 12.632])
         array_equal(aov.loc[:, 'np2'].values, [0.790, 0.750, 0.584])
@@ -282,7 +276,7 @@ class TestParametric(TestCase):
         df_nan2.iloc[158, 0] = np.nan
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
                           between='Group', data=df_nan2, correction=True,
-                          export_filename='test_export.csv').round(3)
+                          ).round(3)
         array_equal(aov.loc[:, 'F'].values, [5.692, 3.053, 3.501])
         array_equal(aov.loc[:, 'np2'].values, [0.094, 0.053, 0.060])
         assert aov.loc[1, 'eps'] == 0.997
@@ -340,8 +334,7 @@ class TestParametric(TestCase):
         # With one covariate, missing values and unbalanced design
         df.loc[[1, 2], 'Scores'] = np.nan
         aov = ancova(data=df, dv='Scores', covar=['Income'],
-                     between='Method',
-                     export_filename='test_export.csv').round(3)
+                     between='Method').round(3)
         assert aov.loc[0, 'F'] == 3.147
         assert aov.loc[1, 'F'] == 19.781
         assert aov.loc[2, 'DF'] == 29
@@ -354,5 +347,5 @@ class TestParametric(TestCase):
         assert aov.loc[3, 'DF'] == 28
         # Other parameters
         ancova(data=df, dv='Scores', covar=['Income', 'BMI'],
-               between='Method', export_filename='test_export.csv')
+               between='Method')
         ancova(data=df, dv='Scores', covar=['Income'], between='Method')

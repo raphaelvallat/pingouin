@@ -86,8 +86,7 @@ class TestNonParametric(TestCase):
                            'Time': np.repeat(['A', 'B', 'C'], 100),
                            'Subject': np.tile(np.arange(100), 3)})
         friedman(data=df, dv='DV', subject='Subject', within='Time')
-        summary = friedman(data=df, dv='DV', within='Time', subject='Subject',
-                           export_filename='test_export.csv')
+        summary = friedman(data=df, dv='DV', within='Time', subject='Subject')
         # Compare with SciPy built-in function
         from scipy import stats
         Q, p = stats.friedmanchisquare(x, y, z)
@@ -104,8 +103,7 @@ class TestNonParametric(TestCase):
         df = pd.DataFrame({'DV': np.r_[x_nan, y, z],
                            'Group': np.repeat(['A', 'B', 'C'], 100)})
         kruskal(data=df, dv='DV', between='Group')
-        summary = kruskal(data=df, dv='DV', between='Group',
-                          export_filename='test_export.csv')
+        summary = kruskal(data=df, dv='DV', between='Group')
         # Compare with SciPy built-in function
         H, p = scipy.stats.kruskal(x_nan, y, z, nan_policy='omit')
         assert np.allclose(np.round(H, 3), summary['H']['Kruskal'])
@@ -120,8 +118,7 @@ class TestNonParametric(TestCase):
         st = cochran(dv='Energetic', within='Time', subject='Subject', data=df)
         assert st.loc['cochran', 'Q'] == 6.706
         assert np.allclose(st.loc['cochran', 'p-unc'], 0.034981)
-        cochran(dv='Energetic', within='Time', subject='Subject', data=df,
-                export_filename='test_export.csv')
+        cochran(dv='Energetic', within='Time', subject='Subject', data=df)
         # With a NaN value
         df.loc[2, 'Energetic'] = np.nan
         cochran(dv='Energetic', within='Time', subject='Subject', data=df)

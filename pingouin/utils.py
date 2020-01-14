@@ -5,7 +5,7 @@ import numpy as np
 from pingouin.external.tabulate import tabulate
 import pandas as pd
 
-__all__ = ["_perm_pval", "print_table", "_export_table", "_check_eftype",
+__all__ = ["_perm_pval", "print_table", "_check_eftype",
            "remove_rm_na", "remove_na", "_flatten_list", "_check_dataframe",
            "_is_sklearn_installed", "_is_statsmodels_installed",
            "_is_mpmath_installed"]
@@ -73,14 +73,16 @@ def print_table(df, floatfmt=".3f", tablefmt='simple'):
     print('')
 
 
-def _export_table(table, fname):
-    """Export DataFrame to .csv"""
-    import os.path as op
-    extension = op.splitext(fname.lower())[1]
-    if extension == '':
-        fname = fname + '.csv'
-    table.to_csv(fname, index=None, sep=',', encoding='utf-8',
-                 float_format='%.4f', decimal='.')
+# def _export_table(table, fname):
+#     """Export DataFrame to .csv.
+#     DEPRECATED in Pingouin v0.3.2
+#     """
+#     import os.path as op
+#     extension = op.splitext(fname.lower())[1]
+#     if extension == '':
+#         fname = fname + '.csv'
+#     table.to_csv(fname, index=None, sep=',', encoding='utf-8',
+#                  float_format='%.4f', decimal='.')
 
 ###############################################################################
 # MISSING VALUES
