@@ -16,9 +16,10 @@ __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
 @pf.register_dataframe_method
 def pairwise_ttests(data=None, dv=None, between=None, within=None,
                     subject=None, parametric=True, alpha=.05, tail='two-sided',
-                    padjust='none', effsize='hedges', nan_policy='listwise',
-                    return_desc=False, interaction=True):
-    '''Pairwise T-tests.
+                    padjust='none', effsize='hedges', correction='auto',
+                    nan_policy='listwise', return_desc=False,
+                    interaction=True):
+    """Pairwise T-tests.
 
     Parameters
     ----------
@@ -28,12 +29,13 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     dv : string
         Name of column containing the dependant variable.
     between : string or list with 2 elements
-        Name of column(s) containing the between factor(s).
+        Name of column(s) containing the between-subject factor(s).
     within : string or list with 2 elements
-        Name of column(s) containing the within factor(s).
+        Name of column(s) containing the within-subject factor(s), i.e. the
+        repeated measurements.
     subject : string
-        Name of column containing the subject identifier. Compulsory for
-        contrast including a within-subject factor.
+        Name of column containing the subject identifier. This is compulsory
+        when ``within`` is specified.
     parametric : boolean
         If True (default), use the parametric :py:func:`ttest` function.
         If False, use :py:func:`pingouin.wilcoxon` or :py:func:`pingouin.mwu`
@@ -69,6 +71,13 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         'odds-ratio' : Odds ratio
         'AUC' : Area Under the Curve
         'CLES' : Common Language Effect Size
+    correction : string or boolean
+        For unpaired two sample T-tests, specify whether or not to correct for
+        unequal variances using Welch separate variances T-test. If `'auto'`,
+        it will automatically uses Welch T-test when the sample sizes are
+        unequal, as recommended by Zimmerman 2004.
+
+        .. versionadded:: 0.3.2
     nan_policy : string
         Can be `'listwise'` for listwise deletion of missing values in repeated
         measures design (= complete-case analysis) or `'pairwise'` for the
@@ -125,11 +134,11 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     In other words, if ``between`` is a list with two elements, the output
     model is between1 + between2 + between1 * between2.
 
-    Similarly, if `within`` is a list with two elements, the output model is
+    Similarly, if ``within`` is a list with two elements, the output model is
     within1 + within2 + within1 * within2.
 
-    If both ``between`` and ``within`` are specified, the function return
-    within + between + within * between.
+    If both ``between`` and ``within`` are specified, the output model is
+    within + between + within * between (= mixed design).
 
     Missing values in repeated measurements are automatically removed using a
     listwise (default) or pairwise deletion strategy. However, you should be
@@ -137,17 +146,36 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     for the interaction effect). We strongly recommend that you preprocess
     your data and remove the missing values before using this function.
 
-    This function has been tested against the `pairwise.t.test` R function.
+    This function has been tested against the `pairwise.t.test
+    <https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/pairwise.t.test>`_
+    R function.
+
+    .. warning :: Versions of Pingouin below 0.3.2 gave wrong results
+        for the between-subject T-test in mixed models (= when both ``between``
+        and ``within`` were specified). Specifically, the group data is now
+        averaged over repeated measurements before calculating the independent
+        T-test, otherwise the degrees of freedom are conflated by the number
+        of repeated measurements. This is the default behavior of JASP and
+        JAMOVI softwares. Make sure to always use the latest release.
+
+    .. note :: Note that contrarily to the default behavior of JAMOVI and
+        the `pairwise.t.test` R function, Pingouin does not pool the error
+        term for the within-subject factor (= repeated measures) when
+        calculating the T-tests. This may lead to slightly different T and
+        p values.
 
     Examples
     --------
-    1. One between-factor
+    For more examples, please refer to the `Jupyter notebooks
+    <https://github.com/raphaelvallat/pingouin/blob/master/notebooks/01_ANOVA.ipynb>`_
+
+    1. One between-subject factor
 
     >>> from pingouin import pairwise_ttests, read_dataset
     >>> df = read_dataset('mixed_anova.csv')
-    >>> post_hocs = pairwise_ttests(dv='Scores', between='Group', data=df)
+    >>> pairwise_ttests(dv='Scores', between='Group', data=df) # doctest: +SKIP
 
-    2. One within-factor
+    2. One within-subject factor
 
     >>> post_hocs = pairwise_ttests(dv='Scores', within='Time',
     ...                             subject='Subject', data=df)
@@ -158,22 +186,22 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     >>> pairwise_ttests(dv='Scores', within='Time', subject='Subject',
     ...                 data=df, parametric=False)  # doctest: +SKIP
 
-    4. Within + Between + Within * Between with corrected p-values
+    4. Mixed design (within and between) with bonferroni-corrected p-values
 
     >>> posthocs = pairwise_ttests(dv='Scores', within='Time',
     ...                            subject='Subject', between='Group',
     ...                            padjust='bonf', data=df)
 
-    5. Between1 + Between2 + Between1 * Between2
+    5. Two between-subject factors. The order of the list matters!
 
     >>> posthocs = pairwise_ttests(dv='Scores', between=['Group', 'Time'],
     ...                            data=df)
 
-    6. Between1 + Between2, no interaction
+    6. Same but without the interaction
 
     >>> posthocs = df.pairwise_ttests(dv='Scores', between=['Group', 'Time'],
     ...                               interaction=False)
-    '''
+    """
     from .parametric import ttest
     from .nonparametric import wilcoxon, mwu
 
@@ -288,7 +316,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             y = grp_col.get_group(col2).to_numpy(dtype=np.float64)
             if parametric:
                 stat_name = 'T'
-                df_ttest = ttest(x, y, paired=paired, tail=tail)
+                df_ttest = ttest(x, y, paired=paired, tail=tail,
+                                 correction=correction)
                 stats.at[i, 'BF10'] = df_ttest.at['T-test', 'BF10']
                 stats.at[i, 'dof'] = df_ttest.at['T-test', 'dof']
             else:
@@ -331,35 +360,44 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             factors = between
             fbt = factors
             fwt = [None, None]
-            # eft = ['between', 'between']
             paired = False
+            agg = [False, False]
         elif contrast == 'multiple_within':
             # B2
             factors = within
             fbt = [None, None]
             fwt = factors
-            # eft = ['within', 'within']
             paired = True
+            agg = [False, False]
         else:
             # B3
             factors = [within, between]
             fbt = [None, between]
             fwt = [within, None]
-            # eft = ['within', 'between']
             paired = False
+            agg = [False, True]
 
         stats = pd.DataFrame()
         for i, f in enumerate(factors):
+            # Since Pingouin v0.3.2, for mixed ANOVA design, the between
+            # subject T-test is calculated AFTER averaging over all the
+            # repeated measurements.
+            if agg[i]:
+                tmp = data.groupby([subject, f], as_index=False).mean()
+            else:
+                tmp = data
             stats = stats.append(pairwise_ttests(dv=dv,
                                                  between=fbt[i],
                                                  within=fwt[i],
                                                  subject=subject,
-                                                 data=data,
+                                                 data=tmp,
                                                  parametric=parametric,
                                                  alpha=alpha,
                                                  tail=tail,
                                                  padjust=padjust,
                                                  effsize=effsize,
+                                                 correction=correction,
+                                                 nan_policy=nan_policy,
                                                  return_desc=return_desc),
                                  ignore_index=True, sort=False)
 
@@ -404,7 +442,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                                               paired=paired), 3)
                 if parametric:
                     stat_name = 'T'
-                    df_ttest = ttest(x, y, paired=paired, tail=tail)
+                    df_ttest = ttest(x, y, paired=paired, tail=tail,
+                                     correction=correction)
                     stats.at[ic, 'BF10'] = df_ttest.at['T-test', 'BF10']
                     stats.at[ic, 'dof'] = df_ttest.at['T-test', 'dof']
                 else:

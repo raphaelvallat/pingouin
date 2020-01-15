@@ -1319,17 +1319,18 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
         DataFrame. Note that this function can also directly be used as a
         Pandas method, in which case this argument is no longer needed.
     dv : string
-        Name of column containing the dependant variable.
+        Name of column containing the dependent variable.
     within : string
-        Name of column containing the within factor.
+        Name of column containing the within-subject factor
+        (repeated measurements).
     subject : string
-        Name of column containing the subject identifier.
+        Name of column containing the between-subject identifier.
     between : string
         Name of column containing the between factor.
     correction : string or boolean
         If True, return Greenhouse-Geisser corrected p-value.
-        If 'auto' (default), compute Mauchly's test of sphericity to determine
-        whether the p-values needs to be corrected.
+        If `'auto'` (default), compute Mauchly's test of sphericity to
+        determine whether the p-values needs to be corrected.
 
     Returns
     -------
@@ -1350,23 +1351,31 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
 
     See Also
     --------
-    anova : One-way and N-way ANOVA
-    rm_anova : One-way and two-way repeated measures ANOVA
+    anova, rm_anova, pairwise_ttests
 
     Notes
     -----
-    Results have been tested against R and JASP.
+    Data are expected to be in long-format (even the repeated measures).
+    If your data is in wide-format, you can use the :py:func:`pandas.melt()`
+    function to convert from wide to long format.
 
     Missing values are automatically removed (listwise deletion) using the
     :py:func:`pingouin.remove_rm_na` function. This could drastically decrease
     the power of the ANOVA if many missing values are present. In that case,
     it might be better to use linear mixed effects models.
 
-    If the between-subject groups are unbalanced (= unequal sample sizes), a
-    type II ANOVA will be computed.
+    Results have been tested against R and JASP.
+
+    .. warning :: If the between-subject groups are unbalanced
+        (= unequal sample sizes), a type II ANOVA will be computed.
+        Note however that SPSS, JAMOVI and JASP by default return a type III
+        ANOVA, which may lead to slightly different results.
 
     Examples
     --------
+    For more examples, please refer to the `Jupyter notebooks
+    <https://github.com/raphaelvallat/pingouin/blob/master/notebooks/01_ANOVA.ipynb>`_
+
     Compute a two-way mixed model ANOVA.
 
     >>> from pingouin import mixed_anova, read_dataset

@@ -13,14 +13,58 @@ class TestPairwise(TestCase):
 
     def test_pairwise_ttests(self):
         """Test function pairwise_ttests.
-        Tested against the pairwise.t.test R function."""
+        Tested against the pairwise.t.test R function, as well as JASP and
+        JAMOVI.
+
+        Note: JAMOVI by default pool the error term for the within-subject
+        factor in mixed ANOVA design. Pingouin does not pool the error term,
+        which is the same behavior as JASP. Also, JASP does not return the
+        uncorrected p-values, therefore only the corrected p-values are
+        compared.
+        """
         df = read_dataset('mixed_anova.csv')
-        # Within + Between + Within * Between
-        pairwise_ttests(dv='Scores', within='Time', between='Group',
-                        subject='Subject', data=df, alpha=.01)
+        df_unb = read_dataset('mixed_anova_unbalanced')
+
+        # Mixed ANOVA design: Within + Between + Within * Between
+        # Compare with JASP and JAMOVI.
+        # 1. With two between-subject groups
+        pt = pairwise_ttests(dv='Scores', within='Time', between='Group',
+                             subject='Subject', data=df, padjust='holm',
+                             interaction=False)
+        assert np.array_equal(pt['Paired'], [True, True, True, False])
+        assert np.array_equal(pt.loc[:2, 'p-corr'].round(3),
+                              [0.174, 0.024, 0.310])
+        np.array_equal(pt.loc[3, 'p-corr'].round(3), [0.174, 0.024, 0.310])
+        assert pt.loc[3, 'p-unc'].round(3) == 0.028
+
         pairwise_ttests(dv='Scores', within=['Time'], between=['Group'],
                         subject='Subject', data=df, padjust='fdr_bh',
-                        return_desc=True)
+                        alpha=.01, return_desc=True)
+
+        # 1. With three between-subject groups
+        pt = pairwise_ttests(dv='Scores', within='Time', between='Group',
+                             subject='Subject', data=df_unb, padjust='bonf',
+                             interaction=False)
+        # Compare the T and p-values of the within-subject factor
+        assert np.array_equal(pt.loc[:5, 'T'],
+                              [-0.777, -1.344, -2.039, -0.814, -1.492, -0.627])
+        assert np.array_equal(pt.loc[:5, 'p-corr'].round(3),
+                              [1., 1., 0.313, 1., 0.889, 1.])
+        assert not pt['dof'].apply(lambda x: x.is_integer()).all()
+
+        # Non-parametric
+        pairwise_ttests(dv='Scores', within='Time', between='Group',
+                        subject='Subject', data=df_unb, parametric=False)
+
+        # Without the Welch correction
+        pt = pairwise_ttests(dv='Scores', within='Time', between='Group',
+                             subject='Subject', data=df_unb, correction=False)
+        assert pt['dof'].apply(lambda x: x.is_integer()).all()
+
+        # We cannnot compare the between subject factor because Pingouin
+        # automatically applies the Welch correction, and we cannot
+        # specify that anywhere in JASP.
+
         # Simple within
         # In R:
         # >>> pairwise.t.test(df$Scores, df$Time, pool.sd = FALSE,
