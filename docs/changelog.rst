@@ -6,10 +6,10 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
-v0.3.2 (dev)
-------------
+v0.3.2 (January 2020)
+---------------------
 
-Hotfix release to fix a critical issue with :py:func:`pingouin.pairwise_ttests` (see below). **We strongly recommend that you update to the newest version of Pingouin and double-check your previous results if you've ever used the pairwise T-tests with more than one factor (e.g. mixed, factorial or 2-way repeated measures design).**
+Hotfix release to fix a critical issue with :py:func:`pingouin.pairwise_ttests` (see below). We strongly recommend that you update to the newest version of Pingouin and double-check your previous results if you've ever used the pairwise T-tests with more than one factor (e.g. mixed, factorial or 2-way repeated measures design).
 
 **Bugfixes**
 
