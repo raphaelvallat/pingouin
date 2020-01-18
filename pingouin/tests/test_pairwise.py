@@ -16,56 +16,30 @@ class TestPairwise(TestCase):
         Tested against the pairwise.t.test R function, as well as JASP and
         JAMOVI.
 
-        Note: JAMOVI by default pool the error term for the within-subject
-        factor in mixed ANOVA design. Pingouin does not pool the error term,
-        which is the same behavior as JASP. Also, JASP does not return the
-        uncorrected p-values, therefore only the corrected p-values are
-        compared.
+        Notes:
+        1) JAMOVI by default pool the error term for the within-subject
+        factor in mixed design. Pingouin does not pool the error term,
+        which is the same behavior as JASP.
+
+        2) JASP does not return the uncorrected p-values, therefore only the
+        corrected p-values are compared.
+
+        3) JASP does not calculate the Bayes Factor for the interaction terms.
+        For mixed design and two-way design, in JASP, the Bayes Factor
+        seems to be calculated without aggregating over repeated measurements.
+
+        4) For factorial between-subject contrasts, both JASP and JAMOVI pool
+        the error term. This option is not yet implemented in Pingouin.
+        Therefore, one cannot directly validate the T and p-values.
         """
-        df = read_dataset('mixed_anova.csv')
+        df = read_dataset('mixed_anova.csv')  # Simple and mixed design
         df_unb = read_dataset('mixed_anova_unbalanced')
+        df_rm2 = read_dataset('rm_anova2')  # 2-way rm design
+        df_aov2 = read_dataset('anova2')  # 2-way factorial design
 
-        # Mixed ANOVA design: Within + Between + Within * Between
-        # Compare with JASP and JAMOVI.
-        # 1. With two between-subject groups
-        pt = pairwise_ttests(dv='Scores', within='Time', between='Group',
-                             subject='Subject', data=df, padjust='holm',
-                             interaction=False)
-        assert np.array_equal(pt['Paired'], [True, True, True, False])
-        assert np.array_equal(pt.loc[:2, 'p-corr'].round(3),
-                              [0.174, 0.024, 0.310])
-        np.array_equal(pt.loc[3, 'p-corr'].round(3), [0.174, 0.024, 0.310])
-        assert pt.loc[3, 'p-unc'].round(3) == 0.028
-
-        pairwise_ttests(dv='Scores', within=['Time'], between=['Group'],
-                        subject='Subject', data=df, padjust='fdr_bh',
-                        alpha=.01, return_desc=True)
-
-        # 1. With three between-subject groups
-        pt = pairwise_ttests(dv='Scores', within='Time', between='Group',
-                             subject='Subject', data=df_unb, padjust='bonf',
-                             interaction=False)
-        # Compare the T and p-values of the within-subject factor
-        assert np.array_equal(pt.loc[:5, 'T'],
-                              [-0.777, -1.344, -2.039, -0.814, -1.492, -0.627])
-        assert np.array_equal(pt.loc[:5, 'p-corr'].round(3),
-                              [1., 1., 0.313, 1., 0.889, 1.])
-        assert not pt['dof'].apply(lambda x: x.is_integer()).all()
-
-        # Non-parametric
-        pairwise_ttests(dv='Scores', within='Time', between='Group',
-                        subject='Subject', data=df_unb, parametric=False)
-
-        # Without the Welch correction
-        pt = pairwise_ttests(dv='Scores', within='Time', between='Group',
-                             subject='Subject', data=df_unb, correction=False)
-        assert pt['dof'].apply(lambda x: x.is_integer()).all()
-
-        # We cannnot compare the between subject factor because Pingouin
-        # automatically applies the Welch correction, and we cannot
-        # specify that anywhere in JASP.
-
-        # Simple within
+        # -------------------------------------------------------------------
+        # Simple within: EASY!
+        # -------------------------------------------------------------------
         # In R:
         # >>> pairwise.t.test(df$Scores, df$Time, pool.sd = FALSE,
         # ...                 p.adjust.method = 'holm', paired = TRUE)
@@ -77,38 +51,151 @@ class TestPairwise(TestCase):
                                       [0.087, 0.008, 0.310])
         pairwise_ttests(dv='Scores', within='Time', subject='Subject',
                         data=df, parametric=False, return_desc=True)
-        # Simple between
-        # In R:
-        # >>> pairwise.t.test(df$Scores, df$Group, pool.sd = FALSE)
+
+        # -------------------------------------------------------------------
+        # Simple between: EASY!
+        # -------------------------------------------------------------------
+        # In R: >>> pairwise.t.test(df$Scores, df$Group, pool.sd = FALSE)
         pt = pairwise_ttests(dv='Scores', between='Group', data=df).round(3)
         assert pt.loc[0, 'p-unc'] == 0.023
         pairwise_ttests(dv='Scores', between='Group',
                         data=df, padjust='bonf', tail='one-sided',
                         effsize='cohen', parametric=False)
 
-        # Two between factors
-        pt = pairwise_ttests(dv='Scores', between=['Time', 'Group'], data=df,
-                             padjust='holm').round(3)
-        pairwise_ttests(dv='Scores', between=['Time', 'Group'], data=df,
-                        padjust='holm', parametric=False)
-        # .. with no interaction
-        pt_no_inter = df.pairwise_ttests(dv='Scores',
-                                         between=['Time', 'Group'],
-                                         interaction=False,
-                                         padjust='holm').round(3)
-        assert pt.drop(columns=['Time']).iloc[0:4, :].equals(pt_no_inter)
+        # -------------------------------------------------------------------
+        # Mixed design: Within + Between + Within * Between
+        # -------------------------------------------------------------------
+        # .Balanced data
+        # ..With marginal means
+        pt = pairwise_ttests(dv='Scores', within='Time', between='Group',
+                             subject='Subject', data=df, padjust='holm',
+                             interaction=False)
+        # ...Within main effect: OK with JASP
+        assert np.array_equal(pt['Paired'], [True, True, True, False])
+        assert np.array_equal(pt.loc[:2, 'p-corr'].round(3),
+                              [0.174, 0.024, 0.310])
+        assert np.array_equal(pt.loc[:2, 'BF10'].astype(float),
+                              [0.582, 4.232, 0.232])
+        # ...Between main effect: T and p-values OK with JASP
+        #    but BF10 is only similar when marginal=False (see note in the
+        #    2-way RM test below).
+        assert pt.loc[3, 'T'].round(3) == -2.248
+        assert pt.loc[3, 'p-unc'].round(3) == 0.028
+        # ...Interaction: slightly different because JASP pool the error term
+        #    across the between-subject groups. JASP does not compute the BF10
+        #    for the interaction.
 
+        # Other options
+        pairwise_ttests(dv='Scores', within=['Time'], between=['Group'],
+                        subject='Subject', data=df, padjust='fdr_bh',
+                        alpha=.01, return_desc=True, parametric=False)
+
+        # .Unbalanced data
+        # ..With marginal means
+        pt1 = pairwise_ttests(dv='Scores', within='Time', between='Group',
+                              subject='Subject', data=df_unb, padjust='bonf')
+        # ...Within main effect: OK with JASP
+        assert np.array_equal(pt1.loc[:5, 'T'],
+                              [-0.777, -1.344, -2.039, -0.814, -1.492, -0.627])
+        assert np.array_equal(pt1.loc[:5, 'p-corr'].round(3),
+                              [1., 1., 0.313, 1., 0.889, 1.])
+        assert np.array_equal(pt1.loc[:5, 'BF10'].astype(float),
+                              [0.273, 0.463, 1.221, 0.280, 0.554, 0.248])
+        # ...Between main effect: slightly different from JASP (why?)
+        #      True with or without the Welch correction...
+        assert (pt1.loc[6:8, 'p-corr'] > 0.20).all()
+        # ...Interaction: slightly different because JASP pool the error term
+        #    across the between-subject groups.
+        # Below the interaction JASP bonferroni-correct p-values, which are
+        # more conservative because JASP perform all possible pairwise tests
+        # jasp_pbonf = [1., 1., 1., 1., 1., 1., 1., 0.886, 1., 1., 1., 1.]
+        assert (pt1.loc[9:, 'p-corr'] > 0.05).all()
+        # Check that the Welch corection is applied by default
+        assert not pt1['dof'].apply(lambda x: x.is_integer()).all()
+
+        # ..No marginal means
+        pt2 = pairwise_ttests(dv='Scores', within='Time', between='Group',
+                              subject='Subject', data=df_unb, padjust='bonf',
+                              marginal=False)
+
+        # This only impacts the between-subject contrast
+        np.array_equal((pt1['T'] == pt2['T']).astype(int),
+                       [1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1])
+        assert (pt1.loc[6:8, 'dof'] < pt2.loc[6:8, 'dof']).all()
+
+        # Without the Welch correction, check that all the DF are integer
+        pt3 = pairwise_ttests(dv='Scores', within='Time', between='Group',
+                              subject='Subject', data=df_unb, correction=False)
+        assert pt3['dof'].apply(lambda x: x.is_integer()).all()
+
+        # -------------------------------------------------------------------
+        # Two between factors (FACTORIAL)
+        # -------------------------------------------------------------------
+        pt = df_aov2.pairwise_ttests(dv='Yield', between=['Blend', 'Crop'],
+                                     padjust='holm').round(3)
+
+        # The T and p-values are close but not exactly the same as JASP /
+        # JAMOVI, because they both pool the error term.
+        # The dof are not available in JASP, but in JAMOVI they are 18
+        # everywhere, which I'm not sure to understand why...
+        assert np.array_equal(pt.loc[:3, 'p-unc'] < 0.05,
+                              [False, False, True, False])
+
+        # However, the Bayes Factor of the simple main effects are the same...!
+        np.array_equal(pt.loc[:3, 'BF10'].astype(float),
+                       [0.374, 0.711, 2.287, 0.533])
+
+        # Using the Welch method (all df should be non-integer)
+        pt_c = df_aov2.pairwise_ttests(dv='Yield', between=['Blend', 'Crop'],
+                                       padjust='holm', correction=True)
+        assert not pt_c['dof'].apply(lambda x: x.is_integer()).any()
+
+        # The ``marginal`` option has no impact here.
+        assert pt.equals(df_aov2.pairwise_ttests(dv='Yield',
+                                                 between=['Blend', 'Crop'],
+                                                 padjust='holm',
+                                                 marginal=True).round(3))
+        # -------------------------------------------------------------------
         # Two within subject factors
-        ptw = pairwise_ttests(data=df, dv='Scores', within=['Group', 'Time'],
-                              subject='Subject', padjust='bonf',
-                              parametric=False).round(3)
-        ptw_no_inter = df.pairwise_ttests(dv='Scores',
-                                          within=['Group', 'Time'],
-                                          subject='Subject', padjust='bonf',
-                                          interaction=False,
-                                          parametric=False).round(3)
-        assert ptw.drop(columns=['Group']).iloc[0:4, :].equals(ptw_no_inter)
+        # -------------------------------------------------------------------
+        # .Marginal = True
+        ptw1 = pairwise_ttests(data=df_rm2, dv='Performance',
+                               within=['Time', 'Metric'],
+                               subject='Subject', padjust='bonf',
+                               marginal=True).round(3)
+        # Compare the T values of the simple main effect against JASP
+        # Note that the T-values of the interaction are slightly different
+        # because JASP pool the error term.
+        assert np.array_equal(ptw1.loc[0:3, 'T'],
+                              [-5.818, -5.110, -7.714, -1.559])
 
+        # .Marginal = False
+        ptw2 = pairwise_ttests(data=df_rm2, dv='Performance',
+                               within=['Time', 'Metric'],
+                               subject='Subject', padjust='bonf',
+                               marginal=False).round(3)
+
+        # For marginal = false, the sum of the dof should be higher..
+        assert ptw2['dof'].sum() > ptw1['dof'].sum()
+        # ..but the T-values of the interaction remain unchanged.
+        assert np.array_equal(ptw1.loc[4:, 'T'], ptw2.loc[4:, 'T'])
+
+        # Note about BAYES: the weird thing with JASP here is that when we
+        # calculate the Bayesian posthoc T-tests, the BF10 are similar to
+        # pingouin(marginal=False). In other words, for "regular" posthoc,
+        # JASP averages over repeated measures (marginal=True),
+        # but not for Bayesian posthocs. Is there a reason? e.g. the assumption
+        # of independence is not valid in Bayesian statistics?
+
+        # Non-parametric (mostly for code coverage)
+        pairwise_ttests(data=df_rm2, dv='Performance',
+                        within=['Time', 'Metric'], subject='Subject',
+                        parametric=False)
+
+        # -------------------------------------------------------------------
+        # ERRORS
+        # -------------------------------------------------------------------
         # Both multiple between and multiple within
         with pytest.raises(ValueError):
             pairwise_ttests(dv='Scores', between=['Time', 'Group'],
@@ -120,7 +207,9 @@ class TestPairwise(TestCase):
         with pytest.raises(ValueError):
             pairwise_ttests(dv='Scores', between='Group', data=df)
 
+        # -------------------------------------------------------------------
         # Missing values in repeated measurements
+        # -------------------------------------------------------------------
         # 1. Parametric
         df = read_dataset('pairwise_ttests_missing')
         st = pairwise_ttests(dv='Value', within='Condition', subject='Subject',
@@ -151,7 +240,9 @@ class TestPairwise(TestCase):
                         within=['Disgustingness', 'Frighteningness'],
                         subject='Subject', padjust='holm', data=df2)
 
-        # Compare with JASP tail / parametric argument
+        # -------------------------------------------------------------------
+        # Test tail / parametric argument (compare with JASP)
+        # -------------------------------------------------------------------
         df = read_dataset('pairwise_ttests')
         # 1. Within
         # 1.1 Parametric

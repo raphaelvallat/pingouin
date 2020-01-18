@@ -1670,9 +1670,10 @@ def ancovan(data=None, dv=None, covar=None, between=None):
     assert all([data[covar[i]].dtype.kind in 'fi' for i in range(len(covar))])
 
     # Fit ANCOVA model
-    formula = dv + ' ~ C(' + between + ')'
+    # formula = dv + ' ~ C(' + between + ')'
+    formula = "Q('%s') ~ C(Q('%s'))" % (dv, between)
     for c in covar:
-        formula += ' + ' + c
+        formula += " + Q('%s')" % (c)
     model = ols(formula, data=data).fit()
     aov = stats.anova_lm(model, typ=2).reset_index()
 
@@ -1680,6 +1681,9 @@ def ancovan(data=None, dv=None, covar=None, between=None):
                         'df': 'DF', 'PR(>F)': 'p-unc'}, inplace=True)
 
     aov.at[0, 'Source'] = between
+
+    for i in range(len(covar)):
+        aov.at[i + 1, 'Source'] = covar[i]
 
     aov['DF'] = aov['DF'].astype(int)
     aov[['SS', 'F']] = aov[['SS', 'F']].round(3)

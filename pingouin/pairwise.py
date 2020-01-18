@@ -15,10 +15,10 @@ __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
 
 @pf.register_dataframe_method
 def pairwise_ttests(data=None, dv=None, between=None, within=None,
-                    subject=None, parametric=True, alpha=.05, tail='two-sided',
-                    padjust='none', effsize='hedges', correction='auto',
-                    nan_policy='listwise', return_desc=False,
-                    interaction=True):
+                    subject=None, parametric=True, marginal=True, alpha=.05,
+                    tail='two-sided', padjust='none', effsize='hedges',
+                    correction='auto', nan_policy='listwise',
+                    return_desc=False, interaction=True):
     """Pairwise T-tests.
 
     Parameters
@@ -30,6 +30,12 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         Name of column containing the dependant variable.
     between : string or list with 2 elements
         Name of column(s) containing the between-subject factor(s).
+
+        .. warning:: Note that Pingouin gives slightly different T and
+            p-values compared to JASP posthoc tests for 2-way factorial design,
+            because Pingouin does not pool the standard
+            error for each factor, but rather calculate each pairwise T-test
+            completely independent of others.
     within : string or list with 2 elements
         Name of column(s) containing the within-subject factor(s), i.e. the
         repeated measurements.
@@ -40,6 +46,28 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         If True (default), use the parametric :py:func:`ttest` function.
         If False, use :py:func:`pingouin.wilcoxon` or :py:func:`pingouin.mwu`
         for paired or unpaired samples, respectively.
+    marginal : boolean
+        If True, average over repeated measures factor when working with mixed
+        or two-way repeated measures design. For instance, in mixed design,
+        the between-subject pairwise T-test(s) will be calculated after
+        averaging across all levels of the within-subject repeated measures
+        factor (the so-called *"marginal means"*).
+
+        Similarly, in two-way repeated measures factor, the pairwise T-test(s)
+        will be calculated after averaging across all levels of the other
+        repeated measures factor.
+
+        Setting ``marginal=True`` is recommended when doing posthoc
+        testing with multiple factors in order to avoid violating the
+        assumption of independence and conflating the degrees of freedom by the
+        number of repeated measurements. This is the default behavior of JASP.
+
+        .. warning:: The default behavior of Pingouin <0.3.2 was
+            ``marginal = False``, which may have led to incorrect p-values
+            for mixed or two-way repeated measures design. Make sure to always
+            use the latest version of Pingouin.
+
+        .. versionadded:: 0.3.2
     alpha : float
         Significance level
     tail : string
@@ -150,19 +178,16 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     <https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/pairwise.t.test>`_
     R function.
 
-    .. warning :: Versions of Pingouin below 0.3.2 gave wrong results
-        for the between-subject T-test in mixed models (= when both ``between``
-        and ``within`` were specified). Specifically, the group data is now
-        averaged over repeated measurements before calculating the independent
-        T-test, otherwise the degrees of freedom are conflated by the number
-        of repeated measurements. This is the default behavior of JASP and
-        JAMOVI softwares. Make sure to always use the latest release.
+    .. warning:: Versions of Pingouin below 0.3.2 gave incorrect results
+        for mixed and two-way repeated measures design (see above warning for
+        the ``marginal`` argument).
 
-    .. note :: Note that contrarily to the default behavior of JAMOVI and
-        the `pairwise.t.test` R function, Pingouin does not pool the error
-        term for the within-subject factor (= repeated measures) when
-        calculating the T-tests. This may lead to slightly different T and
-        p values.
+    .. warning:: Pingouin gives slightly different results than the JASP's
+        posthoc module when working with multiple factors (e.g. mixed,
+        factorial or 2-way repeated measures design). This is mostly caused by
+        the fact that Pingouin does not pool the standard error for
+        between-subject and interaction contrasts. You should always double
+        check your results with JASP or another statistical software.
 
     Examples
     --------
@@ -208,7 +233,6 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     # Safety checks
     _check_dataframe(dv=dv, between=between, within=within, subject=subject,
                      effects='all', data=data)
-
     assert tail in ['one-sided', 'two-sided', 'greater', 'less']
     assert isinstance(alpha, float), 'alpha must be float.'
     assert nan_policy in ['listwise', 'pairwise']
@@ -352,25 +376,24 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             stats['p-corr'] = None
             stats['p-adjust'] = None
     else:
-        # B1: BETWEEN1 + BETWEEN2 + BETWEEN1 * BETWEEN2
-        # B2: WITHIN1 + WITHIN2 + WITHIN1 * WITHIN2
-        # B3: WITHIN + BETWEEN + WITHIN * BETWEEN
+        # Multiple factors
         if contrast == 'multiple_between':
-            # B1
+            # B1: BETWEEN1 + BETWEEN2 + BETWEEN1 * BETWEEN2
             factors = between
             fbt = factors
             fwt = [None, None]
-            paired = False
+            paired = False  # the interaction is not paired
             agg = [False, False]
+            # TODO: add a pool SD option, as in JASP and JAMOVI?
         elif contrast == 'multiple_within':
-            # B2
+            # B2: WITHIN1 + WITHIN2 + WITHIN1 * WITHIN2
             factors = within
             fbt = [None, None]
             fwt = factors
             paired = True
-            agg = [False, False]
+            agg = [True, True]  # Calculate marginal means for both factors
         else:
-            # B3
+            # B3: WITHIN + BETWEEN + WITHIN * BETWEEN
             factors = [within, between]
             fbt = [None, between]
             fwt = [within, None]
@@ -379,11 +402,10 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
         stats = pd.DataFrame()
         for i, f in enumerate(factors):
-            # Since Pingouin v0.3.2, for mixed ANOVA design, the between
-            # subject T-test is calculated AFTER averaging over all the
-            # repeated measurements.
-            if agg[i]:
-                tmp = data.groupby([subject, f], as_index=False).mean()
+            # Introduced in Pingouin v0.3.2
+            if all([agg[i], marginal]):
+                tmp = data.groupby([subject, f], as_index=False,
+                                   sort=False).mean()
             else:
                 tmp = data
             stats = stats.append(pairwise_ttests(dv=dv,
@@ -392,6 +414,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                                                  subject=subject,
                                                  data=tmp,
                                                  parametric=parametric,
+                                                 marginal=marginal,
                                                  alpha=alpha,
                                                  tail=tail,
                                                  padjust=padjust,
