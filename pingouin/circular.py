@@ -6,8 +6,9 @@
 # Berens, Philipp. 2009. CircStat: A MATLAB Toolbox for Circular Statistics.
 # Journal of Statistical Software, Articles 31 (10): 1–21.
 import numpy as np
-from scipy.stats import circmean
-from pingouin import remove_na
+from scipy.stats import norm, circmean
+
+from .utils import remove_na
 
 __all__ = ["circ_axial", "circ_corrcc", "circ_corrcl", "circ_mean", "circ_r",
            "circ_rayleigh", "circ_vtest"]
@@ -45,7 +46,7 @@ def circ_axial(alpha, n):
     >>> alpha = df['Orientation'].values
     >>> alpha = circ_axial(np.deg2rad(alpha), 2)
     """
-    alpha = np.array(alpha)
+    alpha = np.asarray(alpha)
     return np.remainder(alpha * n, 2 * np.pi)
 
 
@@ -112,13 +113,9 @@ def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
     >>> print(r, pval)
     0.547 0.28585306869206784
     """
-    from scipy.stats import norm
     x = np.asarray(x)
     y = np.asarray(y)
-
-    # Check size
-    if x.size != y.size:
-        raise ValueError('x and y must have the same length.')
+    assert x.size == y.size, 'x and y must have the same length.'
 
     # Remove NA
     x, y = remove_na(x, y, paired=True)
@@ -188,10 +185,7 @@ def circ_corrcl(x, y, tail='two-sided'):
     from scipy.stats import pearsonr, chi2
     x = np.asarray(x)
     y = np.asarray(y)
-
-    # Check size
-    if x.size != y.size:
-        raise ValueError('x and y must have the same length.')
+    assert x.size == y.size, 'x and y must have the same length.'
 
     # Remove NA
     x, y = remove_na(x, y, paired=True)
@@ -237,11 +231,10 @@ def circ_mean(alpha, w=None, axis=0):
     >>> circ_mean(alpha)
     1.012962445838065
     """
-    alpha = np.array(alpha)
+    alpha = np.asarray(alpha)
     if isinstance(w, (list, np.ndarray)):
-        w = np.array(w)
-        if alpha.shape != w.shape:
-            raise ValueError("w must have the same shape as alpha.")
+        w = np.asarray(w)
+        assert alpha.shape == w.shape, "w must have the same shape as alpha."
     else:
         w = np.ones_like(alpha)
     return np.angle(np.multiply(w, np.exp(1j * alpha)).sum(axis=axis))
@@ -284,10 +277,9 @@ def circ_r(alpha, w=None, d=None, axis=0):
     >>> circ_r(x)
     0.49723034495605356
     """
-    alpha = np.array(alpha)
-    w = np.array(w) if w is not None else np.ones(alpha.shape)
-    if alpha.size is not w.size:
-        raise ValueError("Input dimensions do not match")
+    alpha = np.asarray(alpha)
+    w = np.asarray(w) if w is not None else np.ones(alpha.shape)
+    assert alpha.shape == w.shape, "Input dimensions do not match"
 
     # Compute weighted sum of cos and sin of angles:
     r = np.multiply(w, np.exp(1j * alpha)).sum(axis=axis)
@@ -299,7 +291,6 @@ def circ_r(alpha, w=None, d=None, axis=0):
     if d is not None:
         c = d / 2 / np.sin(d / 2)
         r = c * r
-
     return r
 
 
@@ -350,13 +341,12 @@ def circ_rayleigh(alpha, w=None, d=None):
     >>> circ_rayleigh(x, w=[.1, .2, .3, .4, .5], d=0.2)
     (0.278, 0.8069972000769801)
     """
-    alpha = np.array(alpha)
+    alpha = np.asarray(alpha)
     if w is None:
         r = circ_r(alpha)
         n = len(alpha)
     else:
-        if len(alpha) is not len(w):
-            raise ValueError("Input dimensions do not match")
+        assert len(alpha) == len(w), "Input dimensions do not match"
         r = circ_r(alpha, w, d)
         n = np.sum(w)
 
@@ -366,7 +356,6 @@ def circ_rayleigh(alpha, w=None, d=None):
 
     # Compute p value using approxation in Zar (1999), p. 617
     pval = np.exp(np.sqrt(1 + 4 * n + 4 * (n**2 - R**2)) - (1 + 2 * n))
-
     return np.round(z, 3), pval
 
 
@@ -424,15 +413,13 @@ def circ_vtest(alpha, dir=0., w=None, d=None):
     >>> circ_vtest(x, dir=0.5, w=[.1, .2, .3, .4, .5], d=0.2)
     (0.637, 0.23086492929174185)
     """
-    from scipy.stats import norm
-    alpha = np.array(alpha)
+    alpha = np.asarray(alpha)
     if w is None:
         r = circ_r(alpha)
         mu = circ_mean(alpha)
         n = len(alpha)
     else:
-        if len(alpha) is not len(w):
-            raise ValueError("Input dimensions do not match")
+        assert len(alpha) == len(w), "Input dimensions do not match"
         r = circ_r(alpha, w, d)
         mu = circ_mean(alpha, w)
         n = np.sum(w)
@@ -444,5 +431,4 @@ def circ_vtest(alpha, dir=0., w=None, d=None):
     # Compute p value
     u = v * np.sqrt(2 / n)
     pval = 1 - norm.cdf(u)
-
     return np.round(v, 3), pval
