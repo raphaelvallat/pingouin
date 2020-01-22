@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 from unittest import TestCase
 from pingouin import read_dataset
 from pingouin.plotting import (plot_blandaltman, plot_skipped_corr, _ppoints,
-                               qqplot, plot_paired, plot_shift, plot_rm_corr)
+                               qqplot, plot_paired, plot_shift, plot_rm_corr,
+                               plot_circmean)
 
 
 class TestPlotting(TestCase):
@@ -100,3 +101,16 @@ class TestPlotting(TestCase):
         g = plot_rm_corr(data=df, x='pH', y='PacO2', subject='Subject',
                          legend=False)
         assert isinstance(g, sns.FacetGrid)
+
+    def test_plot_circmean(self):
+        """Test plot_circmean.
+
+        The MATLAB equivalent is:
+        >>> circ_plot(alpha,'pretty','ro',true,'linewidth',2,'color','r')
+        """
+        alpha = np.array([0.02, 0.07, -0.12, 0.14, 1.2, -1.3])
+        ax = plot_circmean(alpha)
+        assert isinstance(ax, matplotlib.axes.Axes)
+        ax = plot_circmean(alpha, figsize=(5, 5), dpi=100, kwargs_markers={},
+                           kwargs_arrow={})
+        assert isinstance(ax, matplotlib.axes.Axes)

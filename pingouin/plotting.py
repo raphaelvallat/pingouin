@@ -15,7 +15,7 @@ import matplotlib.transforms as transforms
 sns.set(style='ticks', context='notebook')
 
 __all__ = ["plot_blandaltman", "plot_skipped_corr", "qqplot", "plot_paired",
-           "plot_shift", "plot_rm_corr"]
+           "plot_shift", "plot_rm_corr", "plot_circmean"]
 
 
 def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
@@ -991,3 +991,127 @@ def plot_rm_corr(data=None, x=None, y=None, subject=None, legend=False,
         g.add_legend()
 
     return g
+
+
+def plot_circmean(alpha, figsize=(4, 4), dpi=None, ax=None,
+                  kwargs_markers=dict(color='tab:blue', marker='o',
+                  mfc='none', ms=10), kwargs_arrow=dict(width=0.01,
+                  head_width=0.1, head_length=0.1, fc='tab:red',
+                  ec='tab:red')):
+    """Plot the circular mean and vector length of a set of angles
+    on the unit circle.
+
+    .. versionadded:: 0.3.3
+
+    Parameters
+    ----------
+    alpha : array or list
+        Angles (expressed in radians). Only 1D array are supported here.
+    figsize : tuple
+        Figsize in inches. Default is (4, 4).
+    dpi : int
+        Resolution of the figure in dots per inches.
+    ax : matplotlib axes
+        Axis on which to draw the plot.
+    kwargs_markers : dict
+        Optional keywords arguments that are passed to
+        :obj:`matplotlib.axes.Axes.plot`
+        to control the markers aesthetics.
+    kwargs_arrow : dict
+        Optional keywords arguments that are passed to
+        :obj:`matplotlib.axes.Axes.arrow`
+        to control the arrow aesthetics.
+
+    Returns
+    -------
+    ax : Matplotlib Axes instance
+        Returns the Axes object with the plot for further tweaking.
+
+    Examples
+    --------
+
+    Default plot
+
+    .. plot::
+
+        >>> import pingouin as pg
+        >>> ax = pg.plot_circmean([0.05, -0.8, 1.2, 0.8, 0.5, -0.3, 0.3, 0.7])
+
+    Changing some aesthetics parameters
+
+    .. plot::
+
+        >>> import pingouin as pg
+        >>> ax = pg.plot_circmean([0.05, -0.8, 1.2, 0.8, 0.5, -0.3, 0.3, 0.7],
+        ...                       kwargs_markers=dict(color='k', mfc='k'),
+        ...                       kwargs_arrow=dict(ec='k', fc='k'))
+
+    .. plot::
+
+        >>> import pingouin as pg
+        >>> import seaborn as sns
+        >>> sns.set(font_scale=1.5, style='white')
+        >>> ax = pg.plot_circmean([0.8, 1.5, 3.14, 5.2, 6.1, 2.8, 2.6, 3.2],
+        ...                       kwargs_markers=dict(marker="None"))
+    """
+    from matplotlib.patches import Circle
+    from .circular import circ_r, circ_mean
+
+    # Sanity checks
+    alpha = np.asarray(alpha)
+    assert alpha.ndim == 1, "angles must be a one-dimensional array."
+    assert alpha.size > 1, "angles must have at least 2 values."
+
+    assert isinstance(kwargs_markers, dict), "kwargs_markers must be a dict."
+    assert isinstance(kwargs_arrow, dict), "kwargs_arrow must be a dict."
+
+    # Fill missing values in dict
+    if 'color' not in kwargs_markers.keys():
+        kwargs_markers['color'] = 'tab:blue'
+    if 'marker' not in kwargs_markers.keys():
+        kwargs_markers['marker'] = 'o'
+    if 'mfc' not in kwargs_markers.keys():
+        kwargs_markers['mfc'] = 'none'
+    if 'ms' not in kwargs_markers.keys():
+        kwargs_markers['ms'] = 10
+
+    if 'width' not in kwargs_arrow.keys():
+        kwargs_arrow['width'] = 0.01
+    if 'head_width' not in kwargs_arrow.keys():
+        kwargs_arrow['head_width'] = 0.1
+    if 'head_length' not in kwargs_arrow.keys():
+        kwargs_arrow['head_length'] = 0.1
+    if 'fc' not in kwargs_arrow.keys():
+        kwargs_arrow['fc'] = 'tab:red'
+    if 'ec' not in kwargs_arrow.keys():
+        kwargs_arrow['ec'] = 'tab:red'
+
+    # Convert angles to unit vector
+    z = np.exp(1j * alpha)
+    r = circ_r(alpha)  # Resulting vector length
+    phi = circ_mean(alpha)  # Circular mean
+    zm = r * np.exp(1j * phi)
+
+    # Plot unit circle
+    fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
+    circle = Circle((0, 0), 1, edgecolor='k', facecolor='none', linewidth=2)
+    ax.add_patch(circle)
+    ax.axvline(0, lw=1, ls=':', color='slategrey')
+    ax.axhline(0, lw=1, ls=':', color='slategrey')
+    ax.plot(np.real(z), np.imag(z), ls="None", **kwargs_markers)
+
+    # Plot mean resultant vector
+    ax.arrow(0, 0, np.real(zm), np.imag(zm), **kwargs_arrow)
+
+    # X and Y ticks in radians
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+    ax.text(1.2, 0, '0', verticalalignment='center')
+    ax.text(-1.3, 0, '$\pi$', verticalalignment='center')
+    ax.text(0, 1.2, '$+\pi/2$', horizontalalignment='center')
+    ax.text(0, -1.3, '$-\pi/2$', horizontalalignment='center')
+    return ax

@@ -6,6 +6,13 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
+v0.3.3 (dev)
+------------
+
+**New functions**
+
+a. Added :py:func:`pingouin.plot_circmean` function to plot the circular mean and circular vector length of a set of angles (in radians) on the unit circle.
+
 v0.3.2 (January 2020)
 ---------------------
 
