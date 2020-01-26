@@ -449,7 +449,8 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         Predictor(s). Shape = (n_samples, n_features) or (n_samples,).
     y : np.array or list
         Dependent variable. Shape = (n_samples).
-        Must be binary.
+        ``y`` must be binary, i.e. only contains 0 or 1. Multinomial logistic
+        regression is not supported.
     coef_only : bool
         If True, return only the regression coefficients.
     alpha : float
@@ -464,7 +465,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         variable.
     **kwargs : optional
         Optional arguments passed to
-        :py:class:`sklearn.linear_model.LogisticRegression`.
+        :py:class:`sklearn.linear_model.LogisticRegression` (see Notes).
 
     Returns
     -------
@@ -472,7 +473,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         Logistic regression summary::
 
         'names' : name of variable(s) in the model (e.g. x1, x2...)
-        'coef' : regression coefficients
+        'coef' : regression coefficients (log-odds)
         'se' : standard error
         'z' : z-scores
         'pval' : two-tailed p-values
@@ -486,19 +487,41 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     Notes
     -----
     This is a wrapper around the
-    :py:class:`sklearn.linear_model.LogisticRegression` class. Note that
-    Pingouin automatically disables the l2 regularization applied by
-    scikit-learn. This can be modified by changing the `penalty` argument.
+    :py:class:`sklearn.linear_model.LogisticRegression` class. Importantly,
+    Pingouin automatically disables the L2 regularization applied by
+    scikit-learn. This can be modified by changing the ``penalty`` argument.
 
-    The calculation of the p-values and confidence interval is adapted from a
-    code found at
-    https://gist.github.com/rspeare/77061e6e317896be29c6de9a85db301d
+    The logistic regression assumes that the log-odds (the logarithm of the
+    odds) for the value labeled "1" in the response variable is a linear
+    combination of the predictor variables. The log-odds are given by the
+    `logit <https://en.wikipedia.org/wiki/Logit>`_ function,
+    which map a probability :math:`p` of the response variable being "1"
+    from :math:`[0, 1)` to :math:`(-\\infty, +\\infty)`.
 
-    Note that the first coefficient is always the constant term (intercept) of
+    .. math:: \\text{logit}(p) = \\ln \\frac{p}{1 - p} = \\beta_0 + \\beta X
+
+    The odds of the response variable being "1" can be obtained by
+    exponentiating the log-odds:
+
+    .. math:: \\frac{p}{1 - p} = e^{\\beta_0 + \\beta X}
+
+    and the probability of the response variable being "1" is given by:
+
+    .. math:: p = \\frac{1}{1 + e^{-(\\beta_0 + \\beta X})}
+
+    Note that the above function that converts log-odds to probability is
+    called the `logistic function
+    <https://en.wikipedia.org/wiki/Logistic_function>`_.
+
+    The first coefficient is always the constant term (intercept) of
     the model. Scikit-learn will automatically add the intercept
     to your predictor(s) matrix, therefore, :math:`X` should not include a
     constant term. Pingouin will remove any constant term (e.g column with only
     one unique value), or duplicate columns from :math:`X`.
+
+    The calculation of the p-values and confidence interval is adapted from a
+    code found at
+    https://gist.github.com/rspeare/77061e6e317896be29c6de9a85db301d
 
     Results have been compared against statsmodels, R, and JASP.
 
@@ -545,6 +568,78 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     ...                           random_state=42)
     >>> print(lom['coef'].values)
     [-0.36751796 -0.04367056 -0.47841908]
+
+
+    **How to interpret the log-odds coefficients?**
+
+    We'll use the `Wikipedia example
+    <https://en.wikipedia.org/wiki/Logistic_regression#Probability_of_passing_an_exam_versus_hours_of_study>`_
+    of the probability of passing an exam
+    versus the hours of study:
+
+    *A group of 20 students spends between 0 and 6 hours studying for an
+    exam. How does the number of hours spent studying affect the
+    probability of the student passing the exam?*
+
+    >>> # First, let's create the dataframe
+    >>> Hours = [0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 1.75, 2.00, 2.25, 2.50,
+    ...          2.75, 3.00, 3.25, 3.50, 4.00, 4.25, 4.50, 4.75, 5.00, 5.50]
+    >>> Pass = [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1]
+    >>> df = pd.DataFrame({'HoursStudy': Hours, 'PassExam': Pass})
+    >>> # And then run the logistic regression
+    >>> lr = logistic_regression(df['HoursStudy'], df['PassExam']).round(3)
+    >>> lr
+            names   coef     se      z   pval  CI[2.5%]  CI[97.5%]
+    0   Intercept -4.078  1.761 -2.316  0.021    -7.529     -0.626
+    1  HoursStudy  1.505  0.629  2.393  0.017     0.272      2.737
+
+    The ``Intercept`` coefficient (-4.078) is the log-odds of ``PassExam=1``
+    when ``HoursStudy=0``. The odds ratio can be obtained by exponentiating
+    the log-odds:
+
+    >>> np.exp(-4.078)
+    0.016941314421496552
+
+    i.e. :math:`0.017:1`. Conversely the odds of failing the exam are
+    :math:`(1/0.017) \\approx 59:1`.
+
+    The probability can then be obtained with the following equation
+
+    .. math:: p = \\frac{1}{1 + e^{-(-4.078 + 0 * 1.505)}}
+
+    >>> 1 / (1 + np.exp(-(-4.078)))
+    0.016659087580814722
+
+    The ``HoursStudy`` coefficient (1.505) means that for each additional hour
+    of study, the log-odds of passing the exam increase by 1.505, and the odds
+    are multipled by :math:`e^{1.505} \\approx 4.50`.
+
+    For example, a student who studies 2 hours has a probability of passing
+    the exam of 25%:
+
+    >>> 1 / (1 + np.exp(-(-4.078 + 2 * 1.505)))
+    0.2557836148964987
+
+    The table below shows the probability of passing the exam for several
+    values of ``HoursStudy``:
+
+    +----------------+----------+----------------+------------------+
+    | Hours of Study | Log-odds | Odds           | Probability      |
+    +================+==========+================+==================+
+    | 0              | −4.08    | 0.017 ≈ 1:59   | 0.017            |
+    +----------------+----------+----------------+------------------+
+    | 1              | −2.57    | 0.076 ≈ 1:13   | 0.07             |
+    +----------------+----------+----------------+------------------+
+    | 2              | −1.07    | 0.34 ≈ 1:3     | 0.26             |
+    +----------------+----------+----------------+------------------+
+    | 3              | 0.44     | 1.55           | 0.61             |
+    +----------------+----------+----------------+------------------+
+    | 4              | 1.94     | 6.96           | 0.87             |
+    +----------------+----------+----------------+------------------+
+    | 5              | 3.45     | 31.4           | 0.97             |
+    +----------------+----------+----------------+------------------+
+    | 6              | 4.96     | 141.4          | 0.99             |
+    +----------------+----------+----------------+------------------+
     """
     # Check that sklearn is installed
     from pingouin.utils import _is_sklearn_installed
