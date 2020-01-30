@@ -359,8 +359,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             if return_desc:
                 stats.at[i, 'mean(A)'] = np.round(np.nanmean(x), 3)
                 stats.at[i, 'mean(B)'] = np.round(np.nanmean(y), 3)
-                stats.at[i, 'std(A)'] = np.round(np.nanstd(x), 3)
-                stats.at[i, 'std(B)'] = np.round(np.nanstd(y), 3)
+                stats.at[i, 'std(A)'] = np.round(np.nanstd(x, ddof=1), 3)
+                stats.at[i, 'std(B)'] = np.round(np.nanstd(y, ddof=1), 3)
             stats.at[i, stat_name] = df_ttest[stat_name].iat[0]
             stats.at[i, 'p-unc'] = df_ttest['p-val'].iat[0]
             stats.at[i, effsize] = ef
@@ -481,8 +481,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                 if return_desc:
                     stats.at[ic, 'mean(A)'] = np.round(np.nanmean(x), 3)
                     stats.at[ic, 'mean(B)'] = np.round(np.nanmean(y), 3)
-                    stats.at[ic, 'std(A)'] = np.round(np.nanstd(x), 3)
-                    stats.at[ic, 'std(B)'] = np.round(np.nanstd(y), 3)
+                    stats.at[ic, 'std(A)'] = np.round(np.nanstd(x, ddof=1), 3)
+                    stats.at[ic, 'std(B)'] = np.round(np.nanstd(y, ddof=1), 3)
                 stats.at[ic, stat_name] = df_ttest[stat_name].iat[0]
                 stats.at[ic, 'p-unc'] = df_ttest['p-val'].iat[0]
                 stats.at[ic, effsize] = ef
@@ -1011,7 +1011,9 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
             yield o
 
     # Check if columns index has multiple levels
-    if isinstance(data.columns, pd.core.index.MultiIndex):
+    pdv = pd.__version__
+    mindex = pd.MultiIndex if pdv.startswith('1') else pd.core.index.MultiIndex
+    if isinstance(data.columns, mindex):
         multi_index = True
         if columns is not None:
             # Simple List with one element: [('L0', 'L1')]

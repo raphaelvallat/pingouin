@@ -9,6 +9,11 @@ What's new
 v0.3.3 (dev)
 ------------
 
+**Bugfixes**
+
+a. Fixed a bug in :py:func:`pingouin.pairwise_corr` caused by the deprecation of ``pandas.core.index`` in the new version of Pandas (1.0). For now, both Pandas 0.25 and Pandas 1.0 are supported.
+b. The standard deviation in :py:func:`pingouin.pairwise_ttests` when using ``return_desc=True`` is now calculated with ``np.nanstd(ddof=1)`` to be consistent with Pingouin/Pandas default unbiased standard deviation.
+
 **New functions**
 
 a. Added :py:func:`pingouin.plot_circmean` function to plot the circular mean and circular vector length of a set of angles (in radians) on the unit circle.
