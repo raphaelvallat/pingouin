@@ -15,7 +15,7 @@ MAINTAINER = 'Raphael Vallat'
 MAINTAINER_EMAIL = 'raphaelvallat9@gmail.com'
 URL = 'https://pingouin-stats.org/index.html'
 DOWNLOAD_URL = 'https://github.com/raphaelvallat/pingouin/'
-VERSION = '0.3.2'
+VERSION = '0.3.3'
 PACKAGE_DATA = {'pingouin.data.icons': ['*.svg']}
 
 INSTALL_REQUIRES = [
