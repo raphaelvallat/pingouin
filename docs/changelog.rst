@@ -6,6 +6,14 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
+v0.3.4 (dev)
+------------
+
+**Code**
+
+a. Compatibility with Python 3.9 (see `PR by tirkarthi <https://github.com/raphaelvallat/pingouin/pull/83>`_).
+
+
 v0.3.3 (February 2020)
 ----------------------
 
