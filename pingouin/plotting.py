@@ -1111,7 +1111,7 @@ def plot_circmean(alpha, figsize=(4, 4), dpi=None, ax=None,
     ax.spines['left'].set_visible(False)
     ax.spines['bottom'].set_visible(False)
     ax.text(1.2, 0, '0', verticalalignment='center')
-    ax.text(-1.3, 0, '$\pi$', verticalalignment='center')
-    ax.text(0, 1.2, '$+\pi/2$', horizontalalignment='center')
-    ax.text(0, -1.3, '$-\pi/2$', horizontalalignment='center')
+    ax.text(-1.3, 0, r'$\pi$', verticalalignment='center')
+    ax.text(0, 1.2, r'$+\pi/2$', horizontalalignment='center')
+    ax.text(0, -1.3, r'$-\pi/2$', horizontalalignment='center')
     return ax

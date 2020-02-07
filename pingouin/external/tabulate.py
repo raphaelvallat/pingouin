@@ -407,7 +407,7 @@ _multiline_codes_bytes = re.compile(b"\r|\n|\r\n")
 # ANSI color codes
 _invisible_codes = re.compile(r"\x1b\[\d+[;\d]*m|\x1b\[\d*\;\d*\;\d*m")
 # ANSI color codes
-_invisible_codes_bytes = re.compile(b"\x1b\[\d+[;\d]*m|\x1b\[\d*\;\d*\;\d*m")
+_invisible_codes_bytes = re.compile(b"\x1b\\[\\d+\\[;\\d]*m|\x1b\\[\\d*;\\d*;\\d*m")
 
 
 def simple_separated_format(separator):

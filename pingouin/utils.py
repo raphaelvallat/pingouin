@@ -1,6 +1,6 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
-import collections
+import collections.abc
 import numpy as np
 from pingouin.external.tabulate import tabulate
 import pandas as pd
@@ -302,7 +302,7 @@ def _flatten_list(x, include_tuple=False):
     # Remove None
     x = list(filter(None.__ne__, x))
     for el in x:
-        x_is_iter = isinstance(x, collections.Iterable)
+        x_is_iter = isinstance(x, collections.abc.Iterable)
         if x_is_iter:
             if not isinstance(el, (str, tuple)):
                 result.extend(_flatten_list(el))
