@@ -94,6 +94,13 @@ class TestCircular(TestCase):
         mu = circ_mean(x)
         # Compare with the CircStats MATLAB toolbox
         assert np.round(mu, 3) == 1.013
+        # Binned data
+        np.random.seed(123)
+        nbins = 18  # Number of bins to divide the unit circle
+        angles_bins = np.linspace(-np.pi, np.pi, nbins)
+        # w represents the number of incidences per bins, or "weights".
+        w = np.random.randint(low=0, high=5, size=angles_bins.size)
+        assert round(circ_mean(angles_bins, w), 4) == -2.5355
 
     def test_circ_r(self):
         """Test function circ_r."""

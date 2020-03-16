@@ -45,15 +45,15 @@ def convert_angles(angles, low=0, high=360):
 
     .. math::
 
-        \\text{radians} = \\text{angles} \\cdot \\frac{\\pi}{0.5
-        (\\text{high} - \\text{low})}
+        \\text{radians} = \\text{angles} \\cdot \\frac{2\\pi}{\\text{high} -
+        \\text{low}}
 
     Then to wrap radians from the :math:`[0, 2\\pi]` range to the
     :math:`[-\\pi, \\pi]` range:
 
     .. math::
 
-        (\\text{radians} + \\pi)\\mod (2\\pi) - \\pi
+        \\text{radians} = (\\text{radians} + \\pi) \\% (2\\pi) - \\pi
 
     Examples
     --------
@@ -94,7 +94,7 @@ def convert_angles(angles, low=0, high=360):
     angles = np.asarray(angles)
     assert np.min(angles) >= low, 'angles cannot be >= low.'
     assert np.max(angles) <= high, 'angles cannot be <= high.'
-    rad = angles * np.pi / (ptp / 2)
+    rad = angles * (2 * np.pi) / ptp
     return (rad + np.pi) % (2. * np.pi) - np.pi
 
 
@@ -305,32 +305,119 @@ def circ_corrcl(x, y, tail='two-sided'):
 
 
 def circ_mean(angles, w=None, axis=0):
-    """Mean direction for circular data.
+    """Mean direction for (binned) circular data.
 
     Parameters
     ----------
-    angles : array
-        Sample of angles in radians
-    w : array
-        Number of incidences in case of binned angle data
-    axis : int
-        Compute along this dimension
+    angles : array_like
+        Sample of angles in radians. The range of ``angles`` must be either
+        :math:`[0, 2\\pi]` or :math:`[-\\pi, \\pi]`. If ``angles`` is not
+        expressed in radians (e.g. degrees or 24-hours), please use the
+        :py:func:`pingouin.convert_angles` function prior to calculating the
+        mean.
+    w : array_like
+        Number of incidences per bins (i.e. "weights"), in case of binned angle
+        data.
+    axis : int or None
+        Compute along this dimension. Default is the first axis (0).
 
     Returns
     -------
     mu : float
-        Mean direction
+        Circular mean, in radians.
+
+    See also
+    --------
+    scipy.stats.circmean, scipy.stats.circstd, pingouin.circ_r
+
+    Notes
+    -----
+    From Wikipedia:
+
+    *In mathematics, a mean of circular quantities is a mean which is sometimes
+    better-suited for quantities like angles, daytimes, and fractional parts
+    of real numbers. This is necessary since most of the usual means may not be
+    appropriate on circular quantities. For example, the arithmetic mean of 0°
+    and 360° is 180°, which is misleading because for most purposes 360° is
+    the same thing as 0°.
+    As another example, the "average time" between 11 PM and 1 AM is either
+    midnight or noon, depending on whether the two times are part of a single
+    night or part of a single calendar day.*
+
+    The circular mean of a set of angles :math:`\\alpha` is defined by:
+
+    .. math::
+
+        \\bar{\\alpha} =  \\text{angle} \\left ( \\sum_{j=1}^n \\exp(i \\cdot
+        \\alpha_j) \\right )
+
+    For binned angles with weights :math:`w`, this becomes:
+
+    .. math::
+
+        \\bar{\\alpha} =  \\text{angle} \\left ( \\sum_{j=1}^n w \\cdot
+        \\exp(i \\cdot \\alpha_j) \\right )
+
+    References
+    ----------
+    * https://en.wikipedia.org/wiki/Mean_of_circular_quantities
+
+    * Berens, P. (2009). CircStat: A MATLAB Toolbox for Circular
+      Statistics. Journal of Statistical Software, Articles, 31(10),
+      1–21. https://doi.org/10.18637/jss.v031.i10
 
     Examples
     --------
-    Mean resultant vector of circular data
+    1. Circular mean of a 1-D array of angles, in radians
 
-    >>> from pingouin import circ_mean
+    >>> import pingouin as pg
     >>> angles = [0.785, 1.570, 3.141, 0.839, 5.934]
-    >>> circ_mean(angles)
-    1.012962445838065
+    >>> round(pg.circ_mean(angles), 4)
+    1.013
+
+    Compare with SciPy:
+
+    >>> from scipy.stats import circmean
+    >>> import numpy as np
+    >>> round(circmean(angles, low=0, high=2*np.pi), 4)
+    1.013
+
+    2. Using a 2-D array of angles in degrees
+
+    >>> np.random.seed(123)
+    >>> deg = np.random.randint(low=0, high=360, size=(3, 5))
+    >>> deg
+    array([[322,  98, 230,  17,  83],
+           [106, 123,  57, 214, 225],
+           [ 96, 113, 126,  47,  73]])
+
+    We first need to convert from degrees to radians:
+
+    >>> rad = np.round(pg.convert_angles(deg, low=0, high=360), 4)
+    >>> rad
+    array([[-0.6632,  1.7104, -2.2689,  0.2967,  1.4486],
+           [ 1.85  ,  2.1468,  0.9948, -2.5482, -2.3562],
+           [ 1.6755,  1.9722,  2.1991,  0.8203,  1.2741]])
+
+    >>> pg.circ_mean(rad)  # On the first axis (default)
+    array([1.27532162, 1.94336576, 2.23195927, 0.52110503, 1.80240563])
+    >>> pg.circ_mean(rad, axis=-1)  # On the last axis (default)
+    array([0.68920819, 2.49334852, 1.5954149 ])
+    >>> round(pg.circ_mean(rad, axis=None), 4)  # Across the entire array
+    1.6954
+
+    3. Using binned angles
+
+    >>> np.random.seed(123)
+    >>> nbins = 18  # Number of bins to divide the unit circle
+    >>> angles_bins = np.linspace(-np.pi, np.pi, nbins)
+    >>> # w represents the number of incidences per bins, or "weights".
+    >>> w = np.random.randint(low=0, high=5, size=angles_bins.size)
+    >>> round(pg.circ_mean(angles_bins, w), 4)
+    -2.5355
     """
     angles = np.asarray(angles)
+    _checkangles(angles)  # Check that angles is in radians
     if isinstance(w, (list, np.ndarray)):
         w = np.asarray(w)
         assert angles.shape == w.shape, "w must have the same shape as angles."
