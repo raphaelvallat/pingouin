@@ -19,7 +19,7 @@ __all__ = ["convert_angles", "circ_axial", "circ_corrcc", "circ_corrcl",
 
 
 def convert_angles(angles, low=0, high=360):
-    """Element-wise conversion of arbitrary unit circular angles
+    """Element-wise conversion of arbitrary unit circular quantities
     to radians (:math:`[-\\pi, \\pi]` range).
 
     Parameters
@@ -113,19 +113,19 @@ def _checkangles(angles, axis=None):
 # CIRCULAR STATISTICS
 ###############################################################################
 
-def circ_axial(alpha, n):
+def circ_axial(angles, n):
     """Transforms n-axial data to a common scale.
 
     Parameters
     ----------
-    alpha : array
+    angles : array
         Sample of angles in radians
     n : int
         Number of modes
 
     Returns
     -------
-    alpha : float
+    angles : float
         Transformed angles
 
     Notes
@@ -142,11 +142,11 @@ def circ_axial(alpha, n):
     >>> from pingouin import read_dataset
     >>> from pingouin.circular import circ_axial
     >>> df = read_dataset('circular')
-    >>> alpha = df['Orientation'].values
-    >>> alpha = circ_axial(np.deg2rad(alpha), 2)
+    >>> angles = df['Orientation'].values
+    >>> angles = circ_axial(np.deg2rad(angles), 2)
     """
-    alpha = np.asarray(alpha)
-    return np.remainder(alpha * n, 2 * np.pi)
+    angles = np.asarray(angles)
+    return np.remainder(angles * n, 2 * np.pi)
 
 
 def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
@@ -304,12 +304,12 @@ def circ_corrcl(x, y, tail='two-sided'):
     return np.round(r, 3), pval
 
 
-def circ_mean(alpha, w=None, axis=0):
+def circ_mean(angles, w=None, axis=0):
     """Mean direction for circular data.
 
     Parameters
     ----------
-    alpha : array
+    angles : array
         Sample of angles in radians
     w : array
         Number of incidences in case of binned angle data
@@ -326,25 +326,25 @@ def circ_mean(alpha, w=None, axis=0):
     Mean resultant vector of circular data
 
     >>> from pingouin import circ_mean
-    >>> alpha = [0.785, 1.570, 3.141, 0.839, 5.934]
-    >>> circ_mean(alpha)
+    >>> angles = [0.785, 1.570, 3.141, 0.839, 5.934]
+    >>> circ_mean(angles)
     1.012962445838065
     """
-    alpha = np.asarray(alpha)
+    angles = np.asarray(angles)
     if isinstance(w, (list, np.ndarray)):
         w = np.asarray(w)
-        assert alpha.shape == w.shape, "w must have the same shape as alpha."
+        assert angles.shape == w.shape, "w must have the same shape as angles."
     else:
-        w = np.ones_like(alpha)
-    return np.angle(np.multiply(w, np.exp(1j * alpha)).sum(axis=axis))
+        w = np.ones_like(angles)
+    return np.angle(np.multiply(w, np.exp(1j * angles)).sum(axis=axis))
 
 
-def circ_r(alpha, w=None, d=None, axis=0):
+def circ_r(angles, w=None, d=None, axis=0):
     """Mean resultant vector length for circular data.
 
     Parameters
     ----------
-    alpha : array
+    angles : array
         Sample of angles in radians
     w : array
         Number of incidences in case of binned angle data
@@ -376,12 +376,12 @@ def circ_r(alpha, w=None, d=None, axis=0):
     >>> circ_r(x)
     0.49723034495605356
     """
-    alpha = np.asarray(alpha)
-    w = np.asarray(w) if w is not None else np.ones(alpha.shape)
-    assert alpha.shape == w.shape, "Input dimensions do not match"
+    angles = np.asarray(angles)
+    w = np.asarray(w) if w is not None else np.ones(angles.shape)
+    assert angles.shape == w.shape, "Input dimensions do not match"
 
     # Compute weighted sum of cos and sin of angles:
-    r = np.multiply(w, np.exp(1j * alpha)).sum(axis=axis)
+    r = np.multiply(w, np.exp(1j * angles)).sum(axis=axis)
 
     # Obtain length:
     r = np.abs(r) / w.sum(axis=axis)
@@ -393,12 +393,12 @@ def circ_r(alpha, w=None, d=None, axis=0):
     return r
 
 
-def circ_rayleigh(alpha, w=None, d=None):
+def circ_rayleigh(angles, w=None, d=None):
     """Rayleigh test for non-uniformity of circular data.
 
     Parameters
     ----------
-    alpha : np.array
+    angles : np.array
         Sample of angles in radians.
     w : np.array
         Number of incidences in case of binned angle data.
@@ -440,13 +440,13 @@ def circ_rayleigh(alpha, w=None, d=None):
     >>> circ_rayleigh(x, w=[.1, .2, .3, .4, .5], d=0.2)
     (0.278, 0.8069972000769801)
     """
-    alpha = np.asarray(alpha)
+    angles = np.asarray(angles)
     if w is None:
-        r = circ_r(alpha)
-        n = len(alpha)
+        r = circ_r(angles)
+        n = len(angles)
     else:
-        assert len(alpha) == len(w), "Input dimensions do not match"
-        r = circ_r(alpha, w, d)
+        assert len(angles) == len(w), "Input dimensions do not match"
+        r = circ_r(angles, w, d)
         n = np.sum(w)
 
     # Compute Rayleigh's statistic
@@ -458,13 +458,13 @@ def circ_rayleigh(alpha, w=None, d=None):
     return np.round(z, 3), pval
 
 
-def circ_vtest(alpha, dir=0., w=None, d=None):
+def circ_vtest(angles, dir=0., w=None, d=None):
     """V test for non-uniformity of circular data with a specified
     mean direction.
 
     Parameters
     ----------
-    alpha : np.array
+    angles : np.array
         Sample of angles in radians.
     dir : float
         Suspected mean direction (angle in radians).
@@ -512,15 +512,15 @@ def circ_vtest(alpha, dir=0., w=None, d=None):
     >>> circ_vtest(x, dir=0.5, w=[.1, .2, .3, .4, .5], d=0.2)
     (0.637, 0.23086492929174185)
     """
-    alpha = np.asarray(alpha)
+    angles = np.asarray(angles)
     if w is None:
-        r = circ_r(alpha)
-        mu = circ_mean(alpha)
-        n = len(alpha)
+        r = circ_r(angles)
+        mu = circ_mean(angles)
+        n = len(angles)
     else:
-        assert len(alpha) == len(w), "Input dimensions do not match"
-        r = circ_r(alpha, w, d)
-        mu = circ_mean(alpha, w)
+        assert len(angles) == len(w), "Input dimensions do not match"
+        r = circ_r(angles, w, d)
+        mu = circ_mean(angles, w)
         n = np.sum(w)
 
     # Compute Rayleigh and V statistics

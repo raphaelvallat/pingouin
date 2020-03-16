@@ -993,7 +993,7 @@ def plot_rm_corr(data=None, x=None, y=None, subject=None, legend=False,
     return g
 
 
-def plot_circmean(alpha, figsize=(4, 4), dpi=None, ax=None,
+def plot_circmean(angles, figsize=(4, 4), dpi=None, ax=None,
                   kwargs_markers=dict(color='tab:blue', marker='o',
                   mfc='none', ms=10), kwargs_arrow=dict(width=0.01,
                   head_width=0.1, head_length=0.1, fc='tab:red',
@@ -1005,7 +1005,7 @@ def plot_circmean(alpha, figsize=(4, 4), dpi=None, ax=None,
 
     Parameters
     ----------
-    alpha : array or list
+    angles : array or list
         Angles (expressed in radians). Only 1D array are supported here.
     figsize : tuple
         Figsize in inches. Default is (4, 4).
@@ -1058,9 +1058,9 @@ def plot_circmean(alpha, figsize=(4, 4), dpi=None, ax=None,
     from .circular import circ_r, circ_mean
 
     # Sanity checks
-    alpha = np.asarray(alpha)
-    assert alpha.ndim == 1, "angles must be a one-dimensional array."
-    assert alpha.size > 1, "angles must have at least 2 values."
+    angles = np.asarray(angles)
+    assert angles.ndim == 1, "angles must be a one-dimensional array."
+    assert angles.size > 1, "angles must have at least 2 values."
 
     assert isinstance(kwargs_markers, dict), "kwargs_markers must be a dict."
     assert isinstance(kwargs_arrow, dict), "kwargs_arrow must be a dict."
@@ -1087,9 +1087,9 @@ def plot_circmean(alpha, figsize=(4, 4), dpi=None, ax=None,
         kwargs_arrow['ec'] = 'tab:red'
 
     # Convert angles to unit vector
-    z = np.exp(1j * alpha)
-    r = circ_r(alpha)  # Resulting vector length
-    phi = circ_mean(alpha)  # Circular mean
+    z = np.exp(1j * angles)
+    r = circ_r(angles)  # Resulting vector length
+    phi = circ_mean(angles)  # Circular mean
     zm = r * np.exp(1j * phi)
 
     # Plot unit circle

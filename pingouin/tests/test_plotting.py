@@ -108,9 +108,9 @@ class TestPlotting(TestCase):
         The MATLAB equivalent is:
         circ_plot(alpha,'pretty','ro',true,'linewidth',2,'color','r')
         """
-        alpha = np.array([0.02, 0.07, -0.12, 0.14, 1.2, -1.3])
-        ax = plot_circmean(alpha)
+        angles = np.array([0.02, 0.07, -0.12, 0.14, 1.2, -1.3])
+        ax = plot_circmean(angles)
         assert isinstance(ax, matplotlib.axes.Axes)
-        ax = plot_circmean(alpha, figsize=(5, 5), dpi=100, kwargs_markers={},
+        ax = plot_circmean(angles, figsize=(5, 5), dpi=100, kwargs_markers={},
                            kwargs_arrow={})
         assert isinstance(ax, matplotlib.axes.Axes)
