@@ -310,7 +310,7 @@ def circ_mean(angles, w=None, axis=0):
     Parameters
     ----------
     angles : array_like
-        Sample of angles in radians. The range of ``angles`` must be either
+        Samples of angles in radians. The range of ``angles`` must be either
         :math:`[0, 2\\pi]` or :math:`[-\\pi, \\pi]`. If ``angles`` is not
         expressed in radians (e.g. degrees or 24-hours), please use the
         :py:func:`pingouin.convert_angles` function prior to calculating the
@@ -418,11 +418,8 @@ def circ_mean(angles, w=None, axis=0):
     """
     angles = np.asarray(angles)
     _checkangles(angles)  # Check that angles is in radians
-    if isinstance(w, (list, np.ndarray)):
-        w = np.asarray(w)
-        assert angles.shape == w.shape, "w must have the same shape as angles."
-    else:
-        w = np.ones_like(angles)
+    w = np.asarray(w) if w is not None else np.ones(angles.shape)
+    assert angles.shape == w.shape, "Input dimensions do not match"
     return np.angle(np.multiply(w, np.exp(1j * angles)).sum(axis=axis))
 
 
@@ -431,21 +428,26 @@ def circ_r(angles, w=None, d=None, axis=0):
 
     Parameters
     ----------
-    angles : array
-        Sample of angles in radians
-    w : array
-        Number of incidences in case of binned angle data
+    angles : array_like
+        Samples of angles in radians. The range of ``angles`` must be either
+        :math:`[0, 2\\pi]` or :math:`[-\\pi, \\pi]`. If ``angles`` is not
+        expressed in radians (e.g. degrees or 24-hours), please use the
+        :py:func:`pingouin.convert_angles` function prior to calculating the
+        mean.
+    w : array_like
+        Number of incidences per bins (i.e. "weights"), in case of binned angle
+        data.
     d : float
         Spacing (in radians) of bin centers for binned data. If supplied,
         a correction factor is used to correct for bias in the estimation
         of r.
-    axis : int
-        Compute along this dimension
+    axis : int or None
+        Compute along this dimension. Default is the first axis (0).
 
     Returns
     -------
     r : float
-        Mean resultant length
+        Circular mean vector length.
 
     Notes
     -----
@@ -454,23 +456,81 @@ def circ_r(angles, w=None, d=None, axis=0):
     statistics. The closer it is to one, the more concentrated the data
     sample is around the mean direction (Berens 2009).
 
+    The circular vector length of a set of angles :math:`\\alpha` is defined
+    by:
+
+    .. math::
+
+        \\bar{\\alpha} =  \\frac{1}{N}\\left \\| \\sum_{j=1}^n
+        \\exp(i \\cdot \\alpha_j) \\right \\|
+
+    References
+    ----------
+    * https://en.wikipedia.org/wiki/Mean_of_circular_quantities
+
+    * Berens, P. (2009). CircStat: A MATLAB Toolbox for Circular
+      Statistics. Journal of Statistical Software, Articles, 31(10),
+      1–21. https://doi.org/10.18637/jss.v031.i10
+
     Examples
     --------
-    Mean resultant vector length of circular data
+    1. Mean resultant vector length of a 1-D array of angles, in radians
 
-    >>> from pingouin import circ_r
-    >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
-    >>> circ_r(x)
-    0.49723034495605356
+    >>> import pingouin as pg
+    >>> angles = [0.785, 1.570, 3.141, 0.839, 5.934]
+    >>> round(pg.circ_r(angles), 4)
+    0.4972
+
+    Sanity check: if all angles are the same, the vector length should be one:
+
+    >>> angles = [3.14, 3.14, 3.14, 3.14]
+    >>> round(pg.circ_r(angles), 4)
+    1.0
+
+    2. Using a 2-D array of angles in degrees
+
+    >>> import numpy as np
+    >>> np.random.seed(123)
+    >>> deg = np.random.randint(low=0, high=360, size=(3, 5))
+    >>> deg
+    array([[322,  98, 230,  17,  83],
+           [106, 123,  57, 214, 225],
+           [ 96, 113, 126,  47,  73]])
+
+    We first need to convert from degrees to radians:
+
+    >>> rad = np.round(pg.convert_angles(deg, low=0, high=360), 4)
+    >>> rad
+    array([[-0.6632,  1.7104, -2.2689,  0.2967,  1.4486],
+           [ 1.85  ,  2.1468,  0.9948, -2.5482, -2.3562],
+           [ 1.6755,  1.9722,  2.1991,  0.8203,  1.2741]])
+
+    >>> pg.circ_r(rad)  # On the first axis (default)
+    array([0.46695499, 0.98398294, 0.3723287 , 0.31103746, 0.42527149])
+    >>> pg.circ_r(rad, axis=-1)  # On the last axis (default)
+    array([0.28099998, 0.45456096, 0.88261161])
+    >>> round(pg.circ_r(rad, axis=None), 4)  # Across the entire array
+    0.4486
+
+    3. Using binned angles
+
+    >>> np.random.seed(123)
+    >>> nbins = 18  # Number of bins to divide the unit circle
+    >>> angles_bins = np.linspace(-np.pi, np.pi, nbins)
+    >>> # w represents the number of incidences per bins, or "weights".
+    >>> w = np.random.randint(low=0, high=5, size=angles_bins.size)
+    >>> round(pg.circ_r(angles_bins, w), 4)
+    0.3642
     """
     angles = np.asarray(angles)
+    _checkangles(angles)  # Check that angles is in radians
     w = np.asarray(w) if w is not None else np.ones(angles.shape)
     assert angles.shape == w.shape, "Input dimensions do not match"
 
     # Compute weighted sum of cos and sin of angles:
     r = np.multiply(w, np.exp(1j * angles)).sum(axis=axis)
 
-    # Obtain length:
+    # Calculate vector length:
     r = np.abs(r) / w.sum(axis=axis)
 
     # For data with known spacing, apply correction factor
