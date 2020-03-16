@@ -10,12 +10,23 @@ from scipy.stats import norm, circmean
 
 from .utils import remove_na
 
-__all__ = ["convert_angles", "circ_axial", "circ_corrcc", "circ_corrcl",
-           "circ_mean", "circ_r", "circ_rayleigh", "circ_vtest"]
+__all__ = ["convert_angles", "circ_axial",
+           "circ_mean", "circ_r", "circ_corrcc", "circ_corrcl",
+           "circ_rayleigh", "circ_vtest"]
 
 ###############################################################################
 # HELPER FUNCTIONS
 ###############################################################################
+
+def _checkangles(angles, axis=None):
+    """Internal function to check that angles are in radians.
+    """
+    msg = ("Angles are not in unit of radians. Please use the "
+           "`pingouin.convert_angles` function to map your angles to "
+           "the [-pi, pi] range.")
+    ptp_rad = (np.ptp(angles, axis=axis) <= 2 * np.pi)
+    if not ptp_rad.all():
+        raise ValueError(msg)
 
 
 def convert_angles(angles, low=0, high=360):
@@ -98,21 +109,6 @@ def convert_angles(angles, low=0, high=360):
     return (rad + np.pi) % (2. * np.pi) - np.pi
 
 
-def _checkangles(angles, axis=None):
-    """Internal function to check that angles are in radians.
-    """
-    msg = ("Angles are not in unit of radians. Please use the "
-           "`pingouin.convert_angles` function to map your angles to "
-           "the [-pi, pi] range.")
-    ptp_rad = (np.ptp(angles, axis=axis) <= 2 * np.pi)
-    if not ptp_rad.all():
-        raise ValueError(msg)
-
-
-###############################################################################
-# CIRCULAR STATISTICS
-###############################################################################
-
 def circ_axial(angles, n):
     """Transforms n-axial data to a common scale.
 
@@ -149,160 +145,9 @@ def circ_axial(angles, n):
     return np.remainder(angles * n, 2 * np.pi)
 
 
-def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
-    """Correlation coefficient between two circular variables.
-
-    Parameters
-    ----------
-    x : np.array
-        First circular variable (expressed in radians)
-    y : np.array
-        Second circular variable (expressed in radians)
-    tail : string
-        Specify whether to return 'one-sided' or 'two-sided' p-value.
-    correction_uniform : bool
-        Use correction for uniform marginals
-
-    Returns
-    -------
-    r : float
-        Correlation coefficient
-    pval : float
-        Uncorrected p-value
-
-    Notes
-    -----
-    Adapted from the CircStats MATLAB toolbox (Berens 2009).
-
-    Use the :py:func:`numpy.deg2rad` function to convert angles from degrees
-    to radians.
-
-    Please note that NaN are automatically removed.
-
-    If the ``correction_uniform`` is True, an alternative equation from
-    Jammalamadaka & Sengupta (2001, p. 177) is used.
-    If the marginal distribution of ``x`` or ``y`` is uniform, the mean is
-    not well defined, which leads to wrong estimates of the circular
-    correlation. The alternative equation corrects for this by choosing the
-    means in a way that maximizes the postitive or negative correlation.
-
-    References
-    ----------
-    .. [1] Berens, P. (2009). CircStat: A MATLAB Toolbox for Circular
-           Statistics. Journal of Statistical Software, Articles, 31(10), 1–21.
-           https://doi.org/10.18637/jss.v031.i10
-
-    .. [2] Jammalamadaka, S. R., & Sengupta, A. (2001). Topics in circular
-           statistics (Vol. 5). world scientific.
-
-    Examples
-    --------
-    Compute the r and p-value of two circular variables
-
-    >>> from pingouin import circ_corrcc
-    >>> x = [0.785, 1.570, 3.141, 3.839, 5.934]
-    >>> y = [0.593, 1.291, 2.879, 3.892, 6.108]
-    >>> r, pval = circ_corrcc(x, y)
-    >>> print(r, pval)
-    0.942 0.06579836070349088
-
-    With the correction for uniform marginals
-
-    >>> r, pval = circ_corrcc(x, y, correction_uniform=True)
-    >>> print(r, pval)
-    0.547 0.28585306869206784
-    """
-    x = np.asarray(x)
-    y = np.asarray(y)
-    assert x.size == y.size, 'x and y must have the same length.'
-
-    # Remove NA
-    x, y = remove_na(x, y, paired=True)
-    n = x.size
-
-    # Compute correlation coefficient
-    x_sin = np.sin(x - circmean(x))
-    y_sin = np.sin(y - circmean(y))
-
-    if not correction_uniform:
-        # Similar to np.corrcoef(x_sin, y_sin)[0][1]
-        r = np.sum(x_sin * y_sin) / np.sqrt(np.sum(x_sin**2) *
-                                            np.sum(y_sin**2))
-    else:
-        r_minus = np.abs(np.sum(np.exp((x - y) * 1j)))
-        r_plus = np.abs(np.sum(np.exp((x + y) * 1j)))
-        denom = 2 * np.sqrt(np.sum(x_sin ** 2) * np.sum(y_sin ** 2))
-        r = (r_minus - r_plus) / denom
-
-    # Compute T- and p-values
-    tval = np.sqrt((n * (x_sin**2).mean() * (y_sin**2).mean())
-                   / np.mean(x_sin**2 * y_sin**2)) * r
-
-    # Approximately distributed as a standard normal
-    pval = 2 * norm.sf(abs(tval))
-    pval = pval / 2 if tail == 'one-sided' else pval
-    return np.round(r, 3), pval
-
-
-def circ_corrcl(x, y, tail='two-sided'):
-    """Correlation coefficient between one circular and one linear variable
-    random variables.
-
-    Parameters
-    ----------
-    x : np.array
-        First circular variable (expressed in radians)
-    y : np.array
-        Second circular variable (linear)
-    tail : string
-        Specify whether to return 'one-sided' or 'two-sided' p-value.
-
-    Returns
-    -------
-    r : float
-        Correlation coefficient
-    pval : float
-        Uncorrected p-value
-
-    Notes
-    -----
-    Python code borrowed from brainpipe (based on the MATLAB toolbox CircStats)
-
-    Please note that NaN are automatically removed from datasets.
-
-    Examples
-    --------
-    Compute the r and p-value between one circular and one linear variables.
-
-    >>> from pingouin import circ_corrcl
-    >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
-    >>> y = [1.593, 1.291, -0.248, -2.892, 0.102]
-    >>> r, pval = circ_corrcl(x, y)
-    >>> print(r, pval)
-    0.109 0.9708899750629236
-    """
-    from scipy.stats import pearsonr, chi2
-    x = np.asarray(x)
-    y = np.asarray(y)
-    assert x.size == y.size, 'x and y must have the same length.'
-
-    # Remove NA
-    x, y = remove_na(x, y, paired=True)
-    n = x.size
-
-    # Compute correlation coefficent for sin and cos independently
-    rxs = pearsonr(y, np.sin(x))[0]
-    rxc = pearsonr(y, np.cos(x))[0]
-    rcs = pearsonr(np.sin(x), np.cos(x))[0]
-
-    # Compute angular-linear correlation (equ. 27.47)
-    r = np.sqrt((rxc**2 + rxs**2 - 2 * rxc * rxs * rcs) / (1 - rcs**2))
-
-    # Compute p-value
-    pval = chi2.sf(n * r**2, 2)
-    pval = pval / 2 if tail == 'one-sided' else pval
-    return np.round(r, 3), pval
-
+###############################################################################
+# DESCRIPTIVE STATISTICS
+###############################################################################
 
 def circ_mean(angles, w=None, axis=0):
     """Mean direction for (binned) circular data.
@@ -313,8 +158,8 @@ def circ_mean(angles, w=None, axis=0):
         Samples of angles in radians. The range of ``angles`` must be either
         :math:`[0, 2\\pi]` or :math:`[-\\pi, \\pi]`. If ``angles`` is not
         expressed in radians (e.g. degrees or 24-hours), please use the
-        :py:func:`pingouin.convert_angles` function prior to calculating the
-        mean.
+        :py:func:`pingouin.convert_angles` function prior to using the present
+        function.
     w : array_like
         Number of incidences per bins (i.e. "weights"), in case of binned angle
         data.
@@ -432,8 +277,8 @@ def circ_r(angles, w=None, d=None, axis=0):
         Samples of angles in radians. The range of ``angles`` must be either
         :math:`[0, 2\\pi]` or :math:`[-\\pi, \\pi]`. If ``angles`` is not
         expressed in radians (e.g. degrees or 24-hours), please use the
-        :py:func:`pingouin.convert_angles` function prior to calculating the
-        mean.
+        :py:func:`pingouin.convert_angles` function prior to using the present
+        function.
     w : array_like
         Number of incidences per bins (i.e. "weights"), in case of binned angle
         data.
@@ -448,6 +293,10 @@ def circ_r(angles, w=None, d=None, axis=0):
     -------
     r : float
         Circular mean vector length.
+
+    See also
+    --------
+    pingouin.circ_mean
 
     Notes
     -----
@@ -540,15 +389,185 @@ def circ_r(angles, w=None, d=None, axis=0):
     return r
 
 
+###############################################################################
+# INFERENTIAL STATISTICS
+###############################################################################
+
+def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
+    """Correlation coefficient between two circular variables.
+
+    Parameters
+    ----------
+    x : 1-D array_like
+        First circular variable (expressed in radians).
+    y : 1-D array_like
+        Second circular variable (expressed in radians).
+    tail : string
+        Specify whether to return 'one-sided' or 'two-sided' p-value.
+    correction_uniform : bool
+        Use correction for uniform marginals.
+
+    Returns
+    -------
+    r : float
+        Correlation coefficient.
+    pval : float
+        Uncorrected p-value.
+
+    Notes
+    -----
+    Adapted from the CircStats MATLAB toolbox (Berens 2009).
+
+    The range of ``x`` and ``y`` must be either
+    :math:`[0, 2\\pi]` or :math:`[-\\pi, \\pi]`. If ``angles`` is not
+    expressed in radians (e.g. degrees or 24-hours), please use the
+    :py:func:`pingouin.convert_angles` function prior to using the present
+    function.
+
+    Please note that NaN are automatically removed.
+
+    If the ``correction_uniform`` is True, an alternative equation from
+    Jammalamadaka & Sengupta (2001, p. 177) is used.
+    If the marginal distribution of ``x`` or ``y`` is uniform, the mean is
+    not well defined, which leads to wrong estimates of the circular
+    correlation. The alternative equation corrects for this by choosing the
+    means in a way that maximizes the postitive or negative correlation.
+
+    References
+    ----------
+    .. [1] Berens, P. (2009). CircStat: A MATLAB Toolbox for Circular
+           Statistics. Journal of Statistical Software, Articles, 31(10), 1–21.
+           https://doi.org/10.18637/jss.v031.i10
+
+    .. [2] Jammalamadaka, S. R., & Sengupta, A. (2001). Topics in circular
+           statistics (Vol. 5). world scientific.
+
+    Examples
+    --------
+    Compute the r and p-value of two circular variables
+
+    >>> from pingouin import circ_corrcc
+    >>> x = [0.785, 1.570, 3.141, 3.839, 5.934]
+    >>> y = [0.593, 1.291, 2.879, 3.892, 6.108]
+    >>> r, pval = circ_corrcc(x, y)
+    >>> print(r, pval)
+    0.942 0.06579836070349088
+
+    With the correction for uniform marginals
+
+    >>> r, pval = circ_corrcc(x, y, correction_uniform=True)
+    >>> print(r, pval)
+    0.547 0.28585306869206784
+    """
+    x = np.asarray(x)
+    y = np.asarray(y)
+    assert x.size == y.size, 'x and y must have the same length.'
+
+    # Remove NA
+    x, y = remove_na(x, y, paired=True)
+    n = x.size
+
+    # Compute correlation coefficient
+    x_sin = np.sin(x - circmean(x))
+    y_sin = np.sin(y - circmean(y))
+
+    if not correction_uniform:
+        # Similar to np.corrcoef(x_sin, y_sin)[0][1]
+        r = np.sum(x_sin * y_sin) / np.sqrt(np.sum(x_sin**2) *
+                                            np.sum(y_sin**2))
+    else:
+        r_minus = np.abs(np.sum(np.exp((x - y) * 1j)))
+        r_plus = np.abs(np.sum(np.exp((x + y) * 1j)))
+        denom = 2 * np.sqrt(np.sum(x_sin ** 2) * np.sum(y_sin ** 2))
+        r = (r_minus - r_plus) / denom
+
+    # Compute T- and p-values
+    tval = np.sqrt((n * (x_sin**2).mean() * (y_sin**2).mean())
+                   / np.mean(x_sin**2 * y_sin**2)) * r
+
+    # Approximately distributed as a standard normal
+    pval = 2 * norm.sf(abs(tval))
+    pval = pval / 2 if tail == 'one-sided' else pval
+    return np.round(r, 3), pval
+
+
+def circ_corrcl(x, y, tail='two-sided'):
+    """Correlation coefficient between one circular and one linear variable
+    random variables.
+
+    Parameters
+    ----------
+    x : 1-D array_like
+        First circular variable (expressed in radians).
+        The range of ``x`` must be either :math:`[0, 2\\pi]` or
+        :math:`[-\\pi, \\pi]`. If ``angles`` is not
+        expressed in radians (e.g. degrees or 24-hours), please use the
+        :py:func:`pingouin.convert_angles` function prior to using the present
+        function.
+    y : 1-D array_like
+        Second circular variable (linear)
+    tail : string
+        Specify whether to return 'one-sided' or 'two-sided' p-value.
+
+    Returns
+    -------
+    r : float
+        Correlation coefficient
+    pval : float
+        Uncorrected p-value
+
+    Notes
+    -----
+    Please note that NaN are automatically removed from datasets.
+
+    Examples
+    --------
+    Compute the r and p-value between one circular and one linear variables.
+
+    >>> from pingouin import circ_corrcl
+    >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
+    >>> y = [1.593, 1.291, -0.248, -2.892, 0.102]
+    >>> r, pval = circ_corrcl(x, y)
+    >>> print(r, pval)
+    0.109 0.9708899750629236
+    """
+    from scipy.stats import pearsonr, chi2
+    x = np.asarray(x)
+    y = np.asarray(y)
+    assert x.size == y.size, 'x and y must have the same length.'
+
+    # Remove NA
+    x, y = remove_na(x, y, paired=True)
+    n = x.size
+
+    # Compute correlation coefficent for sin and cos independently
+    rxs = pearsonr(y, np.sin(x))[0]
+    rxc = pearsonr(y, np.cos(x))[0]
+    rcs = pearsonr(np.sin(x), np.cos(x))[0]
+
+    # Compute angular-linear correlation (equ. 27.47)
+    r = np.sqrt((rxc**2 + rxs**2 - 2 * rxc * rxs * rcs) / (1 - rcs**2))
+
+    # Compute p-value
+    pval = chi2.sf(n * r**2, 2)
+    pval = pval / 2 if tail == 'one-sided' else pval
+    return np.round(r, 3), pval
+
+
 def circ_rayleigh(angles, w=None, d=None):
     """Rayleigh test for non-uniformity of circular data.
 
     Parameters
     ----------
-    angles : np.array
-        Sample of angles in radians.
-    w : np.array
-        Number of incidences in case of binned angle data.
+    angles : 1-D array_like
+        Samples of angles in radians. The range of ``angles`` must be either
+        :math:`[0, 2\\pi]` or :math:`[-\\pi, \\pi]`. If ``angles`` is not
+        expressed in radians (e.g. degrees or 24-hours), please use the
+        :py:func:`pingouin.convert_angles` function prior to using the present
+        function.
+    w : array_like
+        Number of incidences per bins (i.e. "weights"), in case of binned angle
+        data.
     d : float
         Spacing (in radians) of bin centers for binned data. If supplied,
         a correction factor is used to correct for bias in the estimation
@@ -588,6 +607,7 @@ def circ_rayleigh(angles, w=None, d=None):
     (0.278, 0.8069972000769801)
     """
     angles = np.asarray(angles)
+    _checkangles(angles)  # Check that angles is in radians
     if w is None:
         r = circ_r(angles)
         n = len(angles)
@@ -611,12 +631,17 @@ def circ_vtest(angles, dir=0., w=None, d=None):
 
     Parameters
     ----------
-    angles : np.array
-        Sample of angles in radians.
+    angles : 1-D array_like
+        Samples of angles in radians. The range of ``angles`` must be either
+        :math:`[0, 2\\pi]` or :math:`[-\\pi, \\pi]`. If ``angles`` is not
+        expressed in radians (e.g. degrees or 24-hours), please use the
+        :py:func:`pingouin.convert_angles` function prior to using the present
+        function.
     dir : float
         Suspected mean direction (angle in radians).
-    w : np.array
-        Number of incidences in case of binned angle data.
+    w : array_like
+        Number of incidences per bins (i.e. "weights"), in case of binned angle
+        data.
     d : float
         Spacing (in radians) of bin centers for binned data. If supplied,
         a correction factor is used to correct for bias in the estimation
