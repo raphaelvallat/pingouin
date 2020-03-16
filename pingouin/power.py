@@ -744,7 +744,7 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05,
     now compute the final power of the repeated measures ANOVA:
 
     >>> pg.power_rm_anova(eta=0.394, m=m, n=n, epsilon=0.694, corr=avgcorr)
-    0.8545404196391064
+    0.8545404196391067
     """
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [eta, m, n, power, alpha]])

@@ -1,12 +1,59 @@
+import pytest
 import numpy as np
 from unittest import TestCase
+from scipy.stats import circmean
 from pingouin import read_dataset
+from pingouin.circular import convert_angles, _checkangles
 from pingouin.circular import (circ_axial, circ_corrcc, circ_corrcl, circ_mean,
                                circ_r, circ_rayleigh, circ_vtest)
+
+np.random.seed(123)
+a1 = [-1.2, 2.5, 3.1, -3.1, 0.2, -0.2]   # -np.pi / pi
+a2 = np.pi + np.array(a1)                # 0 / 2 * np.pi
+a3 = [150, 180, 32, 340, 54, 0, 360]     # 0 / 360 deg
+a4 = [22, 23, 0.5, 1.2, 0, 24]           # Hours (0 - 24)
+a5 = np.random.randint(0, 1440, (2, 4))  # Minutes, 2D array
 
 
 class TestCircular(TestCase):
     """Test circular.py."""
+
+    def test_helper_angles(self):
+        """Test helper circular functions."""
+        # Check angles
+        _checkangles(a1)
+        _checkangles(a2, axis=None)
+        with pytest.raises(ValueError):
+            _checkangles(a3)
+        with pytest.raises(ValueError):
+            _checkangles(a3, axis=None)
+        # Convert angles
+        np.testing.assert_array_almost_equal(a1, convert_angles(a1, low=-np.pi,
+                                                                high=np.pi))
+        _checkangles(convert_angles(a2, low=0, high=2 * np.pi))
+        _checkangles(convert_angles(a3, low=0, high=360))
+        _checkangles(convert_angles(a4, low=0, high=24))
+        _checkangles(convert_angles(a5, low=0, high=1440))
+        _checkangles(convert_angles(a3, low=0, high=1440))
+
+        convert_angles(a1, low=-np.pi, high=np.pi)
+        convert_angles(a2, low=0, high=2 * np.pi)
+        convert_angles(a3)
+        convert_angles(a4, low=0, high=24)
+        convert_angles(a5, low=0, high=1440)
+
+        # Compare with scipy.stats.circmean
+        def assert_circmean(x, low, high):
+            m1 = convert_angles(circmean(x, low=low, high=high, axis=-1),
+                                low, high)
+            m2 = circ_mean(convert_angles(x, low, high), axis=-1)
+            assert (np.round(m1, 4) == np.round(m2, 4)).all()
+
+        assert_circmean(a1, low=-np.pi, high=np.pi)
+        assert_circmean(a2, low=0, high=2 * np.pi)
+        assert_circmean(a3, low=0, high=360)
+        assert_circmean(a4, low=0, high=24)
+        assert_circmean(a5, low=0, high=1440)
 
     def test_circ_axial(self):
         """Test function circ_axial."""

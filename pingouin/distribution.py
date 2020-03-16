@@ -590,7 +590,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     >>> hf = pg.epsilon(data, correction='hf')
     >>> lb = pg.epsilon(data, correction='lb')
     >>> print(lb, gg, hf)
-    0.5 0.5587754577585018 0.6223448311539781
+    0.5 0.5587754577585022 0.6223448311539789
 
     Now using a long-format dataframe
 
@@ -616,7 +616,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
 
     >>> pg.epsilon(data, dv='Performance', subject='Subject',
     ...            within=['Metric'])
-    0.9691029584899856
+    0.9691029584899815
 
     The epsilon value is very close to 1, meaning that there is no major
     violation of sphericity.
@@ -832,12 +832,12 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
     ...                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
     ...                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
     >>> pg.sphericity(data)
-    (True, 0.21, 4.677, 2, 0.09649016283209666)
+    (True, 0.21, 4.677, 2, 0.0964901628320963)
 
     John, Nagao and Sugiura (JNS) test
 
     >>> pg.sphericity(data, method='jns')
-    (False, 1.118, 6.176, 2, 0.0456042403075203)
+    (False, 1.118, 6.176, 2, 0.0456042403075201)
 
     Now using a long-format dataframe
 
@@ -863,7 +863,7 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
 
     >>> pg.sphericity(data, dv='Performance', subject='Subject',
     ...            within=['Metric'])
-    (True, 0.968, 0.259, 2, 0.8784417991645136)
+    (True, 0.968, 0.259, 2, 0.8784417991645139)
 
     The p-value value is very large, and the test therefore indicates that
     there is no violation of sphericity.

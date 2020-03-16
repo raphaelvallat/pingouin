@@ -1084,7 +1084,7 @@ def distance_corr(x, y, tail='greater', n_boot=1000, seed=None):
     >>> a = [1, 2, 3, 4, 5]
     >>> b = [1, 2, 9, 4, 4]
     >>> distance_corr(a, b, seed=9)
-    (0.7626762424168667, 0.312)
+    (0.7626762424168665, 0.377)
 
     2. With two 2D arrays and no p-value
 

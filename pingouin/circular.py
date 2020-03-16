@@ -10,9 +10,108 @@ from scipy.stats import norm, circmean
 
 from .utils import remove_na
 
-__all__ = ["circ_axial", "circ_corrcc", "circ_corrcl", "circ_mean", "circ_r",
-           "circ_rayleigh", "circ_vtest"]
+__all__ = ["convert_angles", "circ_axial", "circ_corrcc", "circ_corrcl",
+           "circ_mean", "circ_r", "circ_rayleigh", "circ_vtest"]
 
+###############################################################################
+# HELPER FUNCTIONS
+###############################################################################
+
+
+def convert_angles(angles, low=0, high=360):
+    """Element-wise conversion of arbitrary unit circular angles
+    to radians (:math:`[-\\pi, \\pi]` range).
+
+    Parameters
+    ----------
+    angles : array_like
+        Circular data.
+    low : float or int, optional
+        Low boundary for ``angles`` range.  Default is 0.
+    high : float or int, optional
+        High boundary for ``angles`` range.  Default is 360
+        (for degrees to radians conversion).
+
+    Returns
+    -------
+    radians : array_like
+        Circular data, in radians (range :math:`[-\\pi, \\pi]`).
+
+    Notes
+    -----
+    The formula to convert from an arbitrary range
+    :math:`[\\text{high},\\text{low}]` to radians
+    :math:`[0, 2\\pi]` is:
+
+    .. math::
+
+        \\text{radians} = \\text{angles} \\cdot \\frac{\\pi}{0.5
+        (\\text{high} - \\text{low})}
+
+    Then to wrap radians from the :math:`[0, 2\\pi]` range to the
+    :math:`[-\\pi, \\pi]` range:
+
+    .. math::
+
+        (\\text{radians} + \\pi)\\mod (2\\pi) - \\pi
+
+    Examples
+    --------
+    1. Convert degrees to radians
+
+    >>> from pingouin import convert_angles
+    >>> a = [0, 360, 180, 90, 45, 270]
+    >>> convert_angles(a, low=0, high=360)
+    array([ 0.        ,  0.        , -3.14159265,  1.57079633,  0.78539816,
+           -1.57079633])
+
+    2. Convert hours (24h-format) to radians
+
+    >>> sleep_onset = [22.5, 23.25, 24, 0.5, 1]
+    >>> convert_angles(sleep_onset, low=0, high=24)
+    array([-0.39269908, -0.19634954,  0.        ,  0.13089969,  0.26179939])
+
+    3. Convert radians from :math:`[0, 2\\pi]` to :math:`[-\\pi, \\pi]`:
+
+    >>> import numpy as np
+    >>> rad = [0.1, 3.14, 5, 2, 6]
+    >>> convert_angles(rad, low=0, high=2*np.pi)
+    array([ 0.1       ,  3.14      , -1.28318531,  2.        , -0.28318531])
+
+    4. Convert degrees from a 2-D array
+
+    >>> np.random.seed(123)
+    >>> deg = np.random.randint(low=0, high=360, size=(3, 4))
+    >>> convert_angles(deg)
+    array([[-0.66322512,  1.71042267, -2.26892803,  0.29670597],
+           [ 1.44862328,  1.85004901,  2.14675498,  0.99483767],
+           [-2.54818071, -2.35619449,  1.67551608,  1.97222205]])
+    """
+    assert isinstance(high, (int, float)), 'high must be numeric'
+    assert isinstance(low, (int, float)), 'low must be numeric'
+    ptp = high - low
+    assert ptp > 0, 'high - low must be strictly positive.'
+    angles = np.asarray(angles)
+    assert np.min(angles) >= low, 'angles cannot be >= low.'
+    assert np.max(angles) <= high, 'angles cannot be <= high.'
+    rad = angles * np.pi / (ptp / 2)
+    return (rad + np.pi) % (2. * np.pi) - np.pi
+
+
+def _checkangles(angles, axis=None):
+    """Internal function to check that angles are in radians.
+    """
+    msg = ("Angles are not in unit of radians. Please use the "
+           "`pingouin.convert_angles` function to map your angles to "
+           "the [-pi, pi] range.")
+    ptp_rad = (np.ptp(angles, axis=axis) <= 2 * np.pi)
+    if not ptp_rad.all():
+        raise ValueError(msg)
+
+
+###############################################################################
+# CIRCULAR STATISTICS
+###############################################################################
 
 def circ_axial(alpha, n):
     """Transforms n-axial data to a common scale.
@@ -180,7 +279,7 @@ def circ_corrcl(x, y, tail='two-sided'):
     >>> y = [1.593, 1.291, -0.248, -2.892, 0.102]
     >>> r, pval = circ_corrcl(x, y)
     >>> print(r, pval)
-    0.109 0.9708899750629237
+    0.109 0.9708899750629236
     """
     from scipy.stats import pearsonr, chi2
     x = np.asarray(x)

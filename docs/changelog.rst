@@ -13,6 +13,10 @@ v0.3.4 (dev)
 
 a. Compatibility with Python 3.9 (see `PR by tirkarthi <https://github.com/raphaelvallat/pingouin/pull/83>`_).
 
+**New functions**
+
+a. Added :py:func:`pingouin.convert_angles` function to convert circular data in arbitrary units to radians (-pi, pi range).
+
 
 v0.3.3 (February 2020)
 ----------------------

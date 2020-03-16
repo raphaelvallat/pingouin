@@ -45,6 +45,7 @@ Circular
 .. autosummary::
    :toctree: generated/
 
+    convert_angles
     circ_axial
     circ_corrcc
     circ_corrcl
