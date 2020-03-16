@@ -18,6 +18,10 @@ b. To avoid any confusion, the ``alpha`` argument has been renamed to ``angles``
 
 a. Added :py:func:`pingouin.convert_angles` function to convert circular data in arbitrary units to radians (-pi, pi range).
 
+**Enhancements**
+
+a. Better documentation and testing for circular statistics functions.
+b. Added safety checks that ``angles`` is expressed in radians in circular statistics function.
 
 v0.3.3 (February 2020)
 ----------------------
