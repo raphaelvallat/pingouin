@@ -6,13 +6,14 @@
 # Berens, Philipp. 2009. CircStat: A MATLAB Toolbox for Circular Statistics.
 # Journal of Statistical Software, Articles 31 (10): 1–21.
 import numpy as np
-from scipy.stats import norm, circmean
+from scipy.stats import norm
 
 from .utils import remove_na
 
 __all__ = ["convert_angles", "circ_axial",
            "circ_mean", "circ_r", "circ_corrcc", "circ_corrcl",
            "circ_rayleigh", "circ_vtest"]
+
 
 ###############################################################################
 # HELPER FUNCTIONS
@@ -50,21 +51,20 @@ def convert_angles(angles, low=0, high=360):
 
     Notes
     -----
-    The formula to convert from an arbitrary range
-    :math:`[\\text{high},\\text{low}]` to radians
+    The formula to convert a set of angles :math:`\\alpha` from an arbitrary
+    range :math:`[\\text{high},\\text{low}]` to radians
     :math:`[0, 2\\pi]` is:
 
     .. math::
 
-        \\text{radians} = \\text{angles} \\cdot \\frac{2\\pi}{\\text{high} -
-        \\text{low}}
+        \\alpha_r = \\frac{2\\pi\\alpha}{\\text{high} - \\text{low}}
 
-    Then to wrap radians from the :math:`[0, 2\\pi]` range to the
+    The resulting angles in radians :math:`\\alpha_r` are then wrapped to the
     :math:`[-\\pi, \\pi]` range:
 
     .. math::
 
-        \\text{radians} = (\\text{radians} + \\pi) \\% (2\\pi) - \\pi
+        \\text{angle} \\left ( \\exp(i \\cdot \\alpha_r) \\right )
 
     Examples
     --------
@@ -105,8 +105,11 @@ def convert_angles(angles, low=0, high=360):
     angles = np.asarray(angles)
     assert np.min(angles) >= low, 'angles cannot be >= low.'
     assert np.max(angles) <= high, 'angles cannot be <= high.'
+    # Map to [0, 2pi] range
     rad = angles * (2 * np.pi) / ptp
-    return (rad + np.pi) % (2. * np.pi) - np.pi
+    # Map to [-pi, pi] range, https://stackoverflow.com/a/29237626/10581531
+    # return np.angle(np.exp(1j * rad))
+    return (rad + np.pi) % (2 * np.pi) - np.pi  # Faster
 
 
 def circ_axial(angles, n):
@@ -450,14 +453,14 @@ def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
     >>> x = [0.785, 1.570, 3.141, 3.839, 5.934]
     >>> y = [0.593, 1.291, 2.879, 3.892, 6.108]
     >>> r, pval = circ_corrcc(x, y)
-    >>> print(r, pval)
-    0.942 0.06579836070349088
+    >>> print(r, round(pval, 4))
+    0.942 0.0658
 
     With the correction for uniform marginals
 
     >>> r, pval = circ_corrcc(x, y, correction_uniform=True)
-    >>> print(r, pval)
-    0.547 0.28585306869206784
+    >>> print(r, round(pval, 4))
+    0.547 0.2859
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -468,8 +471,8 @@ def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
     n = x.size
 
     # Compute correlation coefficient
-    x_sin = np.sin(x - circmean(x))
-    y_sin = np.sin(y - circmean(y))
+    x_sin = np.sin(x - circ_mean(x))
+    y_sin = np.sin(y - circ_mean(y))
 
     if not correction_uniform:
         # Similar to np.corrcoef(x_sin, y_sin)[0][1]
