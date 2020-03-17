@@ -30,17 +30,22 @@ class TestCircular(TestCase):
         # Convert angles
         np.testing.assert_array_almost_equal(a1, convert_angles(a1, low=-np.pi,
                                                                 high=np.pi))
+        np.testing.assert_array_almost_equal(a2, convert_angles(a2, low=0,
+                                                                high=2 * np.pi,
+                                                                positive=True))
         _checkangles(convert_angles(a2, low=0, high=2 * np.pi))
         _checkangles(convert_angles(a3, low=0, high=360))
         _checkangles(convert_angles(a4, low=0, high=24))
         _checkangles(convert_angles(a5, low=0, high=1440))
-        _checkangles(convert_angles(a3, low=0, high=1440))
+        _checkangles(convert_angles(a5, low=0, high=1440, positive=True))
 
         convert_angles(a1, low=-np.pi, high=np.pi)
         convert_angles(a2, low=0, high=2 * np.pi)
         convert_angles(a3)
         convert_angles(a4, low=0, high=24)
         convert_angles(a5, low=0, high=1440)
+        assert convert_angles(a5, low=0, high=1440, positive=True).min() >= 0
+        assert convert_angles(a5, low=0, high=1440).min() <= 0
 
         # Compare with scipy.stats.circmean
         def assert_circmean(x, low, high):

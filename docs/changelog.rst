@@ -16,7 +16,7 @@ b. To avoid any confusion, the ``alpha`` argument has been renamed to ``angles``
 
 **New functions**
 
-a. Added :py:func:`pingouin.convert_angles` function to convert circular data in arbitrary units to radians (-pi, pi range).
+a. Added :py:func:`pingouin.convert_angles` function to convert circular data in arbitrary units to radians (:math:`[-\pi, \pi)` range).
 
 **Enhancements**
 

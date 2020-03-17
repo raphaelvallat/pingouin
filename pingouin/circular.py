@@ -30,9 +30,9 @@ def _checkangles(angles, axis=None):
         raise ValueError(msg)
 
 
-def convert_angles(angles, low=0, high=360):
+def convert_angles(angles, low=0, high=360, positive=False):
     """Element-wise conversion of arbitrary unit circular quantities
-    to radians (:math:`[-\\pi, \\pi]` range).
+    to radians.
 
     Parameters
     ----------
@@ -43,11 +43,14 @@ def convert_angles(angles, low=0, high=360):
     high : float or int, optional
         High boundary for ``angles`` range.  Default is 360
         (for degrees to radians conversion).
+    positive : boolean
+        If True, radians are mapped on the :math:`[0, 2\\pi]`. Otherwise,
+        the resulting angles are mapped from :math:`[-\\pi, \\pi)` (default).
 
     Returns
     -------
     radians : array_like
-        Circular data, in radians (range :math:`[-\\pi, \\pi]`).
+        Circular data in radians.
 
     Notes
     -----
@@ -59,8 +62,8 @@ def convert_angles(angles, low=0, high=360):
 
         \\alpha_r = \\frac{2\\pi\\alpha}{\\text{high} - \\text{low}}
 
-    The resulting angles in radians :math:`\\alpha_r` are then wrapped to the
-    :math:`[-\\pi, \\pi]` range:
+    If ``positive=True``, the resulting angles in radians :math:`\\alpha_r`
+    are then wrapped to the :math:`[-\\pi, \\pi)` range:
 
     .. math::
 
@@ -76,13 +79,19 @@ def convert_angles(angles, low=0, high=360):
     array([ 0.        ,  0.        , -3.14159265,  1.57079633,  0.78539816,
            -1.57079633])
 
+    with ``positive=True``:
+
+    >>> convert_angles(a, low=0, high=360, positive=True)
+    array([0.        , 6.28318531, 3.14159265, 1.57079633, 0.78539816,
+           4.71238898])
+
     2. Convert hours (24h-format) to radians
 
     >>> sleep_onset = [22.5, 23.25, 24, 0.5, 1]
     >>> convert_angles(sleep_onset, low=0, high=24)
     array([-0.39269908, -0.19634954,  0.        ,  0.13089969,  0.26179939])
 
-    3. Convert radians from :math:`[0, 2\\pi]` to :math:`[-\\pi, \\pi]`:
+    3. Convert radians from :math:`[0, 2\\pi]` to :math:`[-\\pi, \\pi)`:
 
     >>> import numpy as np
     >>> rad = [0.1, 3.14, 5, 2, 6]
@@ -98,6 +107,7 @@ def convert_angles(angles, low=0, high=360):
            [ 1.44862328,  1.85004901,  2.14675498,  0.99483767],
            [-2.54818071, -2.35619449,  1.67551608,  1.97222205]])
     """
+    assert isinstance(positive, bool)
     assert isinstance(high, (int, float)), 'high must be numeric'
     assert isinstance(low, (int, float)), 'low must be numeric'
     ptp = high - low
@@ -107,9 +117,11 @@ def convert_angles(angles, low=0, high=360):
     assert np.max(angles) <= high, 'angles cannot be <= high.'
     # Map to [0, 2pi] range
     rad = angles * (2 * np.pi) / ptp
-    # Map to [-pi, pi] range, https://stackoverflow.com/a/29237626/10581531
-    # return np.angle(np.exp(1j * rad))
-    return (rad + np.pi) % (2 * np.pi) - np.pi  # Faster
+    if not positive:
+        # Map to [-pi, pi] range, https://stackoverflow.com/a/29237626/10581531
+        # return np.angle(np.exp(1j * rad))
+        rad = (rad + np.pi) % (2 * np.pi) - np.pi  # Faster
+    return rad
 
 
 def circ_axial(angles, n):
@@ -258,11 +270,11 @@ def circ_mean(angles, w=None, axis=0):
 
     >>> np.random.seed(123)
     >>> nbins = 18  # Number of bins to divide the unit circle
-    >>> angles_bins = np.linspace(-np.pi, np.pi, nbins)
+    >>> angles_bins = np.linspace(0, 2 * np.pi, nbins)
     >>> # w represents the number of incidences per bins, or "weights".
     >>> w = np.random.randint(low=0, high=5, size=angles_bins.size)
     >>> round(pg.circ_mean(angles_bins, w), 4)
-    -2.5355
+    0.606
     """
     angles = np.asarray(angles)
     _checkangles(angles)  # Check that angles is in radians
@@ -368,7 +380,7 @@ def circ_r(angles, w=None, d=None, axis=0):
 
     >>> np.random.seed(123)
     >>> nbins = 18  # Number of bins to divide the unit circle
-    >>> angles_bins = np.linspace(-np.pi, np.pi, nbins)
+    >>> angles_bins = np.linspace(0, 2 * np.pi, nbins)
     >>> # w represents the number of incidences per bins, or "weights".
     >>> w = np.random.randint(low=0, high=5, size=angles_bins.size)
     >>> round(pg.circ_r(angles_bins, w), 4)
