@@ -342,8 +342,22 @@ def circ_r(angles, w=None, d=None, axis=0):
 
     >>> import pingouin as pg
     >>> angles = [0.785, 1.570, 3.141, 0.839, 5.934]
-    >>> round(pg.circ_r(angles), 4)
+    >>> r = pg.circ_r(angles)
+    >>> round(r, 4)
     0.4972
+
+    Note that there is a close relationship between the vector length and the
+    circular standard deviation, i.e. :math:`\\sigma = \\sqrt{-2 \\ln R}`:
+
+    >>> import numpy as np
+    >>> round(np.sqrt(-2 * np.log(r)), 4)
+    1.1821
+
+    which gives similar result as SciPy built-in function:
+
+    >>> from scipy.stats import circstd
+    >>> round(circstd(angles), 4)
+    1.1821
 
     Sanity check: if all angles are the same, the vector length should be one:
 
@@ -353,7 +367,6 @@ def circ_r(angles, w=None, d=None, axis=0):
 
     2. Using a 2-D array of angles in degrees
 
-    >>> import numpy as np
     >>> np.random.seed(123)
     >>> deg = np.random.randint(low=0, high=360, size=(3, 5))
     >>> deg
