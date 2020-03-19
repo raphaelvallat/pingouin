@@ -113,8 +113,8 @@ def convert_angles(angles, low=0, high=360, positive=False):
     ptp = high - low
     assert ptp > 0, 'high - low must be strictly positive.'
     angles = np.asarray(angles)
-    assert np.min(angles) >= low, 'angles cannot be >= low.'
-    assert np.max(angles) <= high, 'angles cannot be <= high.'
+    assert np.nanmin(angles) >= low, 'angles cannot be >= low.'
+    assert np.nanmax(angles) <= high, 'angles cannot be <= high.'
     # Map to [0, 2pi] range
     rad = angles * (2 * np.pi) / ptp
     if not positive:
