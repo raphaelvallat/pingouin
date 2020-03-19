@@ -718,8 +718,8 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05,
 
     >>> # n is the sample size and m is the number of repeated measures
     >>> n, m = data.shape
-    >>> pg.power_rm_anova(eta=0.394, m=m, n=n, epsilon=0.694)
-    0.9976707714861207
+    >>> round(pg.power_rm_anova(eta=0.394, m=m, n=n, epsilon=0.694), 3)
+    0.998
 
     Our ANOVA has a very high statistical power. However, to be even more
     accurate in our power calculation, we should also fill in the average
@@ -736,15 +736,16 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05,
     >>> import numpy as np
     >>> corr = np.diag(data.corr(), k=1)
     >>> avgcorr = np.tanh(np.arctanh(corr).mean())
-    >>> avgcorr
-    -0.19955358859483566
+    >>> round(avgcorr, 4)
+    -0.1996
 
     In this example, we're using a fake dataset and the average correlation is
     negative. However, it will most likely be positive with real data. Let's
     now compute the final power of the repeated measures ANOVA:
 
-    >>> pg.power_rm_anova(eta=0.394, m=m, n=n, epsilon=0.694, corr=avgcorr)
-    0.8545404196391067
+    >>> round(pg.power_rm_anova(eta=0.394, m=m, n=n, epsilon=0.694,
+    ...                         corr=avgcorr), 3)
+    0.855
     """
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [eta, m, n, power, alpha]])

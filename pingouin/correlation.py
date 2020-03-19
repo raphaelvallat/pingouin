@@ -1083,8 +1083,9 @@ def distance_corr(x, y, tail='greater', n_boot=1000, seed=None):
     >>> from pingouin import distance_corr
     >>> a = [1, 2, 3, 4, 5]
     >>> b = [1, 2, 9, 4, 4]
-    >>> distance_corr(a, b, seed=9)
-    (0.7626762424168665, 0.377)
+    >>> dcor, pval = distance_corr(a, b, seed=9)
+    >>> print(round(dcor, 3), pval)
+    0.763 0.312
 
     2. With two 2D arrays and no p-value
 
@@ -1093,8 +1094,8 @@ def distance_corr(x, y, tail='greater', n_boot=1000, seed=None):
     >>> from pingouin import distance_corr
     >>> a = np.random.random((10, 10))
     >>> b = np.random.random((10, 10))
-    >>> distance_corr(a, b, n_boot=None)
-    0.8799633012275321
+    >>> round(distance_corr(a, b, n_boot=None), 3)
+    0.88
     """
     assert tail in ['greater', 'less', 'two-sided'], 'Wrong tail argument.'
     x = np.asarray(x)

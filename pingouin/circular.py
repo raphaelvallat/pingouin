@@ -219,6 +219,8 @@ def circ_mean(angles, w=None, axis=0):
         \\bar{\\alpha} =  \\text{angle} \\left ( \\sum_{j=1}^n w \\cdot
         \\exp(i \\cdot \\alpha_j) \\right )
 
+    Missing values in ``angles`` are omitted from the calculations.
+
     References
     ----------
     * https://en.wikipedia.org/wiki/Mean_of_circular_quantities
@@ -267,6 +269,12 @@ def circ_mean(angles, w=None, axis=0):
     >>> round(pg.circ_mean(rad, axis=None), 4)  # Across the entire array
     1.6954
 
+    Missing values are omitted from the calculations:
+
+    >>> rad[0, 0] = np.nan
+    >>> pg.circ_mean(rad)
+    array([1.76275   , 1.94336576, 2.23195927, 0.52110503, 1.80240563])
+
     3. Using binned angles
 
     >>> np.random.seed(123)
@@ -281,7 +289,7 @@ def circ_mean(angles, w=None, axis=0):
     _checkangles(angles)  # Check that angles is in radians
     w = np.asarray(w) if w is not None else np.ones(angles.shape)
     assert angles.shape == w.shape, "Input dimensions do not match"
-    return np.angle(np.multiply(w, np.exp(1j * angles)).sum(axis=axis))
+    return np.angle(np.nansum(np.multiply(w, np.exp(1j * angles)), axis=axis))
 
 
 def circ_r(angles, w=None, d=None, axis=0):
@@ -328,6 +336,8 @@ def circ_r(angles, w=None, d=None, axis=0):
 
         \\bar{\\alpha} =  \\frac{1}{N}\\left \\| \\sum_{j=1}^n
         \\exp(i \\cdot \\alpha_j) \\right \\|
+
+    Missing values in ``angles`` are omitted from the calculations.
 
     References
     ----------
@@ -390,6 +400,12 @@ def circ_r(angles, w=None, d=None, axis=0):
     >>> round(pg.circ_r(rad, axis=None), 4)  # Across the entire array
     0.4486
 
+    Missing values are omitted from the calculations:
+
+    >>> rad[0, 0] = np.nan
+    >>> pg.circ_r(rad)
+    array([0.99619613, 0.98398294, 0.3723287 , 0.31103746, 0.42527149])
+
     3. Using binned angles
 
     >>> np.random.seed(123)
@@ -403,13 +419,17 @@ def circ_r(angles, w=None, d=None, axis=0):
     angles = np.asarray(angles)
     _checkangles(angles)  # Check that angles is in radians
     w = np.asarray(w) if w is not None else np.ones(angles.shape)
-    assert angles.shape == w.shape, "Input dimensions do not match"
+    assert angles.shape == w.shape, "Input dimensions do not match."
+
+    # Add np.nan in weight vector (otherwise nansum(w) is wrong)
+    w = w.astype(float)
+    w[np.isnan(angles)] = np.nan
 
     # Compute weighted sum of cos and sin of angles:
-    r = np.multiply(w, np.exp(1j * angles)).sum(axis=axis)
+    r = np.nansum(np.multiply(w, np.exp(1j * angles)), axis=axis)
 
     # Calculate vector length:
-    r = np.abs(r) / w.sum(axis=axis)
+    r = np.abs(r) / np.nansum(w, axis=axis)
 
     # For data with known spacing, apply correction factor
     if d is not None:
@@ -557,8 +577,8 @@ def circ_corrcl(x, y, tail='two-sided'):
     >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
     >>> y = [1.593, 1.291, -0.248, -2.892, 0.102]
     >>> r, pval = circ_corrcl(x, y)
-    >>> print(r, pval)
-    0.109 0.9708899750629236
+    >>> print(r, round(pval, 3))
+    0.109 0.971
     """
     from scipy.stats import pearsonr, chi2
     x = np.asarray(x)

@@ -589,8 +589,8 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     >>> gg = pg.epsilon(data, correction='gg')
     >>> hf = pg.epsilon(data, correction='hf')
     >>> lb = pg.epsilon(data, correction='lb')
-    >>> print(lb, gg, hf)
-    0.5 0.5587754577585022 0.6223448311539789
+    >>> print("%.2f %.2f %.2f" % (lb, gg, hf))
+    0.50 0.56 0.62
 
     Now using a long-format dataframe
 
@@ -614,9 +614,9 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
 
     The *Metric* factor, however, has three levels:
 
-    >>> pg.epsilon(data, dv='Performance', subject='Subject',
-    ...            within=['Metric'])
-    0.9691029584899815
+    >>> round(pg.epsilon(data, dv='Performance', subject='Subject',
+    ...                  within=['Metric']), 3)
+    0.969
 
     The epsilon value is very close to 1, meaning that there is no major
     violation of sphericity.
@@ -624,9 +624,9 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     Now, let's calculate the epsilon for the interaction between the two
     repeated measures factor:
 
-    >>> pg.epsilon(data, dv='Performance', subject='Subject',
-    ...            within=['Time', 'Metric'])
-    0.727166420214127
+    >>> round(pg.epsilon(data, dv='Performance', subject='Subject',
+    ...                  within=['Time', 'Metric']), 3)
+    0.727
 
     Alternatively, we could use a wide-format dataframe with two column
     levels:
@@ -644,8 +644,8 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     4           40     39      18     25     25      12
     5           27     28      18     19     27      19
 
-    >>> pg.epsilon(piv)
-    0.727166420214127
+    >>> round(pg.epsilon(piv), 3)
+    0.727
 
     which gives the same epsilon value as the long-format dataframe.
     """
@@ -831,13 +831,14 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
     >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
     ...                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
     ...                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
-    >>> pg.sphericity(data)
-    (True, 0.21, 4.677, 2, 0.0964901628320963)
+    >>> spher, W, chisq, dof, pval = pg.sphericity(data)
+    >>> print(spher, W, chisq, dof, round(pval, 3))
+    True 0.21 4.677 2 0.096
 
     John, Nagao and Sugiura (JNS) test
 
-    >>> pg.sphericity(data, method='jns')
-    (False, 1.118, 6.176, 2, 0.0456042403075201)
+    >>> round(pg.sphericity(data, method='jns')[-1], 3)  # P-vlaue only
+    0.046
 
     Now using a long-format dataframe
 
@@ -861,9 +862,9 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
 
     The *Metric* factor, however, has three levels:
 
-    >>> pg.sphericity(data, dv='Performance', subject='Subject',
-    ...            within=['Metric'])
-    (True, 0.968, 0.259, 2, 0.8784417991645139)
+    >>> round(pg.sphericity(data, dv='Performance', subject='Subject',
+    ...                     within=['Metric'])[-1], 3)
+    0.878
 
     The p-value value is very large, and the test therefore indicates that
     there is no violation of sphericity.
@@ -873,9 +874,11 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
     if at least one of the two within-subject factors has no more than two
     levels.
 
-    >>> pg.sphericity(data, dv='Performance', subject='Subject',
-    ...            within=['Time', 'Metric'])
-    (True, 0.625, 3.763, 2, 0.15239168046050933)
+    >>> spher, _, chisq, dof, pval = pg.sphericity(data, dv='Performance',
+    ...                                            subject='Subject',
+    ...                                            within=['Time', 'Metric'])
+    >>> print(spher, chisq, dof, round(pval, 3))
+    True 3.763 2 0.152
 
     Here again, there is no violation of sphericity acccording to Mauchly's
     test.
@@ -896,8 +899,9 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
     4           40     39      18     25     25      12
     5           27     28      18     19     27      19
 
-    >>> pg.sphericity(piv)
-    (True, 0.625, 3.763, 2, 0.15239168046050933)
+    >>> spher, _, chisq, dof, pval = pg.sphericity(piv)
+    >>> print(spher, chisq, dof, round(pval, 3))
+    True 3.763 2 0.152
 
     which gives the same output as the long-format dataframe.
     """

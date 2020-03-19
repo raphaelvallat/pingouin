@@ -13,6 +13,9 @@ a2 = np.pi + np.array(a1)                # 0 / 2 * np.pi
 a3 = [150, 180, 32, 340, 54, 0, 360]     # 0 / 360 deg
 a4 = [22, 23, 0.5, 1.2, 0, 24]           # Hours (0 - 24)
 a5 = np.random.randint(0, 1440, (2, 4))  # Minutes, 2D array
+a3_nan = np.array([150, 180, 32, 340, 54, np.nan, 0, 360])
+a5_nan = a5.astype(float)
+a5_nan[1, 2] = np.nan
 
 
 class TestCircular(TestCase):
@@ -35,8 +38,10 @@ class TestCircular(TestCase):
                                                                 positive=True))
         _checkangles(convert_angles(a2, low=0, high=2 * np.pi))
         _checkangles(convert_angles(a3, low=0, high=360))
+        _checkangles(convert_angles(a3_nan, low=0, high=360))
         _checkangles(convert_angles(a4, low=0, high=24))
         _checkangles(convert_angles(a5, low=0, high=1440))
+        _checkangles(convert_angles(a5_nan, low=0, high=1440))
         _checkangles(convert_angles(a5, low=0, high=1440, positive=True))
 
         convert_angles(a1, low=-np.pi, high=np.pi)
@@ -48,17 +53,23 @@ class TestCircular(TestCase):
         assert convert_angles(a5, low=0, high=1440).min() <= 0
 
         # Compare with scipy.stats.circmean
-        def assert_circmean(x, low, high):
-            m1 = convert_angles(circmean(x, low=low, high=high, axis=-1),
-                                low, high)
-            m2 = circ_mean(convert_angles(x, low, high), axis=-1)
+        def assert_circmean(x, low, high, axis=-1):
+            m1 = convert_angles(circmean(x, low=low, high=high, axis=axis,
+                                         nan_policy='omit'), low, high)
+            m2 = circ_mean(convert_angles(x, low, high), axis=axis)
             assert (np.round(m1, 4) == np.round(m2, 4)).all()
 
         assert_circmean(a1, low=-np.pi, high=np.pi)
         assert_circmean(a2, low=0, high=2 * np.pi)
         assert_circmean(a3, low=0, high=360)
+        assert_circmean(a3_nan, low=0, high=360)
         assert_circmean(a4, low=0, high=24)
-        assert_circmean(a5, low=0, high=1440)
+        assert_circmean(a5, low=0, high=1440, axis=1)
+        assert_circmean(a5, low=0, high=1440, axis=0)
+        assert_circmean(a5, low=0, high=1440, axis=None)
+        assert_circmean(a5_nan, low=0, high=1440, axis=-1)
+        assert_circmean(a5_nan, low=0, high=1440, axis=0)
+        assert_circmean(a5_nan, low=0, high=1440, axis=None)
 
     def test_circ_axial(self):
         """Test function circ_axial."""
@@ -96,9 +107,10 @@ class TestCircular(TestCase):
     def test_circ_mean(self):
         """Test function circ_mean."""
         x = [0.785, 1.570, 3.141, 0.839, 5.934]
-        mu = circ_mean(x)
+        x_nan = np.array([0.785, 1.570, 3.141, 0.839, 5.934, np.nan])
         # Compare with the CircStats MATLAB toolbox
-        assert np.round(mu, 3) == 1.013
+        assert np.round(circ_mean(x), 3) == 1.013
+        assert np.round(circ_mean(x_nan), 3) == 1.013
         # Binned data
         np.random.seed(123)
         nbins = 18  # Number of bins to divide the unit circle
@@ -110,9 +122,10 @@ class TestCircular(TestCase):
     def test_circ_r(self):
         """Test function circ_r."""
         x = [0.785, 1.570, 3.141, 0.839, 5.934]
-        r = circ_r(x)
+        x_nan = np.array([0.785, 1.570, 3.141, 0.839, 5.934, np.nan])
         # Compare with the CircStats MATLAB toolbox
-        assert np.round(r, 3) == 0.497
+        assert np.round(circ_r(x), 3) == 0.497
+        assert np.round(circ_r(x_nan), 3) == 0.497
 
     def test_circ_rayleigh(self):
         """Test function circ_rayleigh."""
