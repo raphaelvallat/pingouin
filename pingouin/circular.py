@@ -25,8 +25,9 @@ def _checkangles(angles, axis=None):
     msg = ("Angles are not in unit of radians. Please use the "
            "`pingouin.convert_angles` function to map your angles to "
            "the [-pi, pi] range.")
-    ptp_rad = (np.ptp(angles, axis=axis) <= 2 * np.pi)
-    if not ptp_rad.all():
+    ptp_rad = np.nanmax(angles, axis=axis) - np.nanmin(angles, axis=axis)
+    ptp_mask = ptp_rad <= 2 * np.pi
+    if not ptp_mask.all():
         raise ValueError(msg)
 
 
