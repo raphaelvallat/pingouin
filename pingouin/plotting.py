@@ -11,8 +11,9 @@ from scipy import stats
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
 
-# Set default Seaborn preferences
-sns.set(style='ticks', context='notebook')
+# Set default Seaborn preferences (disabled Pingouin >= 0.3.4)
+# See https://github.com/raphaelvallat/pingouin/issues/85
+# sns.set(style='ticks', context='notebook')
 
 __all__ = ["plot_blandaltman", "plot_skipped_corr", "qqplot", "plot_paired",
            "plot_shift", "plot_rm_corr", "plot_circmean"]

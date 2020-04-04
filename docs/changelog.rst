@@ -23,6 +23,7 @@ a. Added :py:func:`pingouin.convert_angles` function to convert circular data in
 a. Better documentation and testing for circular statistics functions.
 b. Added safety checks that ``angles`` is expressed in radians in circular statistics function.
 c. :py:func:`pingouin.circ_mean` and :py:func:`pingouin.circ_r` now perform calculations omitting missing values.
+d. Pingouin no longer changes the default matplotlib style to a Seaborn-default (see `issue #85 <https://github.com/raphaelvallat/pingouin/issues/85>`_).
 
 v0.3.3 (February 2020)
 ----------------------
