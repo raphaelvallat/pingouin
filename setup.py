@@ -27,6 +27,7 @@ INSTALL_REQUIRES = [
     'statsmodels>=0.10.0',
     'pandas_flavor>=0.1.2',
     'outdated',
+    'tabulate'
 ]
 
 PACKAGES = [

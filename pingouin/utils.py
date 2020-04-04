@@ -1,9 +1,9 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
-import collections.abc
 import numpy as np
-from pingouin.external.tabulate import tabulate
 import pandas as pd
+import collections.abc
+from tabulate import tabulate
 
 __all__ = ["_perm_pval", "print_table", "_check_eftype",
            "remove_rm_na", "remove_na", "_flatten_list", "_check_dataframe",

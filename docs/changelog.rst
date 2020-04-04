@@ -9,11 +9,12 @@ What's new
 v0.3.4 (dev)
 ------------
 
-**Code**
+**Code and dependencies**
 
 a. Compatibility with Python 3.9 (see `PR by tirkarthi <https://github.com/raphaelvallat/pingouin/pull/83>`_).
 b. To avoid any confusion, the ``alpha`` argument has been renamed to ``angles`` in all circular statistics functions.
-c. Updated flake8 guidelines.
+c. Updated flake8 guidelines and added CI for Python 3.8.
+d. Added the `tabulate <https://pypi.org/project/tabulate/>`_ package as dependency. This is used by the :py:func:`pingouin.print_table` function, as well as the :py:meth:`pandas.DataFrame.to_markdown` function.
 
 **New functions**
 
