@@ -24,7 +24,6 @@ class TestRegression(TestCase):
 
     def test_linear_regression(self):
         """Test function linear_regression."""
-
         # Simple regression
         lm = linear_regression(df['X'], df['Y'])  # Pingouin
         linear_regression(df['X'], df['Y'], add_intercept=False)
@@ -134,7 +133,6 @@ class TestRegression(TestCase):
 
     def test_logistic_regression(self):
         """Test function logistic_regression."""
-
         # Simple regression
         lom = logistic_regression(df['X'], df['Ybin'], as_dataframe=False)
         # Compare to R

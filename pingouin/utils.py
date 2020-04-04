@@ -364,6 +364,7 @@ def _check_dataframe(data=None, dv=None, between=None, within=None,
 
 
 def _is_statsmodels_installed(raise_error=False):
+    """Check if statsmodels is installed."""
     try:
         import statsmodels  # noqa
         is_installed = True
@@ -377,6 +378,7 @@ def _is_statsmodels_installed(raise_error=False):
 
 
 def _is_sklearn_installed(raise_error=False):
+    """Check if sklearn is installed."""
     try:
         import sklearn  # noqa
         is_installed = True
@@ -390,6 +392,7 @@ def _is_sklearn_installed(raise_error=False):
 
 
 def _is_mpmath_installed(raise_error=False):
+    """Check if mpmath is installed."""
     try:
         import mpmath  # noqa
         is_installed = True

@@ -17,7 +17,6 @@ class TestMulticomp(TestCase):
         """Test function fdr.
         Compare to the p.adjust R function.
         """
-
         # FDR BH
         # ------
         reject, pval_corr = fdr(pvals)

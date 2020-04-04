@@ -39,8 +39,8 @@ class TestReliability(TestCase):
 
     def test_intraclass_corr(self):
         """Test function intraclass_corr
-        Compare to the ICC function of the R package psych"""
-
+        Compare to the ICC function of the R package psych
+        """
         # Example from the R package psych (Shrout and Fleiss 1979)
         df_psych = pd.DataFrame({'S': [1, 2, 3, 4, 5, 6],
                                  'J1': [9, 6, 8, 7, 10, 6],

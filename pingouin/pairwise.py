@@ -514,7 +514,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 @pf.register_dataframe_method
 def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
                    tail='two-sided', effsize='hedges'):
-    '''Pairwise Tukey-HSD post-hoc test.
+    """Pairwise Tukey-HSD post-hoc test.
 
     Parameters
     ----------
@@ -617,7 +617,7 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
     >>> from pingouin import pairwise_tukey, read_dataset
     >>> df = read_dataset('anova')
     >>> pt = pairwise_tukey(data=df, dv='Pain threshold', between='Hair color')
-    '''
+    """
     from pingouin.external.qsturng import psturng
 
     assert tail in ['one-sided', 'two-sided']
@@ -672,7 +672,7 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
 
 def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
                          tail='two-sided', effsize='hedges'):
-    '''Pairwise Games-Howell post-hoc test.
+    """Pairwise Games-Howell post-hoc test.
 
     Parameters
     ----------
@@ -771,7 +771,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
     >>> df = read_dataset('anova')
     >>> pairwise_gameshowell(data=df, dv='Pain threshold',
     ...                      between='Hair color')  # doctest: +SKIP
-    '''
+    """
     from pingouin.external.qsturng import psturng
 
     # Check the dataframe

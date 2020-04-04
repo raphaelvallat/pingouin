@@ -116,7 +116,8 @@ class TestEffsize(TestCase):
 
     def test_convert_effsize(self):
         """Test function convert_effsize.
-        Compare to https://www.psychometrica.de/effect_size.html"""
+        Compare to https://www.psychometrica.de/effect_size.html
+        """
         # Cohen d
         d = .40
         assert cef(d, 'cohen', 'none') == d

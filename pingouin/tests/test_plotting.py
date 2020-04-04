@@ -10,6 +10,10 @@ from pingouin.plotting import (plot_blandaltman, plot_skipped_corr, _ppoints,
                                qqplot, plot_paired, plot_shift, plot_rm_corr,
                                plot_circmean)
 
+# Disable open figure warning
+plt.close('all')  # Close all opened windows
+plt.rcParams.update({'figure.max_open_warning': 0})
+
 
 class TestPlotting(TestCase):
     """Test plotting.py."""
@@ -24,6 +28,7 @@ class TestPlotting(TestCase):
         _, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4))
         plot_blandaltman(x, y, agreement=2, confidence=None, ax=ax1)
         plot_blandaltman(x, y, agreement=2, confidence=.68, dpi=200, ax=ax2)
+        plt.close('all')
 
     def test_plot_skipped_corr(self):
         """Test plot_skipped_corr()"""
@@ -34,10 +39,14 @@ class TestPlotting(TestCase):
         # Introduce two outliers
         x[10], y[10] = 160, 100
         x[8], y[8] = 165, 90
+        # Fails because of NumPy/Seaborn issue
+        # https://github.com/mwaskom/seaborn/issues/1950
+        # Should be fixed in the next version of seaborn
         plot_skipped_corr(x, y, xlabel='Height', ylabel='Weight')
         plot_skipped_corr(x, y, n_boot=10)
         fig = plot_skipped_corr(x, y, seed=456)
         assert isinstance(fig, matplotlib.figure.Figure)
+        plt.close('all')
 
     def test_ppoints(self):
         """Test _ppoints()"""
@@ -68,6 +77,7 @@ class TestPlotting(TestCase):
         # Error: required parameters are not specified
         with pytest.raises(ValueError):
             qqplot(x_ln, dist='lognorm', sparams=())
+        plt.close('all')
 
     def test_plot_paired(self):
         """Test plot_paired()"""
@@ -84,6 +94,7 @@ class TestPlotting(TestCase):
         plot_paired(data=df, dv='Scores', within='Time',
                     subject='Subject', order=['June', 'August'],
                     ax=ax2)
+        plt.close('all')
 
     def test_plot_shift(self):
         """Test plot_shift()."""
@@ -93,6 +104,7 @@ class TestPlotting(TestCase):
         plot_shift(x, y, n_boot=100, percentiles=[5, 55, 95], ci=0.68,
                    show_median=False, seed=456, violin=False)
         plot_shift(x, y, paired=True, n_boot=100, percentiles=[25, 75])
+        plt.close('all')
 
     def test_plot_rm_corr(self):
         """Test plot_shift()."""
@@ -101,6 +113,7 @@ class TestPlotting(TestCase):
         g = plot_rm_corr(data=df, x='pH', y='PacO2', subject='Subject',
                          legend=False)
         assert isinstance(g, sns.FacetGrid)
+        plt.close('all')
 
     def test_plot_circmean(self):
         """Test plot_circmean.
@@ -114,3 +127,4 @@ class TestPlotting(TestCase):
         ax = plot_circmean(angles, figsize=(5, 5), dpi=100, kwargs_markers={},
                            kwargs_arrow={})
         assert isinstance(ax, matplotlib.axes.Axes)
+        plt.close('all')

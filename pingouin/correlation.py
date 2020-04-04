@@ -16,8 +16,7 @@ __all__ = ["corr", "partial_corr", "pcorr", "rcorr", "rm_corr",
 
 
 def skipped(x, y, method='spearman'):
-    """
-    Skipped correlation (Rousselet and Pernet 2012).
+    """Skipped correlation (Rousselet and Pernet 2012).
 
     Parameters
     ----------
@@ -56,7 +55,6 @@ def skipped(x, y, method='spearman'):
 
     References
     ----------
-
     .. [1] Pernet CR, Wilcox R, Rousselet GA. Robust Correlation Analyses:
        False Positive and Power Validation Using a New Open Source Matlab
        Toolbox. Frontiers in Psychology. 2012;3:606.
@@ -220,7 +218,6 @@ def percbend(x, y, beta=.2):
 
     References
     ----------
-
     .. [1] Wilcox, R.R., 1994. The percentage bend correlation coefficient.
        Psychometrika 59, 601–616. https://doi.org/10.1007/BF02294395
 

@@ -13,6 +13,7 @@ v0.3.4 (dev)
 
 a. Compatibility with Python 3.9 (see `PR by tirkarthi <https://github.com/raphaelvallat/pingouin/pull/83>`_).
 b. To avoid any confusion, the ``alpha`` argument has been renamed to ``angles`` in all circular statistics functions.
+c. Updated flake8 guidelines.
 
 **New functions**
 

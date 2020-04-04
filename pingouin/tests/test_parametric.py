@@ -209,7 +209,8 @@ class TestParametric(TestCase):
 
     def test_rm_anova(self):
         """Test function rm_anova.
-        Compare with JASP"""
+        Compare with JASP
+        """
         rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
                  correction=False, detailed=False)
         rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
@@ -236,7 +237,8 @@ class TestParametric(TestCase):
 
     def test_rm_anova2(self):
         """Test function rm_anova2.
-        Compare with JASP."""
+        Compare with JASP.
+        """
         data = read_dataset('rm_anova2')
         aov = rm_anova(data=data, subject='Subject', within=['Time', 'Metric'],
                        dv='Performance').round(3)
@@ -258,7 +260,8 @@ class TestParametric(TestCase):
 
     def test_mixed_anova(self):
         """Test function anova.
-        Compare with JASP and ezANOVA."""
+        Compare with JASP and ezANOVA.
+        """
         # Balanced design, two groups, three within factors
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
                           between='Group', data=df, correction=True).round(3)
@@ -324,7 +327,8 @@ class TestParametric(TestCase):
 
     def test_ancova(self):
         """Test function ancovan.
-        Compare with JASP."""
+        Compare with JASP.
+        """
         df = read_dataset('ancova')
         # With one covariate, balanced design, no missing values
         aov = ancova(data=df, dv='Scores', covar='Income',

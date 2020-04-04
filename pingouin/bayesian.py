@@ -1,5 +1,4 @@
-# Author: Raphael Vallat <raphaelvallat9@gmail.com>
-# Date: April 2018
+"""Bayesian functions."""
 import warnings
 import numpy as np
 from scipy.integrate import quad

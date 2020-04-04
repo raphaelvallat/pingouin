@@ -742,7 +742,6 @@ def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype='cohen'):
 
     Notes
     -----
-
     If both nx and ny are specified, the formula to convert from *t* to *d* is:
 
     .. math:: d = t * \\sqrt{\\frac{1}{n_x} + \\frac{1}{n_y}}

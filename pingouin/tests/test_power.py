@@ -10,7 +10,8 @@ class TestPower(TestCase):
 
     def test_power_ttest(self):
         """Test function power_ttest.
-        Values are compared to the pwr R package."""
+        Values are compared to the pwr R package.
+        """
         # ONE-SAMPLE / PAIRED
         # Alternative = 'greater'
         assert np.allclose(power_ttest(d=0.5, n=20, contrast='one-sample',
@@ -87,7 +88,8 @@ class TestPower(TestCase):
 
     def test_power_ttest2n(self):
         """Test function power_ttest2n.
-        Values are compared to the pwr R package."""
+        Values are compared to the pwr R package.
+        """
         # TWO-SAMPLES
         # alternative = 'greater'
         assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5,
@@ -120,7 +122,8 @@ class TestPower(TestCase):
 
     def test_power_anova(self):
         """Test function power_anova.
-        Values are compared to the pwr R package."""
+        Values are compared to the pwr R package.
+        """
         eta = 0.0727003
         assert np.allclose(power_anova(eta=eta, k=4, n=20), 0.5149793)
         assert np.allclose(power_anova(eta=eta, n=20, power=0.80), 10.70313)
@@ -135,7 +138,8 @@ class TestPower(TestCase):
 
     def test_power_rm_anova(self):
         """Test function power_rm_anova.
-        Values are compared to GPower."""
+        Values are compared to GPower.
+        """
         eta = 0.20  # f = 0.5
         eta2 = 0.058823529411764705  # f = 0.25 (default in GPower)
 
@@ -207,7 +211,8 @@ class TestPower(TestCase):
 
     def test_power_chi2(self):
         """Test function power_chi2.
-        Values are compared to the pwr R package."""
+        Values are compared to the pwr R package.
+        """
         w = 0.30
         # Power
         assert np.allclose(power_chi2(dof=1, w=0.3, n=20), 0.2686618)

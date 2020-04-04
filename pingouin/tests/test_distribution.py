@@ -135,7 +135,8 @@ class TestDistribution(TestCase):
 
     def test_sphericity(self):
         """Test function test_sphericity.
-        Compare with ezANOVA."""
+        Compare with ezANOVA.
+        """
         _, W, _, _, p = sphericity(df_pivot, method='mauchly')
         assert W == 0.999
         assert np.round(p, 3) == 0.964

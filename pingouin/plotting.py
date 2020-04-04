@@ -88,7 +88,6 @@ def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
 
     Examples
     --------
-
     Bland-Altman plot
 
     .. plot::
@@ -178,7 +177,6 @@ def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
 
 
 def plot_skipped_corr(x, y, xlabel=None, ylabel=None, n_boot=2000, seed=None):
-
     """Plot the bootstrapped 95% confidence intervals and distribution
     of a robust Skipped correlation.
 
@@ -214,7 +212,6 @@ def plot_skipped_corr(x, y, xlabel=None, ylabel=None, n_boot=2000, seed=None):
 
     Examples
     --------
-
     Plot a robust Skipped correlation with bootstrapped confidence intervals
 
     .. plot::
@@ -400,7 +397,6 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
 
     Examples
     --------
-
     Q-Q plot using a normal theoretical distribution:
 
     .. plot::
@@ -565,7 +561,6 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
 
     Examples
     --------
-
     Default paired plot:
 
     .. plot::
@@ -1030,7 +1025,6 @@ def plot_circmean(angles, figsize=(4, 4), dpi=None, ax=None,
 
     Examples
     --------
-
     Default plot
 
     .. plot::

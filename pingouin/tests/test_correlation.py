@@ -51,7 +51,8 @@ class TestCorrelation(TestCase):
 
     def test_partial_corr(self):
         """Test function partial_corr.
-        Compare with the R package ppcor and JASP."""
+        Compare with the R package ppcor and JASP.
+        """
         df = read_dataset('partial_corr')
         pc = partial_corr(data=df, x='x', y='y', covar='cv1')
         assert pc.loc['pearson', 'r'] == 0.568
@@ -92,7 +93,8 @@ class TestCorrelation(TestCase):
 
     def test_distance_corr(self):
         """Test function distance_corr
-        We compare against the energy R package"""
+        We compare against the energy R package
+        """
         a = [1, 2, 3, 4, 5]
         b = [1, 2, 9, 4, 4]
         dcor1 = distance_corr(a, b, n_boot=None)

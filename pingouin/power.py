@@ -91,7 +91,6 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
 
     References
     ----------
-
     .. [1] Cohen, J. (1988). Statistical power analysis for the behavioral
            sciences (2nd ed.). Hillsdale,NJ: Lawrence Erlbaum.
 
