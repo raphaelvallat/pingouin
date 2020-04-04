@@ -4,10 +4,6 @@ pytest-cov
 pytest-sugar
 pytest-remotedata
 pytest-travis-fold
-flake8
-sphinx
-sphinx-bootstrap-theme
-numpydoc
 openpyxl
 mpmath
 scikit-learn
