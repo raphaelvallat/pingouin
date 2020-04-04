@@ -52,8 +52,6 @@ def _perm_pval(bootstat, estimate, tail='two-sided'):
 def print_table(df, floatfmt=".3f", tablefmt='simple'):
     """Pretty display of table.
 
-    See: https://pypi.org/project/tabulate/.
-
     Parameters
     ----------
     df : DataFrame
@@ -61,7 +59,9 @@ def print_table(df, floatfmt=".3f", tablefmt='simple'):
     floatfmt : string
         Decimal number formatting
     tablefmt : string
-        Table format (e.g. 'simple', 'plain', 'html', 'latex', 'grid')
+        Table format (e.g. 'simple', 'plain', 'html', 'latex', 'grid', 'rst').
+        For a full list of available formats, please refer to
+        https://pypi.org/project/tabulate/
     """
     if 'F' in df.keys():
         print('\n=============\nANOVA SUMMARY\n=============\n')
@@ -72,17 +72,6 @@ def print_table(df, floatfmt=".3f", tablefmt='simple'):
                    tablefmt=tablefmt))
     print('')
 
-
-# def _export_table(table, fname):
-#     """Export DataFrame to .csv.
-#     DEPRECATED in Pingouin v0.3.2
-#     """
-#     import os.path as op
-#     extension = op.splitext(fname.lower())[1]
-#     if extension == '':
-#         fname = fname + '.csv'
-#     table.to_csv(fname, index=None, sep=',', encoding='utf-8',
-#                  float_format='%.4f', decimal='.')
 
 ###############################################################################
 # MISSING VALUES
