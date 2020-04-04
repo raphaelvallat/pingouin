@@ -4,6 +4,7 @@ pytest-cov
 pytest-sugar
 pytest-remotedata
 pytest-travis-fold
+flake8
 openpyxl
 mpmath
 scikit-learn
