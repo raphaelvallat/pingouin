@@ -284,7 +284,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         paired = True if contrast == 'simple_within' else False
         col = within if contrast == 'simple_within' else between
         # Remove NAN in repeated measurements
-        if contrast == 'simple_within' and data[dv].isnull().values.any():
+        if contrast == 'simple_within' and data[dv].isnull().to_numpy().any():
             # Only if nan_policy == 'listwise'. For pairwise deletion,
             # missing values will be removed directly in the lower-level
             # functions (e.g. pg.ttest)
@@ -369,7 +369,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         padjust = None if stats['p-unc'].size <= 1 else padjust
         if padjust is not None:
             if padjust.lower() != 'none':
-                _, stats['p-corr'] = multicomp(stats['p-unc'].values,
+                _, stats['p-corr'] = multicomp(stats['p-unc'].to_numpy(),
                                                alpha=alpha, method=padjust)
                 stats['p-adjust'] = padjust
         else:
@@ -489,7 +489,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
             # Multi-comparison columns
             if padjust is not None and padjust.lower() != 'none':
-                _, pcor = multicomp(stats.loc[idxiter, 'p-unc'].values,
+                _, pcor = multicomp(stats.loc[idxiter, 'p-unc'].to_numpy(),
                                     alpha=alpha, method=padjust)
                 stats.loc[idxiter, 'p-corr'] = pcor
                 stats.loc[idxiter, 'p-adjust'] = padjust
@@ -627,8 +627,8 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
     df = aov.at[1, 'DF']
     ng = aov.at[0, 'DF'] + 1
     grp = data.groupby(between)[dv]
-    n = grp.count().values
-    gmeans = grp.mean().values
+    n = grp.count().to_numpy()
+    gmeans = grp.mean().to_numpy()
     gvar = aov.at[1, 'MS'] / n
 
     # Pairwise combinations
@@ -783,9 +783,9 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
     # Extract infos
     ng = data[between].nunique()
     grp = data.groupby(between)[dv]
-    n = grp.count().values
-    gmeans = grp.mean().values
-    gvars = grp.var().values
+    n = grp.count().to_numpy()
+    gmeans = grp.mean().to_numpy()
+    gvars = grp.var().to_numpy()
 
     # Pairwise combinations
     g1, g2 = np.array(list(combinations(np.arange(ng), 2))).T
@@ -1102,7 +1102,7 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     # Listwise deletion of missing values
     if nan_policy == 'listwise':
-        all_cols = np.unique(stats[['X', 'Y']].values).tolist()
+        all_cols = np.unique(stats[['X', 'Y']].to_numpy()).tolist()
         if covar is not None:
             all_cols.extend(covar)
         data = data[all_cols].dropna()
@@ -1114,18 +1114,18 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     for i in range(stats.shape[0]):
         col1, col2 = stats.at[i, 'X'], stats.at[i, 'Y']
         if covar is None:
-            cor_st = corr(data[col1].values, data[col2].values, tail=tail,
-                          method=method)
+            cor_st = corr(data[col1].to_numpy(), data[col2].to_numpy(),
+                          tail=tail, method=method)
         else:
             cor_st = partial_corr(data=data, x=col1, y=col2, covar=covar,
                                   tail=tail, method=method)
         cor_st_keys = cor_st.columns.tolist()
         if 'BF10' in cor_st_keys:
-            stats.loc[i, dvs_bf10] = cor_st[dvs_bf10].values
+            stats.loc[i, dvs_bf10] = cor_st[dvs_bf10].to_numpy()
         elif 'outliers' in cor_st_keys:
-            stats.loc[i, dvs_out] = cor_st[dvs_out].values
+            stats.loc[i, dvs_out] = cor_st[dvs_out].to_numpy()
         else:
-            stats.loc[i, dvs] = cor_st[dvs].values
+            stats.loc[i, dvs] = cor_st[dvs].to_numpy()
 
     # Force conversion to numeric
     stats = stats.astype({'r': float, 'r2': float, 'adj_r2': float,
@@ -1137,7 +1137,7 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     padjust = None if stats['p-unc'].size <= 1 else padjust
     if padjust is not None:
         if padjust.lower() != 'none':
-            reject, stats['p-corr'] = multicomp(stats['p-unc'].values,
+            reject, stats['p-corr'] = multicomp(stats['p-unc'].to_numpy(),
                                                 method=padjust)
             stats['p-adjust'] = padjust
     else:
@@ -1145,7 +1145,7 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
         stats['p-adjust'] = None
 
     # Standardize correlation coefficients (Fisher z-transformation)
-    stats['z'] = np.round(np.arctanh(stats['r'].values), 3)
+    stats['z'] = np.round(np.arctanh(stats['r'].to_numpy()), 3)
 
     col_order = ['X', 'Y', 'method', 'tail', 'n', 'outliers', 'r', 'CI95%',
                  'r2', 'adj_r2', 'z', 'p-unc', 'p-corr', 'p-adjust',

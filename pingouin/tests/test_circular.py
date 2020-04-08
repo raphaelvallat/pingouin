@@ -74,7 +74,7 @@ class TestCircular(TestCase):
     def test_circ_axial(self):
         """Test function circ_axial."""
         df = read_dataset('circular')
-        angles = df['Orientation'].values
+        angles = df['Orientation'].to_numpy()
         angles = circ_axial(np.deg2rad(angles), 2)
         assert np.allclose(np.round(angles, 4),
                            [0, 0.7854, 1.5708, 2.3562, 3.1416, 3.9270, 4.7124,

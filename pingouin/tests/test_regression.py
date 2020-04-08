@@ -27,8 +27,8 @@ class TestRegression(TestCase):
         # Simple regression
         lm = linear_regression(df['X'], df['Y'])  # Pingouin
         linear_regression(df['X'], df['Y'], add_intercept=False)
-        sc = linregress(df['X'].values, df['Y'].values)  # SciPy
-        assert_equal(lm['names'].values, ['Intercept', 'X'])
+        sc = linregress(df['X'].to_numpy(), df['Y'].to_numpy())  # SciPy
+        assert_equal(lm['names'].to_numpy(), ['Intercept', 'X'])
         assert_almost_equal(lm['coef'][1], sc.slope)
         assert_almost_equal(lm['coef'][0], sc.intercept)
         assert_almost_equal(lm['se'][1], sc.stderr)
@@ -37,8 +37,8 @@ class TestRegression(TestCase):
         assert lm.residuals_.size == df['Y'].size
 
         # Multiple regression with intercept
-        X = df[['X', 'M']].values
-        y = df['Y'].values
+        X = df[['X', 'M']].to_numpy()
+        y = df['Y'].to_numpy()
         lm = linear_regression(X, y, as_dataframe=False)  # Pingouin
         sk = LinearRegression(fit_intercept=True).fit(X, y)  # SkLearn
         assert_equal(lm['names'], ['Intercept', 'x1', 'x2'])
@@ -78,9 +78,9 @@ class TestRegression(TestCase):
 
         # With zero-only column
         lm1 = linear_regression(df[['X', 'M', 'Zero', 'One']], df['Y'])
-        lm2 = linear_regression(df[['X', 'M', 'Zero', 'One']], df['Y'].values,
-                                add_intercept=False)
-        lm3 = linear_regression(df[['X', 'Zero', 'M', 'Zero']].values,
+        lm2 = linear_regression(df[['X', 'M', 'Zero', 'One']],
+                                df['Y'].to_numpy(), add_intercept=False)
+        lm3 = linear_regression(df[['X', 'Zero', 'M', 'Zero']].to_numpy(),
                                 df['Y'], add_intercept=False)
         assert np.array_equal(lm1.loc[:, 'names'], ['Intercept', 'X', 'M'])
         assert np.array_equal(lm2.loc[:, 'names'], ['X', 'M', 'One'])
@@ -89,8 +89,10 @@ class TestRegression(TestCase):
         # With duplicate columns
         lm1 = linear_regression(df[['X', 'One', 'Zero', 'M', 'M', 'X']],
                                 df['Y'])
-        lm2 = linear_regression(df[['X', 'One', 'Zero', 'M', 'M', 'X']].values,
-                                df['Y'], add_intercept=False)
+        lm2 = linear_regression(
+            df[['X', 'One', 'Zero', 'M', 'M', 'X']].to_numpy(),
+            df['Y'], add_intercept=False
+        )
         assert np.array_equal(lm1.loc[:, 'names'], ['Intercept', 'X', 'M'])
         assert np.array_equal(lm2.loc[:, 'names'], ['x1', 'x2', 'x4'])
 
@@ -149,17 +151,17 @@ class TestRegression(TestCase):
         assert_equal(np.round(lom['CI[97.5%]'], 4), [2.8050, 0.0378])
 
         # Multiple predictors
-        X = df[['X', 'M']].values
-        y = df['Ybin'].values
+        X = df[['X', 'M']].to_numpy()
+        y = df['Ybin'].to_numpy()
         lom = logistic_regression(X, y).round(4)  # Pingouin
         # Compare against R
         # summary(glm(Ybin ~ X+M, data=df, family=binomial))
-        assert_equal(lom['coef'].values, [1.3276, -0.1960, -0.0060])
-        assert_equal(lom['se'].values, [0.7784, 0.1408, 0.1253])
-        assert_equal(lom['z'].values, [1.7056, -1.3926, -0.0476])
-        assert_equal(lom['pval'].values, [0.0881, 0.1637, 0.9620])
-        assert_equal(lom['CI[2.5%]'].values, [-.1980, -.4719, -.2516])
-        assert_equal(lom['CI[97.5%]'].values, [2.8531, 0.0799, 0.2397])
+        assert_equal(lom['coef'].to_numpy(), [1.3276, -0.1960, -0.0060])
+        assert_equal(lom['se'].to_numpy(), [0.7784, 0.1408, 0.1253])
+        assert_equal(lom['z'].to_numpy(), [1.7056, -1.3926, -0.0476])
+        assert_equal(lom['pval'].to_numpy(), [0.0881, 0.1637, 0.9620])
+        assert_equal(lom['CI[2.5%]'].to_numpy(), [-.1980, -.4719, -.2516])
+        assert_equal(lom['CI[97.5%]'].to_numpy(), [2.8531, 0.0799, 0.2397])
 
         # Test other arguments
         c = logistic_regression(df[['X', 'M']], df['Ybin'], coef_only=True)
@@ -203,7 +205,7 @@ class TestRegression(TestCase):
         ma = mediation_analysis(data=df, x='X', m='M', y='Y', n_boot=500)
 
         # Compare against R package mediation
-        assert_equal(ma['coef'].values,
+        assert_equal(ma['coef'].to_numpy(),
                      [0.5610, 0.6542, 0.3961, 0.0396, 0.3565])
 
         _, dist = mediation_analysis(data=df, x='X', m='M', y='Y', n_boot=1000,

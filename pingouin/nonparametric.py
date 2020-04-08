@@ -496,14 +496,14 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
 
     # Find the total of rank per groups
     grp = data.groupby(between)['rank']
-    sum_rk_grp = grp.sum().values
-    n_per_grp = grp.count().values
+    sum_rk_grp = grp.sum().to_numpy()
+    n_per_grp = grp.count().to_numpy()
 
     # Calculate chi-square statistic (H)
     H = (12 / (n * (n + 1)) * np.sum(sum_rk_grp**2 / n_per_grp)) - 3 * (n + 1)
 
     # Correct for ties
-    H /= scipy.stats.tiecorrect(data['rank'].values)
+    H /= scipy.stats.tiecorrect(data['rank'].to_numpy())
 
     # Calculate DOF and p-value
     ddof1 = n_groups - 1
@@ -591,7 +591,7 @@ def friedman(data=None, dv=None, within=None, subject=None):
     grp = data.groupby(within)[dv]
     rm = list(data[within].unique())
     k = len(rm)
-    X = np.array([grp.get_group(r).values for r in rm]).T
+    X = np.array([grp.get_group(r).to_numpy() for r in rm]).T
     n = X.shape[0]
 
     # Rank per subject

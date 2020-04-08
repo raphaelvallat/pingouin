@@ -214,19 +214,19 @@ class TestPairwise(TestCase):
         df = read_dataset('pairwise_ttests_missing')
         st = pairwise_ttests(dv='Value', within='Condition', subject='Subject',
                              data=df, nan_policy='listwise')
-        np.testing.assert_array_equal(st['dof'].values, [7, 7, 7])
+        np.testing.assert_array_equal(st['dof'].to_numpy(), [7, 7, 7])
         st2 = pairwise_ttests(dv='Value', within='Condition', data=df,
                               subject='Subject', nan_policy='pairwise')
-        np.testing.assert_array_equal(st2['dof'].values, [8, 7, 8])
+        np.testing.assert_array_equal(st2['dof'].to_numpy(), [8, 7, 8])
         # 2. Non-parametric
         st = pairwise_ttests(dv='Value', within='Condition', subject='Subject',
                              data=df, parametric=False, nan_policy='listwise')
-        np.testing.assert_array_equal(st['W-val'].values, [9, 3, 12])
+        np.testing.assert_array_equal(st['W-val'].to_numpy(), [9, 3, 12])
         st2 = pairwise_ttests(dv='Value', within='Condition', data=df,
                               subject='Subject', nan_policy='pairwise',
                               parametric=False)
         # Tested against a simple for loop on combinations
-        np.testing.assert_array_equal(st2['W-val'].values, [9, 3, 21])
+        np.testing.assert_array_equal(st2['W-val'].to_numpy(), [9, 3, 21])
 
         with pytest.raises(ValueError):
             # Unbalanced design in repeated measurements
@@ -283,11 +283,11 @@ class TestPairwise(TestCase):
 
         # Compare the RBC value for wilcoxon
         from pingouin.nonparametric import wilcoxon
-        x = df[df['Drug'] == 'A']['Scores'].values
-        y = df[df['Drug'] == 'B']['Scores'].values
+        x = df[df['Drug'] == 'A']['Scores'].to_numpy()
+        y = df[df['Drug'] == 'B']['Scores'].to_numpy()
         assert -0.6 < wilcoxon(x, y).at['Wilcoxon', 'RBC'] < -0.4
-        x = df[df['Drug'] == 'B']['Scores'].values
-        y = df[df['Drug'] == 'C']['Scores'].values
+        x = df[df['Drug'] == 'B']['Scores'].to_numpy()
+        y = df[df['Drug'] == 'C']['Scores'].to_numpy()
         assert wilcoxon(x, y).at['Wilcoxon', 'RBC'].round(3) == 0.030
 
         # 2. Between
@@ -324,8 +324,8 @@ class TestPairwise(TestCase):
 
         # Compare the RBC value for MWU
         from pingouin.nonparametric import mwu
-        x = df[df['Gender'] == 'M']['Scores'].values
-        y = df[df['Gender'] == 'F']['Scores'].values
+        x = df[df['Gender'] == 'M']['Scores'].to_numpy()
+        y = df[df['Gender'] == 'F']['Scores'].to_numpy()
         assert abs(mwu(x, y).at['MWU', 'RBC']) == 0.252
 
     def test_pairwise_tukey(self):
@@ -334,7 +334,8 @@ class TestPairwise(TestCase):
         stats = pairwise_tukey(dv='Pain threshold', between='Hair color',
                                data=df)
         assert np.allclose([0.074, 0.435, 0.415, 0.004, 0.789, 0.037],
-                           stats.loc[:, 'p-tukey'].values.round(3), atol=0.05)
+                           stats.loc[:, 'p-tukey'].to_numpy().round(3),
+                           atol=0.05)
 
     def test_pairwise_gameshowell(self):
         """Test function pairwise_gameshowell"""
@@ -346,7 +347,8 @@ class TestPairwise(TestCase):
                                       [2.48, 1.42, 1.75, 4.09, 1.11, 3.56])
         np.testing.assert_array_equal(stats['df'].round(2),
                                       [7.91, 7.94, 6.56, 8.0, 6.82, 6.77])
-        sig = stats['pval'].apply(lambda x: 'Yes' if x < 0.05 else 'No').values
+        sig = stats['pval'].apply(lambda x: 'Yes' if x < 0.05 else
+                                  'No').to_numpy()
         np.testing.assert_array_equal(sig, ['No', 'No', 'No', 'Yes', 'No',
                                             'Yes'])
 
@@ -357,8 +359,8 @@ class TestPairwise(TestCase):
         stats = pairwise_corr(data=data, method='pearson', tail='two-sided')
         jasp_rval = [-0.350, -0.01, -.134, -.368, .267, .055, .065, .159,
                      -.013, .159]
-        assert np.allclose(stats['r'].values, jasp_rval)
-        assert stats['n'].values[0] == 500
+        assert np.allclose(stats['r'].to_numpy(), jasp_rval)
+        assert stats['n'].to_numpy()[0] == 500
         # Correct for multiple comparisons
         pairwise_corr(data=data, method='spearman', tail='one-sided',
                       padjust='bonf')

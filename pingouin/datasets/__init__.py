@@ -33,9 +33,9 @@ def read_dataset(dname):
     if ext.lower() == '.csv':
         dname = d
     # Check that dataset exist
-    if dname not in dts['dataset'].values:
+    if dname not in dts['dataset'].to_numpy():
         raise ValueError('Dataset does not exist. Valid datasets names are',
-                         dts['dataset'].values)
+                         dts['dataset'].to_numpy())
     # Load dataset
     return pd.read_csv(op.join(ddir, dname + '.csv'), sep=',')
 

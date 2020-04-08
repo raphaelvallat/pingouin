@@ -154,7 +154,7 @@ def circ_axial(angles, n):
     >>> from pingouin import read_dataset
     >>> from pingouin.circular import circ_axial
     >>> df = read_dataset('circular')
-    >>> angles = df['Orientation'].values
+    >>> angles = df['Orientation'].to_numpy()
     >>> angles = circ_axial(np.deg2rad(angles), 2)
     """
     angles = np.asarray(angles)

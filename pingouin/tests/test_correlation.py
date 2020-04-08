@@ -21,15 +21,15 @@ class TestCorrelation(TestCase):
         corr(x, y, method='shepherd', tail='two-sided')
         # Compare with robust corr toolbox
         stats = corr(x, y, method='skipped')
-        assert stats['r'].values == 0.512
-        assert stats['outliers'].values == 2
+        assert stats['r'].to_numpy() == 0.512
+        assert stats['outliers'].to_numpy() == 2
         stats = corr(x, y, method='shepherd')
-        assert stats['outliers'].values == 2
+        assert stats['outliers'].to_numpy() == 2
         _, _, outliers = skipped(x, y, method='pearson')
         assert outliers.size == x.size
-        assert stats['n'].values == 30
+        assert stats['n'].to_numpy() == 30
         stats = corr(x, y, method='percbend')
-        assert stats['r'].values == 0.484
+        assert stats['r'].to_numpy() == 0.484
         # Not normally distributed
         z = np.random.uniform(size=30)
         corr(x, z, method='pearson')
@@ -47,7 +47,7 @@ class TestCorrelation(TestCase):
         # Compare with JASP
         df = read_dataset('pairwise_corr')
         stats = corr(df['Neuroticism'], df['Extraversion'])
-        assert np.isclose(1 / float(stats['BF10'].values), 1.478e-13)
+        assert np.isclose(1 / float(stats['BF10'].to_numpy()), 1.478e-13)
 
     def test_partial_corr(self):
         """Test function partial_corr.

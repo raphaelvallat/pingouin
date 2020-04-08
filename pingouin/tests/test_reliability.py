@@ -50,7 +50,7 @@ class TestReliability(TestCase):
         df_psych = df_psych.melt(id_vars='S', var_name='J', value_name='Y')
         icc = intraclass_corr(data=df_psych, targets='S', raters='J',
                               ratings='Y')
-        np.testing.assert_almost_equal(np.round(icc['ICC'].values, 2),
+        np.testing.assert_almost_equal(np.round(icc['ICC'].to_numpy(), 2),
                                        [.17, .29, .72, .44, .62, .91])
         np.testing.assert_almost_equal(np.round(icc['F'], 1),
                                        [1.8, 11., 11., 1.8, 11., 11.])
@@ -59,8 +59,8 @@ class TestReliability(TestCase):
         np.testing.assert_almost_equal((icc['pval']),
                                        [0.16472, 0.00013, 0.00013, 0.16472,
                                         0.00013, 0.00013], decimal=4)
-        lower = icc['CI95%'].explode().values[::2].astype(float)
-        upper = icc['CI95%'].explode().values[1::2].astype(float)
+        lower = icc['CI95%'].explode().to_numpy()[::2].astype(float)
+        upper = icc['CI95%'].explode().to_numpy()[1::2].astype(float)
         np.testing.assert_almost_equal(lower, [-.13, .02, .34, -.88, .07, .68])
         np.testing.assert_almost_equal(upper, [.72, .76, .95, .91, .93, .99])
 
@@ -68,7 +68,7 @@ class TestReliability(TestCase):
         df = read_dataset('icc')
         icc = intraclass_corr(data=df, targets='Wine', raters='Judge',
                               ratings='Scores')
-        np.testing.assert_almost_equal(np.round(icc['ICC'].values, 2),
+        np.testing.assert_almost_equal(np.round(icc['ICC'].to_numpy(), 2),
                                        [0.73, 0.73, 0.73, 0.91, 0.91, 0.92])
         np.testing.assert_almost_equal(np.round(icc['F']), [12] * 6)
         np.testing.assert_almost_equal((icc['df1']), [7] * 6)
@@ -76,8 +76,8 @@ class TestReliability(TestCase):
         np.testing.assert_almost_equal((icc['pval']),
                                        [2.2e-06, 5.0e-06, 5.0e-06, 2.2e-06,
                                         5.0e-06, 5.0e-06])
-        lower = icc['CI95%'].explode().values[::2].astype(float)
-        upper = icc['CI95%'].explode().values[1::2].astype(float)
+        lower = icc['CI95%'].explode().to_numpy()[::2].astype(float)
+        upper = icc['CI95%'].explode().to_numpy()[1::2].astype(float)
         np.testing.assert_almost_equal(lower, [.43, .43, .43, .75, .75, .75])
         np.testing.assert_almost_equal(upper, [.93, .93, .93, .98, .98, .98])
         # Test with missing values
@@ -87,7 +87,7 @@ class TestReliability(TestCase):
         # nan_policy = 'omit'
         icc = intraclass_corr(data=df, targets='Wine', raters='Judge',
                               ratings='Scores', nan_policy='omit')
-        np.testing.assert_almost_equal(np.round(icc['ICC'].values, 2),
+        np.testing.assert_almost_equal(np.round(icc['ICC'].to_numpy(), 2),
                                        [0.75, 0.75, 0.75, 0.92, 0.92, 0.92])
         np.testing.assert_almost_equal(np.round(icc['F']), [13] * 6)
         np.testing.assert_almost_equal((icc['df1']), [6] * 6)

@@ -88,7 +88,7 @@ class TestParametric(TestCase):
 
         # Test partial correlation matrix (compare with the ppcor package)
         corrs = data.pcorr().round(3)
-        np.testing.assert_array_equal(corrs.iloc[0, :].values,
+        np.testing.assert_array_equal(corrs.iloc[0, :].to_numpy(),
                                       [1, 0.392, 0.06, -0.014, -0.149])
         # Now compare against Pingouin's own partial_corr function
         corrs = data[['X', 'Y', 'M']].pcorr()
@@ -116,5 +116,5 @@ class TestParametric(TestCase):
 
         # Test mediation analysis
         med = data.mediation_analysis(x='X', m='M', y='Y', seed=42, n_boot=500)
-        np.testing.assert_array_equal(med.loc[:, 'coef'].values,
+        np.testing.assert_array_equal(med.loc[:, 'coef'].to_numpy(),
                                       [0.5610, 0.6542, 0.3961, 0.0396, 0.3565])

@@ -143,7 +143,7 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     cronbach = (k / (k - 1)) * (1 - np.trace(C) / C.sum().sum())
     # which is equivalent to
     # v = np.diag(C).mean()
-    # c = C.values[np.tril_indices_from(C, k=-1)].mean()
+    # c = C.to_numpy()[np.tril_indices_from(C, k=-1)].mean()
     # cronbach = (k * c) / (v + (k - 1) * c)
 
     # Confidence intervals

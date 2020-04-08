@@ -213,7 +213,8 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
             grp = data.groupby(group, sort=False)
             cols = grp.groups.keys()
             for _, tmp in grp:
-                stats = stats.append(normality(tmp[dv].values, method=method,
+                stats = stats.append(normality(tmp[dv].to_numpy(),
+                                               method=method,
                                                alpha=alpha))
             stats.index = cols
     return stats
@@ -345,7 +346,7 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
             # Get numeric data only
             numdata = data._get_numeric_data()
             assert numdata.shape[1] > 1, 'Data must have at least two columns.'
-            statistic, p = func(*numdata.values)
+            statistic, p = func(*numdata.to_numpy())
         else:
             # Long-format
             assert group in data.columns
@@ -694,7 +695,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     eps = np.min([num / den, 1])
 
     # Method 2. Eigenvalues.
-    # Sv = S.values
+    # Sv = S.to_numpy()
     # S_pop = Sv - Sv.mean(0)[:, None] - Sv.mean(1)[None, :] + Sv.mean()
     # eig = np.linalg.eigvalsh(S_pop)
     # eig = eig[eig > 0.1]
@@ -951,7 +952,7 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
         # 1 - Estimate the population covariance (= double-centered)
         # 2 - Calculate n-1 eigenvalues
         # 3 - Compute Mauchly's statistic
-        S = data.cov().values  # values here, otherwise S.mean() != grandmean
+        S = data.cov().to_numpy()  # NumPy, otherwise S.mean() != grandmean
         S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
         eig = np.linalg.eigvalsh(S_pop)[1:]
         eig = eig[eig > 0.001]  # Additional check to remove very low eig

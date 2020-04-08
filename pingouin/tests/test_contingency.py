@@ -151,9 +151,9 @@ class TestContingency(TestCase):
     def test_dichotomize_series(self):
         """Test function _dichotomize_series."""
         # Integer
-        a = pg.contingency._dichotomize_series(data_ct, 'A').values
-        b = pg.contingency._dichotomize_series(data_ct, 'B').values
-        d = pg.contingency._dichotomize_series(data_ct, 'D').values
+        a = pg.contingency._dichotomize_series(data_ct, 'A').to_numpy()
+        b = pg.contingency._dichotomize_series(data_ct, 'B').to_numpy()
+        d = pg.contingency._dichotomize_series(data_ct, 'D').to_numpy()
         np.testing.assert_array_equal(a, b)
         np.testing.assert_array_equal(b, d)
         with pytest.raises(ValueError):

@@ -30,7 +30,7 @@ Example code
 
   # 1. This is a between subject design, so the first step is to test for equality of variances
   groups = df['Hair color'].unique()
-  data_groups = [df.groupby('Hair color')['Pain threshold'].get_group(g).values for g in groups]
+  data_groups = [df.groupby('Hair color')['Pain threshold'].get_group(g).to_numpy() for g in groups]
   pg.homoscedasticity(data_groups)
 
   # 2. If the groups have equal variances, we can use a regular one-way ANOVA

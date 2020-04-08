@@ -614,8 +614,8 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
 
     for idx, s in enumerate(subj):
         tmp = data.loc[data[subject] == s, [dv, within, subject]]
-        x_val = tmp[tmp[within] == order[0]][dv].values[0]
-        y_val = tmp[tmp[within] == order[1]][dv].values[0]
+        x_val = tmp[tmp[within] == order[0]][dv].to_numpy()[0]
+        y_val = tmp[tmp[within] == order[1]][dv].to_numpy()[0]
         if x_val < y_val:
             color = colors[0]
         elif x_val > y_val:

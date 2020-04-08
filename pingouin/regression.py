@@ -165,7 +165,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     >>> z = np.random.normal(size=n)
     >>> X = np.column_stack((x, z))
     >>> lm = linear_regression(X, y)
-    >>> print(lm['coef'].values)
+    >>> print(lm['coef'].to_numpy())
     [4.54123324 0.36628301 0.17709451]
 
     3. Get the residuals
@@ -181,7 +181,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     >>> import pandas as pd
     >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
     >>> lm = linear_regression(df[['x', 'z']], df['y'])
-    >>> print(lm['coef'].values)
+    >>> print(lm['coef'].to_numpy())
     [4.54123324 0.36628301 0.17709451]
 
     5. No intercept and return coef only
@@ -546,7 +546,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     >>> z = np.random.normal(size=30)
     >>> X = np.column_stack((x, z))
     >>> lom = logistic_regression(X, y)
-    >>> print(lom['coef'].values)
+    >>> print(lom['coef'].to_numpy())
     [-0.36736745 -0.04374684 -0.47829392]
 
     3. Using a Pandas DataFrame
@@ -554,7 +554,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     >>> import pandas as pd
     >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
     >>> lom = logistic_regression(df[['x', 'z']], df['y'])
-    >>> print(lom['coef'].values)
+    >>> print(lom['coef'].to_numpy())
     [-0.36736745 -0.04374684 -0.47829392]
 
     4. Return only the coefficients
@@ -566,7 +566,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
 
     >>> lom = logistic_regression(X, y, solver='sag', max_iter=10000,
     ...                           random_state=42)
-    >>> print(lom['coef'].values)
+    >>> print(lom['coef'].to_numpy())
     [-0.36751796 -0.04367056 -0.47841908]
 
 
@@ -1030,10 +1030,10 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     cols = ['names', 'coef', 'se', 'pval', ll_name, ul_name]
 
     # For speed, we pass np.array instead of pandas DataFrame
-    X_val = data[_fl([x, covar])].values  # X + covar as predictors
-    XM_val = data[_fl([x, m, covar])].values  # X + M + covar as predictors
-    M_val = data[m].values  # M as target (no covariates)
-    y_val = data[y].values  # y as target (no covariates)
+    X_val = data[_fl([x, covar])].to_numpy()  # X + covar as predictors
+    XM_val = data[_fl([x, m, covar])].to_numpy()  # X + M + covar as predictors
+    M_val = data[m].to_numpy()  # M as target (no covariates)
+    y_val = data[y].to_numpy()  # y as target (no covariates)
 
     # M(j) ~ X + covar
     sxm = {}

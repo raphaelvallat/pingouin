@@ -1585,9 +1585,9 @@ def ancova(data=None, dv=None, between=None, covar=None):
     slopes = np.zeros(shape=groups.shape)
     ss = np.zeros(shape=groups.shape)
     for i, b in enumerate(groups):
-        dt_covar = data[data[between] == b][covar].values
+        dt_covar = data[data[between] == b][covar].to_numpy()
         ss[i] = ((dt_covar - dt_covar.mean())**2).sum()
-        slopes[i] = linreg(dt_covar, data[data[between] == b][dv].values)
+        slopes[i] = linreg(dt_covar, data[data[between] == b][dv].to_numpy())
     ss_slopes = ss * slopes
     bw = np.nansum(ss_slopes) / np.sum(ss)
     bt = linreg(data[covar], data[dv])

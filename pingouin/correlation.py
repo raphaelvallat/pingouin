@@ -642,23 +642,23 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
 
     if covar is not None:
         # PARTIAL CORRELATION
-        cvar = np.atleast_2d(C[covar].values)
-        beta_x = np.linalg.lstsq(cvar, C[x].values, rcond=None)[0]
-        beta_y = np.linalg.lstsq(cvar, C[y].values, rcond=None)[0]
-        res_x = C[x].values - np.dot(cvar, beta_x)
-        res_y = C[y].values - np.dot(cvar, beta_y)
+        cvar = np.atleast_2d(C[covar].to_numpy())
+        beta_x = np.linalg.lstsq(cvar, C[x].to_numpy(), rcond=None)[0]
+        beta_y = np.linalg.lstsq(cvar, C[y].to_numpy(), rcond=None)[0]
+        res_x = C[x].to_numpy() - np.dot(cvar, beta_x)
+        res_y = C[y].to_numpy() - np.dot(cvar, beta_y)
     else:
         # SEMI-PARTIAL CORRELATION
         # Initialize "fake" residuals
-        res_x, res_y = data[x].values, data[y].values
+        res_x, res_y = data[x].to_numpy(), data[y].to_numpy()
         if x_covar is not None:
-            cvar = np.atleast_2d(C[x_covar].values)
-            beta_x = np.linalg.lstsq(cvar, C[x].values, rcond=None)[0]
-            res_x = C[x].values - np.dot(cvar, beta_x)
+            cvar = np.atleast_2d(C[x_covar].to_numpy())
+            beta_x = np.linalg.lstsq(cvar, C[x].to_numpy(), rcond=None)[0]
+            res_x = C[x].to_numpy() - np.dot(cvar, beta_x)
         if y_covar is not None:
-            cvar = np.atleast_2d(C[y_covar].values)
-            beta_y = np.linalg.lstsq(cvar, C[y].values, rcond=None)[0]
-            res_y = C[y].values - np.dot(cvar, beta_y)
+            cvar = np.atleast_2d(C[y_covar].to_numpy())
+            beta_y = np.linalg.lstsq(cvar, C[y].to_numpy(), rcond=None)[0]
+            res_y = C[y].to_numpy() - np.dot(cvar, beta_y)
     return corr(res_x, res_y, method=method, tail=tail)
 
 
@@ -845,13 +845,14 @@ def rcorr(self, method='pearson', upper='pval', decimals=3, padjust=None,
             mat_upper = self.corr(method=lambda x, y: spearmanr(x, y)[1])
 
         if padjust is not None:
-            pvals = mat_upper.values[tif(mat, k=1)]
-            mat_upper.values[tif(mat, k=1)] = multicomp(pvals, alpha=0.05,
-                                                        method=padjust)[1]
+            pvals = mat_upper.to_numpy()[tif(mat, k=1)]
+            mat_upper.to_numpy()[tif(mat, k=1)] = multicomp(pvals, alpha=0.05,
+                                                            method=padjust)[1]
 
     # Convert r to text
     mat = mat.astype(str)
-    np.fill_diagonal(mat.values, '-')  # Inplace modification of the diagonal
+    # Inplace modification of the diagonal
+    np.fill_diagonal(mat.to_numpy(), '-')
 
     if upper == 'pval':
 
@@ -869,7 +870,7 @@ def rcorr(self, method='pearson', upper='pval', decimals=3, padjust=None,
                                                          precision=decimals))
 
     # Replace upper triangle by p-values or n
-    mat.values[tif(mat, k=1)] = mat_upper.values[tif(mat, k=1)]
+    mat.to_numpy()[tif(mat, k=1)] = mat_upper.to_numpy()[tif(mat, k=1)]
     return mat
 
 

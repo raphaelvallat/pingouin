@@ -246,9 +246,9 @@ def remove_rm_na(data=None, dv=None, within=None, subject=None,
 
     # Find index with missing values
     if dv is None:
-        iloc_nan = data.isnull().values.nonzero()[0]
+        iloc_nan = data.isnull().to_numpy().nonzero()[0]
     else:
-        iloc_nan = data[dv].isnull().values.nonzero()[0]
+        iloc_nan = data[dv].isnull().to_numpy().nonzero()[0]
 
     # Drop the last within level
     idx_nan = data.index[iloc_nan].droplevel(-1)
