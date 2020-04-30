@@ -499,13 +499,13 @@ def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
     >>> x = [0.785, 1.570, 3.141, 3.839, 5.934]
     >>> y = [0.593, 1.291, 2.879, 3.892, 6.108]
     >>> r, pval = circ_corrcc(x, y)
-    >>> print(r, round(pval, 4))
+    >>> print(round(r, 3), round(pval, 4))
     0.942 0.0658
 
     With the correction for uniform marginals
 
     >>> r, pval = circ_corrcc(x, y, correction_uniform=True)
-    >>> print(r, round(pval, 4))
+    >>> print(round(r, 3), round(pval, 4))
     0.547 0.2859
     """
     x = np.asarray(x)
@@ -537,7 +537,7 @@ def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
     # Approximately distributed as a standard normal
     pval = 2 * norm.sf(abs(tval))
     pval = pval / 2 if tail == 'one-sided' else pval
-    return np.round(r, 3), pval
+    return r, pval
 
 
 def circ_corrcl(x, y, tail='two-sided'):
@@ -577,7 +577,7 @@ def circ_corrcl(x, y, tail='two-sided'):
     >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
     >>> y = [1.593, 1.291, -0.248, -2.892, 0.102]
     >>> r, pval = circ_corrcl(x, y)
-    >>> print(r, round(pval, 3))
+    >>> print(round(r, 3), round(pval, 3))
     0.109 0.971
     """
     from scipy.stats import pearsonr, chi2
@@ -600,7 +600,7 @@ def circ_corrcl(x, y, tail='two-sided'):
     # Compute p-value
     pval = chi2.sf(n * r**2, 2)
     pval = pval / 2 if tail == 'one-sided' else pval
-    return np.round(r, 3), pval
+    return r, pval
 
 
 def circ_rayleigh(angles, w=None, d=None):
@@ -647,13 +647,14 @@ def circ_rayleigh(angles, w=None, d=None):
     >>> from pingouin import circ_rayleigh
     >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
     >>> z, pval = circ_rayleigh(x)
-    >>> print(z, pval)
-    1.236 0.3048435876500138
+    >>> print(round(z, 3), round(pval, 6))
+    1.236 0.304844
 
     2. Specifying w and d
 
-    >>> circ_rayleigh(x, w=[.1, .2, .3, .4, .5], d=0.2)
-    (0.278, 0.8069972000769801)
+    >>> z, pval = circ_rayleigh(x, w=[.1, .2, .3, .4, .5], d=0.2)
+    >>> print(round(z, 3), round(pval, 6))
+    0.278 0.806997
     """
     angles = np.asarray(angles)
     _checkangles(angles)  # Check that angles is in radians
@@ -671,7 +672,7 @@ def circ_rayleigh(angles, w=None, d=None):
 
     # Compute p value using approxation in Zar (1999), p. 617
     pval = np.exp(np.sqrt(1 + 4 * n + 4 * (n**2 - R**2)) - (1 + 2 * n))
-    return np.round(z, 3), pval
+    return z, pval
 
 
 def circ_vtest(angles, dir=0., w=None, d=None):
@@ -725,13 +726,14 @@ def circ_vtest(angles, dir=0., w=None, d=None):
     >>> from pingouin import circ_vtest
     >>> x = [0.785, 1.570, 3.141, 0.839, 5.934]
     >>> v, pval = circ_vtest(x, dir=1)
-    >>> print(v, pval)
+    >>> print(round(v, 3), pval)
     2.486 0.05794648732225438
 
     2. Specifying w and d
 
-    >>> circ_vtest(x, dir=0.5, w=[.1, .2, .3, .4, .5], d=0.2)
-    (0.637, 0.23086492929174185)
+    >>> v, pval = circ_vtest(x, dir=0.5, w=[.1, .2, .3, .4, .5], d=0.2)
+    >>> print(round(v, 3), pval)
+    0.637 0.23086492929174185
     """
     angles = np.asarray(angles)
     if w is None:
@@ -751,4 +753,4 @@ def circ_vtest(angles, dir=0., w=None, d=None):
     # Compute p value
     u = v * np.sqrt(2 / n)
     pval = 1 - norm.cdf(u)
-    return np.round(v, 3), pval
+    return v, pval

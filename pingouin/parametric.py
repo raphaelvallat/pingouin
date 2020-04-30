@@ -287,13 +287,13 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     bf = bayesfactor_ttest(tval, nx, ny, paired=paired, tail=tail, r=r)
 
     # Create output dictionnary
-    stats = {'dof': np.round(dof, 2),
-             'T': round(tval, 3),
+    stats = {'dof': dof,
+             'T': tval,
              'p-val': pval,
              'tail': tail,
-             'cohen-d': round(abs(d), 3),
-             'CI95%': [np.round(ci, 2)],
-             'power': round(power, 3),
+             'cohen-d': abs(d),
+             'CI95%': [np.round(ci, 2)],  # Should we keep rounding for CI?
+             'power': power,
              'BF10': bf}
 
     # Convert to dataframe
@@ -447,18 +447,18 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     >>> import pingouin as pg
     >>> data = pg.read_dataset('rm_anova_wide')
     >>> pg.rm_anova(data)
-       Source  ddof1  ddof2      F     p-unc    np2    eps
-    0  Within      3     24  5.201  0.006557  0.394  0.694
+       Source  ddof1  ddof2         F     p-unc       np2       eps
+    0  Within      3     24  5.200652  0.006557  0.393969  0.694329
 
     One-way repeated-measures ANOVA using a long-format dataset
 
     >>> df = pg.read_dataset('rm_anova')
     >>> aov = pg.rm_anova(dv='DesireToKill', within='Disgustingness',
     ...                   subject='Subject', data=df, detailed=True)
-    >>> print(aov)
-               Source       SS  DF      MS       F        p-unc    np2 eps
-    0  Disgustingness   27.485   1  27.485  12.044  0.000793016  0.116   1
-    1           Error  209.952  92   2.282       -            -      -   -
+    >>> aov.round(3)
+               Source       SS  DF      MS       F  p-unc    np2  eps
+    0  Disgustingness   27.485   1  27.485  12.044  0.001  0.116  1.0
+    1           Error  209.952  92   2.282     NaN    NaN    NaN  NaN
 
     Two-way repeated-measures ANOVA
 
@@ -469,10 +469,9 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     As a :py:class:`pandas.DataFrame` method
 
     >>> df.rm_anova(dv='DesireToKill', within='Disgustingness',
-    ...             subject='Subject',  detailed=True)
-               Source       SS  DF      MS       F        p-unc    np2 eps
-    0  Disgustingness   27.485   1  27.485  12.044  0.000793016  0.116   1
-    1           Error  209.952  92   2.282       -            -      -   -
+    ...             subject='Subject',  detailed=False)
+               Source  ddof1  ddof2          F     p-unc       np2  eps
+    0  Disgustingness      1     92  12.043878  0.000793  0.115758  1.0
     """
     if isinstance(within, list):
         assert len(within) > 0, 'Within is empty.'
@@ -579,10 +578,9 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
                      'p-spher']
     else:
         aov = pd.DataFrame({'Source': [within, 'Error'],
-                            'SS': np.round([sstime, sserror], 3),
+                            'SS': [sstime, sserror],
                             'DF': [ddof1, ddof2],
-                            'MS': np.round([sstime / ddof1, sserror / ddof2],
-                                           3),
+                            'MS': [sstime / ddof1, sserror / ddof2],
                             'F': [fval, np.nan],
                             'p-unc': [p_unc, np.nan],
                             'np2': [np2, np.nan],
@@ -597,11 +595,11 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'p-GG-corr',
                      'np2', 'eps', 'sphericity', 'W-spher', 'p-spher']
 
-    # Round
-    aov[['F', 'eps', 'np2']] = aov[['F', 'eps', 'np2']].round(3)
+    # Round - Disabled in Pingouin v0.3.4
+    # aov[['F', 'eps', 'np2']] = aov[['F', 'eps', 'np2']].round(3)
 
-    # Replace NaN
-    aov = aov.fillna('-')
+    # Replace NaN - Disabled in Pingouin v0.3.4
+    # aov = aov.fillna('-')
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
@@ -757,8 +755,8 @@ def rm_anova2(data=None, dv=None, within=None, subject=None):
                  'p-GG-corr', 'np2', 'eps']
 
     # Round
-    aov[['SS', 'MS', 'F', 'eps', 'np2']] = aov[['SS', 'MS', 'F', 'eps',
-                                                'np2']].round(3)
+    # aov[['SS', 'MS', 'F', 'eps', 'np2']] = aov[['SS', 'MS', 'F', 'eps',
+    #                                             'np2']].round(3)
 
     aov = aov.reindex(columns=col_order)
     return aov
@@ -880,16 +878,15 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
     >>> aov = pg.anova(dv='Pain threshold', between='Hair color', data=df,
     ...             detailed=True)
     >>> aov
-           Source        SS  DF       MS      F       p-unc    np2
-    0  Hair color  1360.726   3  453.575  6.791  0.00411423  0.576
-    1      Within  1001.800  15   66.787      -           -      -
+           Source           SS  DF          MS         F     p-unc       np2
+    0  Hair color  1360.726316   3  453.575439  6.791407  0.004114  0.575962
+    1      Within  1001.800000  15   66.786667       NaN       NaN       NaN
 
     Note that this function can also directly be used as a Pandas method
 
-    >>> df.anova(dv='Pain threshold', between='Hair color', detailed=True)
-           Source        SS  DF       MS      F       p-unc    np2
-    0  Hair color  1360.726   3  453.575  6.791  0.00411423  0.576
-    1      Within  1001.800  15   66.787      -           -      -
+    >>> df.anova(dv='Pain threshold', between='Hair color', detailed=False)
+           Source  ddof1  ddof2         F     p-unc       np2
+    0  Hair color      3     15  6.791407  0.004114  0.575962
 
     Two-way ANOVA with balanced design
 
@@ -915,16 +912,16 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
 
     >>> data = pg.read_dataset('anova3')
     >>> data.anova(dv='Cholesterol', between=['Sex', 'Risk', 'Drug'],
-    ...            ss_type=3)
-                  Source      SS    DF      MS       F     p-unc    np2
-    0                Sex   2.075   1.0   2.075   2.462  0.123191  0.049
-    1               Risk  11.332   1.0  11.332  13.449  0.000613  0.219
-    2               Drug   0.816   2.0   0.408   0.484  0.619249  0.020
-    3         Sex * Risk   0.117   1.0   0.117   0.139  0.710541  0.003
-    4         Sex * Drug   2.564   2.0   1.282   1.522  0.228711  0.060
-    5        Risk * Drug   2.438   2.0   1.219   1.446  0.245485  0.057
-    6  Sex * Risk * Drug   1.844   2.0   0.922   1.094  0.343041  0.044
-    7           Residual  40.445  48.0   0.843     NaN       NaN    NaN
+    ...            ss_type=3).round(3)
+                  Source      SS    DF      MS       F  p-unc    np2
+    0                Sex   2.075   1.0   2.075   2.462  0.123  0.049
+    1               Risk  11.332   1.0  11.332  13.449  0.001  0.219
+    2               Drug   0.816   2.0   0.408   0.484  0.619  0.020
+    3         Sex * Risk   0.117   1.0   0.117   0.139  0.711  0.003
+    4         Sex * Drug   2.564   2.0   1.282   1.522  0.229  0.060
+    5        Risk * Drug   2.438   2.0   1.219   1.446  0.245  0.057
+    6  Sex * Risk * Drug   1.844   2.0   0.922   1.094  0.343  0.044
+    7           Residual  40.445  48.0   0.843     NaN    NaN    NaN
     """
     if isinstance(between, list):
         if len(between) == 0:
@@ -985,20 +982,20 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
         col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc', 'np2']
     else:
         aov = pd.DataFrame({'Source': [between, 'Within'],
-                            'SS': np.round([ssbetween, sserror], 3),
+                            'SS': [ssbetween, sserror],
                             'DF': [ddof1, ddof2],
-                            'MS': np.round([msbetween, mserror], 3),
+                            'MS': [msbetween, mserror],
                             'F': [fval, np.nan],
                             'p-unc': [p_unc, np.nan],
                             'np2': [np2, np.nan]
                             })
         col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'np2']
 
-    # Round
-    aov[['F', 'np2']] = aov[['F', 'np2']].round(3)
+    # Round - Disabled in Pingouin v0.3.4
+    # aov[['F', 'np2']] = aov[['F', 'np2']].round(3)
 
-    # Replace NaN
-    aov = aov.fillna('-')
+    # Replace NaN - Disabled in Pingouin v0.3.4
+    # aov = aov.fillna('-')
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
@@ -1069,11 +1066,9 @@ def anova2(data=None, dv=None, between=None, ss_type=2):
     # Create output dataframe
     aov = pd.DataFrame({'Source': [fac1, fac2, fac1 + ' * ' + fac2,
                                    'Residual'],
-                        'SS': np.round([ss_fac1, ss_fac2, ss_inter,
-                                        ss_resid], 3),
+                        'SS': [ss_fac1, ss_fac2, ss_inter, ss_resid],
                         'DF': [df_fac1, df_fac2, df_inter, df_resid],
-                        'MS': np.round([ms_fac1, ms_fac2, ms_inter,
-                                        ms_resid], 3),
+                        'MS': [ms_fac1, ms_fac2, ms_inter, ms_resid],
                         'F': [fval_fac1, fval_fac2, fval_inter, np.nan],
                         'p-unc': [pval_fac1, pval_fac2, pval_inter, np.nan],
                         'np2': [np2_fac1, np2_fac2, np2_inter, np.nan]
@@ -1147,7 +1142,7 @@ def anovan(data=None, dv=None, between=None, ss_type=2):
     # Re-index and round
     col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'np2']
     aov = aov.reindex(columns=col_order)
-    aov[['SS', 'MS', 'F', 'np2']] = aov[['SS', 'MS', 'F', 'np2']].round(3)
+    # aov[['SS', 'MS', 'F', 'np2']] = aov[['SS', 'MS', 'F', 'np2']].round(3)
     aov.dropna(how='all', axis=1, inplace=True)
 
     # Add formula to dataframe
@@ -1266,8 +1261,8 @@ def welch_anova(data=None, dv=None, between=None):
     >>> df = read_dataset('anova')
     >>> aov = welch_anova(dv='Pain threshold', between='Hair color', data=df)
     >>> aov
-           Source  ddof1  ddof2     F     p-unc
-    0  Hair color      3   8.33  5.89  0.018813
+           Source  ddof1     ddof2         F     p-unc
+    0  Hair color      3  8.329841  5.890115  0.018813
     """
     # Check data
     _check_dataframe(dv=dv, between=between, data=data, effects='between')
@@ -1304,7 +1299,8 @@ def welch_anova(data=None, dv=None, between=None):
 
     col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc']
     aov = aov.reindex(columns=col_order)
-    aov[['F', 'ddof2']] = aov[['F', 'ddof2']].round(3)
+    # Round - Disabled in Pingouin v0.3.4
+    # aov[['F', 'ddof2']] = aov[['F', 'ddof2']].round(3)
     return aov
 
 
@@ -1382,11 +1378,11 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     >>> df = read_dataset('mixed_anova')
     >>> aov = mixed_anova(dv='Scores', between='Group',
     ...                   within='Time', subject='Subject', data=df)
-    >>> aov
-            Source     SS  DF1  DF2     MS      F     p-unc    np2    eps
-    0        Group  5.460    1   58  5.460  5.052  0.028420  0.080      -
-    1         Time  7.628    2  116  3.814  4.027  0.020373  0.065  0.999
-    2  Interaction  5.168    2  116  2.584  2.728  0.069530  0.045      -
+    >>> aov.round(3)
+            Source     SS  DF1  DF2     MS      F  p-unc    np2    eps
+    0        Group  5.460    1   58  5.460  5.052  0.028  0.080    NaN
+    1         Time  7.628    2  116  3.814  4.027  0.020  0.065  0.999
+    2  Interaction  5.167    2  116  2.584  2.728  0.070  0.045    NaN
     """
     # Check data
     _check_dataframe(dv=dv, within=within, between=between, data=data,
@@ -1406,7 +1402,7 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     if not (data.groupby([subject, within])[between].nunique() == 1).all():
         raise ValueError("Subject IDs cannot overlap between groups: each "
                          "group in `%s` must have a unique set of "
-                         "subject IDs, \ne.g. group1 = [1, 2, 3, ..., 10] "
+                         "subject IDs, e.g. group1 = [1, 2, 3, ..., 10] "
                          "and group2 = [11, 12, 13, ..., 20]" % between)
 
     # SUMS OF SQUARES
@@ -1470,22 +1466,23 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
                       'np2': npsq_inter,
                       }, ignore_index=True)
 
-    aov['SS'] = aov['SS'].round(3)
-    aov['MS'] = aov['MS'].round(3)
+    # Rounding - Disabled in Pingouin v0.3.4
+    # aov['SS'] = aov['SS'].round(3)
+    # aov['MS'] = aov['MS'].round(3)
     aov['DF2'] = [dfeb, dfwg, dfwg]
     aov['eps'] = [np.nan, mtime.at[0, 'eps'], np.nan]
     col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc',
                  'p-GG-corr', 'np2', 'eps', 'sphericity', 'W-spher',
                  'p-spher']
 
-    # Replace NaN
-    aov = aov.fillna('-')
+    # Replace NaN - Disabled in Pingouin v0.3.4
+    # aov = aov.fillna('-')
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
 
-    # Round
-    aov[['F', 'eps', 'np2']] = aov[['F', 'eps', 'np2']].round(3)
+    # Round - Disabled in Pingouin v0.3.4
+    # aov[['F', 'eps', 'np2']] = aov[['F', 'eps', 'np2']].round(3)
     return aov
 
 
@@ -1544,19 +1541,19 @@ def ancova(data=None, dv=None, between=None, covar=None):
     >>> df = read_dataset('ancova')
     >>> ancova(data=df, dv='Scores', covar='Income', between='Method')
          Source           SS  DF          F     p-unc
-    0    Method   571.030045   3   3.336482  0.031940
+    0    Method   571.029883   3   3.336482  0.031940
     1    Income  1678.352687   1  29.419438  0.000006
-    2  Residual  1768.522365  31        NaN       NaN
+    2  Residual  1768.522313  31        NaN       NaN
 
     2. Evaluate the reading scores of students with different teaching method
     and family income + BMI as a covariate.
 
     >>> ancova(data=df, dv='Scores', covar=['Income', 'BMI'], between='Method')
-         Source        SS  DF       F     p-unc
-    0    Method   552.284   3   3.233  0.036113
-    1    Income  1573.952   1  27.637  0.000011
-    2       BMI    60.014   1   1.054  0.312842
-    3  Residual  1708.509  30     NaN       NaN
+         Source           SS  DF          F     p-unc
+    0    Method   552.284043   3   3.232550  0.036113
+    1    Income  1573.952434   1  27.637304  0.000011
+    2       BMI    60.013656   1   1.053790  0.312842
+    3  Residual  1708.508657  30        NaN       NaN
     """
     # Safety checks
     assert isinstance(data, pd.DataFrame)
@@ -1686,5 +1683,5 @@ def ancovan(data=None, dv=None, covar=None, between=None):
         aov.at[i + 1, 'Source'] = covar[i]
 
     aov['DF'] = aov['DF'].astype(int)
-    aov[['SS', 'F']] = aov[['SS', 'F']].round(3)
+    # aov[['SS', 'F']] = aov[['SS', 'F']].round(3)
     return aov

@@ -353,14 +353,13 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                     df_ttest = mwu(x, y, tail=tail)
 
             # Compute Hedges / Cohen
-            ef = np.round(compute_effsize(x=x, y=y, eftype=effsize,
-                                          paired=paired), 3)
+            ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
 
             if return_desc:
-                stats.at[i, 'mean(A)'] = np.round(np.nanmean(x), 3)
-                stats.at[i, 'mean(B)'] = np.round(np.nanmean(y), 3)
-                stats.at[i, 'std(A)'] = np.round(np.nanstd(x, ddof=1), 3)
-                stats.at[i, 'std(B)'] = np.round(np.nanstd(y, ddof=1), 3)
+                stats.at[i, 'mean(A)'] = np.nanmean(x)
+                stats.at[i, 'mean(B)'] = np.nanmean(y)
+                stats.at[i, 'std(A)'] = np.nanstd(x, ddof=1)
+                stats.at[i, 'std(B)'] = np.nanstd(y, ddof=1)
             stats.at[i, stat_name] = df_ttest[stat_name].iat[0]
             stats.at[i, 'p-unc'] = df_ttest['p-val'].iat[0]
             stats.at[i, effsize] = ef
@@ -461,8 +460,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                 fac1, col1, col2 = comb
                 x = grp_both.get_group((fac1, col1)).to_numpy(dtype=np.float64)
                 y = grp_both.get_group((fac1, col2)).to_numpy(dtype=np.float64)
-                ef = np.round(compute_effsize(x=x, y=y, eftype=effsize,
-                                              paired=paired), 3)
+                ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
                 if parametric:
                     stat_name = 'T'
                     df_ttest = ttest(x, y, paired=paired, tail=tail,
@@ -479,10 +477,10 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
                 # Append to stats
                 if return_desc:
-                    stats.at[ic, 'mean(A)'] = np.round(np.nanmean(x), 3)
-                    stats.at[ic, 'mean(B)'] = np.round(np.nanmean(y), 3)
-                    stats.at[ic, 'std(A)'] = np.round(np.nanstd(x, ddof=1), 3)
-                    stats.at[ic, 'std(B)'] = np.round(np.nanstd(y, ddof=1), 3)
+                    stats.at[ic, 'mean(A)'] = np.nanmean(x)
+                    stats.at[ic, 'mean(B)'] = np.nanmean(y)
+                    stats.at[ic, 'std(A)'] = np.nanstd(x, ddof=1)
+                    stats.at[ic, 'std(B)'] = np.nanstd(y, ddof=1)
                 stats.at[ic, stat_name] = df_ttest[stat_name].iat[0]
                 stats.at[ic, 'p-unc'] = df_ttest['p-val'].iat[0]
                 stats.at[ic, effsize] = ef
@@ -656,16 +654,16 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
     stats = pd.DataFrame({
                          'A': np.unique(data[between])[g1],
                          'B': np.unique(data[between])[g2],
-                         'mean(A)': np.round(gmeans[g1], 3),
-                         'mean(B)': np.round(gmeans[g2], 3),
-                         'diff': np.round(mn, 3),
-                         'se': np.round(se, 3),
+                         'mean(A)': gmeans[g1],
+                         'mean(B)': gmeans[g2],
+                         'diff': mn,
+                         'se': se,
                          'tail': tail,
-                         'T': np.round(tval, 3),
+                         'T': tval,
                          # 'alpha': alpha,
-                         # 'crit': np.round(crit, 3),
+                         # 'crit': crit,
                          'p-tukey': pval,
-                         effsize: np.round(ef, 3),
+                         effsize: ef,
                          })
     return stats
 
@@ -823,8 +821,6 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
                          'pval': pval,
                          effsize: ef,
                          })
-    col_round = ['mean(A)', 'mean(B)', 'diff', 'se', 'T', 'df', effsize]
-    stats[col_round] = stats[col_round].round(3)
     return stats
 
 
@@ -1145,7 +1141,7 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
         stats['p-adjust'] = None
 
     # Standardize correlation coefficients (Fisher z-transformation)
-    stats['z'] = np.round(np.arctanh(stats['r'].to_numpy()), 3)
+    stats['z'] = np.arctanh(stats['r'].to_numpy())
 
     col_order = ['X', 'Y', 'method', 'tail', 'n', 'outliers', 'r', 'CI95%',
                  'r2', 'adj_r2', 'z', 'p-unc', 'p-corr', 'p-adjust',

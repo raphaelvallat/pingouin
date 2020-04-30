@@ -46,11 +46,11 @@ class TestMultivariate(TestCase):
         # With 3 variables
         # Two-sample independent
         stats = multivariate_ttest(X, Y)
-        assert stats.loc['hotelling', 'F'] == 1.327
-        assert stats.loc['hotelling', 'df1'] == 3
-        assert stats.loc['hotelling', 'df2'] == 32
+        assert round(stats.at['hotelling', 'F'], 3) == 1.327
+        assert stats.at['hotelling', 'df1'] == 3
+        assert stats.at['hotelling', 'df2'] == 32
         assert round(stats.loc['hotelling', 'pval'], 3) == 0.283
         # Paired test with NaN values
         stats = multivariate_ttest(X_na, Y, paired=True)
-        assert stats.loc['hotelling', 'df1'] == 3
-        assert stats.loc['hotelling', 'df2'] == X.shape[0] - 1 - X.shape[1]
+        assert stats.at['hotelling', 'df1'] == 3
+        assert stats.at['hotelling', 'df2'] == X.shape[0] - 1 - X.shape[1]

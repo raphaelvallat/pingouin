@@ -93,22 +93,22 @@ class TestParametric(TestCase):
         # Now compare against Pingouin's own partial_corr function
         corrs = data[['X', 'Y', 'M']].pcorr()
         corrs2 = data.partial_corr(x='X', y='Y', covar='M')
-        assert round(corrs.loc['X', 'Y'], 3) == corrs2.loc['pearson', 'r']
+        assert np.isclose(corrs.at['X', 'Y'], corrs2.at['pearson', 'r'])
 
         # Test rcorr (correlation matrix with p-values)
         # We compare against Pingouin pairwise_corr function
-        corrs = df_corr.rcorr(padjust='holm')
-        corrs2 = df_corr.pairwise_corr(padjust='holm')
-        assert corrs.loc['Neuroticism', 'Agreeableness'] == '*'
-        assert (corrs.loc['Agreeableness', 'Neuroticism'] ==
-                str(corrs2.loc[2, 'r']))
+        corrs = df_corr.rcorr(padjust='holm', decimals=4)
+        corrs2 = df_corr.pairwise_corr(padjust='holm').round(4)
+        assert corrs.at['Neuroticism', 'Agreeableness'] == '*'
+        assert (corrs.at['Agreeableness', 'Neuroticism'] ==
+                str(corrs2.at[2, 'r']))
         corrs = df_corr.rcorr(padjust='holm', stars=False, decimals=4)
-        assert (corrs.loc['Neuroticism', 'Agreeableness'] ==
-                str(corrs2.loc[2, 'p-corr'].round(4)))
-        corrs = df_corr.rcorr(upper='n')
-        corrs2 = df_corr.pairwise_corr()
-        assert corrs.loc['Extraversion', 'Openness'] == corrs2.loc[4, 'n']
-        assert corrs.loc['Openness', 'Extraversion'] == str(corrs2.loc[4, 'r'])
+        assert (corrs.at['Neuroticism', 'Agreeableness'] ==
+                str(corrs2.at[2, 'p-corr'].round(4)))
+        corrs = df_corr.rcorr(upper='n', decimals=5)
+        corrs2 = df_corr.pairwise_corr().round(5)
+        assert corrs.at['Extraversion', 'Openness'] == corrs2.at[4, 'n']
+        assert corrs.at['Openness', 'Extraversion'] == str(corrs2.at[4, 'r'])
         # Method = spearman does not work with Python 3.5 on Travis?
         # Instead it seems to return the Pearson correlation!
         df_corr.rcorr(method='spearman')
@@ -116,5 +116,5 @@ class TestParametric(TestCase):
 
         # Test mediation analysis
         med = data.mediation_analysis(x='X', m='M', y='Y', seed=42, n_boot=500)
-        np.testing.assert_array_equal(med.loc[:, 'coef'].to_numpy(),
+        np.testing.assert_array_equal(med.loc[:, 'coef'].round(4).to_numpy(),
                                       [0.5610, 0.6542, 0.3961, 0.0396, 0.3565])

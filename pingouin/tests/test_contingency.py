@@ -39,8 +39,8 @@ class TestContingency(TestCase):
             p = round(stats.at[i, 'p'], 6)
             sp_chi2, sp_p, sp_dof, _ = chi2_contingency(contingency_table,
                                                         lambda_=lambda_)
-            assert (chi2, p, dof) == (round(sp_chi2, 3), round(sp_p, 6),
-                                      sp_dof)
+            np.testing.assert_allclose([chi2, p, dof],
+                                       [sp_chi2, sp_p, sp_dof], rtol=1e-4)
 
         # Testing resilience to NaN
         mask_nan = np.random.random(data.shape) > 0.8  # ~20% NaN values
@@ -83,18 +83,18 @@ class TestContingency(TestCase):
         # >>> chisq.test(tbl, correct = TRUE)
         # >>> cramersV(tbl)
         _, _, stats = pg.chi2_independence(df_ind, 'sex', 'target')
-        assert stats.at[0, 'chi2'] == 22.717
+        assert round(stats.at[0, 'chi2'], 3) == 22.717
         assert stats.at[0, 'dof'] == 1
-        assert np.allclose(stats.at[0, 'p'], 1.877e-06)
+        assert np.isclose(stats.at[0, 'p'], 1.877e-06)
         assert round(stats.at[0, 'cramer'], 2) == 0.27
 
         # 4 x 2 contingency table
         _, _, stats = pg.chi2_independence(df_ind, 'cp', 'target')
-        assert stats.at[0, 'chi2'] == 81.686
+        assert round(stats.at[0, 'chi2'], 3) == 81.686
         assert stats.at[0, 'dof'] == 3.
         assert stats.at[0, 'p'] < 2.2e-16
         assert round(stats.at[0, 'cramer'], 3) == 0.519
-        assert np.allclose(stats.at[0, 'power'], 1.)
+        assert np.isclose(stats.at[0, 'power'], 1.)
 
     def test_chi2_mcnemar(self):
         """Test function chi2_mcnemar."""
@@ -139,12 +139,12 @@ class TestContingency(TestCase):
         # >>> tbl = table(df$treatment_X, df$treatment_Y)
         # >>> mcnemar.test(tbl, correct = TRUE)
         _, stats = pg.chi2_mcnemar(df_mcnemar, 'treatment_X', 'treatment_Y')
-        assert stats.at['mcnemar', 'chi2'] == 20.021
+        assert round(stats.at['mcnemar', 'chi2'], 3) == 20.021
         assert stats.at['mcnemar', 'dof'] == 1
-        assert np.allclose(stats.at['mcnemar', 'p-approx'], 7.66e-06)
+        assert np.isclose(stats.at['mcnemar', 'p-approx'], 7.66e-06)
         # Results are compared to the exact2x2 R package
         # >>> exact2x2(tbl, paired = TRUE, midp = FALSE)
-        assert np.allclose(stats.at['mcnemar', 'p-exact'], 3.305e-06)
+        assert np.isclose(stats.at['mcnemar', 'p-exact'], 3.305e-06)
         # midp gives slightly different results
         # assert np.allclose(stats.at['mcnemar', 'p-mid'], 3.305e-06)
 

@@ -170,8 +170,8 @@ def chi2_independence(data, x, y, correction=True):
             cramer = np.sqrt(chi2 / (n * dof_cramer))
             power = power_chi2(dof=dof, w=cramer, n=n, alpha=0.05)
 
-        stats.append({'test': name, 'lambda': round(lambda_, 3),
-                      'chi2': round(chi2, 3), 'dof': dof, 'p': p,
+        stats.append({'test': name, 'lambda': lambda_,
+                      'chi2': chi2, 'dof': dof, 'p': p,
                       'cramer': cramer, 'power': power})
 
     stats = pd.DataFrame(stats)[['test', 'lambda', 'chi2', 'dof', 'p',
@@ -290,8 +290,8 @@ def chi2_mcnemar(data, x, y, correction=True):
     The McNemar test should be sensitive to this.
 
     >>> stats
-               chi2  dof  p-approx   p-exact
-    mcnemar  20.021    1  0.000008  0.000003
+                  chi2  dof  p-approx   p-exact
+    mcnemar  20.020833    1  0.000008  0.000003
     """
     # Python code initially inspired by statsmodel's mcnemar
     assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
@@ -318,7 +318,7 @@ def chi2_mcnemar(data, x, y, correction=True):
     chi2 = (abs(b - c) - int(correction))**2 / n_discordants
     pexact = min(1, 2 * binom.cdf(min(b, c), n_discordants, 0.5))
     stats = {
-        'chi2': round(chi2, 3),
+        'chi2': chi2,
         'dof': 1,
         'p-approx': sp_chi2.sf(chi2, 1),
         'p-exact': pexact,

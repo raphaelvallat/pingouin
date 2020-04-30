@@ -35,7 +35,7 @@ class TestEquivalence(TestCase):
         assert np.isclose(tost(a, b).at['TOST', 'pval'], 0.9650974)
 
         # R: tost(a, b)
-        assert tost(a, b, correction=True).at['TOST', 'dof'] == 9.49
+        assert round(tost(a, b, correction=True).at['TOST', 'dof'], 2) == 9.49
         assert np.isclose(tost(a, b, bound=1,
                           correction=True).at['TOST', 'pval'], 0.9643479)
         assert np.isclose(tost(a, b, bound=10).at['TOST', 'pval'], 0.00017933)

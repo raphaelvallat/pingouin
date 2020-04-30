@@ -21,7 +21,7 @@ class TestCorrelation(TestCase):
         corr(x, y, method='shepherd', tail='two-sided')
         # Compare with robust corr toolbox
         stats = corr(x, y, method='skipped')
-        assert stats['r'].to_numpy() == 0.512
+        assert np.round(stats['r'].to_numpy(), 3) == 0.512
         assert stats['outliers'].to_numpy() == 2
         stats = corr(x, y, method='shepherd')
         assert stats['outliers'].to_numpy() == 2
@@ -29,7 +29,7 @@ class TestCorrelation(TestCase):
         assert outliers.size == x.size
         assert stats['n'].to_numpy() == 30
         stats = corr(x, y, method='percbend')
-        assert stats['r'].to_numpy() == 0.484
+        assert np.round(stats['r'].to_numpy(), 3) == 0.484
         # Not normally distributed
         z = np.random.uniform(size=30)
         corr(x, z, method='pearson')
@@ -55,23 +55,23 @@ class TestCorrelation(TestCase):
         """
         df = read_dataset('partial_corr')
         pc = partial_corr(data=df, x='x', y='y', covar='cv1')
-        assert pc.loc['pearson', 'r'] == 0.568
+        assert round(pc.at['pearson', 'r'], 3) == 0.568
         pc = df.partial_corr(x='x', y='y', covar='cv1', method='spearman')
         # Warning: Spearman slightly different than ppcor package, is this
         # caused by difference in Python / R when computing ranks?
-        # assert pc.loc['spearman', 'r'] == 0.578
+        # assert pc.at['spearman', 'r'] == 0.578
         # Partial correlation of x and y controlling for multiple covariates
         pc = partial_corr(data=df, x='x', y='y', covar=['cv1'])
         pc = partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'])
-        assert pc.loc['pearson', 'r'] == 0.493
+        assert round(pc.at['pearson', 'r'], 3) == 0.493
         pc = partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'],
                           method='percbend')
         # Semi-partial correlation
         df.partial_corr(x='x', y='y', y_covar='cv1')
         pc = df.partial_corr(x='x', y='y', x_covar=['cv1', 'cv2', 'cv3'])
-        assert pc.loc['pearson', 'r'] == 0.463
+        assert round(pc.at['pearson', 'r'], 3) == 0.463
         pc = df.partial_corr(x='x', y='y', y_covar=['cv1', 'cv2', 'cv3'])
-        assert pc.loc['pearson', 'r'] == 0.421
+        assert round(pc.at['pearson', 'r'], 3) == 0.421
         partial_corr(data=df, x='x', y='y', x_covar='cv1',
                      y_covar=['cv2', 'cv3'], method='spearman')
         with pytest.raises(ValueError):
@@ -81,11 +81,11 @@ class TestCorrelation(TestCase):
         """Test function rm_corr"""
         df = read_dataset('rm_corr')
         # Test again rmcorr R package.
-        stats = rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
-        assert stats.loc["rm_corr", "r"] == -0.507
-        assert stats.loc["rm_corr", "dof"] == 38
-        assert stats.loc["rm_corr", "CI95%"] == str([-0.71, -0.23])
-        assert round(stats.loc["rm_corr", "pval"], 3) == 0.001
+        stats = rm_corr(data=df, x='pH', y='PacO2', subject='Subject').round(3)
+        assert stats.at["rm_corr", "r"] == -0.507
+        assert stats.at["rm_corr", "dof"] == 38
+        assert stats.at["rm_corr", "CI95%"] == str([-0.71, -0.23])
+        assert stats.at["rm_corr", "pval"] == 0.001
         # Test with less than 3 subjects (same behavior as R package)
         with pytest.raises(ValueError):
             rm_corr(data=df[df['Subject'].isin([1, 2])], x='pH', y='PacO2',

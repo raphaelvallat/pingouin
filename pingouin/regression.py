@@ -941,13 +941,14 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
 
     >>> from pingouin import mediation_analysis, read_dataset
     >>> df = read_dataset('mediation')
-    >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05, seed=42)
-           path    coef      se          pval  CI[2.5%]  CI[97.5%]  sig
-    0     M ~ X  0.5610  0.0945  4.391362e-08    0.3735     0.7485  Yes
-    1     Y ~ M  0.6542  0.0858  1.612674e-11    0.4838     0.8245  Yes
-    2     Total  0.3961  0.1112  5.671128e-04    0.1755     0.6167  Yes
-    3    Direct  0.0396  0.1096  7.187429e-01   -0.1780     0.2572   No
-    4  Indirect  0.3565  0.0833  0.000000e+00    0.2198     0.5377  Yes
+    >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05,
+    ...                    seed=42).round(3)
+           path   coef     se   pval  CI[2.5%]  CI[97.5%]  sig
+    0     M ~ X  0.561  0.094  0.000     0.374      0.749  Yes
+    1     Y ~ M  0.654  0.086  0.000     0.484      0.825  Yes
+    2     Total  0.396  0.111  0.001     0.176      0.617  Yes
+    3    Direct  0.040  0.110  0.719    -0.178      0.257   No
+    4  Indirect  0.357  0.083  0.000     0.220      0.538  Yes
 
     2. Return the indirect bootstrapped beta coefficients
 
@@ -958,37 +959,38 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
 
     3. Mediation analysis with a binary mediator variable
 
-    >>> mediation_analysis(data=df, x='X', m='Mbin', y='Y', seed=42)
-           path    coef      se      pval  CI[2.5%]  CI[97.5%]  sig
-    0  Mbin ~ X -0.0208  0.1159  0.857510   -0.2479     0.2063   No
-    1  Y ~ Mbin -0.1354  0.4118  0.743076   -0.9525     0.6818   No
-    2     Total  0.3961  0.1112  0.000567    0.1755     0.6167  Yes
-    3    Direct  0.3956  0.1117  0.000614    0.1739     0.6173  Yes
-    4  Indirect  0.0023  0.0503  0.960000   -0.0724     0.1464   No
+    >>> mediation_analysis(data=df, x='X', m='Mbin', y='Y', seed=42).round(3)
+           path   coef     se   pval  CI[2.5%]  CI[97.5%]  sig
+    0  Mbin ~ X -0.021  0.116  0.858    -0.248      0.206   No
+    1  Y ~ Mbin -0.135  0.412  0.743    -0.952      0.682   No
+    2     Total  0.396  0.111  0.001     0.176      0.617  Yes
+    3    Direct  0.396  0.112  0.001     0.174      0.617  Yes
+    4  Indirect  0.002  0.050  0.960    -0.072      0.146   No
 
     4. Mediation analysis with covariates
 
     >>> mediation_analysis(data=df, x='X', m='M', y='Y',
-    ...                    covar=['Mbin', 'Ybin'], seed=42)
-           path    coef      se          pval  CI[2.5%]  CI[97.5%]  sig
-    0     M ~ X  0.5594  0.0968  9.394635e-08    0.3672     0.7516  Yes
-    1     Y ~ M  0.6660  0.0861  1.017261e-11    0.4951     0.8368  Yes
-    2     Total  0.4204  0.1129  3.324252e-04    0.1962     0.6446  Yes
-    3    Direct  0.0645  0.1104  5.608583e-01   -0.1548     0.2837   No
-    4  Indirect  0.3559  0.0865  0.000000e+00    0.2093     0.5530  Yes
+    ...                    covar=['Mbin', 'Ybin'], seed=42).round(3)
+           path   coef     se   pval  CI[2.5%]  CI[97.5%]  sig
+    0     M ~ X  0.559  0.097  0.000     0.367      0.752  Yes
+    1     Y ~ M  0.666  0.086  0.000     0.495      0.837  Yes
+    2     Total  0.420  0.113  0.000     0.196      0.645  Yes
+    3    Direct  0.064  0.110  0.561    -0.155      0.284   No
+    4  Indirect  0.356  0.086  0.000     0.209      0.553  Yes
 
     5. Mediation analysis with multiple parallel mediators
 
-    >>> mediation_analysis(data=df, x='X', m=['M', 'Mbin'], y='Y', seed=42)
-                path    coef      se          pval  CI[2.5%]  CI[97.5%]  sig
-    0          M ~ X  0.5610  0.0945  4.391362e-08    0.3735     0.7485  Yes
-    1       Mbin ~ X -0.0051  0.0290  8.592408e-01   -0.0626     0.0523   No
-    2          Y ~ M  0.6537  0.0863  2.118163e-11    0.4824     0.8250  Yes
-    3       Y ~ Mbin -0.0640  0.3282  8.456998e-01   -0.7154     0.5873   No
-    4          Total  0.3961  0.1112  5.671128e-04    0.1755     0.6167  Yes
-    5         Direct  0.0395  0.1102  7.206301e-01   -0.1792     0.2583   No
-    6     Indirect M  0.3563  0.0845  0.000000e+00    0.2148     0.5385  Yes
-    7  Indirect Mbin  0.0003  0.0097  9.520000e-01   -0.0172     0.0252   No
+    >>> mediation_analysis(data=df, x='X', m=['M', 'Mbin'], y='Y',
+    ...                    seed=42).round(3)
+                path   coef     se   pval  CI[2.5%]  CI[97.5%]  sig
+    0          M ~ X  0.561  0.094  0.000     0.374      0.749  Yes
+    1       Mbin ~ X -0.005  0.029  0.859    -0.063      0.052   No
+    2          Y ~ M  0.654  0.086  0.000     0.482      0.825  Yes
+    3       Y ~ Mbin -0.064  0.328  0.846    -0.715      0.587   No
+    4          Total  0.396  0.111  0.001     0.176      0.617  Yes
+    5         Direct  0.040  0.110  0.721    -0.179      0.258   No
+    6     Indirect M  0.356  0.085  0.000     0.215      0.538  Yes
+    7  Indirect Mbin  0.000  0.010  0.952    -0.017      0.025   No
     """
     # Sanity check
     assert isinstance(x, str), 'y must be a string.'
@@ -1102,9 +1104,9 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     stats = stats.append(indirect, ignore_index=True)
     stats = stats.rename(columns={'names': 'path'})
 
-    # Round
-    col_to_round = ['coef', 'se', ll_name, ul_name]
-    stats[col_to_round] = stats[col_to_round].round(4)
+    # Round - Disabled in Pingouin v0.3.4
+    # col_to_round = ['coef', 'se', ll_name, ul_name]
+    # stats[col_to_round] = stats[col_to_round].round(4)
 
     if return_dist:
         return stats, np.squeeze(ab_estimates)

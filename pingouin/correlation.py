@@ -360,54 +360,54 @@ def corr(x, y, tail='two-sided', method='pearson'):
     >>> x, y = np.random.multivariate_normal(mean, cov, 30).T
     >>> # Compute Pearson correlation
     >>> from pingouin import corr
-    >>> corr(x, y)
-              n      r         CI95%     r2  adj_r2     p-val  BF10  power
-    pearson  30  0.491  [0.16, 0.72]  0.242   0.185  0.005813  8.55  0.809
+    >>> corr(x, y).round(3)
+              n      r         CI95%     r2  adj_r2  p-val  BF10  power
+    pearson  30  0.491  [0.16, 0.72]  0.242   0.185  0.006  8.55  0.809
 
     2. Pearson correlation with two outliers
 
     >>> x[3], y[5] = 12, -8
-    >>> corr(x, y)
-              n      r          CI95%     r2  adj_r2     p-val   BF10  power
-    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439148  0.302  0.121
+    >>> corr(x, y).round(3)
+              n      r          CI95%     r2  adj_r2  p-val   BF10  power
+    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439  0.302  0.121
 
     3. Spearman correlation
 
-    >>> corr(x, y, method="spearman")
-               n      r         CI95%     r2  adj_r2     p-val  power
-    spearman  30  0.401  [0.05, 0.67]  0.161   0.099  0.028034   0.61
+    >>> corr(x, y, method="spearman").round(3)
+               n      r         CI95%     r2  adj_r2  p-val  power
+    spearman  30  0.401  [0.05, 0.67]  0.161   0.099  0.028   0.61
 
     4. Percentage bend correlation (robust)
 
-    >>> corr(x, y, method='percbend')
-               n      r         CI95%     r2  adj_r2     p-val  power
-    percbend  30  0.389  [0.03, 0.66]  0.151   0.089  0.033508  0.581
+    >>> corr(x, y, method='percbend').round(3)
+               n      r         CI95%     r2  adj_r2  p-val  power
+    percbend  30  0.389  [0.03, 0.66]  0.151   0.089  0.034  0.581
 
     5. Shepherd's pi correlation (robust)
 
-    >>> corr(x, y, method='shepherd')
-               n  outliers      r         CI95%     r2  adj_r2     p-val  power
-    shepherd  30         2  0.437  [0.09, 0.69]  0.191   0.131  0.020128  0.694
+    >>> corr(x, y, method='shepherd').round(3)
+               n  outliers      r         CI95%     r2  adj_r2  p-val  power
+    shepherd  30         2  0.437  [0.09, 0.69]  0.191   0.131   0.02  0.694
 
     6. Skipped spearman correlation (robust)
 
-    >>> corr(x, y, method='skipped')
-              n  outliers      r         CI95%     r2  adj_r2     p-val  power
-    skipped  30         2  0.437  [0.09, 0.69]  0.191   0.131  0.020128  0.694
+    >>> corr(x, y, method='skipped').round(3)
+              n  outliers      r         CI95%     r2  adj_r2  p-val  power
+    skipped  30         2  0.437  [0.09, 0.69]  0.191   0.131   0.02  0.694
 
     7. One-tailed Pearson correlation
 
-    >>> corr(x, y, tail="one-sided", method='pearson')
-              n      r          CI95%     r2  adj_r2     p-val   BF10  power
-    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.219574  0.467  0.194
+    >>> corr(x, y, tail="one-sided", method='pearson').round(3)
+              n      r          CI95%     r2  adj_r2  p-val   BF10  power
+    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051   0.22  0.467  0.194
 
     8. Using columns of a pandas dataframe
 
     >>> import pandas as pd
     >>> data = pd.DataFrame({'x': x, 'y': y})
-    >>> corr(data['x'], data['y'])
-              n      r          CI95%     r2  adj_r2     p-val   BF10  power
-    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439148  0.302  0.121
+    >>> corr(data['x'], data['y']).round(3)
+              n      r          CI95%     r2  adj_r2  p-val   BF10  power
+    pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439  0.302  0.121
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -436,25 +436,27 @@ def corr(x, y, tail='two-sided', method='pearson'):
     else:
         raise ValueError('Method not recognized.')
 
-    assert not np.isnan(r), 'Correlation returned NaN. Check your data.'
+    if np.isnan(r):
+        # Correlation failed -- new in version v0.3.4, instead of raising an
+        # error we just return a dataframe full of NaN. This avoid sudden
+        # stop in pingouin.pairwise_corr.
+        return pd.DataFrame({'n': nx, 'r': np.nan, 'CI95%': np.nan,
+                             'r2': np.nan, 'adj_r2': np.nan, 'p-val': np.nan,
+                             'BF10': np.nan, 'power': np.nan}, index=[method])
 
     # Compute r2 and adj_r2
     r2 = r**2
     adj_r2 = 1 - (((1 - r2) * (nx - 1)) / (nx - 3))
 
     # Compute the parametric 95% confidence interval and power
-    if r2 < 1:
-        ci = compute_esci(stat=r, nx=nx, ny=nx, eftype='r')
-        pr = round(power_corr(r=r, n=nx, power=None, alpha=0.05, tail=tail), 3)
-    else:
-        ci = [1., 1.]
-        pr = np.inf
+    ci = compute_esci(stat=r, nx=nx, ny=nx, eftype='r')
+    pr = power_corr(r=r, n=nx, power=None, alpha=0.05, tail=tail),
 
     # Create dictionnary
     stats = {'n': nx,
-             'r': round(r, 3),
-             'r2': round(r2, 3),
-             'adj_r2': round(adj_r2, 3),
+             'r': r,
+             'r2': r2,
+             'adj_r2': adj_r2,
              'CI95%': [ci],
              'p-val': pval if tail == 'two-sided' else .5 * pval,
              'power': pr
@@ -465,10 +467,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
 
     # Compute the BF10 for Pearson correlation only
     if method == 'pearson':
-        if r2 < 1:
-            stats['BF10'] = bayesfactor_pearson(r, nx, tail=tail)
-        else:
-            stats['BF10'] = str(np.inf)
+        stats['BF10'] = bayesfactor_pearson(r, nx, tail=tail)
 
     # Convert to DataFrame
     stats = pd.DataFrame.from_records(stats, index=[method])
@@ -569,23 +568,24 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
 
     >>> import pingouin as pg
     >>> df = pg.read_dataset('partial_corr')
-    >>> pg.partial_corr(data=df, x='x', y='y', covar='cv1')
-              n      r         CI95%     r2  adj_r2     p-val    BF10  power
-    pearson  30  0.568  [0.26, 0.77]  0.323   0.273  0.001055  37.773  0.925
+    >>> pg.partial_corr(data=df, x='x', y='y', covar='cv1').round(3)
+              n      r         CI95%     r2  adj_r2  p-val    BF10  power
+    pearson  30  0.568  [0.26, 0.77]  0.323   0.273  0.001  37.773  0.925
 
     2. Spearman partial correlation with several covariates
 
     >>> # Partial correlation of x and y controlling for cv1, cv2 and cv3
     >>> pg.partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'],
-    ...                 method='spearman')
-               n      r         CI95%     r2  adj_r2     p-val  power
-    spearman  30  0.491  [0.16, 0.72]  0.242   0.185  0.005817  0.809
+    ...                 method='spearman').round(3)
+               n      r         CI95%     r2  adj_r2  p-val  power
+    spearman  30  0.491  [0.16, 0.72]  0.242   0.185  0.006  0.809
 
     3. As a pandas method
 
-    >>> df.partial_corr(x='x', y='y', covar=['cv1'], method='spearman')
-               n      r         CI95%     r2  adj_r2     p-val  power
-    spearman  30  0.568  [0.26, 0.77]  0.323   0.273  0.001049  0.925
+    >>> df.partial_corr(x='x', y='y', covar=['cv1'],
+    ...                 method='spearman').round(3)
+               n      r         CI95%     r2  adj_r2  p-val  power
+    spearman  30  0.568  [0.26, 0.77]  0.323   0.273  0.001  0.925
 
     4. Partial correlation matrix (returns only the correlation coefficients)
 
@@ -599,16 +599,17 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
 
     5. Semi-partial correlation on ``x``
 
-    >>> pg.partial_corr(data=df, x='x', y='y', x_covar=['cv1', 'cv2', 'cv3'])
-              n      r         CI95%     r2  adj_r2     p-val   BF10  power
-    pearson  30  0.463  [0.12, 0.71]  0.215   0.156  0.009946  5.404  0.752
+    >>> pg.partial_corr(data=df, x='x', y='y',
+    ...                 x_covar=['cv1', 'cv2', 'cv3']).round(3)
+              n      r         CI95%     r2  adj_r2  p-val   BF10  power
+    pearson  30  0.463  [0.12, 0.71]  0.215   0.156   0.01  5.404  0.752
 
     6. Semi-partial on both``x`` and ``y`` controlling for different variables
 
     >>> pg.partial_corr(data=df, x='x', y='y', x_covar='cv1',
-    ...                 y_covar=['cv2', 'cv3'], method='spearman')
-               n      r         CI95%     r2  adj_r2     p-val  power
-    spearman  30  0.429  [0.08, 0.68]  0.184   0.123  0.018092  0.676
+    ...                 y_covar=['cv2', 'cv3'], method='spearman').round(3)
+               n      r         CI95%     r2  adj_r2  p-val  power
+    spearman  30  0.429  [0.08, 0.68]  0.184   0.123  0.018  0.676
     """
     from pingouin.utils import _flatten_list
     # Check arguments
@@ -941,8 +942,8 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     >>> import pingouin as pg
     >>> df = pg.read_dataset('rm_corr')
     >>> pg.rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
-                 r  dof      pval           CI95%  power
-    rm_corr -0.507   38  0.000847  [-0.71, -0.23]   0.93
+                   r  dof      pval           CI95%     power
+    rm_corr -0.50677   38  0.000847  [-0.71, -0.23]  0.929579
 
     Now plot using the :py:func:`pingouin.plot_rm_corr` function:
 
@@ -980,9 +981,11 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     ci = compute_esci(stat=rm, nx=n, eftype='pearson').tolist()
     pwr = power_corr(r=rm, n=n, tail=tail)
     # Convert to Dataframe
-    stats = pd.DataFrame({"r": round(rm, 3), "dof": int(dof),
-                          "pval": pval, "CI95%": str(ci),
-                          "power": round(pwr, 3)}, index=["rm_corr"])
+    stats = pd.DataFrame({"r": rm,
+                          "dof": int(dof),
+                          "pval": pval,
+                          "CI95%": str(ci),
+                          "power": pwr}, index=["rm_corr"])
     return stats
 
 

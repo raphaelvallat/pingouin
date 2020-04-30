@@ -319,22 +319,22 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
     >>> import pingouin as pg
     >>> data = pg.read_dataset('mediation')
     >>> pg.homoscedasticity(data[['X', 'Y', 'M']])
-                W      pval  equal_var
-    levene  0.435  0.999997       True
+                   W      pval  equal_var
+    levene  0.434861  0.999997       True
 
     2. Bartlett test using a list of iterables
 
     >>> data = [[4, 8, 9, 20, 14], np.array([5, 8, 15, 45, 12])]
     >>> pg.homoscedasticity(data, method="bartlett", alpha=.05)
-                  T      pval  equal_var
-    bartlett  2.874  0.090045       True
+                     T      pval  equal_var
+    bartlett  2.873569  0.090045       True
 
     3. Long-format dataframe
 
     >>> data = pg.read_dataset('rm_anova2')
     >>> pg.homoscedasticity(data, dv='Performance', group='Time')
-                W      pval  equal_var
-    levene  3.192  0.079217       True
+                   W      pval  equal_var
+    levene  3.192197  0.079217       True
     """
     assert isinstance(data, (pd.DataFrame, list, dict))
     assert method.lower() in ['levene', 'bartlett']
@@ -369,7 +369,7 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
     stat_name = 'W' if method.lower() == 'levene' else 'T'
 
     stats = {
-        stat_name: round(statistic, 3),
+        stat_name: statistic,
         'pval': p,
         'equal_var': equal_var
     }
@@ -832,12 +832,12 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
     ...                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
     ...                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
     >>> spher, W, chisq, dof, pval = pg.sphericity(data)
-    >>> print(spher, W, chisq, dof, round(pval, 3))
+    >>> print(spher, round(W, 3), round(chisq, 3), dof, round(pval, 3))
     True 0.21 4.677 2 0.096
 
     John, Nagao and Sugiura (JNS) test
 
-    >>> round(pg.sphericity(data, method='jns')[-1], 3)  # P-vlaue only
+    >>> round(pg.sphericity(data, method='jns')[-1], 3)  # P-value only
     0.046
 
     Now using a long-format dataframe
@@ -877,7 +877,7 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
     >>> spher, _, chisq, dof, pval = pg.sphericity(data, dv='Performance',
     ...                                            subject='Subject',
     ...                                            within=['Time', 'Metric'])
-    >>> print(spher, chisq, dof, round(pval, 3))
+    >>> print(spher, round(chisq, 3), dof, round(pval, 3))
     True 3.763 2 0.152
 
     Here again, there is no violation of sphericity acccording to Mauchly's
@@ -900,7 +900,7 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
     5           27     28      18     19     27      19
 
     >>> spher, _, chisq, dof, pval = pg.sphericity(piv)
-    >>> print(spher, chisq, dof, round(pval, 3))
+    >>> print(spher, round(chisq, 3), dof, round(pval, 3))
     True 3.763 2 0.152
 
     which gives the same output as the long-format dataframe.
@@ -975,4 +975,4 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
         pval = scipy.stats.chi2.sf(chi_sq, ddof)
 
     sphericity = True if pval > alpha else False
-    return sphericity, np.round(W, 3), np.round(chi_sq, 3), int(ddof), pval
+    return sphericity, W, chi_sq, int(ddof), pval

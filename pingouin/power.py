@@ -707,9 +707,9 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05,
     measures ANOVA:
 
     >>> data = data.dropna()
-    >>> pg.rm_anova(data)
-       Source  ddof1  ddof2      F     p-unc    np2    eps
-    0  Within      3     24  5.201  0.006557  0.394  0.694
+    >>> pg.rm_anova(data).round(3)
+       Source  ddof1  ddof2      F  p-unc    np2    eps
+    0  Within      3     24  5.201  0.007  0.394  0.694
 
     The repeated measures ANOVA is significant at the 0.05 level. Now, we can
     easily compute the power of the ANOVA with the information in the ANOVA

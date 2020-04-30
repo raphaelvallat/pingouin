@@ -205,7 +205,7 @@ class TestRegression(TestCase):
         ma = mediation_analysis(data=df, x='X', m='M', y='Y', n_boot=500)
 
         # Compare against R package mediation
-        assert_equal(ma['coef'].to_numpy(),
+        assert_equal(ma['coef'].round(4).to_numpy(),
                      [0.5610, 0.6542, 0.3961, 0.0396, 0.3565])
 
         _, dist = mediation_analysis(data=df, x='X', m='M', y='Y', n_boot=1000,

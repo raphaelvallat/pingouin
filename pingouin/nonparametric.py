@@ -18,8 +18,9 @@ def mad(a, normalize=True, axis=0):
     a : array-like
         Input array.
     normalize : boolean.
-        If True, scale by a normalization constant (~0.67) to ensure
-        consistency with the standard deviation for normally distributed data.
+        If True, scale by a normalization constant :math:`c \\approx  0.67`
+        to ensure consistency with the standard deviation for normally
+        distributed data.
     axis : int or None, optional
         Axis along which the MAD is computed. Default is 0.
         Can also be None to compute the MAD over the entire array.
@@ -215,8 +216,8 @@ def mwu(x, y, tail='two-sided'):
     >>> x = np.random.uniform(low=0, high=1, size=20)
     >>> y = np.random.uniform(low=0.2, high=1.2, size=20)
     >>> pg.mwu(x, y, tail='two-sided')
-         U-val       tail    p-val    RBC   CLES
-    MWU   97.0  two-sided  0.00556  0.515  0.758
+         U-val       tail    p-val    RBC    CLES
+    MWU   97.0  two-sided  0.00556  0.515  0.7575
 
     Compare with SciPy
 
@@ -228,12 +229,12 @@ def mwu(x, y, tail='two-sided'):
     One-sided tail: one can either manually specify the alternative hypothesis
 
     >>> pg.mwu(x, y, tail='greater')
-         U-val     tail     p-val    RBC   CLES
-    MWU   97.0  greater  0.997442  0.515  0.758
+         U-val     tail     p-val    RBC    CLES
+    MWU   97.0  greater  0.997442  0.515  0.7575
 
     >>> pg.mwu(x, y, tail='less')
-         U-val  tail    p-val    RBC   CLES
-    MWU   97.0  less  0.00278  0.515  0.758
+         U-val  tail    p-val    RBC    CLES
+    MWU   97.0  less  0.00278  0.515  0.7575
 
     Or simply leave it to Pingouin, using the `'one-sided'` argument, in which
     case Pingouin will compare the medians of ``x`` and ``y`` and select the
@@ -241,8 +242,8 @@ def mwu(x, y, tail='two-sided'):
 
     >>> # Since np.median(x) < np.median(y), this is equivalent to tail='less'
     >>> pg.mwu(x, y, tail='one-sided')
-         U-val  tail    p-val    RBC   CLES
-    MWU   97.0  less  0.00278  0.515  0.758
+         U-val  tail    p-val    RBC    CLES
+    MWU   97.0  less  0.00278  0.515  0.7575
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -269,11 +270,11 @@ def mwu(x, y, tail='two-sided'):
 
     # Fill output DataFrame
     stats = pd.DataFrame({}, index=['MWU'])
-    stats['U-val'] = round(uval, 3)
+    stats['U-val'] = uval
     stats['tail'] = tail
     stats['p-val'] = pval
-    stats['RBC'] = round(rbc, 3)
-    stats['CLES'] = round(cles, 3)
+    stats['RBC'] = rbc
+    stats['CLES'] = cles
 
     col_order = ['U-val', 'tail', 'p-val', 'RBC', 'CLES']
     stats = stats.reindex(columns=col_order)
@@ -356,8 +357,8 @@ def wilcoxon(x, y, tail='two-sided'):
     >>> x = [20, 22, 19, 20, 22, 18, 24, 20, 19, 24, 26, 13]
     >>> y = [38, 37, 33, 29, 14, 12, 20, 22, 17, 25, 26, 16]
     >>> pg.wilcoxon(x, y, tail='two-sided')
-              W-val       tail     p-val    RBC   CLES
-    Wilcoxon   20.5  two-sided  0.285765 -0.379  0.583
+              W-val       tail     p-val       RBC      CLES
+    Wilcoxon   20.5  two-sided  0.285765 -0.378788  0.583333
 
     Compare with SciPy
 
@@ -368,12 +369,12 @@ def wilcoxon(x, y, tail='two-sided'):
     One-sided tail: one can either manually specify the alternative hypothesis
 
     >>> pg.wilcoxon(x, y, tail='greater')
-              W-val     tail     p-val    RBC   CLES
-    Wilcoxon   20.5  greater  0.876244 -0.379  0.583
+              W-val     tail     p-val       RBC      CLES
+    Wilcoxon   20.5  greater  0.876244 -0.378788  0.583333
 
     >>> pg.wilcoxon(x, y, tail='less')
-              W-val  tail     p-val    RBC   CLES
-    Wilcoxon   20.5  less  0.142883 -0.379  0.583
+              W-val  tail     p-val       RBC      CLES
+    Wilcoxon   20.5  less  0.142883 -0.378788  0.583333
 
     Or simply leave it to Pingouin, using the `'one-sided'` argument, in which
     case Pingouin will look at the sign of the median of the differences
@@ -386,8 +387,8 @@ def wilcoxon(x, y, tail='two-sided'):
     hypothesis that the median of the differences is negative (= less than 0).
 
     >>> pg.wilcoxon(x, y, tail='one-sided')  # Equivalent to tail = 'less'
-              W-val  tail     p-val    RBC   CLES
-    Wilcoxon   20.5  less  0.142883 -0.379  0.583
+              W-val  tail     p-val       RBC      CLES
+    Wilcoxon   20.5  less  0.142883 -0.378788  0.583333
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -421,11 +422,11 @@ def wilcoxon(x, y, tail='two-sided'):
 
     # Fill output DataFrame
     stats = pd.DataFrame({}, index=['Wilcoxon'])
-    stats['W-val'] = round(wval, 3)
+    stats['W-val'] = wval
     stats['tail'] = tail
     stats['p-val'] = pval
-    stats['RBC'] = round(rbc, 3)
-    stats['CLES'] = round(cles, 3)
+    stats['RBC'] = rbc
+    stats['CLES'] = cles
 
     col_order = ['W-val', 'tail', 'p-val', 'RBC', 'CLES']
     stats = stats.reindex(columns=col_order)
@@ -473,8 +474,8 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
     >>> from pingouin import kruskal, read_dataset
     >>> df = read_dataset('anova')
     >>> kruskal(data=df, dv='Pain threshold', between='Hair color')
-                 Source  ddof1       H     p-unc
-    Kruskal  Hair color      3  10.589  0.014172
+                 Source  ddof1         H     p-unc
+    Kruskal  Hair color      3  10.58863  0.014172
     """
     # Check data
     _check_dataframe(dv=dv, between=between, data=data,
@@ -512,7 +513,7 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
     # Create output dataframe
     stats = pd.DataFrame({'Source': between,
                           'ddof1': ddof1,
-                          'H': np.round(H, 3),
+                          'H': H,
                           'p-unc': p_unc,
                           }, index=['Kruskal'])
 
@@ -572,8 +573,8 @@ def friedman(data=None, dv=None, within=None, subject=None):
     >>> df = read_dataset('rm_anova')
     >>> friedman(data=df, dv='DesireToKill', within='Disgustingness',
     ...          subject='Subject')
-                      Source  ddof1      Q     p-unc
-    Friedman  Disgustingness      1  9.228  0.002384
+                      Source  ddof1         Q     p-unc
+    Friedman  Disgustingness      1  9.227848  0.002384
     """
     # Check data
     _check_dataframe(dv=dv, within=within, data=data, subject=subject,
@@ -621,7 +622,7 @@ def friedman(data=None, dv=None, within=None, subject=None):
     # Create output dataframe
     stats = pd.DataFrame({'Source': within,
                           'ddof1': ddof1,
-                          'Q': np.round(Q, 3),
+                          'Q': Q,
                           'p-unc': p_unc,
                           }, index=['Friedman'])
 
@@ -691,8 +692,8 @@ def cochran(data=None, dv=None, within=None, subject=None):
     >>> from pingouin import cochran, read_dataset
     >>> df = read_dataset('cochran')
     >>> cochran(data=df, dv='Energetic', within='Time', subject='Subject')
-            Source  dof      Q     p-unc
-    cochran   Time    2  6.706  0.034981
+            Source  dof         Q     p-unc
+    cochran   Time    2  6.705882  0.034981
     """
     # Check data
     _check_dataframe(dv=dv, within=within, data=data, subject=subject,
@@ -718,7 +719,7 @@ def cochran(data=None, dv=None, within=None, subject=None):
     # Create output dataframe
     stats = pd.DataFrame({'Source': within,
                           'dof': dof,
-                          'Q': np.round(q, 3),
+                          'Q': q,
                           'p-unc': p_unc,
                           }, index=['cochran'])
 

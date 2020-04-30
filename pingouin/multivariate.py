@@ -171,21 +171,21 @@ def multivariate_ttest(X, Y=None, paired=False):
     >>> X = data[data['Condition'] == 'Drug'][dvs]
     >>> Y = data[data['Condition'] == 'Placebo'][dvs]
     >>> pg.multivariate_ttest(X, Y)
-                  T2      F  df1  df2      pval
-    hotelling  4.229  1.327    3   32  0.282898
+                     T2         F  df1  df2      pval
+    hotelling  4.228679  1.326644    3   32  0.282898
 
     Two-sample paired Hotelling T-squared test
 
     >>> pg.multivariate_ttest(X, Y, paired=True)
-                  T2      F  df1  df2      pval
-    hotelling  4.468  1.314    3   15  0.306542
+                     T2         F  df1  df2      pval
+    hotelling  4.468456  1.314252    3   15  0.306542
 
     One-sample Hotelling T-squared test with a specified null hypothesis
 
     >>> null_hypothesis_means = [37.5, 70, 5]
     >>> pg.multivariate_ttest(X, Y=null_hypothesis_means)
-                    T2      F  df1  df2          pval
-    hotelling  253.231  74.48    3   15  3.081281e-09
+                       T2          F  df1  df2          pval
+    hotelling  253.230991  74.479703    3   15  3.081281e-09
     """
     from scipy.stats import f
     x = np.asarray(X)
@@ -246,5 +246,4 @@ def multivariate_ttest(X, Y=None, paired=False):
     # Create output dictionnary
     stats = {'T2': t2, 'F': fval, 'df1': df1, 'df2': df2, 'pval': pval}
     stats = pd.DataFrame(stats, index=['hotelling'])
-    stats[['T2', 'F']] = stats[['T2', 'F']].round(3)
     return stats

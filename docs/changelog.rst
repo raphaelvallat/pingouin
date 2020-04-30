@@ -14,7 +14,7 @@ v0.3.4 (dev)
 a. Compatibility with Python 3.9 (see `PR by tirkarthi <https://github.com/raphaelvallat/pingouin/pull/83>`_).
 b. To avoid any confusion, the ``alpha`` argument has been renamed to ``angles`` in all circular statistics functions.
 c. Updated flake8 guidelines and added CI for Python 3.8.
-d. Added the `tabulate <https://pypi.org/project/tabulate/>`_ package as dependency. This is used by the :py:func:`pingouin.print_table` function, as well as the :py:meth:`pandas.DataFrame.to_markdown` function.
+d. Added the `tabulate <https://pypi.org/project/tabulate/>`_ package as dependency. The tabulate package is used by the :py:func:`pingouin.print_table` function as well as the :py:meth:`pandas.DataFrame.to_markdown` function.
 
 **New functions**
 
@@ -22,10 +22,12 @@ a. Added :py:func:`pingouin.convert_angles` function to convert circular data in
 
 **Enhancements**
 
-a. Better documentation and testing for circular statistics functions.
+a. Better documentation and testing for descriptive circular statistics functions.
 b. Added safety checks that ``angles`` is expressed in radians in circular statistics function.
 c. :py:func:`pingouin.circ_mean` and :py:func:`pingouin.circ_r` now perform calculations omitting missing values.
 d. Pingouin no longer changes the default matplotlib style to a Seaborn-default (see `issue #85 <https://github.com/raphaelvallat/pingouin/issues/85>`_).
+e. Disabled rounding of float in most Pingouin functions in order to reduce numerical imprecision. For more details, please refer to `issue #87 <https://github.com/raphaelvallat/pingouin/issues/87>`_. Users can still round the output using the :py:meth:`pandas.DataFrame.round` method, or changing the default precision of Pandas DataFrame with `pandas.set_option <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.set_option.html>`_.
+f. Disabled filling of missing values by ``'-'`` in some ANOVAs functions, which may have lead to dtypes issues.
 
 v0.3.3 (February 2020)
 ----------------------

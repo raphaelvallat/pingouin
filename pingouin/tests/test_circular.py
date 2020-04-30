@@ -86,7 +86,7 @@ class TestCircular(TestCase):
         y = [0.593, 1.291, 2.879, 3.892, 6.108]
         r, pval = circ_corrcc(x, y)
         # Compare with the CircStats MATLAB toolbox
-        assert r == 0.942
+        assert round(r, 3) == 0.942
         assert np.round(pval, 3) == 0.066
         _, pval2 = circ_corrcc(x, y, tail='one-sided')
         assert pval2 == pval / 2
@@ -99,7 +99,7 @@ class TestCircular(TestCase):
         y = [1.593, 1.291, -0.248, -2.892, 0.102]
         r, pval = circ_corrcl(x, y)
         # Compare with the CircStats MATLAB toolbox
-        assert r == 0.109
+        assert round(r, 3) == 0.109
         assert np.round(pval, 3) == 0.971
         _, pval2 = circ_corrcl(x, y, tail='one-sided')
         assert pval2 == pval / 2
@@ -132,19 +132,19 @@ class TestCircular(TestCase):
         x = [0.785, 1.570, 3.141, 0.839, 5.934]
         z, pval = circ_rayleigh(x)
         # Compare with the CircStats MATLAB toolbox
-        assert z == 1.236
-        assert np.round(pval, 4) == 0.3048
+        assert round(z, 3) == 1.236
+        assert round(pval, 4) == 0.3048
         z, pval = circ_rayleigh(x, w=[.1, .2, .3, .4, .5], d=0.2)
-        assert z == 0.278
-        assert np.round(pval, 4) == 0.8070
+        assert round(z, 3) == 0.278
+        assert round(pval, 4) == 0.8070
 
     def test_circ_vtest(self):
         """Test function circ_vtest."""
         x = [0.785, 1.570, 3.141, 0.839, 5.934]
         v, pval = circ_vtest(x, dir=1)
         # Compare with the CircStats MATLAB toolbox
-        assert v == 2.486
-        assert np.round(pval, 4) == 0.0579
+        assert round(v, 3) == 2.486
+        assert round(pval, 4) == 0.0579
         v, pval = circ_vtest(x, dir=0.5, w=[.1, .2, .3, .4, .5], d=0.2)
-        assert v == 0.637
-        assert np.round(pval, 4) == 0.2309
+        assert round(v, 3) == 0.637
+        assert round(pval, 4) == 0.2309

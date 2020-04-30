@@ -76,7 +76,7 @@ class TestNonParametric(TestCase):
         assert wc_scp[1] == wc_pg.at['Wilcoxon', 'p-val']
         # Compare to R canprot::CLES
         # Note that the RBC value are compared to JASP in test_pairwise.py
-        assert wc_pg.at['Wilcoxon', 'CLES'] == 0.536
+        assert round(wc_pg.at['Wilcoxon', 'CLES'], 3) == 0.536
         assert (wc_pg.at['Wilcoxon', 'p-val'] / 2) == wc_pg_1.at['Wilcoxon',
                                                                  'p-val']
 
@@ -90,10 +90,10 @@ class TestNonParametric(TestCase):
         # Compare with SciPy built-in function
         from scipy import stats
         Q, p = stats.friedmanchisquare(x, y, z)
-        assert np.allclose(np.round(Q, 3), summary['Q']['Friedman'])
-        assert np.allclose(p, summary['p-unc']['Friedman'])
+        assert np.isclose(Q, summary.at['Friedman', 'Q'])
+        assert np.isclose(p, summary.at['Friedman', 'p-unc'])
         # Test with NaN
-        df.loc[10, 'DV'] = np.nan
+        df.at[10, 'DV'] = np.nan
         friedman(data=df, dv='DV', subject='Subject', within='Time')
 
     def test_kruskal(self):
@@ -106,8 +106,8 @@ class TestNonParametric(TestCase):
         summary = kruskal(data=df, dv='DV', between='Group')
         # Compare with SciPy built-in function
         H, p = scipy.stats.kruskal(x_nan, y, z, nan_policy='omit')
-        assert np.allclose(np.round(H, 3), summary['H']['Kruskal'])
-        assert np.allclose(p, summary['p-unc']['Kruskal'])
+        assert np.isclose(H, summary.at['Kruskal', 'H'])
+        assert np.allclose(p, summary.at['Kruskal', 'p-unc'])
 
     def test_cochran(self):
         """Test function cochran
@@ -116,8 +116,8 @@ class TestNonParametric(TestCase):
         from pingouin import read_dataset
         df = read_dataset('cochran')
         st = cochran(dv='Energetic', within='Time', subject='Subject', data=df)
-        assert st.loc['cochran', 'Q'] == 6.706
-        assert np.allclose(st.loc['cochran', 'p-unc'], 0.034981)
+        assert round(st.at['cochran', 'Q'], 3) == 6.706
+        assert np.isclose(st.at['cochran', 'p-unc'], 0.034981)
         cochran(dv='Energetic', within='Time', subject='Subject', data=df)
         # With a NaN value
         df.loc[2, 'Energetic'] = np.nan

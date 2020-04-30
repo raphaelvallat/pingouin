@@ -100,25 +100,25 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     >>> data = pg.read_dataset('cronbach_wide_missing')
     >>> # In R: psych:alpha(data, use="pairwise")
     >>> pg.cronbach_alpha(data=data)
-    (0.732661, array([0.435, 0.909]))
+    (0.732660835214447, array([0.435, 0.909]))
 
     After listwise deletion of missing values (remove the entire rows)
 
     >>> # In R: psych:alpha(data, use="complete.obs")
     >>> pg.cronbach_alpha(data=data, nan_policy='listwise')
-    (0.801695, array([0.581, 0.933]))
+    (0.8016949152542373, array([0.581, 0.933]))
 
     After imputing the missing values with the median of each column
 
     >>> pg.cronbach_alpha(data=data.fillna(data.median()))
-    (0.738019, array([0.447, 0.911]))
+    (0.7380191693290734, array([0.447, 0.911]))
 
     Likert-type long-format dataframe
 
     >>> data = pg.read_dataset('cronbach_alpha')
     >>> pg.cronbach_alpha(data=data, items='Items', scores='Scores',
     ...                   subject='Subj')
-    (0.591719, array([0.195, 0.84 ]))
+    (0.5917188485995826, array([0.195, 0.84 ]))
     """
     # Safety check
     assert isinstance(data, pd.DataFrame), 'data must be a dataframe.'
@@ -152,7 +152,7 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     df2 = df1 * (k - 1)
     lower = 1 - (1 - cronbach) * f.isf(alpha / 2, df1, df2)
     upper = 1 - (1 - cronbach) * f.isf(1 - alpha / 2, df1, df2)
-    return round(cronbach, 6), np.round([lower, upper], 3)
+    return cronbach, np.round([lower, upper], 3)
 
 
 def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
@@ -245,15 +245,16 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
     >>> import pingouin as pg
     >>> data = pg.read_dataset('icc')
     >>> icc = pg.intraclass_corr(data=data, targets='Wine', raters='Judge',
-    ...                          ratings='Scores')
-    >>> icc # doctest: +SKIP
-        Type              Description    ICC  ...  df2      pval         CI95%
-    0   ICC1   Single raters absolute  0.728  ...   24  0.000002  [0.43, 0.93]
-    1   ICC2     Single random raters  0.728  ...   21  0.000005  [0.43, 0.93]
-    2   ICC3      Single fixed raters  0.730  ...   21  0.000005  [0.43, 0.93]
-    3  ICC1k  Average raters absolute  0.914  ...   24  0.000002  [0.75, 0.98]
-    4  ICC2k    Average random raters  0.914  ...   21  0.000005  [0.75, 0.98]
-    5  ICC3k     Average fixed raters  0.915  ...   21  0.000005  [0.75, 0.98]
+    ...                          ratings='Scores').round(3)
+    >>> icc.set_index("Type")
+                       Description    ICC       F  df1  df2  pval         CI95%
+    Type
+    ICC1    Single raters absolute  0.728  11.680    7   24   0.0  [0.43, 0.93]
+    ICC2      Single random raters  0.728  11.787    7   21   0.0  [0.43, 0.93]
+    ICC3       Single fixed raters  0.729  11.787    7   21   0.0  [0.43, 0.93]
+    ICC1k  Average raters absolute  0.914  11.680    7   24   0.0  [0.75, 0.98]
+    ICC2k    Average random raters  0.914  11.787    7   21   0.0  [0.75, 0.98]
+    ICC3k     Average fixed raters  0.915  11.787    7   21   0.0  [0.75, 0.98]
     """
     from pingouin import anova
 
@@ -327,8 +328,8 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
         'Description': ['Single raters absolute', 'Single random raters',
                         'Single fixed raters', 'Average raters absolute',
                         'Average random raters', 'Average fixed raters'],
-        'ICC': np.round([icc1, icc2, icc3, icc1k, icc2k, icc3k], 3),
-        'F': np.round([f1k, f2k, f2k, f1k, f2k, f2k], 3),
+        'ICC': [icc1, icc2, icc3, icc1k, icc2k, icc3k],
+        'F': [f1k, f2k, f2k, f1k, f2k, f2k],
         'df1': n - 1,
         'df2': [df1kd, df2kd, df2kd, df1kd, df2kd, df2kd],
         'pval': [p1k, p2k, p2k, p1k, p2k, p2k]

@@ -138,16 +138,16 @@ class TestDistribution(TestCase):
         Compare with ezANOVA.
         """
         _, W, _, _, p = sphericity(df_pivot, method='mauchly')
-        assert W == 0.999
+        assert round(W, 3) == 0.999
         assert np.round(p, 3) == 0.964
         _, W, _, _, p = sphericity(df, dv='Scores', subject='Subject',
                                    within='Time')  # Long-format
-        assert W == 0.999
+        assert round(W, 3) == 0.999
         assert np.round(p, 3) == 0.964
         assert sphericity(pa)[0]  # Only two levels so sphericity = True
         spher = sphericity(pb)
         assert spher[0]
-        assert spher[1] == 0.968  # W
+        assert round(spher[1], 3) == 0.968  # W
         assert spher[3] == 2  # dof
         assert np.isclose(spher[4], 0.8784418)  # P-value
         # JNS
@@ -156,20 +156,20 @@ class TestDistribution(TestCase):
                    method='jns')
         # Two-way design of shape (2, N)
         spher = sphericity(pab)
-        assert spher[1] == 0.625
+        assert round(spher[1], 3) == 0.625
         assert spher[3] == 2
         assert np.isclose(spher[4], 0.1523917)
         assert sphericity(pab)[1] == sphericity(pab.swaplevel(axis=1))[1]
         spher_long = sphericity(data, subject='Subject', dv='Performance',
                                 within=['Time', 'Metric'])
-        assert spher_long[1] == 0.625
+        assert round(spher_long[1], 3) == 0.625
         assert np.isclose(spher[4], spher_long[4])
         sphericity(pab_single)  # For coverage
         # Now with a (3, 4) two-way design
         # First, main effect
         spher = sphericity(pb1)
         assert spher[0]
-        assert spher[1] == 0.958  # W
+        assert round(spher[1], 3) == 0.958  # W
         assert round(spher[4], 4) == 0.8436  # P-value
         spher2 = sphericity(df3, subject='subj', dv='dv', within=['within2'])
         assert spher[1] == spher2[1]

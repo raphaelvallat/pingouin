@@ -20,7 +20,7 @@ class TestReliability(TestCase):
         df = read_dataset('cronbach_alpha')
         alpha, ci = cronbach_alpha(data=df, items='Items', scores='Scores',
                                    subject='Subj')
-        assert np.round(alpha, 3) == 0.592
+        assert round(alpha, 3) == 0.592
         assert ci[0] == .195
         assert ci[1] == .840
         # With missing values
@@ -33,9 +33,9 @@ class TestReliability(TestCase):
         # Wide format
         data = read_dataset('cronbach_wide_missing')
         alpha, _ = cronbach_alpha(data=data)
-        assert np.round(alpha, 2) == .73
+        assert round(alpha, 2) == .73
         alpha, _ = cronbach_alpha(data=data, nan_policy='listwise')
-        assert np.round(alpha, 2) == .80
+        assert round(alpha, 2) == .80
 
     def test_intraclass_corr(self):
         """Test function intraclass_corr
@@ -51,7 +51,7 @@ class TestReliability(TestCase):
         icc = intraclass_corr(data=df_psych, targets='S', raters='J',
                               ratings='Y')
         np.testing.assert_almost_equal(np.round(icc['ICC'].to_numpy(), 2),
-                                       [.17, .29, .72, .44, .62, .91])
+                                       [.17, .29, .71, .44, .62, .91])
         np.testing.assert_almost_equal(np.round(icc['F'], 1),
                                        [1.8, 11., 11., 1.8, 11., 11.])
         np.testing.assert_almost_equal((icc['df1']), [5] * 6)
