@@ -48,6 +48,12 @@ class TestCorrelation(TestCase):
         df = read_dataset('pairwise_corr')
         stats = corr(df['Neuroticism'], df['Extraversion'])
         assert np.isclose(1 / float(stats['BF10'].to_numpy()), 1.478e-13)
+        # When one column is a constant, the correlation is not defined
+        # and Pingouin return a DataFrame full of NaN, except for ``n``
+        x, y = [1, 1, 1], [1, 2, 3]
+        stats = corr(x, y)
+        assert stats.at['pearson', 'n']
+        assert np.isnan(stats.at['pearson', 'r'])
 
     def test_partial_corr(self):
         """Test function partial_corr.
