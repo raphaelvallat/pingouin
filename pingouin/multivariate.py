@@ -83,12 +83,14 @@ def multivariate_normality(X, alpha=.05):
     b = 1 / (np.sqrt(2)) * ((2 * p + 1) / 4)**(1 / (p + 4)) * \
         (n**(1 / (p + 4)))
 
-    hz = n * 4
+    # Is matrix full-rank (columns are linearly independent)?
     if np.linalg.matrix_rank(S) == p:
         hz = n * (1 / (n**2) * np.sum(np.sum(np.exp(-(b**2) / 2 * Djk))) - 2
                   * ((1 + (b**2))**(-p / 2)) * (1 / n)
                   * (np.sum(np.exp(-((b**2) / (2 * (1 + (b**2)))) * Dj)))
                   + ((1 + (2 * (b**2)))**(-p / 2)))
+    else:
+        hz = n * 4
 
     wb = (1 + b**2) * (1 + 3 * b**2)
     a = 1 + 2 * b**2
@@ -198,10 +200,11 @@ def multivariate_ttest(X, Y=None, paired=False):
     else:
         nx, kx = x.shape
         y = np.asarray(Y)
+        assert y.ndim in [1, 2], 'Y must be 1D or 2D.'
         if y.ndim == 1:
             # One sample with specified null
             assert y.size == kx
-        elif y.ndim == 2:
+        else:
             # Two-sample
             err = 'X and Y must have the same number of features (= columns).'
             assert y.shape[1] == kx, err

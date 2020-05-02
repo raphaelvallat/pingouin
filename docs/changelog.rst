@@ -6,8 +6,12 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
-v0.3.4 (dev)
-------------
+v0.3.4 (May 2020)
+-----------------
+
+**Bugfixes**
+
+a. Fixed minor bug in internal function *pingouin.utils._flatten_list* that could lead to TypeError in :py:func:`pingouin.pairwise_ttests` with within/between factors encoded as integers (see `issue #91 <https://github.com/raphaelvallat/pingouin/issues/91>`_).
 
 **Code and dependencies**
 

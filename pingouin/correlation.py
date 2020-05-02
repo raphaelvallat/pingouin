@@ -78,7 +78,7 @@ def skipped(x, y, method='spearman'):
     # Loop over rows
     dis = np.zeros(shape=(nrows, nrows))
     for i in np.arange(nrows):
-        if bot[i] != 0:
+        if bot[i] != 0:  # Avoid division by zero error
             dis[i, :] = np.linalg.norm(B * B2[i, :] / bot[i], axis=1)
 
     # Detect outliers

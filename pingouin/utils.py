@@ -149,7 +149,7 @@ def remove_na(x, y=None, paired=False, axis='rows'):
         return _remove_na_single(x, axis=axis)
     elif isinstance(y, (int, float, str)):
         return _remove_na_single(x, axis=axis), y
-    elif isinstance(y, (list, np.ndarray)):
+    else:  # y is list, np.array, pd.Series
         y = np.asarray(y)
         # Make sure that we just pass-through if y have only 1 element
         if y.size == 1:
@@ -280,19 +280,25 @@ def _flatten_list(x, include_tuple=False):
     >>> _flatten_list(x)
     ['Xaa', 'Xbb', 'Xcc']
 
-    >>> x = ['Xaa', ('Xbb', 'Xcc')]
+    >>> x = ['Xaa', ('Xbb', 'Xcc'), (1, 2), (1)]
     >>> _flatten_list(x)
-    ['Xaa', ('Xbb', 'Xcc')]
+    ['Xaa', ('Xbb', 'Xcc'), (1, 2), 1]
 
     >>> _flatten_list(x, include_tuple=True)
-    ['Xaa', 'Xbb', 'Xcc']
+    ['Xaa', 'Xbb', 'Xcc', 1, 2, 1]
     """
-    result = []
+    # If x is not iterable, return x
+    if not isinstance(x, collections.abc.Iterable):
+        return x
     # Remove None
     x = list(filter(None.__ne__, x))
+    # Initialize empty output variable
+    result = []
+    # Loop over items in x
     for el in x:
-        x_is_iter = isinstance(x, collections.abc.Iterable)
-        if x_is_iter:
+        # Check if element is iterable
+        el_is_iter = isinstance(el, collections.abc.Iterable)
+        if el_is_iter:
             if not isinstance(el, (str, tuple)):
                 result.extend(_flatten_list(el))
             else:

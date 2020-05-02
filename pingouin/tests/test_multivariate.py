@@ -7,8 +7,12 @@ data = read_dataset('multivariate')
 dvs = ['Fever', 'Pressure', 'Aches']
 X = data[data['Condition'] == 'Drug'][dvs]
 Y = data[data['Condition'] == 'Placebo'][dvs]
+# With missing values
 X_na = X.copy()
 X_na.iloc[4, 2] = np.nan
+# Rank deficient
+X_rd = X.copy()
+X_rd['Bad'] = 1.08 * X_rd['Fever'] - 0.5 * X_rd['Pressure']
 
 
 class TestMultivariate(TestCase):
@@ -31,6 +35,8 @@ class TestMultivariate(TestCase):
         assert round(p, 3) == 0.717
         # With missing values
         multivariate_normality(X_na, alpha=.05)
+        # Rank deficient
+        multivariate_normality(X_rd)
 
     def test_multivariate_ttest(self):
         """Test function multivariate_ttest.

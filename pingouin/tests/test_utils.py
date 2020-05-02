@@ -39,6 +39,8 @@ class TestUtils(TestCase):
         fl = _flatten_list(xt)
         assert fl == xt
         np.testing.assert_array_equal(_flatten_list(xt, include_tuple=True), x)
+        assert _flatten_list(1) == 1  # x is not iterable
+        assert _flatten_list([(1), (2)]) == [1, 2]  # (1) is an int and not tup
 
     def test_perm_pval(self):
         """Test function _perm_pval.
