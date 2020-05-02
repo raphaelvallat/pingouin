@@ -521,6 +521,8 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     grp_subj = data.groupby(subject)[dv]
     sssubj = n_rm * np.sum((grp_subj.mean() - grandmean)**2)
     sserror = sswithin - sssubj
+    # sstotal = sstime + sswithin =  sstime + (sssubj + sserror)
+    # sstotal = ((data[dv] - data[dv].mean())**2).sum()
 
     # Calculate degrees of freedom
     ddof1 = n_rm - 1
@@ -531,9 +533,13 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     fval = sstime / mserror
     p_unc = f(ddof1, ddof2).sf(fval)
 
-    # Calculating partial eta-square
+    # Calculating effect sizes (see Bakeman 2005; Lakens 2013)
+    # In one-way ANOVA, partial eta2 = eta2
     # Similar to (fval * ddof1) / (fval * ddof1 + ddof2)
     np2 = sstime / (sstime + sserror)
+    # ng2 = sstime / (sstime + sssubj + sserror) -- To check!
+    # Omega-squared -- to check!
+    # o2 = (ddof1 * (mstime - mserror)) / (sstotal + mssubj)
 
     # Reshape and remove NAN for sphericity estimation and correction
     data_pivot = data.pivot(index=subject, columns=within, values=dv).dropna()
@@ -956,6 +962,8 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
     # Within effect (= error between)
     #  = (grp.var(ddof=0) * grp.count()).sum()
     sserror = grp.apply(lambda x: (x - x.mean())**2).sum()
+    # In 1-way ANOVA, sstotal = ssbetween + sserror
+    # sstotal = ((data[dv] - data[dv].mean())**2).sum()
 
     # Calculate DOF, MS, F and p-values
     ddof1 = n_groups - 1
@@ -965,9 +973,12 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
     fval = msbetween / mserror
     p_unc = f(ddof1, ddof2).sf(fval)
 
-    # Calculating partial eta-square
+    # Calculating effect sizes (see Bakeman 2005; Lakens 2013)
+    # In one-way ANOVA, partial eta2 = eta2 = generalized eta2
     # Similar to (fval * ddof1) / (fval * ddof1 + ddof2)
-    np2 = ssbetween / (ssbetween + sserror)
+    np2 = ssbetween / (ssbetween + sserror)  # = ssbetween / sstotal
+    # Omega-squared -- to check!
+    # o2 = (ddof1 * (msbetween - mserror)) / (sstotal + mserror)
 
     # Create output dataframe
     if not detailed:
@@ -1444,10 +1455,12 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     ptime = f(dftime, dfwg).sf(ftime)
     pinter = f(dfinter, dfwg).sf(finter)
 
-    # Effects sizes
-    npsq_between = fbetween * dfbetween / (fbetween * dfbetween + dfeb)
-    npsq_time = ftime * dftime / (ftime * dftime + dfwg)
-    npsq_inter = ssinter / (ssinter + sswg)
+    # Effects sizes (see Bakeman 2005)
+    # 1) Partial eta-squared
+    np2_between = fbetween * dfbetween / (fbetween * dfbetween + dfeb)
+    np2_time = ftime * dftime / (ftime * dftime + dfwg)
+    np2_inter = ssinter / (ssinter + sswg)
+    # 2) Generalized eta-squared
 
     # Stats table
     aov = pd.concat([mbetw.drop(1), mtime.drop(1)], sort=False,
@@ -1456,14 +1469,14 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     aov.rename(columns={'DF': 'DF1'}, inplace=True)
     aov.at[0, 'F'], aov.at[1, 'F'] = fbetween, ftime
     aov.at[0, 'p-unc'], aov.at[1, 'p-unc'] = pbetween, ptime
-    aov.at[0, 'np2'], aov.at[1, 'np2'] = npsq_between, npsq_time
+    aov.at[0, 'np2'], aov.at[1, 'np2'] = np2_between, np2_time
     aov = aov.append({'Source': 'Interaction',
                       'SS': ssinter,
                       'DF1': dfinter,
                       'MS': msinter,
                       'F': finter,
                       'p-unc': pinter,
-                      'np2': npsq_inter,
+                      'np2': np2_inter,
                       }, ignore_index=True)
 
     # Rounding - Disabled in Pingouin v0.3.4
