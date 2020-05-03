@@ -374,14 +374,22 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     In one-way repeated-measures ANOVA, the total variance (sums of squares)
     is divided into three components
 
-    .. math:: SS_{total} = SS_{treatment} + (SS_{subjects} + SS_{error})
+    .. math::
+        SS_{\\text{total}} = SS_{\\text{effect}} +
+        (SS_{\\text{subjects}} + SS_{\\text{error}})
 
     with
 
-    .. math:: SS_{total} = \\sum_i^r \\sum_j^n (Y_{ij} - \\overline{Y})^2
-    .. math:: SS_{treatment} = \\sum_i^r n_i(\\overline{Y_i} - \\overline{Y})^2
-    .. math:: SS_{subjects} = r\\sum (\\overline{Y}_s - \\overline{Y})^2
-    .. math:: SS_{error} = SS_{total} - SS_{treatment} - SS_{subjects}
+    .. math::
+        SS_{\\text{total}} = \\sum_i^r \\sum_j^n (Y_{ij} - \\overline{Y})^2
+
+        SS_{\\text{effect}} = \\sum_i^r n_i(\\overline{Y_i} - \\overline{Y})^2
+
+        SS_{\\text{subjects}} = r\\sum (\\overline{Y}_s - \\overline{Y})^2
+
+        SS_{\\text{error}} = SS_{\\text{total}} - SS_{\\text{effect}} -
+        SS_{\\text{subjects}}
+
 
     where :math:`i=1,...,r; j=1,...,n_i`, :math:`r` is the number of
     conditions, :math:`n_i` the number of observations for each condition,
@@ -393,18 +401,20 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
 
     .. math::
 
-        F^* = \\frac{MS_{treatment}}{MS_{error}} =
-        \\frac{\\frac{SS_{treatment}}
-        {r-1}}{\\frac{SS_{error}}{(n - 1)(r - 1)}}
+        F^* = \\frac{MS_{\\text{effect}}}{MS_{\\text{error}}} =
+        \\frac{\\frac{SS_{\\text{effect}}}
+        {r-1}}{\\frac{SS_{\\text{error}}}{(n - 1)(r - 1)}}
 
     and the p-value can be calculated using a F-distribution with
-    :math:`v_{treatment} = r - 1` and
-    :math:`v_{error} = (n - 1)(r - 1)` degrees of freedom.
+    :math:`v_{\\text{effect}} = r - 1` and
+    :math:`v_{\\text{error}} = (n - 1)(r - 1)` degrees of freedom.
 
     The effect size reported in Pingouin is the partial eta-square, which is
     equivalent to eta-square for one-way repeated measures ANOVA.
 
-    .. math:: \\eta_p^2 = \\frac{SS_{treatment}}{SS_{treatment} + SS_{error}}
+    .. math::
+        \\eta_p^2 = \\frac{SS_{\\text{effect}}}{SS_{\\text{effect}} +
+        SS_{\\text{error}}}
 
     Results have been tested against R and JASP. Note however that if the
     dataset contains one or more other within subject factors, an automatic
@@ -480,7 +490,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         elif len(within) == 2:
             return rm_anova2(dv=dv, within=within, data=data, subject=subject)
         else:
-            raise ValueError('Repeated measures ANOVA with more than three '
+            raise ValueError('Repeated measures ANOVA with three or more '
                              'factors are not yet supported.')
 
     # Check data format
@@ -823,10 +833,14 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
     The main idea of ANOVA is to partition the variance (sums of squares)
     into several components. For example, in one-way ANOVA:
 
-    .. math:: SS_{total} = SS_{treatment} + SS_{error}
-    .. math:: SS_{total} = \\sum_i \\sum_j (Y_{ij} - \\overline{Y})^2
-    .. math:: SS_{treatment} = \\sum_i n_i (\\overline{Y_i} - \\overline{Y})^2
-    .. math:: SS_{error} = \\sum_i \\sum_j (Y_{ij} - \\overline{Y}_i)^2
+    .. math::
+        SS_{\\text{total}} = SS_{\\text{effect}} + SS_{\\text{error}}
+
+        SS_{\\text{total}} = \\sum_i \\sum_j (Y_{ij} - \\overline{Y})^2
+
+        SS_{\\text{effect}} = \\sum_i n_i (\\overline{Y_i} - \\overline{Y})^2
+
+        SS_{\\text{error}} = \\sum_i \\sum_j (Y_{ij} - \\overline{Y}_i)^2
 
     where :math:`i=1,...,r; j=1,...,n_i`, :math:`r` is the number of groups,
     and :math:`n_i` the number of observations for the :math:`i` th group.
@@ -835,8 +849,8 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
 
     .. math::
 
-        F^* = \\frac{MS_{treatment}}{MS_{error}} = \\frac{SS_{treatment}
-        / (r - 1)}{SS_{error} / (n_t - r)}
+        F^* = \\frac{MS_{\\text{effect}}}{MS_{\\text{error}}} =
+        \\frac{SS_{\\text{effect}} / (r - 1)}{SS_{\\text{error}} / (n_t - r)}
 
     and the p-value can be calculated using a F-distribution with
     :math:`r-1, n_t-1` degrees of freedom.
@@ -851,7 +865,9 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
     partial eta-square is the same as eta-square and generalized eta-square.
     For more details, see Bakeman 2005; Richardson 2011.
 
-    .. math:: \\eta_p^2 = \\frac{SS_{treatment}}{SS_{treatment} + SS_{error}}
+    .. math::
+        \\eta_p^2 = \\frac{SS_{\\text{effect}}}{SS_{\\text{effect}} +
+        SS_{\\text{error}}}
 
     Note that missing values are automatically removed. Results have been
     tested against R, Matlab and JASP.
@@ -945,10 +961,8 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
 
     # Drop missing values
     data = data[[dv, between]].dropna()
-
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
-
     groups = list(data[between].unique())
     n_groups = len(groups)
     N = data[dv].size
@@ -961,7 +975,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
     #  = (grp.var(ddof=0) * grp.count()).sum()
     sserror = grp.apply(lambda x: (x - x.mean())**2).sum()
     # In 1-way ANOVA, sstotal = ssbetween + sserror
-    # sstotal = ((data[dv] - data[dv].mean())**2).sum()
+    # sstotal = ssbetween + sserror
 
     # Calculate DOF, MS, F and p-values
     ddof1 = n_groups - 1
@@ -975,7 +989,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
     # In one-way ANOVA, partial eta2 = eta2 = generalized eta2
     # Similar to (fval * ddof1) / (fval * ddof1 + ddof2)
     np2 = ssbetween / (ssbetween + sserror)  # = ssbetween / sstotal
-    # Omega-squared -- to check!
+    # Omega-squared
     # o2 = (ddof1 * (msbetween - mserror)) / (sstotal + mserror)
 
     # Create output dataframe
@@ -1218,17 +1232,17 @@ def welch_anova(data=None, dv=None, between=None):
 
     .. math::
 
-        \\overline{Y}_{welch} = \\frac{\\sum_{i=1}^r w_i\\overline{Y}_i}
-        {\\sum w}
+        \\overline{Y}_{\\text{welch}} = \\frac{\\sum_{i=1}^r
+        w_i\\overline{Y}_i}{\\sum w}
 
     where :math:`\\overline{Y}_i` is the mean of the :math:`i` group.
 
-    The treatment sums of squares is defined as:
+    The effect sums of squares is defined as:
 
     .. math::
 
-        SS_{treatment} = \\sum_{i=1}^r w_i
-        (\\overline{Y}_i - \\overline{Y}_{welch})^2
+        SS_{\\text{effect}} = \\sum_{i=1}^r w_i
+        (\\overline{Y}_i - \\overline{Y}_{\\text{welch}})^2
 
     We then need to calculate a term lambda:
 
@@ -1241,7 +1255,7 @@ def welch_anova(data=None, dv=None, between=None):
 
     .. math::
 
-        F_{welch} = \\frac{SS_{treatment} / (r-1)}
+        F_{\\text{welch}} = \\frac{SS_{\\text{effect}} / (r-1)}
         {1 + \\frac{2\\Lambda(r-2)}{3}}
 
     and the p-value approximated using a F-distribution with
