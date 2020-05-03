@@ -516,30 +516,28 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     grandmean = data[dv].mean()
 
     # Calculate sums of squares
-    sstime = ((grp_with.mean() - grandmean)**2 * grp_with.count()).sum()
-    sswithin = grp_with.apply(lambda x: (x - x.mean())**2).sum()
+    ss_with = ((grp_with.mean() - grandmean)**2 * grp_with.count()).sum()
+    ss_resall = grp_with.apply(lambda x: (x - x.mean())**2).sum()
+    # sstotal = sstime + ss_resall =  sstime + (sssubj + sserror)
+    # ss_total = ((data[dv] - grandmean)**2).sum()
+    # We can further divide the residuals into a within and between component:
     grp_subj = data.groupby(subject)[dv]
-    sssubj = n_rm * np.sum((grp_subj.mean() - grandmean)**2)
-    sserror = sswithin - sssubj
-    # sstotal = sstime + sswithin =  sstime + (sssubj + sserror)
-    # sstotal = ((data[dv] - data[dv].mean())**2).sum()
+    ss_resbetw = n_rm * np.sum((grp_subj.mean() - grandmean)**2)
+    ss_reswith = ss_resall - ss_resbetw
 
     # Calculate degrees of freedom
     ddof1 = n_rm - 1
     ddof2 = ddof1 * (n_obs - 1)
 
-    # Calculate F and p-values
-    mserror = sserror / (ddof2 / ddof1)
-    fval = sstime / mserror
+    # Calculate MS, F and p-values
+    ms_with = ss_with / ddof1
+    ms_reswith = ss_reswith / ddof2
+    fval = ms_with / ms_reswith
     p_unc = f(ddof1, ddof2).sf(fval)
 
     # Calculating effect sizes (see Bakeman 2005; Lakens 2013)
-    # In one-way ANOVA, partial eta2 = eta2
-    # Similar to (fval * ddof1) / (fval * ddof1 + ddof2)
-    np2 = sstime / (sstime + sserror)
-    # ng2 = sstime / (sstime + sssubj + sserror) -- To check!
-    # Omega-squared -- to check!
-    # o2 = (ddof1 * (mstime - mserror)) / (sstotal + mssubj)
+    np2 = ss_with / (ss_with + ss_reswith)  # (Partial) eta-squared, np2 == n2
+    # ng2 = ss_with / (ss_with + ss_resall)  # Generalized eta-squared
 
     # Reshape and remove NAN for sphericity estimation and correction
     data_pivot = data.pivot(index=subject, columns=within, values=dv).dropna()
@@ -584,9 +582,9 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
                      'p-spher']
     else:
         aov = pd.DataFrame({'Source': [within, 'Error'],
-                            'SS': [sstime, sserror],
+                            'SS': [ss_with, ss_reswith],
                             'DF': [ddof1, ddof2],
-                            'MS': [sstime / ddof1, sserror / ddof2],
+                            'MS': [ms_with, ms_reswith],
                             'F': [fval, np.nan],
                             'p-unc': [p_unc, np.nan],
                             'np2': [np2, np.nan],
