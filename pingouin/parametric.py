@@ -728,10 +728,20 @@ def rm_anova2(data=None, dv=None, within=None, subject=None):
     p_b = f(df_b, df_bs).sf(f_b)
     p_ab = f(df_ab, df_abs).sf(f_ab)
 
-    # Partial eta-square
-    eta_a = (f_a * df_a) / (f_a * df_a + df_as)
-    eta_b = (f_b * df_b) / (f_b * df_b + df_bs)
-    eta_ab = (f_ab * df_ab) / (f_ab * df_ab + df_abs)
+    # Effect sizes
+    # ..Eta-square
+    # n2_denom = ss_a + ss_as + ss_b + ss_bs + ss_ab + ss_abs
+    # n2_a = ss_a / n2_denom
+    # n2_b = ss_b / n2_denom
+    # n2_ab = ss_ab / n2_denom
+    # ..Partial eta-square
+    np2_a = (f_a * df_a) / (f_a * df_a + df_as)
+    np2_b = (f_b * df_b) / (f_b * df_b + df_bs)
+    np2_ab = (f_ab * df_ab) / (f_ab * df_ab + df_abs)
+    # .. Generalized eta-square (from Bakeman 2005 Table 1)
+    # ng2_a = ss_a / (ss_a + ss_s + ss_as + ss_bs + ss_abs)
+    # ng2_b = ss_b / (ss_b + ss_s + ss_as + ss_bs + ss_abs)
+    # ng2_ab = ss_ab / (ss_ab + ss_s + ss_as + ss_bs + ss_abs)
 
     # Epsilon
     piv_a = data.pivot_table(index=subject, columns=a, values=dv)
@@ -761,7 +771,7 @@ def rm_anova2(data=None, dv=None, within=None, subject=None):
                         'F': [f_a, f_b, f_ab],
                         'p-unc': [p_a, p_b, p_ab],
                         'p-GG-corr': [p_a_corr, p_b_corr, p_ab_corr],
-                        'np2': [eta_a, eta_b, eta_ab],
+                        'np2': [np2_a, np2_b, np2_ab],
                         'eps': [eps_a, eps_b, eps_ab],
                         })
 
@@ -1488,6 +1498,7 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     # ng2_inter = ss_inter / (ss_inter + ss_resall)
     # 4) Generalized omega-squared (like JASP w2 output)
     # From Olejnik and Algina 2003
+    # To be continued...
 
     # Stats table
     aov = pd.concat([aov_betw.drop(1), aov_with.drop(1)], sort=False,
