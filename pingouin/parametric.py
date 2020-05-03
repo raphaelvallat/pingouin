@@ -1418,72 +1418,79 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
 
     # SUMS OF SQUARES
     grandmean = data[dv].mean()
-    # Extract main effects of time and between
-    mtime = rm_anova(dv=dv, within=within, subject=subject, data=data,
-                     correction=correction, detailed=True)
-    mbetw = anova(dv=dv, between=between, data=data, detailed=True)
-    # Extract SS total, residuals and interactions
+    ss_total = ((data[dv] - grandmean)**2).sum()
+    # Extract main effects of within and between factors
+    aov_with = rm_anova(dv=dv, within=within, subject=subject, data=data,
+                        correction=correction, detailed=True)
+    aov_betw = anova(dv=dv, between=between, data=data, detailed=True)
+    ss_betw = aov_betw.at[0, 'SS']
+    ss_with = aov_with.at[0, 'SS']
+    # Extract residuals and interactions
     grp = data.groupby([between, within])[dv]
-    sstotal = grp.apply(lambda x: (x - grandmean)**2).sum()
-    # sst = residuals within + residuals between
-    sst = grp.apply(lambda x: (x - x.mean())**2).sum()
+    # ssresall = residuals within + residuals between
+    ss_resall = grp.apply(lambda x: (x - x.mean())**2).sum()
     # Interaction
-    ssinter = sstotal - (sst + mtime.at[0, 'SS'] + mbetw.at[0, 'SS'])
-    sswg = mtime.at[1, 'SS'] - ssinter
-    sseb = sstotal - (mtime.at[0, 'SS'] + mbetw.at[0, 'SS'] + sswg + ssinter)
+    ss_inter = ss_total - (ss_resall + ss_with + ss_betw)
+    ss_reswith = aov_with.at[1, 'SS'] - ss_inter
+    ss_resbetw = ss_total - (ss_with + ss_betw + ss_reswith + ss_inter)
 
     # DEGREES OF FREEDOM
     n_obs = data.groupby(within)[dv].count().max()
-    dftime = mtime.at[0, 'DF']
-    dfbetween = mbetw.at[0, 'DF']
-    dfeb = n_obs - data.groupby(between)[dv].count().count()
-    dfwg = dftime * dfeb
-    dfinter = mtime.at[0, 'DF'] * mbetw.at[0, 'DF']
+    df_with = aov_with.at[0, 'DF']
+    df_betw = aov_betw.at[0, 'DF']
+    df_resbetw = n_obs - data.groupby(between)[dv].count().count()
+    df_reswith = df_with * df_resbetw
+    df_inter = aov_with.at[0, 'DF'] * aov_betw.at[0, 'DF']
 
     # MEAN SQUARES
-    mseb = sseb / dfeb
-    mswg = sswg / dfwg
-    msinter = ssinter / dfinter
+    ms_betw = aov_betw.at[0, 'MS']
+    ms_with = aov_with.at[0, 'MS']
+    ms_resbetw = ss_resbetw / df_resbetw
+    ms_reswith = ss_reswith / df_reswith
+    ms_inter = ss_inter / df_inter
 
     # F VALUES
-    fbetween = mbetw.at[0, 'MS'] / mseb
-    ftime = mtime.at[0, 'MS'] / mswg
-    finter = msinter / mswg
+    f_betw = ms_betw / ms_resbetw
+    f_with = ms_with / ms_reswith
+    f_inter = ms_inter / ms_reswith
 
     # P-values
-    pbetween = f(dfbetween, dfeb).sf(fbetween)
-    ptime = f(dftime, dfwg).sf(ftime)
-    pinter = f(dfinter, dfwg).sf(finter)
+    p_betw = f(df_betw, df_resbetw).sf(f_betw)
+    p_with = f(df_with, df_reswith).sf(f_with)
+    p_inter = f(df_inter, df_reswith).sf(f_inter)
 
     # Effects sizes (see Bakeman 2005)
     # 1) Partial eta-squared
-    np2_between = fbetween * dfbetween / (fbetween * dfbetween + dfeb)
-    np2_time = ftime * dftime / (ftime * dftime + dfwg)
-    np2_inter = ssinter / (ssinter + sswg)
-    # 2) Generalized eta-squared
+    # np2_betw = f_betw * df_betw / (f_betw * df_betw + df_resbetw)
+    # np2_with = f_with * df_with / (f_with * df_with + df_reswith)
+    np2_betw = ss_betw / (ss_betw + ss_resbetw)
+    np2_with = ss_with / (ss_with + ss_reswith)
+    np2_inter = ss_inter / (ss_inter + ss_reswith)
+    # 2) Standard eta-squared
+    # n2_betw = ss_betw / ss_total
+    # n2_with = ss_with / ss_total
+    # n2_inter = ss_inter / ss_total
+    # 3) Generalized eta-square
+    # ng2_betw = ss_betw / (ss_betw + ss_resall)
+    # ng2_with = ss_with / (ss_with + ss_resall)
+    # ng2_inter = ss_inter / (ss_inter + ss_resall)
+    # 4) Generalized omega-squared (like JASP w2 output)
+    # From Olejnik and Algina 2003
 
     # Stats table
-    aov = pd.concat([mbetw.drop(1), mtime.drop(1)], sort=False,
+    aov = pd.concat([aov_betw.drop(1), aov_with.drop(1)], sort=False,
                     ignore_index=True)
     # Update values
     aov.rename(columns={'DF': 'DF1'}, inplace=True)
-    aov.at[0, 'F'], aov.at[1, 'F'] = fbetween, ftime
-    aov.at[0, 'p-unc'], aov.at[1, 'p-unc'] = pbetween, ptime
-    aov.at[0, 'np2'], aov.at[1, 'np2'] = np2_between, np2_time
-    aov = aov.append({'Source': 'Interaction',
-                      'SS': ssinter,
-                      'DF1': dfinter,
-                      'MS': msinter,
-                      'F': finter,
-                      'p-unc': pinter,
-                      'np2': np2_inter,
-                      }, ignore_index=True)
+    aov.at[0, 'F'], aov.at[1, 'F'] = f_betw, f_with
+    aov.at[0, 'p-unc'], aov.at[1, 'p-unc'] = p_betw, p_with
+    aov.at[0, 'np2'], aov.at[1, 'np2'] = np2_betw, np2_with
+    aov = aov.append({'Source': 'Interaction', 'SS': ss_inter, 'DF1': df_inter,
+                      'MS': ms_inter, 'F': f_inter, 'p-unc': p_inter,
+                      'np2': np2_inter}, ignore_index=True)
 
-    # Rounding - Disabled in Pingouin v0.3.4
-    # aov['SS'] = aov['SS'].round(3)
-    # aov['MS'] = aov['MS'].round(3)
-    aov['DF2'] = [dfeb, dfwg, dfwg]
-    aov['eps'] = [np.nan, mtime.at[0, 'eps'], np.nan]
+    aov['DF2'] = [df_resbetw, df_reswith, df_reswith]
+    aov['eps'] = [np.nan, aov_with.at[0, 'eps'], np.nan]
     col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc',
                  'p-GG-corr', 'np2', 'eps', 'sphericity', 'W-spher',
                  'p-spher']
