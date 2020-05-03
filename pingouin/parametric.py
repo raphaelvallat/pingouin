@@ -1091,10 +1091,15 @@ def anova2(data=None, dv=None, between=None, ss_type=2):
     pval_fac2 = f(df_fac2, df_resid).sf(fval_fac2)
     pval_inter = f(df_inter, df_resid).sf(fval_inter)
 
-    # Partial eta-square
+    # Effect size
+    # ..Partial eta-square
     np2_fac1 = ss_fac1 / (ss_fac1 + ss_resid)
     np2_fac2 = ss_fac2 / (ss_fac2 + ss_resid)
     np2_inter = ss_inter / (ss_inter + ss_resid)
+    # Standard eta-square
+    # n2_fac1 = ss_fac1 / ss_tot
+    # n2_fac2 = ss_fac2 / ss_tot
+    # n2_inter = ss_inter / ss_tot
 
     # Create output dataframe
     aov = pd.DataFrame({'Source': [fac1, fac2, fac1 + ' * ' + fac2,
@@ -1162,8 +1167,14 @@ def anovan(data=None, dv=None, between=None, ss_type=2):
     aov = aov.rename(columns={'index': 'Source', 'sum_sq': 'SS',
                               'df': 'DF', 'PR(>F)': 'p-unc'})
     aov['MS'] = aov['SS'] / aov['DF']
+
+    # Effect size
     aov['np2'] = (aov['F'] * aov['DF']) / (aov['F'] * aov['DF'] +
                                            aov.iloc[-1, 2])
+    # Get standard eta-square for all effects except residuals (last)
+    # ss_total = aov['SS'].sum()
+    # all_n2 = (aov['SS'] / aov['SS'].sum()).to_numpy()
+    # all_n2[-1] = np.nan
 
     def format_source(x):
         for fac in between:
