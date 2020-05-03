@@ -153,6 +153,7 @@ class TestEffsize(TestCase):
         compute_effsize(x=x, y=y, eftype='glass', paired=False)
         compute_effsize(x=x, y=y, eftype='odds-ratio', paired=False)
         compute_effsize(x=x, y=y, eftype='eta-square', paired=False)
+        compute_effsize(x=x, y=y, eftype='cles', paired=False)
         compute_effsize(x=x, y=y, eftype='none', paired=False)
         # Unequal variances
         z = np.random.normal(2.5, 3, 30)
@@ -194,6 +195,7 @@ class TestEffsize(TestCase):
         # No sample size info
         with pytest.raises(ValueError):
             compute_effsize_from_t(tval)
-        # Compare with R
-        assert np.allclose(compute_effsize_from_t(1.736465, nx=6, ny=6),
-                           1.002549)
+        # Compare with Lakens spreadsheet: https://osf.io/vbdah/
+        assert np.isclose(compute_effsize_from_t(1.1, N=31), 0.395131664)
+        assert np.isclose(compute_effsize_from_t(1.74, nx=6, ny=6), 1.00458946)
+        assert np.isclose(compute_effsize_from_t(2.5, nx=10, ny=14), 1.0350983)

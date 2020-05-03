@@ -11,14 +11,8 @@ v0.3.4 (May 2020)
 
 **Bugfixes**
 
-a. Fixed minor bug in internal function *pingouin.utils._flatten_list* that could lead to TypeError in :py:func:`pingouin.pairwise_ttests` with within/between factors encoded as integers (see `issue #91 <https://github.com/raphaelvallat/pingouin/issues/91>`_).
-
-**Code and dependencies**
-
-a. Compatibility with Python 3.9 (see `PR by tirkarthi <https://github.com/raphaelvallat/pingouin/pull/83>`_).
-b. To avoid any confusion, the ``alpha`` argument has been renamed to ``angles`` in all circular statistics functions.
-c. Updated flake8 guidelines and added CI for Python 3.8.
-d. Added the `tabulate <https://pypi.org/project/tabulate/>`_ package as dependency. The tabulate package is used by the :py:func:`pingouin.print_table` function as well as the :py:meth:`pandas.DataFrame.to_markdown` function.
+a. The Cohen :math:`d_{avg}` for paired samples was previously calculated using eq. 10 in `Lakens 2013 <https://www.frontiersin.org/articles/10.3389/fpsyg.2013.00863/full>`_. However, this equation was slightly different from the original proposed by `Cumming 2012 <https://books.google.com/books/about/Understanding_the_New_Statistics.html?id=AVBDYgEACAAJ>`_, and Lakens has since updated the equation in his effect size conversion `spreadsheet <https://osf.io/vbdah/>`_. Pingouin now uses the correct formula, which is :math:`d_{avg} = \frac{\overline{X} - \overline{Y}}{\sqrt{\frac{(\sigma_1^2 + \sigma_2^2)}{2}}}`.
+b. Fixed minor bug in internal function *pingouin.utils._flatten_list* that could lead to TypeError in :py:func:`pingouin.pairwise_ttests` with within/between factors encoded as integers (see `issue #91 <https://github.com/raphaelvallat/pingouin/issues/91>`_).
 
 **New functions**
 
@@ -32,6 +26,13 @@ c. :py:func:`pingouin.circ_mean` and :py:func:`pingouin.circ_r` now perform calc
 d. Pingouin no longer changes the default matplotlib style to a Seaborn-default (see `issue #85 <https://github.com/raphaelvallat/pingouin/issues/85>`_).
 e. Disabled rounding of float in most Pingouin functions in order to reduce numerical imprecision. For more details, please refer to `issue #87 <https://github.com/raphaelvallat/pingouin/issues/87>`_. Users can still round the output using the :py:meth:`pandas.DataFrame.round` method, or changing the default precision of Pandas DataFrame with `pandas.set_option <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.set_option.html>`_.
 f. Disabled filling of missing values by ``'-'`` in some ANOVAs functions, which may have lead to dtypes issues.
+
+**Code and dependencies**
+
+a. Compatibility with Python 3.9 (see `PR by tirkarthi <https://github.com/raphaelvallat/pingouin/pull/83>`_).
+b. To avoid any confusion, the ``alpha`` argument has been renamed to ``angles`` in all circular statistics functions.
+c. Updated flake8 guidelines and added continuous integration for Python 3.8.
+d. Added the `tabulate <https://pypi.org/project/tabulate/>`_ package as dependency. The tabulate package is used by the :py:func:`pingouin.print_table` function as well as the :py:meth:`pandas.DataFrame.to_markdown` function.
 
 v0.3.3 (February 2020)
 ----------------------

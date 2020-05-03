@@ -541,7 +541,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     elif ot == 'odds-ratio':
         # Borenstein et al. 2009
         return np.exp(d * np.pi / np.sqrt(3))
-    elif ot in ['auc', 'cles']:
+    else:  # ['auc', 'cles']
         # Ruscio 2008
         from scipy.stats import norm
         return norm.cdf(d / np.sqrt(2))
@@ -601,7 +601,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
     .. math::
 
         d_{avg} = \\frac{\\overline{X} - \\overline{Y}}
-        {0.5 * (\\sigma_1 + \\sigma_2)}
+        {\\sqrt{\\frac{(\\sigma_1^2 + \\sigma_2^2)}{2}}}
 
     The Cohen’s d is a biased estimate of the population effect size,
     especially for small samples (n < 20). It is often preferable
@@ -625,6 +625,8 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
     .. [2] Cumming, Geoff. Understanding the new statistics: Effect sizes,
            confidence intervals, and meta-analysis. Routledge, 2013.
 
+    .. [3] https://osf.io/vbdah/
+
     Examples
     --------
     1. Compute Cohen d from two independent set of observations.
@@ -646,7 +648,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
     >>> y = [0.91, 3., 2.28, 0.49, 1.42, 3.65, -0.43, 1.57, 3.27, 1.13]
     >>> g = compute_effsize(x=x, y=y, eftype='hedges', paired=True)
     >>> print(g)
-    0.8370985097811404
+    0.8353295489915401
 
     3. Compute Glass delta from two independent set of observations. The group
        with the lowest variance will automatically be selected as the control.
@@ -711,8 +713,11 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
             d = (x.mean() - y.mean()) / poolsd
         else:
             # Report Cohen d-avg (Cumming 2012; Lakens 2013)
-            d = (x.mean() - y.mean()) / (.5 * (x.std(ddof=1)
-                                               + y.std(ddof=1)))
+            # Careful, the formula in Lakens 2013 is wrong. Updated in Pingouin
+            # v0.3.4 to use the formula provided by Cummings 2012.
+            # Before that the denominator was just (SD1 + SD2) / 2
+            d = (x.mean() - y.mean()) / np.sqrt((x.var(ddof=1) +
+                                                 y.var(ddof=1)) / 2)
         return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)
 
 
