@@ -32,8 +32,10 @@ def _checkangles(angles, axis=None):
 
 
 def convert_angles(angles, low=0, high=360, positive=False):
-    """Element-wise conversion of arbitrary unit circular quantities
+    """Element-wise conversion of arbitrary-unit circular quantities
     to radians.
+
+    .. versionadded:: 0.3.4
 
     Parameters
     ----------

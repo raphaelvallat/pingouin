@@ -19,7 +19,7 @@ from .plotting import *
 from .contingency import *
 
 # Version of the package
-__version__ = "0.3.3"
+__version__ = "0.3.4"
 
 # Warn if a newer version of Pingouin is available
 from outdated import warn_if_outdated

@@ -299,7 +299,7 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
 
   # Compute the two-way mixed ANOVA
   aov = pg.mixed_anova(data=df, dv='Scores', between='Group', within='Time',
-                       subject='Subject', correction=False)
+                       subject='Subject', correction=False, effsize="np2")
   pg.print_table(aov)
 
 .. table:: Output
