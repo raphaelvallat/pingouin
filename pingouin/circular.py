@@ -63,12 +63,13 @@ def convert_angles(angles, low=0, high=360, positive=False):
 
         \\alpha_r = \\frac{2\\pi\\alpha}{\\text{high} - \\text{low}}
 
-    If ``positive=True``, the resulting angles in radians :math:`\\alpha_r`
-    are then wrapped to the :math:`[-\\pi, \\pi)` range:
+    If ``positive=False`` (default), the resulting angles in
+    radians :math:`\\alpha_r` are then wrapped to the :math:`[-\\pi, \\pi)`
+    range:
 
     .. math::
 
-        \\text{angle} \\left ( \\exp(i \\cdot \\alpha_r) \\right )
+        (\\text{angle} + \\pi) \\mod 2 \\pi - \\pi
 
     Examples
     --------
@@ -119,9 +120,12 @@ def convert_angles(angles, low=0, high=360, positive=False):
     # Map to [0, 2pi] range
     rad = angles * (2 * np.pi) / ptp
     if not positive:
-        # Map to [-pi, pi] range, https://stackoverflow.com/a/29237626/10581531
-        # return np.angle(np.exp(1j * rad))
-        rad = (rad + np.pi) % (2 * np.pi) - np.pi  # Faster
+        # https://stackoverflow.com/a/29237626/10581531
+        # Map to [-pi, pi) range:
+        rad = (rad + np.pi) % (2 * np.pi) - np.pi  # [-pi, pi)
+        # Map to (-pi, pi] range:
+        # rad = np.angle(np.exp(1j * rad))
+        # rad = -1 * ((-rad + np.pi) % (2 * np.pi) - np.pi)
     return rad
 
 

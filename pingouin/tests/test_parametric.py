@@ -87,9 +87,13 @@ class TestParametric(TestCase):
         # Compare with JASP
         aov = anova(dv='Pain threshold', between='Hair color', data=df_pain,
                     detailed=True).round(3)
-        assert np.isclose(aov.at[0, 'F'], 6.791)
-        assert np.isclose(aov.at[0, 'p-unc'], .004)
-        assert np.isclose(aov.at[0, 'np2'], .576)
+        assert aov.at[0, 'F'] == 6.791
+        assert aov.at[0, 'p-unc'] == .004
+        assert aov.at[0, 'np2'] == .576
+        aov = anova(dv='Pain threshold', between='Hair color', data=df_pain,
+                    effsize="n2", detailed=True).round(3)
+        assert aov.at[0, 'n2'] == .576
+
         # Unbalanced and with missing values
         df_pain.loc[[17, 18], 'Pain threshold'] = np.nan
         aov = df_pain.anova(dv='Pain threshold', between='Hair color').round(3)
@@ -101,43 +105,38 @@ class TestParametric(TestCase):
         # Error: between is an empty list
         with pytest.raises(ValueError):
             anova(dv='Pain threshold', between=[], data=df_pain)
+
         # Two-way ANOVA with balanced design
         df_aov2 = read_dataset('anova2')
         aov2 = anova(dv="Yield", between=["Blend", "Crop"],
-                     data=df_aov2).round(3)
-        array_equal(aov2.loc[:, 'MS'].to_numpy(),
-                    [2.042, 1368.292, 1180.042, 541.847])
-        array_equal(aov2.loc[[0, 1, 2], 'F'].to_numpy(),
-                    [0.004, 2.525, 2.178])
-        array_equal(aov2.loc[[0, 1, 2], 'p-unc'].to_numpy(),
-                    [0.952, 0.108, 0.142])
-        array_equal(aov2.loc[[0, 1, 2], 'np2'].to_numpy(),
-                    [0.000, 0.219, 0.195])
+                     data=df_aov2).round(4)
+        array_equal(aov2.loc[:, 'MS'],
+                    [2.0417, 1368.2917, 1180.0417, 541.8472])
+        array_equal(aov2.loc[[0, 1, 2], 'F'], [0.0038, 2.5252, 2.1778])
+        array_equal(aov2.loc[[0, 1, 2], 'p-unc'], [0.9517, 0.1080, 0.1422])
+        array_equal(aov2.loc[[0, 1, 2], 'np2'], [0.0002, 0.2191, 0.1948])
+        # Same but with standard eta-square
+        aov2 = anova(dv="Yield", between=["Blend", "Crop"],
+                     data=df_aov2, effsize="n2").round(4)
+        array_equal(aov2.loc[[0, 1, 2], 'n2'], [0.0001, 0.1843, 0.1589])
 
         # Two-way ANOVA with unbalanced design
         df_aov2 = read_dataset('anova2_unbalanced')
         aov2 = df_aov2.anova(dv="Scores", between=["Diet", "Exercise"]
                              ).round(3)
-        array_equal(aov2.loc[:, 'MS'].to_numpy(),
-                    [390.625, 180.625, 15.625, 52.625])
-        array_equal(aov2.loc[[0, 1, 2], 'F'].to_numpy(),
-                    [7.423, 3.432, 0.297])
-        array_equal(aov2.loc[[0, 1, 2], 'p-unc'].to_numpy(),
-                    [0.034, 0.113, 0.605])
-        array_equal(aov2.loc[[0, 1, 2], 'np2'].to_numpy(),
-                    [0.553, 0.364, 0.047])
+        array_equal(aov2.loc[:, 'MS'], [390.625, 180.625, 15.625, 52.625])
+        array_equal(aov2.loc[[0, 1, 2], 'F'], [7.423, 3.432, 0.297])
+        array_equal(aov2.loc[[0, 1, 2], 'p-unc'], [0.034, 0.113, 0.605])
+        array_equal(aov2.loc[[0, 1, 2], 'np2'], [0.553, 0.364, 0.047])
 
         # Two-way ANOVA with unbalanced design and missing values
         df_aov2.loc[9, 'Scores'] = np.nan
         # Type 2
         aov2 = anova(dv="Scores", between=["Diet", "Exercise"],
                      data=df_aov2).round(3)
-        array_equal(aov2.loc[[0, 1, 2], 'F'].to_numpy(),
-                    [10.403, 5.167, 0.761])
-        array_equal(aov2.loc[[0, 1, 2], 'p-unc'].to_numpy(),
-                    [0.023, 0.072, 0.423])
-        array_equal(aov2.loc[[0, 1, 2], 'np2'].to_numpy(),
-                    [0.675, 0.508, 0.132])
+        array_equal(aov2.loc[[0, 1, 2], 'F'], [10.403, 5.167, 0.761])
+        array_equal(aov2.loc[[0, 1, 2], 'p-unc'], [0.023, 0.072, 0.423])
+        array_equal(aov2.loc[[0, 1, 2], 'np2'], [0.675, 0.508, 0.132])
         # Type 1
         aov2_ss1 = anova(dv="Scores", between=["Diet", "Exercise"],
                          ss_type=1, data=df_aov2).round(3)
@@ -198,6 +197,11 @@ class TestParametric(TestCase):
         array_equal(aov3_ss3.loc[:, 'p-unc'], [0.053, 0., 0.619, 0.779, 0.477,
                                                0.353, 0.606, np.nan])
 
+        aov3_ss3 = anova(dv="Cholesterol", between=['Sex', 'Risk', 'Drug'],
+                         ss_type=3, data=df_aov3, effsize="n2").round(3)
+        array_equal(aov3_ss3.loc[:, 'n2'], [0.048, 0.189, 0.012, 0.001, 0.018,
+                                            0.026, 0.012, np.nan])
+
         # Error: invalid char in column names
         df_aov3['Sex:'] = np.random.normal(size=df_aov3.shape[0])
         with pytest.raises(ValueError):
@@ -209,12 +213,13 @@ class TestParametric(TestCase):
         # Pain dataset
         df_pain = read_dataset('anova')
         aov = welch_anova(dv='Pain threshold', between='Hair color',
-                          data=df_pain).round(3)
-        # Compare with R oneway.test function
+                          data=df_pain).round(4)
+        # Compare with JASP
         assert aov.at[0, 'ddof1'] == 3
-        assert np.isclose(aov.at[0, 'ddof2'], 8.330)
-        assert np.isclose(aov.at[0, 'F'], 5.890)
-        assert np.isclose(aov.at[0, 'p-unc'], .019)
+        assert aov.at[0, 'ddof2'] == 8.3298
+        assert aov.at[0, 'F'] == 5.8901
+        assert aov.at[0, 'p-unc'] == .0188
+        assert aov.at[0, 'np2'] == 0.5760
 
     def test_rm_anova(self):
         """Test function rm_anova.
@@ -227,9 +232,18 @@ class TestParametric(TestCase):
         # Compare with JASP
         aov = rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
                        correction='auto', detailed=True).round(3)
-        assert np.allclose(aov.at[0, 'F'], 3.913)
-        assert np.allclose(aov.at[0, 'p-unc'], .023)
-        assert np.allclose(aov.at[0, 'np2'], .062)
+        assert aov.at[0, 'F'] == 3.913
+        assert aov.at[0, 'p-unc'] == .023
+        assert aov.at[0, 'np2'] == .062
+
+        # With different effect sizes
+        aov = rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
+                       correction='auto', effsize="n2").round(3)
+        assert aov.at[0, 'n2'] == .062
+        aov = rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
+                       correction='auto', detailed=True,
+                       effsize="ng2").round(3)
+        assert aov.at[0, 'ng2'] == .040
 
         rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
                  correction=True, detailed=True)
@@ -251,14 +265,24 @@ class TestParametric(TestCase):
         data = read_dataset('rm_anova2')
         aov = rm_anova(data=data, subject='Subject', within=['Time', 'Metric'],
                        dv='Performance').round(3)
-        array_equal(aov.loc[:, 'MS'].to_numpy(), [828.817, 682.617, 112.217])
-        array_equal(aov.loc[:, 'F'].to_numpy(), [33.852, 26.959, 12.632])
-        array_equal(aov.loc[:, 'np2'].to_numpy(), [0.790, 0.750, 0.584])
-        assert aov.at[0, "eps"] == 1.000
-        assert aov.at[1, "eps"] == 0.969
-        assert aov.at[2, "eps"] >= 0.500  # 0.5 is the lower bound
+        array_equal(aov.loc[:, 'MS'], [828.817, 682.617, 112.217])
+        array_equal(aov.loc[:, 'F'], [33.852, 26.959, 12.632])
+        array_equal(aov.loc[:, 'np2'], [0.790, 0.750, 0.584])
+        array_equal(aov.loc[:, 'eps'], [1., 0.969, 0.727])
 
-        # With missing values
+        # With different effect sizes
+        aov = rm_anova(data=data, subject='Subject', within=['Time', 'Metric'],
+                       dv='Performance', effsize="n2").round(3)
+        array_equal(aov.loc[:, 'n2'], [0.255, 0.419, 0.069])
+
+        aov = rm_anova(data=data, subject='Subject', within=['Time', 'Metric'],
+                       dv='Performance', effsize="ng2").round(3)
+        array_equal(aov.loc[:, 'ng2'], [0.254, 0.359, 0.084])
+
+        # 2 factors with missing values. Cannot compare with JASP directly
+        # because Pingouin applies an automatic removal of missing values
+        # (on the last factor). JASP uses a regression-based approach which
+        # can handle missing values.
         df2 = read_dataset('rm_missing')
         df2.rm_anova(dv='BOLD', within=['Session', 'Time'], subject='Subj')
 
@@ -274,14 +298,21 @@ class TestParametric(TestCase):
         # Balanced design, two groups, three within factors
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
                           between='Group', data=df, correction=True).round(3)
-        array_equal(aov.loc[:, 'SS'].to_numpy(), [5.460, 7.628, 5.167])
-        array_equal(aov.loc[:, 'DF1'].to_numpy(), [1, 2, 2])
-        array_equal(aov.loc[:, 'DF2'].to_numpy(), [58, 116, 116])
-        array_equal(aov.loc[:, 'F'].to_numpy(), [5.052, 4.027, 2.728])
-        array_equal(aov.loc[:, 'np2'].to_numpy(), [0.080, 0.065, 0.045])
+        array_equal(aov.loc[:, 'SS'], [5.460, 7.628, 5.167])
+        array_equal(aov.loc[:, 'DF1'], [1, 2, 2])
+        array_equal(aov.loc[:, 'DF2'], [58, 116, 116])
+        array_equal(aov.loc[:, 'F'], [5.052, 4.027, 2.728])
+        array_equal(aov.loc[:, 'np2'], [0.080, 0.065, 0.045])
         assert aov.at[1, 'eps'] == 0.999
         assert aov.at[1, 'W-spher'] == 0.999
         assert round(aov.at[1, 'p-GG-corr'], 2) == 0.02
+        # Same with different effect sizes (compare with JASP)
+        aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
+                          between='Group', data=df, effsize="n2").round(3)
+        array_equal(aov.loc[:, 'n2'], [0.029, 0.040, 0.027])
+        aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
+                          between='Group', data=df, effsize="ng2").round(3)
+        array_equal(aov.loc[:, 'ng2'], [0.031, 0.042, 0.029])
 
         # With missing values
         df_nan2 = df_nan.copy()
@@ -289,8 +320,8 @@ class TestParametric(TestCase):
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
                           between='Group', data=df_nan2, correction=True,
                           ).round(3)
-        array_equal(aov.loc[:, 'F'].to_numpy(), [5.692, 3.054, 3.502])
-        array_equal(aov.loc[:, 'np2'].to_numpy(), [0.094, 0.053, 0.060])
+        array_equal(aov.loc[:, 'F'], [5.692, 3.054, 3.502])
+        array_equal(aov.loc[:, 'np2'], [0.094, 0.053, 0.060])
         assert aov.at[1, 'eps'] == 0.997
         assert aov.at[1, 'W-spher'] == 0.996
 
@@ -299,27 +330,36 @@ class TestParametric(TestCase):
         aov = mixed_anova(data=df_unbalanced, dv='Scores',
                           subject='Subject', within='Time', between='Group',
                           correction=True).round(3)
-        array_equal(aov.loc[:, 'F'].to_numpy(), [3.561, 2.421, 1.828])
-        array_equal(aov.loc[:, 'np2'].to_numpy(), [0.063, 0.044, 0.033])
+        array_equal(aov.loc[:, 'F'], [3.561, 2.421, 1.828])
+        array_equal(aov.loc[:, 'np2'], [0.063, 0.044, 0.033])
         assert aov.at[1, 'eps'] == 1.  # JASP = 0.998
         assert aov.at[1, 'W-spher'] == 1.  # JASP = 0.998
 
-        # With three groups and four time points, unbalanced
+        # With three groups and four time points, unbalanced (JASP -- type II)
         df_unbalanced = read_dataset('mixed_anova_unbalanced.csv')
         aov = mixed_anova(data=df_unbalanced, dv='Scores', subject='Subject',
                           correction=True, within='Time',
-                          between='Group')
-        array_equal(aov.loc[:, 'DF1'].to_numpy(), [2, 3, 6])
-        array_equal(aov.loc[:, 'DF2'].to_numpy(), [23, 69, 69])
-        array_equal(aov.loc[:, 'F'].round(3).to_numpy(), [2.303, 1.707, 0.888])
-        np.testing.assert_allclose(aov.loc[:, 'p-unc'].to_numpy(),
-                                   [1.225913e-01, 1.736066e-01, 5.087900e-01],
-                                   rtol=1e-04)
+                          between='Group').round(4)
+        array_equal(aov.loc[:, 'DF1'], [2, 3, 6])
+        array_equal(aov.loc[:, 'DF2'], [23, 69, 69])
+        array_equal(aov.loc[:, 'F'], [2.3026, 1.7071, 0.8877])
+        array_equal(aov.loc[:, 'p-unc'], [0.1226, 0.1736, 0.5088])
+        array_equal(aov.loc[:, 'np2'], [0.1668, 0.0691, 0.0717])
         # Check correction: values are very slightly different than ezANOVA
-        assert np.isclose(aov.at[1, 'eps'], 0.925374, atol=0.01)
-        assert np.isclose(aov.at[1, 'p-GG-corr'], 0.1779205, atol=0.01)
-        assert np.isclose(aov.at[1, 'W-spher'], 0.8850318, atol=0.01)
-        assert np.isclose(aov.at[1, 'p-spher'], 0.7535238, atol=0.1)
+        assert np.isclose(aov.at[1, 'eps'], 0.9254, atol=0.01)
+        assert np.isclose(aov.at[1, 'p-GG-corr'], 0.1779, atol=0.01)
+        assert np.isclose(aov.at[1, 'W-spher'], 0.8850, atol=0.01)
+        assert np.isclose(aov.at[1, 'p-spher'], 0.7535, atol=0.1)
+
+        # Same but with different effect sizes
+        aov = mixed_anova(data=df_unbalanced, dv='Scores', subject='Subject',
+                          within='Time', between='Group',
+                          effsize="n2").round(4)
+        array_equal(aov.loc[:, 'n2'], [0.0332, 0.0516, 0.0537])
+        aov = mixed_anova(data=df_unbalanced, dv='Scores', subject='Subject',
+                          within='Time', between='Group',
+                          effsize="ng2").round(4)
+        array_equal(aov.loc[:, 'ng2'], [0.0371, 0.0566, 0.0587])
 
         # With overlapping subject IDs in the between-subject groups
         df_overlap = df.copy()
@@ -342,23 +382,33 @@ class TestParametric(TestCase):
         df = read_dataset('ancova')
         # With one covariate, balanced design, no missing values
         aov = ancova(data=df, dv='Scores', covar='Income',
-                     between='Method').round(3)
-        assert aov.at[0, 'F'] == 3.336
-        assert aov.at[1, 'F'] == 29.419
+                     between='Method').round(4)
+        array_equal(aov['DF'], [3, 1, 31])
+        array_equal(aov['F'], [3.3365, 29.4194, np.nan])
+        array_equal(aov['p-unc'], [0.0319, 0.000, np.nan])
+        array_equal(aov['np2'], [0.2441, 0.4869, np.nan])
+        aov = ancova(data=df, dv='Scores', covar='Income',
+                     between='Method', effsize="n2").round(4)
+        array_equal(aov['n2'], [0.1421, 0.4177, np.nan])
         # With one covariate, missing values and unbalanced design
         df.loc[[1, 2], 'Scores'] = np.nan
         aov = ancova(data=df, dv='Scores', covar=['Income'],
-                     between='Method').round(3)
-        assert aov.at[0, 'F'] == 3.147
-        assert aov.at[1, 'F'] == 19.781
-        assert aov.at[2, 'DF'] == 29
+                     between='Method').round(4)
+        array_equal(aov['DF'], [3, 1, 29])
+        array_equal(aov['F'], [3.1471, 19.7811, np.nan])
+        array_equal(aov['p-unc'], [0.0400, 0.0001, np.nan])
+        array_equal(aov['np2'], [0.2456, 0.4055, np.nan])
         # With two covariates, missing values and unbalanced design
         aov = ancova(data=df, dv='Scores', covar=['Income', 'BMI'],
-                     between='Method').round(3)
-        assert aov.at[0, 'F'] == 3.019
-        assert aov.at[1, 'F'] == 19.605
-        assert aov.at[2, 'F'] == 1.228
-        assert aov.at[3, 'DF'] == 28
+                     between='Method').round(4)
+        array_equal(aov['DF'], [3, 1, 1, 28])
+        array_equal(aov['F'], [3.0186, 19.6045, 1.2279, np.nan])
+        array_equal(aov['p-unc'], [0.0464, 0.0001, 0.2772, np.nan])
+        array_equal(aov['np2'], [0.2444, 0.4118, 0.0420, np.nan])
+        # Same but using standard eta-squared
+        aov = ancova(data=df, dv='Scores', covar=['Income', 'BMI'],
+                     between='Method', effsize="n2").round(4)
+        array_equal(aov['n2'], [0.1564, 0.3387, 0.0212, np.nan])
         # Other parameters
         ancova(data=df, dv='Scores', covar=['Income', 'BMI'],
                between='Method')

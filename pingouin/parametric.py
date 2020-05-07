@@ -306,7 +306,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
 
 @pf.register_dataframe_method
 def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
-             detailed=False):
+             detailed=False, effsize="np2"):
     """One-way and two-way repeated measures ANOVA.
 
     Parameters
@@ -342,11 +342,16 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         two-way design are not currently implemented in Pingouin.
     detailed : boolean
         If True, return a full ANOVA table.
+    effsize : str
+        Effect size. Must be one of 'np2' (partial eta-squared), 'n2'
+        (eta-squared) or 'ng2'(generalized eta-squared). Note that for
+        one-way repeated measure ANOVA partial eta-squared is the
+        same as eta-squared.
 
     Returns
     -------
-    aov : DataFrame
-        ANOVA summary ::
+    aov : :py:class:`pandas.DataFrame`
+        ANOVA summary::
 
         'Source' : Name of the within-group factor
         'ddof1' : Degrees of freedom (numerator)
@@ -409,8 +414,8 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     :math:`v_{\\text{effect}} = r - 1` and
     :math:`v_{\\text{error}} = (n - 1)(r - 1)` degrees of freedom.
 
-    The effect size reported in Pingouin is the partial eta-square, which is
-    equivalent to eta-square for one-way repeated measures ANOVA.
+    The default effect size reported in Pingouin is the partial eta-squared,
+    which is equivalent to eta-square for one-way repeated measures ANOVA.
 
     .. math::
         \\eta_p^2 = \\frac{SS_{\\text{effect}}}{SS_{\\text{effect}} +
@@ -421,10 +426,14 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     collapsing to the mean is applied on the dependant variable (same behavior
     as the ezANOVA R package). As such, results can differ from those of JASP.
 
-    Missing values are automatically removed (listwise deletion) using the
-    :py:func:`pingouin.remove_rm_na` function. This could drastically decrease
-    the power of the ANOVA if many missing values are present. In that case,
-    it might be better to use linear mixed effects models.
+    Missing values are automatically removed (listwise deletion on the last
+    factor) using the :py:func:`pingouin.remove_rm_na` function.
+    This could drastically decrease the power of the ANOVA if many missing
+    values are present, especially when working with two factors.
+    In that case, we strongly recommend using either JASP to conduct the
+    repeated measures ANOVA (which takes into account the missing values),
+    or using more advanced statistical methods such as linear
+    mixed effect models.
 
     .. warning:: The epsilon adjustement factor of the interaction in
         two-way repeated measures ANOVA where both factors have more than
@@ -460,14 +469,19 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
        Source  ddof1  ddof2         F     p-unc       np2       eps
     0  Within      3     24  5.200652  0.006557  0.393969  0.694329
 
-    One-way repeated-measures ANOVA using a long-format dataset
+    One-way repeated-measures ANOVA using a long-format dataset. We're also
+    specifying two additional options here: ``detailed=True`` means that we'll
+    get a more detailed ANOVA table, and ``effsize='ng2'`` means that we want
+    to get the generalized eta-squared effect size instead of the default
+    partial eta-squared.
 
     >>> df = pg.read_dataset('rm_anova')
     >>> aov = pg.rm_anova(dv='DesireToKill', within='Disgustingness',
-    ...                   subject='Subject', data=df, detailed=True)
+    ...                   subject='Subject', data=df, detailed=True,
+    ...                   effsize="ng2")
     >>> aov.round(3)
-               Source       SS  DF      MS       F  p-unc    np2  eps
-    0  Disgustingness   27.485   1  27.485  12.044  0.001  0.116  1.0
+               Source       SS  DF      MS       F  p-unc    ng2  eps
+    0  Disgustingness   27.485   1  27.485  12.044  0.001  0.026  1.0
     1           Error  209.952  92   2.282     NaN    NaN    NaN  NaN
 
     Two-way repeated-measures ANOVA
@@ -483,12 +497,14 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
                Source  ddof1  ddof2          F     p-unc       np2  eps
     0  Disgustingness      1     92  12.043878  0.000793  0.115758  1.0
     """
+    assert effsize in ['n2', 'np2', 'ng2'], "effsize must be n2, np2 or ng2."
     if isinstance(within, list):
         assert len(within) > 0, 'Within is empty.'
         if len(within) == 1:
             within = within[0]
         elif len(within) == 2:
-            return rm_anova2(dv=dv, within=within, data=data, subject=subject)
+            return rm_anova2(dv=dv, within=within, data=data, subject=subject,
+                             effsize=effsize)
         else:
             raise ValueError('Repeated measures ANOVA with three or more '
                              'factors are not yet supported.')
@@ -546,8 +562,12 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     p_unc = f(ddof1, ddof2).sf(fval)
 
     # Calculating effect sizes (see Bakeman 2005; Lakens 2013)
-    np2 = ss_with / (ss_with + ss_reswith)  # (Partial) eta-squared, np2 == n2
-    # ng2 = ss_with / (ss_with + ss_resall)  # Generalized eta-squared
+    if effsize == "ng2":
+        # Generalized eta-squared
+        ef = ss_with / (ss_with + ss_resall)
+    else:
+        # (Partial) eta-squared, np2 == n2
+        ef = ss_with / (ss_with + ss_reswith)
 
     # Reshape and remove NAN for sphericity estimation and correction
     data_pivot = data.pivot(index=subject, columns=within, values=dv).dropna()
@@ -578,7 +598,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
                             'ddof2': ddof2,
                             'F': fval,
                             'p-unc': p_unc,
-                            'np2': np2,
+                            effsize: ef,
                             'eps': eps,
                             }, index=[0])
         if correction:
@@ -588,7 +608,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
             aov['sphericity'] = spher
 
         col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc',
-                     'p-GG-corr', 'np2', 'eps', 'sphericity', 'W-spher',
+                     'p-GG-corr', effsize, 'eps', 'sphericity', 'W-spher',
                      'p-spher']
     else:
         aov = pd.DataFrame({'Source': [within, 'Error'],
@@ -597,7 +617,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
                             'MS': [ms_with, ms_reswith],
                             'F': [fval, np.nan],
                             'p-unc': [p_unc, np.nan],
-                            'np2': [np2, np.nan],
+                            effsize: [ef, np.nan],
                             'eps': [eps, np.nan]
                             })
         if correction:
@@ -607,50 +627,18 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
             aov['sphericity'] = [spher, np.nan]
 
         col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'p-GG-corr',
-                     'np2', 'eps', 'sphericity', 'W-spher', 'p-spher']
-
-    # Round - Disabled in Pingouin v0.3.4
-    # aov[['F', 'eps', 'np2']] = aov[['F', 'eps', 'np2']].round(3)
-
-    # Replace NaN - Disabled in Pingouin v0.3.4
-    # aov = aov.fillna('-')
+                     effsize, 'eps', 'sphericity', 'W-spher', 'p-spher']
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
     return aov
 
 
-def rm_anova2(data=None, dv=None, within=None, subject=None):
+def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
     """Two-way repeated measures ANOVA.
 
     This is an internal function. The main call to this function should be done
     by the :py:func:`pingouin.rm_anova` function.
-
-    Parameters
-    ----------
-    data : :py:class:`pandas.DataFrame`
-        DataFrame
-    dv : string
-        Name of column containing the dependant variable.
-    within : list
-        Names of column containing the two within factor
-        (e.g. ['Time', 'Treatment'])
-    subject : string
-        Name of column containing the subject identifier.
-
-    Returns
-    -------
-    aov : DataFrame
-        ANOVA summary ::
-
-        'Source' : Name of the within-group factors
-        'ddof1' : Degrees of freedom (numerator)
-        'ddof2' : Degrees of freedom (denominator)
-        'F' : F-value
-        'p-unc' : Uncorrected p-value
-        'np2' : Partial eta-square effect size
-        'eps' : Greenhouse-Geisser epsilon factor (= index of sphericity)
-        'p-GG-corr' : Greenhouse-Geisser corrected p-value
     """
     a, b = within
 
@@ -663,7 +651,7 @@ def rm_anova2(data=None, dv=None, within=None, subject=None):
         data = remove_rm_na(dv=dv, subject=subject, within=[a, b],
                             data=data[[subject, a, b, dv]])
 
-    # Collapse to the mean (that this is also done in remove_rm_na)
+    # Collapse to the mean (this is also done in remove_rm_na)
     data = data.groupby([subject, a, b]).mean().reset_index()
 
     assert not data[a].isnull().any(), 'Cannot have NaN in %s' % a
@@ -729,19 +717,22 @@ def rm_anova2(data=None, dv=None, within=None, subject=None):
     p_ab = f(df_ab, df_abs).sf(f_ab)
 
     # Effect sizes
-    # ..Eta-square
-    # n2_denom = ss_a + ss_as + ss_b + ss_bs + ss_ab + ss_abs
-    # n2_a = ss_a / n2_denom
-    # n2_b = ss_b / n2_denom
-    # n2_ab = ss_ab / n2_denom
-    # ..Partial eta-square
-    np2_a = (f_a * df_a) / (f_a * df_a + df_as)
-    np2_b = (f_b * df_b) / (f_b * df_b + df_bs)
-    np2_ab = (f_ab * df_ab) / (f_ab * df_ab + df_abs)
-    # .. Generalized eta-square (from Bakeman 2005 Table 1)
-    # ng2_a = ss_a / (ss_a + ss_s + ss_as + ss_bs + ss_abs)
-    # ng2_b = ss_b / (ss_b + ss_s + ss_as + ss_bs + ss_abs)
-    # ng2_ab = ss_ab / (ss_ab + ss_s + ss_as + ss_bs + ss_abs)
+    if effsize == "n2":
+        # ..Eta-squared
+        n2_denom = ss_a + ss_as + ss_b + ss_bs + ss_ab + ss_abs
+        ef_a = ss_a / n2_denom
+        ef_b = ss_b / n2_denom
+        ef_ab = ss_ab / n2_denom
+    elif effsize == "ng2":
+        # .. Generalized eta-squared (from Bakeman 2005 Table 1)
+        ef_a = ss_a / (ss_a + ss_s + ss_as + ss_bs + ss_abs)
+        ef_b = ss_b / (ss_b + ss_s + ss_as + ss_bs + ss_abs)
+        ef_ab = ss_ab / (ss_ab + ss_s + ss_as + ss_bs + ss_abs)
+    else:
+        # .. Partial eta squared (default)
+        ef_a = (f_a * df_a) / (f_a * df_a + df_as)
+        ef_b = (f_b * df_b) / (f_b * df_b + df_bs)
+        ef_ab = (f_ab * df_ab) / (f_ab * df_ab + df_abs)
 
     # Epsilon
     piv_a = data.pivot_table(index=subject, columns=a, values=dv)
@@ -771,23 +762,15 @@ def rm_anova2(data=None, dv=None, within=None, subject=None):
                         'F': [f_a, f_b, f_ab],
                         'p-unc': [p_a, p_b, p_ab],
                         'p-GG-corr': [p_a_corr, p_b_corr, p_ab_corr],
-                        'np2': [np2_a, np2_b, np2_ab],
+                        effsize: [ef_a, ef_b, ef_ab],
                         'eps': [eps_a, eps_b, eps_ab],
                         })
-
-    col_order = ['Source', 'SS', 'ddof1', 'ddof2', 'MS', 'F', 'p-unc',
-                 'p-GG-corr', 'np2', 'eps']
-
-    # Round
-    # aov[['SS', 'MS', 'F', 'eps', 'np2']] = aov[['SS', 'MS', 'F', 'eps',
-    #                                             'np2']].round(3)
-
-    aov = aov.reindex(columns=col_order)
     return aov
 
 
 @pf.register_dataframe_method
-def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
+def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
+          effsize='np2'):
     """One-way and *N*-way ANOVA.
 
     Parameters
@@ -811,11 +794,15 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
     detailed : boolean
         If True, return a detailed ANOVA table
         (default True for N-way ANOVA).
+    effsize : str
+        Effect size. Must be 'np2' (partial eta-squared) or 'n2'
+        (eta-squared). Note that for one-way ANOVA partial eta-squared is the
+        same as eta-squared.
 
     Returns
     -------
-    aov : DataFrame
-        ANOVA summary ::
+    aov : :py:class:`pandas.DataFrame`
+        ANOVA summary::
 
         'Source' : Factor names
         'SS' : Sums of squares
@@ -870,7 +857,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
     If the groups have unequal variances, the Games-Howell test is more
     adequate (:py:func:`pingouin.pairwise_gameshowell`).
 
-    The effect size reported in Pingouin is the partial eta-square.
+    The default effect size reported in Pingouin is the partial eta-square.
     However, one should keep in mind that for one-way ANOVA
     partial eta-square is the same as eta-square and generalized eta-square.
     For more details, see Bakeman 2005; Richardson 2011.
@@ -912,10 +899,14 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
     0  Hair color  1360.726316   3  453.575439  6.791407  0.004114  0.575962
     1      Within  1001.800000  15   66.786667       NaN       NaN       NaN
 
-    Note that this function can also directly be used as a Pandas method
+    Same but using a standard eta-squared instead of a partial eta-squared
+    effect size. Also note how here we're using the anova function directly as
+    a method (= built-in function) of our pandas dataframe. In that case,
+    we don't have to specify ``data`` anymore.
 
-    >>> df.anova(dv='Pain threshold', between='Hair color', detailed=False)
-           Source  ddof1  ddof2         F     p-unc       np2
+    >>> df.anova(dv='Pain threshold', between='Hair color', detailed=False,
+    ...          effsize='n2')
+           Source  ddof1  ddof2         F     p-unc        n2
     0  Hair color      3     15  6.791407  0.004114  0.575962
 
     Two-way ANOVA with balanced design
@@ -931,11 +922,12 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
     Two-way ANOVA with unbalanced design (requires statsmodels)
 
     >>> data = pg.read_dataset('anova2_unbalanced')
-    >>> data.anova(dv="Scores", between=["Diet", "Exercise"]).round(3)
-                Source       SS   DF       MS      F  p-unc    np2
-    0             Diet  390.625  1.0  390.625  7.423  0.034  0.553
-    1         Exercise  180.625  1.0  180.625  3.432  0.113  0.364
-    2  Diet * Exercise   15.625  1.0   15.625  0.297  0.605  0.047
+    >>> data.anova(dv="Scores", between=["Diet", "Exercise"],
+    ...            effsize="n2").round(3)
+                Source       SS   DF       MS      F  p-unc     n2
+    0             Diet  390.625  1.0  390.625  7.423  0.034  0.433
+    1         Exercise  180.625  1.0  180.625  3.432  0.113  0.200
+    2  Diet * Exercise   15.625  1.0   15.625  0.297  0.605  0.017
     3         Residual  315.750  6.0   52.625    NaN    NaN    NaN
 
     Three-way ANOVA, type 3 sums of squares (requires statsmodels)
@@ -953,6 +945,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
     6  Sex * Risk * Drug   1.844   2.0   0.922   1.094  0.343  0.044
     7           Residual  40.445  48.0   0.843     NaN    NaN    NaN
     """
+    assert effsize in ['np2', 'n2'], "effsize must be 'np2' or 'n2'."
     if isinstance(between, list):
         if len(between) == 0:
             raise ValueError('between is empty.')
@@ -961,10 +954,12 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
         elif len(between) == 2:
             # Two factors with balanced design = Pingouin implementation
             # Two factors with unbalanced design = statsmodels
-            return anova2(dv=dv, between=between, data=data, ss_type=ss_type)
+            return anova2(dv=dv, between=between, data=data, ss_type=ss_type,
+                          effsize=effsize)
         else:
             # 3 or more factors with (un)-balanced design = statsmodels
-            return anovan(dv=dv, between=between, data=data, ss_type=ss_type)
+            return anovan(dv=dv, between=between, data=data, ss_type=ss_type,
+                          effsize=effsize)
 
     # Check data
     _check_dataframe(dv=dv, between=between, data=data, effects='between')
@@ -1009,10 +1004,9 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
                             'ddof2': ddof2,
                             'F': fval,
                             'p-unc': p_unc,
-                            'np2': np2
+                            effsize: np2
                             }, index=[0])
 
-        col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc', 'np2']
     else:
         aov = pd.DataFrame({'Source': [between, 'Within'],
                             'SS': [ssbetween, sserror],
@@ -1020,22 +1014,14 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False):
                             'MS': [msbetween, mserror],
                             'F': [fval, np.nan],
                             'p-unc': [p_unc, np.nan],
-                            'np2': [np2, np.nan]
+                            effsize: [np2, np.nan]
                             })
-        col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'np2']
 
-    # Round - Disabled in Pingouin v0.3.4
-    # aov[['F', 'np2']] = aov[['F', 'np2']].round(3)
-
-    # Replace NaN - Disabled in Pingouin v0.3.4
-    # aov = aov.fillna('-')
-
-    aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
     return aov
 
 
-def anova2(data=None, dv=None, between=None, ss_type=2):
+def anova2(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
     """Two-way balanced ANOVA in pure Python + Pandas.
 
     This is an internal function. The main call to this function should be done
@@ -1073,7 +1059,8 @@ def anova2(data=None, dv=None, between=None, ss_type=2):
         df_resid = data[dv].size - (ng1 * ng2)
     else:
         # UNBALANCED DESIGN
-        return anovan(dv=dv, between=between, data=data, ss_type=ss_type)
+        return anovan(dv=dv, between=between, data=data, ss_type=ss_type,
+                      effsize=effsize)
 
     # Mean squares
     ms_fac1 = ss_fac1 / df_fac1
@@ -1092,14 +1079,18 @@ def anova2(data=None, dv=None, between=None, ss_type=2):
     pval_inter = f(df_inter, df_resid).sf(fval_inter)
 
     # Effect size
-    # ..Partial eta-square
-    np2_fac1 = ss_fac1 / (ss_fac1 + ss_resid)
-    np2_fac2 = ss_fac2 / (ss_fac2 + ss_resid)
-    np2_inter = ss_inter / (ss_inter + ss_resid)
-    # Standard eta-square
-    # n2_fac1 = ss_fac1 / ss_tot
-    # n2_fac2 = ss_fac2 / ss_tot
-    # n2_inter = ss_inter / ss_tot
+    if effsize == 'n2':
+        # Standard eta-square
+        n2_fac1 = ss_fac1 / ss_tot
+        n2_fac2 = ss_fac2 / ss_tot
+        n2_inter = ss_inter / ss_tot
+        all_effsize = [n2_fac1, n2_fac2, n2_inter, np.nan]
+    else:
+        # ..Partial eta-square
+        np2_fac1 = ss_fac1 / (ss_fac1 + ss_resid)
+        np2_fac2 = ss_fac2 / (ss_fac2 + ss_resid)
+        np2_inter = ss_inter / (ss_inter + ss_resid)
+        all_effsize = [np2_fac1, np2_fac2, np2_inter, np.nan]
 
     # Create output dataframe
     aov = pd.DataFrame({'Source': [fac1, fac2, fac1 + ' * ' + fac2,
@@ -1109,16 +1100,14 @@ def anova2(data=None, dv=None, between=None, ss_type=2):
                         'MS': [ms_fac1, ms_fac2, ms_inter, ms_resid],
                         'F': [fval_fac1, fval_fac2, fval_inter, np.nan],
                         'p-unc': [pval_fac1, pval_fac2, pval_inter, np.nan],
-                        'np2': [np2_fac1, np2_fac2, np2_inter, np.nan]
+                        effsize: all_effsize
                         })
-    col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'np2']
 
-    aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
     return aov
 
 
-def anovan(data=None, dv=None, between=None, ss_type=2):
+def anovan(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
     """N-way ANOVA using statsmodels.
 
     This is an internal function. The main call to this function should be done
@@ -1169,12 +1158,14 @@ def anovan(data=None, dv=None, between=None, ss_type=2):
     aov['MS'] = aov['SS'] / aov['DF']
 
     # Effect size
-    aov['np2'] = (aov['F'] * aov['DF']) / (aov['F'] * aov['DF'] +
-                                           aov.iloc[-1, 2])
-    # Get standard eta-square for all effects except residuals (last)
-    # ss_total = aov['SS'].sum()
-    # all_n2 = (aov['SS'] / aov['SS'].sum()).to_numpy()
-    # all_n2[-1] = np.nan
+    if effsize == 'n2':
+        # Get standard eta-square for all effects except residuals (last)
+        all_n2 = (aov['SS'] / aov['SS'].sum()).to_numpy()
+        all_n2[-1] = np.nan
+        aov['n2'] = all_n2
+    else:
+        aov['np2'] = (aov['F'] * aov['DF']) / (aov['F'] * aov['DF'] +
+                                               aov.iloc[-1, 2])
 
     def format_source(x):
         for fac in between:
@@ -1184,9 +1175,8 @@ def anovan(data=None, dv=None, between=None, ss_type=2):
     aov['Source'] = aov['Source'].apply(format_source)
 
     # Re-index and round
-    col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'np2']
+    col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', effsize]
     aov = aov.reindex(columns=col_order)
-    # aov[['SS', 'MS', 'F', 'np2']] = aov[['SS', 'MS', 'F', 'np2']].round(3)
     aov.dropna(how='all', axis=1, inplace=True)
 
     # Add formula to dataframe
@@ -1210,7 +1200,7 @@ def welch_anova(data=None, dv=None, between=None):
 
     Returns
     -------
-    aov : DataFrame
+    aov : :py:class:`pandas.DataFrame`
         ANOVA summary ::
 
         'Source' : Factor names
@@ -1219,6 +1209,7 @@ def welch_anova(data=None, dv=None, between=None):
         'MS' : Mean squares
         'F' : F-values
         'p-unc' : uncorrected p-values
+        'np2': Partial eta-squared
 
     See Also
     --------
@@ -1305,8 +1296,8 @@ def welch_anova(data=None, dv=None, between=None):
     >>> df = read_dataset('anova')
     >>> aov = welch_anova(dv='Pain threshold', between='Hair color', data=df)
     >>> aov
-           Source  ddof1     ddof2         F     p-unc
-    0  Hair color      3  8.329841  5.890115  0.018813
+           Source  ddof1     ddof2         F     p-unc       np2
+    0  Hair color      3  8.329841  5.890115  0.018813  0.575962
     """
     # Check data
     _check_dataframe(dv=dv, between=between, data=data, effects='between')
@@ -1323,15 +1314,18 @@ def welch_anova(data=None, dv=None, between=None):
     weights = grp.count() / grp.var()
     adj_grandmean = (weights * grp.mean()).sum() / weights.sum()
 
-    # Treatment sum of squares
-    ss_tr = np.sum(weights * np.square(grp.mean() - adj_grandmean))
-    ms_tr = ss_tr / ddof1
+    # Sums of squares (regular and adjusted)
+    ss_res = grp.apply(lambda x: (x - x.mean())**2).sum()
+    ss_bet = ((grp.mean() - data[dv].mean())**2 * grp.count()).sum()
+    ss_betadj = np.sum(weights * np.square(grp.mean() - adj_grandmean))
+    ms_betadj = ss_betadj / ddof1
 
-    # Calculate lambda, F-value and p-value
+    # Calculate lambda, F-value, p-value and np2
     lamb = (3 * np.sum((1 / (grp.count() - 1)) *
                        (1 - (weights / weights.sum()))**2)) / (r**2 - 1)
-    fval = ms_tr / (1 + (2 * lamb * (r - 2)) / 3)
+    fval = ms_betadj / (1 + (2 * lamb * (r - 2)) / 3)
     pval = f.sf(fval, ddof1, 1 / lamb)
+    np2 = ss_bet / (ss_bet + ss_res)
 
     # Create output dataframe
     aov = pd.DataFrame({'Source': between,
@@ -1339,18 +1333,14 @@ def welch_anova(data=None, dv=None, between=None):
                         'ddof2': 1 / lamb,
                         'F': fval,
                         'p-unc': pval,
+                        'np2': np2
                         }, index=[0])
-
-    col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc']
-    aov = aov.reindex(columns=col_order)
-    # Round - Disabled in Pingouin v0.3.4
-    # aov[['F', 'ddof2']] = aov[['F', 'ddof2']].round(3)
     return aov
 
 
 @pf.register_dataframe_method
 def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
-                correction='auto'):
+                correction='auto', effsize="np2"):
     """Mixed-design (split-plot) ANOVA.
 
     Parameters
@@ -1371,18 +1361,21 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
         If True, return Greenhouse-Geisser corrected p-value.
         If `'auto'` (default), compute Mauchly's test of sphericity to
         determine whether the p-values needs to be corrected.
+    effsize : str
+        Effect size. Must be one of 'np2' (partial eta-squared), 'n2'
+        (eta-squared) or 'ng2'(generalized eta-squared).
 
     Returns
     -------
-    aov : DataFrame
-        ANOVA summary ::
+    aov : :py:class:`pandas.DataFrame`
+        ANOVA summary::
 
         'Source' : Names of the factor considered
         'ddof1' : Degrees of freedom (numerator)
         'ddof2' : Degrees of freedom (denominator)
         'F' : F-values
         'p-unc' : Uncorrected p-values
-        'np2' : Partial eta-square effect sizes
+        'np2' : Partial eta-squared effect sizes
         'eps' : Greenhouse-Geisser epsilon factor ( = index of sphericity)
         'p-GG-corr' : Greenhouse-Geisser corrected p-values
         'W-spher' : Sphericity test statistic
@@ -1427,7 +1420,19 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     0        Group  5.460    1   58  5.460  5.052  0.028  0.080    NaN
     1         Time  7.628    2  116  3.814  4.027  0.020  0.065  0.999
     2  Interaction  5.167    2  116  2.584  2.728  0.070  0.045    NaN
+
+    Same but reporting a generalized eta-squared effect size. Notice how we
+    can also apply this function directly as a method of the dataframe, in
+    which case we do not need to specify ``data=df`` anymore.
+
+    >>> df.mixed_anova(dv='Scores', between='Group', within='Time',
+    ...                subject='Subject', effsize="ng2").round(3)
+            Source     SS  DF1  DF2     MS      F  p-unc    ng2    eps
+    0        Group  5.460    1   58  5.460  5.052  0.028  0.031    NaN
+    1         Time  7.628    2  116  3.814  4.027  0.020  0.042  0.999
+    2  Interaction  5.167    2  116  2.584  2.728  0.070  0.029    NaN
     """
+    assert effsize in ['n2', 'np2', 'ng2'], "effsize must be n2, np2 or ng2."
     # Check data
     _check_dataframe(dv=dv, within=within, between=between, data=data,
                      subject=subject, effects='interaction')
@@ -1493,20 +1498,24 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     p_inter = f(df_inter, df_reswith).sf(f_inter)
 
     # Effects sizes (see Bakeman 2005)
-    # 1) Partial eta-squared
-    # np2_betw = f_betw * df_betw / (f_betw * df_betw + df_resbetw)
-    # np2_with = f_with * df_with / (f_with * df_with + df_reswith)
-    np2_betw = ss_betw / (ss_betw + ss_resbetw)
-    np2_with = ss_with / (ss_with + ss_reswith)
-    np2_inter = ss_inter / (ss_inter + ss_reswith)
-    # 2) Standard eta-squared
-    # n2_betw = ss_betw / ss_total
-    # n2_with = ss_with / ss_total
-    # n2_inter = ss_inter / ss_total
-    # 3) Generalized eta-square
-    # ng2_betw = ss_betw / (ss_betw + ss_resall)
-    # ng2_with = ss_with / (ss_with + ss_resall)
-    # ng2_inter = ss_inter / (ss_inter + ss_resall)
+    if effsize == "n2":
+        # Standard eta-squared
+        ef_betw = ss_betw / ss_total
+        ef_with = ss_with / ss_total
+        ef_inter = ss_inter / ss_total
+    elif effsize == "ng2":
+        # Generalized eta-square
+        ef_betw = ss_betw / (ss_betw + ss_resall)
+        ef_with = ss_with / (ss_with + ss_resall)
+        ef_inter = ss_inter / (ss_inter + ss_resall)
+    else:
+        # Partial eta-squared (default)
+        # ef_betw = f_betw * df_betw / (f_betw * df_betw + df_resbetw)
+        # ef_with = f_with * df_with / (f_with * df_with + df_reswith)
+        ef_betw = ss_betw / (ss_betw + ss_resbetw)
+        ef_with = ss_with / (ss_with + ss_reswith)
+        ef_inter = ss_inter / (ss_inter + ss_reswith)
+
     # 4) Generalized omega-squared (like JASP w2 output)
     # From Olejnik and Algina 2003
     # To be continued...
@@ -1518,15 +1527,15 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     aov.rename(columns={'DF': 'DF1'}, inplace=True)
     aov.at[0, 'F'], aov.at[1, 'F'] = f_betw, f_with
     aov.at[0, 'p-unc'], aov.at[1, 'p-unc'] = p_betw, p_with
-    aov.at[0, 'np2'], aov.at[1, 'np2'] = np2_betw, np2_with
+    aov.at[0, effsize], aov.at[1, effsize] = ef_betw, ef_with
     aov = aov.append({'Source': 'Interaction', 'SS': ss_inter, 'DF1': df_inter,
                       'MS': ms_inter, 'F': f_inter, 'p-unc': p_inter,
-                      'np2': np2_inter}, ignore_index=True)
+                      effsize: ef_inter}, ignore_index=True)
 
     aov['DF2'] = [df_resbetw, df_reswith, df_reswith]
     aov['eps'] = [np.nan, aov_with.at[0, 'eps'], np.nan]
     col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc',
-                 'p-GG-corr', 'np2', 'eps', 'sphericity', 'W-spher',
+                 'p-GG-corr', effsize, 'eps', 'sphericity', 'W-spher',
                  'p-spher']
 
     # Replace NaN - Disabled in Pingouin v0.3.4
@@ -1541,7 +1550,7 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
 
 
 @pf.register_dataframe_method
-def ancova(data=None, dv=None, between=None, covar=None):
+def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     """ANCOVA with one or more covariate(s).
 
     Parameters
@@ -1555,17 +1564,21 @@ def ancova(data=None, dv=None, between=None, covar=None):
         Name of column containing the between factor.
     covar : string or list
         Name(s) of column(s) containing the covariate.
+    effsize : str
+        Effect size. Must be 'np2' (partial eta-squared) or 'n2'
+        (eta-squared).
 
     Returns
     -------
-    aov : DataFrame
-        ANCOVA summary ::
+    aov : :py:class:`pandas.DataFrame`
+        ANCOVA summary::
 
         'Source' : Names of the factor considered
         'SS' : Sums of squares
         'DF' : Degrees of freedom
         'F' : F-values
         'p-unc' : Uncorrected p-values
+        'np2': Partial eta-squared
 
     Notes
     -----
@@ -1594,22 +1607,24 @@ def ancova(data=None, dv=None, between=None, covar=None):
     >>> from pingouin import ancova, read_dataset
     >>> df = read_dataset('ancova')
     >>> ancova(data=df, dv='Scores', covar='Income', between='Method')
-         Source           SS  DF          F     p-unc
-    0    Method   571.029883   3   3.336482  0.031940
-    1    Income  1678.352687   1  29.419438  0.000006
-    2  Residual  1768.522313  31        NaN       NaN
+         Source           SS  DF          F     p-unc       np2
+    0    Method   571.029883   3   3.336482  0.031940  0.244077
+    1    Income  1678.352687   1  29.419438  0.000006  0.486920
+    2  Residual  1768.522313  31        NaN       NaN       NaN
 
     2. Evaluate the reading scores of students with different teaching method
     and family income + BMI as a covariate.
 
-    >>> ancova(data=df, dv='Scores', covar=['Income', 'BMI'], between='Method')
-         Source           SS  DF          F     p-unc
-    0    Method   552.284043   3   3.232550  0.036113
-    1    Income  1573.952434   1  27.637304  0.000011
-    2       BMI    60.013656   1   1.053790  0.312842
-    3  Residual  1708.508657  30        NaN       NaN
+    >>> ancova(data=df, dv='Scores', covar=['Income', 'BMI'], between='Method',
+    ...        effsize="n2")
+         Source           SS  DF          F     p-unc        n2
+    0    Method   552.284043   3   3.232550  0.036113  0.141802
+    1    Income  1573.952434   1  27.637304  0.000011  0.404121
+    2       BMI    60.013656   1   1.053790  0.312842  0.015409
+    3  Residual  1708.508657  30        NaN       NaN       NaN
     """
     # Safety checks
+    assert effsize in ['np2', 'n2'], "effsize must be 'np2' or 'n2'."
     assert isinstance(data, pd.DataFrame)
     assert dv in data.columns, '%s is not in data.' % dv
     assert between in data.columns, '%s is not in data.' % between
@@ -1621,7 +1636,8 @@ def ancova(data=None, dv=None, between=None, covar=None):
     # Check the number of covariates
     if isinstance(covar, list):
         if len(covar) > 1:
-            return ancovan(dv=dv, covar=covar, between=between, data=data)
+            return ancovan(dv=dv, covar=covar, between=between, data=data,
+                           effsize=effsize)
         else:
             covar = covar[0]
 
@@ -1669,6 +1685,16 @@ def ancova(data=None, dv=None, between=None, covar=None):
     # P-values
     p_c = f(df_c, df_w).sf(f_c)
     p_b = f(df_b, df_w).sf(f_b)
+    # Effect sizes
+    if effsize == "n2":
+        ss_tot = ss_b + ss_c + ss_w
+        n2_b = ss_b / ss_tot
+        n2_c = ss_c / ss_tot
+        all_effsize = [n2_b, n2_c, np.nan]
+    else:
+        np2_b = ss_b / (ss_b + ss_w)
+        np2_c = ss_c / (ss_c + ss_w)
+        all_effsize = [np2_b, np2_c, np.nan]
 
     # Create dataframe
     aov = pd.DataFrame({'Source': [between, covar, 'Residual'],
@@ -1676,6 +1702,7 @@ def ancova(data=None, dv=None, between=None, covar=None):
                         'DF': [df_b, df_c, df_w],
                         'F': [f_b, f_c, np.nan],
                         'p-unc': [p_b, p_c, np.nan],
+                        effsize: all_effsize
                         })
 
     # Add bw as an attribute (for rm_corr function)
@@ -1683,33 +1710,11 @@ def ancova(data=None, dv=None, between=None, covar=None):
     return aov
 
 
-def ancovan(data=None, dv=None, covar=None, between=None):
+def ancovan(data=None, dv=None, covar=None, between=None, effsize="np2"):
     """ANCOVA with n covariates.
 
     This is an internal function. The main call to this function should be done
     by the :py:func:`pingouin.ancova` function.
-
-    Parameters
-    ----------
-    data : :py:class:`pandas.DataFrame`
-        DataFrame
-    dv : string
-        Name of column containing the dependant variable.
-    covar : string
-        Name(s) of columns containing the covariates.
-    between : string
-        Name of column containing the between factor.
-
-    Returns
-    -------
-    aov : DataFrame
-        ANCOVA summary ::
-
-        'Source' : Names of the factor considered
-        'SS' : Sums of squares
-        'DF' : Degrees of freedom
-        'F' : F-values
-        'p-unc' : Uncorrected p-values
     """
     # Check that stasmodels is installed
     from pingouin.utils import _is_statsmodels_installed
@@ -1737,5 +1742,15 @@ def ancovan(data=None, dv=None, covar=None, between=None):
         aov.at[i + 1, 'Source'] = covar[i]
 
     aov['DF'] = aov['DF'].astype(int)
-    # aov[['SS', 'F']] = aov[['SS', 'F']].round(3)
+
+    # Add effect sizes
+    if effsize == "n2":
+        all_effsize = (aov['SS'] / aov['SS'].sum()).to_numpy()
+        all_effsize[-1] = np.nan
+    else:
+        ss_resid = aov['SS'].iloc[-1]
+        all_effsize = aov['SS'].apply(lambda x: x / (x + ss_resid)).to_numpy()
+        all_effsize[-1] = np.nan
+    aov[effsize] = all_effsize
+
     return aov

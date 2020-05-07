@@ -26,6 +26,9 @@ c. :py:func:`pingouin.circ_mean` and :py:func:`pingouin.circ_r` now perform calc
 d. Pingouin no longer changes the default matplotlib style to a Seaborn-default (see `issue #85 <https://github.com/raphaelvallat/pingouin/issues/85>`_).
 e. Disabled rounding of float in most Pingouin functions in order to reduce numerical imprecision. For more details, please refer to `issue #87 <https://github.com/raphaelvallat/pingouin/issues/87>`_. Users can still round the output using the :py:meth:`pandas.DataFrame.round` method, or changing the default precision of Pandas DataFrame with `pandas.set_option <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.set_option.html>`_.
 f. Disabled filling of missing values by ``'-'`` in some ANOVAs functions, which may have lead to dtypes issues.
+g. Added partial eta-squared (``np2`` column) to the output of :py:func:`pingouin.ancova` and :py:func:`pingouin.welch_anova`.
+h. Added the ``effsize`` option to :py:func:`pingouin.anova` and :py:func:`pingouin.ancova` to return different effect sizes. Must be one of ``'np2'`` (partial eta-squared, default) or ``'n2'`` (eta-squared).
+i. Added the ``effsize`` option to :py:func:`pingouin.rm_anova` and :py:func:`pingouin.mixed_anova` to return different effect sizes. Must be one of ``'np2'`` (partial eta-squared, default), ``'n2'`` (eta-squared) or ``ng2`` (generalized eta-squared).
 
 **Code and dependencies**
 
