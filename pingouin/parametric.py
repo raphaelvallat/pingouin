@@ -1644,9 +1644,6 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     # Assert that covariate is numeric
     assert data[covar].dtype.kind in 'fi', 'Covariate must be numeric.'
 
-    def linreg(x, y):
-        return np.corrcoef(x, y)[0, 1] * np.std(y, ddof=1) / np.std(x, ddof=1)
-
     # Compute slopes
     groups = data[between].unique()
     slopes = np.zeros(shape=groups.shape)
@@ -1654,10 +1651,10 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     for i, b in enumerate(groups):
         dt_covar = data[data[between] == b][covar].to_numpy()
         ss[i] = ((dt_covar - dt_covar.mean())**2).sum()
-        slopes[i] = linreg(dt_covar, data[data[between] == b][dv].to_numpy())
+        slopes[i] = np.polyfit(dt_covar, data[data[between] == b][dv], 1)[0]
     ss_slopes = ss * slopes
     bw = np.nansum(ss_slopes) / np.sum(ss)
-    bt = linreg(data[covar], data[dv])
+    bt = np.polyfit(data[covar], data[dv], 1)[0]
 
     # Run the ANOVA
     aov_dv = anova(data=data, dv=dv, between=between, detailed=True)
