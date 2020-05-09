@@ -951,8 +951,8 @@ def plot_rm_corr(data=None, x=None, y=None, subject=None, legend=False,
     assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame'
     assert x in data.columns, 'The %s column is not in data.' % x
     assert y in data.columns, 'The %s column is not in data.' % y
-    assert data[x].dtype.kind in 'bfi', '%s must be numeric.' % x
-    assert data[y].dtype.kind in 'bfi', '%s must be numeric.' % y
+    assert data[x].dtype.kind in 'bfiu', '%s must be numeric.' % x
+    assert data[y].dtype.kind in 'bfiu', '%s must be numeric.' % y
     assert subject in data.columns, 'The %s column is not in data.' % subject
     if data[subject].nunique() < 3:
         raise ValueError('rm_corr requires at least 3 unique subjects.')

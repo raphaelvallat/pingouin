@@ -632,7 +632,7 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         y_covar = [y_covar]
     assert all([c in data for c in col]), 'columns are not in dataframe.'
     # Check that columns are numeric
-    assert all([data[c].dtype.kind in 'bfi' for c in col])
+    assert all([data[c].dtype.kind in 'bfiu' for c in col])
 
     # Drop rows with NaN
     data = data[col].dropna()
@@ -958,8 +958,8 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame'
     assert x in data.columns, 'The %s column is not in data.' % x
     assert y in data.columns, 'The %s column is not in data.' % y
-    assert data[x].dtype.kind in 'bfi', '%s must be numeric.' % x
-    assert data[y].dtype.kind in 'bfi', '%s must be numeric.' % y
+    assert data[x].dtype.kind in 'bfiu', '%s must be numeric.' % x
+    assert data[y].dtype.kind in 'bfiu', '%s must be numeric.' % y
     assert subject in data.columns, 'The %s column is not in data.' % subject
     if data[subject].nunique() < 3:
         raise ValueError('rm_corr requires at least 3 unique subjects.')

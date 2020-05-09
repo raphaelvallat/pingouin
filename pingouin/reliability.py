@@ -133,7 +133,7 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     assert k >= 2, 'At least two items are required.'
     assert n >= 2, 'At least two raters/subjects are required.'
     err = 'All columns must be numeric.'
-    assert all([data[c].dtype.kind in 'bfi' for c in data.columns]), err
+    assert all([data[c].dtype.kind in 'bfiu' for c in data.columns]), err
     if data.isna().any().any() and nan_policy == 'listwise':
         # In R = psych:alpha(data, use="complete.obs")
         data = data.dropna(axis=0, how='any')
@@ -282,7 +282,7 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
     data = data.reset_index().melt(id_vars=targets, value_name=ratings)
 
     # Check that ratings is a numeric variable
-    assert data[ratings].dtype.kind in 'bfi', 'Ratings must be numeric.'
+    assert data[ratings].dtype.kind in 'bfiu', 'Ratings must be numeric.'
     # Check that data are fully balanced
     # This behavior is ensured by the long-to-wide-to-long transformation
     # Unbalanced data will result in rows with missing values.

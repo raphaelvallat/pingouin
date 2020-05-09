@@ -6,6 +6,13 @@ What's new
 .. contents:: Table of Contents
    :depth: 2
 
+v0.3.5 (dev)
+------------
+
+**Code**
+
+a. Added support for unsigned integers in dtypes safety checks (see `issue #93 <https://github.com/raphaelvallat/pingouin/issues/93>`_).
+
 v0.3.4 (May 2020)
 -----------------
 

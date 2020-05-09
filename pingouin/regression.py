@@ -1014,7 +1014,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     assert all([c in keys for c in columns]), 'Column(s) are not in DataFrame.'
     # Check that columns are numeric
     err_msg = "Columns must be numeric or boolean."
-    assert all([data[c].dtype.kind in 'bfi' for c in columns]), err_msg
+    assert all([data[c].dtype.kind in 'bfiu' for c in columns]), err_msg
 
     # Drop rows with NAN Values
     data = data[columns].dropna()

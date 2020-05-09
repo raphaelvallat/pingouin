@@ -485,7 +485,7 @@ def _long_to_wide_rm(data, dv=None, within=None, subject=None):
     assert isinstance(within, (str, list)), 'within must be a string or list.'
     # Check that all columns are present
     assert dv in data.columns, '%s not in data' % dv
-    assert data[dv].dtype.kind in 'bfi', '%s must be numeric' % dv
+    assert data[dv].dtype.kind in 'bfiu', '%s must be numeric' % dv
     assert subject in data.columns, '%s not in data' % subject
     assert not data[subject].isnull().any(), 'Cannot have NaN in %s' % subject
     if isinstance(within, str):
