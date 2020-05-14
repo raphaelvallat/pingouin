@@ -409,7 +409,7 @@ def wilcoxon(x, y, tail='two-sided'):
 
     # Effect size 1: common language effect size (McGraw and Wong 1992)
     diff = x[:, None] - y
-    cles = max((diff < 0).sum(), (diff > 0).sum()) / diff.size
+    cles = (diff > 0).sum() / diff.size
 
     # Effect size 2: matched-pairs rank biserial correlation (Kerby 2014)
     d = x - y
