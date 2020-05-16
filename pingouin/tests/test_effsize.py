@@ -179,6 +179,14 @@ class TestEffsize(TestCase):
         # With Hedges correction
         g = compute_effsize(x=a, y=b, eftype='hedges', paired=False)
         assert np.isclose(g, 0.9254296)
+        # CLES
+        # Compare to
+        # https://janhove.github.io/reporting/2016/11/16/common-language-effect-sizes
+        x2 = [20, 22, 19, 20, 22, 18, 24, 20, 19, 24, 26, 13]
+        y2 = [38, 37, 33, 29, 14, 12, 20, 22, 17, 25, 26, 16]
+        cl = compute_effsize(x=x2, y=y2, eftype='cles')
+        assert np.isclose(cl, 0.3958333)
+        assert np.isclose((1 - cl), compute_effsize(x=y2, y=x2, eftype='cles'))
 
     def test_compute_effsize_from_t(self):
         """Test function compute_effsize_from_t"""

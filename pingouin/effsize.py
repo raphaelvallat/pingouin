@@ -26,7 +26,7 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
         Indicates if the effect size was estimated from a paired sample.
         This is only relevant for cohen or hedges effect size.
     eftype : string
-        Effect size type. Must be 'r' (correlation) or 'cohen'
+        Effect size type. Must be ``'r'`` (correlation) or ``'cohen'``
         (Cohen d or Hedges g).
     confidence : float
         Confidence level (0.95 = 95%)
@@ -48,16 +48,16 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
 
     and compute the standard deviation:
 
-    .. math:: se = \\frac{1}{\\sqrt{n - 3}}
+    .. math:: \\sigma = \\frac{1}{\\sqrt{n - 3}}
 
     where :math:`n` is the sample size.
 
     The lower and upper confidence intervals - *in z-space* - are then
     given by:
 
-    .. math:: ci_z = z \\pm crit \\cdot se
+    .. math:: \\text{ci}_z = z \\pm \\text{crit} \\cdot \\sigma
 
-    where :math:`crit` is the critical value of the nomal distribution
+    where :math:`\\text{crit}` is the critical value of the nomal distribution
     corresponding to the desired confidence level (e.g. 1.96 in case of a 95%
     confidence interval).
 
@@ -65,8 +65,8 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
 
     .. math::
 
-        ci_r = \\frac{\\exp(2 \\cdot ci_z) - 1}{\\exp(2 \\cdot ci_z) + 1} =
-        \\text{tanh}(ci_z)
+        \\text{ci}_r = \\frac{\\exp(2 \\cdot \\text{ci}_z) - 1}
+        {\\exp(2 \\cdot \\text{ci}_z) + 1} = \\text{tanh}(\\text{ci}_z)
 
     A formula for calculating the confidence interval for a
     **Cohen d effect size** is given by Hedges and Olkin (1985, p86).
@@ -75,7 +75,7 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
 
     .. math::
 
-        se = \\sqrt{\\frac{n_x + n_y}{n_x \\cdot n_y} +
+        \\sigma = \\sqrt{\\frac{n_x + n_y}{n_x \\cdot n_y} +
         \\frac{d^2}{2 (n_x + n_y)}}
 
     where :math:`n_x` and :math:`n_y` are the sample sizes of the two groups.
@@ -84,24 +84,22 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
 
     .. math::
 
-        se = \\sqrt{\\frac{1}{n_x} + \\frac{d^2}{2 \\cdot n_x}}
+        \\sigma = \\sqrt{\\frac{1}{n_x} + \\frac{d^2}{2 \\cdot n_x}}
 
     The lower and upper confidence intervals are then given by:
 
-    .. math:: ci_d = d \\pm crit \\cdot se
-
-    where :math:`crit` is the critical value of the nomal distribution
-    corresponding to the desired confidence level (e.g. 1.96 in case of a 95%
-    confidence interval).
+    .. math:: \\text{ci}_d = d \\pm \\text{crit} \\cdot \\sigma
 
     References
     ----------
-    .. [1] https://en.wikipedia.org/wiki/Fisher_transformation
+    * https://en.wikipedia.org/wiki/Fisher_transformation
 
-    .. [2] Hedges, L., and Ingram Olkin. "Statistical models for
-           meta-analysis." (1985).
+    * Hedges, L., and Ingram Olkin. "Statistical models for meta-analysis."
+      (1985).
 
-    .. [3] http://www.leeds.ac.uk/educol/documents/00002182.htm
+    * http://www.leeds.ac.uk/educol/documents/00002182.htm
+
+    * https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5133225/
 
     Examples
     --------
@@ -111,17 +109,13 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
     >>> x = [3, 4, 6, 7, 5, 6, 7, 3, 5, 4, 2]
     >>> y = [4, 6, 6, 7, 6, 5, 5, 2, 3, 4, 1]
     >>> nx, ny = len(x), len(y)
-    >>> stat = np.corrcoef(x, y)[0][1]
+    >>> stat = pg.compute_effsize(x, y, eftype='r')
     >>> ci = pg.compute_esci(stat=stat, nx=nx, ny=ny, eftype='r')
     >>> print(stat, ci)
-    0.7468280049029223 [0.27 0.93]
+    0.746828004902922 [0.27 0.93]
 
     2. Confidence interval of a Cohen d
 
-    >>> import pingouin as pg
-    >>> x = [3, 4, 6, 7, 5, 6, 7, 3, 5, 4, 2]
-    >>> y = [4, 6, 6, 7, 6, 5, 5, 2, 3, 4, 1]
-    >>> nx, ny = len(x), len(y)
     >>> stat = pg.compute_effsize(x, y, eftype='cohen')
     >>> ci = pg.compute_esci(stat=stat, nx=nx, ny=ny, eftype='cohen')
     >>> print(stat, ci)
@@ -129,8 +123,8 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
     """
     from scipy.stats import norm
     # Safety check
-    assert eftype.lower() in['r', 'pearson', 'spearman', 'cohen',
-                             'd', 'g', 'hedges']
+    assert eftype.lower() in ['r', 'pearson', 'spearman', 'cohen',
+                              'd', 'g', 'hedges']
     assert stat is not None and nx is not None
     assert isinstance(confidence, float)
     assert 0 < confidence < 1
@@ -171,21 +165,22 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
         Second sample. Required only for bivariate functions.
     func : str or custom function
         Function to compute the bootstrapped statistic.
-        Accepted string values are::
+        Accepted string values are:
 
-        'pearson': Pearson correlation (bivariate, requires x and y)
-        'spearman': Spearman correlation (bivariate)
-        'cohen': Cohen d effect size (bivariate)
-        'hedges': Hedges g effect size (bivariate)
-        'mean': Mean (univariate, requires only x)
-        'std': Standard deviation (univariate)
-        'var': Variance (univariate)
+        * ``'pearson'`` : Pearson correlation (bivariate, requires x and y)
+        * ``'spearman'`` : Spearman correlation (bivariate)
+        * ``'cohen'`` : Cohen d effect size (bivariate)
+        * ``'hedges'`` : Hedges g effect size (bivariate)
+        * ``'mean'`` : Mean (univariate, requires only x)
+        * ``'std'`` : Standard deviation (univariate)
+        * ``'var'`` : Variance (univariate)
     method : str
-        Method to compute the confidence intervals::
+        Method to compute the confidence intervals:
 
-        'norm': Normal approximation with bootstrapped bias and standard error
-        'per': basic percentile method
-        'cper': Bias corrected percentile method (default)
+        * ``'norm'`` : Normal approximation with bootstrapped bias and
+          standard error
+        * ``'per'`` : Basic percentile method
+        * ``'cper'`` : Bias corrected percentile method (default)
     paired : boolean
         Indicates whether x and y are paired or not. Only useful when computing
         bivariate Cohen d or Hedges g bootstrapped confidence intervals.
@@ -208,17 +203,17 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
 
     Notes
     -----
-    Results have been tested against the *bootci* Matlab function.
+    Results have been tested against the
+    `bootci <https://www.mathworks.com/help/stats/bootci.html>`_
+    Matlab function.
 
     References
     ----------
-    .. [1] https://www.mathworks.com/help/stats/bootci.html
+    * DiCiccio, T. J., & Efron, B. (1996). Bootstrap confidence intervals.
+      Statistical science, 189-212.
 
-    .. [2] DiCiccio, T. J., & Efron, B. (1996). Bootstrap confidence intervals.
-           Statistical science, 189-212.
-
-    .. [3] Davison, A. C., & Hinkley, D. V. (1997). Bootstrap methods and their
-           application (Vol. 1). Cambridge university press.
+    * Davison, A. C., & Hinkley, D. V. (1997). Bootstrap methods and their
+      application (Vol. 1). Cambridge university press.
 
     Examples
     --------
@@ -391,24 +386,21 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     Parameters
     ----------
     ef : float
-        Original effect size
+        Original effect size.
     input_type : string
-        Effect size type of ef. Must be 'r' or 'd'.
+        Effect size type of ef. Must be ``'r'`` or ``'d'``.
     output_type : string
-        Desired effect size type.
-        Available methods are ::
+        Desired effect size type. Available methods are:
 
-        'cohen' : Unbiased Cohen d
-        'hedges' : Hedges g
-        'glass': Glass delta
-        'eta-square' : Eta-square
-        'odds-ratio' : Odds ratio
-        'AUC' : Area Under the Curve
-        'none' : pass-through (return ``ef``)
+        * ``'cohen'`` : Unbiased Cohen d
+        * ``'hedges'`` : Hedges g
+        * ``'eta-square'`` : Eta-square
+        * ``'odds-ratio'`` : Odds ratio
+        * ``'AUC'`` : Area Under the Curve
+        * ``'none'`` : pass-through (return ``ef``)
 
     nx, ny : int, optional
-        Length of vector x and y.
-        nx and ny are required to convert to Hedges g
+        Length of vector x and y. Required to convert to Hedges g.
 
     Returns
     -------
@@ -422,28 +414,28 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
 
     Notes
     -----
-    The formula to convert **r** to **d** is given in ref [1]:
+    The formula to convert **r** to **d** is given in [1]_:
 
     .. math:: d = \\frac{2r}{\\sqrt{1 - r^2}}
 
-    The formula to convert **d** to **r** is given in ref [2]:
+    The formula to convert **d** to **r** is given in [2]_:
 
     .. math::
 
         r = \\frac{d}{\\sqrt{d^2 + \\frac{(n_x + n_y)^2 - 2(n_x + n_y)}
         {n_xn_y}}}
 
-    The formula to convert **d** to :math:`\\eta^2` is given in ref [3]:
+    The formula to convert **d** to :math:`\\eta^2` is given in [3]_:
 
-    .. math:: \\eta^2 = \\frac{(0.5 * d)^2}{1 + (0.5 * d)^2}
+    .. math:: \\eta^2 = \\frac{(0.5 d)^2}{1 + (0.5 d)^2}
 
-    The formula to convert **d** to an odds-ratio is given in ref [4]:
+    The formula to convert **d** to an odds-ratio is given in [4]_:
 
-    .. math:: OR = e(\\frac{d * \\pi}{\\sqrt{3}})
+    .. math:: \\text{OR} = \\exp (\\frac{d \\pi}{\\sqrt{3}})
 
-    The formula to convert **d** to area under the curve is given in ref [5]:
+    The formula to convert **d** to area under the curve is given in [5]_:
 
-    .. math:: AUC = \\mathcal{N}_{cdf}(\\frac{d}{\\sqrt{2}})
+    .. math:: \\text{AUC} = \\mathcal{N}_{cdf}(\\frac{d}{\\sqrt{2}})
 
     References
     ----------
@@ -467,33 +459,29 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     --------
     1. Convert from Cohen d to eta-square
 
-    >>> from pingouin import convert_effsize
+    >>> import pingouin as pg
     >>> d = .45
-    >>> eta = convert_effsize(d, 'cohen', 'eta-square')
+    >>> eta = pg.convert_effsize(d, 'cohen', 'eta-square')
     >>> print(eta)
     0.048185603807257595
 
     2. Convert from Cohen d to Hegdes g (requires the sample sizes of each
        group)
 
-    >>> d = .45
-    >>> g = convert_effsize(d, 'cohen', 'hedges', nx=10, ny=10)
-    >>> print(g)
+    >>> pg.convert_effsize(.45, 'cohen', 'hedges', nx=10, ny=10)
     0.4309859154929578
 
     3. Convert Pearson r to Cohen d
 
     >>> r = 0.40
-    >>> d = convert_effsize(r, 'r', 'cohen')
+    >>> d = pg.convert_effsize(r, 'r', 'cohen')
     >>> print(d)
     0.8728715609439696
 
     4. Reverse operation: convert Cohen d to Pearson r
 
-    >>> d = 0.873
-    >>> r = convert_effsize(d, 'cohen', 'r')
-    >>> print(r)
-    0.40004943911648533
+    >>> pg.convert_effsize(d, 'cohen', 'r')
+    0.4000000000000001
     """
     it = input_type.lower()
     ot = output_type.lower()
@@ -541,7 +529,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     elif ot == 'odds-ratio':
         # Borenstein et al. 2009
         return np.exp(d * np.pi / np.sqrt(3))
-    else:  # ['auc', 'cles']
+    else:  # ['auc']
         # Ruscio 2008
         from scipy.stats import norm
         return norm.cdf(d / np.sqrt(2))
@@ -558,20 +546,20 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         Second set of observations.
     paired : boolean
         If True, uses Cohen d-avg formula to correct for repeated measurements
-        (Cumming 2012)
+        (see Notes).
     eftype : string
         Desired output effect size.
-        Available methods are ::
+        Available methods are:
 
-        'none' : no effect size
-        'cohen' : Unbiased Cohen d
-        'hedges' : Hedges g
-        'glass': Glass delta
-        'r' : correlation coefficient
-        'eta-square' : Eta-square
-        'odds-ratio' : Odds ratio
-        'AUC' : Area Under the Curve
-        'CLES' : Common language effect size
+        * ``'none'`` : no effect size
+        * ``'cohen'`` : Unbiased Cohen d
+        * ``'hedges'`` : Hedges g
+        * ``'glass'`` : Glass delta
+        * ``'r'`` : correlation coefficient
+        * ``'eta-square'`` : Eta-square
+        * ``'odds-ratio'`` : Odds ratio
+        * ``'AUC'`` : Area Under the Curve
+        * ``'CLES'`` : Common Language Effect Size
 
     Returns
     -------
@@ -588,7 +576,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
     Missing values are automatically removed from the data. If ``x`` and ``y``
     are paired, the entire row is removed.
 
-    If ``x`` and ``y`` are independent, the Cohen's d is:
+    If ``x`` and ``y`` are independent, the Cohen :math:`d` is:
 
     .. math::
 
@@ -605,62 +593,81 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
 
     The Cohen’s d is a biased estimate of the population effect size,
     especially for small samples (n < 20). It is often preferable
-    to use the corrected effect size, or Hedges’g, instead:
+    to use the corrected Hedges :math:`g` instead:
 
-    .. math:: g = d * (1 - \\frac{3}{4(n_1 + n_2) - 9})
+    .. math:: g = d \\times (1 - \\frac{3}{4(n_1 + n_2) - 9})
 
-    If eftype = 'glass', the Glass :math:`\\delta` is reported, using the
-    group with the lowest variance as the control group:
+    The Glass :math:`\\delta` is calculated using the group with the lowest
+    variance as the control group:
 
     .. math::
 
-        \\delta = \\frac{\\overline{X} - \\overline{Y}}{\\sigma_{control}}
+        \\delta = \\frac{\\overline{X} -
+        \\overline{Y}}{\\sigma^2_{\\text{control}}}
+
+    The common language effect size is the proportion of pairs where ``x`` is
+    higher than ``y`` (calculated with a brute-force approach where
+    each observation of ``x`` is paired to each observation of ``y``,
+    see :py:func:`pingouin.wilcoxon` for more details):
+
+    .. math:: \\text{CL} = P(X > Y) + .5 \\times P(X = Y)
+
+    For other effect sizes, Pingouin will first calculate a Cohen :math:`d` and
+    then use the :py:func:`pingouin.convert_effsize` to convert to the desired
+    effect size.
 
     References
     ----------
-    .. [1] Lakens, D., 2013. Calculating and reporting effect sizes to
-       facilitate cumulative science: a practical primer for t-tests and
-       ANOVAs. Front. Psychol. 4, 863. https://doi.org/10.3389/fpsyg.2013.00863
+    * Lakens, D., 2013. Calculating and reporting effect sizes to
+      facilitate cumulative science: a practical primer for t-tests and
+      ANOVAs. Front. Psychol. 4, 863. https://doi.org/10.3389/fpsyg.2013.00863
 
-    .. [2] Cumming, Geoff. Understanding the new statistics: Effect sizes,
-           confidence intervals, and meta-analysis. Routledge, 2013.
+    * Cumming, Geoff. Understanding the new statistics: Effect sizes,
+      confidence intervals, and meta-analysis. Routledge, 2013.
 
-    .. [3] https://osf.io/vbdah/
+    * https://osf.io/vbdah/
 
     Examples
     --------
-    1. Compute Cohen d from two independent set of observations.
+    1. Cohen d from two independent samples.
 
     >>> import numpy as np
-    >>> from pingouin import compute_effsize
-    >>> np.random.seed(123)
-    >>> x = np.random.normal(2, size=100)
-    >>> y = np.random.normal(2.3, size=95)
-    >>> d = compute_effsize(x=x, y=y, eftype='cohen', paired=False)
-    >>> print(d)
-    -0.2835170152506578
+    >>> import pingouin as pg
+    >>> x = [1, 2, 3, 4]
+    >>> y = [3, 4, 5, 6, 7]
+    >>> pg.compute_effsize(x, y, paired=False, eftype='cohen')
+    -1.707825127659933
 
-    2. Compute Hedges g from two paired set of observations.
+    The sign of the Cohen d will be opposite if we reverse the order of
+    ``x`` and ``y``:
 
-    >>> import numpy as np
-    >>> from pingouin import compute_effsize
-    >>> x = [1.62, 2.21, 3.79, 1.66, 1.86, 1.87, 4.51, 4.49, 3.3 , 2.69]
-    >>> y = [0.91, 3., 2.28, 0.49, 1.42, 3.65, -0.43, 1.57, 3.27, 1.13]
-    >>> g = compute_effsize(x=x, y=y, eftype='hedges', paired=True)
-    >>> print(g)
-    0.8353295489915401
+    >>> pg.compute_effsize(y, x, paired=False, eftype='cohen')
+    1.707825127659933
 
-    3. Compute Glass delta from two independent set of observations. The group
-       with the lowest variance will automatically be selected as the control.
+    2. Hedges g from two paired samples.
 
-    >>> import numpy as np
-    >>> from pingouin import compute_effsize
-    >>> np.random.seed(123)
-    >>> x = np.random.normal(2, scale=1, size=50)
-    >>> y = np.random.normal(2, scale=2, size=45)
-    >>> d = compute_effsize(x=x, y=y, eftype='glass')
-    >>> print(d)
-    -0.1170721973604153
+    >>> x = [1, 2, 3, 4, 5, 6, 7]
+    >>> y = [1, 3, 5, 7, 9, 11, 13]
+    >>> pg.compute_effsize(x, y, paired=True, eftype='hedges')
+    -0.8222477210374874
+
+    3. Glass delta from two independent samples. The group with the lowest
+    variance will automatically be selected as the control.
+
+    >>> pg.compute_effsize(x, y, paired=False, eftype='glass')
+    -1.3887301496588271
+
+    4. Common Language Effect Size.
+
+    >>> pg.compute_effsize(x, y, eftype='cles')
+    0.2857142857142857
+
+    In other words, there are ~29% of pairs where ``x`` is higher than ``y``,
+    which means that there are ~71% of pairs where ``x`` is *lower* than ``y``.
+    This can be easily verified by changing the order of ``x`` and ``y``:
+
+    >>> pg.compute_effsize(y, x, eftype='cles')
+    0.7142857142857143
     """
     # Check arguments
     if not _check_eftype(eftype):
@@ -694,9 +701,9 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         r, _ = pearsonr(x, y)
         return r
     elif eftype.lower() == 'cles':
-        # Compute exact CLES
+        # Compute exact CLES (see pingouin.wilcoxon)
         diff = x[:, None] - y
-        return max((diff < 0).sum(), (diff > 0).sum()) / diff.size
+        return np.where(diff == 0, 0.5, diff > 0).mean()
     else:
         # Test equality of variance of data with a stringent threshold
         # equal_var, p = homoscedasticity(x, y, alpha=.001)

@@ -9,6 +9,10 @@ What's new
 v0.3.5 (dev)
 ------------
 
+**Enhancements**
+
+a. The Common Language Effect Size (CLES) is now calculated using the formula given by Vargha and Delaney 2000, which works better when ties are present in data. This applies to the :py:func:`pingouin.wilcoxon` and :py:func:`pingouin.compute_effsize` functions. Furthermore, the CLES is now tail-sensitive in :py:func:`pingouin.wilcoxon`. For :py:func:`pingouin.compute_effsize` however, since tail is not an argment that can be specified, the CLES always corresponds to the proportion of pairs where x is *higher* than y. For more details, please refer to `PR #94 <https://github.com/raphaelvallat/pingouin/pull/94>`_.
+
 **Code**
 
 a. Added support for unsigned integers in dtypes safety checks (see `issue #93 <https://github.com/raphaelvallat/pingouin/issues/93>`_).

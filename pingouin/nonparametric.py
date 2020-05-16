@@ -317,19 +317,33 @@ def wilcoxon(x, y, tail='two-sided'):
 
     Notes
     -----
-    The Wilcoxon signed-rank test tests the null hypothesis that two related
-    paired samples come from the same distribution. In particular, it tests
-    whether the distribution of the differences x - y is symmetric about zero.
-    A continuity correction is applied by default
+    The Wilcoxon signed-rank test [1]_ tests the null hypothesis that two
+    related paired samples come from the same distribution. In particular,
+    it tests whether the distribution of the differences x - y is symmetric
+    about zero. A continuity correction is applied by default
     (see :py:func:`scipy.stats.wilcoxon` for details).
 
-    The rank biserial correlation is the difference between the proportion of
-    favorable evidence minus the proportion of unfavorable evidence
-    (see Kerby 2014).
+    The matched pairs rank biserial correlation [2]_ is the simple difference
+    between the proportion of favorable and unfavorable evidence; in the case
+    of the Wilcoxon signed-rank test, the evidence consists of rank sums
+    (Kerby 2014):
 
-    The common language effect size is the probability (from 0 to 1) that a
-    randomly selected observation from the first sample will be greater than a
-    randomly selected observation from the second sample.
+    .. math:: r = f - u
+
+    The common language effect size is the proportion of pairs where ``x`` is
+    higher than ``y``. It was first introduced by McGraw and Wong (1992) [3]_.
+    Pingouin uses a brute-force version of the formula given by Vargha and
+    Delaney 2000 [4]_:
+
+    .. math:: \\text{CL} = P(X > Y) + .5 \\times P(X = Y)
+
+    The advantage is of this method are twofold. First, the brute-force
+    approach pairs each observation of ``x`` to its ``y`` counterpart, and
+    therefore does not require normally distributed data. Second, the formula
+    takes ties into account and therefore works with ordinal data.
+
+    When tail is ``'less'``, the CLES is then set to :math:`1 - \\text{CL}`,
+    which gives the proportion of pairs where ``x`` is *lower* than ``y``.
 
     .. warning :: Versions of Pingouin below 0.2.6 gave wrong two-sided
         p-values for the Wilcoxon test. P-values were accidentally squared, and
@@ -348,6 +362,13 @@ def wilcoxon(x, y, tail='two-sided'):
     .. [3] McGraw, K. O., & Wong, S. P. (1992). A common language effect size
            statistic. Psychological bulletin, 111(2), 361.
 
+    .. [4] Vargha, A., & Delaney, H. D. (2000). A Critique and Improvement of
+           the “CL” Common Language Effect Size Statistics of McGraw and Wong.
+           Journal of Educational and Behavioral Statistics: A Quarterly
+           Publication Sponsored by the American Educational Research
+           Association and the American Statistical Association, 25(2),
+           101–132. https://doi.org/10.2307/1165329
+
     Examples
     --------
     Wilcoxon test on two related samples.
@@ -358,7 +379,7 @@ def wilcoxon(x, y, tail='two-sided'):
     >>> y = [38, 37, 33, 29, 14, 12, 20, 22, 17, 25, 26, 16]
     >>> pg.wilcoxon(x, y, tail='two-sided')
               W-val       tail     p-val       RBC      CLES
-    Wilcoxon   20.5  two-sided  0.285765 -0.378788  0.583333
+    Wilcoxon   20.5  two-sided  0.285765 -0.378788  0.395833
 
     Compare with SciPy
 
@@ -370,11 +391,11 @@ def wilcoxon(x, y, tail='two-sided'):
 
     >>> pg.wilcoxon(x, y, tail='greater')
               W-val     tail     p-val       RBC      CLES
-    Wilcoxon   20.5  greater  0.876244 -0.378788  0.583333
+    Wilcoxon   20.5  greater  0.876244 -0.378788  0.395833
 
     >>> pg.wilcoxon(x, y, tail='less')
               W-val  tail     p-val       RBC      CLES
-    Wilcoxon   20.5  less  0.142883 -0.378788  0.583333
+    Wilcoxon   20.5  less  0.142883 -0.378788  0.604167
 
     Or simply leave it to Pingouin, using the `'one-sided'` argument, in which
     case Pingouin will look at the sign of the median of the differences
@@ -388,13 +409,11 @@ def wilcoxon(x, y, tail='two-sided'):
 
     >>> pg.wilcoxon(x, y, tail='one-sided')  # Equivalent to tail = 'less'
               W-val  tail     p-val       RBC      CLES
-    Wilcoxon   20.5  less  0.142883 -0.378788  0.583333
+    Wilcoxon   20.5  less  0.142883 -0.378788  0.604167
     """
     x = np.asarray(x)
     y = np.asarray(y)
-
-    # Remove NA
-    x, y = remove_na(x, y, paired=True)
+    x, y = remove_na(x, y, paired=True)  # Remove NA
 
     # Check tails
     possible_tails = ['two-sided', 'one-sided', 'greater', 'less']
@@ -407,9 +426,16 @@ def wilcoxon(x, y, tail='two-sided'):
     wval, pval = scipy.stats.wilcoxon(x, y, zero_method='wilcox',
                                       correction=True, alternative=tail)
 
-    # Effect size 1: common language effect size (McGraw and Wong 1992)
+    # Effect size 1: Common Language Effect Size
+    # Since Pingouin v0.3.5, CLES is tail-specific and calculated
+    # according to the formula given in Vargha and Delaney 2000 which
+    # works with ordinal data.
     diff = x[:, None] - y
-    cles = max((diff < 0).sum(), (diff > 0).sum()) / diff.size
+    # cles = max((diff < 0).sum(), (diff > 0).sum()) / diff.size
+    # Tail = 'greater', with ties set to 0.5
+    # Note that tail = 'two-sided' gives same output as tail = 'greater'
+    cles = np.where(diff == 0, 0.5, diff > 0).mean()
+    cles = 1 - cles if tail == 'less' else cles
 
     # Effect size 2: matched-pairs rank biserial correlation (Kerby 2014)
     d = x - y
