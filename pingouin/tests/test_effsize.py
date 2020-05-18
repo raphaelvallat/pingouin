@@ -12,27 +12,48 @@ df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
                    'Time': ['Mon', 'Thur', 'Mon', 'Thur'],
                    'Values': [1.52, 5.8, 8.2, 3.4]})
 
-x = np.random.normal(2, 1, 30)
-y = np.random.normal(2.5, 1, 30)
+np.random.seed(42)
+x = np.random.normal(2, 1, 20)
+y = np.random.normal(2.5, 1, 20)
+nx, ny = len(x), len(y)
 
 
 class TestEffsize(TestCase):
     """Test effsize.py."""
 
     def test_compute_esci(self):
-        """Test function compute_esci"""
-        compute_esci(stat=.6, nx=30, eftype='r')
-        compute_esci(stat=.4, nx=len(x), ny=len(y), confidence=.99, decimals=4)
-        compute_esci(stat=.6, nx=30, ny=30, eftype='cohen')
-        # Compare with R
-        r, nx = 0.5543563, 6
-        ci = compute_esci(stat=r, nx=nx, eftype='r')
+        """Test function compute_esci.
+
+        Note that since Pingouin v0.3.5, CIs around a Cohen d are calculated
+        using a T (and not Z) distribution. This is the same behavior as the
+        cohen.d function of the effsize R package.
+
+        However, note that the cohen.d function does not use the Cohen d-avg
+        for paired samples, and therefore we cannot directly compare the CIs
+        for paired samples. Similarly, R uses a slightly different formula to
+        estimate the SE of one-sample cohen D.
+        """
+        # Pearson correlation
+        r = 0.5543563
+        ci = compute_esci(stat=r, nx=6, eftype='r')
         assert np.allclose(ci, [-0.47, 0.94])
-        # One sample / paired T-test
-        ci = compute_esci(-0.57932, nx=40, ny=1)
-        ci_p = compute_esci(-0.57932, nx=40, ny=1, paired=True)
-        assert np.allclose(ci, ci_p)
-        assert np.allclose(ci, [-0.91, -0.24])
+        # Cohen d
+        # .. One sample and paired
+        # Cannot compare to R because cohen.d uses different formulas for
+        # Cohen d and SE.
+        d = compute_effsize(np.r_[x, y], y=0)
+        assert round(d, 6) == 2.086694  # Same as cohen.d
+        ci = compute_esci(d, nx + ny, 1, decimals=6)
+        d = compute_effsize(x, y, paired=True)
+        ci = compute_esci(d, nx, ny, paired=True, decimals=6)
+        # .. Independent (compare with cohen.d function)
+        d = compute_effsize(x, y)
+        ci = compute_esci(d, nx, ny, decimals=6)
+        np.testing.assert_equal(ci, [-1.067645, 0.226762])
+        # Same but with different n
+        d = compute_effsize(x, y[:-5])
+        ci = compute_esci(d, nx, len(y[:-5]), decimals=8)
+        np.testing.assert_equal(ci, [-1.33603010, 0.08662825])
 
     def test_compute_boot_esci(self):
         """Test function compute_bootci
@@ -162,17 +183,16 @@ class TestEffsize(TestCase):
         with pytest.raises(ValueError):
             compute_effsize(x=x, y=y, eftype='wrong')
         # Unequal sample size with paired == True
-        z = np.random.normal(2.5, 3, 20)
+        z = np.random.normal(2.5, 3, 25)
         compute_effsize(x=x, y=z, paired=True)
         # Compare with the effsize R package
         a = [3.2, 6.4, 1.8, 2.4, 5.8, 6.5]
         b = [2.4, 3.2, 3.2, 1.4, 2.8, 3.5]
-        # na = len(a)
-        # nb = len(b)
         d = compute_effsize(x=a, y=b, eftype='cohen', paired=False)
         assert np.isclose(d, 1.002549)
         # Note that ci are different than from R because we use a normal and
-        # not a T distribution to estimate the CI
+        # not a T distribution to estimate the CI.
+        # Also, for paired samples, effsize does not return the Cohen d-avg.
         # ci = compute_esci(ef=d, nx=na, ny=nb)
         # assert ci[0] == -.2
         # assert ci[1] == 2.2

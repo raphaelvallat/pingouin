@@ -28,6 +28,8 @@ c. The Common Language Effect Size (CLES) is now calculated using the formula gi
 
    This applies to the :py:func:`pingouin.wilcoxon` and :py:func:`pingouin.compute_effsize` functions. Furthermore, the CLES is now tail-sensitive in the former, but not in the latter since tail is not a valid argument. In :py:func:`pingouin.compute_effsize`, the CLES thus always corresponds to the proportion of pairs where x is *higher* than y. For more details, please refer to `PR #94 <https://github.com/raphaelvallat/pingouin/pull/94>`_.
 
+d. Confidence intervals around a Cohen d effect size are now calculated using a central T distribution instead of a standard normal distribution in the :py:func:`pingouin.compute_esci` function. This is consistent with the effsize R package.
+
 **Code**
 
 a. Added support for unsigned integers in dtypes safety checks (see `issue #93 <https://github.com/raphaelvallat/pingouin/issues/93>`_).

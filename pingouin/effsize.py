@@ -57,7 +57,7 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
 
     .. math:: \\text{ci}_z = z \\pm \\text{crit} \\cdot \\sigma
 
-    where :math:`\\text{crit}` is the critical value of the nomal distribution
+    where :math:`\\text{crit}` is the critical value of the normal distribution
     corresponding to the desired confidence level (e.g. 1.96 in case of a 95%
     confidence interval).
 
@@ -70,8 +70,8 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
 
     A formula for calculating the confidence interval for a
     **Cohen d effect size** is given by Hedges and Olkin (1985, p86).
-    If the effect size estimate from the sample is :math:`d`, then it is
-    normally distributed, with standard deviation:
+    If the effect size estimate from the sample is :math:`d`, then it follows a
+    T distribution with standard deviation:
 
     .. math::
 
@@ -84,11 +84,14 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
 
     .. math::
 
-        \\sigma = \\sqrt{\\frac{1}{n_x} + \\frac{d^2}{2 \\cdot n_x}}
+        \\sigma = \\sqrt{\\frac{1}{n_x} + \\frac{d^2}{2 n_x}}
 
     The lower and upper confidence intervals are then given by:
 
     .. math:: \\text{ci}_d = d \\pm \\text{crit} \\cdot \\sigma
+
+    where :math:`\\text{crit}` is the critical value of the T distribution
+    corresponding to the desired confidence level.
 
     References
     ----------
@@ -117,37 +120,42 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
     2. Confidence interval of a Cohen d
 
     >>> stat = pg.compute_effsize(x, y, eftype='cohen')
-    >>> ci = pg.compute_esci(stat=stat, nx=nx, ny=ny, eftype='cohen')
+    >>> ci = pg.compute_esci(stat, nx=nx, ny=ny, eftype='cohen', decimals=3)
     >>> print(stat, ci)
-    0.1537753990658328 [-0.68  0.99]
+    0.1537753990658328 [-0.737  1.045]
     """
-    from scipy.stats import norm
-    # Safety check
+    from scipy.stats import norm, t
     assert eftype.lower() in ['r', 'pearson', 'spearman', 'cohen',
                               'd', 'g', 'hedges']
     assert stat is not None and nx is not None
     assert isinstance(confidence, float)
-    assert 0 < confidence < 1
-
-    # Note that we are using a normal dist and not a T dist:
-    # from scipy.stats import t
-    # crit = np.abs(t.ppf((1 - confidence) / 2), dof)
-    crit = np.abs(norm.ppf((1 - confidence) / 2))
+    assert 0 < confidence < 1, 'confidence must be between 0 and 1.'
 
     if eftype.lower() in ['r', 'pearson', 'spearman']:
-        # Standardize correlation coefficient
-        z = np.arctanh(stat)
+        z = np.arctanh(stat)  # R-to-z transform
         se = 1 / np.sqrt(nx - 3)
+        crit = np.abs(norm.ppf((1 - confidence) / 2))
         ci_z = np.array([z - crit * se, z + crit * se])
-        # Transform back to r
-        ci = np.tanh(ci_z)
+        ci = np.tanh(ci_z)  # Transform back to r
     else:
+        # Cohen d. Results are different than JASP which uses a non-central T
+        # distribution. See github.com/jasp-stats/jasp-issues/issues/525
         if ny == 1 or paired:
-            # One sample or paired
+            # One-sample or paired. Results vary slightly from the cohen.d R
+            # function which uses instead:
+            # >>> sqrt((n / (n / 2)^2) + .5*(dd^2 / n)) -- one-sample
+            # >>> sqrt( (1/n1 + dd^2/(2*n1))*(2-2*r)); -- paired
+            # where r is the correlation between samples
+            # https://github.com/mtorchiano/effsize/blob/master/R/CohenD.R
+            # However, Pingouin uses the formulas on www.real-statistics.com
             se = np.sqrt(1 / nx + stat**2 / (2 * nx))
+            dof = nx - 1
         else:
-            # Two-sample test
+            # Independent two-samples: give same results as R:
+            # >>> cohen.d(..., paired = FALSE, noncentral=FALSE)
             se = np.sqrt(((nx + ny) / (nx * ny)) + (stat**2) / (2 * (nx + ny)))
+            dof = nx + ny - 2
+        crit = np.abs(t.ppf((1 - confidence) / 2, dof))
         ci = np.array([stat - crit * se, stat + crit * se])
     return np.round(ci, decimals)
 
