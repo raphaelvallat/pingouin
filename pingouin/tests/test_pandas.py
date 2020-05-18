@@ -87,7 +87,7 @@ class TestParametric(TestCase):
         assert corrs['r'].equals(corrs2['r'])
 
         # Test partial correlation matrix (compare with the ppcor package)
-        corrs = data.pcorr().round(3)
+        corrs = data.iloc[:, :5].pcorr().round(3)
         np.testing.assert_array_equal(corrs.iloc[0, :].to_numpy(),
                                       [1, 0.392, 0.06, -0.014, -0.149])
         # Now compare against Pingouin's own partial_corr function

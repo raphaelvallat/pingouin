@@ -15,7 +15,6 @@ One-way ANOVA
 
 .. figure::  /pictures/flowchart/flowchart_one_way_ANOVA.svg
   :align: center
-  :scale: 50
   :alt: One-way ANOVA
 
 Example code
@@ -47,7 +46,6 @@ Correlation
 
 .. figure::  /pictures/flowchart/flowchart_correlations.svg
   :align: center
-  :scale: 50
   :alt: Correlations
 
 Example code
@@ -78,7 +76,6 @@ Non-parametric
 
 .. figure::  /pictures/flowchart/flowchart_nonparametric.svg
   :align: center
-  :scale: 50
   :alt: Non-parametric tests
 
 Example code

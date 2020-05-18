@@ -11,7 +11,22 @@ v0.3.5 (dev)
 
 **Enhancements**
 
-a. The Common Language Effect Size (CLES) is now calculated using the formula given by Vargha and Delaney 2000, which works better when ties are present in data. This applies to the :py:func:`pingouin.wilcoxon` and :py:func:`pingouin.compute_effsize` functions. Furthermore, the CLES is now tail-sensitive in :py:func:`pingouin.wilcoxon`. For :py:func:`pingouin.compute_effsize` however, since tail is not an argment that can be specified, the CLES always corresponds to the proportion of pairs where x is *higher* than y. For more details, please refer to `PR #94 <https://github.com/raphaelvallat/pingouin/pull/94>`_.
+a. Added support for weighted linear regression in :py:func:`pingouin.linear_regression`. Users can now pass sample weights using the ``weights`` argument (similar to ``lm(..., weights)`` in R and ``LinearRegression.fit(X, y, sample_weight)`` in scikit-learn).
+b. The :math:`R^2` in :py:func:`pingouin.linear_regression` is now calculated in a similar manner as statsmodels and R, which give different results as :py:func:`sklearn.metrics.r2_score` when, *and only when*, no constant term (= intercept) is present in the predictor matrix. In that case, scikit-learn (and previous versions of Pingouin) uses the standard :math:`R^2` formula, which assumes a reference model that only includes an intercept:
+
+   .. math:: R^2 = 1 - \frac{\sum_i (y_i - \hat y_i)^2}{\sum_i (y_i - \bar y)^2}
+
+   However, statsmodels, R, and newer versions of Pingouin use a modified formula, which uses a reference model corresponding to noise only (i.e. no intercept, as explained `in this post <https://stats.stackexchange.com/questions/26176/removal-of-statistically-significant-intercept-term-increases-r2-in-linear-mo>`_):
+
+   .. math:: R_0^2 = 1 - \frac{\sum_i (y_i - \hat y_i)^2}{\sum_i y_i^2}
+
+   Note that this only affects the (rare) cases when no intercept is present in the predictor matrix. Remember that Pingouin automatically add a constant term in :py:func:`pingouin.linear_regression`, a behavior that can be disabled using ``add_intercept=False``.
+
+c. The Common Language Effect Size (CLES) is now calculated using the formula given by Vargha and Delaney 2000, which works better when ties are present in data.
+
+   .. math:: \text{CL} = P(X > Y) + .5 \times P(X = Y)
+
+   This applies to the :py:func:`pingouin.wilcoxon` and :py:func:`pingouin.compute_effsize` functions. Furthermore, the CLES is now tail-sensitive in the former, but not in the latter since tail is not a valid argument. In :py:func:`pingouin.compute_effsize`, the CLES thus always corresponds to the proportion of pairs where x is *higher* than y. For more details, please refer to `PR #94 <https://github.com/raphaelvallat/pingouin/pull/94>`_.
 
 **Code**
 

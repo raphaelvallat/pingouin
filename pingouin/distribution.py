@@ -166,6 +166,8 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
     Y       0.348676   8.400129e-01    True
     Mbin  839.716156  4.549393e-183   False
     Ybin  814.468158  1.381932e-177   False
+    W1     24.815974   4.085825e-06   False
+    W2     43.400187   3.765036e-10   False
 
     3. Pandas Series
 

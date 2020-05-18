@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+from pandas.testing import assert_frame_equal
 from numpy.testing import assert_almost_equal, assert_equal
 from unittest import TestCase
 from pingouin.regression import (linear_regression, logistic_regression,
@@ -23,11 +24,14 @@ class TestRegression(TestCase):
     """Test regression.py."""
 
     def test_linear_regression(self):
-        """Test function linear_regression."""
-        # Simple regression
+        """Test function linear_regression.
+
+        Compare against JASP and R lm() function.
+        """
+        # Simple regression (compare to R lm())
         lm = linear_regression(df['X'], df['Y'])  # Pingouin
-        linear_regression(df['X'], df['Y'], add_intercept=False)
-        sc = linregress(df['X'].to_numpy(), df['Y'].to_numpy())  # SciPy
+        sc = linregress(df['X'], df['Y'])  # SciPy
+        # When using assert_equal, we need to use .to_numpy()
         assert_equal(lm['names'].to_numpy(), ['Intercept', 'X'])
         assert_almost_equal(lm['coef'][1], sc.slope)
         assert_almost_equal(lm['coef'][0], sc.intercept)
@@ -35,8 +39,14 @@ class TestRegression(TestCase):
         assert_almost_equal(lm['pval'][1], sc.pvalue)
         assert_almost_equal(np.sqrt(lm['r2'][0]), sc.rvalue)
         assert lm.residuals_.size == df['Y'].size
+        assert_equal(lm['CI[2.5%]'].round(5).to_numpy(), [1.48155, 0.17553])
+        assert_equal(lm['CI[97.5%]'].round(5).to_numpy(), [4.23286, 0.61672])
+        assert round(lm['r2'].iloc[0], 4) == 0.1147
+        assert round(lm['adj_r2'].iloc[0], 4) == 0.1057
+        assert lm.df_model_ == 1
+        assert lm.df_resid_ == 98
 
-        # Multiple regression with intercept
+        # Multiple regression with intercept (compare to JASP)
         X = df[['X', 'M']].to_numpy()
         y = df['Y'].to_numpy()
         lm = linear_regression(X, y, as_dataframe=False)  # Pingouin
@@ -46,8 +56,7 @@ class TestRegression(TestCase):
         assert_almost_equal(lm['coef'][0], sk.intercept_)
         assert_almost_equal(sk.score(X, y), lm['r2'])
         assert lm['residuals'].size == y.size
-
-        # Compare values to JASP
+        # No need for .to_numpy here because we're using a dict and not pandas
         assert_equal([.605, .110, .101], np.round(lm['se'], 3))
         assert_equal([3.145, 0.361, 6.321], np.round(lm['T'], 3))
         assert_equal([0.002, 0.719, 0.000], np.round(lm['pval'], 3))
@@ -58,7 +67,15 @@ class TestRegression(TestCase):
         lm = linear_regression(X, y, add_intercept=False, as_dataframe=False)
         sk = LinearRegression(fit_intercept=False).fit(X, y)
         assert_almost_equal(lm['coef'], sk.coef_)
-        assert_almost_equal(sk.score(X, y), lm['r2'])
+        # Scikit-learn gives wrong R^2 score when no intercept present because
+        # sklearn.metrics.r2_score always assumes that an intercept is present
+        # https://stackoverflow.com/questions/54614157/scikit-learn-statsmodels-which-r-squared-is-correct
+        # assert_almost_equal(sk.score(X, y), lm['r2'])
+        # Instead, we compare to R lm() function:
+        assert round(lm['r2'], 4) == 0.9096
+        assert round(lm['adj_r2'], 4) == 0.9078
+        assert lm['df_model'] == 2
+        assert lm['df_resid'] == 98
 
         # Test other arguments
         linear_regression(df[['X', 'M']], df['Y'], coef_only=True)
@@ -82,9 +99,9 @@ class TestRegression(TestCase):
                                 df['Y'].to_numpy(), add_intercept=False)
         lm3 = linear_regression(df[['X', 'Zero', 'M', 'Zero']].to_numpy(),
                                 df['Y'], add_intercept=False)
-        assert np.array_equal(lm1.loc[:, 'names'], ['Intercept', 'X', 'M'])
-        assert np.array_equal(lm2.loc[:, 'names'], ['X', 'M', 'One'])
-        assert np.array_equal(lm3.loc[:, 'names'], ['x1', 'x3'])
+        assert_equal(lm1.loc[:, 'names'].to_numpy(), ['Intercept', 'X', 'M'])
+        assert_equal(lm2.loc[:, 'names'].to_numpy(), ['X', 'M', 'One'])
+        assert_equal(lm3.loc[:, 'names'].to_numpy(), ['x1', 'x3'])
 
         # With duplicate columns
         lm1 = linear_regression(df[['X', 'One', 'Zero', 'M', 'M', 'X']],
@@ -93,8 +110,8 @@ class TestRegression(TestCase):
             df[['X', 'One', 'Zero', 'M', 'M', 'X']].to_numpy(),
             df['Y'], add_intercept=False
         )
-        assert np.array_equal(lm1.loc[:, 'names'], ['Intercept', 'X', 'M'])
-        assert np.array_equal(lm2.loc[:, 'names'], ['x1', 'x2', 'x4'])
+        assert_equal(lm1.loc[:, 'names'].to_numpy(), ['Intercept', 'X', 'M'])
+        assert_equal(lm2.loc[:, 'names'].to_numpy(), ['x1', 'x2', 'x4'])
 
         # Relative importance
         # Compare to R package relaimpo
@@ -102,10 +119,9 @@ class TestRegression(TestCase):
         # >>> lm1 <- lm(Y ~ X + M, data = data)
         # >>> calc.relimp(lm1, type=c("lmg"))
         lm = linear_regression(df[['X', 'M']], df['Y'], relimp=True)
-        np.testing.assert_almost_equal(lm.loc[[1, 2], 'relimp'],
-                                       [0.05778011, 0.31521913])
-        np.testing.assert_almost_equal(lm.loc[[1, 2], 'relimp_perc'],
-                                       [15.49068, 84.50932], decimal=4)
+        assert_almost_equal(lm.loc[[1, 2], 'relimp'], [0.05778011, 0.31521913])
+        assert_almost_equal(lm.loc[[1, 2], 'relimp_perc'],
+                            [15.49068, 84.50932], decimal=4)
         # Now we make sure that relimp_perc sums to 100% and relimp sums to r2
         assert np.isclose(lm['relimp_perc'].sum(), 100.)
         assert np.isclose(lm['relimp'].sum(), lm.at[0, 'r2'])
@@ -119,19 +135,89 @@ class TestRegression(TestCase):
         lm = linear_regression(df_z[['X', 'M']], df_z['Y'],
                                add_intercept=False,
                                as_dataframe=False, relimp=True)
-        np.testing.assert_almost_equal(lm['relimp'],
-                                       [0.05778011, 0.31521913], decimal=4)
-        np.testing.assert_almost_equal(lm['relimp_perc'],
-                                       [15.49068, 84.50932], decimal=4)
+        assert_almost_equal(lm['relimp'], [0.05778011, 0.31521913], decimal=4)
+        assert_almost_equal(lm['relimp_perc'], [15.49068, 84.50932], decimal=4)
         assert np.isclose(np.sum(lm['relimp']), lm['r2'])
         # 3 predictors + intercept
         lm = linear_regression(df[['X', 'M', 'Ybin']], df['Y'], relimp=True)
-        np.testing.assert_almost_equal(lm.loc[[1, 2, 3], 'relimp'],
-                                       [0.06010737, 0.31724368, 0.01217479])
-        np.testing.assert_almost_equal(lm.loc[[1, 2, 3], 'relimp_perc'],
-                                       [15.43091, 81.44355, 3.12554],
-                                       decimal=4)
+        assert_almost_equal(lm.loc[[1, 2, 3], 'relimp'],
+                            [0.06010737, 0.31724368, 0.01217479])
+        assert_almost_equal(lm.loc[[1, 2, 3], 'relimp_perc'],
+                            [15.43091, 81.44355, 3.12554], decimal=4)
         assert np.isclose(lm['relimp'].sum(), lm.at[0, 'r2'])
+
+        ######################################################################
+        # WEIGHTED REGRESSION - compare against R lm() function
+        # Note that the summary function of R sometimes round to 4 decimals,
+        # sometimes to 5, etc..
+        lm = linear_regression(df[['X', 'M']], df['Y'], weights=df['W2'])
+        assert_equal(lm['coef'].round(5).to_numpy(),
+                     [1.89530, 0.03905, 0.63912])
+        assert_equal(lm['se'].round(5).to_numpy(),
+                     [0.60498, 0.10984, 0.10096])
+        assert_equal(lm['T'].round(3).to_numpy(),
+                     [3.133, 0.356, 6.331])  # R round to 3
+        assert_equal(lm['pval'].round(5).to_numpy(),
+                     [0.00229, 0.72296, 0.00000])
+        assert_equal(lm['CI[2.5%]'].round(5).to_numpy(),
+                     [0.69459, -0.17896, 0.43874])
+        assert_equal(lm['CI[97.5%]'].round(5).to_numpy(),
+                     [3.09602, 0.25706, 0.83949])
+        assert round(lm['r2'].iloc[0], 4) == 0.3742
+        assert round(lm['adj_r2'].iloc[0], 4) == 0.3613
+        assert lm.df_model_ == 2
+        assert lm.df_resid_ == 97
+
+        # No intercept
+        lm = linear_regression(df[['X', 'M']], df['Y'], add_intercept=False,
+                               weights=df['W2'])
+        assert_equal(lm['coef'].round(5).to_numpy(), [0.26924, 0.71733])
+        assert_equal(lm['se'].round(5).to_numpy(), [0.08525, 0.10213])
+        assert_equal(lm['T'].round(3).to_numpy(), [3.158, 7.024])
+        assert_equal(lm['pval'].round(5).to_numpy(), [0.00211, 0.00000])
+        assert_equal(lm['CI[2.5%]'].round(5).to_numpy(), [0.10007, 0.51466])
+        assert_equal(lm['CI[97.5%]'].round(4).to_numpy(), [0.4384, 0.9200])
+        assert round(lm['r2'].iloc[0], 4) == 0.9090
+        assert round(lm['adj_r2'].iloc[0], 4) == 0.9072
+        assert lm.df_model_ == 2
+        assert lm.df_resid_ == 98
+
+        # With some weights set to zero
+        # Here, R gives slightl different results than statsmodels because
+        # zero weights are not taken into account when calculating the degrees
+        # of freedom. Pingouin is similar to R.
+        lm = linear_regression(df[['X']], df['Y'], weights=df['W1'])
+        assert_equal(lm['coef'].round(4).to_numpy(), [3.5597, 0.2820])
+        assert_equal(lm['se'].round(4).to_numpy(), [0.7355, 0.1222])
+        assert_equal(lm['pval'].round(4).to_numpy(), [0.0000, 0.0232])
+        assert_equal(lm['CI[2.5%]'].round(5).to_numpy(), [2.09935, 0.03943])
+        assert_equal(lm['CI[97.5%]'].round(5).to_numpy(), [5.02015, 0.52453])
+        assert round(lm['r2'].iloc[0], 5) == 0.05364
+        assert round(lm['adj_r2'].iloc[0], 5) == 0.04358
+        assert lm.df_model_ == 1
+        assert lm.df_resid_ == 94
+
+        # No intercept
+        lm = linear_regression(df[['X']], df['Y'], add_intercept=False,
+                               weights=df['W1'])
+        assert_equal(lm['coef'].round(5).to_numpy(), [0.85060])
+        assert_equal(lm['se'].round(5).to_numpy(), [0.03719])
+        assert_equal(lm['pval'].round(5).to_numpy(), [0.0000])
+        assert_equal(lm['CI[2.5%]'].round(5).to_numpy(), [0.77678])
+        assert_equal(lm['CI[97.5%]'].round(5).to_numpy(), [0.92443])
+        assert round(lm['r2'].iloc[0], 4) == 0.8463
+        assert round(lm['adj_r2'].iloc[0], 4) == 0.8447
+        assert lm.df_model_ == 1
+        assert lm.df_resid_ == 95
+
+        # With all weights to one, should be equal to OLS
+        assert_frame_equal(linear_regression(df[['X', 'M']], df['Y']),
+                           linear_regression(df[['X', 'M']], df['Y'],
+                                             weights=df['One']))
+
+        with pytest.raises(ValueError):
+            linear_regression(df[['X']], df['Y'], weights=df['W1'],
+                              relimp=True)
 
     def test_logistic_regression(self):
         """Test function logistic_regression."""
@@ -184,15 +270,15 @@ class TestRegression(TestCase):
 
         # With one column that has only one unique value
         c = logistic_regression(df[['One', 'X']], df['Ybin'])
-        assert np.array_equal(c.loc[:, 'names'], ['Intercept', 'X'])
+        assert_equal(c.loc[:, 'names'].to_numpy(), ['Intercept', 'X'])
         c = logistic_regression(df[['X', 'One', 'M', 'Zero']], df['Ybin'])
-        assert np.array_equal(c.loc[:, 'names'], ['Intercept', 'X', 'M'])
+        assert_equal(c.loc[:, 'names'].to_numpy(), ['Intercept', 'X', 'M'])
 
         # With duplicate columns
         c = logistic_regression(df[['X', 'M', 'X']], df['Ybin'])
-        assert np.array_equal(c.loc[:, 'names'], ['Intercept', 'X', 'M'])
+        assert_equal(c.loc[:, 'names'].to_numpy(), ['Intercept', 'X', 'M'])
         c = logistic_regression(df[['X', 'X', 'X']], df['Ybin'])
-        assert np.array_equal(c.loc[:, 'names'], ['Intercept', 'X'])
+        assert_equal(c.loc[:, 'names'].to_numpy(), ['Intercept', 'X'])
 
         # Error: dependent variable is not binary
         with pytest.raises(ValueError):

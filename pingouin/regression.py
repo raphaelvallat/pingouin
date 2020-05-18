@@ -3,23 +3,24 @@ import numpy as np
 import pandas as pd
 import pandas_flavor as pf
 from scipy.stats import t, norm
-from scipy.linalg import pinv, pinvh
+from scipy.linalg import pinv, pinvh, lstsq
 from pingouin.utils import remove_na as rm_na
 from pingouin.utils import _flatten_list as _fl
 
 __all__ = ['linear_regression', 'logistic_regression', 'mediation_analysis']
 
 
-def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
-                      as_dataframe=True, remove_na=False, relimp=False):
+def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
+                      alpha=0.05, as_dataframe=True, remove_na=False,
+                      relimp=False):
     """(Multiple) Linear regression.
 
     Parameters
     ----------
-    X : pd.DataFrame, np.array or list
-        Predictor(s). Shape = (n_samples, n_features) or (n_samples,).
-    y : pd.Series, np.array or list
-        Dependent variable. Shape = (n_samples).
+    X : array_like
+        Predictor(s), of shape *(n_samples, n_features)* or *(n_samples)*.
+    y : array_like
+        Dependent variable, of shape *(n_samples)*.
     add_intercept : bool
         If False, assume that the data are already centered. If True, add a
         constant term to the model. In this case, the first value in the
@@ -29,6 +30,12 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
             (intercept) to the model to limit the bias and force the residual
             mean to equal zero. Note that intercept coefficient and p-values
             are however rarely meaningful.
+    weights : array_like
+        An optional vector of sample weights to be used in the fitting
+        process, of shape *(n_samples)*. Missing or negative weights are not
+        allowed. If not null, a weighted least squares is calculated.
+
+        .. versionadded:: 0.3.5
     coef_only : bool
         If True, return only the regression coefficients.
     alpha : float
@@ -60,22 +67,36 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
 
     Returns
     -------
-    stats : dataframe or dict
+    stats : :py:class:`pandas.DataFrame` or dict
         Linear regression summary:
 
         * ``'names'``: name of variable(s) in the model (e.g. x1, x2...)
         * ``'coef'``: regression coefficients
-        * ``'se'``: standard error of the estimate
+        * ``'se'``: standard errors
         * ``'T'``: T-values
         * ``'pval'``: p-values
         * ``'r2'``: coefficient of determination (:math:`R^2`)
         * ``'adj_r2'``: adjusted :math:`R^2`
-        * ``'CI[2.5%]'``: lower confidence interval
-        * ``'CI[97.5%]'``: upper confidence interval
-        * ``'residuals'``: residuals (only if ``as_dataframe=False``)
+        * ``'CI[2.5%]'``: lower confidence intervals
+        * ``'CI[97.5%]'``: upper confidence intervals
         * ``'relimp'``: relative contribution of each predictor to the final\
                         :math:`R^2` (only if ``relimp=True``).
         * ``'relimp_perc'``: percent relative contribution
+
+        In addition, the output dataframe comes with hidden attributes such as
+        the residuals, and degrees of freedom of the model and residuals, which
+        can be accessed as follow, respectively:
+
+        >>> lm = pg.linear_regression() # doctest: +SKIP
+        >>> lm.residuals_, lm.df_model_, lm.df_resid_ # doctest: +SKIP
+
+        Note that to follow scikit-learn convention, these hidden atributes end
+        with an "_". When ``as_dataframe=False`` however, these attributes
+        are no longer hidden and can be accessed as any other keys in the
+        output dictionnary:
+
+        >>> lm = pg.linear_regression() # doctest: +SKIP
+        >>> lm['residuals'], lm['df_model'], lm['df_resid'] # doctest: +SKIP
 
     See also
     --------
@@ -85,7 +106,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     -----
     The :math:`\\beta` coefficients are estimated using an ordinary least
     squares (OLS) regression, as implemented in the
-    :py:func:`numpy.linalg.lstsq` function. The OLS method minimizes
+    :py:func:`scipy.linalg.lstsq` function. The OLS method minimizes
     the sum of squared residuals, and leads to a closed-form expression for
     the estimated :math:`\\beta`:
 
@@ -126,10 +147,6 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
 
     .. math:: \\overline{R}^2 = 1 - (1 - R^2) \\frac{n - 1}{n - p - 1}
 
-    The residuals can be accessed via :code:`stats.residuals_` if ``stats``
-    is a pandas DataFrame or :code:`stats['residuals']` if ``stats`` is a
-    dict.
-
     The relative importance (``relimp``) column is a partitioning of the
     total :math:`R^2` of the model into individual :math:`R^2` contribution.
     This is calculated by taking the average over average contributions in
@@ -142,18 +159,18 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     from :math:`X`, as well as any column with only one unique value
     (constant), excluding the intercept.
 
-    Results have been compared against sklearn, statsmodels and JASP.
+    Results have been compared against sklearn, R, statsmodels and JASP.
 
     Examples
     --------
     1. Simple linear regression
 
     >>> import numpy as np
-    >>> from pingouin import linear_regression
+    >>> import pingouin as pg
     >>> np.random.seed(123)
     >>> mean, cov, n = [4, 6], [[1, 0.5], [0.5, 1]], 30
     >>> x, y = np.random.multivariate_normal(mean, cov, n).T
-    >>> lm = linear_regression(x, y)
+    >>> lm = pg.linear_regression(x, y)
     >>> lm.round(2)
            names  coef    se     T  pval    r2  adj_r2  CI[2.5%]  CI[97.5%]
     0  Intercept  4.40  0.54  8.16  0.00  0.24    0.21      3.29       5.50
@@ -164,7 +181,7 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     >>> np.random.seed(42)
     >>> z = np.random.normal(size=n)
     >>> X = np.column_stack((x, z))
-    >>> lm = linear_regression(X, y)
+    >>> lm = pg.linear_regression(X, y)
     >>> print(lm['coef'].to_numpy())
     [4.54123324 0.36628301 0.17709451]
 
@@ -180,13 +197,13 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
 
     >>> import pandas as pd
     >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
-    >>> lm = linear_regression(df[['x', 'z']], df['y'])
+    >>> lm = pg.linear_regression(df[['x', 'z']], df['y'])
     >>> print(lm['coef'].to_numpy())
     [4.54123324 0.36628301 0.17709451]
 
     5. No intercept and return coef only
 
-    >>> linear_regression(X, y, add_intercept=False, coef_only=True)
+    >>> pg.linear_regression(X, y, add_intercept=False, coef_only=True)
     array([ 1.40935593, -0.2916508 ])
 
     6. Return a dictionnary instead of a DataFrame
@@ -197,12 +214,12 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
 
     >>> X[4, 1] = np.nan
     >>> y[7] = np.nan
-    >>> linear_regression(X, y, remove_na=True, coef_only=True)
+    >>> pg.linear_regression(X, y, remove_na=True, coef_only=True)
     array([4.64069731, 0.35455398, 0.1888135 ])
 
     8. Get the relative importance of predictors
 
-    >>> lm = linear_regression(X, y, remove_na=True, relimp=True)
+    >>> lm = pg.linear_regression(X, y, remove_na=True, relimp=True)
     >>> lm[['names', 'relimp', 'relimp_perc']]
                names    relimp  relimp_perc
     0  Intercept       NaN          NaN
@@ -219,6 +236,17 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
     relimp           0.264305
     relimp_perc    100.000000
     dtype: float64
+
+    9. Weighted linear regression
+
+    >>> X = [1, 2, 3, 4, 5, 6]
+    >>> y = [10, 22, 11, 13, 13, 16]
+    >>> w = [1, 0.1, 1, 1, 0.5, 1]  # Array of weights. Must be >= 0.
+    >>> lm = pg.linear_regression(X, y, weights=w)
+    >>> lm.round(2)
+           names  coef    se     T  pval    r2  adj_r2  CI[2.5%]  CI[97.5%]
+    0  Intercept  9.00  2.03  4.42  0.01  0.51    0.39      3.35      14.64
+    1         x1  1.04  0.50  2.06  0.11  0.51    0.39     -0.36       2.44
     """
     # Extract names if X is a Dataframe or Series
     if isinstance(X, pd.DataFrame):
@@ -261,22 +289,23 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
         names.insert(0, "Intercept")
 
     # FINAL CHECKS BEFORE RUNNING LEAST SQUARES REGRESSION
-    # 1. Let's remove the column with only zero, otherwise the regression fails
+    # 1. Let's remove column(s) with only zero, otherwise the regression fails
     n_nonzero = np.count_nonzero(X, axis=0)
     idx_zero = np.flatnonzero(n_nonzero == 0)  # Find columns that are only 0
     if len(idx_zero):
         X = np.delete(X, idx_zero, 1)
         names = np.delete(names, idx_zero)
 
-    # 2. We also want to make sure that there is no more than one column
-    # (= Intercept) with only one unique value, otherwise the regression fails
+    # 2. We also want to make sure that there is no more than one constant
+    # column (= intercept), otherwise the regression fails
     # This is equivalent, but much faster, to pd.DataFrame(X).nunique()
     idx_unique = np.where(np.all(X == X[0, :], axis=0))[0]
     if len(idx_unique) > 1:
-        # Houston, we have a problem!
         # We remove all but the first "Intercept" column.
         X = np.delete(X, idx_unique[1:], 1)
         names = np.delete(names, idx_unique[1:])
+    # Is there a constant in our predictor matrix? Useful for dof and R^2.
+    constant = 1 if len(idx_unique) > 0 else 0
 
     # 3. Finally, we want to remove duplicate columns
     if X.shape[1] > 1:
@@ -288,36 +317,68 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
             X = np.delete(X, idx_duplicate, 1)
             names = np.delete(names, idx_duplicate)
 
-    # LEAST-SQUARE REGRESSION + STATISTICS
-    # Compute beta coefficient and predictions
+    # 4. Check that we have enough samples / features
     n, p = X.shape[0], X.shape[1]
     assert n >= 3, 'At least three valid samples are required in X.'
     assert p >= 1, 'X must have at least one valid column.'
-    coef, ss_res, _, _ = np.linalg.lstsq(X, y, rcond=None)
+
+    # 5. Handle weights
+    if weights is not None:
+        if relimp:
+            raise ValueError("relimp = True is not supported when using "
+                             "weights.")
+        w = np.asarray(weights)
+        assert w.ndim == 1, 'weights must be a 1D array.'
+        assert w.size == n, 'weights must be of shape n_samples.'
+        assert not np.isnan(w).any(), 'Missing weights are not accepted.'
+        assert not (w < 0).any(), 'Negative weights are not accepted.'
+        # Do not count weights == 0 in dof
+        # This gives similar results as R lm() but different from statsmodels
+        n = np.count_nonzero(w)
+        # Rescale (whitening)
+        wts = np.diag(np.sqrt(w))
+        Xw = wts @ X
+        yw = wts @ y
+    else:
+        # Set all weights to one, [1, 1, 1, ...]
+        w = np.ones(n)
+        Xw = X
+        yw = y
+
+    # FIT (WEIGHTED) LEAST SQUARES REGRESSION USING SCIPY.LINALG.LSTST
+    coef, ss_res, rank, _ = lstsq(Xw, yw)
     if coef_only:
         return coef
-    ss_res = np.squeeze(ss_res)
-    pred = np.dot(X, coef)
-    resid = y - pred
-    # Degrees of freedom should not include the intercept
-    dof = n - p if add_intercept else n - p - 1
-    # Compute mean squared error, variance and SE
-    MSE = ss_res / dof
-    beta_var = MSE * (np.linalg.pinv(np.dot(X.T, X)).diagonal())
-    beta_se = np.sqrt(beta_var)
 
-    # Compute R2, adjusted R2 and RMSE
-    ss_tot = np.square(y - y.mean()).sum()
-    # ss_exp = np.square(pred - y.mean()).sum()
-    r2 = 1 - (ss_res / ss_tot)
-    adj_r2 = 1 - (1 - r2) * (n - 1) / dof
+    # Degrees of freedom
+    df_model = rank - constant
+    df_resid = n - p
+
+    # Calculate predicted values and (weighted) residuals
+    pred = Xw @ coef
+    resid = (yw - pred)
+    # ss_res = (resid ** 2).sum()
+
+    # Calculate total (weighted) sums of squares and R^2
+    ss_tot = np.dot(yw, yw)
+    ss_wtot = np.sum(w * (y - np.average(y, weights=w))**2)
+    if constant:
+        r2 = 1 - ss_res / ss_wtot
+    else:
+        r2 = 1 - ss_res / ss_tot
+    adj_r2 = 1 - (1 - r2) * (n - constant) / df_resid
+
+    # Compute mean squared error, variance and SE
+    mse = ss_res / df_resid
+    beta_var = mse * (np.linalg.pinv(Xw.T.dot(Xw)).diagonal())
+    beta_se = np.sqrt(beta_var)
 
     # Compute T and p-values
     T = coef / beta_se
-    pval = 2 * t.sf(np.fabs(T), dof)
+    pval = 2 * t.sf(np.fabs(T), df_resid)
 
     # Compute confidence intervals
-    crit = t.ppf(1 - alpha / 2, dof)
+    crit = t.ppf(1 - alpha / 2, df_resid)
     marg_error = crit * beta_se
     ll = coef - marg_error
     ul = coef + marg_error
@@ -347,9 +408,13 @@ def linear_regression(X, y, add_intercept=True, coef_only=False, alpha=0.05,
 
     if as_dataframe:
         stats = pd.DataFrame(stats)
+        stats.df_model_ = df_model
+        stats.df_resid_ = df_resid
         stats.residuals_ = 0  # Trick to avoid Pandas warning
         stats.residuals_ = resid  # Residuals is a hidden attribute
     else:
+        stats['df_model'] = df_model
+        stats['df_resid'] = df_resid
         stats['residuals'] = resid
     return stats
 
