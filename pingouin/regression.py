@@ -356,11 +356,11 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
 
     # Calculate predicted values and (weighted) residuals
     pred = Xw @ coef
-    resid = (yw - pred)
+    resid = yw - pred
     # ss_res = (resid ** 2).sum()
 
     # Calculate total (weighted) sums of squares and R^2
-    ss_tot = np.dot(yw, yw)
+    ss_tot = yw @ yw
     ss_wtot = np.sum(w * (y - np.average(y, weights=w))**2)
     if constant:
         r2 = 1 - ss_res / ss_wtot
@@ -370,7 +370,7 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
 
     # Compute mean squared error, variance and SE
     mse = ss_res / df_resid
-    beta_var = mse * (np.linalg.pinv(Xw.T.dot(Xw)).diagonal())
+    beta_var = mse * (np.linalg.pinv(Xw.T @ Xw).diagonal())
     beta_se = np.sqrt(beta_var)
 
     # Compute T and p-values
@@ -789,7 +789,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     # Fisher Information Matrix
     denom = (2 * (1 + np.cosh(lom.decision_function(X))))
     denom = np.tile(denom, (p, 1)).T
-    fim = np.dot((X_design / denom).T, X_design)
+    fim = (X_design / denom).T @ X_design
     crao = np.linalg.pinv(fim)
 
     # Standard error and Z-scores

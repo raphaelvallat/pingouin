@@ -646,8 +646,8 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         cvar = np.atleast_2d(C[covar].to_numpy())
         beta_x = np.linalg.lstsq(cvar, C[x].to_numpy(), rcond=None)[0]
         beta_y = np.linalg.lstsq(cvar, C[y].to_numpy(), rcond=None)[0]
-        res_x = C[x].to_numpy() - np.dot(cvar, beta_x)
-        res_y = C[y].to_numpy() - np.dot(cvar, beta_y)
+        res_x = C[x].to_numpy() - cvar @ beta_x
+        res_y = C[y].to_numpy() - cvar @ beta_y
     else:
         # SEMI-PARTIAL CORRELATION
         # Initialize "fake" residuals
@@ -655,11 +655,11 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         if x_covar is not None:
             cvar = np.atleast_2d(C[x_covar].to_numpy())
             beta_x = np.linalg.lstsq(cvar, C[x].to_numpy(), rcond=None)[0]
-            res_x = C[x].to_numpy() - np.dot(cvar, beta_x)
+            res_x = C[x].to_numpy() - cvar @ beta_x
         if y_covar is not None:
             cvar = np.atleast_2d(C[y_covar].to_numpy())
             beta_y = np.linalg.lstsq(cvar, C[y].to_numpy(), rcond=None)[0]
-            res_y = C[y].to_numpy() - np.dot(cvar, beta_y)
+            res_y = C[y].to_numpy() - cvar @ beta_y
     return corr(res_x, res_y, method=method, tail=tail)
 
 
