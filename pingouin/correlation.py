@@ -622,6 +622,9 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     assert isinstance(y_covar, (str, list, type(None)))
     if covar is not None and (x_covar is not None or y_covar is not None):
         raise ValueError('Cannot specify both covar and {x,y}_covar.')
+    assert x != covar, 'x and covar must be independent'
+    assert y != covar, 'y and covar must be independent'
+    assert x != y, 'x and y must be independent'
     # Check that columns exist
     col = _flatten_list([x, y, covar, x_covar, y_covar])
     if isinstance(covar, str):
@@ -630,6 +633,8 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         x_covar = [x_covar]
     if isinstance(y_covar, str):
         y_covar = [y_covar]
+        
+        
     assert all([c in data for c in col]), 'columns are not in dataframe.'
     # Check that columns are numeric
     assert all([data[c].dtype.kind in 'bfi' for c in col])
