@@ -896,8 +896,7 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
         * ``'method'``: Correlation type.
         * ``'covar'``: List of specified covariate(s), only when covariates
           are passed.
-        * ``'tail'``: Indicates whether the p-values are one-sided or
-          two-sided.
+        * ``'tail'``: Tail of the test.
         * ``'n'``: Sample size (after removal of missing values).
         * ``'r'``: Correlation coefficients.
         * ``'CI95'``: 95% parametric confidence intervals.
@@ -907,6 +906,9 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
         * ``'p-unc'``: Uncorrected p-values.
         * ``'p-corr'``: Corrected p-values.
         * ``'p-adjust'``: P-values correction method.
+        * ``'BF10'``: Bayes Factor of the alternative hypothesis
+          (only for Pearson correlation)
+        * ``'power'``: achieved power of the test (= 1 - type II error).
 
     Notes
     -----
@@ -916,12 +918,10 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     This function is more flexible and gives a much more detailed
     output than the :py:func:`pandas.DataFrame.corr()` method (i.e. p-values,
-    confidence interval, Bayes Factor..). This comes however at
+    confidence interval, Bayes Factor...). This comes however at
     an increased computational cost. While this should not be discernible for
     dataframe with less than 10,000 rows and/or less than 20 columns, this
-    function can be slow for very large dataset. For speed purpose, the Bayes
-    Factor is only computed when the sample size is less than 1000
-    (and ``method='pearson'``).
+    function can be slow for very large dataset.
 
     A faster alternative to get the r-values and p-values in a matrix format is
     to use the :py:func:`pingouin.rcorr` function, which works directly as a

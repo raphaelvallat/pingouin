@@ -693,7 +693,6 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     spearman  30  0.429  [0.08, 0.68]  0.184   0.123  0.018  0.676
     """
     from pingouin.utils import _flatten_list
-    # Check arguments
     assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
     assert data.shape[0] > 2, 'Data must have at least 3 samples.'
     assert isinstance(x, (str, tuple)), 'x must be a string.'
@@ -714,8 +713,7 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         x_covar = [x_covar]
     if isinstance(y_covar, str):
         y_covar = [y_covar]
-        
-        
+
     assert all([c in data for c in col]), 'columns are not in dataframe.'
     # Check that columns are numeric
     assert all([data[c].dtype.kind in 'bfiu' for c in col])
