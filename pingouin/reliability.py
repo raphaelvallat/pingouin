@@ -11,7 +11,7 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
 
     Parameters
     ----------
-    data : pandas dataframe
+    data : :py:class:`pandas.DataFrame`
         Wide or long-format dataframe.
     items : str
         Column in ``data`` with the items names (long-format only).

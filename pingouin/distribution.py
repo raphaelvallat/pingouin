@@ -63,7 +63,7 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
 
     Parameters
     ----------
-    data : dataframe, series, list or 1D np.array
+    data : :py:class:`pandas.DataFrame`, series, list or 1D np.array
         Iterable. Can be either a single list, 1D numpy array,
         or a wide- or long-format pandas dataframe.
     dv : str
@@ -80,11 +80,10 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
 
     Returns
     -------
-    stats : dataframe
-        Pandas DataFrame with columns:
+    stats : :py:class:`pandas.DataFrame`
 
-        * ``'W'``: test statistic
-        * ``'pval'``: p-value
+        * ``'W'``: Test statistic.
+        * ``'pval'``: p-value.
         * ``'normal'``: True if ``data`` is normally distributed.
 
     See Also
@@ -227,7 +226,7 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
 
     Parameters
     ----------
-    data : dataframe, list or dict
+    data : :py:class:`pandas.DataFrame`, list or dict
         Iterable. Can be either a list / dictionnary of iterables
         or a wide- or long-format pandas dataframe.
     dv : str
@@ -244,10 +243,9 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
 
     Returns
     -------
-    stats : dataframe
-        Pandas DataFrame with columns:
+    stats : :py:class:`pandas.DataFrame`
 
-        * ``'W/T'``: test statistic ('W' for Levene, 'T' for Bartlett)
+        * ``'W/T'``: Test statistic ('W' for Levene, 'T' for Bartlett)
         * ``'pval'``: p-value
         * ``'equal_var'``: True if ``data`` has equal variance
 
@@ -507,7 +505,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
 
     Parameters
     ----------
-    data : pd.DataFrame
+    data : :py:class:`pandas.DataFrame`
         DataFrame containing the repeated measurements.
         Both wide and long-format dataframe are supported for this function.
         To test for an interaction term between two repeated measures factors
@@ -526,11 +524,11 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
         Name of column containing the subject identifier (only required if
         ``data`` is in long format).
     correction : string
-        Specify the epsilon version ::
+        Specify the epsilon version:
 
-            'gg' : Greenhouse-Geisser
-            'hf' : Huynh-Feldt
-            'lb' : Lower bound
+        * ``'gg'``: Greenhouse-Geisser
+        * ``'hf'``: Huynh-Feldt
+        * ``'lb'``: Lower bound
 
     Returns
     -------
@@ -718,7 +716,7 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
 
     Parameters
     ----------
-    data : pd.DataFrame
+    data : :py:class:`pandas.DataFrame`
         DataFrame containing the repeated measurements.
         Both wide and long-format dataframe are supported for this function.
         To test for an interaction term between two repeated measures factors
@@ -737,10 +735,10 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
         Name of column containing the subject identifier (only required if
         ``data`` is in long format).
     method : str
-        Method to compute sphericity ::
+        Method to compute sphericity:
 
-        'jns' : John, Nagao and Sugiura test.
-        'mauchly' : Mauchly test (default).
+        * ``'jns'``: John, Nagao and Sugiura test.
+        * ``'mauchly'``: Mauchly test (default).
 
     alpha : float
         Significance level

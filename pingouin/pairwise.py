@@ -23,7 +23,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
     Parameters
     ----------
-    data : pandas DataFrame
+    data : :py:class:`pandas.DataFrame`
         DataFrame. Note that this function can also directly be used as a
         Pandas method, in which case this argument is no longer needed.
     dv : string
@@ -79,26 +79,25 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         based on the test statistic.
     padjust : string
         Method used for testing and adjustment of pvalues.
-        Available methods are ::
 
-        'none' : no correction
-        'bonf' : one-step Bonferroni correction
-        'sidak' : one-step Sidak correction
-        'holm' : step-down method using Bonferroni adjustments
-        'fdr_bh' : Benjamini/Hochberg FDR correction
-        'fdr_by' : Benjamini/Yekutieli FDR correction
+        * ``'none'``: no correction
+        * ``'bonf'``: one-step Bonferroni correction
+        * ``'sidak'``: one-step Sidak correction
+        * ``'holm'``: step-down method using Bonferroni adjustments
+        * ``'fdr_bh'``: Benjamini/Hochberg FDR correction
+        * ``'fdr_by'``: Benjamini/Yekutieli FDR correction
     effsize : string or None
-        Effect size type. Available methods are ::
+        Effect size type. Available methods are:
 
-        'none' : no effect size
-        'cohen' : Unbiased Cohen d
-        'hedges' : Hedges g
-        'glass': Glass delta
-        'r' : Pearson correlation coefficient
-        'eta-square' : Eta-square
-        'odds-ratio' : Odds ratio
-        'AUC' : Area Under the Curve
-        'CLES' : Common Language Effect Size
+        * ``'none'``: no effect size
+        * ``'cohen'``: Unbiased Cohen d
+        * ``'hedges'``: Hedges g
+        * ``'glass'``: Glass delta
+        * ``'r'``: Pearson correlation coefficient
+        * ``'eta-square'``: Eta-square
+        * ``'odds-ratio'``: Odds ratio
+        * ``'AUC'``: Area Under the Curve
+        * ``'CLES'``: Common Language Effect Size
     correction : string or boolean
         For unpaired two sample T-tests, specify whether or not to correct for
         unequal variances using Welch separate variances T-test. If `'auto'`,
@@ -123,23 +122,25 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
     Returns
     -------
-    stats : DataFrame
-        Stats summary ::
+    stats : :py:class:`pandas.DataFrame`
 
-        'A' : Name of first measurement
-        'B' : Name of second measurement
-        'Paired' : indicates whether the two measurements are paired or not
-        'Parametric' : indicates if (non)-parametric tests were used
-        'Tail' : indicate whether the p-values are one-sided or two-sided
-        'T' : T statistic (only if parametric=True)
-        'U-val' : Mann-Whitney U stat (if parametric=False and unpaired data)
-        'W-val' : Wilcoxon W stat (if parametric=False and paired data)
-        'dof' : degrees of freedom (only if parametric=True)
-        'p-unc' : Uncorrected p-values
-        'p-corr' : Corrected p-values
-        'p-adjust' : p-values correction method
-        'BF10' : Bayes Factor
-        'hedges' : effect size (or any effect size defined in ``effsize``)
+        * ``'A'``: Name of first measurement
+        * ``'B'``: Name of second measurement
+        * ``'Paired'``: indicates whether the two measurements are paired or
+          not
+        * ``'Parametric'``: indicates if (non)-parametric tests were used
+        * ``'Tail'``: indicate whether the p-values are one-sided or two-sided
+        * ``'T'``: T statistic (only if parametric=True)
+        * ``'U-val'``: Mann-Whitney U stat (if parametric=False and unpaired
+          data)
+        * ``'W-val'``: Wilcoxon W stat (if parametric=False and paired data)
+        * ``'dof'``: degrees of freedom (only if parametric=True)
+        * ``'p-unc'``: Uncorrected p-values
+        * ``'p-corr'``: Corrected p-values
+        * ``'p-adjust'``: p-values correction method
+        * ``'BF10'``: Bayes Factor
+        * ``'hedges'``: effect size (or any effect size defined in
+          ``effsize``)
 
     See also
     --------
@@ -516,7 +517,7 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
 
     Parameters
     ----------
-    data : pandas DataFrame
+    data : :py:class:`pandas.DataFrame`
         DataFrame. Note that this function can also directly be used as a
         Pandas method, in which case this argument is no longer needed.
     dv : string
@@ -528,33 +529,33 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
     tail : string
         Indicates whether to return the 'two-sided' or 'one-sided' p-values
     effsize : string or None
-        Effect size type. Available methods are ::
+        Effect size type. Available methods are:
 
-        'none' : no effect size
-        'cohen' : Unbiased Cohen d
-        'hedges' : Hedges g
-        'glass': Glass delta
-        'r' : Pearson correlation coefficient
-        'eta-square' : Eta-square
-        'odds-ratio' : Odds ratio
-        'AUC' : Area Under the Curve
-        'CLES' : Common Language Effect Size
+        * ``'none'``: no effect size
+        * ``'cohen'``: Unbiased Cohen d
+        * ``'hedges'``: Hedges g
+        * ``'glass'``: Glass delta
+        * ``'r'``: Pearson correlation coefficient
+        * ``'eta-square'``: Eta-square
+        * ``'odds-ratio'``: Odds ratio
+        * ``'AUC'``: Area Under the Curve
+        * ``'CLES'``: Common Language Effect Size
 
     Returns
     -------
-    stats : DataFrame
-        Stats summary ::
+    stats : :py:class:`pandas.DataFrame`
 
-        'A' : Name of first measurement
-        'B' : Name of second measurement
-        'mean(A)' : Mean of first measurement
-        'mean(B)' : Mean of second measurement
-        'diff' : Mean difference (= mean(A) - mean(B))
-        'se' : Standard error
-        'tail' : indicate whether the p-values are one-sided or two-sided
-        'T' : T-values
-        'p-tukey' : Tukey-HSD corrected p-values
-        'hedges' : effect size (or any effect size defined in ``effsize``)
+        * ``'A'``: Name of first measurement
+        * ``'B'``: Name of second measurement
+        * ``'mean(A)'``: Mean of first measurement
+        * ``'mean(B)'``: Mean of second measurement
+        * ``'diff'``: Mean difference (= mean(A) - mean(B))
+        * ``'se'``: Standard error
+        * ``'tail'``: indicate whether the p-values are one-sided or two-sided
+        * ``'T'``: T-values
+        * ``'p-tukey'``: Tukey-HSD corrected p-values
+        * ``'hedges'``: effect size (or any effect size defined in
+          ``effsize``)
 
     Notes
     -----
@@ -674,7 +675,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
 
     Parameters
     ----------
-    data : pandas DataFrame
+    data : :py:class:`pandas.DataFrame`
         DataFrame
     dv : string
         Name of column containing the dependant variable.
@@ -685,32 +686,35 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
     tail : string
         Indicates whether to return the 'two-sided' or 'one-sided' p-values
     effsize : string or None
-        Effect size type. Available methods are ::
+        Effect size type. Available methods are:
 
-        'none' : no effect size
-        'cohen' : Unbiased Cohen d
-        'hedges' : Hedges g
-        'glass': Glass delta
-        'eta-square' : Eta-square
-        'odds-ratio' : Odds ratio
-        'AUC' : Area Under the Curve
+        * ``'none'``: no effect size
+        * ``'cohen'``: Unbiased Cohen d
+        * ``'hedges'``: Hedges g
+        * ``'glass'``: Glass delta
+        * ``'r'``: Pearson correlation coefficient
+        * ``'eta-square'``: Eta-square
+        * ``'odds-ratio'``: Odds ratio
+        * ``'AUC'``: Area Under the Curve
+        * ``'CLES'``: Common Language Effect Size
 
     Returns
     -------
-    stats : DataFrame
-        Stats summary ::
+    stats : :py:class:`pandas.DataFrame`
+        Stats summary:
 
-        'A' : Name of first measurement
-        'B' : Name of second measurement
-        'mean(A)' : Mean of first measurement
-        'mean(B)' : Mean of second measurement
-        'diff' : Mean difference (= mean(A) - mean(B))
-        'se' : Standard error
-        'tail' : indicate whether the p-values are one-sided or two-sided
-        'T' : T-values
-        'df' : adjusted degrees of freedom
-        'pval' : Games-Howell corrected p-values
-        'hedges' : effect size (or any effect size defined in ``effsize``)
+        * ``'A'``: Name of first measurement
+        * ``'B'``: Name of second measurement
+        * ``'mean(A)'``: Mean of first measurement
+        * ``'mean(B)'``: Mean of second measurement
+        * ``'diff'``: Mean difference (= mean(A) - mean(B))
+        * ``'se'``: Standard error
+        * ``'tail'``: indicate whether the p-values are one-sided or two-sided
+        * ``'T'``: T-values
+        * ``'df'``: adjusted degrees of freedom
+        * ``'pval'``: Games-Howell corrected p-values
+        * ``'hedges'``: effect size (or any effect size defined in
+          ``effsize``)
 
     Notes
     -----
@@ -831,73 +835,78 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     Parameters
     ----------
-    data : pandas DataFrame
+    data : :py:class:`pandas.DataFrame`
         DataFrame. Note that this function can also directly be used as a
         Pandas method, in which case this argument is no longer needed.
     columns : list or str
-        Column names in data ::
+        Column names in data:
 
-        '["a", "b", "c"]' : combination between columns a, b, and c
-        '["a"]' : product between a and all the other numeric columns
-        '[["a"], ["b", "c"]]' : product between ["a"] and ["b", "c"]
-        '[["a", "d"], ["b", "c"]]' : product between ["a", "d"] and ["b", "c"]
-        '[["a", "d"], None]' : product between ["a", "d"] and all other columns
+        * ``["a", "b", "c"]``: combination between columns a, b, and c.
+        * ``["a"]``: product between a and all the other numeric columns.
+        * ``[["a"], ["b", "c"]]``: product between ["a"] and ["b", "c"].
+        * ``[["a", "d"], ["b", "c"]]``: product between ["a", "d"] and
+          ["b", "c"].
+        * ``[["a", "d"], None]``: product between ["a", "d"] and all other
+          numeric columns in dataframe.
 
-        Note that if column is not specified, then the function will return the
-        pairwise correlation between the combination of all the numeric columns
-        in data. See the examples section for more details on this.
+        If column is None, the function will return the pairwise correlation
+        between the combination of all the numeric columns in data.
+        See the examples section for more details on this.
     covar : None, string or list
         Covariate(s) for partial correlation. Must be one or more columns
         in data. Use a list if there are more than one covariate. If
         ``covar`` is not None, a partial correlation will be computed using
         :py:func:`pingouin.partial_corr` function.
     tail : string
-        Indicates whether to return the 'two-sided' or 'one-sided' p-values
+        Specify whether to return ``'one-sided'`` or ``'two-sided'`` p-value.
+        Note that the former are simply half the latter.
     method : string
-        Specify which method to use for the computation of the correlation
-        coefficient. Available methods are ::
+        Correlation type:
 
-        'pearson' : Pearson product-moment correlation
-        'spearman' : Spearman rank-order correlation
-        'kendall' : Kendall’s tau (ordinal data)
-        'percbend' : percentage bend correlation (robust)
-        'shepherd' : Shepherd's pi correlation (robust Spearman)
+        * ``'pearson'``: Pearson :math:`r` product-moment correlation
+        * ``'spearman'``: Spearman :math:`\\rho` rank-order correlation
+        * ``'kendall'``: Kendall's :math:`\\tau` correlation
+          (for ordinal data)
+        * ``'bicor'``: Biweight midcorrelation (robust)
+        * ``'percbend'``: Percentage bend correlation (robust)
+        * ``'shepherd'``: Shepherd's pi correlation (robust)
+        * ``'skipped'``: Skipped correlation (robust)
     padjust : string
         Method used for testing and adjustment of pvalues.
-        Available methods are ::
 
-        'none' : no correction
-        'bonf' : one-step Bonferroni correction
-        'sidak' : one-step Sidak correction
-        'holm' : step-down method using Bonferroni adjustments
-        'fdr_bh' : Benjamini/Hochberg FDR correction
-        'fdr_by' : Benjamini/Yekutieli FDR correction
+        * ``'none'``: no correction
+        * ``'bonf'``: one-step Bonferroni correction
+        * ``'sidak'``: one-step Sidak correction
+        * ``'holm'``: step-down method using Bonferroni adjustments
+        * ``'fdr_bh'``: Benjamini/Hochberg FDR correction
+        * ``'fdr_by'``: Benjamini/Yekutieli FDR correction
     nan_policy : string
-        Can be `'listwise'` for listwise deletion of missing values
-        (= complete-case analysis) or `'pairwise'` (default) for the more
+        Can be ``'listwise'`` for listwise deletion of missing values
+        (= complete-case analysis) or ``'pairwise'`` (default) for the more
         liberal pairwise deletion (= available-case analysis).
 
         .. versionadded:: 0.2.9
 
     Returns
     -------
-    stats : DataFrame
-        Stats summary ::
+    stats : :py:class:`pandas.DataFrame`
 
-        'X' : Name(s) of first columns
-        'Y' : Name(s) of second columns
-        'method' : method used to compute the correlation
-        'covar' : List of specified covariate(s) (only for partial correlation)
-        'tail' : indicates whether the p-values are one-sided or two-sided
-        'n' : Sample size (after NaN removal)
-        'r' : Correlation coefficients
-        'CI95' : 95% parametric confidence intervals
-        'r2' : R-squared values
-        'adj_r2' : Adjusted R-squared values
-        'z' : Standardized correlation coefficients
-        'p-unc' : uncorrected one or two tailed p-values
-        'p-corr' : corrected one or two tailed p-values
-        'p-adjust' : Correction method
+        * ``'X'``: Name(s) of first columns.
+        * ``'Y'``: Name(s) of second columns.
+        * ``'method'``: Correlation type.
+        * ``'covar'``: List of specified covariate(s), only when covariates
+          are passed.
+        * ``'tail'``: Indicates whether the p-values are one-sided or
+          two-sided.
+        * ``'n'``: Sample size (after removal of missing values).
+        * ``'r'``: Correlation coefficients.
+        * ``'CI95'``: 95% parametric confidence intervals.
+        * ``'r2'``: R-squared values.
+        * ``'adj_r2'``: Adjusted R-squared values.
+        * ``'z'``: Standardized correlation coefficients.
+        * ``'p-unc'``: Uncorrected p-values.
+        * ``'p-corr'``: Corrected p-values.
+        * ``'p-adjust'``: P-values correction method.
 
     Notes
     -----
@@ -912,16 +921,17 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     dataframe with less than 10,000 rows and/or less than 20 columns, this
     function can be slow for very large dataset. For speed purpose, the Bayes
     Factor is only computed when the sample size is less than 1000
-    (and method='pearson').
+    (and ``method='pearson'``).
 
     A faster alternative to get the r-values and p-values in a matrix format is
     to use the :py:func:`pingouin.rcorr` function, which works directly as a
     :py:class:`pandas.DataFrame` method (see example below).
 
     This function also works with two-dimensional multi-index columns. In this
-    case, columns must be list(s) of tuple(s). See the Jupyter notebook
-    for more details:
-    https://github.com/raphaelvallat/pingouin/blob/master/notebooks/04_Correlations.ipynb
+    case, columns must be list(s) of tuple(s). Please refer to this `example
+    Jupyter notebook
+    <https://github.com/raphaelvallat/pingouin/blob/master/notebooks/04_Correlations.ipynb>`_
+    for more details.
 
     If ``covar`` is specified, this function will compute the pairwise partial
     correlation between the variables. If you are only interested in computing
@@ -939,10 +949,10 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     >>> pairwise_corr(data, method='spearman', tail='one-sided',
     ...               padjust='bonf')  # doctest: +SKIP
 
-    2. Robust two-sided correlation with uncorrected p-values
+    2. Robust two-sided biweight midcorrelation with uncorrected p-values
 
     >>> pcor = pairwise_corr(data, columns=['Openness', 'Extraversion',
-    ...                                     'Neuroticism'], method='percbend')
+    ...                                     'Neuroticism'], method='bicor')
 
     3. One-versus-all pairwise correlations
 

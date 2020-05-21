@@ -23,10 +23,7 @@ def fdr(pvals, alpha=0.05, method='fdr_bh'):
     alpha : float
         Error rate (= alpha level).
     method : str
-        FDR correction methods ::
-
-        'fdr_bh' : Benjamini/Hochberg for independent / posit correlated tests
-        'fdr_by' : Benjamini/Yekutieli for negatively correlated tests
+        FDR correction methods. Can be 'fdr_bh' or 'fdr_by'.
 
     Returns
     -------
@@ -358,14 +355,14 @@ def multicomp(pvals, alpha=0.05, method='holm'):
         Significance level.
     method : string
         Method used for testing and adjustment of p-values. Can be either the
-        full name or initial letters. Available methods are ::
+        full name or initial letters. Available methods are:
 
-        'bonf' : one-step Bonferroni correction
-        'sidak' : one-step Sidak correction
-        'holm' : step-down method using Bonferroni adjustments
-        'fdr_bh' : Benjamini/Hochberg FDR correction
-        'fdr_by' : Benjamini/Yekutieli FDR correction
-        'none' : pass-through option (no correction applied)
+        * ``'bonf'``: one-step Bonferroni correction
+        * ``'sidak'``: one-step Sidak correction
+        * ``'holm'``: step-down method using Bonferroni adjustments
+        * ``'fdr_bh'``: Benjamini/Hochberg FDR correction
+        * ``'fdr_by'``: Benjamini/Yekutieli FDR correction
+        * ``'none'``: pass-through option (no correction applied)
 
     Returns
     -------

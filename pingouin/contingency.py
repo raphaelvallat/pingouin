@@ -23,7 +23,7 @@ def chi2_independence(data, x, y, correction=True):
 
     Parameters
     ----------
-    data : pd.DataFrame
+    data : :py:class:`pandas.DataFrame`
         The dataframe containing the ocurrences for the test.
     x, y : string
         The variables names for the Chi-squared test. Must be names of columns
@@ -38,8 +38,8 @@ def chi2_independence(data, x, y, correction=True):
         The expected contingency table of frequencies.
     observed : pd.DataFrame
         The (corrected or not) observed contingency table of frequencies.
-    stats : pd.DataFrame
-        The tests summary, containing four columns:
+    stats : :py:class:`pandas.DataFrame`
+        The test summary, containing four columns:
 
         * ``'test'``: The statistic name
         * ``'lambda'``: The :math:`\\lambda` value used for the power\
@@ -185,7 +185,7 @@ def chi2_mcnemar(data, x, y, correction=True):
 
     Parameters
     ----------
-    data : pd.DataFrame
+    data : :py:class:`pandas.DataFrame`
         The dataframe containing the ocurrences for the test. Each row must
         represent either a subject or a pair of subjects.
     x, y : string
@@ -215,8 +215,8 @@ def chi2_mcnemar(data, x, y, correction=True):
     -------
     observed : pd.DataFrame
         The observed contingency table of frequencies.
-    stats : pd.DataFrame
-        The tests summary:
+    stats : :py:class:`pandas.DataFrame`
+        The test summary:
 
         * ``'chi2'``: The test statistic
         * ``'dof'``: The degree of freedom
@@ -364,7 +364,7 @@ def dichotomous_crosstab(data, x, y):
 
     Parameters
     ----------
-    data : pd.DataFrame
+    data : :py:class:`pandas.DataFrame`
         Pandas dataframe
     x, y : string
         Column names in ``data``.

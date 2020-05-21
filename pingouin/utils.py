@@ -187,7 +187,7 @@ def remove_rm_na(data=None, dv=None, within=None, subject=None,
 
     Parameters
     ----------
-    data : dataframe
+    data : :py:class:`pandas.DataFrame`
         Long-format dataframe.
     dv : string or list
         Dependent variable(s), from which the missing values should be removed.
@@ -205,7 +205,7 @@ def remove_rm_na(data=None, dv=None, within=None, subject=None,
 
     Returns
     -------
-    data : dataframe
+    stats : :py:class:`pandas.DataFrame`
         Dataframe without the missing values.
 
     Notes

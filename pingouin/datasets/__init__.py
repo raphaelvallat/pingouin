@@ -18,7 +18,7 @@ def read_dataset(dname):
 
     Returns
     -------
-    data : pd.DataFrame
+    data : :py:class:`pandas.DataFrame`
         Dataset
 
     Examples

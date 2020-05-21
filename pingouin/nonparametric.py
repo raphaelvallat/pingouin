@@ -165,13 +165,12 @@ def mwu(x, y, tail='two-sided'):
 
     Returns
     -------
-    stats : pandas DataFrame
-        Test summary ::
+    stats : :py:class:`pandas.DataFrame`
 
-        'U-val' : U-value
-        'p-val' : p-value
-        'RBC'   : rank-biserial correlation (effect size)
-        'CLES'  : common language effect size
+        * ``'U-val'``: U-value
+        * ``'p-val'``: p-value
+        * ``'RBC'``   : rank-biserial correlation (effect size)
+        * ``'CLES'``  : common language effect size
 
     See also
     --------
@@ -303,13 +302,12 @@ def wilcoxon(x, y, tail='two-sided'):
 
     Returns
     -------
-    stats : pandas DataFrame
-        Test summary ::
+    stats : :py:class:`pandas.DataFrame`
 
-        'W-val' : W-value
-        'p-val' : p-value
-        'RBC'   : matched pairs rank-biserial correlation (effect size)
-        'CLES'  : common language effect size
+        * ``'W-val'``: W-value
+        * ``'p-val'``: p-value
+        * ``'RBC'``   : matched pairs rank-biserial correlation (effect size)
+        * ``'CLES'``  : common language effect size
 
     See also
     --------
@@ -464,7 +462,7 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
 
     Parameters
     ----------
-    data : pandas DataFrame
+    data : :py:class:`pandas.DataFrame`
         DataFrame
     dv : string
         Name of column containing the dependant variable.
@@ -473,12 +471,11 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
 
     Returns
     -------
-    stats : DataFrame
-        Test summary ::
+    stats : :py:class:`pandas.DataFrame`
 
-        'H' : The Kruskal-Wallis H statistic, corrected for ties
-        'p-unc' : Uncorrected p-value
-        'dof' : degrees of freedom
+        * ``'H'``: The Kruskal-Wallis H statistic, corrected for ties
+        * ``'p-unc'``: Uncorrected p-value
+        * ``'dof'``: degrees of freedom
 
     Notes
     -----
@@ -556,7 +553,7 @@ def friedman(data=None, dv=None, within=None, subject=None):
 
     Parameters
     ----------
-    data : pandas DataFrame
+    data : :py:class:`pandas.DataFrame`
         DataFrame
     dv : string
         Name of column containing the dependant variable.
@@ -567,12 +564,11 @@ def friedman(data=None, dv=None, within=None, subject=None):
 
     Returns
     -------
-    stats : DataFrame
-        Test summary ::
+    stats : :py:class:`pandas.DataFrame`
 
-        'Q' : The Friedman Q statistic, corrected for ties
-        'p-unc' : Uncorrected p-value
-        'dof' : degrees of freedom
+        * ``'Q'``: The Friedman Q statistic, corrected for ties
+        * ``'p-unc'``: Uncorrected p-value
+        * ``'dof'``: degrees of freedom
 
     Notes
     -----
@@ -666,7 +662,7 @@ def cochran(data=None, dv=None, within=None, subject=None):
 
     Parameters
     ----------
-    data : pandas DataFrame
+    data : :py:class:`pandas.DataFrame`
         DataFrame
     dv : string
         Name of column containing the binary dependant variable.
@@ -677,12 +673,11 @@ def cochran(data=None, dv=None, within=None, subject=None):
 
     Returns
     -------
-    stats : DataFrame
-        Test summary ::
+    stats : :py:class:`pandas.DataFrame`
 
-        'Q' : The Cochran Q statistic
-        'p-unc' : Uncorrected p-value
-        'dof' : degrees of freedom
+        * ``'Q'``: The Cochran Q statistic
+        * ``'p-unc'``: Uncorrected p-value
+        * ``'dof'``: degrees of freedom
 
     Notes
     -----

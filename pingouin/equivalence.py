@@ -29,12 +29,11 @@ def tost(x, y, bound=1, paired=False, correction=False):
 
     Returns
     -------
-    stats : pandas DataFrame
-        TOST summary ::
+    stats : :py:class:`pandas.DataFrame`
 
-        'bound' : bound (= epsilon, or equivalence margin)
-        'dof' : degrees of freedom
-        'pval' : TOST p-value
+        * ``'bound'``: bound (= epsilon, or equivalence margin)
+        * ``'dof'``: degrees of freedom
+        * ``'pval'``: TOST p-value
 
     See also
     --------

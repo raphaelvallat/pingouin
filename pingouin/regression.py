@@ -534,16 +534,16 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
 
     Returns
     -------
-    stats : dataframe or dict
-        Logistic regression summary::
+    stats : :py:class:`pandas.DataFrame` or dict
+        Logistic regression summary:
 
-        'names' : name of variable(s) in the model (e.g. x1, x2...)
-        'coef' : regression coefficients (log-odds)
-        'se' : standard error
-        'z' : z-scores
-        'pval' : two-tailed p-values
-        'CI[2.5%]' : lower confidence interval
-        'CI[97.5%]' : upper confidence interval
+        * ``'names'``: name of variable(s) in the model (e.g. x1, x2...)
+        * ``'coef'``: regression coefficients (log-odds)
+        * ``'se'``: standard error
+        * ``'z'``: z-scores
+        * ``'pval'``: two-tailed p-values
+        * ``'CI[2.5%]'``: lower confidence interval
+        * ``'CI[97.5%]'``: upper confidence interval
 
     See also
     --------
@@ -892,7 +892,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
 
     Parameters
     ----------
-    data : pd.DataFrame
+    data : :py:class:`pandas.DataFrame`
         Dataframe.
     x : str
         Column name in data containing the predictor variable.
@@ -923,16 +923,16 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
 
     Returns
     -------
-    stats : pd.DataFrame
-        Mediation summary::
+    stats : :py:class:`pandas.DataFrame`
+        Mediation summary:
 
-        'path' : regression model
-        'coef' : regression estimates
-        'se' : standard error
-        'CI[2.5%]' : lower confidence interval
-        'CI[97.5%]' : upper confidence interval
-        'pval' : two-sided p-values
-        'sig' : statistical significance
+        * ``'path'``: regression model
+        * ``'coef'``: regression estimates
+        * ``'se'``: standard error
+        * ``'CI[2.5%]'``: lower confidence interval
+        * ``'CI[97.5%]'``: upper confidence interval
+        * ``'pval'``: two-sided p-values
+        * ``'sig'``: statistical significance
 
     See also
     --------

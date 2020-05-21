@@ -2,13 +2,14 @@
 import numpy as np
 import pandas as pd
 import pandas_flavor as pf
+from scipy.spatial.distance import pdist, squareform
 from scipy.stats import pearsonr, spearmanr, kendalltau
+
 from pingouin.power import power_corr
 from pingouin.multicomp import multicomp
 from pingouin.effsize import compute_esci
 from pingouin.utils import remove_na, _perm_pval
 from pingouin.bayesian import bayesfactor_pearson
-from scipy.spatial.distance import pdist, squareform
 
 
 __all__ = ["corr", "partial_corr", "pcorr", "rcorr", "rm_corr",
@@ -68,13 +69,11 @@ def skipped(x, y, method='spearman'):
     X = np.column_stack((x, y))
     nrows, ncols = X.shape
     gval = np.sqrt(chi2.ppf(0.975, 2))
-
     # Compute center and distance to center
     center = MinCovDet(random_state=42).fit(X).location_
     B = X - center
     B2 = B**2
     bot = B2.sum(axis=1)
-
     # Loop over rows
     dis = np.zeros(shape=(nrows, nrows))
     for i in np.arange(nrows):
@@ -99,7 +98,6 @@ def skipped(x, y, method='spearman'):
     iqr = np.apply_along_axis(idealf, 1, dis)
     thresh = (np.median(dis, axis=1) + gval * iqr)
     outliers = np.apply_along_axis(np.greater, 0, dis, thresh).any(axis=0)
-
     # Compute correlation on remaining data
     if method == 'spearman':
         r, pval = spearmanr(X[~outliers, 0], X[~outliers, 1])
@@ -131,7 +129,6 @@ def bsmahal(a, b, n_boot=200):
     MD = np.zeros((n, n_boot))
     nr = np.arange(n)
     xB = np.random.choice(nr, size=(n_boot, n), replace=True)
-
     # Bootstrap the MD
     for i in np.arange(n_boot):
         s1 = b[xB[i, :], 0]
@@ -141,7 +138,6 @@ def bsmahal(a, b, n_boot=200):
         _, R = np.linalg.qr(X - mu)
         sol = np.linalg.solve(R.T, (a - mu).T)
         MD[:, i] = np.sum(sol**2, 0) * (n - 1)
-
     # Average across all bootstraps
     return MD.mean(1)
 
@@ -174,23 +170,16 @@ def shepherd(x, y, n_boot=200):
 
     Pi is Spearman's Rho after outlier removal.
     """
-    from scipy.stats import spearmanr
-
     X = np.column_stack((x, y))
-
     # Bootstrapping on Mahalanobis distance
     m = bsmahal(X, X, n_boot)
-
     # Determine outliers
     outliers = (m >= 6)
-
     # Compute correlation
     r, pval = spearmanr(x[~outliers], y[~outliers])
-
     # (optional) double the p-value to achieve a nominal false alarm rate
     # pval *= 2
     # pval = 1 if pval > 1 else pval
-
     return r, pval, outliers
 
 
@@ -261,75 +250,158 @@ def percbend(x, y, beta=.2):
     return r, pval
 
 
+def bicor(x, y, c=9):
+    """
+    Biweight midcorrelation.
+
+    Parameters
+    ----------
+    x, y : array_like
+        First and second set of observations. x and y must be independent.
+    c : float
+        Tuning constant for the biweight estimator (default = 9.0).
+
+    Returns
+    -------
+    r : float
+        Correlation coefficient.
+    pval : float
+        Two-tailed p-value.
+
+    References
+    ----------
+    https://en.wikipedia.org/wiki/Biweight_midcorrelation
+
+    https://docs.astropy.org/en/stable/api/astropy.stats.biweight.biweight_midcovariance.html
+    """
+    from scipy.stats import t
+    # Calculate median
+    nx = x.size
+    x_median = np.median(x)
+    y_median = np.median(y)
+    # Raw median absolute deviation
+    x_mad = np.median(np.abs(x - x_median))
+    y_mad = np.median(np.abs(y - y_median))
+    # Calculate weights
+    u = (x - x_median) / (c * x_mad)
+    v = (y - y_median) / (c * y_mad)
+    w_x = (1 - u**2)**2 * ((1 - np.abs(u)) > 0)
+    w_y = (1 - v**2)**2 * ((1 - np.abs(v)) > 0)
+    # Normalize x and y by weights
+    x_norm = (x - x_median) * w_x
+    y_norm = (y - y_median) * w_y
+    denom = (np.sqrt((x_norm**2).sum()) * np.sqrt((y_norm**2).sum()))
+    # Calculate r, t and two-sided p-value
+    r = (x_norm * y_norm).sum() / denom
+    tval = r * np.sqrt((nx - 2) / (1 - r**2))
+    pval = 2 * t.sf(abs(tval), nx - 2)
+    return r, pval
+
+
 def corr(x, y, tail='two-sided', method='pearson'):
     """(Robust) correlation between two variables.
 
     Parameters
     ----------
     x, y : array_like
-        First and second set of observations. x and y must be independent.
+        First and second set of observations. ``x`` and ``y`` must be
+        independent.
     tail : string
-        Specify whether to return 'one-sided' or 'two-sided' p-value.
+        Specify whether to return ``'one-sided'`` or ``'two-sided'`` p-value.
+        Note that the former are simply half the latter.
     method : string
-        Specify which method to use for the computation of the correlation
-        coefficient. Available methods are ::
+        Correlation type:
 
-        'pearson' : Pearson product-moment correlation
-        'spearman' : Spearman rank-order correlation
-        'kendall' : Kendall’s tau (ordinal data)
-        'percbend' : percentage bend correlation (robust)
-        'shepherd' : Shepherd's pi correlation (robust Spearman)
-        'skipped' : skipped correlation (robust Spearman, requires sklearn)
+        * ``'pearson'``: Pearson :math:`r` product-moment correlation
+        * ``'spearman'``: Spearman :math:`\\rho` rank-order correlation
+        * ``'kendall'``: Kendall's :math:`\\tau` correlation
+          (for ordinal data)
+        * ``'bicor'``: Biweight midcorrelation (robust)
+        * ``'percbend'``: Percentage bend correlation (robust)
+        * ``'shepherd'``: Shepherd's pi correlation (robust)
+        * ``'skipped'``: Skipped correlation (robust)
 
     Returns
     -------
-    stats : pandas DataFrame
-        Test summary ::
+    stats : :py:class:`pandas.DataFrame`
 
-        'n' : Sample size (after NaN removal)
-        'outliers' : number of outliers (only for 'shepherd' or 'skipped')
-        'r' : Correlation coefficient
-        'CI95' : 95% parametric confidence intervals
-        'r2' : R-squared
-        'adj_r2' : Adjusted R-squared
-        'p-val' : one or two tailed p-value
-        'BF10' : Bayes Factor of the alternative hypothesis (Pearson only)
-        'power' : achieved power of the test (= 1 - type II error).
+        * ``'n'``: Sample size (after removal of missing values)
+        * ``'outliers'``: number of outliers, only if a robust method was used
+        * ``'r'``: Correlation coefficient
+        * ``'CI95'``: 95% parametric confidence intervals around :math:`r`
+        * ``'r2'``: R-squared (:math:`= r^2`)
+        * ``'adj_r2'``: Adjusted R-squared
+        * ``'p-val'``: tail of the test
+        * ``'BF10'``: Bayes Factor of the alternative hypothesis
+          (only for Pearson correlation)
+        * ``'power'``: achieved power of the test (= 1 - type II error).
 
     See also
     --------
     pairwise_corr : Pairwise correlation between columns of a pandas DataFrame
     partial_corr : Partial correlation
+    rm_corr : Repeated measures correlation
 
     Notes
     -----
-    The Pearson correlation coefficient measures the linear relationship
-    between two datasets. Strictly speaking, Pearson's correlation requires
-    that each dataset be normally distributed. Correlations of -1 or +1 imply
-    an exact linear relationship.
+    The `Pearson correlation coefficient
+    <https://en.wikipedia.org/wiki/Pearson_correlation_coefficient>`_
+    measures the linear relationship between two datasets. Strictly speaking,
+    Pearson's correlation requires that each dataset be normally distributed.
+    Correlations of -1 or +1 imply a perfect negative and positive linear
+    relationship, respectively, with 0 indicating the absence of association.
 
-    The Spearman correlation is a nonparametric measure of the monotonicity of
-    the relationship between two datasets. Unlike the Pearson correlation,
-    the Spearman correlation does not assume that both datasets are normally
-    distributed. Correlations of -1 or +1 imply an exact monotonic
-    relationship.
+    .. math::
+        r_{xy} = \\frac{\\sum_i(x_i - \\bar{x})(y_i - \\bar{y})}
+        {\\sqrt{\\sum_i(x_i - \\bar{x})^2} \\sqrt{\\sum_i(y_i - \\bar{y})^2}}
+        = \\frac{\\text{cov}(x, y)}{\\sigma_x \\sigma_y}
 
-    Kendall’s tau is a measure of the correspondence between two rankings.
-    Values close to 1 indicate strong agreement, values close to -1 indicate
-    strong disagreement.
-
-    The percentage bend correlation [1]_ is a robust method that
-    protects against univariate outliers.
-
-    The Shepherd's pi [2]_ and skipped [3]_, [4]_ correlations are both robust
-    methods that returns the Spearman's rho after bivariate outliers removal.
-    Note that the skipped correlation requires that the scikit-learn
-    package is installed (for computing the minimum covariance determinant).
-
-    Please note that rows with NaN are automatically removed.
+    where :math:`\\text{cov}` is the sample covariance and :math:`\\sigma`
+    is the sample standard deviation.
 
     If ``method='pearson'``, The Bayes Factor is calculated using the
     :py:func:`pingouin.bayesfactor_pearson` function.
+
+    The `Spearman correlation coefficient
+    <https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient>`_
+    is a non-parametric measure of the monotonicity of the relationship between
+    two datasets. Unlike the Pearson correlation, the Spearman correlation does
+    not assume that both datasets are normally distributed. Correlations of -1
+    or +1 imply an exact negative and positive monotonic relationship,
+    respectively. Mathematically, the Spearman correlation coefficient is
+    defined as the Pearson correlation coefficient between the
+    `rank variables <https://en.wikipedia.org/wiki/Ranking>`_.
+
+    The `Kendall correlation coefficient
+    <https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient>`_
+    is a measure of the correspondence between two rankings. Values also range
+    from -1 (perfect disagreement) to 1 (perfect agreement), with 0 indicating
+    the absence of association. Consistent with
+    :py:func:`scipy.stats.kendalltau`, Pingouin returns the Tau-b coefficient,
+    which adjusts for ties:
+
+    .. math:: \\tau_B = \\frac{(P - Q)}{\\sqrt{(P + Q + T) (P + Q + U)}}
+
+    where :math:`P` is the number of concordant pairs, :math:`Q` the number of
+    discordand pairs, :math:`T` the number of ties in x, and :math:`U`
+    the number of ties in y.
+
+    The `biweight midcorrelation
+    <https://en.wikipedia.org/wiki/Biweight_midcorrelation>`_ and
+    percentage bend correlation [1]_ are both robust methods that
+    protects against *univariate* outliers by down-weighting observations that
+    deviate too much from the median.
+
+    The Shepherd pi [2]_ correlation and skipped [3]_, [4]_ correlation are
+    both robust methods that returns the Spearman correlation coefficient after
+    removing *bivariate* outliers. Briefly, the Shepherd pi uses a
+    bootstrapping of the Mahalanobis distance to identify outliers, while the
+    skipped correlation is based on the minimum covariance determinant
+    (which requires scikit-learn). Note that these two methods are
+    significantly slower than the previous ones.
+
+    .. important:: Please note that rows with missing values (NaN) are
+        automatically removed.
 
     References
     ----------
@@ -354,69 +426,74 @@ def corr(x, y, tail='two-sided', method='pearson'):
     1. Pearson correlation
 
     >>> import numpy as np
+    >>> import pingouin as pg
     >>> # Generate random correlated samples
     >>> np.random.seed(123)
     >>> mean, cov = [4, 6], [(1, .5), (.5, 1)]
     >>> x, y = np.random.multivariate_normal(mean, cov, 30).T
     >>> # Compute Pearson correlation
-    >>> from pingouin import corr
-    >>> corr(x, y).round(3)
+    >>> pg.corr(x, y).round(3)
               n      r         CI95%     r2  adj_r2  p-val  BF10  power
     pearson  30  0.491  [0.16, 0.72]  0.242   0.185  0.006  8.55  0.809
 
     2. Pearson correlation with two outliers
 
     >>> x[3], y[5] = 12, -8
-    >>> corr(x, y).round(3)
+    >>> pg.corr(x, y).round(3)
               n      r          CI95%     r2  adj_r2  p-val   BF10  power
     pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439  0.302  0.121
 
-    3. Spearman correlation
+    3. Spearman correlation (robust to outliers)
 
-    >>> corr(x, y, method="spearman").round(3)
+    >>> pg.corr(x, y, method="spearman").round(3)
                n      r         CI95%     r2  adj_r2  p-val  power
     spearman  30  0.401  [0.05, 0.67]  0.161   0.099  0.028   0.61
 
-    4. Percentage bend correlation (robust)
+    4. Biweight midcorrelation (robust)
 
-    >>> corr(x, y, method='percbend').round(3)
+    >>> pg.corr(x, y, method="bicor").round(3)
+            n      r         CI95%     r2  adj_r2  p-val  power
+    bicor  30  0.393  [0.04, 0.66]  0.155   0.092  0.031  0.592
+
+    5. Percentage bend correlation (robust)
+
+    >>> pg.corr(x, y, method='percbend').round(3)
                n      r         CI95%     r2  adj_r2  p-val  power
     percbend  30  0.389  [0.03, 0.66]  0.151   0.089  0.034  0.581
 
-    5. Shepherd's pi correlation (robust)
+    6. Shepherd's pi correlation (robust)
 
-    >>> corr(x, y, method='shepherd').round(3)
+    >>> pg.corr(x, y, method='shepherd').round(3)
                n  outliers      r         CI95%     r2  adj_r2  p-val  power
     shepherd  30         2  0.437  [0.09, 0.69]  0.191   0.131   0.02  0.694
 
-    6. Skipped spearman correlation (robust)
+    7. Skipped spearman correlation (robust)
 
-    >>> corr(x, y, method='skipped').round(3)
+    >>> pg.corr(x, y, method='skipped').round(3)
               n  outliers      r         CI95%     r2  adj_r2  p-val  power
     skipped  30         2  0.437  [0.09, 0.69]  0.191   0.131   0.02  0.694
 
-    7. One-tailed Pearson correlation
+    8. One-tailed Pearson correlation
 
-    >>> corr(x, y, tail="one-sided", method='pearson').round(3)
+    >>> pg.corr(x, y, tail="one-sided", method='pearson').round(3)
               n      r          CI95%     r2  adj_r2  p-val   BF10  power
     pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051   0.22  0.467  0.194
 
-    8. Using columns of a pandas dataframe
+    9. Using columns of a pandas dataframe
 
     >>> import pandas as pd
     >>> data = pd.DataFrame({'x': x, 'y': y})
-    >>> corr(data['x'], data['y']).round(3)
+    >>> pg.corr(data['x'], data['y']).round(3)
               n      r          CI95%     r2  adj_r2  p-val   BF10  power
     pearson  30  0.147  [-0.23, 0.48]  0.022  -0.051  0.439  0.302  0.121
     """
+    # Safety check
     x = np.asarray(x)
     y = np.asarray(y)
+    assert x.ndim == y.ndim == 1, 'x and y must be 1D array.'
+    assert x.size == y.size, 'x and y must have the same length.'
 
-    # Check size
-    if x.size != y.size:
-        raise ValueError('x and y must have the same length.')
-
-    # Remove NA
+    # Remove rows with missing values
     x, y = remove_na(x, y, paired=True)
     nx = x.size
 
@@ -427,6 +504,8 @@ def corr(x, y, tail='two-sided', method='pearson'):
         r, pval = spearmanr(x, y)
     elif method == 'kendall':
         r, pval = kendalltau(x, y)
+    elif method == 'bicor':
+        r, pval = bicor(x, y)
     elif method == 'percbend':
         r, pval = percbend(x, y)
     elif method == 'shepherd':
@@ -438,8 +517,8 @@ def corr(x, y, tail='two-sided', method='pearson'):
 
     if np.isnan(r):
         # Correlation failed -- new in version v0.3.4, instead of raising an
-        # error we just return a dataframe full of NaN. This avoid sudden
-        # stop in pingouin.pairwise_corr.
+        # error we just return a dataframe full of NaN (except sample size).
+        # This avoid sudden stop in pingouin.pairwise_corr.
         return pd.DataFrame({'n': nx, 'r': np.nan, 'CI95%': np.nan,
                              'r2': np.nan, 'adj_r2': np.nan, 'p-val': np.nan,
                              'BF10': np.nan, 'power': np.nan}, index=[method])
@@ -486,7 +565,7 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
 
     Parameters
     ----------
-    data : pd.DataFrame
+    data : :py:class:`pandas.DataFrame`
         Dataframe. Note that this function can also directly be used as a
         :py:class:`pandas.DataFrame` method, in which case this argument is
         no longer needed.
@@ -506,32 +585,34 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         from ``y`` but not from ``x``). Note that you cannot specify both
         ``covar`` and ``y_covar``.
     tail : string
-        Specify whether to return the 'one-sided' or 'two-sided' p-value.
+        Specify whether to return ``'one-sided'`` or ``'two-sided'`` p-value.
+        Note that the former are simply half the latter.
     method : string
-        Specify which method to use for the computation of the correlation
-        coefficient. Available methods are ::
+        Correlation type:
 
-        'pearson' : Pearson product-moment correlation
-        'spearman' : Spearman rank-order correlation
-        'kendall' : Kendall’s tau (ordinal data)
-        'percbend' : percentage bend correlation (robust)
-        'shepherd' : Shepherd's pi correlation (robust Spearman)
-        'skipped' : skipped correlation (robust Spearman, requires sklearn)
+        * ``'pearson'``: Pearson :math:`r` product-moment correlation
+        * ``'spearman'``: Spearman :math:`\\rho` rank-order correlation
+        * ``'kendall'``: Kendall's :math:`\\tau` correlation
+          (for ordinal data)
+        * ``'bicor'``: Biweight midcorrelation (robust)
+        * ``'percbend'``: Percentage bend correlation (robust)
+        * ``'shepherd'``: Shepherd's pi correlation (robust)
+        * ``'skipped'``: Skipped correlation (robust)
 
     Returns
     -------
-    stats : pandas DataFrame
-        Test summary ::
+    stats : :py:class:`pandas.DataFrame`
 
-        'n' : Sample size (after NaN removal)
-        'outliers' : number of outliers (only for 'shepherd' or 'skipped')
-        'r' : Correlation coefficient
-        'CI95' : 95% parametric confidence intervals
-        'r2' : R-squared
-        'adj_r2' : Adjusted R-squared
-        'p-val' : one or two tailed p-value
-        'BF10' : Bayes Factor of the alternative hypothesis (Pearson only)
-        'power' : achieved power of the test (= 1 - type II error).
+        * ``'n'``: Sample size (after removal of missing values)
+        * ``'outliers'``: number of outliers, only if a robust method was used
+        * ``'r'``: Correlation coefficient
+        * ``'CI95'``: 95% parametric confidence intervals around :math:`r`
+        * ``'r2'``: R-squared (:math:`= r^2`)
+        * ``'adj_r2'``: Adjusted R-squared
+        * ``'p-val'``: tail of the test
+        * ``'BF10'``: Bayes Factor of the alternative hypothesis
+          (only for Pearson correlation)
+        * ``'power'``: achieved power of the test (= 1 - type II error).
 
     Notes
     -----
@@ -746,15 +827,14 @@ def rcorr(self, method='pearson', upper='pval', decimals=3, padjust=None,
     decimals : int
         Number of decimals to display in the output correlation matrix.
     padjust : string or None
-        Method used for adjustment of pvalues.
-        Available methods are ::
+        Method used for testing and adjustment of pvalues.
 
-        'none' : no correction
-        'bonf' : one-step Bonferroni correction
-        'sidak' : one-step Sidak correction
-        'holm' : step-down method using Bonferroni adjustments
-        'fdr_bh' : Benjamini/Hochberg FDR correction
-        'fdr_by' : Benjamini/Yekutieli FDR correction
+        * ``'none'``: no correction
+        * ``'bonf'``: one-step Bonferroni correction
+        * ``'sidak'``: one-step Sidak correction
+        * ``'holm'``: step-down method using Bonferroni adjustments
+        * ``'fdr_bh'``: Benjamini/Hochberg FDR correction
+        * ``'fdr_by'``: Benjamini/Yekutieli FDR correction
     stars : boolean
         If True, only significant p-values are displayed as stars using the
         pre-defined thresholds of ``pval_stars``. If False, all the raw
@@ -882,7 +962,7 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
 
     Parameters
     ----------
-    data : pd.DataFrame
+    data : :py:class:`pandas.DataFrame`
         Dataframe.
     x, y : string
         Name of columns in ``data`` containing the two dependent variables.
@@ -893,14 +973,13 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
 
     Returns
     -------
-    stats : pandas DataFrame
-        Test summary ::
+    stats : :py:class:`pandas.DataFrame`
 
-        'r' : Repeated measures correlation coefficient
-        'dof' : Degrees of freedom
-        'pval' : one or two tailed p-value
-        'CI95' : 95% parametric confidence intervals
-        'power' : achieved power of the test (= 1 - type II error).
+        * ``'r'``: Repeated measures correlation coefficient
+        * ``'dof'``: Degrees of freedom
+        * ``'pval'``: one or two tailed p-value
+        * ``'CI95'``: 95% parametric confidence intervals
+        * ``'power'``: achieved power of the test (= 1 - type II error).
 
     See also
     --------

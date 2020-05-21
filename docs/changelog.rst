@@ -22,13 +22,15 @@ b. The :math:`R^2` in :py:func:`pingouin.linear_regression` is now calculated in
 
    Note that this only affects the (rare) cases when no intercept is present in the predictor matrix. Remember that Pingouin automatically add a constant term in :py:func:`pingouin.linear_regression`, a behavior that can be disabled using ``add_intercept=False``.
 
-c. The Common Language Effect Size (CLES) is now calculated using the formula given by Vargha and Delaney 2000, which works better when ties are present in data.
+c. Added support for robust `biweight midcorrelation <https://en.wikipedia.org/wiki/Biweight_midcorrelation>`_ (``'bicor'``) in :py:func:`pingouin.corr` and :py:func:`pingouin.pairwise_corr`.
+
+d. The Common Language Effect Size (CLES) is now calculated using the formula given by Vargha and Delaney 2000, which works better when ties are present in data.
 
    .. math:: \text{CL} = P(X > Y) + .5 \times P(X = Y)
 
    This applies to the :py:func:`pingouin.wilcoxon` and :py:func:`pingouin.compute_effsize` functions. Furthermore, the CLES is now tail-sensitive in the former, but not in the latter since tail is not a valid argument. In :py:func:`pingouin.compute_effsize`, the CLES thus always corresponds to the proportion of pairs where x is *higher* than y. For more details, please refer to `PR #94 <https://github.com/raphaelvallat/pingouin/pull/94>`_.
 
-d. Confidence intervals around a Cohen d effect size are now calculated using a central T distribution instead of a standard normal distribution in the :py:func:`pingouin.compute_esci` function. This is consistent with the effsize R package.
+e. Confidence intervals around a Cohen d effect size are now calculated using a central T distribution instead of a standard normal distribution in the :py:func:`pingouin.compute_esci` function. This is consistent with the effsize R package.
 
 **Code**
 

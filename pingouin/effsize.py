@@ -175,20 +175,20 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
         Function to compute the bootstrapped statistic.
         Accepted string values are:
 
-        * ``'pearson'`` : Pearson correlation (bivariate, requires x and y)
-        * ``'spearman'`` : Spearman correlation (bivariate)
-        * ``'cohen'`` : Cohen d effect size (bivariate)
-        * ``'hedges'`` : Hedges g effect size (bivariate)
-        * ``'mean'`` : Mean (univariate, requires only x)
-        * ``'std'`` : Standard deviation (univariate)
-        * ``'var'`` : Variance (univariate)
+        * ``'pearson'``: Pearson correlation (bivariate, requires x and y)
+        * ``'spearman'``: Spearman correlation (bivariate)
+        * ``'cohen'``: Cohen d effect size (bivariate)
+        * ``'hedges'``: Hedges g effect size (bivariate)
+        * ``'mean'``: Mean (univariate, requires only x)
+        * ``'std'``: Standard deviation (univariate)
+        * ``'var'``: Variance (univariate)
     method : str
         Method to compute the confidence intervals:
 
-        * ``'norm'`` : Normal approximation with bootstrapped bias and
+        * ``'norm'``: Normal approximation with bootstrapped bias and
           standard error
-        * ``'per'`` : Basic percentile method
-        * ``'cper'`` : Bias corrected percentile method (default)
+        * ``'per'``: Basic percentile method
+        * ``'cper'``: Bias corrected percentile method (default)
     paired : boolean
         Indicates whether x and y are paired or not. Only useful when computing
         bivariate Cohen d or Hedges g bootstrapped confidence intervals.
@@ -400,12 +400,12 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     output_type : string
         Desired effect size type. Available methods are:
 
-        * ``'cohen'`` : Unbiased Cohen d
-        * ``'hedges'`` : Hedges g
-        * ``'eta-square'`` : Eta-square
-        * ``'odds-ratio'`` : Odds ratio
-        * ``'AUC'`` : Area Under the Curve
-        * ``'none'`` : pass-through (return ``ef``)
+        * ``'cohen'``: Unbiased Cohen d
+        * ``'hedges'``: Hedges g
+        * ``'eta-square'``: Eta-square
+        * ``'odds-ratio'``: Odds ratio
+        * ``'AUC'``: Area Under the Curve
+        * ``'none'``: pass-through (return ``ef``)
 
     nx, ny : int, optional
         Length of vector x and y. Required to convert to Hedges g.
@@ -559,15 +559,15 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         Desired output effect size.
         Available methods are:
 
-        * ``'none'`` : no effect size
-        * ``'cohen'`` : Unbiased Cohen d
-        * ``'hedges'`` : Hedges g
-        * ``'glass'`` : Glass delta
-        * ``'r'`` : correlation coefficient
-        * ``'eta-square'`` : Eta-square
-        * ``'odds-ratio'`` : Odds ratio
-        * ``'AUC'`` : Area Under the Curve
-        * ``'CLES'`` : Common Language Effect Size
+        * ``'none'``: no effect size
+        * ``'cohen'``: Unbiased Cohen d
+        * ``'hedges'``: Hedges g
+        * ``'glass'``: Glass delta
+        * ``'r'``: correlation coefficient
+        * ``'eta-square'``: Eta-square
+        * ``'odds-ratio'``: Odds ratio
+        * ``'AUC'``: Area Under the Curve
+        * ``'CLES'``: Common Language Effect Size
 
     Returns
     -------

@@ -517,7 +517,7 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
 
     Parameters
     ----------
-    data : pandas DataFrame
+    data : :py:class:`pandas.DataFrame`
         Long-format dataFrame.
     dv : string
         Name of column containing the dependant variable.

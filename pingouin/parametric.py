@@ -46,15 +46,14 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     Returns
     -------
     stats : :py:class:`pandas.DataFrame`
-        T-test summary::
 
-        'T' : T-value
-        'p-val' : p-value
-        'dof' : degrees of freedom
-        'cohen-d' : Cohen d effect size
-        'CI95%' : 95% confidence intervals of the difference in means
-        'power' : achieved power of the test ( = 1 - type II error)
-        'BF10' : Bayes Factor of the alternative hypothesis
+        * ``'T'``: T-value
+        * ``'p-val'``: p-value
+        * ``'dof'``: degrees of freedom
+        * ``'cohen-d'``: Cohen d effect size
+        * ``'CI95%'``: 95% confidence intervals of the difference in means
+        * ``'power'``: achieved power of the test ( = 1 - type II error)
+        * ``'BF10'``: Bayes Factor of the alternative hypothesis
 
     See also
     --------
@@ -351,19 +350,19 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     Returns
     -------
     aov : :py:class:`pandas.DataFrame`
-        ANOVA summary::
+        ANOVA summary:
 
-        'Source' : Name of the within-group factor
-        'ddof1' : Degrees of freedom (numerator)
-        'ddof2' : Degrees of freedom (denominator)
-        'F' : F-value
-        'p-unc' : Uncorrected p-value
-        'np2' : Partial eta-square effect size
-        'eps' : Greenhouse-Geisser epsilon factor (= index of sphericity)
-        'p-GG-corr' : Greenhouse-Geisser corrected p-value
-        'W-spher' : Sphericity test statistic
-        'p-spher' : p-value of the sphericity test
-        'sphericity' : sphericity of the data (boolean)
+        * ``'Source'``: Name of the within-group factor
+        * ``'ddof1'``: Degrees of freedom (numerator)
+        * ``'ddof2'``: Degrees of freedom (denominator)
+        * ``'F'``: F-value
+        * ``'p-unc'``: Uncorrected p-value
+        * ``'np2'``: Partial eta-square effect size
+        * ``'eps'``: Greenhouse-Geisser epsilon factor (= index of sphericity)
+        * ``'p-GG-corr'``: Greenhouse-Geisser corrected p-value
+        * ``'W-spher'``: Sphericity test statistic
+        * ``'p-spher'``: p-value of the sphericity test
+        * ``'sphericity'``: sphericity of the data (boolean)
 
     See Also
     --------
@@ -802,15 +801,15 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
     Returns
     -------
     aov : :py:class:`pandas.DataFrame`
-        ANOVA summary::
+        ANOVA summary:
 
-        'Source' : Factor names
-        'SS' : Sums of squares
-        'DF' : Degrees of freedom
-        'MS' : Mean squares
-        'F' : F-values
-        'p-unc' : uncorrected p-values
-        'np2' : Partial eta-square effect sizes
+        * ``'Source'``: Factor names
+        * ``'SS'``: Sums of squares
+        * ``'DF'``: Degrees of freedom
+        * ``'MS'``: Mean squares
+        * ``'F'``: F-values
+        * ``'p-unc'``: uncorrected p-values
+        * ``'np2'``: Partial eta-square effect sizes
 
     See Also
     --------
@@ -1190,26 +1189,26 @@ def welch_anova(data=None, dv=None, between=None):
 
     Parameters
     ----------
+    data : :py:class:`pandas.DataFrame`
+        DataFrame. Note that this function can also directly be used as a
+        Pandas method, in which case this argument is no longer needed.
     dv : string
         Name of column containing the dependant variable.
     between : string
         Name of column containing the between factor.
-    data : :py:class:`pandas.DataFrame`
-        DataFrame. Note that this function can also directly be used as a
-        Pandas method, in which case this argument is no longer needed.
 
     Returns
     -------
     aov : :py:class:`pandas.DataFrame`
-        ANOVA summary ::
+        ANOVA summary:
 
-        'Source' : Factor names
-        'SS' : Sums of squares
-        'DF' : Degrees of freedom
-        'MS' : Mean squares
-        'F' : F-values
-        'p-unc' : uncorrected p-values
-        'np2': Partial eta-squared
+        * ``'Source'``: Factor names
+        * ``'SS'``: Sums of squares
+        * ``'DF'``: Degrees of freedom
+        * ``'MS'``: Mean squares
+        * ``'F'``: F-values
+        * ``'p-unc'``: uncorrected p-values
+        * ``'np2'``: Partial eta-squared
 
     See Also
     --------
@@ -1368,19 +1367,19 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     Returns
     -------
     aov : :py:class:`pandas.DataFrame`
-        ANOVA summary::
+        ANOVA summary:
 
-        'Source' : Names of the factor considered
-        'ddof1' : Degrees of freedom (numerator)
-        'ddof2' : Degrees of freedom (denominator)
-        'F' : F-values
-        'p-unc' : Uncorrected p-values
-        'np2' : Partial eta-squared effect sizes
-        'eps' : Greenhouse-Geisser epsilon factor ( = index of sphericity)
-        'p-GG-corr' : Greenhouse-Geisser corrected p-values
-        'W-spher' : Sphericity test statistic
-        'p-spher' : p-value of the sphericity test
-        'sphericity' : sphericity of the data (boolean)
+        * ``'Source'``: Names of the factor considered
+        * ``'ddof1'``: Degrees of freedom (numerator)
+        * ``'ddof2'``: Degrees of freedom (denominator)
+        * ``'F'``: F-values
+        * ``'p-unc'``: Uncorrected p-values
+        * ``'np2'``: Partial eta-squared effect sizes
+        * ``'eps'``: Greenhouse-Geisser epsilon factor (= index of sphericity)
+        * ``'p-GG-corr'``: Greenhouse-Geisser corrected p-values
+        * ``'W-spher'``: Sphericity test statistic
+        * ``'p-spher'``: p-value of the sphericity test
+        * ``'sphericity'``: sphericity of the data (boolean)
 
     See Also
     --------
@@ -1571,14 +1570,14 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     Returns
     -------
     aov : :py:class:`pandas.DataFrame`
-        ANCOVA summary::
+        ANCOVA summary:
 
-        'Source' : Names of the factor considered
-        'SS' : Sums of squares
-        'DF' : Degrees of freedom
-        'F' : F-values
-        'p-unc' : Uncorrected p-values
-        'np2': Partial eta-squared
+        * ``'Source'``: Names of the factor considered
+        * ``'SS'``: Sums of squares
+        * ``'DF'``: Degrees of freedom
+        * ``'F'``: F-values
+        * ``'p-unc'``: Uncorrected p-values
+        * ``'np2'``: Partial eta-squared
 
     Notes
     -----

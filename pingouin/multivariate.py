@@ -131,18 +131,17 @@ def multivariate_ttest(X, Y=None, paired=False):
 
     Returns
     -------
-    stats : pandas DataFrame
-        Hotelling T-squared test summary ::
+    stats : :py:class:`pandas.DataFrame`
 
-        'T2' : T-squared value
-        'F' : F-value
-        'df1' : first degree of freedom
-        'df2' : second degree of freedom
-        'p-val' : p-value
+        * ``'T2'``: T-squared value
+        * ``'F'``: F-value
+        * ``'df1'``: first degree of freedom
+        * ``'df2'``: second degree of freedom
+        * ``'p-val'``: p-value
 
     See Also
     --------
-    multivariate_normality : Multivariate normality test
+    multivariate_normality : Multivariate normality test.
     ttest : Univariate T-test.
 
     Notes

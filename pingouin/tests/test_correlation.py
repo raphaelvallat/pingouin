@@ -30,6 +30,9 @@ class TestCorrelation(TestCase):
         assert stats['n'].to_numpy() == 30
         stats = corr(x, y, method='percbend')
         assert np.round(stats['r'].to_numpy(), 3) == 0.484
+        # Compare biweight correlation to astropy
+        stats = corr(x, y, method='bicor')
+        assert np.isclose(stats['r'].to_numpy(), 0.4951417784979)
         # Not normally distributed
         z = np.random.uniform(size=30)
         corr(x, z, method='pearson')
@@ -42,9 +45,7 @@ class TestCorrelation(TestCase):
         # Wrong argument
         with pytest.raises(ValueError):
             corr(x, y, method='error')
-        with pytest.raises(ValueError):
-            corr(x, y[:-10])
-        # Compare with JASP
+        # Compare BF10 with JASP
         df = read_dataset('pairwise_corr')
         stats = corr(df['Neuroticism'], df['Extraversion'])
         assert np.isclose(1 / float(stats['BF10'].to_numpy()), 1.478e-13)
