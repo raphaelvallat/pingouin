@@ -268,11 +268,19 @@ def bicor(x, y, c=9):
     pval : float
         Two-tailed p-value.
 
+    Notes
+    -----
+    This function will return (np.nan, np.nan) if mad(x) == 0 or mad(y) == 0.
+
     References
     ----------
     https://en.wikipedia.org/wiki/Biweight_midcorrelation
 
     https://docs.astropy.org/en/stable/api/astropy.stats.biweight.biweight_midcovariance.html
+
+    Langfelder, P., & Horvath, S. (2012). Fast R Functions for Robust
+    Correlations and Hierarchical Clustering. Journal of Statistical Software,
+    46(11). https://www.ncbi.nlm.nih.gov/pubmed/23050260
     """
     from scipy.stats import t
     # Calculate median
@@ -282,6 +290,11 @@ def bicor(x, y, c=9):
     # Raw median absolute deviation
     x_mad = np.median(np.abs(x - x_median))
     y_mad = np.median(np.abs(y - y_median))
+    if x_mad == 0 or y_mad == 0:
+        # From Langfelder and Horvath 2012:
+        # "Strictly speaking, a call to bicor in R should return a missing
+        # value if mad(x) = 0 or mad(y) = 0." This avoids division by zero.
+        return np.nan, np.nan
     # Calculate weights
     u = (x - x_median) / (c * x_mad)
     v = (y - y_median) / (c * y_mad)
@@ -511,7 +524,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     elif method == 'shepherd':
         r, pval, outliers = shepherd(x, y)
     elif method == 'skipped':
-        r, pval, outliers = skipped(x, y, method='spearman')
+        r, pval, outliers = skipped(x, y)
     else:
         raise ValueError('Method not recognized.')
 

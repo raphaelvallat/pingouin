@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 from unittest import TestCase
 from pingouin.correlation import (corr, rm_corr, partial_corr,
-                                  skipped, distance_corr)
+                                  skipped, distance_corr, bicor)
 from pingouin import read_dataset
 
 
@@ -55,6 +55,8 @@ class TestCorrelation(TestCase):
         stats = corr(x, y)
         assert stats.at['pearson', 'n']
         assert np.isnan(stats.at['pearson', 'r'])
+        # Biweight midcorrelation returns NaN when MAD is not defined
+        assert np.isnan(bicor(np.array([1, 1, 1, 1, 0, 1]), np.arange(6))[0])
 
     def test_partial_corr(self):
         """Test function partial_corr.
