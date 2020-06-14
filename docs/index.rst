@@ -99,12 +99,6 @@ or conda
   conda install -c conda-forge pingouin
 
 Pingouin is under heavy development and it is likely that bugs/mistakes will be discovered in future releases. Please always make sure that you are using the latest version of Pingouin (new releases are `frequent <https://pingouin-stats.org/changelog.html>`_, i.e. about one per month).
-
-To be notified whenever a new release of Pingouin is available, you can click on "Watch releases" on the `GitHub <https://github.com/raphaelvallat/pingouin>`_ of Pingouin (see below).
-
-.. figure::  /pictures/github_watch_release.png
-  :align:   center
-
 Whenever a new release is out there, you can upgrade your version by typing the following line in a terminal window:
 
 .. code-block:: shell
