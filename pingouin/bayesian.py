@@ -17,7 +17,8 @@ def _format_bf(bf, precision=3, trim='0'):
     return out
 
 
-def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
+def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707,
+    return_as_str=True):
     """
     Bayes Factor of a T-test.
 
@@ -121,6 +122,8 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     >>> print("BF10-greater: %s | BF10-less: %s" % (bf_greater, bf_less))
     BF10-greater: 0.029 | BF10-less: 34.369
     """
+    _format_fun = _format_bf if return_as_str else lambda x: x
+
     # Check tails
     possible_tails = ['two-sided', 'one-sided', 'greater', 'less']
     assert tail in possible_tails, 'Invalid tail argument.'
@@ -156,10 +159,11 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     if ((tail == 'greater' and t < 0) or (tail == 'less' and t > 0)) and bf10 > 1:  # noqa
         bf10 = 1 / bf10
 
-    return _format_bf(bf10)
+    return _format_fun(bf10)
 
 
-def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
+def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.,
+    return_as_str=True):
     """
     Bayes Factor of a Pearson correlation.
 
@@ -274,6 +278,8 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
     >>> print("BF: %s" % bayesfactor_pearson(r, n, tail='one-sided'))
     BF: 21.185
     """
+    _format_fun = _format_bf if return_as_str else lambda x: x
+
     from scipy.special import gamma, betaln, hyp2f1
     assert method.lower() in ['ly', 'wetzels'], 'Method not recognized.'
     assert tail.lower() in ['two-sided', 'one-sided', 'greater', 'less',
@@ -335,10 +341,10 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
                 # We expect the correlation to be negative
                 bf10 = bf10neg
 
-    return _format_bf(bf10)
+    return _format_fun(bf10)
 
 
-def bayesfactor_binom(k, n, p=.5):
+def bayesfactor_binom(k, n, p=.5, return_as_str=True):
     """
     Bayes factor of a binomial test with :math:`k` successes,
     :math:`n` trials and base probability :math:`p`.
@@ -423,6 +429,7 @@ def bayesfactor_binom(k, n, p=.5):
     >>> print("Bayes Factor: %s" % bf)
     Bayes Factor: 0.024
     """
+    _format_fun = _format_bf if return_as_str else lambda x: x
     from scipy.stats import binom
     assert 0 < p < 1, 'p must be between 0 and 1.'
     assert isinstance(k, int), 'k must be int.'
@@ -433,4 +440,4 @@ def bayesfactor_binom(k, n, p=.5):
         return binom.pmf(k, n, g)
 
     bf10 = quad(fun, 0, 1, args=(k, n))[0] / binom.pmf(k, n, p)
-    return _format_bf(bf10)
+    return _format_fun(bf10)
