@@ -12,6 +12,8 @@ v0.3.6 (dev)
 **Enhancements**
 
 a. Added ``within_first`` boolean argument to :py:func:`pingouin.pairwise_ttests`. This is useful in mixed design when one want to change the order of the interaction. The default behavior of Pingouin is to return the within * between pairwise tests for the interaction. Using ``within_first=False``, one can now return the between * within pairwise tests. For more details, see `issue 102 <https://github.com/raphaelvallat/pingouin/issues/102>`_ on GitHub.
+b. Added the Palmer Station LTER Penguin example dataset (https://github.com/allisonhorst/palmerpenguins), which describes the flipper length and boody mass for different species of penguins (Adelie, Chinstrap and Gentoo). See reference at https://doi.org/10.1371/journal.pone.0090081.
+c. :py:func:`pingouin.list_dataset` now returns a dataframe instead of simply printing the output.
 
 v0.3.5 (June 2020)
 ------------------

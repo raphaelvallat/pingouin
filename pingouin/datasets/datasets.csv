@@ -20,6 +20,7 @@ pairwise_corr,Big 5 personality traits,corr - pairwise_corr,Dolan et al 2009
 pairwise_ttests,Scores at 3 time points per gender,pairwise_ttests,Pingouin
 pairwise_ttests_missing,Scores at 3 time points with missing values,pairwise_ttests,Pingouin
 partial_corr,Scores at 4 time points,partial_corr,Pingouin
+penguins,Flipper length and boody mass for different species of penguins (Adelie - Chinstrap - Gentoo),everything!,https://github.com/allisonhorst/palmerpenguins
 rm_anova,Hostility towards insect,rm_anova - mixed_anova,Ryan et al 2013
 rm_anova_wide,Scores at 4 time points,rm_anova,Pingouin
 rm_anova2,Performance of employees at two time points and three areas,rm_anova2,www.real-statistics.com

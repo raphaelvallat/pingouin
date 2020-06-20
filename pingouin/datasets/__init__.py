@@ -25,8 +25,8 @@ def read_dataset(dname):
     --------
     Load the ANOVA dataset
 
-    >>> from pingouin import read_dataset
-    >>> df = read_dataset('anova')
+    >>> import pingouin as pg
+    >>> df = read_dataset('penguins')
     """
     # Check extension
     d, ext = op.splitext(dname)
@@ -46,7 +46,35 @@ def list_dataset():
     Examples
     --------
 
-    >>> from pingouin import list_dataset
-    >>> list_dataset()  # doctest: +SKIP
-    """
-    print_table(dts)
+    >>> import pingouin as pg
+    >>> all_datasets = pg.list_dataset()
+    >>> all_datasets.index
+    ['ancova',
+     'anova',
+     'anova2',
+     'anova2_unbalanced',
+     'anova3',
+     'anova3_unbalanced',
+     'chi2_independence',
+     'chi2_mcnemar',
+     'circular',
+     'cochran',
+     'cronbach_alpha',
+     'cronbach_wide_missing',
+     'icc',
+     'mediation',
+     'mixed_anova',
+     'mixed_anova_unbalanced',
+     'multivariate',
+     'pairwise_corr',
+     'pairwise_ttests',
+     'pairwise_ttests_missing',
+     'partial_corr',
+     'penguins',
+     'rm_anova',
+     'rm_anova_wide',
+     'rm_anova2',
+     'rm_corr',
+     'rm_missing']
+     """
+    return dts.set_index('dataset')
