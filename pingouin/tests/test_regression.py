@@ -303,8 +303,8 @@ class TestRegression(TestCase):
         assert_equal(np.round(lom['se'], 5), [0.72439, 0.00017])
         assert_equal(np.round(lom['z'], 3), [-7.127, 7.177])
         assert np.allclose(lom['pval'], [1.03e-12, 7.10e-13])
-        assert np.allclose(lom['CI[2.5%]'], [-6.5823210639, 0.0009012591])
-        assert np.allclose(lom['CI[97.5%]'], [-3.742762224, 0.001578379])
+        assert_equal(np.round(lom['CI[2.5%]'], 5), [-6.58232, 0.00090])
+        assert_equal(np.round(lom['CI[97.5%]'], 5), [-3.74276, 0.00158])
 
         # With a different scaling: z / p-values should be similar
         lom = logistic_regression(data['body_mass_kg'], data['male'],
@@ -313,8 +313,8 @@ class TestRegression(TestCase):
         assert_equal(np.round(lom['se'], 4), [0.7244, 0.1727])
         assert_equal(np.round(lom['z'], 3), [-7.127, 7.177])
         assert np.allclose(lom['pval'], [1.03e-12, 7.10e-13])
-        assert np.allclose(lom['CI[2.5%]'], [-6.5823211, 0.9012591])
-        assert np.allclose(lom['CI[97.5%]'], [-3.742762, 1.578379])
+        assert_equal(np.round(lom['CI[2.5%]'], 5), [-6.58232, 0.90126])
+        assert_equal(np.round(lom['CI[97.5%]'], 5), [-3.74276, 1.57838])
 
         # With no intercept
         lom = logistic_regression(data['body_mass_kg'], data['male'],
@@ -340,10 +340,10 @@ class TestRegression(TestCase):
                      [2.9984, 0.8141, 0.4293, 1.1946])
         assert_equal(np.round(lom['z'], 3),
                      [-9.049, 9.056, -0.596, -8.520])
-        assert np.allclose(lom['CI[2.5%]'],
-                           [-33.008527, 5.777162, -1.097361, -12.519166])
-        assert np.allclose(lom['CI[97.5%]'],
-                           [-21.2551911, 8.9685250, 0.5855108, -7.8364509])
+        assert_equal(np.round(lom['CI[2.5%]'], 3),
+                     [-33.009, 5.777, -1.097, -12.519])
+        assert_equal(np.round(lom['CI[97.5%]'], 3),
+                     [-21.255, 8.969, 0.586, -7.836])
 
     def test_mediation_analysis(self):
         """Test function mediation_analysis.
