@@ -417,7 +417,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                 fbt = [between, None]
                 fwt = [None, within]
                 paired = True
-                agg = [False, False]
+                agg = [True, False]
 
         stats = pd.DataFrame()
         for i, f in enumerate(factors):
