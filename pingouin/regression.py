@@ -28,7 +28,7 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
 
         .. note:: It is generally recommanded to include a constant term
             (intercept) to the model to limit the bias and force the residual
-            mean to equal zero. Note that intercept coefficient and p-values
+            mean to equal zero. The intercept coefficient and p-values
             are however rarely meaningful.
     weights : array_like
         An optional vector of sample weights to be used in the fitting
@@ -166,8 +166,8 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     1. Simple linear regression using columns of a pandas dataframe
 
     In this first example, we'll use the tips dataset to see how well we
-    can predict the tip that a waiter received (in dollars) based on the total
-    bill (also in dollars).
+    can predict the waiter's tip (in dollars) based on the total bill (also
+    in dollars).
 
     >>> import numpy as np
     >>> import pingouin as pg
@@ -179,7 +179,15 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     0   Intercept  0.92  0.16   5.76   0.0  0.46    0.45      0.61       1.23
     1  total_bill  0.11  0.01  14.26   0.0  0.46    0.45      0.09       0.12
 
+    It comes as no surprise that total bill is indeed a significant predictor
+    of the waiter's tip (T=14.26, p<0.05). The :math:`R^2` of the model is 0.46
+    and the adjusted :math:`R^2` is 0.45, which means that our model roughly
+    explains ~45% of the total variance in the tip amount.
+
     2. Multiple linear regression
+
+    We can also have more than one predictor and run a multiple linear
+    regression. Below, we add the party size as a second predictor of tip.
 
     >>> # We'll add a second predictor: the party size
     >>> lm = pg.linear_regression(df[['total_bill', 'size']], df['tip'])
@@ -189,7 +197,11 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     1  total_bill  0.09  0.01  10.17  0.00  0.47    0.46      0.07       0.11
     2        size  0.19  0.09   2.26  0.02  0.47    0.46      0.02       0.36
 
-    Note that this function works with numpy arrays as well:
+    The party size is also a significant predictor of tip (T=2.26, p=0.02).
+    Note that adding this new predictor however only improved the :math:`R^2`
+    of our model by ~1%.
+
+    This function also works with numpy arrays:
 
     >>> X = df[['total_bill', 'size']].to_numpy()
     >>> y = df['tip'].to_numpy()
@@ -205,7 +217,27 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     >>> np.round(lm.residuals_, 2)[:9]
     array([-1.62, -0.55,  0.31,  0.06, -0.11,  0.93,  0.13, -0.81, -0.49])
 
-    5. No intercept and return coef only
+    Using pandas, we can show a summary of the distribution of the residuals:
+
+    >>> import pandas as pd
+    >>> pd.Series(lm.residuals_).describe().round(2)
+    count    244.00
+    mean      -0.00
+    std        1.01
+    min       -2.93
+    25%       -0.55
+    50%       -0.09
+    75%        0.51
+    max        4.04
+    dtype: float64
+
+    5. No intercept and return only the regression coefficients
+
+    Sometimes it may be useful to remove the constant term from the regression,
+    or to only return the regression coefficients without calculating the
+    standard errors or p-values. This latter can potentially save you a lot of
+    time if you need to calculate hundreds of regression and only care about
+    the coefficients!
 
     >>> pg.linear_regression(X, y, add_intercept=False, coef_only=True)
     array([0.1007119 , 0.36209717])
@@ -563,6 +595,14 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     Pingouin automatically disables the L2 regularization applied by
     scikit-learn. This can be modified by changing the ``penalty`` argument.
 
+    .. warning:: Versions of Pingouin <0.3.6 used the *'lbfgs'* solver, which
+        regularize the intercept and may thus have resulted in different
+        z and p-values based on the scaling (e.g. standardization) of the
+        predictors. Newer version of Pingouin use the *'newton-cg'*
+        solver, which is scaling-independent i.e. no regularization is applied
+        to the intercept and p-values are therefore unchanged with different
+        scaling of the data (consistent with the glm R function).
+
     The logistic regression assumes that the log-odds (the logarithm of the
     odds) for the value labeled "1" in the response variable is a linear
     combination of the predictor variables. The log-odds are given by the
@@ -603,7 +643,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
 
     In this first example, we'll use the
     `penguins dataset <https://github.com/allisonhorst/palmerpenguins>`_
-    to see how well we can predict the sex of the penguins based on their
+    to see how well we can predict the sex of penguins based on their
     bodies mass.
 
     >>> import numpy as np
@@ -621,7 +661,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     0    Intercept -5.16  0.71 -7.24   0.0     -6.56      -3.77
     1  body_mass_g  0.00  0.00  7.24   0.0      0.00       0.00
 
-    Body mass is a significant predictor of sex (p<0.001). Note here that it
+    Body mass is a significant predictor of sex (p<0.001). Here, it
     could be useful to rescale our predictor variable from *g* to *kg*
     (e.g divide by 1000) in order to get more intuitive coefficients and
     confidence intervals:
@@ -637,7 +677,9 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     2. Multiple binary logistic regression
 
     We'll now add the species as a categorical predictor in our model. To do
-    so, we first need to dummy-code our variable:
+    so, we first need to dummy-code our categorical variable, dropping the
+    first level of our categorical variable (species = Adelie) which will be
+    used as the reference level:
 
     >>> df = pd.get_dummies(df, columns=['species'], drop_first=True)
     >>> X = df[['body_mass_kg', 'species_Chinstrap', 'species_Gentoo']]
