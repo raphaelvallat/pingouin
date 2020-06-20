@@ -3,8 +3,15 @@
 What's new
 ##########
 
-.. contents:: Table of Contents
-   :depth: 2
+.. .. contents:: Table of Contents
+..    :depth: 2
+
+v0.3.6 (dev)
+------------
+
+**Enhancements**
+
+a. Added ``within_first`` boolean argument to :py:func:`pingouin.pairwise_ttests`. This is useful in mixed design when one want to change the order of the interaction. The default behavior of Pingouin is to return the within * between pairwise tests for the interaction. Using ``within_first=False``, one can now return the between * within pairwise tests. For more details, see `issue 102 <https://github.com/raphaelvallat/pingouin/issues/102>`_ on GitHub.
 
 v0.3.5 (June 2020)
 ------------------

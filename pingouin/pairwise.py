@@ -18,7 +18,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                     subject=None, parametric=True, marginal=True, alpha=.05,
                     tail='two-sided', padjust='none', effsize='hedges',
                     correction='auto', nan_policy='listwise',
-                    return_desc=False, interaction=True):
+                    return_desc=False, interaction=True, within_first=True):
     """Pairwise T-tests.
 
     Parameters
@@ -27,20 +27,20 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         DataFrame. Note that this function can also directly be used as a
         Pandas method, in which case this argument is no longer needed.
     dv : string
-        Name of column containing the dependant variable.
+        Name of column containing the dependent variable.
     between : string or list with 2 elements
         Name of column(s) containing the between-subject factor(s).
 
         .. warning:: Note that Pingouin gives slightly different T and
             p-values compared to JASP posthoc tests for 2-way factorial design,
-            because Pingouin does not pool the standard
-            error for each factor, but rather calculate each pairwise T-test
-            completely independent of others.
+            because Pingouin does not pool the standard error for each factor,
+            but rather calculate each pairwise T-test completely independent
+            of others.
     within : string or list with 2 elements
         Name of column(s) containing the within-subject factor(s), i.e. the
         repeated measurements.
     subject : string
-        Name of column containing the subject identifier. This is compulsory
+        Name of column containing the subject identifier. This is mandatory
         when ``within`` is specified.
     parametric : boolean
         If True (default), use the parametric :py:func:`ttest` function.
@@ -119,15 +119,22 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         Notes).
 
         .. versionadded:: 0.2.9
+    within_first : boolean
+        Determines the order of the interaction in mixed design. Pingouin will
+        return within * between when this parameter is set to True (default),
+        and between * within otherwise.
+
+        .. versionadded:: 0.3.6
 
     Returns
     -------
     stats : :py:class:`pandas.DataFrame`
 
+        * ``'Contrast'``: Contrast (= independent variable or interaction)
         * ``'A'``: Name of first measurement
         * ``'B'``: Name of second measurement
         * ``'Paired'``: indicates whether the two measurements are paired or
-          not
+          independent
         * ``'Parametric'``: indicates if (non)-parametric tests were used
         * ``'Tail'``: indicate whether the p-values are one-sided or two-sided
         * ``'T'``: T statistic (only if parametric=True)
@@ -167,7 +174,9 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     within1 + within2 + within1 * within2.
 
     If both ``between`` and ``within`` are specified, the output model is
-    within + between + within * between (= mixed design).
+    within + between + within * between (= mixed design), unless
+    ``within_first=False`` in which case the model becomes between + within +
+    between * within.
 
     Missing values in repeated measurements are automatically removed using a
     listwise (default) or pairwise deletion strategy. However, you should be
@@ -393,12 +402,22 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             paired = True
             agg = [True, True]  # Calculate marginal means for both factors
         else:
-            # B3: WITHIN + BETWEEN + WITHIN * BETWEEN
-            factors = [within, between]
-            fbt = [None, between]
-            fwt = [within, None]
-            paired = False
-            agg = [False, True]
+            # B3: WITHIN + BETWEEN + INTERACTION
+            # Decide which order should be reported
+            if within_first:
+                # within + between + within * between
+                factors = [within, between]
+                fbt = [None, between]
+                fwt = [within, None]
+                paired = False  # only for interaction
+                agg = [False, True]
+            else:
+                # between + within + between * within
+                factors = [between, within]
+                fbt = [between, None]
+                fwt = [None, within]
+                paired = True
+                agg = [False, False]
 
         stats = pd.DataFrame()
         for i, f in enumerate(factors):
@@ -408,6 +427,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                                    sort=False).mean()
             else:
                 tmp = data
+            # Recursive call to pairwise_ttests
             stats = stats.append(pairwise_ttests(dv=dv,
                                                  between=fbt[i],
                                                  within=fwt[i],

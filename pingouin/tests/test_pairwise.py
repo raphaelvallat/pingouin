@@ -1,11 +1,10 @@
+import pytest
 import pandas as pd
 import numpy as np
-import pytest
-
 from unittest import TestCase
+from pingouin import read_dataset
 from pingouin.pairwise import (pairwise_ttests, pairwise_corr, pairwise_tukey,
                                pairwise_gameshowell)
-from pingouin import read_dataset
 
 
 class TestPairwise(TestCase):
@@ -76,14 +75,40 @@ class TestPairwise(TestCase):
                               [0.174, 0.024, 0.310])
         assert np.array_equal(pt.loc[:2, 'BF10'].astype(float),
                               [0.582, 4.232, 0.232])
-        # ...Between main effect: T and p-values OK with JASP
-        #    but BF10 is only similar when marginal=False (see note in the
-        #    2-way RM test below).
+        # ..Between main effect: T and p-values OK with JASP
+        #   but BF10 is only similar when marginal=False (see note in the
+        #   2-way RM test below).
         assert pt.loc[3, 'T'].round(3) == -2.248
         assert pt.loc[3, 'p-unc'].round(3) == 0.028
-        # ...Interaction: slightly different because JASP pool the error term
+        # ..Interaction: slightly different because JASP pool the error term
         #    across the between-subject groups. JASP does not compute the BF10
         #    for the interaction.
+
+        # ..Changing the order of the model with ``within_first=False``.
+        #   output model is now between + within + between * within.
+        # https://github.com/raphaelvallat/pingouin/issues/102
+        pt = pairwise_ttests(dv='Scores', within='Time', between='Group',
+                             subject='Subject', data=df, padjust='holm',
+                             within_first=False)
+        # This should be equivalent to manually filtering dataframe to keep
+        # only one level at a time of the between factor and then running
+        # a within-subject pairwise T-tests.
+        pt_con = pairwise_ttests(dv='Scores', within='Time',
+                                    subject='Subject', padjust='holm',
+                                    data=df[df['Group'] == 'Control'])
+        pt_med = pairwise_ttests(dv='Scores', within='Time',
+                                    subject='Subject', padjust='holm',
+                                    data=df[df['Group'] == 'Meditation'])
+        pt_merged = pt_con.append(pt_med)
+        # T, dof and p-valus should be equal
+        assert np.array_equal(pt_merged['T'], pt['T'].iloc[4:])
+        assert np.array_equal(pt_merged['dof'], pt['dof'].iloc[4:])
+        assert np.array_equal(pt_merged['p-unc'], pt['p-unc'].iloc[4:])
+        # However adjusted p-values are not equal because they are calculated
+        # separetely on each dataframe.
+        assert not np.array_equal(pt_merged['p-corr'], pt['p-corr'].iloc[4:])
+        # I also manually checked the previous lines using parametric=False and
+        # one-sided test.
 
         # Other options
         pairwise_ttests(dv='Scores', within=['Time'], between=['Group'],
