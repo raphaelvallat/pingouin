@@ -32,3 +32,4 @@ include pingouin/datasets/rm_anova2.csv
 include pingouin/datasets/rm_anova_wide.csv
 include pingouin/datasets/rm_corr.csv
 include pingouin/datasets/rm_missing.csv
+include pingouin/datasets/tips.csv

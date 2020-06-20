@@ -23,10 +23,24 @@ def read_dataset(dname):
 
     Examples
     --------
-    Load the ANOVA dataset
+    Load the `Penguin <https://github.com/allisonhorst/palmerpenguins>`_
+    dataset:
 
     >>> import pingouin as pg
-    >>> df = read_dataset('penguins')
+    >>> df = pg.read_dataset('penguins')
+    >>> df # doctest: +SKIP
+        species  island  bill_length_mm  ...  flipper_length_mm  body_mass_g     sex
+    0    Adelie  Biscoe            37.8  ...              174.0       3400.0  female
+    1    Adelie  Biscoe            37.7  ...              180.0       3600.0    male
+    2    Adelie  Biscoe            35.9  ...              189.0       3800.0  female
+    3    Adelie  Biscoe            38.2  ...              185.0       3950.0    male
+    4    Adelie  Biscoe            38.8  ...              180.0       3800.0    male
+    ..      ...     ...             ...  ...                ...          ...     ...
+    339  Gentoo  Biscoe             NaN  ...                NaN          NaN     NaN
+    340  Gentoo  Biscoe            46.8  ...              215.0       4850.0  female
+    341  Gentoo  Biscoe            50.4  ...              222.0       5750.0    male
+    342  Gentoo  Biscoe            45.2  ...              212.0       5200.0  female
+    343  Gentoo  Biscoe            49.9  ...              213.0       5400.0    male
     """
     # Check extension
     d, ext = op.splitext(dname)
@@ -48,7 +62,7 @@ def list_dataset():
 
     >>> import pingouin as pg
     >>> all_datasets = pg.list_dataset()
-    >>> all_datasets.index
+    >>> all_datasets.index.tolist()
     ['ancova',
      'anova',
      'anova2',
@@ -75,6 +89,7 @@ def list_dataset():
      'rm_anova_wide',
      'rm_anova2',
      'rm_corr',
-     'rm_missing']
+     'rm_missing',
+     'tips']
      """
     return dts.set_index('dataset')

@@ -9,11 +9,17 @@ What's new
 v0.3.6 (dev)
 ------------
 
+**Bugfixes**
+
+a. Changed the default scikit-learn solver in :py:func:`pingouin.logistic_regression` from *'lbfgs'* to *'newton-cg'* in order to get results that are `always consistent with R or statsmodels <https://stats.stackexchange.com/questions/203816/logistic-regression-scikit-learn-vs-glmnet>`_. Specifically, previous version of Pingouin based on the *'lbfgs'* solver applied a regularization of the intercept which may have led to different coefficients and p-values for the predictors of interest based on the scaling of these predictors (e.g very small or very large values). The new *'newton-cg'* solver is scaling-independent, i.e. no regularization is applied to the intercept and p-values are therefore unchanged with different scaling of the data.
+b. Fixed invalid results in :py:func:`pingouin.logistic_regression` when ``fit_intercept=False`` was passed as a keyword argument to scikit-learn. The standard errors and p-values were still calculated by taking into account an intercept in the model. 
+
 **Enhancements**
 
 a. Added ``within_first`` boolean argument to :py:func:`pingouin.pairwise_ttests`. This is useful in mixed design when one want to change the order of the interaction. The default behavior of Pingouin is to return the within * between pairwise tests for the interaction. Using ``within_first=False``, one can now return the between * within pairwise tests. For more details, see `issue 102 <https://github.com/raphaelvallat/pingouin/issues/102>`_ on GitHub.
-b. Added the Palmer Station LTER Penguin example dataset (https://github.com/allisonhorst/palmerpenguins), which describes the flipper length and boody mass for different species of penguins (Adelie, Chinstrap and Gentoo). See reference at https://doi.org/10.1371/journal.pone.0090081.
-c. :py:func:`pingouin.list_dataset` now returns a dataframe instead of simply printing the output.
+b. :py:func:`pingouin.list_dataset` now returns a dataframe instead of simply printing the output.
+c. Added the Palmer Station LTER `Penguin dataset <https://github.com/allisonhorst/palmerpenguins>`_, which describes the flipper length and body mass for different species of penguins. It can be loaded with ``pingouin.read_dataset('penguins')``.
+d. Added the `Tips dataset <https://vincentarelbundock.github.io/Rdatasets/doc/reshape2/tips.html)>`_. It can be loaded with ``pingouin.read_dataset('tips')``.
 
 v0.3.5 (June 2020)
 ------------------

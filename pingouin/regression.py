@@ -163,68 +163,71 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
 
     Examples
     --------
-    1. Simple linear regression
+    1. Simple linear regression using columns of a pandas dataframe
 
     >>> import numpy as np
     >>> import pingouin as pg
-    >>> np.random.seed(123)
-    >>> mean, cov, n = [4, 6], [[1, 0.5], [0.5, 1]], 30
-    >>> x, y = np.random.multivariate_normal(mean, cov, n).T
-    >>> lm = pg.linear_regression(x, y)
+    >>> df = pg.read_dataset('tips')
+    >>> # Let's predict the tip ($) based on the total bill (also in $)
+    >>> lm = pg.linear_regression(df['total_bill'], df['tip'])
     >>> lm.round(2)
-           names  coef    se     T  pval    r2  adj_r2  CI[2.5%]  CI[97.5%]
-    0  Intercept  4.40  0.54  8.16  0.00  0.24    0.21      3.29       5.50
-    1         x1  0.39  0.13  2.99  0.01  0.24    0.21      0.12       0.67
+            names  coef    se      T  pval    r2  adj_r2  CI[2.5%]  CI[97.5%]
+    0   Intercept  0.92  0.16   5.76   0.0  0.46    0.45      0.61       1.23
+    1  total_bill  0.11  0.01  14.26   0.0  0.46    0.45      0.09       0.12
 
     2. Multiple linear regression
 
-    >>> np.random.seed(42)
-    >>> z = np.random.normal(size=n)
-    >>> X = np.column_stack((x, z))
-    >>> lm = pg.linear_regression(X, y)
-    >>> print(lm['coef'].to_numpy())
-    [4.54123324 0.36628301 0.17709451]
+    >>> # We'll add a second predictor: the party size
+    >>> lm = pg.linear_regression(df[['total_bill', 'size']], df['tip'])
+    >>> lm.round(2)
+            names  coef    se      T  pval    r2  adj_r2  CI[2.5%]  CI[97.5%]
+    0   Intercept  0.67  0.19   3.46  0.00  0.47    0.46      0.29       1.05
+    1  total_bill  0.09  0.01  10.17  0.00  0.47    0.46      0.07       0.11
+    2        size  0.19  0.09   2.26  0.02  0.47    0.46      0.02       0.36
+
+    Note that this function works with numpy arrays as well:
+
+    >>> X = df[['total_bill', 'size']].to_numpy()
+    >>> y = df['tip'].to_numpy()
+    >>> pg.linear_regression(X, y).round(2)
+           names  coef    se      T  pval    r2  adj_r2  CI[2.5%]  CI[97.5%]
+    0  Intercept  0.67  0.19   3.46  0.00  0.47    0.46      0.29       1.05
+    1         x1  0.09  0.01  10.17  0.00  0.47    0.46      0.07       0.11
+    2         x2  0.19  0.09   2.26  0.02  0.47    0.46      0.02       0.36
 
     3. Get the residuals
 
-    >>> np.round(lm.residuals_, 2)
-    array([ 1.18, -1.17,  1.32,  0.76, -1.25,  0.34, -1.54, -0.2 ,  0.36,
-           -0.39,  0.69,  1.39,  0.2 , -1.14, -0.21, -1.68,  0.67, -0.69,
-            0.62,  0.92, -1.  ,  0.64, -0.21, -0.78,  1.08, -0.03, -1.3 ,
-            0.64,  0.81, -0.04])
-
-    4. Using a Pandas DataFrame
-
-    >>> import pandas as pd
-    >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
-    >>> lm = pg.linear_regression(df[['x', 'z']], df['y'])
-    >>> print(lm['coef'].to_numpy())
-    [4.54123324 0.36628301 0.17709451]
+    >>> # For clarity, only display the first 9 values
+    >>> np.round(lm.residuals_, 2)[:9]
+    array([-1.62, -0.55,  0.31,  0.06, -0.11,  0.93,  0.13, -0.81, -0.49])
 
     5. No intercept and return coef only
 
     >>> pg.linear_regression(X, y, add_intercept=False, coef_only=True)
-    array([ 1.40935593, -0.2916508 ])
+    array([0.1007119 , 0.36209717])
 
-    6. Return a dictionnary instead of a DataFrame
+    6. Return a dictionnary instead of a dataframe
 
-    >>> lm_dict = linear_regression(X, y, as_dataframe=False)
+    >>> lm_dict = pg.linear_regression(X, y, as_dataframe=False)
+    >>> lm_dict.keys()
+    dict_keys(['names', 'coef', 'se', 'T', 'pval', 'r2', 'adj_r2', 'CI[2.5%]',
+               'CI[97.5%]', 'df_model', 'df_resid', 'residuals'])
 
     7. Remove missing values
 
     >>> X[4, 1] = np.nan
     >>> y[7] = np.nan
     >>> pg.linear_regression(X, y, remove_na=True, coef_only=True)
-    array([4.64069731, 0.35455398, 0.1888135 ])
+    array([0.65749955, 0.09262059, 0.19927529])
 
     8. Get the relative importance of predictors
 
     >>> lm = pg.linear_regression(X, y, remove_na=True, relimp=True)
     >>> lm[['names', 'relimp', 'relimp_perc']]
-               names    relimp  relimp_perc
+           names    relimp  relimp_perc
     0  Intercept       NaN          NaN
-    1         x1  0.217265    82.202201
-    2         x2  0.047041    17.797799
+    1         x1  0.342503    73.045583
+    2         x2  0.126386    26.954417
 
     The ``relimp`` column is a partitioning of the total :math:`R^2` of the
     model into individual contribution. Therefore, it sums to the :math:`R^2`
@@ -233,7 +236,7 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     for more details.
 
     >>> lm[['relimp', 'relimp_perc']].sum()
-    relimp           0.264305
+    relimp           0.468889
     relimp_perc    100.000000
     dtype: float64
 
@@ -510,10 +513,10 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
 
     Parameters
     ----------
-    X : np.array or list
-        Predictor(s). Shape = (n_samples, n_features) or (n_samples,).
-    y : np.array or list
-        Dependent variable. Shape = (n_samples).
+    X : array_like
+        Predictor(s), of shape *(n_samples, n_features)* or *(n_samples)*.
+    y : array_like
+        Dependent variable, of shape *(n_samples)*.
         ``y`` must be binary, i.e. only contains 0 or 1. Multinomial logistic
         regression is not supported.
     coef_only : bool
@@ -592,48 +595,69 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
 
     Examples
     --------
-    1. Simple binary logistic regression
+    1. Simple binary logistic regression.
+
+    In this first example, we'll use the
+    `penguins dataset <https://github.com/allisonhorst/palmerpenguins>`_
+    to see how well we can predict the sex of the penguins based on their
+    bodies mass.
 
     >>> import numpy as np
-    >>> from pingouin import logistic_regression
-    >>> np.random.seed(123)
-    >>> x = np.random.normal(size=30)
-    >>> y = np.random.randint(0, 2, size=30)
-    >>> lom = logistic_regression(x, y)
+    >>> import pandas as pd
+    >>> import pingouin as pg
+    >>> df = pg.read_dataset('penguins')
+    >>> # Let's first convert the target variable from string to boolean:
+    >>> df['male'] = (df['sex'] == 'male').astype(int)  # male: 1, female: 0
+    >>> # Since there are missing values in our outcome variable, we need to
+    >>> # set `remove_na=True` otherwise regression will fail.
+    >>> lom = pg.logistic_regression(df['body_mass_g'], df['male'],
+    ...                              remove_na=True)
     >>> lom.round(2)
-           names  coef    se     z  pval  CI[2.5%]  CI[97.5%]
-    0  Intercept -0.27  0.37 -0.74  0.46     -1.00       0.45
-    1         x1  0.07  0.32  0.21  0.84     -0.55       0.68
+             names  coef    se     z  pval  CI[2.5%]  CI[97.5%]
+    0    Intercept -5.16  0.71 -7.24   0.0     -6.56      -3.77
+    1  body_mass_g  0.00  0.00  7.24   0.0      0.00       0.00
+
+    Body mass is a significant predictor of sex (p<0.001). Note here that it
+    could be useful to rescale our predictor variable from *g* to *kg*
+    (e.g divide by 1000) in order to get more intuitive coefficients and
+    confidence intervals:
+
+    >>> df['body_mass_kg'] = df['body_mass_g'] / 1000
+    >>> lom = pg.logistic_regression(df['body_mass_kg'], df['male'],
+    ...                              remove_na=True)
+    >>> lom.round(2)
+              names  coef    se     z  pval  CI[2.5%]  CI[97.5%]
+    0     Intercept -5.16  0.71 -7.24   0.0     -6.56      -3.77
+    1  body_mass_kg  1.23  0.17  7.24   0.0      0.89       1.56
 
     2. Multiple binary logistic regression
 
-    >>> np.random.seed(42)
-    >>> z = np.random.normal(size=30)
-    >>> X = np.column_stack((x, z))
-    >>> lom = logistic_regression(X, y)
+    We'll now add the species as a categorical predictor in our model. To do
+    so, we first need to dummy-code our variable:
+
+    >>> df = pd.get_dummies(df, columns=['species'], drop_first=True)
+    >>> X = df[['body_mass_kg', 'species_Chinstrap', 'species_Gentoo']]
+    >>> y = df['male']
+    >>> lom = pg.logistic_regression(X, y, remove_na=True)
+    >>> lom.round(2)
+                   names   coef    se     z  pval  CI[2.5%]  CI[97.5%]
+    0          Intercept -26.24  2.84 -9.24  0.00    -31.81     -20.67
+    1       body_mass_kg   7.10  0.77  9.23  0.00      5.59       8.61
+    2  species_Chinstrap  -0.13  0.42 -0.31  0.75     -0.96       0.69
+    3     species_Gentoo  -9.72  1.12 -8.65  0.00    -11.92      -7.52
+
+    3. Using NumPy aray and returning only the coefficients
+
+    >>> pg.logistic_regression(X.to_numpy(), y.to_numpy(), coef_only=True,
+    ...                        remove_na=True)
+    array([-26.23906892,   7.09826571,  -0.13180626,  -9.71718529])
+
+    4. Passing custom parameters to sklearn
+
+    >>> lom = pg.logistic_regression(X, y, solver='sag', max_iter=10000,
+    ...                           random_state=42, remove_na=True)
     >>> print(lom['coef'].to_numpy())
-    [-0.36736745 -0.04374684 -0.47829392]
-
-    3. Using a Pandas DataFrame
-
-    >>> import pandas as pd
-    >>> df = pd.DataFrame({'x': x, 'y': y, 'z': z})
-    >>> lom = logistic_regression(df[['x', 'z']], df['y'])
-    >>> print(lom['coef'].to_numpy())
-    [-0.36736745 -0.04374684 -0.47829392]
-
-    4. Return only the coefficients
-
-    >>> logistic_regression(X, y, coef_only=True)
-    array([-0.36736745, -0.04374684, -0.47829392])
-
-    5. Passing custom parameters to sklearn
-
-    >>> lom = logistic_regression(X, y, solver='sag', max_iter=10000,
-    ...                           random_state=42)
-    >>> print(lom['coef'].to_numpy())
-    [-0.36751796 -0.04367056 -0.47841908]
-
+    [-25.98248153   7.02881472  -0.13119779  -9.62247569]
 
     **How to interpret the log-odds coefficients?**
 
@@ -652,7 +676,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     >>> Pass = [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1]
     >>> df = pd.DataFrame({'HoursStudy': Hours, 'PassExam': Pass})
     >>> # And then run the logistic regression
-    >>> lr = logistic_regression(df['HoursStudy'], df['PassExam']).round(3)
+    >>> lr = pg.logistic_regression(df['HoursStudy'], df['PassExam']).round(3)
     >>> lr
             names   coef     se      z   pval  CI[2.5%]  CI[97.5%]
     0   Intercept -4.078  1.761 -2.316  0.021    -7.529     -0.626
@@ -770,23 +794,29 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
 
     # Initialize and fit
     if 'solver' not in kwargs:
-        kwargs['solver'] = 'lbfgs'
+        # https://stats.stackexchange.com/a/204324/253579
+        # Updated in Pingouin > 0.3.6 to be consistent with R
+        kwargs['solver'] = 'newton-cg'
     if 'multi_class' not in kwargs:
         kwargs['multi_class'] = 'auto'
     if 'penalty' not in kwargs:
         kwargs['penalty'] = 'none'
     lom = LogisticRegression(**kwargs)
     lom.fit(X, y)
-    coef = np.append(lom.intercept_, lom.coef_)
+
+    if lom.get_params()['fit_intercept']:
+        names.insert(0, "Intercept")
+        X_design = np.column_stack((np.ones(X.shape[0]), X))
+        coef = np.append(lom.intercept_, lom.coef_)
+    else:
+        coef = lom.coef_
+        X_design = X
+
     if coef_only:
         return coef
 
-    # Design matrix -- add intercept
-    names.insert(0, "Intercept")
-    X_design = np.column_stack((np.ones(X.shape[0]), X))
-    n, p = X_design.shape
-
     # Fisher Information Matrix
+    n, p = X_design.shape
     denom = (2 * (1 + np.cosh(lom.decision_function(X))))
     denom = np.tile(denom, (p, 1)).T
     fim = (X_design / denom).T @ X_design
@@ -799,7 +829,9 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     # Two-tailed p-values
     pval = 2 * norm.sf(np.fabs(z_scores))
 
-    # Confidence intervals
+    # Wald Confidence intervals
+    # In R: this is equivalent to confint.default(model)
+    # Note that confint(model) will however return the profile CI
     crit = norm.ppf(1 - alpha / 2)
     ll = coef - crit * se
     ul = coef + crit * se
@@ -1026,7 +1058,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
 
     >>> mediation_analysis(data=df, x='X', m='Mbin', y='Y', seed=42).round(3)
            path   coef     se   pval  CI[2.5%]  CI[97.5%]  sig
-    0  Mbin ~ X -0.021  0.116  0.858    -0.248      0.206   No
+    0  Mbin ~ X -0.021  0.116  0.857    -0.248      0.206   No
     1  Y ~ Mbin -0.135  0.412  0.743    -0.952      0.682   No
     2     Total  0.396  0.111  0.001     0.176      0.617  Yes
     3    Direct  0.396  0.112  0.001     0.174      0.617  Yes

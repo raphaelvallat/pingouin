@@ -1,15 +1,20 @@
 import pytest
 import numpy as np
-from pandas.testing import assert_frame_equal
-from numpy.testing import assert_almost_equal, assert_equal
+import pandas as pd
 from unittest import TestCase
-from pingouin.regression import (linear_regression, logistic_regression,
-                                 mediation_analysis, _pval_from_bootci)
-from pingouin import read_dataset
 
 from scipy.stats import linregress, zscore
 from sklearn.linear_model import LinearRegression
 
+from pandas.testing import assert_frame_equal
+from numpy.testing import assert_almost_equal, assert_equal
+
+from pingouin import read_dataset
+from pingouin.regression import (linear_regression, logistic_regression,
+                                 mediation_analysis, _pval_from_bootci)
+
+
+# 1st dataset: mediation
 df = read_dataset('mediation')
 df['Zero'] = 0
 df['One'] = 1
@@ -18,6 +23,11 @@ df_nan = df.copy()
 df_nan.loc[1, 'M'] = np.nan
 df_nan.loc[10, 'X'] = np.nan
 df_nan.loc[12, ['Y', 'Ybin']] = np.nan
+
+# 2nd dataset: penguins
+data = read_dataset('penguins').dropna()
+data['male'] = (data['sex'] == 'male').astype(int)
+data['body_mass_kg'] = data['body_mass_g'] / 1000
 
 
 class TestRegression(TestCase):
@@ -242,16 +252,16 @@ class TestRegression(TestCase):
         lom = logistic_regression(X, y).round(4)  # Pingouin
         # Compare against R
         # summary(glm(Ybin ~ X+M, data=df, family=binomial))
-        assert_equal(lom['coef'].to_numpy(), [1.3276, -0.1960, -0.0060])
+        assert_equal(lom['coef'].to_numpy(), [1.3275, -0.1960, -0.0060])
         assert_equal(lom['se'].to_numpy(), [0.7784, 0.1408, 0.1253])
-        assert_equal(lom['z'].to_numpy(), [1.7056, -1.3926, -0.0476])
-        assert_equal(lom['pval'].to_numpy(), [0.0881, 0.1637, 0.9620])
-        assert_equal(lom['CI[2.5%]'].to_numpy(), [-.1980, -.4719, -.2516])
+        assert_equal(lom['z'].to_numpy(), [1.7055, -1.3926, -0.0475])
+        assert_equal(lom['pval'].to_numpy(), [0.0881, 0.1637, 0.9621])
+        assert_equal(lom['CI[2.5%]'].to_numpy(), [-.1981, -.4719, -.2516])
         assert_equal(lom['CI[97.5%]'].to_numpy(), [2.8531, 0.0799, 0.2397])
 
         # Test other arguments
         c = logistic_regression(df[['X', 'M']], df['Ybin'], coef_only=True)
-        assert_equal(np.round(c, 4), [1.3276, -0.1960, -0.0060])
+        assert_equal(np.round(c, 4), [1.3275, -0.1960, -0.0060])
 
         # With missing values
         logistic_regression(df_nan[['X', 'M']], df_nan['Ybin'], remove_na=True)
@@ -284,6 +294,56 @@ class TestRegression(TestCase):
         with pytest.raises(ValueError):
             y[3] = 2
             logistic_regression(X, y)
+
+        # --------------------------------------------------------------------
+        # 2ND dataset (Penguin)-- compare to R
+        lom = logistic_regression(data['body_mass_g'], data['male'],
+                                  as_dataframe=False)
+        assert np.allclose(lom['coef'], [-5.162541644, 0.001239819])
+        assert_equal(np.round(lom['se'], 5), [0.72439, 0.00017])
+        assert_equal(np.round(lom['z'], 3), [-7.127, 7.177])
+        assert np.allclose(lom['pval'], [1.03e-12, 7.10e-13])
+        assert np.allclose(lom['CI[2.5%]'], [-6.5823210639, 0.0009012591])
+        assert np.allclose(lom['CI[97.5%]'], [-3.742762224, 0.001578379])
+
+        # With a different scaling: z / p-values should be similar
+        lom = logistic_regression(data['body_mass_kg'], data['male'],
+                                  as_dataframe=False)
+        assert np.allclose(lom['coef'], [-5.162542, 1.239819])
+        assert_equal(np.round(lom['se'], 4), [0.7244, 0.1727])
+        assert_equal(np.round(lom['z'], 3), [-7.127, 7.177])
+        assert np.allclose(lom['pval'], [1.03e-12, 7.10e-13])
+        assert np.allclose(lom['CI[2.5%]'], [-6.5823211, 0.9012591])
+        assert np.allclose(lom['CI[97.5%]'], [-3.742762, 1.578379])
+
+        # With no intercept
+        lom = logistic_regression(data['body_mass_kg'], data['male'],
+                                  as_dataframe=False, fit_intercept=False)
+        assert np.isclose(lom['coef'], 0.04150582)
+        assert np.round(lom['se'], 5) == 0.02570
+        assert np.round(lom['z'], 3) == 1.615
+        assert np.round(lom['pval'], 3) == 0.106
+        assert np.round(lom['CI[2.5%]'], 3) == -0.009
+        assert np.round(lom['CI[97.5%]'], 3) == 0.092
+
+        # With categorical predictors
+        # R: >>> glm("male ~ body_mass_kg + species", family=binomial, ...)
+        #    >>> confint.default(model)  # Wald CI
+        # See https://stats.stackexchange.com/a/275421/253579
+        data_dum = pd.get_dummies(data, columns=['species'], drop_first=True)
+        X = data_dum[['body_mass_kg', 'species_Chinstrap', 'species_Gentoo']]
+        y = data_dum['male']
+        lom = logistic_regression(X, y, as_dataframe=False)
+        assert_equal(np.round(lom['coef'], 7),
+                     [-27.1318593, 7.3728436, -0.2559251, -10.1778083])
+        assert_equal(np.round(lom['se'], 4),
+                     [2.9984, 0.8141, 0.4293, 1.1946])
+        assert_equal(np.round(lom['z'], 3),
+                     [-9.049, 9.056, -0.596, -8.520])
+        assert np.allclose(lom['CI[2.5%]'],
+                           [-33.008527, 5.777162, -1.097361, -12.519166])
+        assert np.allclose(lom['CI[97.5%]'],
+                           [-21.2551911, 8.9685250, 0.5855108, -7.8364509])
 
     def test_mediation_analysis(self):
         """Test function mediation_analysis.

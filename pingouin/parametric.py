@@ -892,7 +892,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
     >>> import pingouin as pg
     >>> df = pg.read_dataset('anova')
     >>> aov = pg.anova(dv='Pain threshold', between='Hair color', data=df,
-    ...             detailed=True)
+    ...                detailed=True)
     >>> aov
            Source           SS  DF          MS         F     p-unc       np2
     0  Hair color  1360.726316   3  453.575439  6.791407  0.004114  0.575962
