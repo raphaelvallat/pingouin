@@ -165,6 +165,10 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     --------
     1. Simple linear regression using columns of a pandas dataframe
 
+    In this first example, we'll use the tips dataset to see how well we
+    can predict the tip that a waiter received (in dollars) based on the total
+    bill (also in dollars).
+
     >>> import numpy as np
     >>> import pingouin as pg
     >>> df = pg.read_dataset('tips')
