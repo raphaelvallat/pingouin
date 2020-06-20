@@ -4,18 +4,18 @@ Guidelines
 ##########
 
 In this page, you will find a collection of flowcharts designed to help you choose
-which functions of `Pingouin` are adequate for your analysis. Click on
-the desired flowchart to view a full scale image with hyperlinks.
+which functions of Pingouin are adequate for your analysis. Click on
+the desired flowchart to view a full scale image with hyperlinks to the relevant documentation.
 
 .. contents:: Table of Contents
    :depth: 2
 
-One-way ANOVA
--------------
+ANOVA
+-----
 
 .. figure::  /pictures/flowchart/flowchart_one_way_ANOVA.svg
   :align: center
-  :alt: One-way ANOVA
+  :alt: ANOVA
 
 Example code
 ~~~~~~~~~~~~
@@ -28,9 +28,7 @@ Example code
   df = pg.read_dataset('anova')
 
   # 1. This is a between subject design, so the first step is to test for equality of variances
-  groups = df['Hair color'].unique()
-  data_groups = [df.groupby('Hair color')['Pain threshold'].get_group(g).to_numpy() for g in groups]
-  pg.homoscedasticity(data_groups)
+  pg.homoscedasticity(data=df, dv='Pain threshold', group='Hair color')
 
   # 2. If the groups have equal variances, we can use a regular one-way ANOVA
   pg.anova(data=df, dv='Pain threshold', between='Hair color')
@@ -59,10 +57,10 @@ Example code
   # Load an example dataset with the personality scores of 500 participants
   df = pg.read_dataset('pairwise_corr')
 
-  # 1.Test for bivariate normality
-  print(multivariate_normality(df[['Neuroticism', 'Openness']]))
+  # 1.Test for bivariate normality (optional)
+  pg.multivariate_normality(df[['Neuroticism', 'Openness']])
 
-  # 1bis. Visual inspection with a histogram + scatter plot
+  # 1bis. Visual inspection with a histogram + scatter plot (optional)
   sns.jointplot(data=df, x='Neuroticism', y='Openness', kind='reg')
 
   # 2. If the data have a bivariate normal distribution and no clear outlier(s), we can use a regular Pearson correlation
