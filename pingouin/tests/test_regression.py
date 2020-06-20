@@ -303,8 +303,8 @@ class TestRegression(TestCase):
         assert_equal(np.round(lom['se'], 5), [0.72439, 0.00017])
         assert_equal(np.round(lom['z'], 3), [-7.127, 7.177])
         assert np.allclose(lom['pval'], [1.03e-12, 7.10e-13])
-        assert_equal(np.round(lom['CI[2.5%]'], 5), [-6.58232, 0.00090])
-        assert_equal(np.round(lom['CI[97.5%]'], 5), [-3.74276, 0.00158])
+        assert_equal(np.round(lom['CI[2.5%]'], 4), [-6.5823, 0.0009])
+        assert_equal(np.round(lom['CI[97.5%]'], 4), [-3.7427, 0.0016])
 
         # With a different scaling: z / p-values should be similar
         lom = logistic_regression(data['body_mass_kg'], data['male'],

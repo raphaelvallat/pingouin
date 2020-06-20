@@ -12,7 +12,9 @@ v0.3.6 (dev)
 **Bugfixes**
 
 a. Changed the default scikit-learn solver in :py:func:`pingouin.logistic_regression` from *'lbfgs'* to *'newton-cg'* in order to get results that are `always consistent with R or statsmodels <https://stats.stackexchange.com/questions/203816/logistic-regression-scikit-learn-vs-glmnet>`_. Specifically, previous version of Pingouin based on the *'lbfgs'* solver applied a regularization of the intercept which may have led to different coefficients and p-values for the predictors of interest based on the scaling of these predictors (e.g very small or very large values). The new *'newton-cg'* solver is scaling-independent, i.e. no regularization is applied to the intercept and p-values are therefore unchanged with different scaling of the data.
-b. Fixed invalid results in :py:func:`pingouin.logistic_regression` when ``fit_intercept=False`` was passed as a keyword argument to scikit-learn. The standard errors and p-values were still calculated by taking into account an intercept in the model. 
+b. Fixed invalid results in :py:func:`pingouin.logistic_regression` when ``fit_intercept=False`` was passed as a keyword argument to scikit-learn. The standard errors and p-values were still calculated by taking into account an intercept in the model.
+
+.. warning:: we highly recommend double-checking all previous code and results that called the :py:func:`pingouin.logistic_regression` function, especially if it involved non-standardized predictors and/or custom keywords arguments passed to scikit-learn.
 
 **Enhancements**
 
