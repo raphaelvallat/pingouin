@@ -64,7 +64,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     Missing values are automatically removed from the data. If ``x`` and
     ``y`` are paired, the entire row is removed (= listwise deletion).
 
-    The **two-sample T-test for unpaired data** is defined as:
+    The **T-value for unpaired samples** is defined as:
 
     .. math::
 
@@ -100,32 +100,30 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     between the two paired samples, :math:`n` is the number of observations
     (sample size), :math:`s_d` is the sample standard deviation of the
     differences and :math:`s_{\\overline{x}}` is the estimated standard error
-    of the mean of the differences.
+    of the mean of the differences. The p-value is then calculated using a
+    T-distribution with :math:`n-1` degrees of freedom.
 
-    The p-value is then calculated using a T-distribution with :math:`n-1`
-    degrees of freedom.
-
-    The scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor is approximated using
-    the :py:func:`pingouin.bayesfactor_ttest` function.
+    The scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor is approximated
+    using the :py:func:`pingouin.bayesfactor_ttest` function.
 
     Results have been tested against JASP and the `t.test` R function.
 
     References
     ----------
-    .. [1] https://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm
+    * https://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm
 
-    .. [2] Delacre, M., Lakens, D., & Leys, C. (2017). Why psychologists should
-           by default use Welch’s t-test instead of Student’s t-test.
-           International Review of Social Psychology, 30(1).
+    * Delacre, M., Lakens, D., & Leys, C. (2017). Why psychologists should
+      by default use Welch’s t-test instead of Student’s t-test.
+      International Review of Social Psychology, 30(1).
 
-    .. [3] Zimmerman, D. W. (2004). A note on preliminary tests of equality of
-           variances. British Journal of Mathematical and Statistical
-           Psychology, 57(1), 173-181.
+    * Zimmerman, D. W. (2004). A note on preliminary tests of equality of
+      variances. British Journal of Mathematical and Statistical
+      Psychology, 57(1), 173-181.
 
-    .. [4] Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,
-           2009. Bayesian t tests for accepting and rejecting the null
-           hypothesis. Psychon. Bull. Rev. 16, 225–237.
-           https://doi.org/10.3758/PBR.16.2.225
+    * Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,
+      2009. Bayesian t tests for accepting and rejecting the null
+      hypothesis. Psychon. Bull. Rev. 16, 225–237.
+      https://doi.org/10.3758/PBR.16.2.225
 
     Examples
     --------
@@ -137,9 +135,11 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
               T  dof       tail  p-val          CI95%  cohen-d   BF10  power
     T-test  1.4    4  two-sided   0.23  [-1.68, 5.08]     0.62  0.766   0.19
 
-    2. Paired T-test. Since tail is `'one-sided'`, Pingouin will
+    2. Paired T-test.
+
+    Note that in the example below, since ``tail='one-sided'``, Pingouin will
     automatically infer the alternative hypothesis based on the T-value. In
-    the example below, the T-value is negative so the tail is set to `'less'`..
+    the example below, the T-value is negative so the tail is set to `'less'`,
 
     >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
@@ -147,34 +147,34 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
                T  dof  tail  p-val          CI95%  cohen-d   BF10  power
     T-test -2.31    4  less   0.04  [-inf, -0.05]     0.25  3.122   0.12
 
-    ..which is indeed equivalent to directly testing that ``x`` has a
+    which is indeed equivalent to directly testing that ``x`` has a
     smaller mean than ``y`` (``tail = 'less'``)
 
     >>> ttest(pre, post, paired=True, tail='less').round(2)
                T  dof  tail  p-val          CI95%  cohen-d   BF10  power
     T-test -2.31    4  less   0.04  [-inf, -0.05]     0.25  3.122   0.12
 
-    3. Now testing the opposite alternative hypothesis (``tail = 'greater'``)
+    Now testing the opposite alternative hypothesis (``tail = 'greater'``)
 
     >>> ttest(pre, post, paired=True, tail='greater').round(2)
                T  dof     tail  p-val         CI95%  cohen-d  BF10  power
     T-test -2.31    4  greater   0.96  [-1.35, inf]     0.25  0.32   0.02
 
-    4. Paired T-test with missing values.
+    3. Paired T-test with missing values.
 
     >>> import numpy as np
     >>> pre = [5.5, 2.4, np.nan, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
     >>> stats = ttest(pre, post, paired=True)
 
-    5. Independent two-sample T-test (equal sample size).
+    4. Independent two-sample T-test (equal sample size).
 
     >>> np.random.seed(123)
     >>> x = np.random.normal(loc=7, size=20)
     >>> y = np.random.normal(loc=4, size=20)
     >>> stats = ttest(x, y, correction='auto')
 
-    6. Independent two-sample T-test (unequal sample size).
+    5. Independent two-sample T-test (unequal sample size).
 
     >>> np.random.seed(123)
     >>> x = np.random.normal(loc=7, size=20)
@@ -446,21 +446,9 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         (a value close to 1 indicates that sphericity is met.) For more
         details, see :py:func:`pingouin.sphericity`.
 
-    References
-    ----------
-    .. [1] Bakeman, R. (2005). Recommended effect size statistics for
-           repeated measures designs. Behavior research methods, 37(3),
-           379-384.
-
-    .. [2] Richardson, J. T. (2011). Eta squared and partial eta squared as
-           measures of effect size in educational research. Educational
-           Research Review, 6(2), 135-147.
-
-    .. [3] https://en.wikipedia.org/wiki/Repeated_measures_design
-
     Examples
     --------
-    One-way repeated measures ANOVA using a wide-format dataset
+    1. One-way repeated measures ANOVA using a wide-format dataset
 
     >>> import pingouin as pg
     >>> data = pg.read_dataset('rm_anova_wide')
@@ -468,11 +456,12 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
        Source  ddof1  ddof2         F     p-unc       np2       eps
     0  Within      3     24  5.200652  0.006557  0.393969  0.694329
 
-    One-way repeated-measures ANOVA using a long-format dataset. We're also
-    specifying two additional options here: ``detailed=True`` means that we'll
-    get a more detailed ANOVA table, and ``effsize='ng2'`` means that we want
-    to get the generalized eta-squared effect size instead of the default
-    partial eta-squared.
+    2. One-way repeated-measures ANOVA using a long-format dataset.
+
+    We're also specifying two additional options here: ``detailed=True`` means
+    that we'll get a more detailed ANOVA table, and ``effsize='ng2'``
+    means that we want to get the generalized eta-squared effect size instead
+    of the default partial eta-squared.
 
     >>> df = pg.read_dataset('rm_anova')
     >>> aov = pg.rm_anova(dv='DesireToKill', within='Disgustingness',
@@ -483,13 +472,13 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     0  Disgustingness   27.485   1  27.485  12.044  0.001  0.026  1.0
     1           Error  209.952  92   2.282     NaN    NaN    NaN  NaN
 
-    Two-way repeated-measures ANOVA
+    3. Two-way repeated-measures ANOVA
 
     >>> aov = pg.rm_anova(dv='DesireToKill',
     ...                   within=['Disgustingness', 'Frighteningness'],
     ...                   subject='Subject', data=df)
 
-    As a :py:class:`pandas.DataFrame` method
+    4. As a :py:class:`pandas.DataFrame` method
 
     >>> df.rm_anova(dv='DesireToKill', within='Disgustingness',
     ...             subject='Subject',  detailed=False)
@@ -856,10 +845,9 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
     If the groups have unequal variances, the Games-Howell test is more
     adequate (:py:func:`pingouin.pairwise_gameshowell`).
 
-    The default effect size reported in Pingouin is the partial eta-square.
-    However, one should keep in mind that for one-way ANOVA
-    partial eta-square is the same as eta-square and generalized eta-square.
-    For more details, see Bakeman 2005; Richardson 2011.
+    The default effect size reported in Pingouin is the partial eta-square,
+    which, for one-way ANOVA is the same as eta-square and generalized
+    eta-square.
 
     .. math::
         \\eta_p^2 = \\frac{SS_{\\text{effect}}}{SS_{\\text{effect}} +
@@ -872,18 +860,6 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
         **unbalanced N-way ANOVA**. This issue has been resolved in
         Pingouin>=0.2.5. In such cases, the ANOVA is calculated via an
         internal call to the statsmodels package.
-
-    References
-    ----------
-    .. [1] Liu, Hangcheng. "Comparing Welch's ANOVA, a Kruskal-Wallis test and
-           traditional ANOVA in case of Heterogeneity of Variance." (2015).
-
-    .. [2] Bakeman, Roger. "Recommended effect size statistics for repeated
-           measures designs." Behavior research methods 37.3 (2005): 379-384.
-
-    .. [3] Richardson, John TE. "Eta squared and partial eta squared as
-           measures of effect size in educational research." Educational
-           Research Review 6.2 (2011): 135-147.
 
     Examples
     --------

@@ -19,7 +19,7 @@ def read_dataset(dname):
     Returns
     -------
     data : :py:class:`pandas.DataFrame`
-        Dataset
+        Requested dataset.
 
     Examples
     --------
@@ -56,6 +56,12 @@ def read_dataset(dname):
 
 def list_dataset():
     """List available example datasets.
+
+    Returns
+    -------
+    datasets : :py:class:`pandas.DataFrame`
+        A dataframe with the name, description and reference of all the
+        datasets included in Pingouin.
 
     Examples
     --------

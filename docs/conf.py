@@ -27,7 +27,6 @@
 # If your documentation needs a minimal Sphinx version, state it here.
 #
 # needs_sphinx = '1.0'
-
 import os
 import sys
 import time
@@ -192,11 +191,9 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
-# Add the 'copybutton' javascript, to hide/show the prompt in code
-# examples, originally taken from scikit-learn's doc/conf.py
+# Add custom CSS
 def setup(app):
-    app.add_javascript('copybutton.js')
-    app.add_stylesheet('style.css')
+    app.add_css_file('style.css')
 
 
 # -- Intersphinx ------------------------------------------------

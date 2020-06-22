@@ -542,7 +542,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
 
     Notes
     -----
-    The **lower bound epsilon** is:
+    The lower bound epsilon is:
 
     .. math:: lb = \\frac{1}{\\text{dof}},
 
@@ -550,7 +550,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     :math:`k` minus 1 for one-way design and :math:`(k_1 - 1)(k_2 - 1)`
     for two-way design
 
-    The **Greenhouse-Geisser epsilon** is given by:
+    The Greenhouse-Geisser epsilon is given by:
 
     .. math::
 
@@ -562,7 +562,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     grandmean of S and :math:`\\overline{\\text{diag}(S)}` the mean of all the
     elements on the diagonal of S (i.e. mean of the variances).
 
-    The **Huynh-Feldt epsilon** is given by:
+    The Huynh-Feldt epsilon is given by:
 
     .. math::
 
@@ -571,11 +571,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
 
     where :math:`n` is the number of observations.
 
-    Missing values are automatically removed from ``data`` (listwise deletion).
-
-    References
-    ----------
-    .. [1] http://www.real-statistics.com/anova-repeated-measures/sphericity/
+    Missing values are automatically removed from data (listwise deletion).
 
     Examples
     --------

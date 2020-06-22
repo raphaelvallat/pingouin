@@ -1007,32 +1007,23 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     for determining the common within-individual association for paired
     measures assessed on two or more occasions for multiple individuals.
 
-    From Bakdash and Marusich (2017):
+    From `Bakdash and Marusich (2017)
+    <https://doi.org/10.3389/fpsyg.2017.00456>`_:
 
-        "Rmcorr accounts for non-independence among observations using analysis
+        *Rmcorr accounts for non-independence among observations using analysis
         of covariance (ANCOVA) to statistically adjust for inter-individual
         variability. By removing measured variance between-participants,
         rmcorr provides the best linear fit for each participant using parallel
         regression lines (the same slope) with varying intercepts.
         Like a Pearson correlation coefficient, the rmcorr coefficient
         is bounded by − 1 to 1 and represents the strength of the linear
-        association between two variables."
+        association between two variables.*
 
-    Results have been tested against the `rmcorr` R package.
+    Results have been tested against the
+    `rmcorr <https://github.com/cran/rmcorr>`_ R package.
 
-    Please note that NaN are automatically removed from the dataframe
-    (listwise deletion).
-
-    References
-    ----------
-    .. [1] Bakdash, J.Z., Marusich, L.R., 2017. Repeated Measures Correlation.
-           Front. Psychol. 8, 456. https://doi.org/10.3389/fpsyg.2017.00456
-
-    .. [2] Bland, J. M., & Altman, D. G. (1995). Statistics notes: Calculating
-           correlation coefficients with repeated observations:
-           Part 1—correlation within subjects. Bmj, 310(6977), 446.
-
-    .. [3] https://github.com/cran/rmcorr
+    Please note that missing values are automatically removed from the
+    dataframe (listwise deletion).
 
     Examples
     --------

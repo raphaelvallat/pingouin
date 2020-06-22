@@ -590,18 +590,12 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
 
     Notes
     -----
-    This is a wrapper around the
-    :py:class:`sklearn.linear_model.LogisticRegression` class. Importantly,
-    Pingouin automatically disables the L2 regularization applied by
-    scikit-learn. This can be modified by changing the ``penalty`` argument.
 
-    .. warning:: Versions of Pingouin <0.3.6 used the *'lbfgs'* solver, which
-        regularize the intercept and may thus have resulted in different
-        z and p-values based on the scaling (e.g. standardization) of the
-        predictors. Newer version of Pingouin use the *'newton-cg'*
-        solver, which is scaling-independent i.e. no regularization is applied
-        to the intercept and p-values are therefore unchanged with different
-        scaling of the data (consistent with the glm R function).
+    .. caution:: This function is a wrapper around the
+        :py:class:`sklearn.linear_model.LogisticRegression` class. However,
+        Pingouin internally disables the L2 regularization and changes the
+        default solver in order to get results that are similar to R and
+        statsmodels.
 
     The logistic regression assumes that the log-odds (the logarithm of the
     odds) for the value labeled "1" in the response variable is a linear
@@ -617,24 +611,20 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
 
     .. math:: \\frac{p}{1 - p} = e^{\\beta_0 + \\beta X}
 
-    and the probability of the response variable being "1" is given by:
+    and the probability of the response variable being "1" is given by the
+    `logistic function <https://en.wikipedia.org/wiki/Logistic_function>`_:
 
     .. math:: p = \\frac{1}{1 + e^{-(\\beta_0 + \\beta X})}
 
-    Note that the above function that converts log-odds to probability is
-    called the `logistic function
-    <https://en.wikipedia.org/wiki/Logistic_function>`_.
-
     The first coefficient is always the constant term (intercept) of
-    the model. Scikit-learn will automatically add the intercept
+    the model. Pingouin will automatically add the intercept
     to your predictor(s) matrix, therefore, :math:`X` should not include a
     constant term. Pingouin will remove any constant term (e.g column with only
     one unique value), or duplicate columns from :math:`X`.
 
     The calculation of the p-values and confidence interval is adapted from a
-    code found at
-    https://gist.github.com/rspeare/77061e6e317896be29c6de9a85db301d
-
+    `code by Rob Speare
+    <https://gist.github.com/rspeare/77061e6e317896be29c6de9a85db301d>`_.
     Results have been compared against statsmodels, R, and JASP.
 
     Examples
@@ -843,8 +833,6 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
         # https://stats.stackexchange.com/a/204324/253579
         # Updated in Pingouin > 0.3.6 to be consistent with R
         kwargs['solver'] = 'newton-cg'
-    if 'multi_class' not in kwargs:
-        kwargs['multi_class'] = 'auto'
     if 'penalty' not in kwargs:
         kwargs['penalty'] = 'none'
     lom = LogisticRegression(**kwargs)
@@ -941,7 +929,6 @@ def _bca(ab_estimates, sample_point, n_boot, alpha=0.05):
     """
     # Bias of bootstrap estimates
     z0 = norm.ppf(np.sum(ab_estimates < sample_point) / n_boot)
-
     # Adjusted intervals
     adjusted_ll = norm.cdf(2 * z0 + norm.ppf(alpha / 2)) * 100
     adjusted_ul = norm.cdf(2 * z0 + norm.ppf(1 - alpha / 2)) * 100

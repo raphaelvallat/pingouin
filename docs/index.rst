@@ -505,8 +505,7 @@ To see the code or report a bug, please visit the `GitHub repository <https://gi
 
 Note that this program is provided with NO WARRANTY OF ANY KIND. If you can, always double check the results with another statistical software.
 
-Contributors
-------------
+**Contributors**
 
 - Nicolas Legrand
 - `Richard Höchenberger <http://hoechenberger.net/>`_
@@ -517,21 +516,7 @@ How to cite Pingouin?
 
 If you want to cite Pingouin, please use the publication in JOSS:
 
-Vallat, R. (2018). Pingouin: statistics in Python. *Journal of Open Source Software*, 3(31), 1026, `https://doi.org/10.21105/joss.01026 <https://doi.org/10.21105/joss.01026>`_
-
-.. code-block:: latex
-
-  @ARTICLE{Vallat2018,
-    title    = "Pingouin: statistics in Python",
-    author   = "Vallat, Raphael",
-    journal  = "The Journal of Open Source Software",
-    volume   =  3,
-    number   =  31,
-    pages    = "1026",
-    month    =  nov,
-    year     =  2018
-  }
-
+* Vallat, R. (2018). Pingouin: statistics in Python. *Journal of Open Source Software*, 3(31), 1026, `https://doi.org/10.21105/joss.01026 <https://doi.org/10.21105/joss.01026>`_
 
 Acknowledgement
 ===============
@@ -541,9 +526,7 @@ Several functions of Pingouin were inspired from R or Matlab toolboxes, includin
 - `effsize package (R) <https://cran.r-project.org/web/packages/effsize/effsize.pdf>`_
 - `ezANOVA package (R) <https://cran.r-project.org/web/packages/ez/ez.pdf>`_
 - `pwr package (R) <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_
-- `circular statistics (Matlab) <https://www.mathworks.com/matlabcentral/fileexchange/10676-circular-statistics-toolbox-directional-statistics>`_ (Berens 2009)
-- `robust correlations (Matlab) <https://sourceforge.net/projects/robustcorrtool/>`_ (Pernet, Wilcox & Rousselet, 2012)
-- `repeated-measure correlation (R) <https://cran.r-project.org/web/packages/rmcorr/index.html>`_ (Bakdash & Marusich, 2017)
-
-I am also grateful to Charles Zaiontz and his website `www.real-statistics.com <https://www.real-statistics.com/>`_ which has been useful to
-understand the practical implementation of several functions.
+- `circular statistics (Matlab) <https://www.mathworks.com/matlabcentral/fileexchange/10676-circular-statistics-toolbox-directional-statistics>`_
+- `robust correlations (Matlab) <https://sourceforge.net/projects/robustcorrtool/>`_
+- `repeated-measure correlation (R) <https://cran.r-project.org/web/packages/rmcorr/index.html>`_
+- `real-statistics.com <https://www.real-statistics.com/>`_
