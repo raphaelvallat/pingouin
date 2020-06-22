@@ -294,17 +294,17 @@ class TestPairwise(TestCase):
         pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
                              parametric=False, data=df, tail='greater')
         np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
-                                      [0.910, 0.951, 0.482])
+                                      [0.910, 0.951, 0.483])
         # 1.2.2 Tail is less
         pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
                              parametric=False, data=df, tail='less')
         np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
-                                      [0.108, 0.060, 0.554])
+                                      [0.108, 0.060, 0.551])
         # 1.2.3 Tail is one-sided: smallest p-value
         pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
                              parametric=False, data=df, tail='one-sided')
         np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
-                                      [0.108, 0.060, 0.482])
+                                      [0.108, 0.060, 0.483])
 
         # Compare the RBC value for wilcoxon
         from pingouin.nonparametric import wilcoxon

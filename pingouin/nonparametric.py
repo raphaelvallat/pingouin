@@ -41,7 +41,7 @@ def mad(a, normalize=True, axis=0):
     to the standard deviation, but is more robust to outliers.
 
     SciPy 1.3 and higher includes a similar function:
-    :py:func:`scipy.stats.median_absolute_deviation`.
+    :py:func:`scipy.stats.median_abs_deviation`.
 
     Please note that missing values are automatically removed.
 
@@ -77,9 +77,9 @@ def mad(a, normalize=True, axis=0):
 
     Compare with Scipy >= 1.3
 
-    >>> from scipy.stats import median_absolute_deviation
-    >>> median_absolute_deviation(w, axis=None, nan_policy='omit')
-    1.1607745088260824
+    >>> from scipy.stats import median_abs_deviation
+    >>> median_abs_deviation(w, scale='normal', axis=None, nan_policy='omit')
+    1.1607762457644006
     """
     a = np.asarray(a)
     if axis is None:

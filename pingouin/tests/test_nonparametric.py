@@ -20,22 +20,23 @@ class TestNonParametric(TestCase):
 
     def test_mad(self):
         """Test function mad."""
-        from scipy.stats import median_absolute_deviation as mad_scp
+        from scipy.stats import median_abs_deviation as mad_scp
         a = [1.2, 3, 4.5, 2.4, 5, 6.7, 0.4]
         # Compare to Matlab
         assert mad(a, normalize=False) == 1.8
         assert np.round(mad(a), 3) == np.round(1.8 * 1.4826, 3)
         # Axes handling -- Compare to SciPy
-        assert np.allclose(mad_scp(w), mad(w))  # Axis = 0
-        assert np.allclose(mad_scp(w, axis=1), mad(w, axis=1))
-        assert np.allclose(mad_scp(w, axis=None), mad(w, axis=None))
+        assert np.allclose(mad_scp(w, scale='normal'), mad(w))  # Axis = 0
+        assert np.allclose(mad_scp(w, scale='normal', axis=1), mad(w, axis=1))
+        assert np.allclose(mad_scp(w, scale='normal', axis=None),
+                           mad(w, axis=None))
         # Missing values
         # Note that in Scipy 1.3.0, mad(axis=0/1) does not work properly
         # if data contains NaN, even when passing (nan_policy='omit')
         wnan = w.copy()
         wnan[3, 2] = np.nan
-        assert np.allclose(mad_scp(wnan, axis=None, nan_policy='omit'),
-                           mad(wnan, axis=None))
+        assert np.allclose(mad_scp(wnan, scale='normal', axis=None,
+                                   nan_policy='omit'), mad(wnan, axis=None))
         assert mad(wnan, axis=0).size == wnan.shape[1]
         assert mad(wnan, axis=1).size == wnan.shape[0]
         # Now we make sure that `w` and `wnan` returns almost the same results,
