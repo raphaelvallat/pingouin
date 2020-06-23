@@ -40,8 +40,8 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     ``subj`` columns (in which case the data will be converted into wide
     format using the :py:meth:`pandas.DataFrame.pivot` method).
 
-    Internal consistency is usually measured with Cronbach's alpha, a statistic
-    calculated from the pairwise correlations between items.
+    Internal consistency is usually measured with Cronbach's alpha [1]_,
+    a statistic calculated from the pairwise correlations between items.
     Internal consistency ranges between negative infinity and one.
     Coefficient alpha will be negative whenever there is greater
     within-subject variability than between-subject variability.
@@ -67,7 +67,7 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     where :math:`\\bar c` refers to the average of all covariances between
     items and :math:`\\bar v` to the average variance of each item.
 
-    95% confidence intervals are calculated using Feldt's method:
+    95% confidence intervals are calculated using Feldt's method [2]_:
 
     .. math::
 
@@ -78,17 +78,14 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     where :math:`n` is the number of subjects and :math:`k` the number of
     items.
 
-    Results have been tested against the R package psych.
+    Results have been tested against the `psych
+    <https://cran.r-project.org/web/packages/psych/psych.pdf>`_ R package.
 
     References
     ----------
-    .. [1] https://en.wikipedia.org/wiki/Cronbach%27s_alpha
+    .. [1] http://www.real-statistics.com/reliability/cronbachs-alpha/
 
-    .. [2] http://www.real-statistics.com/reliability/cronbachs-alpha/
-
-    .. [3] https://cran.r-project.org/web/packages/psych/psych.pdf
-
-    .. [4] Feldt, Leonard S., Woodruff, David J., & Salih, Fathi A. (1987).
+    .. [2] Feldt, Leonard S., Woodruff, David J., & Salih, Fathi A. (1987).
            Statistical inference for coefficient alpha. Applied Psychological
            Measurement, 11(1):93-103.
 
@@ -171,7 +168,7 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
         Name of column in ``data`` containing the ratings.
     nan_policy : str
         Defines how to handle when input contains missing values (nan).
-        'raise' (default) throws an error, 'omit' performs the calculations
+        `'raise'` (default) throws an error, `'omit'` performs the calculations
         after deleting target(s) with one or more missing values (= listwise
         deletion).
 
@@ -193,15 +190,17 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
 
     Notes
     -----
-    The intraclass correlation (ICC) assesses the reliability of ratings by
-    comparing the variability of different ratings of the same subject to the
-    total variation across all ratings and all subjects.
+    The intraclass correlation (ICC, [1]_) assesses the reliability of ratings
+    by comparing the variability of different ratings of the same subject to
+    the total variation across all ratings and all subjects.
 
-    Shrout and Fleiss (1979) describe six cases of reliability of ratings done
-    by :math:`k` raters on :math:`n` targets. Pingouin returns all six cases
-    with corresponding F and p-values, as well as 95% confidence intervals.
+    Shrout and Fleiss (1979) [2]_ describe six cases of reliability of ratings
+    done by :math:`k` raters on :math:`n` targets. Pingouin returns all six
+    cases with corresponding F and p-values, as well as 95% confidence
+    intervals.
 
-    From the documentation of the ICC function in the R package psych:
+    From the documentation of the ICC function in the `psych
+    <https://cran.r-project.org/web/packages/psych/psych.pdf>`_ R package:
 
     - **ICC1**: Each target is rated by a different rater and the raters are
       selected at random. This is a one-way ANOVA fixed effects model.
@@ -230,13 +229,11 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
 
     References
     ----------
-    .. [1] Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations:
+    .. [1] http://www.real-statistics.com/reliability/intraclass-correlation/
+
+    .. [2] Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations:
            uses in assessing rater reliability. Psychological bulletin, 86(2),
            420.
-
-    .. [2] https://cran.r-project.org/web/packages/psych/psych.pdf
-
-    .. [3] http://www.real-statistics.com/reliability/intraclass-correlation/
 
     Examples
     --------

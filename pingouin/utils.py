@@ -54,7 +54,7 @@ def print_table(df, floatfmt=".3f", tablefmt='simple'):
 
     Parameters
     ----------
-    df : DataFrame
+    df : :py:class:`pandas.DataFrame`
         Dataframe to print (e.g. ANOVA summary)
     floatfmt : string
         Decimal number formatting

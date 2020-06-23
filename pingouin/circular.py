@@ -471,7 +471,7 @@ def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
 
     Notes
     -----
-    Adapted from the CircStats MATLAB toolbox (Berens 2009).
+    Adapted from the CircStats MATLAB toolbox [1]_.
 
     The range of ``x`` and ``y`` must be either
     :math:`[0, 2\\pi]` or :math:`[-\\pi, \\pi]`. If ``angles`` is not
@@ -482,11 +482,11 @@ def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
     Please note that NaN are automatically removed.
 
     If the ``correction_uniform`` is True, an alternative equation from
-    Jammalamadaka & Sengupta (2001, p. 177) is used.
-    If the marginal distribution of ``x`` or ``y`` is uniform, the mean is
-    not well defined, which leads to wrong estimates of the circular
-    correlation. The alternative equation corrects for this by choosing the
-    means in a way that maximizes the postitive or negative correlation.
+    [2]_ (p. 177) is used. If the marginal distribution of ``x`` or ``y`` is
+    uniform, the mean is not well defined, which leads to wrong estimates
+    of the circular correlation. The alternative equation corrects for this
+    by choosing the means in a way that maximizes the positive or negative
+    correlation.
 
     References
     ----------

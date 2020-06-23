@@ -1005,12 +1005,11 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
 
     Notes
     -----
-    Mediation analysis is a "statistical procedure to test
+    Mediation analysis [1]_ is a *"statistical procedure to test
     whether the effect of an independent variable X on a dependent variable
     Y (i.e., X → Y) is at least partly explained by a chain of effects of the
     independent variable on an intervening mediator variable M and of the
-    intervening variable on the dependent variable (i.e., X → M → Y)"
-    (from Fiedler et al. 2011).
+    intervening variable on the dependent variable (i.e., X → M → Y)"* [2]_.
 
     The **indirect effect** (also referred to as average causal mediation
     effect or ACME) of X on Y through mediator M quantifies the estimated
@@ -1018,28 +1017,27 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     causal steps in which X affects M, which in turn affects Y.
     It is considered significant if the specified confidence interval does not
     include 0. The path 'X --> Y' is the sum of both the indirect and direct
-    effect. It is sometimes referred to as total effect. For more details,
-    please refer to Fiedler et al 2011 or Hayes and Rockwood 2017.
+    effect. It is sometimes referred to as total effect.
 
     A linear regression is used if the mediator variable is continuous and a
-    logistic regression if the mediator variable is dichotomous (binary). Note
-    that this function also supports parallel multiple mediators: "in such
-    models, mediators may be and often are correlated, but nothing in the
-    model allows one mediator to causally influence another."
-    (Hayes and Rockwood 2017)
+    logistic regression if the mediator variable is dichotomous (binary).
+    Multiple parallel mediators are also supported.
 
     This function wll only work well if the outcome variable is continuous.
     It does not support binary or ordinal outcome variable. For more
-    advanced mediation models, please refer to the `lavaan` or `mediation` R
-    packages, or the PROCESS macro for SPSS.
+    advanced mediation models, please refer to the
+    `lavaan <http://lavaan.ugent.be/tutorial/mediation.html>`_ or  `mediation
+    <https://cran.r-project.org/web/packages/mediation/mediation.pdf>`_ R
+    packages, or the `PROCESS macro
+    <https://www.processmacro.org/index.html>`_ for SPSS.
 
     The two-sided p-value of the indirect effect is computed using the
     bootstrap distribution, as in the mediation R package. However, the p-value
-    should be interpreted with caution since it is a) not constructed
-    conditioned on a true null hypothesis (see Hayes and Rockwood 2017) and b)
-    varies depending on the number of bootstrap samples and the random seed.
+    should be interpreted with caution since it is not constructed
+    conditioned on a true null hypothesis [3]_ and varies depending on the
+    number of bootstrap samples and the random seed.
 
-    Note that rows with NaN are automatically removed.
+    Note that rows with missing values are automatically removed.
 
     Results have been tested against the R mediation package and this tutorial
     https://data.library.virginia.edu/introduction-to-mediation-analysis/
@@ -1054,16 +1052,13 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     .. [2] Fiedler, K., Schott, M. & Meiser, T. What mediation analysis can
            (not) do. J. Exp. Soc. Psychol. 47, 1231–1236 (2011).
 
+
     .. [3] Hayes, A. F. & Rockwood, N. J. Regression-based statistical
            mediation and moderation analysis in clinical research:
            Observations, recommendations, and implementation. Behav. Res.
            Ther. 98, 39–57 (2017).
 
-    .. [4] https://cran.r-project.org/web/packages/mediation/mediation.pdf
-
-    .. [5] http://lavaan.ugent.be/tutorial/mediation.html
-
-    .. [6] https://github.com/rmill040/pymediation
+    Code originally adapted from https://github.com/rmill040/pymediation.
 
     Examples
     --------

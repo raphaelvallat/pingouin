@@ -373,43 +373,47 @@ def multicomp(pvals, alpha=0.05, method='holm'):
 
     Notes
     -----
-    This function is similar to the `p.adjust` R function.
+    This function is similar to the `p.adjust
+    <https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html>`_
+    R function.
 
-    The correction methods include the Bonferroni correction (``bonf``)
+    The correction methods include the Bonferroni correction (``'bonf'``)
     in which the p-values are multiplied by the number of comparisons.
     Less conservative methods are also included such as Sidak (1967)
-    (``sidak``), Holm (1979) (``holm``), Benjamini & Hochberg (1995)
-    (``fdr_bh``), and Benjamini & Yekutieli (2001) (``fdr_by``), respectively.
+    (``'sidak'``), Holm (1979) (``'holm'``), Benjamini & Hochberg (1995)
+    (``'fdr_bh'``), and Benjamini & Yekutieli (2001) (``'fdr_by'``),
+    respectively.
 
     The first three methods are designed to give strong control of the
     family-wise error rate. Note that the Holm's method is usually preferred.
-    The ``fdr_bh`` and ``fdr_by`` methods control the false discovery rate,
+    The ``'fdr_bh'`` and ``'fdr_by'`` methods control the false discovery rate,
     i.e. the expected proportion of false discoveries amongst the rejected
     hypotheses. The false discovery rate is a less stringent condition than
     the family-wise error rate, so these methods are more powerful than the
     others.
 
-    The **Bonferroni** adjusted p-values are defined as:
+    The **Bonferroni** [1]_ adjusted p-values are defined as:
 
     .. math::
         \\widetilde {p}_{{(i)}}= n \\cdot p_{{(i)}}
 
     where :math:`n` is the number of *finite* p-values (i.e. excluding NaN).
 
-    The **Sidak** adjusted p-values are defined as:
+    The **Sidak** [2]_ adjusted p-values are defined as:
 
     .. math::
         \\widetilde {p}_{{(i)}}= 1 - (1 - p_{{(i)}})^{n}
 
-    The **Holm** adjusted p-values are the running maximum of the sorted
+    The **Holm** [3]_ adjusted p-values are the running maximum of the sorted
     p-values divided by the corresponding increasing alpha level:
 
     .. math::
         \\widetilde {p}_{{(i)}}=\\max _{{j\\leq i}}\\left\\{(n-j+1)p_{{(j)}}
         \\right\\}_{{1}}
 
-    The **Benjamini–Hochberg** procedure (BH step-up procedure) controls the
-    false discovery rate (FDR) at level :math:`\\alpha`. It works as follows:
+    The **Benjamini–Hochberg** procedure (BH step-up procedure, [4]_)
+    controls the false discovery rate (FDR) at level :math:`\\alpha`.
+    It works as follows:
 
     1. For a given :math:`\\alpha`, find the largest :math:`k` such that
     :math:`P_{(k)}\\leq \\frac {k}{n}\\alpha.`
@@ -420,32 +424,32 @@ def multicomp(pvals, alpha=0.05, method='holm'):
     The BH procedure is valid when the :math:`n` tests are independent, and
     also in various scenarios of dependence, but is not universally valid.
 
-    The **Benjamini–Yekutieli** procedure (BY) controls the FDR under arbitrary
-    dependence assumptions. This refinement modifies the threshold and finds
-    the largest :math:`k` such that:
+    The **Benjamini–Yekutieli** procedure (BY, [5]_) controls the FDR under
+    arbitrary dependence assumptions. This refinement modifies the threshold
+    and finds the largest :math:`k` such that:
 
     .. math::
         P_{(k)} \\leq \\frac{k}{n \\cdot c(n)} \\alpha
 
     References
     ----------
-    - Bonferroni, C. E. (1935). Il calcolo delle assicurazioni su gruppi
-      di teste. Studi in onore del professore salvatore ortu carboni, 13-60.
+    .. [1] Bonferroni, C. E. (1935). Il calcolo delle assicurazioni su gruppi
+       di teste. Studi in onore del professore salvatore ortu carboni, 13-60.
 
-    - Šidák, Z. K. (1967). "Rectangular Confidence Regions for the Means of
-      Multivariate Normal Distributions". Journal of the American Statistical
-      Association. 62 (318): 626–633.
+    .. [2] Šidák, Z. K. (1967). "Rectangular Confidence Regions for the Means
+       of Multivariate Normal Distributions". Journal of the American
+       Statistical Association. 62 (318): 626–633.
 
-    - Holm, S. (1979). A simple sequentially rejective multiple test procedure.
-      Scandinavian Journal of Statistics, 6, 65–70.
+    .. [3] Holm, S. (1979). A simple sequentially rejective multiple test
+       procedure. Scandinavian Journal of Statistics, 6, 65–70.
 
-    - Benjamini, Y., and Hochberg, Y. (1995). Controlling the false discovery
-      rate: a practical and powerful approach to multiple testing. Journal of
-      the Royal Statistical Society Series B, 57, 289–300.
+    .. [4] Benjamini, Y., and Hochberg, Y. (1995). Controlling the false
+       discovery rate: a practical and powerful approach to multiple testing.
+       Journal of the Royal Statistical Society Series B, 57, 289–300.
 
-    - Benjamini, Y., and Yekutieli, D. (2001). The control of the false
-      discovery rate in multiple testing under dependency. Annals of
-      Statistics, 29, 1165–1188.
+    .. [5] Benjamini, Y., and Yekutieli, D. (2001). The control of the false
+       discovery rate in multiple testing under dependency. Annals of
+       Statistics, 29, 1165–1188.
 
     Examples
     --------

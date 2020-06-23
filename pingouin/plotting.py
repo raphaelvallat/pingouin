@@ -48,10 +48,10 @@ def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
 
     Notes
     -----
-    Bland-Altman plots are extensively used to evaluate the agreement among two
-    different instruments or two measurements techniques. Bland-Altman plots
-    allow identification of any systematic difference between the measurements
-    (i.e., fixed bias) or possible outliers.
+    Bland-Altman plots [1]_ are extensively used to evaluate the agreement
+    among two different instruments or two measurements techniques.
+    They allow identification of any systematic difference between the
+    measurements (i.e., fixed bias) or possible outliers.
 
     The mean difference is the estimated bias, and the SD of the differences
     measures the random fluctuations around this mean. If the mean value of the
@@ -70,9 +70,8 @@ def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
     or assessing repeatability, it is important to calculate confidence
     intervals for 95% limits of agreement.
 
-    The code is an adaptation of the Python package
-    `PyCompare <https://github.com/jaketmp/pyCompare>`_ by
-    Jake TM Pearce. All credits goes to the original author. The present
+    The code is an adaptation of the
+    `PyCompare <https://github.com/jaketmp/pyCompare>`_ package. The present
     implementation is a simplified version; please refer to the original
     package for more advanced functionalities.
 
@@ -81,10 +80,6 @@ def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
     .. [1] Bland, J. M., & Altman, D. (1986). Statistical methods for assessing
            agreement between two methods of clinical measurement. The lancet,
            327(8476), 307-310.
-
-    .. [2] https://github.com/jaketmp/pyCompare
-
-    .. [3] https://en.wikipedia.org/wiki/Bland%E2%80%93Altman_plot
 
     Examples
     --------
@@ -199,9 +194,10 @@ def plot_skipped_corr(x, y, xlabel=None, ylabel=None, n_boot=2000, seed=None):
 
     Notes
     -----
-    This function is inspired by the Matlab Robust Correlation Toolbox (Pernet,
-    Wilcox and Rousselet, 2012). It uses the skipped correlation to determine
-    the outliers. Note that this function requires the scikit-learn package.
+    This function is inspired by the Matlab Robust Correlation Toolbox [1]_.
+    It uses the skipped correlation to determine the outliers
+    (see :py:func:`pingouin.corr`).
+
 
     References
     ----------
@@ -329,16 +325,14 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
     x : array_like
         Sample data.
     dist : str or stats.distributions instance, optional
-        Distribution or distribution function name. The default is 'norm' for a
-        normal probability plot. Objects that look enough like a
-        `scipy.stats.distributions` instance (i.e. they have a ``ppf`` method)
-        are also accepted.
+        Distribution or distribution function name. The default is `'norm'`
+        for a normal probability plot.
     sparams : tuple, optional
         Distribution-specific shape parameters (shape parameters, location,
         and scale). See :py:func:`scipy.stats.probplot` for more details.
     confidence : float
         Confidence level (.95 = 95%) for point-wise confidence envelope.
-        Pass False for no envelope.
+        Can be disabled by passing False.
     figsize : tuple
         Figsize in inches
     ax : matplotlib axes
@@ -388,12 +382,10 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
 
     References
     ----------
-    .. [1] https://en.wikipedia.org/wiki/Q%E2%80%93Q_plot
+    * https://github.com/cran/car/blob/master/R/qqPlot.R
 
-    .. [2] https://github.com/cran/car/blob/master/R/qqPlot.R
-
-    .. [3] Fox, J. (2008), Applied Regression Analysis and Generalized Linear
-           Models, 2nd Ed., Sage Publications, Inc.
+    * Fox, J. (2008), Applied Regression Analysis and Generalized Linear
+      Models, 2nd Ed., Sage Publications, Inc.
 
     Examples
     --------
@@ -520,7 +512,7 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
     data : :py:class:`pandas.DataFrame`
         Long-format dataFrame.
     dv : string
-        Name of column containing the dependant variable.
+        Name of column containing the dependent variable.
     within : string
         Name of column containing the within-subject factor. Note that
         ``within`` must have exactly two within-subject levels
@@ -642,8 +634,6 @@ def plot_shift(x, y, paired=False, n_boot=1000,
                ci=.95, seed=None, show_median=True, violin=True):
     """Shift plot.
 
-    The shift plot is described in Rousselet, Pernet and Wilcox (2017).
-
     Parameters
     ----------
     x, y : array_like
@@ -680,8 +670,9 @@ def plot_shift(x, y, paired=False, n_boot=1000,
 
     Notes
     -----
-    Computes a shift function for two (in)dependent groups using the robust
-    Harrell-Davis quantile estimator in conjunction with bias-corrected
+    The shift plot is described in [1]_.
+    It computes a shift function [2]_ for two (in)dependent groups using the
+    robust Harrell-Davis quantile estimator in conjunction with bias-corrected
     bootstrap confidence intervals.
 
     References
@@ -898,12 +889,14 @@ def plot_rm_corr(data=None, x=None, y=None, subject=None, legend=False,
 
     Notes
     -----
-    Repeated measures correlation (rmcorr) is a statistical technique
+    Repeated measures correlation [1]_ (rmcorr) is a statistical technique
     for determining the common within-individual association for paired
     measures assessed on two or more occasions for multiple individuals.
 
-    Results have been tested against the `rmcorr` R package. Note that this
-    function requires the statsmodels Python package.
+    Results have been tested against the
+    `rmcorr <https://github.com/cran/rmcorr>` R package. Note that this
+    function requires `statsmodels
+    <https://www.statsmodels.org/stable/index.html>`_.
 
     Missing values are automatically removed from the ``data``
     (listwise deletion).
@@ -912,12 +905,6 @@ def plot_rm_corr(data=None, x=None, y=None, subject=None, legend=False,
     ----------
     .. [1] Bakdash, J.Z., Marusich, L.R., 2017. Repeated Measures Correlation.
            Front. Psychol. 8, 456. https://doi.org/10.3389/fpsyg.2017.00456
-
-    .. [2] Bland, J. M., & Altman, D. G. (1995). Statistics notes: Calculating
-           correlation coefficients with repeated observations:
-           Part 1—correlation within subjects. Bmj, 310(6977), 446.
-
-    .. [3] https://github.com/cran/rmcorr
 
     Examples
     --------

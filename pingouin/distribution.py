@@ -26,7 +26,7 @@ def gzscore(x):
     -----
     Geometric Z-scores are better measures of dispersion than arithmetic
     z-scores when the sample data come from a log-normally distributed
-    population.
+    population [1]_.
 
     Given the raw scores :math:`x`, the geometric mean :math:`\\mu_g` and
     the geometric standard deviation :math:`\\sigma_g`,
@@ -40,7 +40,7 @@ def gzscore(x):
 
     Examples
     --------
-    Standardize a log-normal array
+    Standardize a lognormal-distributed vector:
 
     >>> import numpy as np
     >>> from pingouin import gzscore
@@ -71,8 +71,8 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
     group : str
         Grouping variable (only when ``data`` is a long-format dataframe).
     method : str
-        Normality test. 'shapiro' (default) performs the Shapiro-Wilk test
-        using :py:func:`scipy.stats.shapiro`, and 'normaltest' performs the
+        Normality test. `'shapiro'` (default) performs the Shapiro-Wilk test
+        using :py:func:`scipy.stats.shapiro`, and `'normaltest'` performs the
         omnibus test of normality using :py:func:`scipy.stats.normaltest`.
         The latter is more appropriate for large samples.
     alpha : float
@@ -122,25 +122,24 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
     distributed.
 
     The result of the Shapiro-Wilk test should be interpreted with caution in
-    the case of large sample sizes. Indeed, quoting from Wikipedia:
+    the case of large sample sizes. Indeed, quoting from
+    `Wikipedia <https://en.wikipedia.org/wiki/Shapiro%E2%80%93Wilk_test>`_:
 
-    *"Like most statistical significance tests, if the sample size is
-    sufficiently large this test may detect even trivial departures from the
-    null hypothesis (i.e., although there may be some statistically significant
-    effect, it may be too small to be of any practical significance); thus,
-    additional investigation of the effect size is typically advisable,
-    e.g., a Q–Q plot in this case."*
+        *"Like most statistical significance tests, if the sample size is
+        sufficiently large this test may detect even trivial departures from
+        the null hypothesis (i.e., although there may be some statistically
+        significant effect, it may be too small to be of any practical
+        significance); thus, additional investigation of the effect size is
+        typically advisable, e.g., a Q–Q plot in this case."*
 
     Note that missing values are automatically removed (casewise deletion).
 
     References
     ----------
-    .. [1] Shapiro, S. S., & Wilk, M. B. (1965). An analysis of variance test
-           for normality (complete samples). Biometrika, 52(3/4), 591-611.
+    * Shapiro, S. S., & Wilk, M. B. (1965). An analysis of variance test
+      for normality (complete samples). Biometrika, 52(3/4), 591-611.
 
-    .. [2] https://www.itl.nist.gov/div898/handbook/prc/section2/prc213.htm
-
-    .. [3] https://en.wikipedia.org/wiki/Shapiro%E2%80%93Wilk_test
+    * https://www.itl.nist.gov/div898/handbook/prc/section2/prc213.htm
 
     Examples
     --------
@@ -234,8 +233,8 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
     group : str
         Grouping variable (only when ``data`` is a long-format dataframe).
     method : str
-        Statistical test. 'levene' (default) performs the Levene test
-        using :py:func:`scipy.stats.levene`, and 'bartlett' performs the
+        Statistical test. `'levene'` (default) performs the Levene test
+        using :py:func:`scipy.stats.levene`, and `'bartlett'` performs the
         Bartlett test using :py:func:`scipy.stats.bartlett`.
         The former is more robust to departure from normality.
     alpha : float
@@ -256,7 +255,7 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
 
     Notes
     -----
-    The **Bartlett** :math:`T` statistic is defined as:
+    The **Bartlett** :math:`T` statistic [1]_ is defined as:
 
     .. math::
 
@@ -278,7 +277,7 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
 
     .. math:: T \\sim \\chi^2(k-1)
 
-    The **Levene** :math:`W` statistic is defined as:
+    The **Levene** :math:`W` statistic [2]_ is defined as:
 
     .. math::
 
@@ -286,7 +285,7 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
         \\frac{\\sum_{i=1}^{k}N_{i}(\\overline{Z}_{i.}-\\overline{Z})^{2} }
         {\\sum_{i=1}^{k}\\sum_{j=1}^{N_i}(Z_{ij}-\\overline{Z}_{i.})^{2} }
 
-    where :math:`Z_{ij} = |Y_{ij} - median({Y}_{i.})|`,
+    where :math:`Z_{ij} = |Y_{ij} - \\text{median}({Y}_{i.})|`,
     :math:`\\overline{Z}_{i.}` are the group means of :math:`Z_{ij}` and
     :math:`\\overline{Z}` is the grand mean of :math:`Z_{ij}`.
 
@@ -307,9 +306,6 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
     .. [2] Brown, M. B., & Forsythe, A. B. (1974). Robust tests for the
            equality of variances. Journal of the American Statistical
            Association, 69(346), 364-367.
-
-    .. [3] NIST/SEMATECH e-Handbook of Statistical Methods,
-           http://www.itl.nist.gov/div898/handbook/
 
     Examples
     --------
@@ -512,7 +508,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
         with a wide-format dataframe, ``data`` must have a two-levels
         :py:class:`pandas.MultiIndex` columns.
     dv : string
-        Name of column containing the dependant variable (only required if
+        Name of column containing the dependent variable (only required if
         ``data`` is in long format).
     within : string
         Name of column containing the within factor (only required if ``data``
@@ -719,7 +715,7 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
         with a wide-format dataframe, ``data`` must have a two-levels
         :py:class:`pandas.MultiIndex` columns.
     dv : string
-        Name of column containing the dependant variable (only required if
+        Name of column containing the dependent variable (only required if
         ``data`` is in long format).
     within : string
         Name of column containing the within factor (only required if ``data``
@@ -733,8 +729,8 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
     method : str
         Method to compute sphericity:
 
-        * ``'jns'``: John, Nagao and Sugiura test.
-        * ``'mauchly'``: Mauchly test (default).
+        * `'jns'`: John, Nagao and Sugiura test.
+        * `'mauchly'`: Mauchly test (default).
 
     alpha : float
         Significance level
@@ -766,7 +762,7 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
 
     Notes
     -----
-    The **Mauchly** :math:`W` statistic is defined by:
+    The **Mauchly** :math:`W` statistic [1]_ is defined by:
 
     .. math::
 
@@ -786,7 +782,7 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
 
     .. math:: \\chi_w^2 \\sim \\chi^2(\\frac{k(k-1)}{2}-1)
 
-    The **JNS** :math:`V` statistic is defined by:
+    The **JNS** :math:`V` statistic ([2]_, [3]_, [4]_) is defined by:
 
     .. math::
 
@@ -816,7 +812,7 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
     .. [4] John, S. (1972). The distribution of a statistic used for testing
            sphericity of normal distributions. Biometrika, 59(1), 169-173.
 
-    .. [5] http://www.real-statistics.com/anova-repeated-measures/sphericity/
+    See also http://www.real-statistics.com/anova-repeated-measures/sphericity/
 
     Examples
     --------

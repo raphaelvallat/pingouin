@@ -50,9 +50,9 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
     Notice that ``alpha`` has a default value of 0.05 so None must be
     explicitly passed if you want to compute it.
 
-    This function is a mere Python translation of the original `pwr.t.test`
-    function implemented in the `pwr` package. All credit goes to the author,
-    Stephane Champely.
+    This function is a Python adaptation of the `pwr.t.test`
+    function implemented in the
+    `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
 
     Statistical power is the likelihood that a study will
     detect an effect when there is an effect there to be detected.
@@ -87,14 +87,8 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
     variables (i.e. sample size, effect size, or significance level). If the
     solving fails, a nan value is returned.
 
-    Results have been tested against GPower and the R pwr package.
-
-    References
-    ----------
-    .. [1] Cohen, J. (1988). Statistical power analysis for the behavioral
-           sciences (2nd ed.). Hillsdale,NJ: Lawrence Erlbaum.
-
-    .. [2] https://cran.r-project.org/web/packages/pwr/pwr.pdf
+    Results have been tested against GPower and the
+    `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
 
     Examples
     --------
@@ -247,9 +241,9 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
     Notice that ``alpha`` has a default value of 0.05 so None must be
     explicitly passed if you want to compute it.
 
-    This function is a mere Python translation of the original `pwr.t2n.test`
-    function implemented in the `pwr` package. All credit goes to the author,
-    Stephane Champely.
+    This function is a Python adaptation of the `pwr.t2n.test`
+    function implemented in the
+    `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
 
     Statistical power is the likelihood that a study will
     detect an effect when there is an effect there to be detected.
@@ -281,7 +275,8 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
     variables (i.e. sample size, effect size, or significance level). If the
     solving fails, a nan value is returned.
 
-    Results have been tested against GPower and the R pwr package.
+    Results have been tested against GPower and the
+    `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
 
     Examples
     --------
@@ -408,9 +403,9 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
     Notice that ``alpha`` has a default value of 0.05 so None must be
     explicitly passed if you want to compute it.
 
-    This function is a mere Python translation of the original `pwr.anova.test`
-    function implemented in the `pwr` package. All credit goes to the author,
-    Stephane Champely.
+    This function is a Python adaptation of the `pwr.anova.test`
+    function implemented in the
+    `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
 
     Statistical power is the likelihood that a study will
     detect an effect when there is an effect there to be detected.
@@ -456,14 +451,8 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
     variables (i.e. sample size, effect size, or significance level). If the
     solving fails, a nan value is returned.
 
-    Results have been validated against GPower and the R pwr package.
-
-    References
-    ----------
-    .. [1] Cohen, J. (1988). Statistical power analysis for the behavioral
-           sciences (2nd ed.). Hillsdale,NJ: Lawrence Erlbaum.
-
-    .. [2] https://cran.r-project.org/web/packages/pwr/pwr.pdf
+    Results have been tested against GPower and the
+    `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
 
     Examples
     --------
@@ -650,14 +639,8 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05,
     variables (i.e. sample size, effect size, or significance level). If the
     solving fails, a nan value is returned.
 
-    Results have been validated against GPower.
-
-    References
-    ----------
-    .. [1] Cohen, J. (1988). Statistical power analysis for the behavioral
-           sciences (2nd ed.). Hillsdale,NJ: Lawrence Erlbaum.
-
-    .. [2] https://cran.r-project.org/web/packages/pwr/pwr.pdf
+    Results have been tested against GPower and the
+    `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
 
     Examples
     --------
@@ -844,7 +827,7 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
         Significance level (type I error probability).
         The default is 0.05.
     tail : str
-        Indicates whether the test is "two-sided" or "one-sided".
+        Indicates whether the test is `'two-sided'` or `'one-sided'`.
 
     Notes
     -----
@@ -858,16 +841,9 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
     variables (i.e. sample size, effect size, or significance level). If the
     solving fails, a nan value is returned.
 
-    This function is a mere Python translation of the original `pwr.r.test`
-    function implemented in the `pwr` R package.
-    All credit goes to the author, Stephane Champely.
-
-    References
-    ----------
-    .. [1] Cohen, J. (1988). Statistical power analysis for the behavioral
-           sciences (2nd ed.). Hillsdale,NJ: Lawrence Erlbaum.
-
-    .. [2] https://cran.r-project.org/web/packages/pwr/pwr.pdf
+    This function is a Python adaptation of the `pwr.r.test`
+    function implemented in the
+    `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
 
     Examples
     --------
@@ -1004,9 +980,9 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
     Notice that ``alpha`` has a default value of 0.05 so None must be
     explicitly passed if you want to compute it.
 
-    This function is a mere Python translation of the original `pwr.chisq.test`
-    function implemented in the `pwr` package. All credit goes to the author,
-    Stephane Champely.
+    This function is a Python adaptation of the `pwr.chisq.test`
+    function implemented in the
+    `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
 
     Statistical power is the likelihood that a study will
     detect an effect when there is an effect there to be detected.
@@ -1032,14 +1008,8 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
     variables (i.e. sample size, effect size, or significance level). If the
     solving fails, a nan value is returned.
 
-    Results have been tested against GPower and the R pwr package.
-
-    References
-    ----------
-    .. [1] Cohen, J. (1988). Statistical power analysis for the behavioral
-           sciences (2nd ed.). Hillsdale,NJ: Lawrence Erlbaum.
-
-    .. [2] https://cran.r-project.org/web/packages/pwr/pwr.pdf
+    Results have been tested against GPower and the
+    `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
 
     Examples
     --------

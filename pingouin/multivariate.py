@@ -30,11 +30,12 @@ def multivariate_normality(X, alpha=.05):
 
     Notes
     -----
-    The Henze-Zirkler test has a good overall power against alternatives
-    to normality and is feasable for any dimension and any sample size.
+    The Henze-Zirkler test [1]_ has a good overall power against alternatives
+    to normality and works for any dimension and sample size.
 
-    Adapted to Python from a Matlab code by Antonio Trujillo-Ortiz and
-    tested against the R package MVN.
+    Adapted to Python from a Matlab code [2]_ by Antonio Trujillo-Ortiz and
+    tested against the
+    `MVN <https://cran.r-project.org/web/packages/MVN/MVN.pdf>`_ R package.
 
     Rows with missing values are automatically removed using the
     :py:func:`remove_na` function.
@@ -146,21 +147,22 @@ def multivariate_ttest(X, Y=None, paired=False):
 
     Notes
     -----
-    Hotelling 's T-squared test is the multivariate counterpart of the T-test.
+    The Hotelling 's T-squared test [1]_ is the multivariate counterpart of
+    the T-test.
 
     Rows with missing values are automatically removed using the
     :py:func:`remove_na` function.
 
-    Tested against the R package Hotelling.
+    Tested against the `Hotelling
+    <https://cran.r-project.org/web/packages/Hotelling/Hotelling.pdf>`_ R
+    package.
 
     References
     ----------
     .. [1] Hotelling, H. The Generalization of Student's Ratio. Ann. Math.
            Statist. 2 (1931), no. 3, 360--378.
 
-    .. [2] http://www.real-statistics.com/multivariate-statistics/
-
-    .. [3] https://cran.r-project.org/web/packages/Hotelling/Hotelling.pdf
+    See also http://www.real-statistics.com/multivariate-statistics/
 
     Examples
     --------

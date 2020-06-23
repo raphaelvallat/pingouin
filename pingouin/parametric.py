@@ -318,7 +318,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         measures ANOVA. However, ``data`` must be in long format for two-way
         repeated measures.
     dv : string
-        Name of column containing the dependant variable (only required if
+        Name of column containing the dependent variable (only required if
         ``data`` is in long format).
     within : string
         Name of column containing the within factor (only required if ``data``
@@ -422,7 +422,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
 
     Results have been tested against R and JASP. Note however that if the
     dataset contains one or more other within subject factors, an automatic
-    collapsing to the mean is applied on the dependant variable (same behavior
+    collapsing to the mean is applied on the dependent variable (same behavior
     as the ezANOVA R package). As such, results can differ from those of JASP.
 
     Missing values are automatically removed (listwise deletion on the last
@@ -1169,7 +1169,7 @@ def welch_anova(data=None, dv=None, between=None):
         DataFrame. Note that this function can also directly be used as a
         Pandas method, in which case this argument is no longer needed.
     dv : string
-        Name of column containing the dependant variable.
+        Name of column containing the dependent variable.
     between : string
         Name of column containing the between factor.
 
@@ -1534,7 +1534,7 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
         DataFrame. Note that this function can also directly be used as a
         Pandas method, in which case this argument is no longer needed.
     dv : string
-        Name of column containing the dependant variable.
+        Name of column containing the dependent variable.
     between : string
         Name of column containing the between factor.
     covar : string or list

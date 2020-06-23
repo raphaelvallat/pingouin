@@ -113,7 +113,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     >>> print("Bayes Factor: %s (one-sample)" % bf)
     Bayes Factor: 34.369 (one-sample)
 
-    4. Now specify the direction of the test
+    4. Now specifying the direction of the test
 
     >>> tval = -3.5
     >>> bf_greater = bayesfactor_ttest(tval, 20, tail='greater')
@@ -179,7 +179,7 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
         Method to compute the Bayes Factor. Can be *'ly'* (default) or
         *'wetzels'*. The former has an exact analytical solution, while the
         latter requires integral solving (and is therefore slower). *'wetzels'*
-        was the default in Pingouin <= 0.2.5. See notes for details.
+        was the default in Pingouin <= 0.2.5. See Notes for details.
     kappa : float
         Kappa factor. This is sometimes called the *rscale* parameter, and
         is only used when ``method`` is *'ly'*.
@@ -200,13 +200,11 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
 
     Notes
     -----
-    If you would like to compute the Bayes Factor directly from the raw data
-    instead of from the correlation coefficient, use the
+    To compute the Bayes Factor directly from the raw data, use the
     :py:func:`pingouin.corr` function.
 
     The two-sided **Wetzels Bayes Factor** (also called *JZS Bayes Factor*)
-    is calculated using the equation 13 and associated R code of Wetzels &
-    Wagenmakers (2012):
+    is calculated using the equation 13 and associated R code of [1]_:
 
     .. math::
 
@@ -220,7 +218,7 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
     integral, it is slower than the analytical solution described below.
 
     The two-sided **Ly Bayes Factor** (also called *Jeffreys
-    exact Bayes Factor*) is calculated using equation 25 of Ly et al, 2016:
+    exact Bayes Factor*) is calculated using equation 25 of [2]_:
 
     .. math::
 
@@ -356,7 +354,7 @@ def bayesfactor_binom(k, n, p=.5):
     -------
     bf10 : float
         The Bayes Factor quantifies the evidence in favour of the
-        **alternative hypothesis**, where the null hypothesis is that
+        alternative hypothesis, where the null hypothesis is that
         the random variable is binomially distributed with base probability
         :math:`p`.
 
@@ -379,9 +377,9 @@ def bayesfactor_binom(k, n, p=.5):
 
     References
     ----------
-    .. [1] http://pcl.missouri.edu/bf-binomial
+    * http://pcl.missouri.edu/bf-binomial
 
-    .. [2] https://en.wikipedia.org/wiki/Bayes_factor
+    * https://en.wikipedia.org/wiki/Bayes_factor
 
     Examples
     --------

@@ -541,7 +541,7 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
         DataFrame. Note that this function can also directly be used as a
         Pandas method, in which case this argument is no longer needed.
     dv : string
-        Name of column containing the dependant variable.
+        Name of column containing the dependent variable.
     between: string
         Name of column containing the between factor.
     alpha : float
@@ -579,7 +579,7 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
 
     Notes
     -----
-    Tukey HSD post-hoc is best for balanced one-way ANOVA.
+    Tukey HSD post-hoc [1]_ is best for balanced one-way ANOVA.
 
     It has been proven to be conservative for one-way ANOVA with unequal
     sample sizes. However, it is not robust if the groups have unequal
@@ -617,8 +617,7 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
 
     Note that the p-values might be slightly different than those obtained
     using R or Matlab since the studentized range approximation is done using
-    the Gleason (1999) algorithm, which is more efficient and accurate than
-    the algorithms used in Matlab or R.
+    the Gleason (1999) algorithm [2]_, which is more efficient and accurate.
 
     References
     ----------
@@ -698,7 +697,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
     data : :py:class:`pandas.DataFrame`
         DataFrame
     dv : string
-        Name of column containing the dependant variable.
+        Name of column containing the dependent variable.
     between: string
         Name of column containing the between factor.
     alpha : float
@@ -738,8 +737,8 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
 
     Notes
     -----
-    Games-Howell is very similar to the Tukey HSD post-hoc test but is much
-    more robust to heterogeneity of variances. While the
+    Games-Howell [1]_ is very similar to the Tukey HSD post-hoc test but is
+    much more robust to heterogeneity of variances. While the
     Tukey-HSD post-hoc is optimal after a classic one-way ANOVA, the
     Games-Howell is optimal after a Welch ANOVA.
     Games-Howell is not valid for repeated measures ANOVA.
@@ -772,8 +771,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
 
     Note that the p-values might be slightly different than those obtained
     using R or Matlab since the studentized range approximation is done using
-    the Gleason (1999) algorithm, which is more efficient and accurate than
-    the algorithms used in Matlab or R.
+    the Gleason (1999) algorithm [2]_, which is more efficient and accurate.
 
     References
     ----------

@@ -36,18 +36,16 @@ def mad(a, normalize=True, axis=0):
 
     Notes
     -----
-    The median absolute deviation (MAD) computes the median over the
-    absolute deviations from the median. It is a measure of dispersion similar
-    to the standard deviation, but is more robust to outliers.
+    The `median absolute deviation
+    <https://en.wikipedia.org/wiki/Median_absolute_deviation>`_ (MAD) computes
+    the median over the absolute deviations from the median. It is a measure of
+    dispersion similar to the standard deviation, but is more robust to
+    outliers.
 
     SciPy 1.3 and higher includes a similar function:
     :py:func:`scipy.stats.median_abs_deviation`.
 
     Please note that missing values are automatically removed.
-
-    References
-    ----------
-    .. [1] https://en.wikipedia.org/wiki/Median_absolute_deviation
 
     Examples
     --------
@@ -111,7 +109,8 @@ def madmedianrule(a):
 
     Notes
     -----
-    The MAD-median-rule will refer to declaring :math:`X_i` an outlier if
+    The MAD-median-rule ([1]_, [2]_) will refer to declaring :math:`X_i`
+    an outlier if
 
     .. math::
 
@@ -119,7 +118,7 @@ def madmedianrule(a):
 
     where :math:`M` is the median of :math:`X`,
     :math:`\\text{MAD}_{\\text{norm}}` the normalized median absolute deviation
-    of :math:`X` (see :py:func:`pingouin.mad`), and :math:`K` is the square
+    of :math:`X`, and :math:`K` is the square
     root of the .975 quantile of a :math:`X^2` distribution with one degree
     of freedom, which is roughly equal to 2.24.
 
@@ -169,7 +168,7 @@ def mwu(x, y, tail='two-sided'):
 
         * ``'U-val'``: U-value
         * ``'p-val'``: p-value
-        * ``'RBC'``   : rank-biserial correlation (effect size)
+        * ``'RBC'``   : rank-biserial correlation
         * ``'CLES'``  : common language effect size
 
     See also
@@ -178,7 +177,7 @@ def mwu(x, y, tail='two-sided'):
 
     Notes
     -----
-    The Mann–Whitney U test (also called Wilcoxon rank-sum test) is a
+    The Mann–Whitney U test [1]_ (also called Wilcoxon rank-sum test) is a
     non-parametric test of the null hypothesis that it is equally likely that
     a randomly selected value from one sample will be less than or greater
     than a randomly selected value from a second sample. The test assumes
@@ -186,13 +185,13 @@ def mwu(x, y, tail='two-sided'):
     default uses a continuity correction
     (see :py:func:`scipy.stats.mannwhitneyu` for details).
 
-    The rank biserial correlation effect size is the difference between the
-    proportion of favorable evidence minus the proportion of unfavorable
-    evidence (see Kerby 2014).
+    The rank biserial correlation [2]_ is the difference between
+    the proportion of favorable evidence minus the proportion of unfavorable
+    evidence.
 
-    The common language effect size is the probability (from 0 to 1) that a
-    randomly selected observation from the first sample will be greater than a
-    randomly selected observation from the second sample.
+    The common language effect size [3]_ is the probability (from 0 to 1) that
+    a randomly selected observation from the first sample will be greater than
+    a randomly selected observation from the second sample.
 
     References
     ----------
@@ -465,7 +464,7 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
     data : :py:class:`pandas.DataFrame`
         DataFrame
     dv : string
-        Name of column containing the dependant variable.
+        Name of column containing the dependent variable.
     between : string
         Name of column containing the between factor.
 
@@ -556,7 +555,7 @@ def friedman(data=None, dv=None, within=None, subject=None):
     data : :py:class:`pandas.DataFrame`
         DataFrame
     dv : string
-        Name of column containing the dependant variable.
+        Name of column containing the dependent variable.
     within : string
         Name of column containing the within-subject factor.
     subject : string
@@ -577,7 +576,7 @@ def friedman(data=None, dv=None, within=None, subject=None):
     Data are expected to be in long-format.
 
     Note that if the dataset contains one or more other within subject
-    factors, an automatic collapsing to the mean is applied on the dependant
+    factors, an automatic collapsing to the mean is applied on the dependent
     variable (same behavior as the ezANOVA R package). As such, results can
     differ from those of JASP. If you can, always double-check the results.
 
@@ -657,7 +656,7 @@ def friedman(data=None, dv=None, within=None, subject=None):
 
 
 def cochran(data=None, dv=None, within=None, subject=None):
-    """Cochran Q test. Special case of the Friedman test when the dependant
+    """Cochran Q test. A special case of the Friedman test when the dependent
     variable is binary.
 
     Parameters
@@ -665,7 +664,7 @@ def cochran(data=None, dv=None, within=None, subject=None):
     data : :py:class:`pandas.DataFrame`
         DataFrame
     dv : string
-        Name of column containing the binary dependant variable.
+        Name of column containing the binary dependent variable.
     within : string
         Name of column containing the within-subject factor.
     subject : string
@@ -681,7 +680,7 @@ def cochran(data=None, dv=None, within=None, subject=None):
 
     Notes
     -----
-    The Cochran Q Test is a non-parametric test for ANOVA with repeated
+    The Cochran Q test [1]_ is a non-parametric test for ANOVA with repeated
     measures where the dependent variable is binary.
 
     Data are expected to be in long-format. NaN are automatically removed
@@ -773,15 +772,15 @@ def harrelldavis(x, quantile=0.5, axis=-1):
 
     Notes
     -----
-    The Harrell-Davis method [1] estimates the :math:`q^{th}` quantile by a
+    The Harrell-Davis method [1]_ estimates the :math:`q^{th}` quantile by a
     linear combination of  the  order statistics. Results have been tested
-    against the Matlab implementation proposed by [2]. This method is also used
-    to measure the confidence intervals of the difference between quantiles of
-    two groups, as implemented in the shift function [3].
+    against a Matlab implementation [2]_. Note that this method is also
+    used to measure the confidence intervals of the difference between
+    quantiles of two groups, as implemented in the shift function [3]_.
 
     See Also
     --------
-    plot_shift : Shift function.
+    plot_shift
 
     References
     ----------
@@ -799,7 +798,7 @@ def harrelldavis(x, quantile=0.5, axis=-1):
     Examples
     --------
     Estimate the 0.5 quantile (i.e median) of 100 observation picked from a
-    normal distribution with ``mean=0`` and ``std=1``.
+    normal distribution with zero mean and unit variance.
 
     >>> import numpy as np
     >>> import pingouin as pg

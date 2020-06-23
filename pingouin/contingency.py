@@ -34,9 +34,9 @@ def chi2_independence(data, x, y, correction=True):
 
     Returns
     -------
-    expected : pd.DataFrame
+    expected : :py:class:`pandas.DataFrame`
         The expected contingency table of frequencies.
-    observed : pd.DataFrame
+    observed : :py:class:`pandas.DataFrame`
         The (corrected or not) observed contingency table of frequencies.
     stats : :py:class:`pandas.DataFrame`
         The test summary, containing four columns:
@@ -73,13 +73,13 @@ def chi2_independence(data, x, y, correction=True):
 
     References
     ----------
-    .. [1] Cressie, N., & Read, T. R. (1984). Multinomial goodness‐of‐fit
-           tests. Journal of the Royal Statistical Society: Series B
-           (Methodological), 46(3), 440-464.
+    * Cressie, N., & Read, T. R. (1984). Multinomial goodness‐of‐fit
+      tests. Journal of the Royal Statistical Society: Series B
+      (Methodological), 46(3), 440-464.
 
-    .. [2] Yates, F. (1934). Contingency Tables Involving Small Numbers and the
-           :math:`\\chi^2` Test. Supplement to the Journal of the Royal
-           Statistical Society, 1, 217-235.
+    * Yates, F. (1934). Contingency Tables Involving Small Numbers and the
+      :math:`\\chi^2` Test. Supplement to the Journal of the Royal
+      Statistical Society, 1, 217-235.
 
     Examples
     --------
@@ -213,7 +213,7 @@ def chi2_mcnemar(data, x, y, correction=True):
 
     Returns
     -------
-    observed : pd.DataFrame
+    observed : :py:class:`pandas.DataFrame`
         The observed contingency table of frequencies.
     stats : :py:class:`pandas.DataFrame`
         The test summary:
@@ -267,13 +267,13 @@ def chi2_mcnemar(data, x, y, correction=True):
 
     References
     ----------
-    .. [1] Edwards, A. L. (1948). Note on the "correction for continuity" in
-           testing the significance of the difference between correlated
-           proportions. Psychometrika, 13(3), 185-187.
+    * Edwards, A. L. (1948). Note on the "correction for continuity" in
+      testing the significance of the difference between correlated
+      proportions. Psychometrika, 13(3), 185-187.
 
-    .. [2] McNemar, Q. (1947). Note on the sampling error of the difference
-           between correlated proportions or percentages. Psychometrika, 12(2),
-           153-157.
+    * McNemar, Q. (1947). Note on the sampling error of the difference
+      between correlated proportions or percentages. Psychometrika, 12(2),
+      153-157.
 
     Examples
     --------
@@ -383,7 +383,7 @@ def dichotomous_crosstab(data, x, y):
 
     Returns
     -------
-    crosstab : pd.DataFrame
+    crosstab : :py:class:`pandas.DataFrame`
         The 2x2 crosstab. See :py:func:`pandas.crosstab` for more details.
 
     Examples

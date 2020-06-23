@@ -598,7 +598,7 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         from ``y`` but not from ``x``). Note that you cannot specify both
         ``covar`` and ``y_covar``.
     tail : string
-        Specify whether to return ``'one-sided'`` or ``'two-sided'`` p-value.
+        Specify whether to return `'one-sided'` or `'two-sided'` p-value.
         Note that the former are simply half the latter.
     method : string
         Correlation type:
@@ -629,32 +629,28 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
 
     Notes
     -----
-    From [4]_:
+    From [1]_:
 
-    “With *partial correlation*, we find the correlation between :math:`x`
-    and :math:`y` holding :math:`C` constant for both :math:`x` and
-    :math:`y`. Sometimes, however, we want to hold :math:`C` constant for
-    just :math:`x` or just :math:`y`. In that case, we compute a
-    *semi-partial correlation*. A partial correlation is computed between
-    two residuals. A semi-partial correlation is computed between one
-    residual and another raw (or unresidualized) variable.”
+        *With partial correlation, we find the correlation between x
+        and y holding C constant for both x and
+        y. Sometimes, however, we want to hold C constant for
+        just x or just y. In that case, we compute a
+        semi-partial correlation. A partial correlation is computed between
+        two residuals. A semi-partial correlation is computed between one
+        residual and another raw (or unresidualized) variable.*
 
     Note that if you are not interested in calculating the statistics and
     p-values but only the partial correlation matrix, a (faster)
     alternative is to use the :py:func:`pingouin.pcorr` method (see example 4).
 
     Rows with missing values are automatically removed from data. Results have
-    been tested against the `ppcor` R package.
+    been tested against the
+    `ppcor <https://cran.r-project.org/web/packages/ppcor/index.html>`_
+    R package.
 
     References
     ----------
-    .. [1] https://en.wikipedia.org/wiki/Partial_correlation
-
-    .. [2] https://cran.r-project.org/web/packages/ppcor/index.html
-
-    .. [3] https://gist.github.com/fabianp/9396204419c7b638d38f
-
-    .. [4] http://faculty.cas.usf.edu/mbrannick/regression/Partial.html
+    .. [1] http://faculty.cas.usf.edu/mbrannick/regression/Partial.html
 
     Examples
     --------
@@ -691,14 +687,14 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     cv2  0.130  0.104 -0.241  1.000 -0.118
     cv3 -0.385 -0.002 -0.470 -0.118  1.000
 
-    5. Semi-partial correlation on ``x``
+    5. Semi-partial correlation on x
 
     >>> pg.partial_corr(data=df, x='x', y='y',
     ...                 x_covar=['cv1', 'cv2', 'cv3']).round(3)
               n      r         CI95%     r2  adj_r2  p-val   BF10  power
     pearson  30  0.463  [0.12, 0.71]  0.215   0.156   0.01  5.404  0.752
 
-    6. Semi-partial on both``x`` and ``y`` controlling for different variables
+    6. Semi-partial on both x and y controlling for different variables
 
     >>> pg.partial_corr(data=df, x='x', y='y', x_covar='cv1',
     ...                 y_covar=['cv2', 'cv3'], method='spearman').round(3)
@@ -773,7 +769,9 @@ def pcorr(self):
     -----
     This function calculates the pairwise partial correlations for each pair of
     variables in a :py:class:`pandas.DataFrame` given all the others. It has
-    the same behavior as the pcor function in the `ppcor` R package.
+    the same behavior as the pcor function in the
+    `ppcor <https://cran.r-project.org/web/packages/ppcor/index.html>`_
+    R package.
 
     Note that this function only returns the raw Pearson correlation
     coefficient. If you want to calculate the test statistic and p-values, or
@@ -782,11 +780,7 @@ def pcorr(self):
     functions. The :py:func:`pingouin.pcorr` function uses the inverse of
     the variance-covariance matrix to calculate the partial correlation matrix
     and is therefore much faster than the two latter functions which are based
-    on the residuals.
-
-    References
-    ----------
-    .. [1] https://cran.r-project.org/web/packages/ppcor/index.html
+    on the residuals of a linear regression.
 
     Examples
     --------
@@ -1097,7 +1091,7 @@ def distance_corr(x, y, tail='greater', n_boot=1000, seed=None):
 
     Parameters
     ----------
-    x, y : np.ndarray
+    x, y : array_like
         1D or 2D input arrays, shape (n_samples, n_features).
         ``x`` and ``y`` must have the same number of samples and must not
         contain missing values.
@@ -1119,19 +1113,19 @@ def distance_corr(x, y, tail='greater', n_boot=1000, seed=None):
     dcor : float
         Sample distance correlation (range from 0 to 1).
     pval : float
-        P-value
+        P-value.
 
     Notes
     -----
     From Wikipedia:
 
-    *Distance correlation is a measure of dependence between two paired
-    random vectors of arbitrary, not necessarily equal, dimension. The
-    distance correlation coefficient is zero if and only if the random vectors
-    are independent. Thus, distance correlation measures both linear and
-    nonlinear association between two random variables or random vectors.
-    This is in contrast to Pearson's correlation, which can only detect
-    linear association between two random variables.*
+        *Distance correlation is a measure of dependence between two paired
+        random vectors of arbitrary, not necessarily equal, dimension. The
+        distance correlation coefficient is zero if and only if the random
+        vectors are independent. Thus, distance correlation measures both
+        linear and nonlinear association between two random variables or
+        random vectors. This is in contrast to Pearson's correlation, which can
+        only detect linear association between two random variables.*
 
     The distance correlation of two random variables is obtained by
     dividing their distance covariance by the product of their distance
@@ -1149,21 +1143,21 @@ def distance_corr(x, y, tail='greater', n_boot=1000, seed=None):
     Note that by contrast to Pearson's correlation, the distance correlation
     cannot be negative, i.e :math:`0 \\leq \\text{dCor} \\leq 1`.
 
-    Results have been tested against the 'energy' R package.
+    Results have been tested against the
+    `energy <https://cran.r-project.org/web/packages/energy/energy.pdf>`_
+    R package.
 
     References
     ----------
-    .. [1] https://en.wikipedia.org/wiki/Distance_correlation
+    * https://en.wikipedia.org/wiki/Distance_correlation
 
-    .. [2] Székely, G. J., Rizzo, M. L., & Bakirov, N. K. (2007).
-           Measuring and testing dependence by correlation of distances.
-           The annals of statistics, 35(6), 2769-2794.
+    * Székely, G. J., Rizzo, M. L., & Bakirov, N. K. (2007).
+      Measuring and testing dependence by correlation of distances.
+      The annals of statistics, 35(6), 2769-2794.
 
-    .. [3] https://gist.github.com/satra/aa3d19a12b74e9ab7941
+    * https://gist.github.com/satra/aa3d19a12b74e9ab7941
 
-    .. [4] https://gist.github.com/wladston/c931b1495184fbb99bec
-
-    .. [5] https://cran.r-project.org/web/packages/energy/energy.pdf
+    * https://gist.github.com/wladston/c931b1495184fbb99bec
 
     Examples
     --------
