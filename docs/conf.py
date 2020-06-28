@@ -13,15 +13,6 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
-
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -31,7 +22,6 @@ import os
 import sys
 import time
 import pingouin
-import matplotlib as mpl
 import sphinx_bootstrap_theme
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -39,15 +29,15 @@ import sphinx_bootstrap_theme
 # ones.
 sys.path.insert(0, os.path.abspath('sphinxext'))
 extensions = [
-              'sphinx.ext.mathjax',
-              'sphinx.ext.doctest',
-              'sphinx.ext.viewcode',
-              'sphinx.ext.githubpages',
-              'sphinx.ext.autosummary',
-              'sphinx.ext.autodoc',
-              'sphinx.ext.intersphinx',
-              'matplotlib.sphinxext.plot_directive',
-              'numpydoc']
+    'sphinx.ext.mathjax',
+    'sphinx.ext.doctest',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.githubpages',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'matplotlib.sphinxext.plot_directive',
+    'numpydoc']
 
 # Generate the API documentation when building
 autosummary_generate = True
@@ -120,17 +110,15 @@ html_theme_options = {
     'bootstrap_version': "3",
     'navbar_class': "navbar",
     'navbar_links': [
-                     ("Functions", "api"),
-                     ("Guidelines", "guidelines"),
-                     ("FAQ", "faq"),
-                     ("What's new", "changelog"),
-                     ("Contribute", "contributing")
-                     ],
+        ("Functions", "api"),
+        ("Guidelines", "guidelines"),
+        ("FAQ", "faq"),
+        ("What's new", "changelog"),
+        ("Contribute", "contributing")],
+}
 
-    }
-
-html_logo = 'pictures/pingouin_128x128.png'
-html_favicon = 'pictures/favicon.ico'
+html_logo = 'pictures/pingouin.png'
+html_favicon = 'pictures/pingouin_blue.svg'
 
 # -- Options for HTMLHelp output ------------------------------------------
 
@@ -191,17 +179,19 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
-# Add custom CSS
+
 def setup(app):
+    """Add custom CSS"""
     app.add_css_file('style.css')
 
 
 # -- Intersphinx ------------------------------------------------
 
-intersphinx_mapping = {'numpy': ('http://docs.scipy.org/doc/numpy/', None),
-                       'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
-                       'matplotlib': ('http://matplotlib.org/', None),
-                       'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
-                       'statsmodels': ('http://www.statsmodels.org/stable/', None),
-                       'seaborn': ('https://seaborn.pydata.org/', None),
-                       'sklearn': ('http://scikit-learn.org/stable', None)}
+intersphinx_mapping = {
+    'numpy': ('http://docs.scipy.org/doc/numpy/', None),
+    'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
+    'matplotlib': ('http://matplotlib.org/', None),
+    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
+    'statsmodels': ('http://www.statsmodels.org/stable/', None),
+    'seaborn': ('https://seaborn.pydata.org/', None),
+    'sklearn': ('http://scikit-learn.org/stable', None)}

@@ -25,6 +25,7 @@ INSTALL_REQUIRES = [
     'matplotlib>=3.0.2',
     'seaborn>=0.9.0',
     'statsmodels>=0.10.0',
+    'scikit-learn',
     'pandas_flavor>=0.1.2',
     'outdated',
     'tabulate'
@@ -40,6 +41,8 @@ CLASSIFIERS = [
     'Intended Audience :: Science/Research',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
     'Topic :: Scientific/Engineering :: Mathematics',
     'Operating System :: POSIX',
     'Operating System :: Unix',
