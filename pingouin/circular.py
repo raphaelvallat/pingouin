@@ -738,8 +738,8 @@ def circ_vtest(angles, dir=0., w=None, d=None):
     2. Specifying w and d
 
     >>> v, pval = circ_vtest(x, dir=0.5, w=[.1, .2, .3, .4, .5], d=0.2)
-    >>> print(round(v, 3), pval)
-    0.637 0.23086492929174185
+    >>> print(round(v, 3), round(pval, 5))
+    0.637 0.23086
     """
     angles = np.asarray(angles)
     if w is None:

@@ -590,7 +590,6 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
 
     Notes
     -----
-
     .. caution:: This function is a wrapper around the
         :py:class:`sklearn.linear_model.LogisticRegression` class. However,
         Pingouin internally disables the L2 regularization and changes the

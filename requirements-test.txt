@@ -6,6 +6,4 @@ pytest-remotedata
 pytest-travis-fold
 openpyxl
 mpmath
-scikit-learn
-seaborn
 scipy>=1.5.0

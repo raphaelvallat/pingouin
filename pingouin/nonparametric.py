@@ -804,8 +804,8 @@ def harrelldavis(x, quantile=0.5, axis=-1):
     >>> import pingouin as pg
     >>> np.random.seed(123)
     >>> x = np.random.normal(0, 1, 100)
-    >>> pg.harrelldavis(x, quantile=0.5)
-    -0.04991656842939151
+    >>> round(pg.harrelldavis(x, quantile=0.5), 4)
+    -0.0499
 
     Several quantiles at once
 

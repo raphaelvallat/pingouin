@@ -114,15 +114,15 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
     >>> nx, ny = len(x), len(y)
     >>> stat = pg.compute_effsize(x, y, eftype='r')
     >>> ci = pg.compute_esci(stat=stat, nx=nx, ny=ny, eftype='r')
-    >>> print(stat, ci)
-    0.746828004902922 [0.27 0.93]
+    >>> print(round(stat, 4), ci)
+    0.7468 [0.27 0.93]
 
     2. Confidence interval of a Cohen d
 
     >>> stat = pg.compute_effsize(x, y, eftype='cohen')
     >>> ci = pg.compute_esci(stat, nx=nx, ny=ny, eftype='cohen', decimals=3)
-    >>> print(stat, ci)
-    0.1537753990658328 [-0.737  1.045]
+    >>> print(round(stat, 4), ci)
+    0.1538 [-0.737  1.045]
     """
     from scipy.stats import norm, t
     assert eftype.lower() in ['r', 'pearson', 'spearman', 'cohen',
