@@ -3,11 +3,8 @@
 What's new
 ##########
 
-.. .. contents:: Table of Contents
-..    :depth: 2
-
-v0.3.6 (dev)
-------------
+v0.3.6 (July 2020)
+------------------
 
 **Bugfixes**
 
