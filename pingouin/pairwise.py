@@ -644,7 +644,13 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
     aov = anova(dv=dv, data=data, between=between, detailed=True)
     df = aov.at[1, 'DF']
     ng = aov.at[0, 'DF'] + 1
-    grp = data.groupby(between)[dv]
+    grp = data.groupby(between)[dv]  # default is sort=True
+    # Careful: pd.unique does NOT sort whereas numpy does
+    # The line below should be equal to labels = np.unique(data[between])
+    # However, this does not work if between is a Categorical column, because
+    # Pandas applies a custom, not alphabetical, sorting.
+    # See https://github.com/raphaelvallat/pingouin/issues/111
+    labels = np.array(list(grp.groups.keys()))
     n = grp.count().to_numpy()
     gmeans = grp.mean().to_numpy()
     gvar = aov.at[1, 'MS'] / n
@@ -670,10 +676,9 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
     ef = convert_effsize(d, 'cohen', effsize, n[g1], n[g2])
 
     # Create dataframe
-    # Careful: pd.unique does NOT sort whereas numpy does
     stats = pd.DataFrame({
-                         'A': np.unique(data[between])[g1],
-                         'B': np.unique(data[between])[g2],
+                         'A': labels[g1],
+                         'B': labels[g2],
                          'mean(A)': gmeans[g1],
                          'mean(B)': gmeans[g2],
                          'diff': mn,
@@ -802,7 +807,13 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
 
     # Extract infos
     ng = data[between].nunique()
-    grp = data.groupby(between)[dv]
+    grp = data.groupby(between)[dv]  # default is sort=True
+    # Careful: pd.unique does NOT sort whereas numpy does
+    # The line below should be equal to labels = np.unique(data[between])
+    # However, this does not work if between is a Categorical column, because
+    # Pandas applies a custom, not alphabetical, sorting.
+    # See https://github.com/raphaelvallat/pingouin/issues/111
+    labels = np.array(list(grp.groups.keys()))
     n = grp.count().to_numpy()
     gmeans = grp.mean().to_numpy()
     gvars = grp.var().to_numpy()
@@ -829,10 +840,9 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
     ef = convert_effsize(d, 'cohen', effsize, n[g1], n[g2])
 
     # Create dataframe
-    # Careful: pd.unique does NOT sort whereas numpy does
     stats = pd.DataFrame({
-                         'A': np.unique(data[between])[g1],
-                         'B': np.unique(data[between])[g2],
+                         'A': labels[g1],
+                         'B': labels[g2],
                          'mean(A)': gmeans[g1],
                          'mean(B)': gmeans[g2],
                          'diff': mn,
