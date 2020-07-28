@@ -8,10 +8,13 @@ v0.3.7 (July 2020)
 
 **Bugfixes**
 
-a. Fix a bug in :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell` in which the group labels (columns A and B) were incorrect. This was caused by a discrepancy between Numpy and Pandas sorting of the unique values in the between column, only if this latter is encoded as a Categorical. For more details, please refer to `issue 111 <https://github.com/raphaelvallat/pingouin/issues/111>`_ on GitHub. The sorting is now entirely based on Pandas and does not depend on Numpy.
+a. Fix a bug in :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell` in which the group labels (columns A and B) were incorrect. This was caused by a discrepancy between Numpy and Pandas sorting of the labels in the between column, when and only when this latter was encoded as a :py:class:`pandas.Categorical`. For more details, please refer to `issue 111 <https://github.com/raphaelvallat/pingouin/issues/111>`_ on GitHub. The sorting is now entirely based on Pandas and does not depend on Numpy.
 
-.. warning:: Please check all previous code and results that called the :py:func:`pingouin.pairwise_tukey` or :py:func:`pingouin.pairwise_gameshowell` functions with the between column encoded as a Categorical.
+.. warning:: Please check all previous code and results that called the :py:func:`pingouin.pairwise_tukey` or :py:func:`pingouin.pairwise_gameshowell` functions with the between column encoded as a :py:class:`pandas.Categorical`.
 
+**Deprecation**
+
+a. Removed the :py:func:`pingouin.plot_skipped_corr` function (see `issue 105 <https://github.com/raphaelvallat/pingouin/issues/105>`_).
 
 v0.3.6 (July 2020)
 ------------------

@@ -6,9 +6,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from unittest import TestCase
 from pingouin import read_dataset
-from pingouin.plotting import (plot_blandaltman, plot_skipped_corr, _ppoints,
-                               qqplot, plot_paired, plot_shift, plot_rm_corr,
-                               plot_circmean)
+from pingouin.plotting import (plot_blandaltman, _ppoints, qqplot, plot_paired,
+                               plot_shift, plot_rm_corr, plot_circmean)
 
 # Disable open figure warning
 plt.close('all')  # Close all opened windows
@@ -28,24 +27,6 @@ class TestPlotting(TestCase):
         _, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4))
         plot_blandaltman(x, y, agreement=2, confidence=None, ax=ax1)
         plot_blandaltman(x, y, agreement=2, confidence=.68, dpi=200, ax=ax2)
-        plt.close('all')
-
-    def test_plot_skipped_corr(self):
-        """Test plot_skipped_corr()"""
-        # Data for correlation
-        np.random.seed(123)
-        x, y = np.random.multivariate_normal([170, 70], [[20, 10],
-                                                         [10, 20]], 30).T
-        # Introduce two outliers
-        x[10], y[10] = 160, 100
-        x[8], y[8] = 165, 90
-        # Fails because of NumPy/Seaborn issue
-        # https://github.com/mwaskom/seaborn/issues/1950
-        # Should be fixed in the next version of seaborn
-        plot_skipped_corr(x, y, xlabel='Height', ylabel='Weight')
-        plot_skipped_corr(x, y, n_boot=10)
-        fig = plot_skipped_corr(x, y, seed=456)
-        assert isinstance(fig, matplotlib.figure.Figure)
         plt.close('all')
 
     def test_ppoints(self):
