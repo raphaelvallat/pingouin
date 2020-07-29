@@ -1,6 +1,6 @@
 import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
 from unittest import TestCase
 from pingouin import read_dataset
 from pingouin.pairwise import (pairwise_ttests, pairwise_corr, pairwise_tukey,
@@ -354,28 +354,63 @@ class TestPairwise(TestCase):
         assert round(abs(mwu(x, y).at['MWU', 'RBC']), 3) == 0.252
 
     def test_pairwise_tukey(self):
-        """Test function pairwise_tukey"""
+        """Test function pairwise_tukey.
+
+        The p-values are slightly different because of a different algorithm
+        used to calculate the studentized range approximation, but
+        significance should be the same.
+        """
+        # Compare with R package `userfriendlyscience` - Hair color dataset
         df = read_dataset('anova')
         stats = pairwise_tukey(dv='Pain threshold', between='Hair color',
                                data=df)
         assert np.allclose([0.074, 0.435, 0.415, 0.004, 0.789, 0.037],
                            stats.loc[:, 'p-tukey'].to_numpy().round(3),
                            atol=0.05)
+        # Compare with JASP in the Palmer Penguins dataset
+        df = read_dataset("penguins")
+        stats = df.pairwise_tukey(dv="body_mass_g", between="species").round(4)
+        assert np.array_equal(stats['A'], ["Adelie", "Adelie", "Chinstrap"])
+        assert np.array_equal(stats['B'], ["Chinstrap", "Gentoo", "Gentoo"])
+        assert np.array_equal(stats['diff'], [-32.426, -1375.354, -1342.928])
+        assert np.array_equal(stats['se'], [67.5117, 56.1480, 69.8569])
+        assert np.array_equal(stats['T'], [-0.4803, -24.4952, -19.2240])
+        sig = stats['p-tukey'].apply(lambda x: 'Yes' if x < 0.05 else
+                                     'No').to_numpy()
+        assert np.array_equal(sig, ['No', 'Yes', 'Yes'])
 
     def test_pairwise_gameshowell(self):
-        """Test function pairwise_gameshowell"""
+        """Test function pairwise_gameshowell.
+
+        The p-values are slightly different because of a different algorithm
+        used to calculate the studentized range approximation, but
+        significance should be the same.
+        """
+        # Compare with R package `userfriendlyscience` - Hair color dataset
         df = read_dataset('anova')
         stats = pairwise_gameshowell(dv='Pain threshold', between='Hair color',
                                      data=df)
-        # Compare with R package `userfriendlyscience`
-        np.testing.assert_array_equal(np.abs(stats['T'].round(2)),
-                                      [2.47, 1.42, 1.75, 4.09, 1.11, 3.56])
-        np.testing.assert_array_equal(stats['df'].round(2),
-                                      [7.91, 7.94, 6.56, 8.0, 6.82, 6.77])
+        assert np.array_equal(np.abs(stats['T'].round(2)),
+                              [2.47, 1.42, 1.75, 4.09, 1.11, 3.56])
+        assert np.array_equal(stats['df'].round(2),
+                              [7.91, 7.94, 6.56, 8.0, 6.82, 6.77])
         sig = stats['pval'].apply(lambda x: 'Yes' if x < 0.05 else
                                   'No').to_numpy()
-        np.testing.assert_array_equal(sig, ['No', 'No', 'No', 'Yes', 'No',
-                                            'Yes'])
+        assert np.array_equal(sig, ['No', 'No', 'No', 'Yes', 'No', 'Yes'])
+
+        # Compare with JASP in the Palmer Penguins dataset
+        df = read_dataset("penguins")
+        stats = pairwise_gameshowell(data=df, dv="body_mass_g",
+                                     between="species").round(4)
+        assert np.array_equal(stats['A'], ["Adelie", "Adelie", "Chinstrap"])
+        assert np.array_equal(stats['B'], ["Chinstrap", "Gentoo", "Gentoo"])
+        assert np.array_equal(stats['diff'], [-32.426, -1375.354, -1342.928])
+        assert np.array_equal(stats['se'], [59.7064, 58.8109, 65.1028])
+        assert np.array_equal(stats['df'], [152.4548, 249.6426, 170.4044])
+        assert np.array_equal(stats['T'], [-0.5431, -23.3860, -20.6278])
+        sig = stats['pval'].apply(lambda x: 'Yes' if x < 0.05 else
+                                  'No').to_numpy()
+        assert np.array_equal(sig, ['No', 'Yes', 'Yes'])
 
     def test_pairwise_corr(self):
         """Test function pairwise_corr"""

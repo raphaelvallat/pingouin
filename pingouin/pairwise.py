@@ -574,8 +574,12 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
         * ``'tail'``: indicate whether the p-values are one-sided or two-sided
         * ``'T'``: T-values
         * ``'p-tukey'``: Tukey-HSD corrected p-values
-        * ``'hedges'``: effect size (or any effect size defined in
+        * ``'hedges'``: Hedges effect size (or any effect size defined in
           ``effsize``)
+
+    See also
+    --------
+    pairwise_ttests, pairwise_gameshowell
 
     Notes
     -----
@@ -594,11 +598,11 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
     .. math::
 
         t = \\frac{\\overline{x}_i - \\overline{x}_j}
-        {\\sqrt{2 \\cdot MS_w / n}}
+        {\\sqrt{2 \\cdot \\text{MS}_w / n}}
 
     where :math:`\\overline{x}_i` and :math:`\\overline{x}_j` are the means of
-    the first and second group, respectively, :math:`MS_w` the mean squares of
-    the error (computed using ANOVA) and :math:`n` the sample size.
+    the first and second group, respectively, :math:`\\text{MS}_w` the mean
+    squares of the error (computed using ANOVA) and :math:`n` the sample size.
 
     If the sample sizes are unequal, the Tukey-Kramer procedure is
     automatically used:
@@ -606,18 +610,19 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
     .. math::
 
         t = \\frac{\\overline{x}_i - \\overline{x}_j}{\\sqrt{\\frac{MS_w}{n_i}
-        + \\frac{MS_w}{n_j}}}
+        + \\frac{\\text{MS}_w}{n_j}}}
 
     where :math:`n_i` and :math:`n_j` are the sample sizes of the first and
     second group, respectively.
 
     The p-values are then approximated using the Studentized range distribution
-    :math:`Q(\\sqrt2*|t_i|, r, N - r)` where :math:`r` is the total number of
+    :math:`Q(\\sqrt2|t_i|, r, N - r)` where :math:`r` is the total number of
     groups and :math:`N` is the total sample size.
 
-    Note that the p-values might be slightly different than those obtained
-    using R or Matlab since the studentized range approximation is done using
-    the Gleason (1999) algorithm [2]_, which is more efficient and accurate.
+    .. caution:: The p-values might be slightly different than those obtained
+        with R or Matlab since the studentized range approximation is done
+        using the Gleason (1999) algorithm [2]_, which is more efficient and
+        accurate.
 
     References
     ----------
@@ -630,11 +635,16 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
 
     Examples
     --------
-    Pairwise Tukey post-hocs on the pain threshold dataset.
+    Pairwise Tukey post-hocs on the Penguins dataset.
 
-    >>> from pingouin import pairwise_tukey, read_dataset
-    >>> df = read_dataset('anova')
-    >>> pt = pairwise_tukey(data=df, dv='Pain threshold', between='Hair color')
+    >>> import pingouin as pg
+    >>> df = pg.read_dataset('penguins')
+    >>> pt = pg.pairwise_tukey(data=df, dv='body_mass_g', between='species')
+    >>> pt.round(3)
+               A          B   mean(A)   mean(B)      diff      se       tail       T  p-tukey  hedges
+    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  67.512  two-sided  -0.480    0.881  -0.070
+    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148  two-sided -24.495    0.001  -2.967
+    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857  two-sided -19.224    0.001  -2.894
     """
     from pingouin.external.qsturng import psturng
 
@@ -737,16 +747,20 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
         * ``'T'``: T-values
         * ``'df'``: adjusted degrees of freedom
         * ``'pval'``: Games-Howell corrected p-values
-        * ``'hedges'``: effect size (or any effect size defined in
+        * ``'hedges'``: Hedges effect size (or any effect size defined in
           ``effsize``)
+
+    See also
+    --------
+    pairwise_ttests, pairwise_tukey
 
     Notes
     -----
     Games-Howell [1]_ is very similar to the Tukey HSD post-hoc test but is
     much more robust to heterogeneity of variances. While the
     Tukey-HSD post-hoc is optimal after a classic one-way ANOVA, the
-    Games-Howell is optimal after a Welch ANOVA.
-    Games-Howell is not valid for repeated measures ANOVA.
+    Games-Howell is optimal after a Welch ANOVA. Please note that Games-Howell
+    is not valid for repeated measures ANOVA.
 
     Compared to the Tukey-HSD test, the Games-Howell test uses different pooled
     variances for each pair of variables instead of the same pooled variance.
@@ -772,11 +786,12 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
     and sample size of the second group.
 
     The p-values are then approximated using the Studentized range distribution
-    :math:`Q(\\sqrt2*|t_i|, r, v_i)`.
+    :math:`Q(\\sqrt2|t_i|, r, v_i)`.
 
-    Note that the p-values might be slightly different than those obtained
-    using R or Matlab since the studentized range approximation is done using
-    the Gleason (1999) algorithm [2]_, which is more efficient and accurate.
+    .. caution:: The p-values might be slightly different than those obtained
+        with R or Matlab since the studentized range approximation is done
+        using the Gleason (1999) algorithm [2]_, which is more efficient and
+        accurate.
 
     References
     ----------
@@ -790,12 +805,15 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
 
     Examples
     --------
-    Pairwise Games-Howell post-hocs on the pain threshold dataset.
+    Pairwise Games-Howell post-hocs on the Penguins dataset.
 
-    >>> from pingouin import pairwise_gameshowell, read_dataset
-    >>> df = read_dataset('anova')
-    >>> pairwise_gameshowell(data=df, dv='Pain threshold',
-    ...                      between='Hair color')  # doctest: +SKIP
+    >>> import pingouin as pg
+    >>> df = pg.read_dataset('penguins')
+    >>> pg.pairwise_gameshowell(data=df, dv='body_mass_g', between='species').round(3)
+               A          B   mean(A)   mean(B)      diff      se       tail       T       df   pval  hedges
+    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  59.706  two-sided  -0.543  152.455  0.841  -0.079
+    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  58.811  two-sided -23.386  249.643  0.001  -2.833
+    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  65.103  two-sided -20.628  170.404  0.001  -3.105
     """
     from pingouin.external.qsturng import psturng
 
@@ -821,7 +839,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
     # Pairwise combinations
     g1, g2 = np.array(list(combinations(np.arange(ng), 2))).T
     mn = gmeans[g1] - gmeans[g2]
-    se = np.sqrt(0.5 * (gvars[g1] / n[g1] + gvars[g2] / n[g2]))
+    se = np.sqrt(gvars[g1] / n[g1] + gvars[g2] / n[g2])
     tval = mn / np.sqrt(gvars[g1] / n[g1] + gvars[g2] / n[g2])
     df = (gvars[g1] / n[g1] + gvars[g2] / n[g2])**2 / \
          ((((gvars[g1] / n[g1])**2) / (n[g1] - 1)) +
