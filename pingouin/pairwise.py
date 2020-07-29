@@ -531,8 +531,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
 
 @pf.register_dataframe_method
-def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
-                   tail='two-sided', effsize='hedges'):
+def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     """Pairwise Tukey-HSD post-hoc test.
 
     Parameters
@@ -544,10 +543,6 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
         Name of column containing the dependent variable.
     between: string
         Name of column containing the between factor.
-    alpha : float
-        Significance level
-    tail : string
-        Indicates whether to return the 'two-sided' or 'one-sided' p-values
     effsize : string or None
         Effect size type. Available methods are:
 
@@ -571,7 +566,6 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
         * ``'mean(B)'``: Mean of second measurement
         * ``'diff'``: Mean difference (= mean(A) - mean(B))
         * ``'se'``: Standard error
-        * ``'tail'``: indicate whether the p-values are one-sided or two-sided
         * ``'T'``: T-values
         * ``'p-tukey'``: Tukey-HSD corrected p-values
         * ``'hedges'``: Hedges effect size (or any effect size defined in
@@ -589,9 +583,7 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
     sample sizes. However, it is not robust if the groups have unequal
     variances, in which case the Games-Howell test is more adequate.
     Tukey HSD is not valid for repeated measures ANOVA.
-
-    Note that when the sample sizes are unequal, this function actually
-    performs the Tukey-Kramer test (which allows for unequal sample sizes).
+    Only one-way ANOVA design are supported.
 
     The T-values are defined as:
 
@@ -620,9 +612,9 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
     groups and :math:`N` is the total sample size.
 
     .. caution:: The p-values might be slightly different than those obtained
-        with R or Matlab since the studentized range approximation is done
-        using the Gleason (1999) algorithm [2]_, which is more efficient and
-        accurate.
+        with R or Matlab because Pingouin uses the Gleason (1999)
+        algorithm [2]_ for the studentized range approximation, which is
+        more efficient and accurate.
 
     References
     ----------
@@ -641,14 +633,12 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
     >>> df = pg.read_dataset('penguins')
     >>> pt = pg.pairwise_tukey(data=df, dv='body_mass_g', between='species')
     >>> pt.round(3)
-               A          B   mean(A)   mean(B)      diff      se       tail       T  p-tukey  hedges
-    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  67.512  two-sided  -0.480    0.881  -0.070
-    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148  two-sided -24.495    0.001  -2.967
-    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857  two-sided -19.224    0.001  -2.894
+               A          B   mean(A)   mean(B)      diff      se       T  p-tukey  hedges
+    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  67.512  -0.480    0.881  -0.070
+    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148 -24.495    0.001  -2.967
+    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857 -19.224    0.001  -2.894
     """
     from pingouin.external.qsturng import psturng
-
-    assert tail in ['one-sided', 'two-sided']
 
     # First compute the ANOVA
     aov = anova(dv=dv, data=data, between=between, detailed=True)
@@ -675,7 +665,6 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
     # from pingouin.external.qsturng import qsturng
     # crit = qsturng(1 - alpha, ng, df) / np.sqrt(2)
     pval = psturng(np.sqrt(2) * np.abs(tval), ng, df)
-    pval = pval * 0.5 if tail == 'one-sided' else pval
 
     # Uncorrected p-values
     # from scipy.stats import t
@@ -693,18 +682,14 @@ def pairwise_tukey(data=None, dv=None, between=None, alpha=.05,
                          'mean(B)': gmeans[g2],
                          'diff': mn,
                          'se': se,
-                         'tail': tail,
                          'T': tval,
-                         # 'alpha': alpha,
-                         # 'crit': crit,
                          'p-tukey': pval,
                          effsize: ef,
                          })
     return stats
 
 
-def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
-                         tail='two-sided', effsize='hedges'):
+def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
     """Pairwise Games-Howell post-hoc test.
 
     Parameters
@@ -715,10 +700,6 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
         Name of column containing the dependent variable.
     between: string
         Name of column containing the between factor.
-    alpha : float
-        Significance level
-    tail : string
-        Indicates whether to return the 'two-sided' or 'one-sided' p-values
     effsize : string or None
         Effect size type. Available methods are:
 
@@ -743,7 +724,6 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
         * ``'mean(B)'``: Mean of second measurement
         * ``'diff'``: Mean difference (= mean(A) - mean(B))
         * ``'se'``: Standard error
-        * ``'tail'``: indicate whether the p-values are one-sided or two-sided
         * ``'T'``: T-values
         * ``'df'``: adjusted degrees of freedom
         * ``'pval'``: Games-Howell corrected p-values
@@ -761,6 +741,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
     Tukey-HSD post-hoc is optimal after a classic one-way ANOVA, the
     Games-Howell is optimal after a Welch ANOVA. Please note that Games-Howell
     is not valid for repeated measures ANOVA.
+    Only one-way ANOVA design are supported.
 
     Compared to the Tukey-HSD test, the Games-Howell test uses different pooled
     variances for each pair of variables instead of the same pooled variance.
@@ -789,9 +770,9 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
     :math:`Q(\\sqrt2|t_i|, r, v_i)`.
 
     .. caution:: The p-values might be slightly different than those obtained
-        with R or Matlab since the studentized range approximation is done
-        using the Gleason (1999) algorithm [2]_, which is more efficient and
-        accurate.
+        with R or Matlab because Pingouin uses the Gleason (1999)
+        algorithm [2]_ for the studentized range approximation, which is
+        more efficient and accurate.
 
     References
     ----------
@@ -810,10 +791,10 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
     >>> import pingouin as pg
     >>> df = pg.read_dataset('penguins')
     >>> pg.pairwise_gameshowell(data=df, dv='body_mass_g', between='species').round(3)
-               A          B   mean(A)   mean(B)      diff      se       tail       T       df   pval  hedges
-    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  59.706  two-sided  -0.543  152.455  0.841  -0.079
-    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  58.811  two-sided -23.386  249.643  0.001  -2.833
-    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  65.103  two-sided -20.628  170.404  0.001  -3.105
+               A          B   mean(A)   mean(B)      diff      se       T       df   pval  hedges
+    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  59.706  -0.543  152.455  0.841  -0.079
+    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  58.811 -23.386  249.643  0.001  -2.833
+    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  65.103 -20.628  170.404  0.001  -3.105
     """
     from pingouin.external.qsturng import psturng
 
@@ -847,7 +828,6 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
 
     # Compute corrected p-values
     pval = psturng(np.sqrt(2) * np.abs(tval), ng, df)
-    pval = pval * 0.5 if tail == 'one-sided' else pval
 
     # Uncorrected p-values
     # from scipy.stats import t
@@ -865,7 +845,6 @@ def pairwise_gameshowell(data=None, dv=None, between=None, alpha=.05,
                          'mean(B)': gmeans[g2],
                          'diff': mn,
                          'se': se,
-                         'tail': tail,
                          'T': tval,
                          'df': df,
                          'pval': pval,

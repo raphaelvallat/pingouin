@@ -8,10 +8,11 @@ v0.3.7 (July 2020)
 
 **Bugfixes**
 
-a. Fix a bug in :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell` in which the group labels (columns A and B) were incorrect. This was caused by a discrepancy between Numpy and Pandas sorting of the labels in the between column, when and only when this latter was encoded as a :py:class:`pandas.Categorical`. For more details, please refer to `issue 111 <https://github.com/raphaelvallat/pingouin/issues/111>`_ on GitHub. The sorting is now entirely based on Pandas and does not depend on Numpy.
-b. Fix a bug in :py:func:`pingouin.pairwise_gameshowell` in which the reported standard errors were slightly incorrect because of a typo in the code. However, the T-values and p-values were fortunately calculated using the correct standard errors, so this bug did not impact the T and p-values, only the `se` column.
+a. Fix a bug in :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell` in which the group labels (columns A and B) were incorrect. This was caused by a discrepancy between Numpy and Pandas sorting of the labels in the ``between`` column, when and only when this latter was encoded as a :py:class:`pandas.Categorical`. For more details, please refer to `issue 111 <https://github.com/raphaelvallat/pingouin/issues/111>`_ on GitHub. The sorting is now entirely based on Pandas and does not depend on Numpy.
+b. Fix a bug in :py:func:`pingouin.pairwise_gameshowell` in which the reported standard errors were slightly incorrect because of a typo in the code. However, the T-values and p-values were fortunately calculated using the correct standard errors, so this bug did not impact the T and p-values, only the ``se`` column.
+c. Removed the ``tail`` and ``alpha`` argument from the in :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell` functions to be consistent with JASP. Note that the ``alpha`` parameter did not have any impact. One-sided p-values were obtained by halving the two-sided p-values.
 
-.. warning:: Please check all previous code and results that called the :py:func:`pingouin.pairwise_tukey` or :py:func:`pingouin.pairwise_gameshowell` functions with the between column encoded as a :py:class:`pandas.Categorical`.
+.. error:: Please check all previous code and results that called the :py:func:`pingouin.pairwise_tukey` or :py:func:`pingouin.pairwise_gameshowell` functions, especially if the ``between`` column was encoded as a :py:class:`pandas.Categorical`.
 
 **Deprecation**
 
