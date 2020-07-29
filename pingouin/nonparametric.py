@@ -510,8 +510,7 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
     data = data.reset_index(drop=True)
 
     # Extract number of groups and total sample size
-    groups = list(data[between].unique())
-    n_groups = len(groups)
+    n_groups = data[between].nunique()
     n = data[dv].size
 
     # Rank data, dealing with ties appropriately
@@ -538,12 +537,6 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
                           'H': H,
                           'p-unc': p_unc,
                           }, index=['Kruskal'])
-
-    col_order = ['Source', 'ddof1', 'H', 'p-unc']
-
-    stats = stats.reindex(columns=col_order)
-    stats.dropna(how='all', axis=1, inplace=True)
-
     return stats
 
 
@@ -646,12 +639,6 @@ def friedman(data=None, dv=None, within=None, subject=None):
                           'Q': Q,
                           'p-unc': p_unc,
                           }, index=['Friedman'])
-
-    col_order = ['Source', 'ddof1', 'Q', 'p-unc']
-
-    stats = stats.reindex(columns=col_order)
-    stats.dropna(how='all', axis=1, inplace=True)
-
     return stats
 
 
@@ -857,5 +844,4 @@ def harrelldavis(x, quantile=0.5, axis=-1):
         y = y[0]  # Return a float instead of a list if n quantile is 1
     else:
         y = np.array(y)
-
     return y

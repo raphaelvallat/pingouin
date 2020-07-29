@@ -12,7 +12,7 @@ This hotfix release brings important changes to the :py:func:`pingouin.pairwise_
 
 We strongly recommend that all users upgrade their version of Pingouin (:code:`pip install -U pingouin`).
 
-a. Fixed a bug in :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell` in which the group labels (columns A and B) were incorrect when the ``between`` column was encoded as a :py:class:`pandas.Categorical`. This was caused by a discrepancy in how Numpy and Pandas sort the labels in the ``between`` column. For more details, please refer to `issue 111 <https://github.com/raphaelvallat/pingouin/issues/111>`_. The sorting is now entirely based on Pandas.
+a. Fixed a bug in :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell` in which the group labels (columns A and B) were incorrect when the ``between`` column was encoded as a :py:class:`pandas.Categorical` with non-alphabetical categories order. This was caused by a discrepancy in how Numpy and Pandas sorted the categories in the ``between`` column. For more details, please refer to `issue 111 <https://github.com/raphaelvallat/pingouin/issues/111>`_.
 b. Fixed a bug in :py:func:`pingouin.pairwise_gameshowell` in which the reported standard errors were slightly incorrect because of a typo in the code. However, the T-values and p-values were fortunately calculated using the correct standard errors, so this bug only impacted the values in the ``se`` column.
 c. Removed the ``tail`` and ``alpha`` argument from the in :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell` functions to be consistent with JASP. Note that the ``alpha`` parameter did not have any impact. One-sided p-values were obtained by halving the two-sided p-values.
 

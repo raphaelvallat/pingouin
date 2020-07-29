@@ -368,13 +368,31 @@ class TestPairwise(TestCase):
                            stats.loc[:, 'p-tukey'].to_numpy().round(3),
                            atol=0.05)
         # Compare with JASP in the Palmer Penguins dataset
+        # The between factor (Species) is unbalanced.
         df = read_dataset("penguins")
         stats = df.pairwise_tukey(dv="body_mass_g", between="species").round(4)
         assert np.array_equal(stats['A'], ["Adelie", "Adelie", "Chinstrap"])
         assert np.array_equal(stats['B'], ["Chinstrap", "Gentoo", "Gentoo"])
         assert np.array_equal(stats['diff'], [-32.426, -1375.354, -1342.928])
+        # SE is different for each group (Tukey-Kramer)
         assert np.array_equal(stats['se'], [67.5117, 56.1480, 69.8569])
         assert np.array_equal(stats['T'], [-0.4803, -24.4952, -19.2240])
+        sig = stats['p-tukey'].apply(lambda x: 'Yes' if x < 0.05 else
+                                     'No').to_numpy()
+        assert np.array_equal(sig, ['No', 'Yes', 'Yes'])
+
+        # Same but with balanced group
+        df_balanced = df.groupby('species').head(20).copy()
+        # To complicate things, let's encode between as a categorical
+        df_balanced['species'] = df_balanced['species'].astype('category')
+        stats = df_balanced.pairwise_tukey(dv="body_mass_g",
+                                           between="species").round(4)
+        assert np.array_equal(stats['A'], ["Adelie", "Adelie", "Chinstrap"])
+        assert np.array_equal(stats['B'], ["Chinstrap", "Gentoo", "Gentoo"])
+        assert np.array_equal(stats['diff'], [-142.5, -1457.5, -1315.])
+        # SE is the same for all groups (Tukey HSD)
+        assert np.array_equal(stats['se'], [142.9475, 142.9475, 142.9475])
+        assert np.array_equal(stats['T'], [-0.9969, -10.1961, -9.1992])
         sig = stats['p-tukey'].apply(lambda x: 'Yes' if x < 0.05 else
                                      'No').to_numpy()
         assert np.array_equal(sig, ['No', 'Yes', 'Yes'])
@@ -408,6 +426,22 @@ class TestPairwise(TestCase):
         assert np.array_equal(stats['se'], [59.7064, 58.8109, 65.1028])
         assert np.array_equal(stats['df'], [152.4548, 249.6426, 170.4044])
         assert np.array_equal(stats['T'], [-0.5431, -23.3860, -20.6278])
+        sig = stats['pval'].apply(lambda x: 'Yes' if x < 0.05 else
+                                  'No').to_numpy()
+        assert np.array_equal(sig, ['No', 'Yes', 'Yes'])
+
+        # Same but with balanced group
+        df_balanced = df.groupby('species').head(20).copy()
+        # To complicate things, let's encode between as a categorical
+        df_balanced['species'] = df_balanced['species'].astype('category')
+        stats = pairwise_gameshowell(data=df_balanced, dv="body_mass_g",
+                                     between="species").round(4)
+        assert np.array_equal(stats['A'], ["Adelie", "Adelie", "Chinstrap"])
+        assert np.array_equal(stats['B'], ["Chinstrap", "Gentoo", "Gentoo"])
+        assert np.array_equal(stats['diff'], [-142.5, -1457.5, -1315.])
+        assert np.array_equal(stats['se'], [104.5589, 163.1546, 154.1104])
+        assert np.array_equal(stats['df'], [35.5510, 30.8479, 26.4576])
+        assert np.array_equal(stats['T'], [-1.3629, -8.9332, -8.5328])
         sig = stats['pval'].apply(lambda x: 'Yes' if x < 0.05 else
                                   'No').to_numpy()
         assert np.array_equal(sig, ['No', 'Yes', 'Yes'])

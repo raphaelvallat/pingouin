@@ -943,8 +943,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
     data = data[[dv, between]].dropna()
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
-    groups = list(data[between].unique())
-    n_groups = len(groups)
+    n_groups = data[between].nunique()
     N = data[dv].size
 
     # Calculate sums of squares
