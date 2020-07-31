@@ -26,7 +26,7 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
         constant term to the model. In this case, the first value in the
         output dict is the intercept of the model.
 
-        .. note:: It is generally recommanded to include a constant term
+        .. note:: It is generally recommended to include a constant term
             (intercept) to the model to limit the bias and force the residual
             mean to equal zero. The intercept coefficient and p-values
             are however rarely meaningful.
@@ -112,7 +112,7 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
 
     .. math:: \\hat{\\beta} = (X^TX)^{-1} X^Ty
 
-    It is generally recommanded to include a constant term (intercept) to the
+    It is generally recommended to include a constant term (intercept) to the
     model to limit the bias and force the residual mean to equal zero.
     Note that intercept coefficient and p-values are however rarely meaningful.
 
