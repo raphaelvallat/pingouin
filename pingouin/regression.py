@@ -98,12 +98,16 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
         >>> lm = pg.linear_regression() # doctest: +SKIP
         >>> lm['residuals'], lm['df_model'], lm['df_resid'] # doctest: +SKIP
 
-        Also, when ``as_dataframe=False`` the dictionary contains the
+        When ``as_dataframe=False`` the dictionary also contains the
         processed ``X`` and ``y`` arrays (i.e, with NaNs removed if
-        ``remove_na=True``), the weighted arrays ``Xw`` and ``yw``, and the
-        model's predicted values ``pred``.
+        ``remove_na=True``) and the model's predicted values ``pred``.
 
-         >>> lm['X'], lm['Xw'], lm['y'], lm['yw'], lm['pred'] # doctest: +SKIP
+        >>> lm['X'], lm['y'], lm['pred'] # doctest: +SKIP
+
+        For a weighted least squares fit, the weighted ``Xw`` and ``yw``
+        arrays are included in the dictionary.
+
+        >>> lm['Xw'], lm['yw'] # doctest: +SKIP
 
     See also
     --------
@@ -463,10 +467,11 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
         stats['df_resid'] = df_resid
         stats['residuals'] = resid
         stats['X'] = X
-        stats['Xw'] = Xw
         stats['y'] = y
-        stats['yw'] = yw
         stats['pred'] = pred
+        if weights is not None:
+            stats['yw'] = yw
+            stats['Xw'] = Xw
     return stats
 
 
