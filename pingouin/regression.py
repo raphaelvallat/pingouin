@@ -93,10 +93,21 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
         Note that to follow scikit-learn convention, these hidden atributes end
         with an "_". When ``as_dataframe=False`` however, these attributes
         are no longer hidden and can be accessed as any other keys in the
-        output dictionnary:
+        output dictionary.
 
         >>> lm = pg.linear_regression() # doctest: +SKIP
         >>> lm['residuals'], lm['df_model'], lm['df_resid'] # doctest: +SKIP
+
+        When ``as_dataframe=False`` the dictionary also contains the
+        processed ``X`` and ``y`` arrays (i.e, with NaNs removed if
+        ``remove_na=True``) and the model's predicted values ``pred``.
+
+        >>> lm['X'], lm['y'], lm['pred'] # doctest: +SKIP
+
+        For a weighted least squares fit, the weighted ``Xw`` and ``yw``
+        arrays are included in the dictionary.
+
+        >>> lm['Xw'], lm['yw'] # doctest: +SKIP
 
     See also
     --------
@@ -455,6 +466,12 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
         stats['df_model'] = df_model
         stats['df_resid'] = df_resid
         stats['residuals'] = resid
+        stats['X'] = X
+        stats['y'] = y
+        stats['pred'] = pred
+        if weights is not None:
+            stats['yw'] = yw
+            stats['Xw'] = Xw
     return stats
 
 
