@@ -258,7 +258,8 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     >>> lm_dict = pg.linear_regression(X, y, as_dataframe=False)
     >>> lm_dict.keys()
     dict_keys(['names', 'coef', 'se', 'T', 'pval', 'r2', 'adj_r2', 'CI[2.5%]',
-               'CI[97.5%]', 'df_model', 'df_resid', 'residuals'])
+               'CI[97.5%]', 'df_model', 'df_resid', 'residuals', 'X', 'y',
+               'pred'])
 
     7. Remove missing values
 

@@ -3,6 +3,13 @@
 What's new
 ##########
 
+v0.3.8 (dev)
+------------
+
+**Enhancements**
+
+a. :py:func:`pingouin.linear_regression` now returns the processed X and y variables (Xw and yw for WLS) and the predicted values if ``as_dataframe=False``. See `issue 112 <https://github.com/raphaelvallat/pingouin/issues/112>`_.
+
 v0.3.7 (July 2020)
 ------------------
 

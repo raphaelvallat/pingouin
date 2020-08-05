@@ -225,6 +225,10 @@ class TestRegression(TestCase):
                            linear_regression(df[['X', 'M']], df['Y'],
                                              weights=df['One']))
 
+        # Output is a dictionary
+        linear_regression(df[['X', 'M']], df['Y'], weights=df['W2'],
+                          as_dataframe=False)
+
         with pytest.raises(ValueError):
             linear_regression(df[['X']], df['Y'], weights=df['W1'],
                               relimp=True)
