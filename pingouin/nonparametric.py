@@ -189,9 +189,20 @@ def mwu(x, y, tail='two-sided'):
     the proportion of favorable evidence minus the proportion of unfavorable
     evidence.
 
-    The common language effect size [3]_ is the probability (from 0 to 1) that
-    a randomly selected observation from the first sample will be greater than
-    a randomly selected observation from the second sample.
+    The common language effect size is the proportion of pairs where ``x`` is
+    higher than ``y``. It was first introduced by McGraw and Wong (1992) [3]_.
+    Pingouin uses a brute-force version of the formula given by Vargha and
+    Delaney 2000 [4]_:
+
+    .. math:: \\text{CL} = P(X > Y) + .5 \\times P(X = Y)
+
+    The advantage is of this method are twofold. First, the brute-force
+    approach pairs each observation of ``x`` to its ``y`` counterpart, and
+    therefore does not require normally distributed data. Second, the formula
+    takes ties into account and therefore works with ordinal data.
+
+    When tail is ``'less'``, the CLES is then set to :math:`1 - \\text{CL}`,
+    which gives the proportion of pairs where ``x`` is *lower* than ``y``.
 
     References
     ----------
@@ -206,6 +217,13 @@ def mwu(x, y, tail='two-sided'):
     .. [3] McGraw, K. O., & Wong, S. P. (1992). A common language effect size
            statistic. Psychological bulletin, 111(2), 361.
 
+    .. [4] Vargha, A., & Delaney, H. D. (2000). A Critique and Improvement of
+        the “CL” Common Language Effect Size Statistics of McGraw and Wong.
+        Journal of Educational and Behavioral Statistics: A Quarterly
+        Publication Sponsored by the American Educational Research
+        Association and the American Statistical Association, 25(2),
+        101–132. https://doi.org/10.2307/1165329
+
     Examples
     --------
     >>> import numpy as np
@@ -215,7 +233,7 @@ def mwu(x, y, tail='two-sided'):
     >>> y = np.random.uniform(low=0.2, high=1.2, size=20)
     >>> pg.mwu(x, y, tail='two-sided')
          U-val       tail    p-val    RBC    CLES
-    MWU   97.0  two-sided  0.00556  0.515  0.7575
+    MWU   97.0  two-sided  0.00556  0.515  0.2425
 
     Compare with SciPy
 
@@ -228,7 +246,7 @@ def mwu(x, y, tail='two-sided'):
 
     >>> pg.mwu(x, y, tail='greater')
          U-val     tail     p-val    RBC    CLES
-    MWU   97.0  greater  0.997442  0.515  0.7575
+    MWU   97.0  greater  0.997442  0.515  0.2425
 
     >>> pg.mwu(x, y, tail='less')
          U-val  tail    p-val    RBC    CLES
@@ -259,9 +277,15 @@ def mwu(x, y, tail='two-sided'):
     uval, pval = scipy.stats.mannwhitneyu(x, y, use_continuity=True,
                                           alternative=tail)
 
-    # Effect size 1: common language effect size (McGraw and Wong 1992)
+    # Effect size 1: Common Language Effect Size
+    # CLES is tail-specific and calculated according to the formula given in
+    # Vargha and Delaney 2000 which works with ordinal data.
     diff = x[:, None] - y
-    cles = max((diff < 0).sum(), (diff > 0).sum()) / diff.size
+    # cles = max((diff < 0).sum(), (diff > 0).sum()) / diff.size
+    # Tail = 'greater', with ties set to 0.5
+    # Note that tail = 'two-sided' gives same output as tail = 'greater'
+    cles = np.where(diff == 0, 0.5, diff > 0).mean()
+    cles = 1 - cles if tail == 'less' else cles
 
     # Effect size 2: rank biserial correlation (Wendt 1972)
     rbc = 1 - (2 * uval) / diff.size  # diff.size = x.size * y.size
