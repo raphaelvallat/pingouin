@@ -459,6 +459,12 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
     """
     from pingouin.utils import _check_dataframe, remove_rm_na
 
+    # Update default kwargs with specified inputs
+    _pointplot_kwargs = {'scale': .6, 'markers': '.'}
+    _pointplot_kwargs.update(pointplot_kwargs)
+    _boxplot_kwargs = {'color': 'lightslategrey', 'width': .2}
+    _boxplot_kwargs.update(boxplot_kwargs)
+
     # Validate args
     _check_dataframe(data=data, dv=dv, within=within, subject=subject,
                      effects='within')
@@ -495,11 +501,11 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
 
         # Plot individual lines using Seaborn
         sns.pointplot(data=tmp, x=within, y=dv, order=order, color=color,
-                      ax=ax, **pointplot_kwargs)
+                      ax=ax, **_pointplot_kwargs)
 
     if boxplot:
         sns.boxplot(data=data, x=within, y=dv, order=order, ax=ax,
-                    **boxplot_kwargs)
+                    **_boxplot_kwargs)
 
     # Despine and trim
     sns.despine(trim=True, ax=ax)
