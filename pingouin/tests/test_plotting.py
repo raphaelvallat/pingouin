@@ -75,6 +75,9 @@ class TestPlotting(TestCase):
         plot_paired(data=df, dv='Scores', within='Time',
                     subject='Subject', order=['June', 'August'],
                     ax=ax2)
+        plot_paired(data=df, dv='Scores', within='Time',
+                    subject='Subject', order=['June', 'August'],
+                    boxplot_in_front=True, ax=ax2)
         plt.close('all')
 
     def test_plot_shift(self):

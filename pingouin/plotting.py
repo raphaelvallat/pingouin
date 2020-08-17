@@ -378,7 +378,8 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
 
 
 def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
-                boxplot=True, figsize=(4, 4), dpi=100, ax=None,
+                boxplot=True, boxplot_in_front=False,
+                figsize=(4, 4), dpi=100, ax=None,
                 colors=['green', 'grey', 'indianred'],
                 pointplot_kwargs={'scale': .6, 'markers': '.'},
                 boxplot_kwargs={'color': 'lightslategrey', 'width': .2}):
@@ -465,6 +466,14 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
     _boxplot_kwargs = {'color': 'lightslategrey', 'width': .2}
     _boxplot_kwargs.update(boxplot_kwargs)
 
+    # Set boxplot in front of Line2D plot (zorder=2 for both) and add alpha
+    if boxplot_in_front:
+        _boxplot_kwargs.update({
+            'boxprops': {'zorder': 2},
+            'whiskerprops': {'zorder': 2},
+            'zorder': 2,
+        })
+
     # Validate args
     _check_dataframe(data=data, dv=dv, within=within, subject=subject,
                      effects='within')
@@ -506,6 +515,11 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
     if boxplot:
         sns.boxplot(data=data, x=within, y=dv, order=order, ax=ax,
                     **_boxplot_kwargs)
+
+        # Set alpha to patch of boxplot but not to whiskers
+        for patch in ax.artists:
+            r, g, b, a = patch.get_facecolor()
+            patch.set_facecolor((r, g, b, .75))
 
     # Despine and trim
     sns.despine(trim=True, ax=ax)
