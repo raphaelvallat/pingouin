@@ -404,6 +404,12 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
     boxplot : boolean
         If True, add a boxplot to the paired lines using the
         :py:func:`seaborn.boxplot` function.
+    boxplot_in_front : boolean
+        If True, the boxplot is plotted on the foreground (i.e. above the
+        individual lines) and with a slight transparency. This makes the
+        overall plot more readable when plotting a large numbers of subjects.
+
+        .. versionadded:: 0.3.8
     figsize : tuple
         Figsize in inches
     dpi : int
@@ -436,11 +442,9 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
 
     .. plot::
 
-        >>> from pingouin import read_dataset
-        >>> df = read_dataset('mixed_anova')
-        >>> df = df.query("Group == 'Meditation' and Subject > 40")
-        >>> df = df.query("Time == 'August' or Time == 'June'")
         >>> import pingouin as pg
+        >>> df = pg.read_dataset('mixed_anova').query("Time != 'January'")
+        >>> df = df.query("Group == 'Meditation' and Subject > 40")
         >>> ax = pg.plot_paired(data=df, dv='Scores', within='Time',
         ...                     subject='Subject', dpi=150)
 
@@ -448,15 +452,24 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
 
     .. plot::
 
-        >>> from pingouin import read_dataset
-        >>> df = read_dataset('mixed_anova').query("Time != 'January'")
         >>> import pingouin as pg
         >>> import matplotlib.pyplot as plt
+        >>> df = pg.read_dataset('mixed_anova').query("Time != 'January'")
+        >>> df = df.query("Group == 'Meditation' and Subject > 40")
         >>> fig, ax1 = plt.subplots(1, 1, figsize=(5, 4))
-        >>> pg.plot_paired(data=df[df['Group'] == 'Meditation'],
-        ...                dv='Scores', within='Time', subject='Subject',
-        ...                ax=ax1, boxplot=False,
+        >>> pg.plot_paired(data=df, dv='Scores', within='Time',
+        ...                subject='Subject', ax=ax1, boxplot=False,
         ...                colors=['grey', 'grey', 'grey'])  # doctest: +SKIP
+
+    With the boxplot on the foreground:
+
+    .. plot::
+
+        >>> import pingouin as pg
+        >>> df = pg.read_dataset('mixed_anova').query("Time != 'January'")
+        >>> df = df.query("Group == 'Control'")
+        >>> ax = pg.plot_paired(data=df, dv='Scores', within='Time',
+        ...                     subject='Subject', boxplot_in_front=True)
     """
     from pingouin.utils import _check_dataframe, remove_rm_na
 
