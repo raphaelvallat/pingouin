@@ -6,4 +6,4 @@ options = {}
 
 
 def _set_default_options():
-    options['round'] = 4
+    options['round'] = None
