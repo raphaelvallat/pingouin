@@ -132,8 +132,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     >>> from pingouin import ttest
     >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> ttest(x, 4).round(2)
-              T  dof       tail  p-val          CI95%  cohen-d   BF10  power
-    T-test  1.4    4  two-sided   0.23  [-1.68, 5.08]     0.62  0.766   0.19
+            T  dof       tail  p-val         CI95%  cohen-d   BF10  power
+    T-test  1.4    4  two-sided   0.23  [2.32, 9.08]     0.62  0.766   0.19
 
     2. Paired T-test.
 
@@ -248,15 +248,14 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     # Effect size
     d = compute_effsize(x, y, paired=paired, eftype='cohen')
 
-    # 95% confidence interval for the effect size
-    # ci = compute_esci(d, nx, ny, paired=paired, eftype='cohen',
-    #                   confidence=.95)
-
-    # 95% confidence interval for the difference in means
+    # 95% confidence interval for the (difference in) means
     # Compare to the t.test r function
     conf = 0.975 if tail == 'two-sided' else 0.95
     tcrit = t.ppf(conf, dof)
     ci = np.array([tval - tcrit, tval + tcrit]) * se
+    if ny == 1:
+        ci += y
+
     if tail == 'greater':
         ci[1] = np.inf
     elif tail == 'less':

@@ -6,6 +6,10 @@ What's new
 v0.3.8 (dev)
 ------------
 
+**Bugfixes**
+
+a. Fix a bug in in :py:func:`pingouin.ttest` in which the confidence intervals for one-sample T-test with y != 0 were invalid (e.g. ``pg.ttest(x=[4, 6, 7, 4], y=4)``). See `issue 119 <https://github.com/raphaelvallat/pingouin/issues/119>`_.
+
 **Enhancements**
 
 a. :py:func:`pingouin.linear_regression` now returns the processed X and y variables (Xw and yw for WLS) and the predicted values if ``as_dataframe=False``. See `issue 112 <https://github.com/raphaelvallat/pingouin/issues/112>`_.
