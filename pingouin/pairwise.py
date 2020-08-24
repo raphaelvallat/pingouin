@@ -7,7 +7,8 @@ from itertools import combinations, product
 from pingouin.parametric import anova
 from pingouin.multicomp import multicomp
 from pingouin.effsize import compute_effsize, convert_effsize
-from pingouin.utils import remove_rm_na, _check_dataframe, _flatten_list
+from pingouin.utils import (remove_rm_na, _check_dataframe, _flatten_list,
+                            postprocess_dataframe)
 
 __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
            "pairwise_corr"]
@@ -527,7 +528,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         stats['Time'].fillna('-', inplace=True)
         stats.rename(columns={'Time': factors[0]}, inplace=True)
 
-    return stats
+    return postprocess_dataframe(stats)
 
 
 @pf.register_dataframe_method
@@ -686,7 +687,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
                          'p-tukey': pval,
                          effsize: ef,
                          })
-    return stats
+    return postprocess_dataframe(stats)
 
 
 def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
@@ -850,7 +851,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
                          'pval': pval,
                          effsize: ef,
                          })
-    return stats
+    return postprocess_dataframe(stats)
 
 
 @pf.register_dataframe_method
@@ -1189,4 +1190,4 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     if covar is not None:
         stats.insert(loc=3, column='covar', value=str(covar))
 
-    return stats
+    return postprocess_dataframe(stats)

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from pingouin.utils import remove_na
+from pingouin.utils import remove_na, postprocess_dataframe
 
 __all__ = ["multivariate_normality", "multivariate_ttest"]
 
@@ -250,4 +250,4 @@ def multivariate_ttest(X, Y=None, paired=False):
     # Create output dictionnary
     stats = {'T2': t2, 'F': fval, 'df1': df1, 'df2': df2, 'pval': pval}
     stats = pd.DataFrame(stats, index=['hotelling'])
-    return stats
+    return postprocess_dataframe(stats)

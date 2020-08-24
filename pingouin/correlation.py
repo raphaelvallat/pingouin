@@ -8,7 +8,7 @@ from scipy.stats import pearsonr, spearmanr, kendalltau
 from pingouin.power import power_corr
 from pingouin.multicomp import multicomp
 from pingouin.effsize import compute_esci
-from pingouin.utils import remove_na, _perm_pval
+from pingouin.utils import remove_na, _perm_pval, postprocess_dataframe
 from pingouin.bayesian import bayesfactor_pearson
 
 
@@ -568,7 +568,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     col_keep = ['n', 'outliers', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val',
                 'BF10', 'power']
     col_order = [k for k in col_keep if k in stats.keys().tolist()]
-    return stats[col_order]
+    return postprocess_dataframe(stats)[col_order]
 
 
 @pf.register_dataframe_method
@@ -1068,7 +1068,7 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
                           "pval": pval,
                           "CI95%": str(ci),
                           "power": pwr}, index=["rm_corr"])
-    return stats
+    return postprocess_dataframe(stats)
 
 
 def _dcorr(y, n2, A, dcov2_xx):

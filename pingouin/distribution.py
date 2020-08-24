@@ -2,7 +2,7 @@ import warnings
 import scipy.stats
 import numpy as np
 import pandas as pd
-from .utils import remove_na
+from .utils import remove_na, postprocess_dataframe
 from .utils import _flatten_list as _fl
 
 __all__ = ["gzscore", "normality", "homoscedasticity", "anderson",
@@ -217,7 +217,7 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
                                                method=method,
                                                alpha=alpha))
             stats.index = cols
-    return stats
+    return postprocess_dataframe(stats)
 
 
 def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):

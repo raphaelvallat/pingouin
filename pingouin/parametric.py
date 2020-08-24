@@ -5,7 +5,7 @@ import pandas as pd
 from scipy.stats import f
 import pandas_flavor as pf
 from pingouin import (_check_dataframe, remove_rm_na, remove_na, _flatten_list,
-                      bayesfactor_ttest, epsilon, sphericity)
+                      bayesfactor_ttest, epsilon, sphericity, postprocess_dataframe)
 
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova",
            "ancova"]
@@ -299,7 +299,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
                  'power']
     stats = pd.DataFrame.from_records(stats, columns=col_order,
                                       index=['T-test'])
-    return stats
+    return postprocess_dataframe(stats)
 
 
 @pf.register_dataframe_method

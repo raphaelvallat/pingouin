@@ -6,6 +6,7 @@ from scipy.stats import t, norm
 from scipy.linalg import pinv, pinvh, lstsq
 from pingouin.utils import remove_na as rm_na
 from pingouin.utils import _flatten_list as _fl
+from pingouin.utils import postprocess_dataframe
 
 __all__ = ['linear_regression', 'logistic_regression', 'mediation_analysis']
 
@@ -458,7 +459,7 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
         stats.update(reli)
 
     if as_dataframe:
-        stats = pd.DataFrame(stats)
+        stats = postprocess_dataframe(pd.DataFrame(stats))
         stats.df_model_ = df_model
         stats.df_resid_ = df_resid
         stats.residuals_ = 0  # Trick to avoid Pandas warning
@@ -558,7 +559,7 @@ def _relimp(S):
                     'relimp': all_preds,
                     'relimp_perc': all_preds / sum(all_preds) * 100}
 
-    return stats_relimp
+    return postprocess_dataframe(stats_relimp)
 
 
 def logistic_regression(X, y, coef_only=False, alpha=0.05,
@@ -895,7 +896,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     stats = {'names': names, 'coef': coef, 'se': se, 'z': z_scores,
              'pval': pval, ll_name: ll, ul_name: ul}
     if as_dataframe:
-        return pd.DataFrame(stats)
+        return postprocess_dataframe(pd.DataFrame(stats))
     else:
         return stats
 
@@ -1251,6 +1252,6 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     # stats[col_to_round] = stats[col_to_round].round(4)
 
     if return_dist:
-        return stats, np.squeeze(ab_estimates)
+        return postprocess_dataframe(stats), np.squeeze(ab_estimates)
     else:
-        return stats
+        return postprocess_dataframe(stats)
