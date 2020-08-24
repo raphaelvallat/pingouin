@@ -104,7 +104,11 @@ def postprocess_dataframe(df):
     """
     df = df.copy()
     for row, col in it.product(df.index, df.columns):
-        if not isinstance(df.at[row,col], numbers.Number):
+        if (not isinstance(df.at[row,col], numbers.Number) and
+            not (isinstance(df.at[row,col], np.ndarray) and
+                 issubclass(df.at[row,col].dtype.type, np.floating)
+                )
+            ):
             continue
         decimals = _get_round_setting_for(row, col)
         if decimals is None:
