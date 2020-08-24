@@ -290,7 +290,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
              'p-val': pval,
              'tail': tail,
              'cohen-d': abs(d),
-             'CI95%': ci,
+             'CI95%': [ci],
              'power': power,
              'BF10': bf}
 
