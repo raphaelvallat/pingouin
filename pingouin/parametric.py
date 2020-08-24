@@ -290,7 +290,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
              'p-val': pval,
              'tail': tail,
              'cohen-d': abs(d),
-             'CI95%': [np.round(ci, 2)],  # Should we keep rounding for CI?
+             'CI95%': ci,
              'power': power,
              'BF10': bf}
 
