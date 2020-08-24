@@ -1066,7 +1066,7 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     stats = pd.DataFrame({"r": rm,
                           "dof": int(dof),
                           "pval": pval,
-                          "CI95%": str(ci),
+                          "CI95%": [ci],
                           "power": pwr}, index=["rm_corr"])
     return postprocess_dataframe(stats)
 
