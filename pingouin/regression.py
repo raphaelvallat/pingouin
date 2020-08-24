@@ -559,7 +559,7 @@ def _relimp(S):
                     'relimp': all_preds,
                     'relimp_perc': all_preds / sum(all_preds) * 100}
 
-    return postprocess_dataframe(stats_relimp)
+    return stats_relimp
 
 
 def logistic_regression(X, y, coef_only=False, alpha=0.05,
