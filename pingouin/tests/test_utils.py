@@ -52,7 +52,7 @@ class TestUtils(TestCase):
         df_expected.Values = [1.54321, 5.877, 8.235, 3.457]
         df_expected.Values2 = [1.5432, 5.88, 8.2346, 3.0]
 
-        postprocess_dataframe(df2)
+        df2 = postprocess_dataframe(df2)
         pd.testing.assert_frame_equal(df2, df_expected)
 
         # restore old options

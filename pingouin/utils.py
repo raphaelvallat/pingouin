@@ -89,7 +89,8 @@ def postprocess_dataframe(df):
     available; if not, a row-based option is used, if available; if not, the default is
     used. (Default `pingouin.options['round'] = None`, indicating no rounding.)
 
-    Post-processing is applied in-place, modifying the original DataFrame.
+    Post-processing is applied on a copy of the DataFrame, leaving the original DataFrame
+    untouched.
 
     Parameters
     ----------
@@ -101,6 +102,7 @@ def postprocess_dataframe(df):
     df : :py:class:`pandas.DataFrame`
         Dataframe with post-processing applied
     """
+    df = df.copy()
     for row, col in it.product(df.index, df.columns):
         if not isinstance(df.at[row,col], numbers.Number):
             continue
