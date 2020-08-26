@@ -1,17 +1,16 @@
-# Author: Raphael Vallat <raphaelvallat9@gmail.com>
-# Date: April 2018
-import itertools as it
+"""Helper functions."""
 import numbers
 import numpy as np
 import pandas as pd
+import itertools as it
 import collections.abc
 from tabulate import tabulate
 from .config import options
 
-__all__ = ["_perm_pval", "print_table", "postprocess_dataframe", "_check_eftype",
-           "remove_rm_na", "remove_na", "_flatten_list", "_check_dataframe",
-           "_is_sklearn_installed", "_is_statsmodels_installed",
-           "_is_mpmath_installed"]
+__all__ = ["_perm_pval", "print_table", "postprocess_dataframe",
+           "_check_eftype", "remove_rm_na", "remove_na", "_flatten_list",
+           "_check_dataframe", "_is_sklearn_installed",
+           "_is_statsmodels_installed", "_is_mpmath_installed"]
 
 
 def _perm_pval(bootstat, estimate, tail='two-sided'):
@@ -77,20 +76,24 @@ def print_table(df, floatfmt=".3f", tablefmt='simple'):
 
 
 def postprocess_dataframe(df):
-    """Apply some post-processing of a stats dataframe, like e.g. apply rounding.
+    """Apply some post-processing to an ouput dataframe (e.g. rounding).
 
     Whether and how rounding is applied is governed by options specified in
-    `pingouin.options`. The default rounding (number of decimals to which to round) is
-    determined by option key `round` (`pingouin.options['round']`). You can specify
-    rounding for a given column name by the option `'round.column.<colname>'`, e.g.
-    `'round.column.CI95%'`. Analogously, `'round.row.<rowname>'` also works (where `rowname`)
-    refers to the pandas index), as well as `'round.cell.[<rolname>]x[<colname]'`.
-    A cell-based option is used, if available; if not, a column-based option is used, if
-    available; if not, a row-based option is used, if available; if not, the default is
-    used. (Default `pingouin.options['round'] = None`, indicating no rounding.)
+    `pingouin.options`. The default rounding (number of decimals) is
+    determined by `pingouin.options['round']`. You can specify rounding for a
+    given column name by the option `'round.column.<colname>'`, e.g.
+    `'round.column.CI95%'`. Analogously, `'round.row.<rowname>'` also works
+    (where `rowname`) refers to the pandas index), as well as
+    `'round.cell.[<rolname>]x[<colname]'`. A cell-based option is used,
+    if available; if not, a column-based option is used, if
+    available; if not, a row-based option is used, if available; if not,
+    the default is used. (Default `pingouin.options['round'] = None`,
+    i.e. no rounding is applied.)
 
-    Post-processing is applied on a copy of the DataFrame, leaving the original DataFrame
-    untouched.
+    Post-processing is applied on a copy of the DataFrame, leaving the
+    original DataFrame untouched.
+
+    This is an internal functions (no public API).
 
     Parameters
     ----------
@@ -104,22 +107,21 @@ def postprocess_dataframe(df):
     """
     df = df.copy()
     for row, col in it.product(df.index, df.columns):
-        if (not isinstance(df.at[row,col], numbers.Number) and
-            not (isinstance(df.at[row,col], np.ndarray) and
-                 issubclass(df.at[row,col].dtype.type, np.floating)
-                )
-            ):
+        if (not isinstance(df.at[row, col], numbers.Number) and
+            not (isinstance(df.at[row, col], np.ndarray) and
+                 issubclass(df.at[row, col].dtype.type, np.floating))):
             continue
         decimals = _get_round_setting_for(row, col)
         if decimals is None:
             continue
-        df.at[row,col] = np.round(df.at[row,col], decimals=decimals)
+        df.at[row, col] = np.round(df.at[row, col], decimals=decimals)
 
     return df
 
 
 def _get_round_setting_for(row, col):
-    keys_to_check = ('round.cell.[{}]x[{}]'.format(row, col),
+    keys_to_check = (
+        'round.cell.[{}]x[{}]'.format(row, col),
         'round.column.{}'.format(col), 'round.row.{}'.format(row))
     for key in keys_to_check:
         try:

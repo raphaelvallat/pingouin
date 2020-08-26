@@ -3,7 +3,8 @@
 import scipy
 import numpy as np
 import pandas as pd
-from pingouin import remove_na, remove_rm_na, _check_dataframe, postprocess_dataframe
+from pingouin import (remove_na, remove_rm_na, _check_dataframe,
+                      postprocess_dataframe)
 
 __all__ = ["mad", "madmedianrule", "mwu", "wilcoxon", "kruskal", "friedman",
            "cochran", "harrelldavis"]

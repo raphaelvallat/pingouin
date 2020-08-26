@@ -19,7 +19,7 @@ from .plotting import *
 from .contingency import *
 from .config import *
 
-# Version of the package
+# Current version
 __version__ = "0.3.7"
 
 # Warn if a newer version of Pingouin is available

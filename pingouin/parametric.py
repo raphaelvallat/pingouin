@@ -5,7 +5,8 @@ import pandas as pd
 from scipy.stats import f
 import pandas_flavor as pf
 from pingouin import (_check_dataframe, remove_rm_na, remove_na, _flatten_list,
-                      bayesfactor_ttest, epsilon, sphericity, postprocess_dataframe)
+                      bayesfactor_ttest, epsilon, sphericity,
+                      postprocess_dataframe)
 
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova",
            "ancova"]
