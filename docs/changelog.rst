@@ -16,6 +16,7 @@ a. :py:func:`pingouin.linear_regression` now returns the processed X and y varia
 b. The Common Language Effect Size (CLES) in :py:func:`pingouin.mwu` is now calculated using the formula given by Vargha and Delaney 2000, which works better when ties are present in data. This is consistent with the :py:func:`pingouin.wilcoxon` and :py:func:`pingouin.compute_effsize` functions. See `issue 114 <https://github.com/raphaelvallat/pingouin/issues/114>`_.
 c. Better handling of kwargs arguments in :py:func:`pingouin.plot_paired` (see `PR 116 <https://github.com/raphaelvallat/pingouin/pull/116>`_).
 d. Added ``boxplot_in_front`` argument to the :py:func:`pingouin.plot_paired`. When set to True, the boxplot is displayed in front of the lines with a slight transparency. This can make the overall plot more readable when plotting data from a large number of subjects. (see `PR 117 <https://github.com/raphaelvallat/pingouin/pull/117>`_).
+e. Added `pingouin.options` mechanism, which can now beused to specify either default rounding (e.g. `pingouin.options['round'] = 4` for 4 decimals), per column (e.g. `pingouin.options['round.column.CI95%'] = 2`), per row (e.g. `pingouin.options['round.row.T-test'] = 2`), or per cell (e.g. `pingouin.options['round.cell.[T-test]x[CI95%]'] = 2`).
 
 v0.3.7 (July 2020)
 ------------------

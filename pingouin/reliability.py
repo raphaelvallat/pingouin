@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import f
+from pingouin.utils import postprocess_dataframe
 
 __all__ = ["cronbach_alpha", "intraclass_corr"]
 
@@ -370,4 +371,4 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
                                   u2 * k / (1 + u2 * (k - 1))],
                                  [1 - 1 / f3l, 1 - 1 / f3u]])
 
-    return stats
+    return postprocess_dataframe(stats)

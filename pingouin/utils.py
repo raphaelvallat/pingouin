@@ -1,11 +1,14 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
+import itertools as it
+import numbers
 import numpy as np
 import pandas as pd
 import collections.abc
 from tabulate import tabulate
+from .config import options
 
-__all__ = ["_perm_pval", "print_table", "_check_eftype",
+__all__ = ["_perm_pval", "print_table", "postprocess_dataframe", "_check_eftype",
            "remove_rm_na", "remove_na", "_flatten_list", "_check_dataframe",
            "_is_sklearn_installed", "_is_statsmodels_installed",
            "_is_mpmath_installed"]
@@ -71,6 +74,59 @@ def print_table(df, floatfmt=".3f", tablefmt='simple'):
     print(tabulate(df, headers="keys", showindex=False, floatfmt=floatfmt,
                    tablefmt=tablefmt))
     print('')
+
+
+def postprocess_dataframe(df):
+    """Apply some post-processing of a stats dataframe, like e.g. apply rounding.
+
+    Whether and how rounding is applied is governed by options specified in
+    `pingouin.options`. The default rounding (number of decimals to which to round) is
+    determined by option key `round` (`pingouin.options['round']`). You can specify
+    rounding for a given column name by the option `'round.column.<colname>'`, e.g.
+    `'round.column.CI95%'`. Analogously, `'round.row.<rowname>'` also works (where `rowname`)
+    refers to the pandas index), as well as `'round.cell.[<rolname>]x[<colname]'`.
+    A cell-based option is used, if available; if not, a column-based option is used, if
+    available; if not, a row-based option is used, if available; if not, the default is
+    used. (Default `pingouin.options['round'] = None`, indicating no rounding.)
+
+    Post-processing is applied on a copy of the DataFrame, leaving the original DataFrame
+    untouched.
+
+    Parameters
+    ----------
+    df : :py:class:`pandas.DataFrame`
+        Dataframe to apply post-processing to (e.g. ANOVA summary)
+
+    Returns
+    ----------
+    df : :py:class:`pandas.DataFrame`
+        Dataframe with post-processing applied
+    """
+    df = df.copy()
+    for row, col in it.product(df.index, df.columns):
+        if (not isinstance(df.at[row,col], numbers.Number) and
+            not (isinstance(df.at[row,col], np.ndarray) and
+                 issubclass(df.at[row,col].dtype.type, np.floating)
+                )
+            ):
+            continue
+        decimals = _get_round_setting_for(row, col)
+        if decimals is None:
+            continue
+        df.at[row,col] = np.round(df.at[row,col], decimals=decimals)
+
+    return df
+
+
+def _get_round_setting_for(row, col):
+    keys_to_check = ('round.cell.[{}]x[{}]'.format(row, col),
+        'round.column.{}'.format(col), 'round.row.{}'.format(row))
+    for key in keys_to_check:
+        try:
+            return options[key]
+        except KeyError:
+            pass
+    return options['round']
 
 
 ###############################################################################

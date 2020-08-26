@@ -3,7 +3,7 @@
 import scipy
 import numpy as np
 import pandas as pd
-from pingouin import remove_na, remove_rm_na, _check_dataframe
+from pingouin import remove_na, remove_rm_na, _check_dataframe, postprocess_dataframe
 
 __all__ = ["mad", "madmedianrule", "mwu", "wilcoxon", "kruskal", "friedman",
            "cochran", "harrelldavis"]
@@ -300,7 +300,7 @@ def mwu(x, y, tail='two-sided'):
 
     col_order = ['U-val', 'tail', 'p-val', 'RBC', 'CLES']
     stats = stats.reindex(columns=col_order)
-    return stats
+    return postprocess_dataframe(stats)
 
 
 def wilcoxon(x, y, tail='two-sided'):
@@ -477,7 +477,7 @@ def wilcoxon(x, y, tail='two-sided'):
 
     col_order = ['W-val', 'tail', 'p-val', 'RBC', 'CLES']
     stats = stats.reindex(columns=col_order)
-    return stats
+    return postprocess_dataframe(stats)
 
 
 def kruskal(data=None, dv=None, between=None, detailed=False):
@@ -561,7 +561,7 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
                           'H': H,
                           'p-unc': p_unc,
                           }, index=['Kruskal'])
-    return stats
+    return postprocess_dataframe(stats)
 
 
 def friedman(data=None, dv=None, within=None, subject=None):
@@ -663,7 +663,7 @@ def friedman(data=None, dv=None, within=None, subject=None):
                           'Q': Q,
                           'p-unc': p_unc,
                           }, index=['Friedman'])
-    return stats
+    return postprocess_dataframe(stats)
 
 
 def cochran(data=None, dv=None, within=None, subject=None):
@@ -754,7 +754,7 @@ def cochran(data=None, dv=None, within=None, subject=None):
                           'p-unc': p_unc,
                           }, index=['cochran'])
 
-    return stats
+    return postprocess_dataframe(stats)
 
 
 def harrelldavis(x, quantile=0.5, axis=-1):

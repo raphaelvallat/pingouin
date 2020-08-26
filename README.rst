@@ -459,6 +459,7 @@ Note that this program is provided with NO WARRANTY OF ANY KIND. If you can, alw
 - Nicolas Legrand
 - `Richard Höchenberger <http://hoechenberger.net/>`_
 - `Arthur Paulino <https://github.com/arthurpaulino>`_
+- `Eelke Spaak <https://eelkespaak.nl/>`_
 
 How to cite Pingouin?
 =====================
