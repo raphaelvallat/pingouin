@@ -1,10 +1,12 @@
 # Date: May 2019
+import warnings
+import numpy as np
+import pandas as pd
+
 from scipy.stats.contingency import expected_freq
 from scipy.stats import power_divergence, binom, chi2 as sp_chi2
-import pandas as pd
-import numpy as np
-import warnings
-from .power import power_chi2
+
+from pingouin import power_chi2, _postprocess_dataframe
 
 
 __all__ = ['chi2_independence', 'chi2_mcnemar', 'dichotomous_crosstab']
@@ -45,7 +47,7 @@ def chi2_independence(data, x, y, correction=True):
         * ``'lambda'``: The :math:`\\lambda` value used for the power\
                         divergence statistic
         * ``'chi2'``: The test statistic
-        * ``'p'``: The p-value of the test
+        * ``'pval'``: The p-value of the test
         * ``'cramer'``: The Cramer's V effect size
         * ``'power'``: The statistical power of the test
 
@@ -116,13 +118,13 @@ def chi2_independence(data, x, y, correction=True):
     tests should be sensitive to this difference.
 
     >>> stats.round(3)
-                     test  lambda    chi2  dof    p  cramer  power
-    0             pearson   1.000  22.717  1.0  0.0   0.274  0.997
-    1        cressie-read   0.667  22.931  1.0  0.0   0.275  0.998
-    2      log-likelihood   0.000  23.557  1.0  0.0   0.279  0.998
-    3       freeman-tukey  -0.500  24.220  1.0  0.0   0.283  0.998
-    4  mod-log-likelihood  -1.000  25.071  1.0  0.0   0.288  0.999
-    5              neyman  -2.000  27.458  1.0  0.0   0.301  0.999
+                     test  lambda    chi2  dof  pval  cramer  power
+    0             pearson   1.000  22.717  1.0   0.0   0.274  0.997
+    1        cressie-read   0.667  22.931  1.0   0.0   0.275  0.998
+    2      log-likelihood   0.000  23.557  1.0   0.0   0.279  0.998
+    3       freeman-tukey  -0.500  24.220  1.0   0.0   0.283  0.998
+    4  mod-log-likelihood  -1.000  25.071  1.0   0.0   0.288  0.999
+    5              neyman  -2.000  27.458  1.0   0.0   0.301  0.999
 
     Very low p-values indeed. The gender qualifies as a good predictor for the
     presence of heart disease on this dataset.
@@ -171,12 +173,12 @@ def chi2_independence(data, x, y, correction=True):
             power = power_chi2(dof=dof, w=cramer, n=n, alpha=0.05)
 
         stats.append({'test': name, 'lambda': lambda_,
-                      'chi2': chi2, 'dof': dof, 'p': p,
+                      'chi2': chi2, 'dof': dof, 'pval': p,
                       'cramer': cramer, 'power': power})
 
-    stats = pd.DataFrame(stats)[['test', 'lambda', 'chi2', 'dof', 'p',
+    stats = pd.DataFrame(stats)[['test', 'lambda', 'chi2', 'dof', 'pval',
                                  'cramer', 'power']]
-    return expected, observed, stats
+    return expected, observed, _postprocess_dataframe(stats)
 
 
 def chi2_mcnemar(data, x, y, correction=True):
@@ -290,7 +292,7 @@ def chi2_mcnemar(data, x, y, correction=True):
     The McNemar test should be sensitive to this.
 
     >>> stats
-                  chi2  dof  p-approx   p-exact
+                chi2  dof  p-approx   p-exact
     mcnemar  20.020833    1  0.000008  0.000003
     """
     # Python code initially inspired by statsmodel's mcnemar
@@ -327,7 +329,7 @@ def chi2_mcnemar(data, x, y, correction=True):
 
     stats = pd.DataFrame(stats, index=['mcnemar'])
 
-    return observed, stats
+    return observed, _postprocess_dataframe(stats)
 
 
 ###############################################################################

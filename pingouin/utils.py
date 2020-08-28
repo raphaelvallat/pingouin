@@ -7,7 +7,7 @@ import collections.abc
 from tabulate import tabulate
 from .config import options
 
-__all__ = ["_perm_pval", "print_table", "postprocess_dataframe",
+__all__ = ["_perm_pval", "print_table", "_postprocess_dataframe",
            "_check_eftype", "remove_rm_na", "remove_na", "_flatten_list",
            "_check_dataframe", "_is_sklearn_installed",
            "_is_statsmodels_installed", "_is_mpmath_installed"]
@@ -75,7 +75,7 @@ def print_table(df, floatfmt=".3f", tablefmt='simple'):
     print('')
 
 
-def postprocess_dataframe(df):
+def _postprocess_dataframe(df):
     """Apply some post-processing to an ouput dataframe (e.g. rounding).
 
     Whether and how rounding is applied is governed by options specified in
@@ -107,15 +107,24 @@ def postprocess_dataframe(df):
     """
     df = df.copy()
     for row, col in it.product(df.index, df.columns):
-        if (not isinstance(df.at[row, col], numbers.Number) and
-            not (isinstance(df.at[row, col], np.ndarray) and
-                 issubclass(df.at[row, col].dtype.type, np.floating))):
+        if isinstance(df.at[row, col], bool):
+            # No rounding if value is a boolean
             continue
+        is_number = isinstance(df.at[row, col], numbers.Number)
+        is_array = isinstance(df.at[row, col], np.ndarray)
+        if not any([is_number, is_array]):
+            # No rounding if value is not a Number or an array
+            continue
+        if is_array:
+            is_float_array = issubclass(df.at[row, col].dtype.type,
+                                        np.floating)
+            if not is_float_array:
+                # No rounding if value is not a float array
+                continue
         decimals = _get_round_setting_for(row, col)
         if decimals is None:
             continue
         df.at[row, col] = np.round(df.at[row, col], decimals=decimals)
-
     return df
 
 

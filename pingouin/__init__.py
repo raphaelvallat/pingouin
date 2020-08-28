@@ -27,4 +27,4 @@ from outdated import warn_if_outdated
 warn_if_outdated("pingouin", __version__)
 
 # load default options
-_set_default_options()
+set_default_options()

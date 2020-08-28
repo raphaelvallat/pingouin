@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import f
-from pingouin.utils import postprocess_dataframe
+from pingouin.config import options
+from pingouin.utils import _postprocess_dataframe
+
 
 __all__ = ["cronbach_alpha", "intraclass_corr"]
 
@@ -292,8 +294,13 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
 
     # Two-way ANOVA
     with np.errstate(invalid='ignore'):
-        aov = anova(dv=ratings, between=[targets, raters], data=data,
+        # For max precision, make sure rounding is disabled
+        old_options = options.copy()
+        options.clear()
+        options['round'] = None
+        aov = anova(data=data, dv=ratings, between=[targets, raters],
                     ss_type=2)
+        options.update(old_options)  # restore options
 
     # Extract mean squares
     msb = aov.at[0, 'MS']
@@ -359,16 +366,13 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
     u2 = n * (f2l * msb - mse) / (k * msj + (k * n - k - n) * mse + n * f2l *
                                   msb)
 
-    # Round the confidence intervals
-    def list_round(x, decimals=2):
-        for i, xi in enumerate(x):
-            x[i] = np.round(xi, decimals).tolist()
-        return x
+    stats['CI95%'] = [
+        np.array([l1, u1]),
+        np.array([l2, u2]),
+        np.array([l3, u3]),
+        np.array([1 - 1 / f1l, 1 - 1 / f1u]),
+        np.array([l2 * k / (1 + l2 * (k - 1)), u2 * k / (1 + u2 * (k - 1))]),
+        np.array([1 - 1 / f3l, 1 - 1 / f3u])
+    ]
 
-    stats['CI95%'] = list_round([[l1, u1], [l2, u2], [l3, u3],
-                                 [1 - 1 / f1l, 1 - 1 / f1u],
-                                 [l2 * k / (1 + l2 * (k - 1)),
-                                  u2 * k / (1 + u2 * (k - 1))],
-                                 [1 - 1 / f3l, 1 - 1 / f3u]])
-
-    return postprocess_dataframe(stats)
+    return _postprocess_dataframe(stats)

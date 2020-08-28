@@ -4,9 +4,10 @@ import pandas as pd
 import pandas_flavor as pf
 from scipy.stats import t, norm
 from scipy.linalg import pinv, pinvh, lstsq
+from pingouin.config import options
 from pingouin.utils import remove_na as rm_na
 from pingouin.utils import _flatten_list as _fl
-from pingouin.utils import postprocess_dataframe
+from pingouin.utils import _postprocess_dataframe
 
 __all__ = ['linear_regression', 'logistic_regression', 'mediation_analysis']
 
@@ -459,7 +460,7 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
         stats.update(reli)
 
     if as_dataframe:
-        stats = postprocess_dataframe(pd.DataFrame(stats))
+        stats = _postprocess_dataframe(pd.DataFrame(stats))
         stats.df_model_ = df_model
         stats.df_resid_ = df_resid
         stats.residuals_ = 0  # Trick to avoid Pandas warning
@@ -896,7 +897,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     stats = {'names': names, 'coef': coef, 'se': se, 'z': z_scores,
              'pval': pval, ll_name: ll, ul_name: ul}
     if as_dataframe:
-        return postprocess_dataframe(pd.DataFrame(stats))
+        return _postprocess_dataframe(pd.DataFrame(stats))
     else:
         return stats
 
@@ -1085,13 +1086,13 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     >>> from pingouin import mediation_analysis, read_dataset
     >>> df = read_dataset('mediation')
     >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05,
-    ...                    seed=42).round(3)
-           path   coef     se   pval  CI[2.5%]  CI[97.5%]  sig
-    0     M ~ X  0.561  0.094  0.000     0.374      0.749  Yes
-    1     Y ~ M  0.654  0.086  0.000     0.484      0.825  Yes
-    2     Total  0.396  0.111  0.001     0.176      0.617  Yes
-    3    Direct  0.040  0.110  0.719    -0.178      0.257   No
-    4  Indirect  0.357  0.083  0.000     0.220      0.538  Yes
+    ...                    seed=42)
+           path      coef        se          pval  CI[2.5%]  CI[97.5%]  sig
+    0     M ~ X  0.561015  0.094480  4.391362e-08  0.373522   0.748509  Yes
+    1     Y ~ M  0.654173  0.085831  1.612674e-11  0.483844   0.824501  Yes
+    2     Total  0.396126  0.111160  5.671128e-04  0.175533   0.616719  Yes
+    3    Direct  0.039604  0.109648  7.187429e-01 -0.178018   0.257226   No
+    4  Indirect  0.356522  0.083313  0.000000e+00  0.219818   0.537654  Yes
 
     2. Return the indirect bootstrapped beta coefficients
 
@@ -1180,6 +1181,11 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     M_val = data[m].to_numpy()  # M as target (no covariates)
     y_val = data[y].to_numpy()  # y as target (no covariates)
 
+    # For max precision, make sure rounding is disabled
+    old_options = options.copy()
+    options.clear()
+    options['round'] = None
+
     # M(j) ~ X + covar
     sxm = {}
     for idx, j in enumerate(m):
@@ -1247,11 +1253,10 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     stats = stats.append(indirect, ignore_index=True)
     stats = stats.rename(columns={'names': 'path'})
 
-    # Round - Disabled in Pingouin v0.3.4
-    # col_to_round = ['coef', 'se', ll_name, ul_name]
-    # stats[col_to_round] = stats[col_to_round].round(4)
+    # Restore options
+    options.update(old_options)
 
     if return_dist:
-        return postprocess_dataframe(stats), np.squeeze(ab_estimates)
+        return _postprocess_dataframe(stats), np.squeeze(ab_estimates)
     else:
-        return postprocess_dataframe(stats)
+        return _postprocess_dataframe(stats)

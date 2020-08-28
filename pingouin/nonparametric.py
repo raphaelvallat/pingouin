@@ -4,7 +4,7 @@ import scipy
 import numpy as np
 import pandas as pd
 from pingouin import (remove_na, remove_rm_na, _check_dataframe,
-                      postprocess_dataframe)
+                      _postprocess_dataframe)
 
 __all__ = ["mad", "madmedianrule", "mwu", "wilcoxon", "kruskal", "friedman",
            "cochran", "harrelldavis"]
@@ -292,16 +292,13 @@ def mwu(x, y, tail='two-sided'):
     rbc = 1 - (2 * uval) / diff.size  # diff.size = x.size * y.size
 
     # Fill output DataFrame
-    stats = pd.DataFrame({}, index=['MWU'])
-    stats['U-val'] = uval
-    stats['tail'] = tail
-    stats['p-val'] = pval
-    stats['RBC'] = rbc
-    stats['CLES'] = cles
-
-    col_order = ['U-val', 'tail', 'p-val', 'RBC', 'CLES']
-    stats = stats.reindex(columns=col_order)
-    return postprocess_dataframe(stats)
+    stats = pd.DataFrame({
+        'U-val': uval,
+        'tail': tail,
+        'p-val': pval,
+        'RBC': rbc,
+        'CLES': cles}, index=['MWU'])
+    return _postprocess_dataframe(stats)
 
 
 def wilcoxon(x, y, tail='two-sided'):
@@ -469,16 +466,13 @@ def wilcoxon(x, y, tail='two-sided'):
     rbc = r_plus / rsum - r_minus / rsum
 
     # Fill output DataFrame
-    stats = pd.DataFrame({}, index=['Wilcoxon'])
-    stats['W-val'] = wval
-    stats['tail'] = tail
-    stats['p-val'] = pval
-    stats['RBC'] = rbc
-    stats['CLES'] = cles
-
-    col_order = ['W-val', 'tail', 'p-val', 'RBC', 'CLES']
-    stats = stats.reindex(columns=col_order)
-    return postprocess_dataframe(stats)
+    stats = pd.DataFrame({
+        'W-val': wval,
+        'tail': tail,
+        'p-val': pval,
+        'RBC': rbc,
+        'CLES': cles}, index=['Wilcoxon'])
+    return _postprocess_dataframe(stats)
 
 
 def kruskal(data=None, dv=None, between=None, detailed=False):
@@ -562,7 +556,7 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
                           'H': H,
                           'p-unc': p_unc,
                           }, index=['Kruskal'])
-    return postprocess_dataframe(stats)
+    return _postprocess_dataframe(stats)
 
 
 def friedman(data=None, dv=None, within=None, subject=None):
@@ -664,7 +658,7 @@ def friedman(data=None, dv=None, within=None, subject=None):
                           'Q': Q,
                           'p-unc': p_unc,
                           }, index=['Friedman'])
-    return postprocess_dataframe(stats)
+    return _postprocess_dataframe(stats)
 
 
 def cochran(data=None, dv=None, within=None, subject=None):
@@ -755,7 +749,7 @@ def cochran(data=None, dv=None, within=None, subject=None):
                           'p-unc': p_unc,
                           }, index=['cochran'])
 
-    return postprocess_dataframe(stats)
+    return _postprocess_dataframe(stats)
 
 
 def harrelldavis(x, quantile=0.5, axis=-1):

@@ -13,7 +13,6 @@ from pingouin import read_dataset
 from pingouin.regression import (linear_regression, logistic_regression,
                                  mediation_analysis, _pval_from_bootci)
 
-
 # 1st dataset: mediation
 df = read_dataset('mediation')
 df['Zero'] = 0

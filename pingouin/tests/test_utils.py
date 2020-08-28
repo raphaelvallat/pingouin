@@ -6,7 +6,7 @@ import pingouin
 
 from unittest import TestCase
 from pingouin import read_dataset
-from pingouin.utils import (print_table, postprocess_dataframe,
+from pingouin.utils import (print_table, _postprocess_dataframe,
                             _get_round_setting_for,
                             _perm_pval, remove_rm_na,
                             _check_eftype, _check_dataframe,
@@ -31,8 +31,8 @@ class TestUtils(TestCase):
         df3['A'] = 0
         print_table(df3, tablefmt='html', floatfmt='.3f')
 
-    def test_postprocess_dataframe(self):
-        """Test function postprocess_dataframe."""
+    def test__postprocess_dataframe(self):
+        """Test function _postprocess_dataframe."""
         df2 = df.copy()
         # add some more values and give a stringy index
         df2.Values = [1.54321, 5.87654, 8.23456, 3.45678]
@@ -52,7 +52,7 @@ class TestUtils(TestCase):
         df_expected.Values = [1.54321, 5.877, 8.235, 3.457]
         df_expected.Values2 = [1.5432, 5.88, 8.2346, 3.0]
 
-        df2 = postprocess_dataframe(df2)
+        df2 = _postprocess_dataframe(df2)
         pd.testing.assert_frame_equal(df2, df_expected)
 
         # restore old options
