@@ -536,7 +536,7 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
     data['rank'] = scipy.stats.rankdata(data[dv])
 
     # Find the total of rank per groups
-    grp = data.groupby(between)['rank']
+    grp = data.groupby(between, observed=True)['rank']
     sum_rk_grp = grp.sum().to_numpy()
     n_per_grp = grp.count().to_numpy()
 
@@ -612,6 +612,13 @@ def friedman(data=None, dv=None, within=None, subject=None):
     # Check data
     _check_dataframe(dv=dv, within=within, data=data, subject=subject,
                      effects='within')
+
+    # Convert Categorical columns to string
+    # This is important otherwise all the groupby will return different results
+    # unless we specify .groupby(..., observed = True).
+    for c in [subject, within]:
+        if data[c].dtype.name == 'category':
+            data[c] = data[c].astype(str)
 
     # Collapse to the mean
     data = data.groupby([subject, within]).mean().reset_index()
@@ -724,6 +731,13 @@ def cochran(data=None, dv=None, within=None, subject=None):
     # Check data
     _check_dataframe(dv=dv, within=within, data=data, subject=subject,
                      effects='within')
+
+    # Convert Categorical columns to string
+    # This is important otherwise all the groupby will return different results
+    # unless we specify .groupby(..., observed = True).
+    for c in [subject, within]:
+        if data[c].dtype.name == 'category':
+            data[c] = data[c].astype(str)
 
     # Remove NaN
     if data[dv].isnull().any():

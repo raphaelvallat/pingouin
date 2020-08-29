@@ -211,7 +211,7 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
             stats = pd.DataFrame([])
             assert group in data.columns
             assert dv in data.columns
-            grp = data.groupby(group, sort=False)
+            grp = data.groupby(group, observed=True, sort=False)
             cols = grp.groups.keys()
             for _, tmp in grp:
                 stats = stats.append(normality(tmp[dv].to_numpy(),
@@ -348,7 +348,7 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
             # Long-format
             assert group in data.columns
             assert dv in data.columns
-            grp = data.groupby(group)[dv]
+            grp = data.groupby(group, observed=True)[dv]
             assert grp.ngroups > 1, 'Data must have at least two columns.'
             statistic, p = func(*grp.apply(list))
     elif isinstance(data, list):

@@ -9,8 +9,17 @@ from pingouin import read_dataset
 # Generate random data for ANOVA
 df = read_dataset('mixed_anova.csv')
 
+# With missing values
 df_nan = df.copy()
 df_nan.iloc[[4, 15], 0] = np.nan
+
+# With categorical!
+df_cat = df.copy()
+df_cat[['Time', 'Group', 'Subject']] = df_cat[[
+    'Time', 'Group', 'Subject']].astype('category')
+# Let's complicate things even more and add "ghost" Categories
+df_cat['Time'].cat.add_categories('Casper', inplace=True)
+df_cat['Group'].cat.add_categories('The Friendly Ghost', inplace=True)
 
 # Create random normal variables
 np.random.seed(1234)
@@ -186,6 +195,18 @@ class TestParametric(TestCase):
         with pytest.raises(ValueError):
             anova(dv='Pain threshold', between=[], data=df_pain)
 
+        # Unbalanced and with missing values AND between as a categorical
+        df_paincat = df_pain.copy()
+        df_paincat['Hair color'] = df_paincat['Hair color'].astype('category')
+        df_paincat['Hair color'].cat.add_categories('Bald', inplace=True)
+        aov = df_paincat.anova(dv='Pain threshold',
+                               between='Hair color').round(3)
+        assert aov.at[0, 'ddof1'] == 3
+        assert aov.at[0, 'ddof2'] == 13
+        assert aov.at[0, 'F'] == 4.359
+        assert aov.at[0, 'p-unc'] == 0.025
+        assert aov.at[0, 'np2'] == 0.501
+
         # Two-way ANOVA with balanced design
         df_aov2 = read_dataset('anova2')
         aov2 = anova(dv="Yield", between=["Blend", "Crop"],
@@ -316,6 +337,13 @@ class TestParametric(TestCase):
         assert aov.at[0, 'p-unc'] == .023
         assert aov.at[0, 'np2'] == .062
 
+        # Same but with categorical columns
+        aov = rm_anova(dv='Scores', within='Time', subject='Subject',
+                       data=df_cat, correction='auto', detailed=True).round(3)
+        assert aov.at[0, 'F'] == 3.913
+        assert aov.at[0, 'p-unc'] == .023
+        assert aov.at[0, 'np2'] == .062
+
         # With different effect sizes
         aov = rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
                        correction='auto', effsize="n2").round(3)
@@ -345,6 +373,18 @@ class TestParametric(TestCase):
         data = read_dataset('rm_anova2')
         aov = rm_anova(data=data, subject='Subject', within=['Time', 'Metric'],
                        dv='Performance').round(3)
+        array_equal(aov.loc[:, 'MS'], [828.817, 682.617, 112.217])
+        array_equal(aov.loc[:, 'F'], [33.852, 26.959, 12.632])
+        array_equal(aov.loc[:, 'np2'], [0.790, 0.750, 0.584])
+        array_equal(aov.loc[:, 'eps'], [1., 0.969, 0.727])
+
+        # With categorical
+        data_cat = data.copy()
+        data_cat[['Subject', 'Time', 'Metric']] = \
+            data_cat[['Subject', 'Time', 'Metric']].astype('category')
+        data_cat['Time'].cat.add_categories('Casper', inplace=True)
+        aov = rm_anova(data=data_cat, subject='Subject',
+                       within=['Time', 'Metric'], dv='Performance').round(3)
         array_equal(aov.loc[:, 'MS'], [828.817, 682.617, 112.217])
         array_equal(aov.loc[:, 'F'], [33.852, 26.959, 12.632])
         array_equal(aov.loc[:, 'np2'], [0.790, 0.750, 0.584])
@@ -386,6 +426,19 @@ class TestParametric(TestCase):
         assert aov.at[1, 'eps'] == 0.999
         assert aov.at[1, 'W-spher'] == 0.999
         assert round(aov.at[1, 'p-GG-corr'], 2) == 0.02
+        # With categorical: should be the same
+        aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
+                          between='Group', data=df_cat,
+                          correction=True).round(3)
+        array_equal(aov.loc[:, 'SS'], [5.460, 7.628, 5.167])
+        array_equal(aov.loc[:, 'DF1'], [1, 2, 2])
+        array_equal(aov.loc[:, 'DF2'], [58, 116, 116])
+        array_equal(aov.loc[:, 'F'], [5.052, 4.027, 2.728])
+        array_equal(aov.loc[:, 'np2'], [0.080, 0.065, 0.045])
+        assert aov.at[1, 'eps'] == 0.999
+        assert aov.at[1, 'W-spher'] == 0.999
+        assert round(aov.at[1, 'p-GG-corr'], 2) == 0.02
+
         # Same with different effect sizes (compare with JASP)
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
                           between='Group', data=df, effsize="n2").round(3)

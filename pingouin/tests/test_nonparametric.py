@@ -104,10 +104,16 @@ class TestNonParametric(TestCase):
         df = pd.DataFrame({'DV': np.r_[x, y, z],
                            'Time': np.repeat(['A', 'B', 'C'], 100),
                            'Subject': np.tile(np.arange(100), 3)})
-        friedman(data=df, dv='DV', subject='Subject', within='Time')
         summary = friedman(data=df, dv='DV', within='Time', subject='Subject')
         # Compare with SciPy built-in function
         from scipy import stats
+        Q, p = stats.friedmanchisquare(x, y, z)
+        assert np.isclose(Q, summary.at['Friedman', 'Q'])
+        assert np.isclose(p, summary.at['Friedman', 'p-unc'])
+        # With Categorical
+        df['Time'] = df['Time'].astype('category')
+        df['Time'] = df['Time'].cat.add_categories("Unused")
+        summary = friedman(data=df, dv='DV', within='Time', subject='Subject')
         Q, p = stats.friedmanchisquare(x, y, z)
         assert np.isclose(Q, summary.at['Friedman', 'Q'])
         assert np.isclose(p, summary.at['Friedman', 'p-unc'])
@@ -137,7 +143,13 @@ class TestNonParametric(TestCase):
         st = cochran(dv='Energetic', within='Time', subject='Subject', data=df)
         assert round(st.at['cochran', 'Q'], 3) == 6.706
         assert np.isclose(st.at['cochran', 'p-unc'], 0.034981)
-        cochran(dv='Energetic', within='Time', subject='Subject', data=df)
+        # With Categorical
+        df['Time'] = df['Time'].astype('category')
+        df['Subject'] = df['Subject'].astype('category')
+        df['Time'] = df['Time'].cat.add_categories("Unused")
+        st = cochran(dv='Energetic', within='Time', subject='Subject', data=df)
+        assert round(st.at['cochran', 'Q'], 3) == 6.706
+        assert np.isclose(st.at['cochran', 'p-unc'], 0.034981)
         # With a NaN value
         df.loc[2, 'Energetic'] = np.nan
         cochran(dv='Energetic', within='Time', subject='Subject', data=df)

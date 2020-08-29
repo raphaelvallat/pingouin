@@ -512,6 +512,13 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     _check_dataframe(dv=dv, within=within, data=data, subject=subject,
                      effects='within')
 
+    # Convert Categorical columns to string
+    # This is important otherwise all the groupby will return different results
+    # unless we specify .groupby(..., observed = True).
+    for c in [subject, within]:
+        if data[c].dtype.name == 'category':
+            data[c] = data[c].astype(str)
+
     # Collapse to the mean
     data = data.groupby([subject, within]).mean().reset_index()
 
@@ -633,6 +640,13 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
     # Validate the dataframe
     _check_dataframe(dv=dv, within=within, data=data, subject=subject,
                      effects='within')
+
+    # Convert Categorical columns to string
+    # This is important otherwise all the groupby will return different results
+    # unless we specify .groupby(..., observed = True).
+    for c in [subject, a, b]:
+        if data[c].dtype.name == 'category':
+            data[c] = data[c].astype(str)
 
     # Remove NaN
     if data[[subject, a, b, dv]].isnull().any().any():
@@ -947,7 +961,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
     N = data[dv].size
 
     # Calculate sums of squares
-    grp = data.groupby(between)[dv]
+    grp = data.groupby(between, observed=True)[dv]
     # Between effect
     ssbetween = ((grp.mean() - data[dv].mean())**2 * grp.count()).sum()
     # Within effect (= error between)
@@ -1013,7 +1027,7 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
-    grp_both = data.groupby(between)[dv]
+    grp_both = data.groupby(between, observed=True)[dv]
 
     if grp_both.count().nunique() == 1:
         # BALANCED DESIGN
@@ -1285,7 +1299,7 @@ def welch_anova(data=None, dv=None, between=None):
     ddof1 = r - 1
 
     # Compute weights and ajusted means
-    grp = data.groupby(between)[dv]
+    grp = data.groupby(between, observed=True)[dv]
     weights = grp.count() / grp.var()
     adj_grandmean = (weights * grp.mean()).sum() / weights.sum()
 
@@ -1412,7 +1426,15 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     _check_dataframe(dv=dv, within=within, between=between, data=data,
                      subject=subject, effects='interaction')
 
+    # Convert Categorical columns to string
+    # This is important otherwise all the groupby will return different results
+    # unless we specify .groupby(..., observed = True).
+    for c in [within, between, subject]:
+        if data[c].dtype.name == 'category':
+            data[c] = data[c].astype(str)
+
     # Collapse to the mean
+    # Important to set observed = True when working with categorical
     data = data.groupby([subject, within, between]).mean().reset_index()
 
     # Remove NaN

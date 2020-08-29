@@ -342,19 +342,21 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             else:
                 # The `remove_rm_na` also aggregate other repeated measures
                 # factor using the mean. Here, we ensure this behavior too.
-                data = data.groupby([subject, within])[dv].mean().reset_index()
+                data = data.groupby([subject, within],
+                                    observed=True)[dv].mean().reset_index()
             # Now we check that subjects are present in all conditions
             # For example, if we have four subjects and 3 conditions,
             # and if subject 2 have missing data at the third condition,
             # we still need a row with missing values for this subject.
-            if data.groupby(within)[subject].count().nunique() != 1:
+            if data.groupby(within,
+                            observed=True)[subject].count().nunique() != 1:
                 raise ValueError("Repeated measures dataframe is not balanced."
                                  " `Subjects` must have the same number of "
                                  "elements in all conditions, "
                                  "even when missing values are present.")
 
         # Extract effects
-        grp_col = data.groupby(col, sort=False)[dv]
+        grp_col = data.groupby(col, sort=False, observed=True)[dv]
         labels = grp_col.groups.keys()
         # Number and labels of possible comparisons
         if len(labels) >= 2:
@@ -469,7 +471,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             # Introduced in Pingouin v0.3.2
             if all([agg[i], marginal]):
                 tmp = data.groupby([subject, f], as_index=False,
-                                   sort=False).mean()
+                                   observed=True, sort=False).mean()
             else:
                 tmp = data
             # Recursive call to pairwise_ttests
@@ -492,9 +494,9 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         # Then compute the interaction between the factors
         if interaction:
             nrows = stats.shape[0]
-            grp_fac1 = data.groupby(factors[0], sort=False)[dv]
-            grp_fac2 = data.groupby(factors[1], sort=False)[dv]
-            grp_both = data.groupby(factors, sort=False)[dv]
+            grp_fac1 = data.groupby(factors[0], observed=True, sort=False)[dv]
+            grp_fac2 = data.groupby(factors[1], observed=True, sort=False)[dv]
+            grp_both = data.groupby(factors, observed=True, sort=False)[dv]
             labels_fac1 = grp_fac1.groups.keys()
             labels_fac2 = grp_fac2.groups.keys()
             # comb_fac1 = list(combinations(labels_fac1, 2))
@@ -700,7 +702,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     options.update(old_options)  # Restore original options
     df = aov.at[1, 'DF']
     ng = aov.at[0, 'DF'] + 1
-    grp = data.groupby(between)[dv]  # default is sort=True
+    grp = data.groupby(between, observed=True)[dv]  # default is sort=True
     # Careful: pd.unique does NOT sort whereas numpy does
     # The line below should be equal to labels = np.unique(data[between])
     # However, this does not work if between is a Categorical column, because
@@ -863,7 +865,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
 
     # Extract infos
     ng = data[between].nunique()
-    grp = data.groupby(between)[dv]  # default is sort=True
+    grp = data.groupby(between, observed=True)[dv]  # default is sort=True
     # Careful: pd.unique does NOT sort whereas numpy does
     # The line below should be equal to labels = np.unique(data[between])
     # However, this does not work if between is a Categorical column, because

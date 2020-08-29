@@ -299,13 +299,13 @@ def remove_rm_na(data=None, dv=None, within=None, subject=None,
                          "subject column. Please remove them manually.")
 
     # Check if more within-factors are present and if so, aggregate
-    if (data.groupby(idx_cols).count() > 1).any().any():
+    if (data.groupby(idx_cols, observed=True).count() > 1).any().any():
         # Make sure that we keep the non-numeric columns when aggregating
         # This is disabled by default to avoid any confusion.
         # all_others = all_cols.difference(idx_cols)
         # all_num = data[all_others].select_dtypes(include='number').columns
         # agg = {c: aggregate if c in all_num else 'first' for c in all_others}
-        data = data.groupby(idx_cols).agg(aggregate)
+        data = data.groupby(idx_cols, observed=True).agg(aggregate)
     else:
         # Set subject + within factors as index.
         # Sorting is done to avoid performance warning when dropping.
