@@ -1132,12 +1132,12 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
         assert all([c in keys for c in covar]), (
             'covar not in data, not num or single unique value.'
         )
-        # Assert that there is at least one combination
-        if stats.shape[0] == 0:
-            raise ValueError("No column combination found. Please make sure "
-                             "that the specified columns and covar exist in "
-                             "the dataframe, are numeric, and contain at "
-                             "least two unique values.")
+        # # Assert that there is at least one combination
+        # if stats.shape[0] == 0:
+        #     raise ValueError("No column combination found. Please make sure "
+        #                      "that the specified columns and covar exist in "
+        #                      "the dataframe, are numeric, and contain at "
+        #                      "least two unique values.")
 
     # Listwise deletion of missing values
     if nan_policy == 'listwise':
