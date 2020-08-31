@@ -881,7 +881,10 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
         Covariate(s) for partial correlation. Must be one or more columns
         in data. Use a list if there are more than one covariate. If
         ``covar`` is not None, a partial correlation will be computed using
-        :py:func:`pingouin.partial_corr` function.
+        :py:func:`pingouin.partial_corr` function. Covariate(s) overlapping
+        with specific combinations of columns will be disregarded for these
+        combinations. If ``covar`` is None, a non-partial correlation will be
+        computed using :py:func:`pingouin.corr` function.
     tail : string
         Specify whether to return ``'one-sided'`` or ``'two-sided'`` p-value.
         Note that the former are simply half the latter.
@@ -945,8 +948,8 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     output than the :py:func:`pandas.DataFrame.corr()` method (i.e. p-values,
     confidence interval, Bayes Factor...). This comes however at
     an increased computational cost. While this should not be discernible for
-    dataframe with less than 10,000 rows and/or less than 20 columns, this
-    function can be slow for very large dataset.
+    a dataframe with less than 10,000 rows and/or less than 20 columns, this
+    function can be slow for very large datasets.
 
     A faster alternative to get the r-values and p-values in a matrix format is
     to use the :py:func:`pingouin.rcorr` function, which works directly as a
@@ -958,12 +961,12 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     <https://github.com/raphaelvallat/pingouin/blob/master/notebooks/04_Correlations.ipynb>`_
     for more details.
 
-    If ``covar`` is specified, this function will compute the pairwise partial
-    correlation between the variables. If you are only interested in computing
-    the partial correlation matrix (i.e. the raw pairwise partial correlation
-    coefficient matrix, without the p-values, sample sizes, etc), a better
-    alternative is to use the :py:func:`pingouin.pcorr` function (see
-    example 7).
+    If and only if ``covar`` is specified, this function will compute the
+    pairwise partial correlation between the variables. If you are only
+    interested in computing the partial correlation matrix (i.e. the raw
+    pairwise partial correlation coefficient matrix, without the p-values,
+    sample sizes, etc), a better alternative is to use the
+    :py:func:`pingouin.pcorr` function (see example 7).
 
     Examples
     --------
@@ -996,6 +999,7 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     >>> pcor = pairwise_corr(data, covar='Neuroticism')  # One covariate
     >>> pcor = pairwise_corr(data, covar=['Neuroticism', 'Openness'])  # Two
+    >>> pcor = pairwise_corr(data, covar=data.columns)  # All, except x and y
 
     7. Pairwise partial correlation matrix using :py:func:`pingouin.pcorr`
 
@@ -1117,39 +1121,49 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     # Now we check if covariates are present
     if covar is not None:
-        assert isinstance(covar, (str, list)), 'covar must be list or string.'
+        assert isinstance(covar, (str, list, pd.Index)), (
+            'covar must be list or string.'
+        )
         if isinstance(covar, str):
             covar = [covar]
+        elif isinstance(covar, pd.Index):
+            covar = covar.tolist()
         # Check that columns exist and are numeric
-        assert all([c in keys for c in covar]), 'covar not in data or not num.'
-        # And we make sure that X or Y does not contain covar
-        stats = stats[~stats[['X', 'Y']].isin(covar).any(1)]
-        stats = stats.reset_index(drop=True)
+        assert all([c in keys for c in covar]), (
+            'covar not in data, not num or single unique value.'
+        )
+        # Assert that there is at least one combination
         if stats.shape[0] == 0:
             raise ValueError("No column combination found. Please make sure "
                              "that the specified columns and covar exist in "
-                             "the dataframe, are numeric, and contains at "
+                             "the dataframe, are numeric, and contain at "
                              "least two unique values.")
 
     # Listwise deletion of missing values
     if nan_policy == 'listwise':
         all_cols = np.unique(stats[['X', 'Y']].to_numpy()).tolist()
         if covar is not None:
-            all_cols.extend(covar)
+            # Extend cols to check for NaN by covar if they do not overlap
+            all_cols.extend([_cvr for _cvr in covar if _cvr not in all_cols])
         data = data[all_cols].dropna()
 
     # Compute pairwise correlations and fill dataframe
     dvs = ['n', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'power']
     dvs_out = dvs + ['outliers']
     dvs_bf10 = dvs + ['BF10']
+    covar_strings = []  # List for strings of covar combinations
     for i in range(stats.shape[0]):
         col1, col2 = stats.at[i, 'X'], stats.at[i, 'Y']
         if covar is None:
             cor_st = corr(data[col1].to_numpy(), data[col2].to_numpy(),
                           tail=tail, method=method)
         else:
-            cor_st = partial_corr(data=data, x=col1, y=col2, covar=covar,
+            # Select non-overlapping covars for the current x- and y-columns
+            # and calculate partial correlation
+            _covar = [_cvr for _cvr in covar if _cvr not in (col1, col2)]
+            cor_st = partial_corr(data=data, x=col1, y=col2, covar=_covar,
                                   tail=tail, method=method)
+            covar_strings.append(str(_covar))  # Store used covars in list
         cor_st_keys = cor_st.columns.tolist()
         if 'BF10' in cor_st_keys:
             stats.loc[i, dvs_bf10] = cor_st[dvs_bf10].to_numpy()
@@ -1187,6 +1201,6 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     # Add covariates names if present
     if covar is not None:
-        stats.insert(loc=3, column='covar', value=str(covar))
+        stats.insert(loc=3, column='covar', value=covar_strings)
 
     return stats

@@ -495,8 +495,16 @@ class TestPairwise(TestCase):
         pairwise_corr(data, covar=['Age', 'Neuroticism'])
         with pytest.raises(AssertionError):
             pairwise_corr(data, covar=['Age', 'Gender'])
-        with pytest.raises(ValueError):
-            pairwise_corr(data, columns=['Neuroticism', 'Age'], covar='Age')
+        # with pytest.raises(ValueError):
+        #     pairwise_corr(data, columns=['Neuroticism', 'Age'], covar='Age')
+        # Partial pairwise with overlapping covariates
+        pairwise_corr(
+            data.drop(columns=['One', 'Gender']),
+            covar=data.drop(columns=['One', 'Gender']).columns
+        )
+        pairwise_corr(data, columns='Neuroticism', covar='Age')
+        with pytest.raises(AssertionError):
+            pairwise_corr(data, columns=['Neuroticism', 'Age'], covar='One')
         # Partial pairwise with missing values
         data.loc[[4, 5, 8, 20, 22], 'Age'] = np.nan
         data.loc[[10, 12], 'Neuroticism'] = np.nan
@@ -539,6 +547,7 @@ class TestPairwise(TestCase):
         pairwise_corr(data, covar=[('Psycho', 'Anxiety')])
         pairwise_corr(data, columns=[('Behavior', 'Rating')],
                       covar=[('Psycho', 'Anxiety')])
+        pairwise_corr(data, covar=data.columns)
         # With missing values
         data.iloc[2, [2, 3]] = np.nan
         data.iloc[[1, 4], [1, 4]] = np.nan
