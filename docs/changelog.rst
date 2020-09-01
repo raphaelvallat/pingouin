@@ -3,6 +3,35 @@
 What's new
 ##########
 
+v0.3.8 (dev)
+------------
+
+**Bugfixes**
+
+a. Fix a bug in in :py:func:`pingouin.ttest` in which the confidence intervals for one-sample T-test with y != 0 were invalid (e.g. ``pg.ttest(x=[4, 6, 7, 4], y=4)``). See `issue 119 <https://github.com/raphaelvallat/pingouin/issues/119>`_.
+
+**New features**
+
+a. Added a `pingouin.options` module which can be used to set default options. For example, one can set the default decimal rounding of the output dataframe, either for the entire dataframe, per column, per row, or per cell. See `PR120 <https://github.com/raphaelvallat/pingouin/pull/120>`_. For more details, please refer to `notebooks/06_others.ipynb <https://github.com/raphaelvallat/pingouin/blob/master/notebooks/06_Others.ipynb>`_.
+
+   .. code-block:: python
+
+      import pingouin as pg
+      pg.options['round'] = None  # Default: no rounding
+      pg.options['round'] = 4
+      pg.options['round.column.CI95%'] = 2
+      pg.options['round.row.T-test'] = 2
+      pg.options['round.cell.[T-test]x[CI95%]'] = 2
+
+
+**Enhancements**
+
+a. :py:func:`pingouin.linear_regression` now returns the processed X and y variables (Xw and yw for WLS) and the predicted values if ``as_dataframe=False``. See `issue 112 <https://github.com/raphaelvallat/pingouin/issues/112>`_.
+b. The Common Language Effect Size (CLES) in :py:func:`pingouin.mwu` is now calculated using the formula given by Vargha and Delaney 2000, which works better when ties are present in data. This is consistent with the :py:func:`pingouin.wilcoxon` and :py:func:`pingouin.compute_effsize` functions. See `issue 114 <https://github.com/raphaelvallat/pingouin/issues/114>`_.
+c. Better handling of kwargs arguments in :py:func:`pingouin.plot_paired` (see `PR 116 <https://github.com/raphaelvallat/pingouin/pull/116>`_).
+d. Added ``boxplot_in_front`` argument to the :py:func:`pingouin.plot_paired`. When set to True, the boxplot is displayed in front of the lines with a slight transparency. This can make the overall plot more readable when plotting data from a large number of subjects. (see `PR 117 <https://github.com/raphaelvallat/pingouin/pull/117>`_).
+e. Better handling of Categorical columns in several functions (e.g. ANOVA). See `issue 122 <https://github.com/raphaelvallat/pingouin/issues/122>`_.
+
 v0.3.7 (July 2020)
 ------------------
 

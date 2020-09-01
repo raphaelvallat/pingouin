@@ -2,8 +2,9 @@ import warnings
 import scipy.stats
 import numpy as np
 import pandas as pd
-from .utils import remove_na
-from .utils import _flatten_list as _fl
+from pingouin.utils import _flatten_list as _fl
+from pingouin.utils import remove_na, _postprocess_dataframe
+
 
 __all__ = ["gzscore", "normality", "homoscedasticity", "anderson",
            "epsilon", "sphericity"]
@@ -157,15 +158,15 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
 
     >>> data = pg.read_dataset('mediation')
     >>> data.loc[1, 'X'] = np.nan
-    >>> pg.normality(data, method='normaltest')
-                   W           pval  normal
-    X       1.791839   4.082320e-01    True
-    M       0.492349   7.817859e-01    True
-    Y       0.348676   8.400129e-01    True
-    Mbin  839.716156  4.549393e-183   False
-    Ybin  814.468158  1.381932e-177   False
-    W1     24.815974   4.085825e-06   False
-    W2     43.400187   3.765036e-10   False
+    >>> pg.normality(data, method='normaltest').round(3)
+                W   pval  normal
+    X       1.792  0.408    True
+    M       0.492  0.782    True
+    Y       0.349  0.840    True
+    Mbin  839.716  0.000   False
+    Ybin  814.468  0.000   False
+    W1     24.816  0.000   False
+    W2     43.400  0.000   False
 
     3. Pandas Series
 
@@ -210,14 +211,14 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
             stats = pd.DataFrame([])
             assert group in data.columns
             assert dv in data.columns
-            grp = data.groupby(group, sort=False)
+            grp = data.groupby(group, observed=True, sort=False)
             cols = grp.groups.keys()
             for _, tmp in grp:
                 stats = stats.append(normality(tmp[dv].to_numpy(),
                                                method=method,
                                                alpha=alpha))
             stats.index = cols
-    return stats
+    return _postprocess_dataframe(stats)
 
 
 def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
@@ -347,7 +348,7 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
             # Long-format
             assert group in data.columns
             assert dv in data.columns
-            grp = data.groupby(group)[dv]
+            grp = data.groupby(group, observed=True)[dv]
             assert grp.ngroups > 1, 'Data must have at least two columns.'
             statistic, p = func(*grp.apply(list))
     elif isinstance(data, list):
@@ -364,13 +365,10 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
     equal_var = True if p > alpha else False
     stat_name = 'W' if method.lower() == 'levene' else 'T'
 
-    stats = {
-        stat_name: statistic,
-        'pval': p,
-        'equal_var': equal_var
-    }
+    stats = pd.DataFrame({stat_name: statistic, 'pval': p,
+                          'equal_var': equal_var}, index=[method])
 
-    return pd.DataFrame(stats, columns=stats.keys(), index=[method])
+    return _postprocess_dataframe(stats)
 
 
 def anderson(*args, dist='norm'):

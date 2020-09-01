@@ -93,7 +93,8 @@ class TestCorrelation(TestCase):
         stats = rm_corr(data=df, x='pH', y='PacO2', subject='Subject').round(3)
         assert stats.at["rm_corr", "r"] == -0.507
         assert stats.at["rm_corr", "dof"] == 38
-        assert stats.at["rm_corr", "CI95%"] == str([-0.71, -0.23])
+        assert np.allclose(np.round(stats.at["rm_corr", "CI95%"], 2),
+                           [-0.71, -0.23])
         assert stats.at["rm_corr", "pval"] == 0.001
         # Test with less than 3 subjects (same behavior as R package)
         with pytest.raises(ValueError):

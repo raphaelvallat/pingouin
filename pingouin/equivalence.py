@@ -2,7 +2,8 @@
 # Date: July 2019
 import numpy as np
 import pandas as pd
-from .parametric import ttest
+from pingouin.parametric import ttest
+from pingouin.utils import _postprocess_dataframe
 
 
 __all__ = ["tost"]
@@ -82,5 +83,8 @@ def tost(x, y, bound=1, paired=False, correction=False):
     pval = max(df_a.at['T-test', 'p-val'], df_b.at['T-test', 'p-val'])
 
     # Create output dataframe
-    stats = {'bound': bound, 'dof': df_a.at['T-test', 'dof'], 'pval': pval}
-    return pd.DataFrame.from_records(stats, index=['TOST'])
+    stats = pd.DataFrame({
+        'bound': bound,
+        'dof': df_a.at['T-test', 'dof'],
+        'pval': pval}, index=['TOST'])
+    return _postprocess_dataframe(stats)

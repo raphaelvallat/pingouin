@@ -4,10 +4,12 @@ import numpy as np
 import pandas as pd
 import pandas_flavor as pf
 from itertools import combinations, product
+from pingouin.config import options
 from pingouin.parametric import anova
 from pingouin.multicomp import multicomp
 from pingouin.effsize import compute_effsize, convert_effsize
-from pingouin.utils import remove_rm_na, _check_dataframe, _flatten_list
+from pingouin.utils import (remove_rm_na, _check_dataframe, _flatten_list,
+                            _postprocess_dataframe)
 
 __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
            "pairwise_corr"]
@@ -206,36 +208,72 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
     1. One between-subject factor
 
-    >>> from pingouin import pairwise_ttests, read_dataset
-    >>> df = read_dataset('mixed_anova.csv')
-    >>> pairwise_ttests(dv='Scores', between='Group', data=df) # doctest: +SKIP
+    >>> import pandas as pd
+    >>> import pingouin as pg
+    >>> df = pg.read_dataset('mixed_anova.csv')
+    >>> pg.pairwise_ttests(dv='Scores', between='Group', data=df).round(3)
+      Contrast        A           B  Paired  Parametric     T    dof       Tail  p-unc   BF10  hedges
+    0    Group  Control  Meditation   False        True -2.29  178.0  two-sided  0.023  1.813   -0.34
 
     2. One within-subject factor
 
-    >>> post_hocs = pairwise_ttests(dv='Scores', within='Time',
-    ...                             subject='Subject', data=df)
-    >>> print(post_hocs)  # doctest: +SKIP
+    >>> post_hocs = pg.pairwise_ttests(dv='Scores', within='Time',
+    ...                                subject='Subject', data=df)
+    >>> post_hocs.round(3)
+      Contrast        A        B  Paired  Parametric      T   dof       Tail  p-unc   BF10  hedges
+    0     Time   August  January    True        True -1.740  59.0  two-sided  0.087  0.582  -0.328
+    1     Time   August     June    True        True -2.743  59.0  two-sided  0.008  4.232  -0.483
+    2     Time  January     June    True        True -1.024  59.0  two-sided  0.310  0.232  -0.170
 
     3. Non-parametric pairwise paired test (wilcoxon)
 
-    >>> pairwise_ttests(dv='Scores', within='Time', subject='Subject',
-    ...                 data=df, parametric=False)  # doctest: +SKIP
+    >>> pg.pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+    ...                    data=df, parametric=False).round(3)
+      Contrast        A        B  Paired  Parametric  W-val       Tail  p-unc  hedges
+    0     Time   August  January    True       False  716.0  two-sided  0.144  -0.328
+    1     Time   August     June    True       False  564.0  two-sided  0.010  -0.483
+    2     Time  January     June    True       False  887.0  two-sided  0.840  -0.170
 
     4. Mixed design (within and between) with bonferroni-corrected p-values
 
-    >>> posthocs = pairwise_ttests(dv='Scores', within='Time',
-    ...                            subject='Subject', between='Group',
-    ...                            padjust='bonf', data=df)
+    >>> posthocs = pg.pairwise_ttests(dv='Scores', within='Time',
+    ...                               subject='Subject', between='Group',
+    ...                               padjust='bonf', data=df)
+    >>> posthocs.round(3)
+           Contrast     Time        A           B Paired  Parametric      T   dof       Tail  p-unc  p-corr p-adjust   BF10  hedges
+    0          Time        -   August     January   True        True -1.740  59.0  two-sided  0.087   0.261     bonf  0.582  -0.328
+    1          Time        -   August        June   True        True -2.743  59.0  two-sided  0.008   0.024     bonf  4.232  -0.483
+    2          Time        -  January        June   True        True -1.024  59.0  two-sided  0.310   0.931     bonf  0.232  -0.170
+    3         Group        -  Control  Meditation  False        True -2.248  58.0  two-sided  0.028     NaN      NaN  2.096  -0.573
+    4  Time * Group   August  Control  Meditation  False        True  0.316  58.0  two-sided  0.753   1.000     bonf  0.274   0.081
+    5  Time * Group  January  Control  Meditation  False        True -1.434  58.0  two-sided  0.157   0.471     bonf  0.619  -0.365
+    6  Time * Group     June  Control  Meditation  False        True -2.744  58.0  two-sided  0.008   0.024     bonf  5.593  -0.699
 
     5. Two between-subject factors. The order of the list matters!
 
-    >>> posthocs = pairwise_ttests(dv='Scores', between=['Group', 'Time'],
-    ...                            data=df)
+    >>> pg.pairwise_ttests(dv='Scores', between=['Group', 'Time'],
+    ...                    data=df).round(3)
+           Contrast       Group        A           B Paired  Parametric      T    dof       Tail  p-unc     BF10  hedges
+    0         Group           -  Control  Meditation  False        True -2.290  178.0  two-sided  0.023    1.813  -0.340
+    1          Time           -   August     January  False        True -1.806  118.0  two-sided  0.074    0.839  -0.328
+    2          Time           -   August        June  False        True -2.660  118.0  two-sided  0.009    4.499  -0.483
+    3          Time           -  January        June  False        True -0.934  118.0  two-sided  0.352    0.288  -0.170
+    4  Group * Time     Control   August     January  False        True -0.383   58.0  two-sided  0.703    0.279  -0.098
+    5  Group * Time     Control   August        June  False        True -0.292   58.0  two-sided  0.771    0.272  -0.074
+    6  Group * Time     Control  January        June  False        True  0.045   58.0  two-sided  0.964    0.263   0.011
+    7  Group * Time  Meditation   August     January  False        True -2.188   58.0  two-sided  0.033    1.884  -0.558
+    8  Group * Time  Meditation   August        June  False        True -4.040   58.0  two-sided  0.000  148.302  -1.030
+    9  Group * Time  Meditation  January        June  False        True -1.442   58.0  two-sided  0.155    0.625  -0.367
 
     6. Same but without the interaction
 
-    >>> posthocs = df.pairwise_ttests(dv='Scores', between=['Group', 'Time'],
-    ...                               interaction=False)
+    >>> df.pairwise_ttests(dv='Scores', between=['Group', 'Time'],
+    ...                    interaction=False).round(3)
+      Contrast        A           B  Paired  Parametric      T    dof       Tail  p-unc   BF10  hedges
+    0    Group  Control  Meditation   False        True -2.290  178.0  two-sided  0.023  1.813  -0.340
+    1     Time   August     January   False        True -1.806  118.0  two-sided  0.074  0.839  -0.328
+    2     Time   August        June   False        True -2.660  118.0  two-sided  0.009  4.499  -0.483
+    3     Time  January        June   False        True -0.934  118.0  two-sided  0.352  0.288  -0.170
     """
     from .parametric import ttest
     from .nonparametric import wilcoxon, mwu
@@ -304,19 +342,21 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             else:
                 # The `remove_rm_na` also aggregate other repeated measures
                 # factor using the mean. Here, we ensure this behavior too.
-                data = data.groupby([subject, within])[dv].mean().reset_index()
+                data = data.groupby([subject, within],
+                                    observed=True)[dv].mean().reset_index()
             # Now we check that subjects are present in all conditions
             # For example, if we have four subjects and 3 conditions,
             # and if subject 2 have missing data at the third condition,
             # we still need a row with missing values for this subject.
-            if data.groupby(within)[subject].count().nunique() != 1:
+            if data.groupby(within,
+                            observed=True)[subject].count().nunique() != 1:
                 raise ValueError("Repeated measures dataframe is not balanced."
                                  " `Subjects` must have the same number of "
                                  "elements in all conditions, "
                                  "even when missing values are present.")
 
         # Extract effects
-        grp_col = data.groupby(col, sort=False)[dv]
+        grp_col = data.groupby(col, sort=False, observed=True)[dv]
         labels = grp_col.groups.keys()
         # Number and labels of possible comparisons
         if len(labels) >= 2:
@@ -344,6 +384,11 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         stats.loc[:, 'Tail'] = tail
         stats.loc[:, 'Paired'] = paired
 
+        # For max precision, make sure rounding is disabled
+        old_options = options.copy()
+        options.clear()
+        options['round'] = None
+
         for i in range(stats.shape[0]):
             col1, col2 = stats.at[i, 'A'], stats.at[i, 'B']
             x = grp_col.get_group(col1).to_numpy(dtype=np.float64)
@@ -361,6 +406,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                 else:
                     stat_name = 'U-val'
                     df_ttest = mwu(x, y, tail=tail)
+
+            options.update(old_options)  # restore options
 
             # Compute Hedges / Cohen
             ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
@@ -424,7 +471,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             # Introduced in Pingouin v0.3.2
             if all([agg[i], marginal]):
                 tmp = data.groupby([subject, f], as_index=False,
-                                   sort=False).mean()
+                                   observed=True, sort=False).mean()
             else:
                 tmp = data
             # Recursive call to pairwise_ttests
@@ -447,9 +494,9 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         # Then compute the interaction between the factors
         if interaction:
             nrows = stats.shape[0]
-            grp_fac1 = data.groupby(factors[0], sort=False)[dv]
-            grp_fac2 = data.groupby(factors[1], sort=False)[dv]
-            grp_both = data.groupby(factors, sort=False)[dv]
+            grp_fac1 = data.groupby(factors[0], observed=True, sort=False)[dv]
+            grp_fac2 = data.groupby(factors[1], observed=True, sort=False)[dv]
+            grp_both = data.groupby(factors, observed=True, sort=False)[dv]
             labels_fac1 = grp_fac1.groups.keys()
             labels_fac2 = grp_fac2.groups.keys()
             # comb_fac1 = list(combinations(labels_fac1, 2))
@@ -476,6 +523,11 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             stats.loc[idxiter, 'A'] = combs[:, 1]
             stats.loc[idxiter, 'B'] = combs[:, 2]
 
+            # For max precision, make sure rounding is disabled
+            old_options = options.copy()
+            options.clear()
+            options['round'] = None
+
             for i, comb in enumerate(combs):
                 ic = nrows + i  # Take into account previous rows
                 fac1, col1, col2 = comb
@@ -495,6 +547,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                     else:
                         stat_name = 'U-val'
                         df_ttest = mwu(x, y, tail=tail)
+
+                options.update(old_options)  # restore options
 
                 # Append to stats
                 if return_desc:
@@ -527,7 +581,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         stats['Time'].fillna('-', inplace=True)
         stats.rename(columns={'Time': factors[0]}, inplace=True)
 
-    return stats
+    return _postprocess_dataframe(stats)
 
 
 @pf.register_dataframe_method
@@ -631,8 +685,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
 
     >>> import pingouin as pg
     >>> df = pg.read_dataset('penguins')
-    >>> pt = pg.pairwise_tukey(data=df, dv='body_mass_g', between='species')
-    >>> pt.round(3)
+    >>> df.pairwise_tukey(dv='body_mass_g', between='species').round(3)
                A          B   mean(A)   mean(B)      diff      se       T  p-tukey  hedges
     0     Adelie  Chinstrap  3700.662  3733.088   -32.426  67.512  -0.480    0.881  -0.070
     1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148 -24.495    0.001  -2.967
@@ -641,10 +694,15 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     from pingouin.external.qsturng import psturng
 
     # First compute the ANOVA
+    # For max precision, make sure rounding is disabled
+    old_options = options.copy()
+    options.clear()
+    options['round'] = None
     aov = anova(dv=dv, data=data, between=between, detailed=True)
+    options.update(old_options)  # Restore original options
     df = aov.at[1, 'DF']
     ng = aov.at[0, 'DF'] + 1
-    grp = data.groupby(between)[dv]  # default is sort=True
+    grp = data.groupby(between, observed=True)[dv]  # default is sort=True
     # Careful: pd.unique does NOT sort whereas numpy does
     # The line below should be equal to labels = np.unique(data[between])
     # However, this does not work if between is a Categorical column, because
@@ -686,7 +744,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
                          'p-tukey': pval,
                          effsize: ef,
                          })
-    return stats
+    return _postprocess_dataframe(stats)
 
 
 def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
@@ -790,7 +848,8 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
 
     >>> import pingouin as pg
     >>> df = pg.read_dataset('penguins')
-    >>> pg.pairwise_gameshowell(data=df, dv='body_mass_g', between='species').round(3)
+    >>> pg.pairwise_gameshowell(data=df, dv='body_mass_g',
+    ...                         between='species').round(3)
                A          B   mean(A)   mean(B)      diff      se       T       df   pval  hedges
     0     Adelie  Chinstrap  3700.662  3733.088   -32.426  59.706  -0.543  152.455  0.841  -0.079
     1     Adelie     Gentoo  3700.662  5076.016 -1375.354  58.811 -23.386  249.643  0.001  -2.833
@@ -806,7 +865,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
 
     # Extract infos
     ng = data[between].nunique()
-    grp = data.groupby(between)[dv]  # default is sort=True
+    grp = data.groupby(between, observed=True)[dv]  # default is sort=True
     # Careful: pd.unique does NOT sort whereas numpy does
     # The line below should be equal to labels = np.unique(data[between])
     # However, this does not work if between is a Categorical column, because
@@ -850,7 +909,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
                          'pval': pval,
                          effsize: ef,
                          })
-    return stats
+    return _postprocess_dataframe(stats)
 
 
 @pf.register_dataframe_method
@@ -972,24 +1031,49 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     --------
     1. One-sided spearman correlation corrected for multiple comparisons
 
-    >>> from pingouin import pairwise_corr, read_dataset
-    >>> data = read_dataset('pairwise_corr').iloc[:, 1:]
-    >>> pairwise_corr(data, method='spearman', tail='one-sided',
-    ...               padjust='bonf')  # doctest: +SKIP
+    >>> import pandas as pd
+    >>> import pingouin as pg
+    >>> data = pg.read_dataset('pairwise_corr').iloc[:, 1:]
+    >>> pg.pairwise_corr(data, method='spearman', tail='one-sided',
+    ...                  padjust='bonf').round(3)
+                   X                  Y    method       tail    n      r           CI95%     r2  adj_r2      z  p-unc  p-corr p-adjust  power
+    0    Neuroticism       Extraversion  spearman  one-sided  500 -0.325   [-0.4, -0.24]  0.106   0.102 -0.338  0.000   0.000     bonf  1.000
+    1    Neuroticism           Openness  spearman  one-sided  500 -0.028   [-0.12, 0.06]  0.001  -0.003 -0.028  0.265   1.000     bonf  0.154
+    2    Neuroticism      Agreeableness  spearman  one-sided  500 -0.151  [-0.24, -0.06]  0.023   0.019 -0.152  0.000   0.004     bonf  0.959
+    3    Neuroticism  Conscientiousness  spearman  one-sided  500 -0.356  [-0.43, -0.28]  0.127   0.123 -0.372  0.000   0.000     bonf  1.000
+    4   Extraversion           Openness  spearman  one-sided  500  0.243    [0.16, 0.32]  0.059   0.055  0.248  0.000   0.000     bonf  1.000
+    5   Extraversion      Agreeableness  spearman  one-sided  500  0.062   [-0.03, 0.15]  0.004  -0.000  0.062  0.083   0.832     bonf  0.398
+    6   Extraversion  Conscientiousness  spearman  one-sided  500  0.056   [-0.03, 0.14]  0.003  -0.001  0.056  0.106   1.000     bonf  0.345
+    7       Openness      Agreeableness  spearman  one-sided  500  0.170    [0.08, 0.25]  0.029   0.025  0.171  0.000   0.001     bonf  0.985
+    8       Openness  Conscientiousness  spearman  one-sided  500 -0.007   [-0.09, 0.08]  0.000  -0.004 -0.007  0.440   1.000     bonf  0.068
+    9  Agreeableness  Conscientiousness  spearman  one-sided  500  0.161    [0.07, 0.24]  0.026   0.022  0.162  0.000   0.002     bonf  0.976
 
     2. Robust two-sided biweight midcorrelation with uncorrected p-values
 
-    >>> pcor = pairwise_corr(data, columns=['Openness', 'Extraversion',
-    ...                                     'Neuroticism'], method='bicor')
+    >>> pcor = pg.pairwise_corr(data, columns=['Openness', 'Extraversion',
+    ...                                        'Neuroticism'], method='bicor')
+    >>> pcor.round(3)
+                  X             Y method       tail    n      r           CI95%     r2  adj_r2      z  p-unc  power
+    0      Openness  Extraversion  bicor  two-sided  500  0.247    [0.16, 0.33]  0.061   0.057  0.252  0.000  1.000
+    1      Openness   Neuroticism  bicor  two-sided  500 -0.028   [-0.12, 0.06]  0.001  -0.003 -0.028  0.535  0.095
+    2  Extraversion   Neuroticism  bicor  two-sided  500 -0.343  [-0.42, -0.26]  0.118   0.114 -0.358  0.000  1.000
 
     3. One-versus-all pairwise correlations
 
-    >>> pairwise_corr(data, columns=['Neuroticism'])  # doctest: +SKIP
+    >>> pg.pairwise_corr(data, columns=['Neuroticism']).round(3)
+                 X                  Y   method       tail    n      r           CI95%     r2  adj_r2      z  p-unc       BF10  power
+    0  Neuroticism       Extraversion  pearson  two-sided  500 -0.350  [-0.42, -0.27]  0.123   0.119 -0.366  0.000  6.765e+12  1.000
+    1  Neuroticism           Openness  pearson  two-sided  500 -0.010    [-0.1, 0.08]  0.000  -0.004 -0.010  0.817      0.058  0.056
+    2  Neuroticism      Agreeableness  pearson  two-sided  500 -0.134  [-0.22, -0.05]  0.018   0.014 -0.135  0.003      5.122  0.854
+    3  Neuroticism  Conscientiousness  pearson  two-sided  500 -0.368  [-0.44, -0.29]  0.135   0.132 -0.386  0.000  2.644e+14  1.000
 
     4. Pairwise correlations between two lists of columns (cartesian product)
 
     >>> columns = [['Neuroticism', 'Extraversion'], ['Openness']]
-    >>> pairwise_corr(data, columns)   # doctest: +SKIP
+    >>> pg.pairwise_corr(data, columns).round(3)
+                  X         Y   method       tail    n      r         CI95%     r2  adj_r2      z  p-unc       BF10  power
+    0   Neuroticism  Openness  pearson  two-sided  500 -0.010  [-0.1, 0.08]  0.000  -0.004 -0.010  0.817      0.058  0.056
+    1  Extraversion  Openness  pearson  two-sided  500  0.267  [0.18, 0.35]  0.071   0.068  0.274  0.000  5.277e+06  1.000
 
     5. As a Pandas method
 
@@ -1003,11 +1087,11 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     7. Pairwise partial correlation matrix using :py:func:`pingouin.pcorr`
 
-    >>> data[['Neuroticism', 'Openness', 'Extraversion']].pcorr()
+    >>> data[['Neuroticism', 'Openness', 'Extraversion']].pcorr().round(3)
                   Neuroticism  Openness  Extraversion
-    Neuroticism      1.000000  0.092097     -0.360421
-    Openness         0.092097  1.000000      0.281312
-    Extraversion    -0.360421  0.281312      1.000000
+    Neuroticism         1.000     0.092        -0.360
+    Openness            0.092     1.000         0.281
+    Extraversion       -0.360     0.281         1.000
 
     8. Correlation matrix with p-values using :py:func:`pingouin.rcorr`
 
@@ -1147,6 +1231,11 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
             all_cols.extend([_cvr for _cvr in covar if _cvr not in all_cols])
         data = data[all_cols].dropna()
 
+    # For max precision, make sure rounding is disabled
+    old_options = options.copy()
+    options.clear()
+    options['round'] = None
+
     # Compute pairwise correlations and fill dataframe
     dvs = ['n', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'power']
     dvs_out = dvs + ['outliers']
@@ -1171,6 +1260,8 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
             stats.loc[i, dvs_out] = cor_st[dvs_out].to_numpy()
         else:
             stats.loc[i, dvs] = cor_st[dvs].to_numpy()
+
+    options.update(old_options)  # restore options
 
     # Force conversion to numeric
     stats = stats.astype({'r': float, 'r2': float, 'adj_r2': float,
@@ -1203,4 +1294,4 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     if covar is not None:
         stats.insert(loc=3, column='covar', value=covar_strings)
 
-    return stats
+    return _postprocess_dataframe(stats)

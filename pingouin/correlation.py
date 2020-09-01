@@ -5,10 +5,11 @@ import pandas_flavor as pf
 from scipy.spatial.distance import pdist, squareform
 from scipy.stats import pearsonr, spearmanr, kendalltau
 
+from pingouin.config import options
 from pingouin.power import power_corr
 from pingouin.multicomp import multicomp
 from pingouin.effsize import compute_esci
-from pingouin.utils import remove_na, _perm_pval
+from pingouin.utils import remove_na, _perm_pval, _postprocess_dataframe
 from pingouin.bayesian import bayesfactor_pearson
 
 
@@ -541,7 +542,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     adj_r2 = 1 - (((1 - r2) * (nx - 1)) / (nx - 3))
 
     # Compute the parametric 95% confidence interval and power
-    ci = compute_esci(stat=r, nx=nx, ny=nx, eftype='r')
+    ci = compute_esci(stat=r, nx=nx, ny=nx, eftype='r', decimals=6)
     pr = power_corr(r=r, n=nx, power=None, alpha=0.05, tail=tail),
 
     # Create dictionnary
@@ -568,7 +569,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
     col_keep = ['n', 'outliers', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val',
                 'BF10', 'power']
     col_order = [k for k in col_keep if k in stats.keys().tolist()]
-    return stats[col_order]
+    return _postprocess_dataframe(stats)[col_order]
 
 
 @pf.register_dataframe_method
@@ -667,7 +668,7 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     >>> # Partial correlation of x and y controlling for cv1, cv2 and cv3
     >>> pg.partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'],
     ...                 method='spearman').round(3)
-               n      r         CI95%     r2  adj_r2  p-val  power
+           n      r         CI95%     r2  adj_r2  p-val  power
     spearman  30  0.491  [0.16, 0.72]  0.242   0.185  0.006  0.809
 
     3. As a pandas method
@@ -1050,7 +1051,12 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     data = data[[x, y, subject]].dropna(axis=0)
 
     # Using PINGOUIN
+    # For max precision, make sure rounding is disabled
+    old_options = options.copy()
+    options.clear()
+    options['round'] = None
     aov = ancova(dv=y, covar=x, between=subject, data=data)
+    options.update(old_options)  # restore options
     bw = aov.bw_  # Beta within parameter
     sign = np.sign(bw)
     dof = int(aov.at[2, 'DF'])
@@ -1066,9 +1072,9 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     stats = pd.DataFrame({"r": rm,
                           "dof": int(dof),
                           "pval": pval,
-                          "CI95%": str(ci),
+                          "CI95%": [ci],
                           "power": pwr}, index=["rm_corr"])
-    return stats
+    return _postprocess_dataframe(stats)
 
 
 def _dcorr(y, n2, A, dcov2_xx):

@@ -56,6 +56,8 @@ class TestNonParametric(TestCase):
         mwu_scp = scipy.stats.mannwhitneyu(x, y, use_continuity=True,
                                            alternative='two-sided')
         mwu_pg = mwu(x, y, tail='two-sided')
+        mwu_pg_less = mwu(x, y, tail='less')
+        mwu_pg_greater = mwu(x, y, tail='greater')
         # Similar to R: wilcox.test(df$x, df$y, paired = FALSE, exact = FALSE)
         # Note that the RBC value are compared to JASP in test_pairwise.py
         assert mwu_scp[0] == mwu_pg.at['MWU', 'U-val']
@@ -63,10 +65,15 @@ class TestNonParametric(TestCase):
         # One-sided
         assert np.median(x) > np.median(y)  # Tail = greater, x > y
         assert (mwu(x, y, tail='one-sided').at['MWU', 'p-val'] ==
-                mwu(x, y, tail='greater').at['MWU', 'p-val'])
-        assert (mwu(x, y, tail='less').at['MWU', 'p-val'] ==
+                mwu_pg_greater.at['MWU', 'p-val'])
+        assert (mwu_pg_less.at['MWU', 'p-val'] ==
                 scipy.stats.mannwhitneyu(x, y, use_continuity=True,
                                          alternative='less')[1])
+        # CLES is compared to:
+        # https://janhove.github.io/reporting/2016/11/16/common-language-effect-sizes
+        assert round(mwu_pg.at['MWU', 'CLES'], 4) == 0.5363
+        assert round(mwu_pg_less.at['MWU', 'CLES'], 4) == 0.4637
+        assert round(mwu_pg_greater.at['MWU', 'CLES'], 4) == 0.5363
 
     def test_wilcoxon(self):
         """Test function wilcoxon"""
@@ -97,10 +104,16 @@ class TestNonParametric(TestCase):
         df = pd.DataFrame({'DV': np.r_[x, y, z],
                            'Time': np.repeat(['A', 'B', 'C'], 100),
                            'Subject': np.tile(np.arange(100), 3)})
-        friedman(data=df, dv='DV', subject='Subject', within='Time')
         summary = friedman(data=df, dv='DV', within='Time', subject='Subject')
         # Compare with SciPy built-in function
         from scipy import stats
+        Q, p = stats.friedmanchisquare(x, y, z)
+        assert np.isclose(Q, summary.at['Friedman', 'Q'])
+        assert np.isclose(p, summary.at['Friedman', 'p-unc'])
+        # With Categorical
+        df['Time'] = df['Time'].astype('category')
+        df['Time'] = df['Time'].cat.add_categories("Unused")
+        summary = friedman(data=df, dv='DV', within='Time', subject='Subject')
         Q, p = stats.friedmanchisquare(x, y, z)
         assert np.isclose(Q, summary.at['Friedman', 'Q'])
         assert np.isclose(p, summary.at['Friedman', 'p-unc'])
@@ -130,7 +143,13 @@ class TestNonParametric(TestCase):
         st = cochran(dv='Energetic', within='Time', subject='Subject', data=df)
         assert round(st.at['cochran', 'Q'], 3) == 6.706
         assert np.isclose(st.at['cochran', 'p-unc'], 0.034981)
-        cochran(dv='Energetic', within='Time', subject='Subject', data=df)
+        # With Categorical
+        df['Time'] = df['Time'].astype('category')
+        df['Subject'] = df['Subject'].astype('category')
+        df['Time'] = df['Time'].cat.add_categories("Unused")
+        st = cochran(dv='Energetic', within='Time', subject='Subject', data=df)
+        assert round(st.at['cochran', 'Q'], 3) == 6.706
+        assert np.isclose(st.at['cochran', 'p-unc'], 0.034981)
         # With a NaN value
         df.loc[2, 'Energetic'] = np.nan
         cochran(dv='Energetic', within='Time', subject='Subject', data=df)

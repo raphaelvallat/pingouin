@@ -9,8 +9,17 @@ from pingouin import read_dataset
 # Generate random data for ANOVA
 df = read_dataset('mixed_anova.csv')
 
+# With missing values
 df_nan = df.copy()
 df_nan.iloc[[4, 15], 0] = np.nan
+
+# With categorical!
+df_cat = df.copy()
+df_cat[['Time', 'Group', 'Subject']] = df_cat[[
+    'Time', 'Group', 'Subject']].astype('category')
+# Let's complicate things even more and add "ghost" Categories
+df_cat['Time'].cat.add_categories('Casper', inplace=True)
+df_cat['Group'].cat.add_categories('The Friendly Ghost', inplace=True)
 
 # Create random normal variables
 np.random.seed(1234)
@@ -22,60 +31,140 @@ class TestParametric(TestCase):
     """Test parametric.py."""
 
     def test_ttest(self):
-        """Test function ttest"""
+        """Test function ttest.
+        Compare with Matlab, R and JASP.
+        """
+        # Test different combination of argments
         h = np.random.normal(scale=0.9, size=95)
         ttest(x, 0.5)
-        stats = ttest(x, y, paired=True, tail='one-sided').round(3)
-        # Compare with JASP
-        assert np.allclose(stats.at['T-test', 'T'], 0.616)
-        assert np.allclose(stats.at['T-test', 'p-val'], .270)
         ttest(x, y, paired=False, correction='auto')
         ttest(x, y, paired=False, correction=True)
         ttest(x, y, paired=False, r=0.5)
         ttest(x, h, paired=True)
-        # Compare with R t.test
+
         a = [4, 7, 8, 6, 3, 2]
         b = [6, 8, 7, 10, 11, 9]
-        tt = ttest(a, b, paired=False, correction=False, tail='two-sided')
-        assert round(tt.at['T-test', 'T'], 3) == -2.842
-        assert tt.at['T-test', 'dof'] == 10
-        assert round(tt.loc['T-test', 'p-val'], 5) == 0.01749
-        np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [-6.24, -0.76])
-        # - Two sample unequal variances
-        tt = ttest(a, b, paired=False, correction=True, tail='two-sided')
-        assert round(tt.loc['T-test', 'dof'], 3) == 9.494
-        assert round(tt.loc['T-test', 'p-val'], 5) == 0.01837
-        np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [-6.26, -0.74])
-        # - Paired
-        tt = ttest(a, b, paired=True, correction=False, tail='two-sided')
-        assert round(tt.loc['T-test', 'T'], 3) == -2.445
+
+        # 1) One sample with y=0
+        # R: t.test(a, mu=0)
+        # Two-sided
+        tt = ttest(a, y=0, tail='two-sided')
+        assert round(tt.loc['T-test', 'T'], 5) == 5.17549
+        assert tt.loc['T-test', 'dof'] == 5
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.00354
+        array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [2.52, 7.48])
+        # One-sided (greater)
+        tt = ttest(a, y=0, tail='greater')
+        assert round(tt.loc['T-test', 'T'], 5) == 5.17549
+        assert tt.loc['T-test', 'dof'] == 5
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.00177
+        array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [3.05, np.inf])
+        # tail='one-sided' equals tail='greater'
+        tt = ttest(a, y=0, tail='one-sided')
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.00177
+        # One-sided (less)
+        tt = ttest(a, y=0, tail='less')
+        assert round(tt.loc['T-test', 'T'], 5) == 5.17549
+        assert tt.loc['T-test', 'dof'] == 5
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.99823
+        array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [-np.inf, 6.95])
+
+        # 2) One sample with y=4
+        # R: t.test(a, mu=4)
+        # Two-sided
+        tt = ttest(a, y=4, tail='two-sided')
+        assert round(tt.loc['T-test', 'T'], 5) == 1.0351
+        assert tt.loc['T-test', 'dof'] == 5
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.34807
+        array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [2.52, 7.48])
+        # One-sided (greater)
+        tt = ttest(a, y=4, tail='greater')
+        assert round(tt.loc['T-test', 'T'], 5) == 1.0351
+        assert tt.loc['T-test', 'dof'] == 5
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.17403
+        array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [3.05, np.inf])
+        # tail='one-sided' equals tail='greater'
+        tt = ttest(a, y=4, tail='one-sided')
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.17403
+        # One-sided (less)
+        tt = ttest(a, y=4, tail='less')
+        assert round(tt.loc['T-test', 'T'], 5) == 1.0351
+        assert tt.loc['T-test', 'dof'] == 5
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.82597
+        array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [-np.inf, 6.95])
+
+        # 3) Paired two-sample
+        # R: t.test(a, b, paired=TRUE)
+        # Two-sided
+        tt = ttest(a, b, paired=True, tail='two-sided')
+        assert round(tt.loc['T-test', 'T'], 5) == -2.44451
         assert tt.loc['T-test', 'dof'] == 5
         assert round(tt.loc['T-test', 'p-val'], 5) == 0.05833
-        np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [-7.18, 0.18])
+        array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [-7.18, 0.18])
+        # One-sided (greater)
+        tt = ttest(a, b, paired=True, tail='greater')
+        assert round(tt.loc['T-test', 'T'], 5) == -2.44451
+        assert tt.loc['T-test', 'dof'] == 5
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.97084
+        array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [-6.39, np.inf])
+        # One-sided (less)
+        tt = ttest(a, b, paired=True, tail='less')
+        assert round(tt.loc['T-test', 'T'], 5) == -2.44451
+        assert tt.loc['T-test', 'dof'] == 5
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.02916
+        array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [-np.inf, -0.61])
+        # tail='one-sided' equals tail='less'
+        tt = ttest(a, b, paired=True, tail='one-sided')
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.02916
+
         # When the two arrays are identical
         tt = ttest(a, a, paired=True)
         assert str(tt.loc['T-test', 'T']) == str(np.nan)
         assert str(tt.loc['T-test', 'p-val']) == str(np.nan)
         assert tt.loc['T-test', 'cohen-d'] == 0.
         assert tt.loc['T-test', 'BF10'] == str(np.nan)
-        # - One sample one-sided
-        tt = ttest(a, y=0, paired=False, correction=False, tail='one-sided')
-        assert round(tt.loc['T-test', 'T'], 3) == 5.175
-        assert tt.loc['T-test', 'dof'] == 5
-        assert round(tt.loc['T-test', 'p-val'], 3) == 0.002
-        np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [3.05, np.inf])
-        # - Two-sample equal variances, tail = 'greater'
-        tt = ttest(a, b, paired=False, tail='greater')
-        assert tt.loc['T-test', 'tail'] == 'greater'
-        assert round(tt.loc['T-test', 'p-val'], 4) == 0.9913
-        assert float(tt.loc['T-test', 'BF10']) < 1
-        np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [-5.73, np.inf])
-        # tail = 'less'
-        tt = ttest(a, b, paired=False, tail='less')
-        assert tt.loc['T-test', 'tail'] == 'less'
+
+        # 4) Independent two-samples, equal variance (no correction)
+        # R: t.test(a, b, paired=FALSE, var.equal=TRUE)
+        # Two-sided
+        tt = ttest(a, b, correction=False, tail='two-sided')
+        assert round(tt.loc['T-test', 'T'], 5) == -2.84199
+        assert tt.loc['T-test', 'dof'] == 10
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.01749
+        array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [-6.24, -0.76])
+        # One-sided (greater)
+        tt = ttest(a, b, correction=False, tail='greater')
+        assert round(tt.loc['T-test', 'T'], 5) == -2.84199
+        assert tt.loc['T-test', 'dof'] == 10
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.99126
+        array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [-5.73, np.inf])
+        # One-sided (less)
+        tt = ttest(a, b, correction=False, tail='less')
+        assert round(tt.loc['T-test', 'T'], 5) == -2.84199
+        assert tt.loc['T-test', 'dof'] == 10
         assert round(tt.loc['T-test', 'p-val'], 5) == 0.00874
-        assert float(tt.loc['T-test', 'BF10']) > 1
-        np.testing.assert_allclose(tt.loc['T-test', 'CI95%'], [-np.inf, -1.27])
+        array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [-np.inf, -1.27])
+
+        # 5) Independent two-samples, Welch correction
+        # R: t.test(a, b, paired=FALSE, var.equal=FALSE)
+        # Two-sided
+        tt = ttest(a, b, correction=True, tail='two-sided')
+        assert round(tt.loc['T-test', 'T'], 5) == -2.84199
+        assert round(tt.loc['T-test', 'dof'], 5) == 9.49438
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.01837
+        array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [-6.26, -0.74])
+        # One-sided (greater)
+        tt = ttest(a, b, correction=True, tail='greater')
+        assert round(tt.loc['T-test', 'T'], 5) == -2.84199
+        assert round(tt.loc['T-test', 'dof'], 5) == 9.49438
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.99082
+        array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [-5.74, np.inf])
+        # One-sided (less)
+        tt = ttest(a, b, correction=True, tail='less')
+        assert round(tt.loc['T-test', 'T'], 5) == -2.84199
+        assert round(tt.loc['T-test', 'dof'], 5) == 9.49438
+        assert round(tt.loc['T-test', 'p-val'], 5) == 0.00918
+        array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [-np.inf, -1.26])
 
     def test_anova(self):
         """Test function anova.
@@ -105,6 +194,18 @@ class TestParametric(TestCase):
         # Error: between is an empty list
         with pytest.raises(ValueError):
             anova(dv='Pain threshold', between=[], data=df_pain)
+
+        # Unbalanced and with missing values AND between as a categorical
+        df_paincat = df_pain.copy()
+        df_paincat['Hair color'] = df_paincat['Hair color'].astype('category')
+        df_paincat['Hair color'].cat.add_categories('Bald', inplace=True)
+        aov = df_paincat.anova(dv='Pain threshold',
+                               between='Hair color').round(3)
+        assert aov.at[0, 'ddof1'] == 3
+        assert aov.at[0, 'ddof2'] == 13
+        assert aov.at[0, 'F'] == 4.359
+        assert aov.at[0, 'p-unc'] == 0.025
+        assert aov.at[0, 'np2'] == 0.501
 
         # Two-way ANOVA with balanced design
         df_aov2 = read_dataset('anova2')
@@ -236,6 +337,13 @@ class TestParametric(TestCase):
         assert aov.at[0, 'p-unc'] == .023
         assert aov.at[0, 'np2'] == .062
 
+        # Same but with categorical columns
+        aov = rm_anova(dv='Scores', within='Time', subject='Subject',
+                       data=df_cat, correction='auto', detailed=True).round(3)
+        assert aov.at[0, 'F'] == 3.913
+        assert aov.at[0, 'p-unc'] == .023
+        assert aov.at[0, 'np2'] == .062
+
         # With different effect sizes
         aov = rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
                        correction='auto', effsize="n2").round(3)
@@ -265,6 +373,18 @@ class TestParametric(TestCase):
         data = read_dataset('rm_anova2')
         aov = rm_anova(data=data, subject='Subject', within=['Time', 'Metric'],
                        dv='Performance').round(3)
+        array_equal(aov.loc[:, 'MS'], [828.817, 682.617, 112.217])
+        array_equal(aov.loc[:, 'F'], [33.852, 26.959, 12.632])
+        array_equal(aov.loc[:, 'np2'], [0.790, 0.750, 0.584])
+        array_equal(aov.loc[:, 'eps'], [1., 0.969, 0.727])
+
+        # With categorical
+        data_cat = data.copy()
+        data_cat[['Subject', 'Time', 'Metric']] = \
+            data_cat[['Subject', 'Time', 'Metric']].astype('category')
+        data_cat['Time'].cat.add_categories('Casper', inplace=True)
+        aov = rm_anova(data=data_cat, subject='Subject',
+                       within=['Time', 'Metric'], dv='Performance').round(3)
         array_equal(aov.loc[:, 'MS'], [828.817, 682.617, 112.217])
         array_equal(aov.loc[:, 'F'], [33.852, 26.959, 12.632])
         array_equal(aov.loc[:, 'np2'], [0.790, 0.750, 0.584])
@@ -306,6 +426,19 @@ class TestParametric(TestCase):
         assert aov.at[1, 'eps'] == 0.999
         assert aov.at[1, 'W-spher'] == 0.999
         assert round(aov.at[1, 'p-GG-corr'], 2) == 0.02
+        # With categorical: should be the same
+        aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
+                          between='Group', data=df_cat,
+                          correction=True).round(3)
+        array_equal(aov.loc[:, 'SS'], [5.460, 7.628, 5.167])
+        array_equal(aov.loc[:, 'DF1'], [1, 2, 2])
+        array_equal(aov.loc[:, 'DF2'], [58, 116, 116])
+        array_equal(aov.loc[:, 'F'], [5.052, 4.027, 2.728])
+        array_equal(aov.loc[:, 'np2'], [0.080, 0.065, 0.045])
+        assert aov.at[1, 'eps'] == 0.999
+        assert aov.at[1, 'W-spher'] == 0.999
+        assert round(aov.at[1, 'p-GG-corr'], 2) == 0.02
+
         # Same with different effect sizes (compare with JASP)
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
                           between='Group', data=df, effsize="n2").round(3)

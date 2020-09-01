@@ -2,9 +2,13 @@ import pandas as pd
 import numpy as np
 import pytest
 
+import pingouin
+
 from unittest import TestCase
 from pingouin import read_dataset
-from pingouin.utils import (print_table, _perm_pval, remove_rm_na,
+from pingouin.utils import (print_table, _postprocess_dataframe,
+                            _get_round_setting_for,
+                            _perm_pval, remove_rm_na,
                             _check_eftype, _check_dataframe,
                             remove_na, _flatten_list, _is_sklearn_installed,
                             _is_statsmodels_installed, _is_mpmath_installed)
@@ -26,6 +30,53 @@ class TestUtils(TestCase):
         print_table(df2)
         df3['A'] = 0
         print_table(df3, tablefmt='html', floatfmt='.3f')
+
+    def test__postprocess_dataframe(self):
+        """Test function _postprocess_dataframe."""
+        df2 = df.copy()
+        # add some more values and give a stringy index
+        df2.Values = [1.54321, 5.87654, 8.23456, 3.45678]
+        df2 = df2.assign(Values2=[1.54321, 5.87654, 8.23456, 3.45678])
+        df2.index = ['row' + str(x) for x in df.index]
+
+        # set rounding options (keeping original options dict to restore after)
+        old_opts = pingouin.options.copy()
+        pingouin.options.clear()
+        pingouin.options['round'] = 4
+        pingouin.options['round.cell.[row0]x[Values]'] = None
+        pingouin.options['round.column.Values'] = 3
+        pingouin.options['round.row.row1'] = 2
+        pingouin.options['round.cell.[row3]x[Values2]'] = 0
+
+        df_expected = df2.copy()
+        df_expected.Values = [1.54321, 5.877, 8.235, 3.457]
+        df_expected.Values2 = [1.5432, 5.88, 8.2346, 3.0]
+
+        df2 = _postprocess_dataframe(df2)
+        pd.testing.assert_frame_equal(df2, df_expected)
+
+        # restore old options
+        pingouin.options.update(old_opts)
+
+    def test_get_round_setting_for(self):
+        """Test function _get_round_setting_for."""
+        # set rounding options (keeping original options dict to restore after)
+        old_opts = pingouin.options.copy()
+        pingouin.options.clear()
+        pingouin.options['round'] = 4
+        pingouin.options['round.cell.[row0]x[Values]'] = None
+        pingouin.options['round.column.Values'] = 3
+        pingouin.options['round.row.row1'] = 2
+        pingouin.options['round.cell.[row3]x[Values2]'] = 0
+
+        assert _get_round_setting_for('row0', 'Values') is None
+        assert _get_round_setting_for('row1', 'Values') == 3
+        assert _get_round_setting_for('row1', 'Values2') == 2
+        assert _get_round_setting_for('row3', 'Values2') == 0
+        assert _get_round_setting_for('row2', 'Values2') == 4  # default
+
+        # restore old options
+        pingouin.options.update(old_opts)
 
     def test_flatten_list(self):
         """Test function _flatten_list."""

@@ -36,7 +36,7 @@ class TestContingency(TestCase):
             lambda_ = stats.at[i, 'lambda']
             dof = stats.at[i, 'dof']
             chi2 = stats.at[i, 'chi2']
-            p = round(stats.at[i, 'p'], 6)
+            p = round(stats.at[i, 'pval'], 6)
             sp_chi2, sp_p, sp_dof, _ = chi2_contingency(contingency_table,
                                                         lambda_=lambda_)
             np.testing.assert_allclose([chi2, p, dof],
@@ -69,7 +69,7 @@ class TestContingency(TestCase):
         assert stats.at[0, 'dof'] == 0
         for i in stats.index:
             chi2 = stats.at[i, 'chi2']
-            p = stats.at[i, 'p']
+            p = stats.at[i, 'pval']
             assert (chi2, p) == (0.0, 1.0)
 
         # Testing warning on low count
@@ -85,14 +85,14 @@ class TestContingency(TestCase):
         _, _, stats = pg.chi2_independence(df_ind, 'sex', 'target')
         assert round(stats.at[0, 'chi2'], 3) == 22.717
         assert stats.at[0, 'dof'] == 1
-        assert np.isclose(stats.at[0, 'p'], 1.877e-06)
+        assert np.isclose(stats.at[0, 'pval'], 1.877e-06)
         assert round(stats.at[0, 'cramer'], 2) == 0.27
 
         # 4 x 2 contingency table
         _, _, stats = pg.chi2_independence(df_ind, 'cp', 'target')
         assert round(stats.at[0, 'chi2'], 3) == 81.686
         assert stats.at[0, 'dof'] == 3.
-        assert stats.at[0, 'p'] < 2.2e-16
+        assert stats.at[0, 'pval'] < 2.2e-16
         assert round(stats.at[0, 'cramer'], 3) == 0.519
         assert np.isclose(stats.at[0, 'power'], 1.)
 

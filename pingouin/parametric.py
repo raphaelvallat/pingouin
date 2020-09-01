@@ -5,7 +5,8 @@ import pandas as pd
 from scipy.stats import f
 import pandas_flavor as pf
 from pingouin import (_check_dataframe, remove_rm_na, remove_na, _flatten_list,
-                      bayesfactor_ttest, epsilon, sphericity)
+                      bayesfactor_ttest, epsilon, sphericity,
+                      _postprocess_dataframe)
 
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova",
            "ancova"]
@@ -132,8 +133,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     >>> from pingouin import ttest
     >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> ttest(x, 4).round(2)
-              T  dof       tail  p-val          CI95%  cohen-d   BF10  power
-    T-test  1.4    4  two-sided   0.23  [-1.68, 5.08]     0.62  0.766   0.19
+              T  dof       tail  p-val         CI95%  cohen-d   BF10  power
+    T-test  1.4    4  two-sided   0.23  [2.32, 9.08]     0.62  0.766   0.19
 
     2. Paired T-test.
 
@@ -248,15 +249,14 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     # Effect size
     d = compute_effsize(x, y, paired=paired, eftype='cohen')
 
-    # 95% confidence interval for the effect size
-    # ci = compute_esci(d, nx, ny, paired=paired, eftype='cohen',
-    #                   confidence=.95)
-
-    # 95% confidence interval for the difference in means
+    # 95% confidence interval for the (difference in) means
     # Compare to the t.test r function
     conf = 0.975 if tail == 'two-sided' else 0.95
     tcrit = t.ppf(conf, dof)
     ci = np.array([tval - tcrit, tval + tcrit]) * se
+    if ny == 1:
+        ci += y
+
     if tail == 'greater':
         ci[1] = np.inf
     elif tail == 'less':
@@ -291,7 +291,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
              'p-val': pval,
              'tail': tail,
              'cohen-d': abs(d),
-             'CI95%': [np.round(ci, 2)],  # Should we keep rounding for CI?
+             'CI95%': [ci],
              'power': power,
              'BF10': bf}
 
@@ -300,7 +300,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
                  'power']
     stats = pd.DataFrame.from_records(stats, columns=col_order,
                                       index=['T-test'])
-    return stats
+    return _postprocess_dataframe(stats)
 
 
 @pf.register_dataframe_method
@@ -512,6 +512,13 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     _check_dataframe(dv=dv, within=within, data=data, subject=subject,
                      effects='within')
 
+    # Convert Categorical columns to string
+    # This is important otherwise all the groupby will return different results
+    # unless we specify .groupby(..., observed = True).
+    for c in [subject, within]:
+        if data[c].dtype.name == 'category':
+            data[c] = data[c].astype(str)
+
     # Collapse to the mean
     data = data.groupby([subject, within]).mean().reset_index()
 
@@ -619,7 +626,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
-    return aov
+    return _postprocess_dataframe(aov)
 
 
 def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
@@ -633,6 +640,13 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
     # Validate the dataframe
     _check_dataframe(dv=dv, within=within, data=data, subject=subject,
                      effects='within')
+
+    # Convert Categorical columns to string
+    # This is important otherwise all the groupby will return different results
+    # unless we specify .groupby(..., observed = True).
+    for c in [subject, a, b]:
+        if data[c].dtype.name == 'category':
+            data[c] = data[c].astype(str)
 
     # Remove NaN
     if data[[subject, a, b, dv]].isnull().any().any():
@@ -753,7 +767,7 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
                         effsize: [ef_a, ef_b, ef_ab],
                         'eps': [eps_a, eps_b, eps_ab],
                         })
-    return aov
+    return _postprocess_dataframe(aov)
 
 
 @pf.register_dataframe_method
@@ -869,10 +883,10 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
     >>> df = pg.read_dataset('anova')
     >>> aov = pg.anova(dv='Pain threshold', between='Hair color', data=df,
     ...                detailed=True)
-    >>> aov
-           Source           SS  DF          MS         F     p-unc       np2
-    0  Hair color  1360.726316   3  453.575439  6.791407  0.004114  0.575962
-    1      Within  1001.800000  15   66.786667       NaN       NaN       NaN
+    >>> aov.round(3)
+           Source        SS  DF       MS      F  p-unc    np2
+    0  Hair color  1360.726   3  453.575  6.791  0.004  0.576
+    1      Within  1001.800  15   66.787    NaN    NaN    NaN
 
     Same but using a standard eta-squared instead of a partial eta-squared
     effect size. Also note how here we're using the anova function directly as
@@ -947,7 +961,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
     N = data[dv].size
 
     # Calculate sums of squares
-    grp = data.groupby(between)[dv]
+    grp = data.groupby(between, observed=True)[dv]
     # Between effect
     ssbetween = ((grp.mean() - data[dv].mean())**2 * grp.count()).sum()
     # Within effect (= error between)
@@ -992,7 +1006,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
                             })
 
     aov.dropna(how='all', axis=1, inplace=True)
-    return aov
+    return _postprocess_dataframe(aov)
 
 
 def anova2(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
@@ -1013,7 +1027,7 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
-    grp_both = data.groupby(between)[dv]
+    grp_both = data.groupby(between, observed=True)[dv]
 
     if grp_both.count().nunique() == 1:
         # BALANCED DESIGN
@@ -1078,7 +1092,7 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
                         })
 
     aov.dropna(how='all', axis=1, inplace=True)
-    return aov
+    return _postprocess_dataframe(aov)
 
 
 def anovan(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
@@ -1154,6 +1168,7 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
     aov.dropna(how='all', axis=1, inplace=True)
 
     # Add formula to dataframe
+    aov = _postprocess_dataframe(aov)
     aov.formula_ = formula
     return aov
 
@@ -1284,7 +1299,7 @@ def welch_anova(data=None, dv=None, between=None):
     ddof1 = r - 1
 
     # Compute weights and ajusted means
-    grp = data.groupby(between)[dv]
+    grp = data.groupby(between, observed=True)[dv]
     weights = grp.count() / grp.var()
     adj_grandmean = (weights * grp.mean()).sum() / weights.sum()
 
@@ -1309,7 +1324,7 @@ def welch_anova(data=None, dv=None, between=None):
                         'p-unc': pval,
                         'np2': np2
                         }, index=[0])
-    return aov
+    return _postprocess_dataframe(aov)
 
 
 @pf.register_dataframe_method
@@ -1411,7 +1426,15 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     _check_dataframe(dv=dv, within=within, between=between, data=data,
                      subject=subject, effects='interaction')
 
+    # Convert Categorical columns to string
+    # This is important otherwise all the groupby will return different results
+    # unless we specify .groupby(..., observed = True).
+    for c in [within, between, subject]:
+        if data[c].dtype.name == 'category':
+            data[c] = data[c].astype(str)
+
     # Collapse to the mean
+    # Important to set observed = True when working with categorical
     data = data.groupby([subject, within, between]).mean().reset_index()
 
     # Remove NaN
@@ -1512,15 +1535,10 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
                  'p-GG-corr', effsize, 'eps', 'sphericity', 'W-spher',
                  'p-spher']
 
-    # Replace NaN - Disabled in Pingouin v0.3.4
-    # aov = aov.fillna('-')
-
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
 
-    # Round - Disabled in Pingouin v0.3.4
-    # aov[['F', 'eps', 'np2']] = aov[['F', 'eps', 'np2']].round(3)
-    return aov
+    return _postprocess_dataframe(aov)
 
 
 @pf.register_dataframe_method
@@ -1677,6 +1695,7 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
                         })
 
     # Add bw as an attribute (for rm_corr function)
+    aov = _postprocess_dataframe(aov)
     aov.bw_ = bw
     return aov
 
@@ -1723,5 +1742,4 @@ def ancovan(data=None, dv=None, covar=None, between=None, effsize="np2"):
         all_effsize = aov['SS'].apply(lambda x: x / (x + ss_resid)).to_numpy()
         all_effsize[-1] = np.nan
     aov[effsize] = all_effsize
-
-    return aov
+    return _postprocess_dataframe(aov)

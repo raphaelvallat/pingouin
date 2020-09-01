@@ -13,7 +13,6 @@ from pingouin import read_dataset
 from pingouin.regression import (linear_regression, logistic_regression,
                                  mediation_analysis, _pval_from_bootci)
 
-
 # 1st dataset: mediation
 df = read_dataset('mediation')
 df['Zero'] = 0
@@ -224,6 +223,10 @@ class TestRegression(TestCase):
         assert_frame_equal(linear_regression(df[['X', 'M']], df['Y']),
                            linear_regression(df[['X', 'M']], df['Y'],
                                              weights=df['One']))
+
+        # Output is a dictionary
+        linear_regression(df[['X', 'M']], df['Y'], weights=df['W2'],
+                          as_dataframe=False)
 
         with pytest.raises(ValueError):
             linear_regression(df[['X']], df['Y'], weights=df['W1'],

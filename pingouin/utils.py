@@ -1,14 +1,16 @@
-# Author: Raphael Vallat <raphaelvallat9@gmail.com>
-# Date: April 2018
+"""Helper functions."""
+import numbers
 import numpy as np
 import pandas as pd
+import itertools as it
 import collections.abc
 from tabulate import tabulate
+from .config import options
 
-__all__ = ["_perm_pval", "print_table", "_check_eftype",
-           "remove_rm_na", "remove_na", "_flatten_list", "_check_dataframe",
-           "_is_sklearn_installed", "_is_statsmodels_installed",
-           "_is_mpmath_installed"]
+__all__ = ["_perm_pval", "print_table", "_postprocess_dataframe",
+           "_check_eftype", "remove_rm_na", "remove_na", "_flatten_list",
+           "_check_dataframe", "_is_sklearn_installed",
+           "_is_statsmodels_installed", "_is_mpmath_installed"]
 
 
 def _perm_pval(bootstat, estimate, tail='two-sided'):
@@ -71,6 +73,71 @@ def print_table(df, floatfmt=".3f", tablefmt='simple'):
     print(tabulate(df, headers="keys", showindex=False, floatfmt=floatfmt,
                    tablefmt=tablefmt))
     print('')
+
+
+def _postprocess_dataframe(df):
+    """Apply some post-processing to an ouput dataframe (e.g. rounding).
+
+    Whether and how rounding is applied is governed by options specified in
+    `pingouin.options`. The default rounding (number of decimals) is
+    determined by `pingouin.options['round']`. You can specify rounding for a
+    given column name by the option `'round.column.<colname>'`, e.g.
+    `'round.column.CI95%'`. Analogously, `'round.row.<rowname>'` also works
+    (where `rowname`) refers to the pandas index), as well as
+    `'round.cell.[<rolname>]x[<colname]'`. A cell-based option is used,
+    if available; if not, a column-based option is used, if
+    available; if not, a row-based option is used, if available; if not,
+    the default is used. (Default `pingouin.options['round'] = None`,
+    i.e. no rounding is applied.)
+
+    Post-processing is applied on a copy of the DataFrame, leaving the
+    original DataFrame untouched.
+
+    This is an internal functions (no public API).
+
+    Parameters
+    ----------
+    df : :py:class:`pandas.DataFrame`
+        Dataframe to apply post-processing to (e.g. ANOVA summary)
+
+    Returns
+    ----------
+    df : :py:class:`pandas.DataFrame`
+        Dataframe with post-processing applied
+    """
+    df = df.copy()
+    for row, col in it.product(df.index, df.columns):
+        if isinstance(df.at[row, col], bool):
+            # No rounding if value is a boolean
+            continue
+        is_number = isinstance(df.at[row, col], numbers.Number)
+        is_array = isinstance(df.at[row, col], np.ndarray)
+        if not any([is_number, is_array]):
+            # No rounding if value is not a Number or an array
+            continue
+        if is_array:
+            is_float_array = issubclass(df.at[row, col].dtype.type,
+                                        np.floating)
+            if not is_float_array:
+                # No rounding if value is not a float array
+                continue
+        decimals = _get_round_setting_for(row, col)
+        if decimals is None:
+            continue
+        df.at[row, col] = np.round(df.at[row, col], decimals=decimals)
+    return df
+
+
+def _get_round_setting_for(row, col):
+    keys_to_check = (
+        'round.cell.[{}]x[{}]'.format(row, col),
+        'round.column.{}'.format(col), 'round.row.{}'.format(row))
+    for key in keys_to_check:
+        try:
+            return options[key]
+        except KeyError:
+            pass
+    return options['round']
 
 
 ###############################################################################
@@ -232,13 +299,13 @@ def remove_rm_na(data=None, dv=None, within=None, subject=None,
                          "subject column. Please remove them manually.")
 
     # Check if more within-factors are present and if so, aggregate
-    if (data.groupby(idx_cols).count() > 1).any().any():
+    if (data.groupby(idx_cols, observed=True).count() > 1).any().any():
         # Make sure that we keep the non-numeric columns when aggregating
         # This is disabled by default to avoid any confusion.
         # all_others = all_cols.difference(idx_cols)
         # all_num = data[all_others].select_dtypes(include='number').columns
         # agg = {c: aggregate if c in all_num else 'first' for c in all_others}
-        data = data.groupby(idx_cols).agg(aggregate)
+        data = data.groupby(idx_cols, observed=True).agg(aggregate)
     else:
         # Set subject + within factors as index.
         # Sorting is done to avoid performance warning when dropping.

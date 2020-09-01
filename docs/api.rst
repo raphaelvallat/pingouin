@@ -168,6 +168,7 @@ Others
       remove_rm_na
       read_dataset
       list_dataset
+      set_default_options
 
 Plotting
 --------
