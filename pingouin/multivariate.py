@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from collections import namedtuple
 from pingouin.utils import remove_na, _postprocess_dataframe
 
 __all__ = ["multivariate_normality", "multivariate_ttest"]
@@ -17,10 +18,12 @@ def multivariate_normality(X, alpha=.05):
 
     Returns
     -------
+    hz : float
+        The Henze-Zirkler test statistic.
+    pval : float
+        P-value.
     normal : boolean
         True if X comes from a multivariate normal distribution.
-    p : float
-        P-value.
 
     See Also
     --------
@@ -54,9 +57,8 @@ def multivariate_normality(X, alpha=.05):
     >>> import pingouin as pg
     >>> data = pg.read_dataset('multivariate')
     >>> X = data[['Fever', 'Pressure', 'Aches']]
-    >>> normal, p = pg.multivariate_normality(X, alpha=.05)
-    >>> print(normal, round(p, 3))
-    True 0.717
+    >>> pg.multivariate_normality(X, alpha=.05)
+    HZResults(hz=0.5400861018514641, pval=0.7173686509624891, normal=True)
     """
     from scipy.stats import lognorm
 
@@ -109,7 +111,9 @@ def multivariate_normality(X, alpha=.05):
     # P-value
     pval = lognorm.sf(hz, psi, scale=np.exp(pmu))
     normal = True if pval > alpha else False
-    return normal, pval
+
+    HZResults = namedtuple('HZResults', ['hz', 'pval', 'normal'])
+    return HZResults(hz=hz, pval=pval, normal=normal)
 
 
 def multivariate_ttest(X, Y=None, paired=False):

@@ -31,6 +31,7 @@ b. The Common Language Effect Size (CLES) in :py:func:`pingouin.mwu` is now calc
 c. Better handling of kwargs arguments in :py:func:`pingouin.plot_paired` (see `PR 116 <https://github.com/raphaelvallat/pingouin/pull/116>`_).
 d. Added ``boxplot_in_front`` argument to the :py:func:`pingouin.plot_paired`. When set to True, the boxplot is displayed in front of the lines with a slight transparency. This can make the overall plot more readable when plotting data from a large number of subjects. (see `PR 117 <https://github.com/raphaelvallat/pingouin/pull/117>`_).
 e. Better handling of Categorical columns in several functions (e.g. ANOVA). See `issue 122 <https://github.com/raphaelvallat/pingouin/issues/122>`_.
+f. :py:func:`multivariate_normality` now also returns the test statistic. This function also comes with better unit testing against the MVN R package.
 
 v0.3.7 (July 2020)
 ------------------
