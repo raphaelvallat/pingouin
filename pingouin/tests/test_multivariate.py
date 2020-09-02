@@ -26,17 +26,23 @@ class TestMultivariate(TestCase):
         # With 2 variables
         mean, cov, n = [4, 6], [[1, .5], [.5, 1]], 30
         Z = np.random.multivariate_normal(mean, cov, n)
-        normal, p = multivariate_normality(Z, alpha=.05)
-        # Compare with the Matlab Robust Corr toolbox
-        assert normal
-        assert np.round(p, 3) == 0.752
+        hz, pval, normal = multivariate_normality(Z, alpha=.05)
+        assert round(hz, 7) == 0.3243965
+        assert round(pval, 7) == 0.7523511
+        assert normal is True
         # With 3 variables
-        normal, p = multivariate_normality(data[dvs], alpha=.01)
-        assert round(p, 3) == 0.717
+        hz, pval, normal = multivariate_normality(data[dvs], alpha=.01)
+        assert round(hz, 7) == 0.5400861
+        assert round(pval, 7) == 0.7173687
+        assert normal is True
         # With missing values
-        multivariate_normality(X_na, alpha=.05)
+        hz, pval, normal = multivariate_normality(X_na, alpha=.05)
+        assert round(hz, 7) == 0.7288211
+        assert round(pval, 7) == 0.1120792
+        assert normal is True
         # Rank deficient
-        multivariate_normality(X_rd)
+        # Return a LAPACK singular error in R so we cannot compare
+        hz, pval, normal = multivariate_normality(X_rd)
 
     def test_multivariate_ttest(self):
         """Test function multivariate_ttest.

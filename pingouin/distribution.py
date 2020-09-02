@@ -2,6 +2,7 @@ import warnings
 import scipy.stats
 import numpy as np
 import pandas as pd
+from collections import namedtuple
 from pingouin.utils import _flatten_list as _fl
 from pingouin.utils import remove_na, _postprocess_dataframe
 
@@ -739,11 +740,11 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
         True if data have the sphericity property.
     W : float
         Test statistic.
-    chi_sq : float
+    chi2 : float
         Chi-square statistic.
-    ddof : int
+    dof : int
         Degrees of freedom.
-    p : float
+    pval : float
         P-value.
 
     Raises
@@ -964,5 +965,8 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
         chi_sq = 0.5 * n * d**2 * (W - 1 / d)
         pval = scipy.stats.chi2.sf(chi_sq, ddof)
 
-    sphericity = True if pval > alpha else False
-    return sphericity, W, chi_sq, int(ddof), pval
+    spher = True if pval > alpha else False
+
+    SpherResults = namedtuple(
+        'SpherResults', ['spher', 'W', 'chi2', 'dof', 'pval'])
+    return SpherResults(spher, W, chi_sq, int(ddof), pval)
