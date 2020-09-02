@@ -507,7 +507,7 @@ class TestPairwise(TestCase):
             pairwise_corr(data, columns=['Neuroticism', 'Age'], covar='One')
         # Test against pcorr:
         _pcorr = data.drop(columns=['One', 'Gender']).pcorr().stack()
-        _pwcorr =pairwise_corr(
+        _pwcorr = pairwise_corr(
             data.drop(columns=['One', 'Gender']),
             covar=data.drop(columns=['test', 'One', 'Gender']).columns
         )[['X', 'Y', 'r']].set_index(['X', 'Y']).squeeze()
