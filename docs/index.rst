@@ -511,6 +511,7 @@ Note that this program is provided with NO WARRANTY OF ANY KIND. If you can, alw
 - `Richard Höchenberger <http://hoechenberger.net/>`_
 - `Arthur Paulino <https://github.com/arthurpaulino>`_
 - `Eelke Spaak <https://eelkespaak.nl/>`_
+- `Johannes Elfner <https://www.linkedin.com/in/johannes-elfner/>`_
 
 How to cite Pingouin?
 =====================

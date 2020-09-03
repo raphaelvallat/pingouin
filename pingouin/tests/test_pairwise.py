@@ -495,8 +495,21 @@ class TestPairwise(TestCase):
         pairwise_corr(data, covar=['Age', 'Neuroticism'])
         with pytest.raises(AssertionError):
             pairwise_corr(data, covar=['Age', 'Gender'])
-        with pytest.raises(ValueError):
-            pairwise_corr(data, columns=['Neuroticism', 'Age'], covar='Age')
+        # Partial pairwise with overlapping covariates
+        pairwise_corr(
+            data.drop(columns=['One', 'Gender']),
+            covar=data.drop(columns=['test', 'One', 'Gender']).columns
+        )
+        pairwise_corr(data, columns='Neuroticism', covar='Age')
+        with pytest.raises(AssertionError):
+            pairwise_corr(data, columns=['Neuroticism', 'Age'], covar='One')
+        # Test against pcorr:
+        _pcorr = data.drop(columns=['One', 'Gender']).pcorr().stack()
+        _pwcorr = pairwise_corr(
+            data.drop(columns=['One', 'Gender']),
+            covar=data.drop(columns=['test', 'One', 'Gender']).columns
+        )[['X', 'Y', 'r']].set_index(['X', 'Y']).squeeze()
+        assert np.allclose(_pcorr.reindex(_pwcorr.index), _pwcorr)
         # Partial pairwise with missing values
         data.loc[[4, 5, 8, 20, 22], 'Age'] = np.nan
         data.loc[[10, 12], 'Neuroticism'] = np.nan
@@ -539,6 +552,15 @@ class TestPairwise(TestCase):
         pairwise_corr(data, covar=[('Psycho', 'Anxiety')])
         pairwise_corr(data, columns=[('Behavior', 'Rating')],
                       covar=[('Psycho', 'Anxiety')])
+        pairwise_corr(data, covar=data.columns)
+        # Test against pcorr:
+        _pcorr = data.pcorr()
+        _pcorr.index = _pcorr.index.tolist()  # MultiIndex to tuples
+        _pcorr.columns = _pcorr.columns.tolist()  # MultiIndex to tuples
+        _pwcorr = pairwise_corr(
+            data, covar=data.columns
+        )[['X', 'Y', 'r']].set_index(['X', 'Y']).squeeze()
+        assert np.allclose(_pcorr.stack().reindex(_pwcorr.index), _pwcorr)
         # With missing values
         data.iloc[2, [2, 3]] = np.nan
         data.iloc[[1, 4], [1, 4]] = np.nan
