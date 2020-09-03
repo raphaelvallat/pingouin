@@ -495,8 +495,6 @@ class TestPairwise(TestCase):
         pairwise_corr(data, covar=['Age', 'Neuroticism'])
         with pytest.raises(AssertionError):
             pairwise_corr(data, covar=['Age', 'Gender'])
-        # with pytest.raises(ValueError):
-        #     pairwise_corr(data, columns=['Neuroticism', 'Age'], covar='Age')
         # Partial pairwise with overlapping covariates
         pairwise_corr(
             data.drop(columns=['One', 'Gender']),
