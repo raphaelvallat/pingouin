@@ -50,7 +50,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
 
     Returns
     -------
-    bf : str
+    bf : float
         Scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor (BF10).
         The Bayes Factor quantifies the evidence in favour of the
         alternative hypothesis.
@@ -129,7 +129,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     # Check T-value
     assert isinstance(t, (int, float)), 'The T-value must be a int or a float.'
     if not np.isfinite(t):
-        return str(np.nan)
+        return np.nan
 
     # Function to be integrated
     def fun(g, t, n, r, df):
@@ -169,7 +169,7 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
         Pearson correlation coefficient.
     n : int
         Sample size.
-    tail : str
+    tail : float
         Tail of the alternative hypothesis. Can be *'two-sided'*,
         *'one-sided'*, *'greater'* or *'less'*. *'greater'* corresponds to a
         positive correlation, *'less'* to a negative correlation.
@@ -279,7 +279,7 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
 
     # Wrong input
     if not np.isfinite(r) or n < 2:
-        return str(np.nan)
+        return np.nan
     assert -1 <= r <= 1, 'r must be between -1 and 1.'
 
     if tail.lower() != 'two-sided' and method.lower() == 'wetzels':
