@@ -114,7 +114,10 @@ def _postprocess_dataframe(df):
         if round_option is None:
             continue
         if callable(round_option):
-            df.at[row, col] = round_option(df.at[row, col])
+            newval = round_option(df.at[row, col])
+            # ensure that dtype changes are processed
+            df[col] = df[col].astype(type(newval))
+            df.at[row, col] = newval
             continue
         if isinstance(df.at[row, col], bool):
             # No rounding if value is a boolean
