@@ -156,7 +156,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     if ((tail == 'greater' and t < 0) or (tail == 'less' and t > 0)) and bf10 > 1:  # noqa
         bf10 = 1 / bf10
 
-    return _format_bf(bf10)
+    return bf10
 
 
 def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
@@ -333,7 +333,7 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
                 # We expect the correlation to be negative
                 bf10 = bf10neg
 
-    return _format_bf(bf10)
+    return bf10
 
 
 def bayesfactor_binom(k, n, p=.5):
@@ -431,4 +431,4 @@ def bayesfactor_binom(k, n, p=.5):
         return binom.pmf(k, n, g)
 
     bf10 = quad(fun, 0, 1, args=(k, n))[0] / binom.pmf(k, n, p)
-    return _format_bf(bf10)
+    return bf10
