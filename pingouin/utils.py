@@ -90,10 +90,13 @@ def _postprocess_dataframe(df):
     the default is used. (Default `pingouin.options['round'] = None`,
     i.e. no rounding is applied.)
 
+    If a round option is `callable` instead of `int`, then it will be called,
+    and the return value stored in the cell.
+
     Post-processing is applied on a copy of the DataFrame, leaving the
     original DataFrame untouched.
 
-    This is an internal functions (no public API).
+    This is an internal function (no public API).
 
     Parameters
     ----------
@@ -107,6 +110,12 @@ def _postprocess_dataframe(df):
     """
     df = df.copy()
     for row, col in it.product(df.index, df.columns):
+        round_option = _get_round_setting_for(row, col)
+        if round_option is None:
+            continue
+        if callable(round_option):
+            df.at[row, col] = round_option(df.at[row, col])
+            continue
         if isinstance(df.at[row, col], bool):
             # No rounding if value is a boolean
             continue
@@ -121,10 +130,7 @@ def _postprocess_dataframe(df):
             if not is_float_array:
                 # No rounding if value is not a float array
                 continue
-        decimals = _get_round_setting_for(row, col)
-        if decimals is None:
-            continue
-        df.at[row, col] = np.round(df.at[row, col], decimals=decimals)
+        df.at[row, col] = np.round(df.at[row, col], decimals=round_option)
     return df
 
 
