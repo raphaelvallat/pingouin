@@ -13,6 +13,18 @@ y = np.random.normal(size=100)
 z = np.random.normal(loc=.5, size=100)
 v, w = np.random.multivariate_normal([0, 0], [[1, .8], [.8, 1]], 100).T
 
+
+def appr(x, rel=False, thresh=1e-3):
+    """
+    Assert that two numbers (or two sets of numbers) are equal to each other
+    within some tolerance.
+    """
+    if rel:
+        return approx(x, rel=thresh)
+    else:
+        return approx(x, abs=thresh)
+
+
 class TestBayesian(TestCase):
     """Test bayesian.py."""
 
@@ -20,7 +32,6 @@ class TestBayesian(TestCase):
         """Test function bayesfactor_ttest."""
         # check for approximate equality with 1e-3 tolerance
         # (as this is how we store the values here)
-        appr = lambda x: approx(x, abs=1e-3)
         assert bayesfactor_ttest(3.5, 20, 20) == appr(26.743)
         assert bayesfactor_ttest(3.5, 20) == appr(17.185)
         assert bayesfactor_ttest(3.5, 20, 1) == appr(17.185)
@@ -44,7 +55,6 @@ class TestBayesian(TestCase):
         # Similar to JASP with kappa=1, or correlationBF with rscale='wide'
         # check for approximate equality with 1e-3 tolerance
         # (as this is how we store the values here)
-        appr = lambda x: approx(x, abs=1e-3)
         assert bfp(0.1, 83) == appr(0.204)
         assert bfp(-0.1, 83) == appr(0.204)
         assert bfp(0.1, 83, tail='one-sided') == appr(0.332)
@@ -63,13 +73,12 @@ class TestBayesian(TestCase):
         assert bfp(r, n, tail='g', method='wetzels') == appr(0.275)
         assert bfp(r, n, tail='l') == appr(0.073)
         r, _ = pearsonr(v, w)
-        appr = lambda x: approx(x, rel=1e-3) # relative tolerance here
-        assert bfp(r, n) == appr(2.321e+22)
-        assert bfp(r, n, tail='g') == appr(4.643e+22)
+        # relative tolerance here
+        assert bfp(r, n) == appr(2.321e+22, rel=True)
+        assert bfp(r, n, tail='g') == appr(4.643e+22, rel=True)
         # assert bfp(r, n, tail='l')) == 1.677e-26
 
         # Compare the integral solving method (Wetzels)
-        appr = lambda x: approx(x, abs=1e-3) # back to absolute tolerance
         assert bfp(0.6, 20, method='wetzels') == appr(8.221)
         assert bfp(-0.6, 20, method='wetzels') == appr(8.221)
         assert bfp(0.6, 10, method='wetzels') == appr(1.278)

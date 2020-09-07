@@ -1183,7 +1183,6 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
 
     # For max precision, make sure rounding is disabled
     old_options = options.copy()
-    options.clear()
     options['round'] = None
 
     # M(j) ~ X + covar

@@ -386,7 +386,6 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
         # For max precision, make sure rounding is disabled
         old_options = options.copy()
-        options.clear()
         options['round'] = None
 
         for i in range(stats.shape[0]):
@@ -525,7 +524,6 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
             # For max precision, make sure rounding is disabled
             old_options = options.copy()
-            options.clear()
             options['round'] = None
 
             for i, comb in enumerate(combs):
@@ -696,7 +694,6 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     # First compute the ANOVA
     # For max precision, make sure rounding is disabled
     old_options = options.copy()
-    options.clear()
     options['round'] = None
     aov = anova(dv=dv, data=data, between=between, detailed=True)
     options.update(old_options)  # Restore original options
@@ -1227,7 +1224,6 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     # For max precision, make sure rounding is disabled
     old_options = options.copy()
-    options.clear()
     options['round'] = None
 
     # Compute pairwise correlations and fill dataframe
