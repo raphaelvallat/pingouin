@@ -9,6 +9,8 @@ options = {}
 
 def set_default_options():
     """Reset Pingouin's default global options (e.g. rounding).
+
+    .. versionadded:: 0.3.8
     """
     options.clear()
 
