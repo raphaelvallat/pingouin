@@ -10,6 +10,8 @@ __all__ = ["bayesfactor_ttest", "bayesfactor_pearson", "bayesfactor_binom"]
 def _format_bf(bf, precision=3, trim='0'):
     """Format BF10 to floating point or scientific notation.
     """
+    if type(bf) == str:
+        return bf
     if bf >= 1e4 or bf <= 1e-4:
         out = np.format_float_scientific(bf, precision=precision, trim=trim)
     else:
@@ -50,7 +52,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
 
     Returns
     -------
-    bf : str
+    bf : float
         Scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor (BF10).
         The Bayes Factor quantifies the evidence in favour of the
         alternative hypothesis.
@@ -129,7 +131,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     # Check T-value
     assert isinstance(t, (int, float)), 'The T-value must be a int or a float.'
     if not np.isfinite(t):
-        return str(np.nan)
+        return np.nan
 
     # Function to be integrated
     def fun(g, t, n, r, df):
@@ -156,7 +158,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     if ((tail == 'greater' and t < 0) or (tail == 'less' and t > 0)) and bf10 > 1:  # noqa
         bf10 = 1 / bf10
 
-    return _format_bf(bf10)
+    return bf10
 
 
 def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
@@ -169,7 +171,7 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
         Pearson correlation coefficient.
     n : int
         Sample size.
-    tail : str
+    tail : float
         Tail of the alternative hypothesis. Can be *'two-sided'*,
         *'one-sided'*, *'greater'* or *'less'*. *'greater'* corresponds to a
         positive correlation, *'less'* to a negative correlation.
@@ -279,7 +281,7 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
 
     # Wrong input
     if not np.isfinite(r) or n < 2:
-        return str(np.nan)
+        return np.nan
     assert -1 <= r <= 1, 'r must be between -1 and 1.'
 
     if tail.lower() != 'two-sided' and method.lower() == 'wetzels':
@@ -333,7 +335,7 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
                 # We expect the correlation to be negative
                 bf10 = bf10neg
 
-    return _format_bf(bf10)
+    return bf10
 
 
 def bayesfactor_binom(k, n, p=.5):
@@ -431,4 +433,4 @@ def bayesfactor_binom(k, n, p=.5):
         return binom.pmf(k, n, g)
 
     bf10 = quad(fun, 0, 1, args=(k, n))[0] / binom.pmf(k, n, p)
-    return _format_bf(bf10)
+    return bf10
