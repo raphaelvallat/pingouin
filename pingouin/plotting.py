@@ -502,9 +502,6 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
     # Remove NaN values
     data = remove_rm_na(dv=dv, within=within, subject=subject, data=data)
 
-    # Extract subjects
-    subj = data[subject].unique()
-
     # Extract within-subject level (alphabetical order)
     x_cat = np.unique(data[within])
 
