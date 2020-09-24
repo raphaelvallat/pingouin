@@ -10,6 +10,8 @@ __all__ = ["bayesfactor_ttest", "bayesfactor_pearson", "bayesfactor_binom"]
 def _format_bf(bf, precision=3, trim='0'):
     """Format BF10 to floating point or scientific notation.
     """
+    if type(bf) == str:
+        return bf
     if bf >= 1e4 or bf <= 1e-4:
         out = np.format_float_scientific(bf, precision=precision, trim=trim)
     else:
@@ -50,7 +52,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
 
     Returns
     -------
-    bf : str
+    bf : float
         Scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor (BF10).
         The Bayes Factor quantifies the evidence in favour of the
         alternative hypothesis.
@@ -98,19 +100,19 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
 
     >>> from pingouin import bayesfactor_ttest
     >>> bf = bayesfactor_ttest(3.5, 20, 20)
-    >>> print("Bayes Factor: %s (two-sample independent)" % bf)
+    >>> print("Bayes Factor: %.3f (two-sample independent)" % bf)
     Bayes Factor: 26.743 (two-sample independent)
 
     2. Bayes Factor of a paired two-sample T-test
 
     >>> bf = bayesfactor_ttest(3.5, 20, 20, paired=True)
-    >>> print("Bayes Factor: %s (two-sample paired)" % bf)
+    >>> print("Bayes Factor: %.3f (two-sample paired)" % bf)
     Bayes Factor: 17.185 (two-sample paired)
 
     3. Bayes Factor of an one-sided one-sample T-test
 
     >>> bf = bayesfactor_ttest(3.5, 20, tail='one-sided')
-    >>> print("Bayes Factor: %s (one-sample)" % bf)
+    >>> print("Bayes Factor: %.3f (one-sample)" % bf)
     Bayes Factor: 34.369 (one-sample)
 
     4. Now specifying the direction of the test
@@ -118,7 +120,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     >>> tval = -3.5
     >>> bf_greater = bayesfactor_ttest(tval, 20, tail='greater')
     >>> bf_less = bayesfactor_ttest(tval, 20, tail='less')
-    >>> print("BF10-greater: %s | BF10-less: %s" % (bf_greater, bf_less))
+    >>> print("BF10-greater: %.3f | BF10-less: %.3f" % (bf_greater, bf_less))
     BF10-greater: 0.029 | BF10-less: 34.369
     """
     # Check tails
@@ -129,7 +131,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     # Check T-value
     assert isinstance(t, (int, float)), 'The T-value must be a int or a float.'
     if not np.isfinite(t):
-        return str(np.nan)
+        return np.nan
 
     # Function to be integrated
     def fun(g, t, n, r, df):
@@ -156,7 +158,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     if ((tail == 'greater' and t < 0) or (tail == 'less' and t > 0)) and bf10 > 1:  # noqa
         bf10 = 1 / bf10
 
-    return _format_bf(bf10)
+    return bf10
 
 
 def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
@@ -169,7 +171,7 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
         Pearson correlation coefficient.
     n : int
         Sample size.
-    tail : str
+    tail : float
         Tail of the alternative hypothesis. Can be *'two-sided'*,
         *'one-sided'*, *'greater'* or *'less'*. *'greater'* corresponds to a
         positive correlation, *'less'* to a negative correlation.
@@ -186,7 +188,7 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
 
     Returns
     -------
-    bf : str
+    bf : float
         Bayes Factor (BF10).
         The Bayes Factor quantifies the evidence in favour of the alternative
         hypothesis.
@@ -250,26 +252,26 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
     >>> from pingouin import bayesfactor_pearson
     >>> r, n = 0.6, 20
     >>> bf = bayesfactor_pearson(r, n)
-    >>> print("Bayes Factor: %s" % bf)
+    >>> print("Bayes Factor: %.3f" % bf)
     Bayes Factor: 10.634
 
     Compare to Wetzels method:
 
     >>> bf = bayesfactor_pearson(r, n, method='wetzels')
-    >>> print("Bayes Factor: %s" % bf)
+    >>> print("Bayes Factor: %.3f" % bf)
     Bayes Factor: 8.221
 
     One-sided test
 
     >>> bf10pos = bayesfactor_pearson(r, n, tail='greater')
     >>> bf10neg = bayesfactor_pearson(r, n, tail='less')
-    >>> print("BF-pos: %s, BF-neg: %s" % (bf10pos, bf10neg))
+    >>> print("BF-pos: %.3f, BF-neg: %.3f" % (bf10pos, bf10neg))
     BF-pos: 21.185, BF-neg: 0.082
 
     We can also only pass ``tail='one-sided'`` and Pingouin will automatically
     infer the directionality of the test based on the ``r`` value.
 
-    >>> print("BF: %s" % bayesfactor_pearson(r, n, tail='one-sided'))
+    >>> print("BF: %.3f" % bayesfactor_pearson(r, n, tail='one-sided'))
     BF: 21.185
     """
     from scipy.special import gamma, betaln, hyp2f1
@@ -279,7 +281,7 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
 
     # Wrong input
     if not np.isfinite(r) or n < 2:
-        return str(np.nan)
+        return np.nan
     assert -1 <= r <= 1, 'r must be between -1 and 1.'
 
     if tail.lower() != 'two-sided' and method.lower() == 'wetzels':
@@ -333,7 +335,7 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
                 # We expect the correlation to be negative
                 bf10 = bf10neg
 
-    return _format_bf(bf10)
+    return bf10
 
 
 def bayesfactor_binom(k, n, p=.5):
@@ -389,16 +391,16 @@ def bayesfactor_binom(k, n, p=.5):
 
     >>> import pingouin as pg
     >>> bf = float(pg.bayesfactor_binom(k=115, n=200, p=0.5))
-    >>> # Note that Pingouin returns the BF-alt by default, formatted as a str.
+    >>> # Note that Pingouin returns the BF-alt by default.
     >>> # BF-null is simply 1 / BF-alt
     >>> print("BF-null: %.3f, BF-alt: %.3f" % (1 / bf, bf))
-    BF-null: 1.198, BF-alt: 0.835
+    BF-null: 1.197, BF-alt: 0.835
 
     Since the Bayes Factor of the null hypothesis ("the coin is fair") is
     higher than the Bayes Factor of the alternative hypothesis
     ("the coin is not fair"), we can conclude that there is more evidence to
     support the fact that the coin is indeed fair. However, the strength of the
-    evidence in favor of the null hypothesis (1.198) is "barely worth
+    evidence in favor of the null hypothesis (1.197) is "barely worth
     mentionning" according to Jeffreys's rule of thumb.
 
     Interestingly, a frequentist alternative to this test would give very
@@ -418,7 +420,7 @@ def bayesfactor_binom(k, n, p=.5):
     Last example using a different base probability of successes
 
     >>> bf = pg.bayesfactor_binom(k=100, n=1000, p=0.1)
-    >>> print("Bayes Factor: %s" % bf)
+    >>> print("Bayes Factor: %.3f" % bf)
     Bayes Factor: 0.024
     """
     from scipy.stats import binom
@@ -431,4 +433,4 @@ def bayesfactor_binom(k, n, p=.5):
         return binom.pmf(k, n, g)
 
     bf10 = quad(fun, 0, 1, args=(k, n))[0] / binom.pmf(k, n, p)
-    return _format_bf(bf10)
+    return bf10

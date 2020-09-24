@@ -3,8 +3,8 @@
 What's new
 ##########
 
-v0.3.8 (dev)
-------------
+v0.3.8 (September 2020)
+-----------------------
 
 **Bugfixes**
 
@@ -33,6 +33,7 @@ d. Added ``boxplot_in_front`` argument to the :py:func:`pingouin.plot_paired`. W
 e. Better handling of Categorical columns in several functions (e.g. ANOVA). See `issue 122 <https://github.com/raphaelvallat/pingouin/issues/122>`_.
 f. :py:func:`multivariate_normality` now also returns the test statistic. This function also comes with better unit testing against the MVN R package.
 g. :py:func:`pingouin.pairwise_corr` can now control for all covariates by excluding each specific set of column-combinations from the covariates to use for this combination, similar to :py:func:`pingouin.pcorr`. See `PR 124 <https://github.com/raphaelvallat/pingouin/pull/124>`_.
+h. Bayes factor formatting is now handled via the options module. The default behaviour is unchanged (return as formatted string), but can easily be disabled by setting `pingouin.options["round.column.BF10"] = None`. See `PR 126 <https://github.com/raphaelvallat/pingouin/pull/126>`_.
 
 v0.3.7 (July 2020)
 ------------------

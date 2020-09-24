@@ -296,7 +296,6 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
     with np.errstate(invalid='ignore'):
         # For max precision, make sure rounding is disabled
         old_options = options.copy()
-        options.clear()
         options['round'] = None
         aov = anova(data=data, dv=ratings, between=[targets, raters],
                     ss_type=2)

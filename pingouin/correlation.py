@@ -1053,7 +1053,6 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     # Using PINGOUIN
     # For max precision, make sure rounding is disabled
     old_options = options.copy()
-    options.clear()
     options['round'] = None
     aov = ancova(dv=y, covar=x, between=subject, data=data)
     options.update(old_options)  # restore options
