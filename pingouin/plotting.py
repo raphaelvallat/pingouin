@@ -475,10 +475,8 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
         >>> import matplotlib.pyplot as plt
         >>> df = pg.read_dataset('mixed_anova').query("Group == 'Meditation'")
         >>> # df = df.query("Group == 'Meditation' and Subject > 40")
-        >>> fig, ax1 = plt.subplots(1, 1, figsize=(5, 4))
         >>> pg.plot_paired(data=df, dv='Scores', within='Time',
-        ...                subject='Subject', ax=ax1, orient='h'
-        ...                )  # doctest: +SKIP
+                           subject='Subject', orient='h')  # doctest: +SKIP
 
     With the boxplot on the foreground:
 
