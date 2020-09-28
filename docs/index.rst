@@ -512,6 +512,7 @@ Note that this program is provided with NO WARRANTY OF ANY KIND. If you can, alw
 - `Arthur Paulino <https://github.com/arthurpaulino>`_
 - `Eelke Spaak <https://eelkespaak.nl/>`_
 - `Johannes Elfner <https://www.linkedin.com/in/johannes-elfner/>`_
+- `Stefan Appelhoff <https://stefanappelhoff.com>`_
 
 How to cite Pingouin?
 =====================
