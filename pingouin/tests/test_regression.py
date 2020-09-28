@@ -131,7 +131,8 @@ class TestRegression(TestCase):
         y = rng.randn(n)
 
         with pytest.warns(UserWarning,
-                          match='rank deficient (rank 5 with 6 columns'):
+                          match='(rank 5 with 6 columns)'):
+
             res_pingouin = linear_regression(X, y, add_intercept=True)
 
         X_with_intercept = sm.add_constant(X)

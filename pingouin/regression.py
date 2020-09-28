@@ -406,7 +406,7 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     calc_ss_res = False
     if rank < Xw.shape[1]:
         warnings.warn('Design matrix supplied with `X` parameter is rank '
-                      f'deficient (rank {rank} with {Xw.shape[1]} columns. '
+                      f'deficient (rank {rank} with {Xw.shape[1]} columns). '
                       'That means that one or more of the columns in `X` '
                       'are a linear combination of one of more of the '
                       'other columns.')
