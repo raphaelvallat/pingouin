@@ -5,6 +5,7 @@ from unittest import TestCase
 
 from scipy.stats import linregress, zscore
 from sklearn.linear_model import LinearRegression
+import statsmodels.api as sm
 
 from pandas.testing import assert_frame_equal
 from numpy.testing import assert_almost_equal, assert_equal
@@ -121,6 +122,45 @@ class TestRegression(TestCase):
         )
         assert_equal(lm1.loc[:, 'names'].to_numpy(), ['Intercept', 'X', 'M'])
         assert_equal(lm2.loc[:, 'names'].to_numpy(), ['x1', 'x2', 'x4'])
+
+        # with rank deficient design matrix `X`
+        # see: https://github.com/raphaelvallat/pingouin/issues/130
+        n = 100
+        rng = np.random.RandomState(42)
+        X = np.vstack([rng.permutation([0, 1, 0, 0, 0]) for i in range(n)])
+        y = rng.randn(n)
+
+        with pytest.warns(UserWarning,
+                          match='rank deficient (rank 5 with 6 columns'):
+            res_pingouin = linear_regression(X, y, add_intercept=True)
+
+        X_with_intercept = sm.add_constant(X)
+        res_sm = sm.OLS(endog=y, exog=X_with_intercept).fit()
+
+        np.testing.assert_allclose(res_pingouin.residuals_, res_sm.resid)
+        np.testing.assert_allclose(res_pingouin['coef'], res_sm.params)
+        np.testing.assert_allclose(res_pingouin['r2'][0], res_sm.rsquared)
+
+        # Some parameters differ within 0.001 to 0.05 tolerance
+        rtol = 0.05
+        np.testing.assert_allclose(res_pingouin['T'], res_sm.tvalues,
+                                   rtol=rtol)
+        np.testing.assert_allclose(res_pingouin['se'], res_sm.bse,
+                                   rtol=rtol)
+        np.testing.assert_allclose(res_pingouin['pval'], res_sm.pvalues,
+                                   rtol=rtol)
+        np.testing.assert_allclose(res_pingouin['CI[2.5%]'],
+                                   res_sm.conf_int()[:, 0],
+                                   rtol=rtol)
+        np.testing.assert_allclose(res_pingouin['CI[97.5%]'],
+                                   res_sm.conf_int()[:, 1],
+                                   rtol=rtol)
+
+        # some parameters do not match at all: diff ~0.7
+        rtol = 0.7
+        np.testing.assert_allclose(res_pingouin['adj_r2'][0],
+                                   res_sm.rsquared_adj,
+                                   rtol=rtol)
 
         # Relative importance
         # Compare to R package relaimpo
