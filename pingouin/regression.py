@@ -1,4 +1,5 @@
 import itertools
+import warnings
 import numpy as np
 import pandas as pd
 import pandas_flavor as pf
@@ -402,15 +403,24 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     coef, ss_res, rank, _ = lstsq(Xw, yw)
     if coef_only:
         return coef
+    calc_ss_res = False
+    if rank < Xw.shape[1]:
+        warnings.warn('Design matrix supplied with `X` parameter is rank '
+                      f'deficient (rank {rank} with {Xw.shape[1]} columns. '
+                      'That means that one or more of the columns in `X` '
+                      'are a linear combination of one of more of the '
+                      'other columns.')
+        calc_ss_res = True
 
     # Degrees of freedom
     df_model = rank - constant
     df_resid = n - p
-
     # Calculate predicted values and (weighted) residuals
     pred = Xw @ coef
     resid = yw - pred
-    # ss_res = (resid ** 2).sum()
+    if calc_ss_res:
+        # In case we did not get ss_res from lstsq due to rank deficiency
+        ss_res = (resid ** 2).sum()
 
     # Calculate total (weighted) sums of squares and R^2
     ss_tot = yw @ yw
