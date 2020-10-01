@@ -3,6 +3,13 @@
 What's new
 ##########
 
+v0.3.9
+-----------------------
+
+**Enhancements**
+
+a. :py:func:`pingouin.plot_paired` now supports an arbitrary number of within-levels as well as horizontal plotting. See `PR 126 <https://github.com/raphaelvallat/pingouin/pull/133>`_.
+
 v0.3.8 (September 2020)
 -----------------------
 

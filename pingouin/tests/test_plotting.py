@@ -78,6 +78,16 @@ class TestPlotting(TestCase):
         plot_paired(data=df, dv='Scores', within='Time',
                     subject='Subject', order=['June', 'August'],
                     boxplot_in_front=True, ax=ax2)
+        # Test with more than two within levels
+        df = read_dataset('mixed_anova')
+        df = df.query("Group == 'Meditation' and Subject > 40").copy()
+        df.loc[[101, 161], 'Scores'] = 6
+        plot_paired(data=df, dv='Scores', within='Time', subject='Subject',
+                    order=['January', 'June', 'August'])
+        plot_paired(data=df, dv='Scores', within='Time', subject='Subject',
+                    order=['January', 'June', 'August'], orient='h')
+        plot_paired(data=df, dv='Scores', within='Time', subject='Subject',
+                    orient='h', boxplot=False)
         plt.close('all')
 
     def test_plot_shift(self):

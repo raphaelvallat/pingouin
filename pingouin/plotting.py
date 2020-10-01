@@ -378,10 +378,10 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
 
 
 def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
-                boxplot=True, boxplot_in_front=False,
+                boxplot=True, boxplot_in_front=False, orient='v',
                 figsize=(4, 4), dpi=100, ax=None,
                 colors=['green', 'grey', 'indianred'],
-                pointplot_kwargs={'scale': .6, 'markers': '.'},
+                pointplot_kwargs={'scale': .6, 'marker': '.'},
                 boxplot_kwargs={'color': 'lightslategrey', 'width': .2}):
     """
     Paired plot.
@@ -410,6 +410,12 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
         overall plot more readable when plotting a large numbers of subjects.
 
         .. versionadded:: 0.3.8
+    orient : string
+        Plot the boxplots vertically and the subjects on the x-axis if
+        ``orient='v'`` (default). Set to ``orient='h'`` to rotate the plot by
+        by 90 degrees.
+
+        .. versionadded:: 0.3.9
     figsize : tuple
         Figsize in inches
     dpi : int
@@ -461,6 +467,17 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
         ...                subject='Subject', ax=ax1, boxplot=False,
         ...                colors=['grey', 'grey', 'grey'])  # doctest: +SKIP
 
+    Horizontal paired plot with three unique within-levels:
+
+    .. plot::
+
+        >>> import pingouin as pg
+        >>> import matplotlib.pyplot as plt
+        >>> df = pg.read_dataset('mixed_anova').query("Group == 'Meditation'")
+        >>> # df = df.query("Group == 'Meditation' and Subject > 40")
+        >>> pg.plot_paired(data=df, dv='Scores', within='Time',
+                           subject='Subject', orient='h')  # doctest: +SKIP
+
     With the boxplot on the foreground:
 
     .. plot::
@@ -474,10 +491,18 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
     from pingouin.utils import _check_dataframe, remove_rm_na
 
     # Update default kwargs with specified inputs
-    _pointplot_kwargs = {'scale': .6, 'markers': '.'}
+    _pointplot_kwargs = {'scale': .6, 'marker': '.'}
     _pointplot_kwargs.update(pointplot_kwargs)
     _boxplot_kwargs = {'color': 'lightslategrey', 'width': .2}
     _boxplot_kwargs.update(boxplot_kwargs)
+    # Extract pointplot alpha, if set
+    pp_alpha = _pointplot_kwargs.pop('alpha', 1.)
+
+    # Calculate size of the plot elements by scale as in Seaborn pointplot
+    scale = _pointplot_kwargs.pop('scale')
+    lw = plt.rcParams["lines.linewidth"] * 1.8 * scale  # get the linewidth
+    mew = lw * .75  # get the markeredgewidth
+    markersize = np.pi * np.square(lw) * 2  # get the markersize
 
     # Set boxplot in front of Line2D plot (zorder=2 for both) and add alpha
     if boxplot_in_front:
@@ -494,45 +519,90 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
     # Remove NaN values
     data = remove_rm_na(dv=dv, within=within, subject=subject, data=data)
 
-    # Extract subjects
-    subj = data[subject].unique()
-
     # Extract within-subject level (alphabetical order)
     x_cat = np.unique(data[within])
-    assert len(x_cat) == 2, 'Within must have exactly two unique levels.'
 
     if order is None:
         order = x_cat
     else:
-        assert len(order) == 2, 'Order must have exactly two elements.'
+        assert len(order) == len(x_cat), (
+            'Order must have the same number of elements as the number '
+            'of levels in `within`.'
+        )
+
+    # Substitue within by integer order of the ordered columns to allow for
+    # changing the order of numeric withins.
+    data['wthn'] = data[within].replace(
+        {_ordr: i for i, _ordr in enumerate(order)}
+    )
+    order_num = range(len(order))  # Make numeric order
 
     # Start the plot
     if ax is None:
         fig, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
 
-    for idx, s in enumerate(subj):
-        tmp = data.loc[data[subject] == s, [dv, within, subject]]
-        x_val = tmp[tmp[within] == order[0]][dv].to_numpy()[0]
-        y_val = tmp[tmp[within] == order[1]][dv].to_numpy()[0]
-        if x_val < y_val:
-            color = colors[0]
-        elif x_val > y_val:
-            color = colors[2]
-        elif x_val == y_val:
-            color = colors[1]
+    # Set x and y depending on orientation using the num. replacement within
+    _x = 'wthn' if orient == 'v' else dv
+    _y = dv if orient == 'v' else 'wthn'
 
+    for cat in range(len(x_cat) - 1):
+        _order = (order_num[cat], order_num[cat + 1])
+        # Extract data of the current subject-combination
+        data_now = data.loc[data['wthn'].isin(_order), [dv, 'wthn', subject]]
+        # Select colors for all lines between the current subjects
+        y1 = data_now.loc[data_now['wthn'] == _order[0], dv].to_numpy()
+        y2 = data_now.loc[data_now['wthn'] == _order[1], dv].to_numpy()
+        # Line and scatter colors depending on subject dv trend
+        _colors = np.where(
+            y1 < y2, colors[0], np.where(y1 > y2, colors[2], colors[1])
+        )
+        # Line and scatter colors as hue-indexed dictionary
+        _colors = {
+            subj: clr for subj, clr in zip(data_now[subject].unique(), _colors)
+        }
         # Plot individual lines using Seaborn
-        sns.pointplot(data=tmp, x=within, y=dv, order=order, color=color,
-                      ax=ax, **_pointplot_kwargs)
+        sns.lineplot(data=data_now, x=_x, y=_y, hue=subject,
+                     palette=_colors, ls='-', lw=lw,
+                     legend=False, ax=ax)
+        # Plot individual markers using Seaborn
+        sns.scatterplot(data=data_now, x=_x, y=_y, hue=subject,
+                        palette=_colors, edgecolor='face', lw=mew,
+                        sizes=[markersize] * data_now.shape[0],
+                        legend=False, ax=ax, **_pointplot_kwargs)
+
+    # Set zorder and alpha of pointplot markers and lines
+    _ = plt.setp(ax.collections, alpha=pp_alpha, zorder=2)  # Set marker alpha
+    _ = plt.setp(ax.lines, alpha=pp_alpha, zorder=2)  # Set line alpha
 
     if boxplot:
-        sns.boxplot(data=data, x=within, y=dv, order=order, ax=ax,
-                    **_boxplot_kwargs)
+        # Set boxplot x and y depending on orientation
+        _xbp = within if orient == 'v' else dv
+        _ybp = dv if orient == 'v' else within
+        sns.boxplot(data=data, x=_xbp, y=_ybp, order=order, ax=ax,
+                    orient=orient, **_boxplot_kwargs)
 
         # Set alpha to patch of boxplot but not to whiskers
         for patch in ax.artists:
             r, g, b, a = patch.get_facecolor()
             patch.set_facecolor((r, g, b, .75))
+    else:
+        # If no boxplot, axis needs manual styling as in Seaborn pointplot
+        if orient == 'v':
+            xlabel, ylabel = within, dv
+            ax.set_xticks(np.arange(len(x_cat)))
+            ax.set_xticklabels(order)
+            ax.xaxis.grid(False)
+            ax.set_xlim(-.5, len(x_cat) - .5, auto=None)
+        else:
+            xlabel, ylabel = dv, within
+            ax.set_yticks(np.arange(len(x_cat)))
+            ax.set_yticklabels(order)
+            ax.yaxis.grid(False)
+            ax.set_ylim(-.5, len(x_cat) - .5, auto=None)
+            ax.invert_yaxis()
+
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
 
     # Despine and trim
     sns.despine(trim=True, ax=ax)
