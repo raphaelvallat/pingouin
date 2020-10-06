@@ -400,7 +400,7 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
         yw = y
 
     # FIT (WEIGHTED) LEAST SQUARES REGRESSION USING SCIPY.LINALG.LSTST
-    coef, ss_res, rank, _ = np.linalg.lstsq(Xw, yw)
+    coef, ss_res, rank, _ = np.linalg.lstsq(Xw, yw, rcond=None)
     if coef_only:
         return coef
     calc_ss_res = False
