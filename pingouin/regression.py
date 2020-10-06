@@ -414,7 +414,7 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
 
     # Degrees of freedom
     df_model = rank - constant
-    df_resid = n - p
+    df_resid = n - rank
     # Calculate predicted values and (weighted) residuals
     pred = Xw @ coef
     resid = yw - pred

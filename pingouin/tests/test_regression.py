@@ -141,27 +141,16 @@ class TestRegression(TestCase):
         np.testing.assert_allclose(res_pingouin.residuals_, res_sm.resid)
         np.testing.assert_allclose(res_pingouin['coef'], res_sm.params)
         np.testing.assert_allclose(res_pingouin['r2'][0], res_sm.rsquared)
-
-        # Some parameters differ within 0.001 to 0.05 tolerance
-        rtol = 0.05
-        np.testing.assert_allclose(res_pingouin['T'], res_sm.tvalues,
-                                   rtol=rtol)
-        np.testing.assert_allclose(res_pingouin['se'], res_sm.bse,
-                                   rtol=rtol)
-        np.testing.assert_allclose(res_pingouin['pval'], res_sm.pvalues,
-                                   rtol=rtol)
-        np.testing.assert_allclose(res_pingouin['CI[2.5%]'],
-                                   res_sm.conf_int()[:, 0],
-                                   rtol=rtol)
-        np.testing.assert_allclose(res_pingouin['CI[97.5%]'],
-                                   res_sm.conf_int()[:, 1],
-                                   rtol=rtol)
-
-        # some parameters do not match at all: diff ~0.7
-        rtol = 0.7
         np.testing.assert_allclose(res_pingouin['adj_r2'][0],
-                                   res_sm.rsquared_adj,
-                                   rtol=rtol)
+                                   res_sm.rsquared_adj)
+        np.testing.assert_allclose(res_pingouin['T'], res_sm.tvalues)
+        np.testing.assert_allclose(res_pingouin['se'], res_sm.bse)
+        np.testing.assert_allclose(res_pingouin['pval'], res_sm.pvalues)
+        np.testing.assert_allclose(res_pingouin['CI[2.5%]'],
+                                   res_sm.conf_int()[:, 0])
+        np.testing.assert_allclose(res_pingouin['CI[97.5%]'],
+                                   res_sm.conf_int()[:, 1])
+
 
         # Relative importance
         # Compare to R package relaimpo
