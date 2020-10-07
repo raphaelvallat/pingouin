@@ -399,12 +399,14 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
         Xw = X
         yw = y
 
-    # FIT (WEIGHTED) LEAST SQUARES REGRESSION USING SCIPY.LINALG.LSTST
+    # FIT (WEIGHTED) LEAST SQUARES REGRESSION USING NP.LINALG.LSTST
     coef, ss_res, rank, _ = np.linalg.lstsq(Xw, yw, rcond=None)
+    ss_res = ss_res[0] if ss_res.shape == (1,) else ss_res
     if coef_only:
         return coef
     calc_ss_res = False
     if rank < Xw.shape[1]:
+        # in this case, ss_res is of shape (0,), i.e., an empty array
         warnings.warn('Design matrix supplied with `X` parameter is rank '
                       f'deficient (rank {rank} with {Xw.shape[1]} columns). '
                       'That means that one or more of the columns in `X` '
@@ -415,6 +417,7 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     # Degrees of freedom
     df_model = rank - constant
     df_resid = n - rank
+
     # Calculate predicted values and (weighted) residuals
     pred = Xw @ coef
     resid = yw - pred
