@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.6, 3.7, 3.8]
 
     runs-on: ${{ matrix.platform }}
 
@@ -33,7 +33,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        pytest --doctest-modules --cov=pingouin/ --cov-report=xml --cov-config=setup.cfg --verbose
+        pytest --verbose
 
     - name: Upload coverage report
       if: "matrix.platform == 'ubuntu-latest'"
