@@ -1,9 +1,10 @@
 import itertools
+import warnings
 import numpy as np
 import pandas as pd
 import pandas_flavor as pf
 from scipy.stats import t, norm
-from scipy.linalg import pinv, pinvh, lstsq
+from scipy.linalg import pinv, pinvh
 from pingouin.config import options
 from pingouin.utils import remove_na as rm_na
 from pingouin.utils import _flatten_list as _fl
@@ -119,7 +120,7 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     -----
     The :math:`\\beta` coefficients are estimated using an ordinary least
     squares (OLS) regression, as implemented in the
-    :py:func:`scipy.linalg.lstsq` function. The OLS method minimizes
+    :py:func:`np.linalg.lstsq` function. The OLS method minimizes
     the sum of squared residuals, and leads to a closed-form expression for
     the estimated :math:`\\beta`:
 
@@ -398,19 +399,31 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
         Xw = X
         yw = y
 
-    # FIT (WEIGHTED) LEAST SQUARES REGRESSION USING SCIPY.LINALG.LSTST
-    coef, ss_res, rank, _ = lstsq(Xw, yw)
+    # FIT (WEIGHTED) LEAST SQUARES REGRESSION USING NP.LINALG.LSTST
+    coef, ss_res, rank, _ = np.linalg.lstsq(Xw, yw, rcond=None)
+    ss_res = ss_res[0] if ss_res.shape == (1,) else ss_res
     if coef_only:
         return coef
+    calc_ss_res = False
+    if rank < Xw.shape[1]:
+        # in this case, ss_res is of shape (0,), i.e., an empty array
+        warnings.warn('Design matrix supplied with `X` parameter is rank '
+                      f'deficient (rank {rank} with {Xw.shape[1]} columns). '
+                      'That means that one or more of the columns in `X` '
+                      'are a linear combination of one of more of the '
+                      'other columns.')
+        calc_ss_res = True
 
     # Degrees of freedom
     df_model = rank - constant
-    df_resid = n - p
+    df_resid = n - rank
 
     # Calculate predicted values and (weighted) residuals
     pred = Xw @ coef
     resid = yw - pred
-    # ss_res = (resid ** 2).sum()
+    if calc_ss_res:
+        # In case we did not get ss_res from lstsq due to rank deficiency
+        ss_res = (resid ** 2).sum()
 
     # Calculate total (weighted) sums of squares and R^2
     ss_tot = yw @ yw
