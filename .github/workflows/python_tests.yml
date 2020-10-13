@@ -33,7 +33,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        pytest --verbose
+        pytest --cov --verbose
 
     - name: Upload coverage report
       if: "matrix.platform == 'ubuntu-latest'"
