@@ -33,7 +33,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        pytest --doctest-modules --cov=pingouin/ --cov-report=xml --cov-config=setup.cfg --verbose
+        pytest --cov --cov-report=xml --cov-config=setup.cfg --verbose
 
     - name: Upload coverage report
       if: "matrix.platform == 'ubuntu-latest'"
