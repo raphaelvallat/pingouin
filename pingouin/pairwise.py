@@ -209,6 +209,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
 
     >>> import pandas as pd
     >>> import pingouin as pg
+    >>> pd.set_option('expand_frame_repr', False)
+    >>> pd.set_option('max_columns', 20)
     >>> df = pg.read_dataset('mixed_anova.csv')
     >>> pg.pairwise_ttests(dv='Scores', between='Group', data=df).round(3)
       Contrast        A           B  Paired  Parametric     T    dof       Tail  p-unc   BF10  hedges
@@ -1027,6 +1029,8 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     >>> import pandas as pd
     >>> import pingouin as pg
+    >>> pd.set_option('expand_frame_repr', False)
+    >>> pd.set_option('max_columns', 20)
     >>> data = pg.read_dataset('pairwise_corr').iloc[:, 1:]
     >>> pg.pairwise_corr(data, method='spearman', tail='one-sided',
     ...                  padjust='bonf').round(3)
