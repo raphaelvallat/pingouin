@@ -94,7 +94,6 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         * ``'none'``: no effect size
         * ``'cohen'``: Unbiased Cohen d
         * ``'hedges'``: Hedges g
-        * ``'glass'``: Glass delta
         * ``'r'``: Pearson correlation coefficient
         * ``'eta-square'``: Eta-square
         * ``'odds-ratio'``: Odds ratio
@@ -601,7 +600,6 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
         * ``'none'``: no effect size
         * ``'cohen'``: Unbiased Cohen d
         * ``'hedges'``: Hedges g
-        * ``'glass'``: Glass delta
         * ``'r'``: Pearson correlation coefficient
         * ``'eta-square'``: Eta-square
         * ``'odds-ratio'``: Odds ratio
@@ -761,7 +759,6 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
         * ``'none'``: no effect size
         * ``'cohen'``: Unbiased Cohen d
         * ``'hedges'``: Hedges g
-        * ``'glass'``: Glass delta
         * ``'r'``: Pearson correlation coefficient
         * ``'eta-square'``: Eta-square
         * ``'odds-ratio'``: Odds ratio

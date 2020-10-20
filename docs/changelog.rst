@@ -6,6 +6,11 @@ What's new
 v0.3.9 (dev)
 ------------
 
+**Deprecation**
+
+a. Removed the Glass delta effect size, for which the current implementation in Pingouin invalidly assumes that the control group will always have the lowest standard deviation.
+See `issue 139 <https://github.com/raphaelvallat/pingouin/issues/139>`_.
+
 **Enhancements**
 
 a. :py:func:`pingouin.plot_paired` now supports an arbitrary number of within-levels as well as horizontal plotting. See `PR 133 <https://github.com/raphaelvallat/pingouin/pull/133>`_.

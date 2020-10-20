@@ -150,7 +150,6 @@ class TestEffsize(TestCase):
         cef(d, 'cohen', 'hedges', nx=10, ny=10)
         cef(d, 'cohen', 'r')
         cef(d, 'cohen', 'hedges')
-        cef(d, 'cohen', 'glass')
 
         # Correlation coefficient
         r = .65
@@ -171,7 +170,6 @@ class TestEffsize(TestCase):
         compute_effsize(x=x, y=y, eftype='cohen', paired=False)
         compute_effsize(x=x, y=y, eftype='AUC', paired=True)
         compute_effsize(x=x, y=y, eftype='r', paired=False)
-        compute_effsize(x=x, y=y, eftype='glass', paired=False)
         compute_effsize(x=x, y=y, eftype='odds-ratio', paired=False)
         compute_effsize(x=x, y=y, eftype='eta-square', paired=False)
         compute_effsize(x=x, y=y, eftype='cles', paired=False)

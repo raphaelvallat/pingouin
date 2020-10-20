@@ -389,8 +389,8 @@ def _flatten_list(x, include_tuple=False):
 
 def _check_eftype(eftype):
     """Check validity of eftype"""
-    if eftype.lower() in ['none', 'hedges', 'cohen', 'glass', 'r',
-                          'eta-square', 'odds-ratio', 'auc', 'cles']:
+    if eftype.lower() in ['none', 'hedges', 'cohen', 'r', 'eta-square',
+                          'odds-ratio', 'auc', 'cles']:
         return True
     else:
         return False

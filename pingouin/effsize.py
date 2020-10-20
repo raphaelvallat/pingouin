@@ -520,10 +520,6 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
             warnings.warn("You need to pass nx and ny arguments to compute "
                           "Hedges g. Returning Cohen's d instead")
             return d
-    elif ot == 'glass':
-        warnings.warn("Returning original effect size instead of Glass "
-                      "because variance is not known.")
-        return ef
     elif ot == 'r':
         # McGrath and Meyer 2006
         if all(v is not None for v in [nx, ny]):
@@ -562,7 +558,6 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         * ``'none'``: no effect size
         * ``'cohen'``: Unbiased Cohen d
         * ``'hedges'``: Hedges g
-        * ``'glass'``: Glass delta
         * ``'r'``: correlation coefficient
         * ``'eta-square'``: Eta-square
         * ``'odds-ratio'``: Odds ratio
@@ -604,14 +599,6 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
     to use the corrected Hedges :math:`g` instead:
 
     .. math:: g = d \\times (1 - \\frac{3}{4(n_1 + n_2) - 9})
-
-    The Glass :math:`\\delta` is calculated using the group with the lowest
-    variance as the control group:
-
-    .. math::
-
-        \\delta = \\frac{\\overline{X} -
-        \\overline{Y}}{\\sigma^2_{\\text{control}}}
 
     The common language effect size is the proportion of pairs where ``x`` is
     higher than ``y`` (calculated with a brute-force approach where
@@ -659,13 +646,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
     >>> pg.compute_effsize(x, y, paired=True, eftype='hedges')
     -0.8222477210374874
 
-    3. Glass delta from two independent samples. The group with the lowest
-    variance will automatically be selected as the control.
-
-    >>> pg.compute_effsize(x, y, paired=False, eftype='glass')
-    -1.3887301496588271
-
-    4. Common Language Effect Size.
+    3. Common Language Effect Size.
 
     >>> pg.compute_effsize(x, y, eftype='cles')
     0.2857142857142857
@@ -698,12 +679,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         # Case 1: One-sample Test
         d = (x.mean() - y) / x.std(ddof=1)
         return d
-    if eftype.lower() == 'glass':
-        # Find group with lowest variance
-        sd_control = np.min([x.std(ddof=1), y.std(ddof=1)])
-        d = (x.mean() - y.mean()) / sd_control
-        return d
-    elif eftype.lower() == 'r':
+    if eftype.lower() == 'r':
         # Return correlation coefficient (useful for CI bootstrapping)
         from scipy.stats import pearsonr
         r, _ = pearsonr(x, y)
@@ -713,12 +689,6 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         diff = x[:, None] - y
         return np.where(diff == 0, 0.5, diff > 0).mean()
     else:
-        # Test equality of variance of data with a stringent threshold
-        # equal_var, p = homoscedasticity(x, y, alpha=.001)
-        # if not equal_var:
-        #     print('Unequal variances (p<.001). You should report',
-        #           'Glass delta instead.')
-
         # Compute unbiased Cohen's d effect size
         if not paired:
             # https://en.wikipedia.org/wiki/Effect_size
