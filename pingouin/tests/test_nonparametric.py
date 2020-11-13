@@ -104,7 +104,8 @@ class TestNonParametric(TestCase):
         df = pd.DataFrame({'DV': np.r_[x, y, z],
                            'Time': np.repeat(['A', 'B', 'C'], 100),
                            'Subject': np.tile(np.arange(100), 3)})
-        summary = friedman(data=df, dv='DV', within='Time', subject='Subject')
+        summary = friedman(data=df, dv='DV', within='Time', subject='Subject', method='chisq')
+        friedman(data=df, dv='DV', within='Time', subject='Subject', method='f')
         # Compare with SciPy built-in function
         from scipy import stats
         Q, p = stats.friedmanchisquare(x, y, z)
@@ -113,13 +114,15 @@ class TestNonParametric(TestCase):
         # With Categorical
         df['Time'] = df['Time'].astype('category')
         df['Time'] = df['Time'].cat.add_categories("Unused")
-        summary = friedman(data=df, dv='DV', within='Time', subject='Subject')
+        summary = friedman(data=df, dv='DV', within='Time', subject='Subject', method='chisq')
+        friedman(data=df, dv='DV', within='Time', subject='Subject', method='f')
         Q, p = stats.friedmanchisquare(x, y, z)
         assert np.isclose(Q, summary.at['Friedman', 'Q'])
         assert np.isclose(p, summary.at['Friedman', 'p-unc'])
         # Test with NaN
         df.at[10, 'DV'] = np.nan
-        friedman(data=df, dv='DV', subject='Subject', within='Time')
+        friedman(data=df, dv='DV', subject='Subject', within='Time', method='chisq')
+        friedman(data=df, dv='DV', within='Time', subject='Subject', method='f')
 
     def test_kruskal(self):
         """Test function kruskal"""

@@ -559,7 +559,7 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
     return _postprocess_dataframe(stats)
 
 
-def friedman(data=None, dv=None, within=None, subject=None):
+def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
     """Friedman test for repeated measurements.
 
     Parameters
@@ -572,14 +572,29 @@ def friedman(data=None, dv=None, within=None, subject=None):
         Name of column containing the within-subject factor.
     subject : string
         Name of column containing the subject identifier.
+    method : string
+        Statistical test to perform. Must be ``'chisq'`` (chi-square test) or ``'f'`` (F test).
+        See notes below for explanation.
 
     Returns
     -------
     stats : :py:class:`pandas.DataFrame`
 
-        * ``'Q'``: The Friedman Q statistic, corrected for ties
-        * ``'p-unc'``: Uncorrected p-value
-        * ``'dof'``: degrees of freedom
+        * ``'W'``: Kendall's coefficient of concordance, corrected for ties
+
+        If ``method='chisq'``
+
+            * ``'Q'``: The Friedman chi-square statistic, corrected for ties
+            * ``'dof'``: degrees of freedom
+            * ``'p-unc'``: Uncorrected p-value of the chi squared test
+
+
+        If ``method='f'``
+
+            * ``'F'``: The Friedman F statistic, corrected for ties
+            * ``'dof1'``: degrees of freedom of the numerator
+            * ``'dof2'``: degrees of freedom of the denominator
+            * ``'p-unc'``: Uncorrected p-value of the F test
 
     Notes
     -----
@@ -592,11 +607,22 @@ def friedman(data=None, dv=None, within=None, subject=None):
     variable (same behavior as the ezANOVA R package). As such, results can
     differ from those of JASP. If you can, always double-check the results.
 
-    Due to the assumption that the test statistic has a chi squared
-    distribution, the p-value is only reliable for n > 10 and more than 6
-    repeated measurements.
-
     NaN values are automatically removed.
+
+    The Friedman test is equivalent to the test of significance of Kendalls's
+    coefficient of concordance (Kendall's W). Most commonly a Q statistic,
+    which has asymptotical chi-squared distribution, is computed and used for
+    testing. However, in [1]_ they showed this test to be overly conservative
+    for small numbers of samples and repeated measures. Instead they recommend
+    the F test, which has the correct size and behaves like a permutation test.
+
+
+    References
+    ----------
+    .. [1] Marozzi, M. (2014). Testing for concordance between several criteria.
+           Journal of Statistical Computation and Simulation, 84(9), 1843–1850.
+           https://doi.org/10.1080/00949655.2013.766189
+
 
     Examples
     --------
@@ -606,8 +632,8 @@ def friedman(data=None, dv=None, within=None, subject=None):
     >>> df = read_dataset('rm_anova')
     >>> friedman(data=df, dv='DesireToKill', within='Disgustingness',
     ...          subject='Subject')
-                      Source  ddof1         Q     p-unc
-    Friedman  Disgustingness      1  9.227848  0.002384
+                      Source         W  ddof1         Q     p-unc
+    Friedman  Disgustingness  0.099224      1  9.227848  0.002384
     """
     # Check data
     _check_dataframe(dv=dv, within=within, data=data, subject=subject,
@@ -642,29 +668,49 @@ def friedman(data=None, dv=None, within=None, subject=None):
 
     ssbn = (ranked.sum(axis=0)**2).sum()
 
-    # Compute the test statistic
-    Q = (12 / (n * k * (k + 1))) * ssbn - 3 * n * (k + 1)
-
-    # Correct for ties
+    # Correction for ties
     ties = 0
     for i in range(n):
         replist, repnum = scipy.stats.find_repeats(X[i])
         for t in repnum:
             ties += t * (t * t - 1)
 
-    c = 1 - ties / float(k * (k * k - 1) * n)
-    Q /= c
+    # Compute Kendall's W corrected for ties
+    W = (12*ssbn - 3*n*n*k*(k+1)*(k+1)) / (n*n*k*(k-1)*(k+1) - n*ties)
 
-    # Approximate the p-value
-    ddof1 = k - 1
-    p_unc = scipy.stats.chi2.sf(Q, ddof1)
+    if method == 'chisq':
+        # Compute the Q statistic
+        Q = n * (k-1) * W
 
-    # Create output dataframe
-    stats = pd.DataFrame({'Source': within,
-                          'ddof1': ddof1,
-                          'Q': Q,
-                          'p-unc': p_unc,
-                          }, index=['Friedman'])
+        # Approximate the p-value
+        ddof1 = k - 1
+        p_unc = scipy.stats.chi2.sf(Q, ddof1)
+
+        # Create output dataframe
+        stats = pd.DataFrame({'Source': within,
+                              'W': W,
+                              'ddof1': ddof1,
+                              'Q': Q,
+                              'p-unc': p_unc,
+                              }, index=['Friedman'])
+    elif method == 'f':
+        # Compute the F statistic
+        F = W * (n-1) / (1-W)
+
+        # Approximate the p-value
+        ddof1 = k - 1 - 2 / n
+        ddof2 = (n-1) * ddof1
+        p_unc = scipy.stats.f.sf(F, ddof1, ddof2)
+
+        # Create output dataframe
+        stats = pd.DataFrame({'Source': within,
+                              'W': W,
+                              'ddof1': ddof1,
+                              'ddof2': ddof2,
+                              'F': F,
+                              'p-unc': p_unc,
+                              }, index=['Friedman'])
+
     return _postprocess_dataframe(stats)
 
 
