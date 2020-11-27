@@ -612,9 +612,10 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
     The Friedman test is equivalent to the test of significance of Kendalls's
     coefficient of concordance (Kendall's W). Most commonly a Q statistic,
     which has asymptotical chi-squared distribution, is computed and used for
-    testing. However, in [1]_ they showed this test to be overly conservative
-    for small numbers of samples and repeated measures. Instead they recommend
-    the F test, which has the correct size and behaves like a permutation test.
+    testing. However, in [1]_ they showed the chi-squared test to be overly 
+    conservative for small numbers of samples and repeated measures. Instead 
+    they recommend the F test, which has the correct size and behaves like a
+    permutation test, but is computationaly much easier.
 
 
     References
@@ -634,6 +635,19 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
     ...          subject='Subject')
                       Source         W  ddof1         Q     p-unc
     Friedman  Disgustingness  0.099224      1  9.227848  0.002384
+
+
+    This time we will use the F test method.
+
+    >>> from pingouin import friedman, read_dataset
+    >>> df = read_dataset('rm_anova')
+    >>> friedman(data=df, dv='DesireToKill', within='Disgustingness',
+    ...          subject='Subject', method='f')
+                      Source         W     ddof1      ddof2         F     p-unc
+    Friedman  Disgustingness  0.099224  0.978495  90.021505  10.13418  0.002138
+
+    We can see, compared to the previous example, that the p-value is slightly
+    lower. This is expected, since the F test is more powerful (see Notes).
     """
     # Check data
     _check_dataframe(dv=dv, within=within, data=data, subject=subject,
@@ -676,11 +690,11 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
             ties += t * (t * t - 1)
 
     # Compute Kendall's W corrected for ties
-    W = (12*ssbn - 3*n*n*k*(k+1)*(k+1)) / (n*n*k*(k-1)*(k+1) - n*ties)
+    W = (12 * ssbn - 3 * n * n * k * (k + 1) * (k + 1)) / (n * n * k * (k - 1) * (k + 1) - n * ties)
 
     if method == 'chisq':
         # Compute the Q statistic
-        Q = n * (k-1) * W
+        Q = n * (k - 1) * W
 
         # Approximate the p-value
         ddof1 = k - 1
@@ -695,11 +709,11 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
                               }, index=['Friedman'])
     elif method == 'f':
         # Compute the F statistic
-        F = W * (n-1) / (1-W)
+        F = W * (n - 1) / (1 - W)
 
         # Approximate the p-value
         ddof1 = k - 1 - 2 / n
-        ddof2 = (n-1) * ddof1
+        ddof2 = (n - 1) * ddof1
         p_unc = scipy.stats.f.sf(F, ddof1, ddof2)
 
         # Create output dataframe
