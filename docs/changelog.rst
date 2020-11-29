@@ -15,6 +15,7 @@ See `issue 139 <https://github.com/raphaelvallat/pingouin/issues/139>`_.
 
 a. :py:func:`pingouin.plot_paired` now supports an arbitrary number of within-levels as well as horizontal plotting. See `PR 133 <https://github.com/raphaelvallat/pingouin/pull/133>`_.
 b. :py:func:`pingouin.linear_regression` now handles a rank deficient design matrix X by producing a warning and trying to calculate the sum of squared residuals without relying on :py:func:`np.linalg.lstsq`. See `issue 130 <https://github.com/raphaelvallat/pingouin/issues/130>`_.
+c. :py:func:`pingouin.friedman` now has an option to choose between Chi square test or F test method.
 
 v0.3.8 (September 2020)
 -----------------------
