@@ -1055,7 +1055,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     logistic regression if the mediator variable is dichotomous (binary).
     Multiple parallel mediators are also supported.
 
-    This function wll only work well if the outcome variable is continuous.
+    This function will only work well if the outcome variable is continuous.
     It does not support binary or ordinal outcome variable. For more
     advanced mediation models, please refer to the
     `lavaan <http://lavaan.ugent.be/tutorial/mediation.html>`_ or  `mediation
