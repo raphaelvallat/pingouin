@@ -83,7 +83,7 @@ Dependencies
 
 The main dependencies of Pingouin are :
 
-* `NumPy <https://numpy.org/>`_ (>= 1.15)
+* `NumPy <https://numpy.org/>`_ (>= 1.16.5)
 * `SciPy <https://www.scipy.org/>`_ (>= 1.3.0)
 * `Pandas <https://pandas.pydata.org/>`_ (>= 0.24)
 * `Pandas-flavor <https://github.com/Zsailer/pandas_flavor>`_ (>= 0.1.2)
