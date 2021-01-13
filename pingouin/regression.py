@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pandas_flavor as pf
 from scipy.stats import t, norm
-from scipy.linalg import pinv, pinvh
+from scipy.linalg import pinvh
 from pingouin.config import options
 from pingouin.utils import remove_na as rm_na
 from pingouin.utils import _flatten_list as _fl
@@ -545,7 +545,8 @@ def _relimp(S):
                     ss_reg_without = ss_reg_precomp[str(sorted(p))]
                 else:
                     S_without = S.iloc[p, target_int]
-                    ss_reg_without = pinv(S.iloc[p, p]) @ S_without @ S_without
+                    ss_reg_without = (np.linalg.pinv(S.iloc[p, p]) @ S_without
+                                      @ S_without)
                     ss_reg_precomp[str(sorted(p))] = ss_reg_without
 
                 S_with = S.iloc[p_with, target_int]
