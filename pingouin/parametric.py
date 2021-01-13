@@ -21,7 +21,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         First set of observations.
     y : array_like or float
         Second set of observations. If ``y`` is a single value, a one-sample
-        T-test is computed.
+        T-test is computed against that value, which is assumed to be the
+        true value of the mean (= "mu" in the t.test R function).
     paired : boolean
         Specify whether the two observations are related (i.e. repeated
         measures) or independent.
