@@ -612,18 +612,16 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
     The Friedman test is equivalent to the test of significance of Kendalls's
     coefficient of concordance (Kendall's W). Most commonly a Q statistic,
     which has asymptotical chi-squared distribution, is computed and used for
-    testing. However, in [1]_ they showed the chi-squared test to be overly 
-    conservative for small numbers of samples and repeated measures. Instead 
+    testing. However, in [1]_ they showed the chi-squared test to be overly
+    conservative for small numbers of samples and repeated measures. Instead
     they recommend the F test, which has the correct size and behaves like a
     permutation test, but is computationaly much easier.
 
-
     References
     ----------
-    .. [1] Marozzi, M. (2014). Testing for concordance between several criteria.
-           Journal of Statistical Computation and Simulation, 84(9), 1843–1850.
-           https://doi.org/10.1080/00949655.2013.766189
-
+    .. [1] Marozzi, M. (2014). Testing for concordance between several
+           criteria. Journal of Statistical Computation and Simulation,
+           84(9), 1843–1850. https://doi.org/10.1080/00949655.2013.766189
 
     Examples
     --------

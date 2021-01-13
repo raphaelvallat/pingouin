@@ -151,7 +151,6 @@ class TestRegression(TestCase):
         np.testing.assert_allclose(res_pingouin['CI[97.5%]'],
                                    res_sm.conf_int()[:, 1])
 
-
         # Relative importance
         # Compare to R package relaimpo
         # >>> data <- read.csv('mediation.csv')
