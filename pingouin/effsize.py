@@ -46,16 +46,16 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
 
     .. math:: z = 0.5 \\cdot \\ln \\frac{1 + r}{1 - r} = \\text{arctanh}(r)
 
-    and compute the standard deviation:
+    and compute the standard error:
 
-    .. math:: \\sigma = \\frac{1}{\\sqrt{n - 3}}
+    .. math:: \\text{SE} = \\frac{1}{\\sqrt{n - 3}}
 
     where :math:`n` is the sample size.
 
     The lower and upper confidence intervals - *in z-space* - are then
     given by:
 
-    .. math:: \\text{ci}_z = z \\pm \\text{crit} \\cdot \\sigma
+    .. math:: \\text{ci}_z = z \\pm \\text{crit} \\cdot \\text{SE}
 
     where :math:`\\text{crit}` is the critical value of the normal distribution
     corresponding to the desired confidence level (e.g. 1.96 in case of a 95%
@@ -71,11 +71,11 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
     A formula for calculating the confidence interval for a
     **Cohen d effect size** is given by Hedges and Olkin (1985, p86).
     If the effect size estimate from the sample is :math:`d`, then it follows a
-    T distribution with standard deviation:
+    T distribution with standard error:
 
     .. math::
 
-        \\sigma = \\sqrt{\\frac{n_x + n_y}{n_x \\cdot n_y} +
+        \\text{SE} = \\sqrt{\\frac{n_x + n_y}{n_x \\cdot n_y} +
         \\frac{d^2}{2 (n_x + n_y)}}
 
     where :math:`n_x` and :math:`n_y` are the sample sizes of the two groups.
@@ -84,11 +84,11 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
 
     .. math::
 
-        \\sigma = \\sqrt{\\frac{1}{n_x} + \\frac{d^2}{2 n_x}}
+        \\text{SE} = \\sqrt{\\frac{1}{n_x} + \\frac{d^2}{2 n_x}}
 
     The lower and upper confidence intervals are then given by:
 
-    .. math:: \\text{ci}_d = d \\pm \\text{crit} \\cdot \\sigma
+    .. math:: \\text{ci}_d = d \\pm \\text{crit} \\cdot \\text{SE}
 
     where :math:`\\text{crit}` is the critical value of the T distribution
     corresponding to the desired confidence level.

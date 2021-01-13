@@ -8,7 +8,7 @@ v0.3.9 (dev)
 
 **Deprecation**
 
-a. Removed the Glass delta effect size, for which the current implementation in Pingouin invalidly assumes that the control group will always have the lowest standard deviation.
+a. Removed the Glass delta effect size. Until now, Pingouin invalidly assumed that the control group was always the one with the lowest standard deviation. Since this cannot be verified, and to avoid any confusion, the Glass delta effect size has been completely removed from Pingouin.
 See `issue 139 <https://github.com/raphaelvallat/pingouin/issues/139>`_.
 
 **Enhancements**
