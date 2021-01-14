@@ -36,21 +36,21 @@ jobs:
         pytest --cov --cov-report=xml --cov-config=setup.cfg --verbose
 
     - name: Build docs
-      if: matrix.platform == 'ubuntu-latest'
+      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == 3.8 }}
       run: |
         pip install --upgrade sphinx sphinx_bootstrap_theme numpydoc
         make -C docs clean
         make -C docs html
 
     - name: Upload doc build artifacts
-      if: matrix.platform == 'ubuntu-latest'
+      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == 3.8 }}
       uses: actions/upload-artifact@v1
       with:
         name: docs-artifact
         path: docs/build/html
 
     - name: Upload coverage report
-      if: matrix.platform == 'ubuntu-latest'
+      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == 3.8 }}
       uses: codecov/codecov-action@v1
       with:
         token: c6ed6ca6-a040-4f23-9ebf-8c474c998097
