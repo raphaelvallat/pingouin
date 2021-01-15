@@ -49,25 +49,11 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         If False, use :py:func:`pingouin.wilcoxon` or :py:func:`pingouin.mwu`
         for paired or unpaired samples, respectively.
     marginal : boolean
-        If True, average over repeated measures factor when working with mixed
-        or two-way repeated measures design. For instance, in mixed design,
-        the between-subject pairwise T-test(s) will be calculated after
-        averaging across all levels of the within-subject repeated measures
-        factor (the so-called *"marginal means"*).
-
-        Similarly, in two-way repeated measures factor, the pairwise T-test(s)
-        will be calculated after averaging across all levels of the other
-        repeated measures factor.
-
-        Setting ``marginal=True`` is recommended when doing posthoc
-        testing with multiple factors in order to avoid violating the
-        assumption of independence and conflating the degrees of freedom by the
-        number of repeated measurements. This is the default behavior of JASP.
-
-        .. warning:: The default behavior of Pingouin <0.3.2 was
-            ``marginal = False``, which may have led to incorrect p-values
-            for mixed or two-way repeated measures design. Make sure to always
-            use the latest version of Pingouin.
+        If True, the between-subject pairwise T-test(s) will be calculated
+        after averaging across all levels of the within-subject factor in mixed
+        design. This is recommended to avoid violating the assumption of
+        independence and conflating the degrees of freedom by the
+        number of repeated measurements.
 
         .. versionadded:: 0.3.2
     alpha : float
@@ -189,16 +175,11 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     <https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/pairwise.t.test>`_
     R function.
 
-    .. warning:: Versions of Pingouin below 0.3.2 gave incorrect results
-        for mixed and two-way repeated measures design (see above warning for
-        the ``marginal`` argument).
-
-    .. warning:: Pingouin gives slightly different results than the JASP's
-        posthoc module when working with multiple factors (e.g. mixed,
-        factorial or 2-way repeated measures design). This is mostly caused by
-        the fact that Pingouin does not pool the standard error for
-        between-subject and interaction contrasts. You should always double
-        check your results with JASP or another statistical software.
+    .. warning:: Versions of Pingouin below 0.3.9 gave incorrect results
+        for one-way and two-way repeated measures when the dataframe was not
+        sorted by subject (see issue 151). Please make sure you're using the
+        latest version of Pingouin, and always double check your results with
+        another statistical software.
 
     Examples
     --------
@@ -332,19 +313,23 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         # OPTION A: SIMPLE MAIN EFFECTS, WITHIN OR BETWEEN
         paired = True if contrast == 'simple_within' else False
         col = within if contrast == 'simple_within' else between
-        # Remove NAN in repeated measurements
-        if contrast == 'simple_within' and data[dv].isnull().to_numpy().any():
+
+        if contrast == 'simple_within':
+            # Check missing values
+            isna = data[dv].isnull().to_numpy().any()
             # Only if nan_policy == 'listwise'. For pairwise deletion,
             # missing values will be removed directly in the lower-level
             # functions (e.g. pg.ttest)
-            if nan_policy == 'listwise':
+            if all([isna, nan_policy == 'listwise']):
                 data = remove_rm_na(dv=dv, within=within, subject=subject,
                                     data=data)
             else:
-                # The `remove_rm_na` also aggregate other repeated measures
-                # factor using the mean. Here, we ensure this behavior too.
-                data = data.groupby([subject, within],
-                                    observed=True)[dv].mean().reset_index()
+                # BUGFIX 0.3.9: If repeated measures, we sort by subject and
+                # within and aggregate other repeated measures factor using
+                # the mean. Note that these two steps are already done in the
+                # remove_rm_na function.
+                data = data.groupby([subject, within], observed=True, sort=True
+                                    )[dv].mean().reset_index()
             # Now we check that subjects are present in all conditions
             # For example, if we have four subjects and 3 conditions,
             # and if subject 2 have missing data at the third condition,
@@ -357,7 +342,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                                  "even when missing values are present.")
 
         # Extract effects
-        grp_col = data.groupby(col, sort=False, observed=True)[dv]
+        grp_col = data.groupby(col, sort=True, observed=True)[dv]
         labels = grp_col.groups.keys()
         # Number and labels of possible comparisons
         if len(labels) >= 2:
@@ -471,7 +456,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             # Introduced in Pingouin v0.3.2
             if all([agg[i], marginal]):
                 tmp = data.groupby([subject, f], as_index=False,
-                                   observed=True, sort=False).mean()
+                                   observed=True, sort=True).mean()
             else:
                 tmp = data
             # Recursive call to pairwise_ttests
@@ -494,9 +479,13 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         # Then compute the interaction between the factors
         if interaction:
             nrows = stats.shape[0]
-            grp_fac1 = data.groupby(factors[0], observed=True, sort=False)[dv]
-            grp_fac2 = data.groupby(factors[1], observed=True, sort=False)[dv]
-            grp_both = data.groupby(factors, observed=True, sort=False)[dv]
+            # BUGFIX 0.3.9: If subject is present, make sure that we respect
+            # the order of subjects
+            if subject is not None:
+                data = data.set_index(subject).sort_index()
+            grp_fac1 = data.groupby(factors[0], observed=True, sort=True)[dv]
+            grp_fac2 = data.groupby(factors[1], observed=True, sort=True)[dv]
+            grp_both = data.groupby(factors, observed=True, sort=True)[dv]
             labels_fac1 = grp_fac1.groups.keys()
             labels_fac2 = grp_fac2.groups.keys()
             # comb_fac1 = list(combinations(labels_fac1, 2))
