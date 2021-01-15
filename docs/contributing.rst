@@ -73,14 +73,6 @@ the documentation is also built on GitHub servers after every commit you make as
 To inspect these build artifacts, follow these steps:
 
 * Click on the "Show all checks" dropdown menu at the end of the Pull Request user interface
-* Click on the check that starts with ``Python tests / build (ubuntu-latest, 3.8)``
-* Now in the top right corner of the opening window, you will see a small dropdown menu called "Artifacts"
-* Click on that drowndown menu and download the ``docs-artifact`` zip file
-
-You can then unpack that zip file on your computer, enter the directory, and open the ``index.html`` file that you will find there.
-That should open the Pingouin documentation based on the changes from your Pull Request.
-
-See the following two screenshots for clarification of the process:
 
 .. figure::  /pictures/github_checks.png
   :align:   center
@@ -88,8 +80,16 @@ See the following two screenshots for clarification of the process:
 
   Screenshot of the GitHub checks dropdown menu
 
+* Click on the check that starts with ``Python tests / build (ubuntu-latest, 3.8)``
+* Now in the top right corner of the opening window, you will see a small dropdown menu called "Artifacts"
+
   .. figure::  /pictures/github_build_artifacts.png
   :align:   center
   :alt: GitHub build artifacts dropdown menu
 
   Screenshot of the GitHub build artifacts dropdown menu
+
+* Click on that drowndown menu and download the ``docs-artifact`` zip file
+
+You can then unpack that zip file on your computer, enter the directory, and open the ``index.html`` file that you will find there.
+That should open the Pingouin documentation based on the changes from your Pull Request.
