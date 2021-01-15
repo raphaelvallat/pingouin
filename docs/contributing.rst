@@ -49,7 +49,7 @@ If you want to test the documentation locally, you will need to install the foll
 
 .. code-block:: bash
 
-  $ pip install --upgrade sphinx sphinx_bootstrap_theme numpydoc
+  $ pip install --upgrade sphinx sphinx_bootstrap_theme numpydoc sphinx-copybutton
 
 and then within the ``pingouin/docs`` directory do:
 
