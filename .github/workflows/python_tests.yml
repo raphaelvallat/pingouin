@@ -16,6 +16,9 @@ jobs:
 
     runs-on: ${{ matrix.platform }}
 
+    env:
+      FORCE_COLOR: true
+
     steps:
     - uses: actions/checkout@v2
 
