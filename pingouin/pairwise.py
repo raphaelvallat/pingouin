@@ -948,7 +948,7 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
         * ``'pearson'``: Pearson :math:`r` product-moment correlation
         * ``'spearman'``: Spearman :math:`\\rho` rank-order correlation
-        * ``'kendall'``: Kendall's :math:`\\tau` correlation
+        * ``'kendall'``: Kendall's :math:`\\tau_B` correlation
           (for ordinal data)
         * ``'bicor'``: Biweight midcorrelation (robust)
         * ``'percbend'``: Percentage bend correlation (robust)
