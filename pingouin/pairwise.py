@@ -151,10 +151,10 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     first column, 2) the pairwise T-tests between each values of the second
     column and 3) the interaction between col1 and col2. The interaction is
     dependent of the order of the list, so ['col1', 'col2'] will not yield the
-    same results as ['col2', 'col1'], and will only be calculated if
-    ``interaction=True``.
+    same results as ['col2', 'col1']. Furthermore, the interaction will only be
+    calculated if ``interaction=True``.
 
-    In other words, if ``between`` is a list with two elements, the output
+    If ``between`` is a list with two elements, the output
     model is between1 + between2 + between1 * between2.
 
     Similarly, if ``within`` is a list with two elements, the output model is
@@ -171,14 +171,10 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     for the interaction effect). We strongly recommend that you preprocess
     your data and remove the missing values before using this function.
 
-    This function has been tested against the `pairwise.t.test
-    <https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/pairwise.t.test>`_
-    R function.
-
-    .. warning:: Versions of Pingouin below 0.3.9 gave incorrect results
+    .. warning:: Versions of Pingouin below 0.3.9 gave INCORRECT RESULTS
         for one-way and two-way repeated measures when the dataframe was not
         sorted by subject (see issue 151). Please make sure you're using the
-        latest version of Pingouin, and always double check your results with
+        LATEST VERSION of Pingouin, and always DOUBLE CHECK your results with
         another statistical software.
 
     Examples
@@ -341,7 +337,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                                  "elements in all conditions, "
                                  "even when missing values are present.")
 
-        # Extract effects
+        # Extract levels of the grouping variable, sorted in alphabetical order
         grp_col = data.groupby(col, sort=True, observed=True)[dv]
         labels = grp_col.groups.keys()
         # Number and labels of possible comparisons
@@ -454,6 +450,9 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         stats = pd.DataFrame()
         for i, f in enumerate(factors):
             # Introduced in Pingouin v0.3.2
+            # Note that is only has an impact in the between test of mixed
+            # designs. Indeed, a similar groupby is applied by default on
+            # each within-subject factor of a two-way repeated measures design.
             if all([agg[i], marginal]):
                 tmp = data.groupby([subject, f], as_index=False,
                                    observed=True, sort=True).mean()
@@ -480,9 +479,10 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         if interaction:
             nrows = stats.shape[0]
             # BUGFIX 0.3.9: If subject is present, make sure that we respect
-            # the order of subjects
+            # the order of subjects.
             if subject is not None:
                 data = data.set_index(subject).sort_index()
+            # Extract interaction levels, sorted in alphabetical order
             grp_fac1 = data.groupby(factors[0], observed=True, sort=True)[dv]
             grp_fac2 = data.groupby(factors[1], observed=True, sort=True)[dv]
             grp_both = data.groupby(factors, observed=True, sort=True)[dv]
