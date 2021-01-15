@@ -80,10 +80,16 @@ To inspect these build artifacts, follow these steps:
 You can then unpack that zip file on your computer, enter the directory, and open the ``index.html`` file that you will find there.
 That should open the Pingouin documentation based on the changes from your Pull Request.
 
-See the following two images for clarification of the process:
+See the following two screenshots for clarification of the process:
 
 .. figure::  /pictures/github_checks.png
   :align:   center
+  :alt: GitHub checks dropdown menu
+
+  Screenshot of the GitHub checks dropdown menu
 
   .. figure::  /pictures/github_build_artifacts.png
   :align:   center
+  :alt: GitHub build artifacts dropdown menu
+
+  Screenshot of the GitHub build artifacts dropdown menu
