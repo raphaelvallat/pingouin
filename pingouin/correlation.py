@@ -328,7 +328,7 @@ def corr(x, y, tail='two-sided', method='pearson'):
 
         * ``'pearson'``: Pearson :math:`r` product-moment correlation
         * ``'spearman'``: Spearman :math:`\\rho` rank-order correlation
-        * ``'kendall'``: Kendall's :math:`\\tau` correlation
+        * ``'kendall'``: Kendall's :math:`\\tau_B` correlation
           (for ordinal data)
         * ``'bicor'``: Biweight midcorrelation (robust)
         * ``'percbend'``: Percentage bend correlation (robust)
@@ -606,7 +606,7 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
 
         * ``'pearson'``: Pearson :math:`r` product-moment correlation
         * ``'spearman'``: Spearman :math:`\\rho` rank-order correlation
-        * ``'kendall'``: Kendall's :math:`\\tau` correlation
+        * ``'kendall'``: Kendall's :math:`\\tau_B` correlation
           (for ordinal data)
         * ``'bicor'``: Biweight midcorrelation (robust)
         * ``'percbend'``: Percentage bend correlation (robust)

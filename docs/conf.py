@@ -37,7 +37,14 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'matplotlib.sphinxext.plot_directive',
-    'numpydoc']
+    'numpydoc',
+    'sphinx_copybutton',
+]
+
+# configure sphinx-copybutton
+# https://github.com/executablebooks/sphinx-copybutton
+copybutton_prompt_text = r">>> |\.\.\. |\$ "
+copybutton_prompt_is_regexp = True
 
 # Generate the API documentation when building
 autosummary_generate = True
