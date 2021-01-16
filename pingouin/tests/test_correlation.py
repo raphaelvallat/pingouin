@@ -23,9 +23,13 @@ class TestCorrelation(TestCase):
         stats = corr(x, y, method='skipped')
         assert np.round(stats['r'].to_numpy(), 3) == 0.512
         assert stats['outliers'].to_numpy() == 2
+        # Changing the method using kwargs
+        sk_sp = corr(x, y, method='skipped', corr_type='spearman')
+        sk_pe = corr(x, y, method='skipped', corr_type='pearson')
+        assert not sk_sp.equals(sk_pe)
         stats = corr(x, y, method='shepherd')
         assert stats['outliers'].to_numpy() == 2
-        _, _, outliers = skipped(x, y, method='pearson')
+        _, _, outliers = skipped(x, y, corr_type='pearson')
         assert outliers.size == x.size
         assert stats['n'].to_numpy() == 30
         stats = corr(x, y, method='percbend')
@@ -33,6 +37,9 @@ class TestCorrelation(TestCase):
         # Compare biweight correlation to astropy
         stats = corr(x, y, method='bicor')
         assert np.isclose(stats['r'].to_numpy(), 0.4951417784979)
+        # Changing the value of C using kwargs
+        stats = corr(x, y, method='bicor', c=5)
+        assert np.isclose(stats['r'].to_numpy(), 0.4940706950017)
         # Not normally distributed
         z = np.random.uniform(size=30)
         corr(x, z, method='pearson')

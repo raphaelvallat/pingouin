@@ -17,14 +17,14 @@ __all__ = ["corr", "partial_corr", "pcorr", "rcorr", "rm_corr",
            "distance_corr"]
 
 
-def skipped(x, y, method='spearman'):
+def skipped(x, y, corr_type='spearman'):
     """Skipped correlation (Rousselet and Pernet 2012).
 
     Parameters
     ----------
     x, y : array_like
         First and second set of observations. x and y must be independent.
-    method : str
+    corr_type : str
         Method used to compute the correlation after outlier removal. Can be
         either 'spearman' (default) or 'pearson'.
 
@@ -100,7 +100,7 @@ def skipped(x, y, method='spearman'):
     thresh = (np.median(dis, axis=1) + gval * iqr)
     outliers = np.apply_along_axis(np.greater, 0, dis, thresh).any(axis=0)
     # Compute correlation on remaining data
-    if method == 'spearman':
+    if corr_type == 'spearman':
         r, pval = spearmanr(X[~outliers, 0], X[~outliers, 1])
     else:
         r, pval = pearsonr(X[~outliers, 0], X[~outliers, 1])
@@ -312,7 +312,7 @@ def bicor(x, y, c=9):
     return r, pval
 
 
-def corr(x, y, tail='two-sided', method='pearson'):
+def corr(x, y, tail='two-sided', method='pearson', **kwargs):
     """(Robust) correlation between two variables.
 
     Parameters
@@ -334,6 +334,8 @@ def corr(x, y, tail='two-sided', method='pearson'):
         * ``'percbend'``: Percentage bend correlation (robust)
         * ``'shepherd'``: Shepherd's pi correlation (robust)
         * ``'skipped'``: Skipped correlation (robust)
+    **kwargs : optional
+        Optional argument(s) passed to the lower-level functions.
 
     Returns
     -------
@@ -515,17 +517,17 @@ def corr(x, y, tail='two-sided', method='pearson'):
     if method == 'pearson':
         r, pval = pearsonr(x, y)
     elif method == 'spearman':
-        r, pval = spearmanr(x, y)
+        r, pval = spearmanr(x, y, **kwargs)
     elif method == 'kendall':
-        r, pval = kendalltau(x, y)
+        r, pval = kendalltau(x, y, **kwargs)
     elif method == 'bicor':
-        r, pval = bicor(x, y)
+        r, pval = bicor(x, y, **kwargs)
     elif method == 'percbend':
-        r, pval = percbend(x, y)
+        r, pval = percbend(x, y, **kwargs)
     elif method == 'shepherd':
-        r, pval, outliers = shepherd(x, y)
+        r, pval, outliers = shepherd(x, y, **kwargs)
     elif method == 'skipped':
-        r, pval, outliers = skipped(x, y)
+        r, pval, outliers = skipped(x, y, **kwargs)
     else:
         raise ValueError('Method not recognized.')
 
