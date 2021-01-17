@@ -53,6 +53,10 @@ class TestParametric(TestCase):
         assert tt.loc['T-test', 'dof'] == 5
         assert round(tt.loc['T-test', 'p-val'], 5) == 0.00354
         array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [2.52, 7.48])
+        # Using a different confidence level
+        tt = ttest(a, y=0, tail='two-sided', confidence=0.90)
+        array_equal(np.round(tt.loc['T-test', 'CI90%'], 3), [3.053, 6.947])
+
         # One-sided (greater)
         tt = ttest(a, y=0, tail='greater')
         assert round(tt.loc['T-test', 'T'], 5) == 5.17549
@@ -107,6 +111,10 @@ class TestParametric(TestCase):
         assert tt.loc['T-test', 'dof'] == 5
         assert round(tt.loc['T-test', 'p-val'], 5) == 0.97084
         array_equal(np.round(tt.loc['T-test', 'CI95%'], 2), [-6.39, np.inf])
+        # With a different confidence level
+        tt = ttest(a, b, paired=True, tail='greater', confidence=0.99)
+        array_equal(np.round(tt.loc['T-test', 'CI99%'], 3), [-8.318, np.inf])
+
         # One-sided (less)
         tt = ttest(a, b, paired=True, tail='less')
         assert round(tt.loc['T-test', 'T'], 5) == -2.44451

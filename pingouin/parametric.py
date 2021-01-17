@@ -12,7 +12,8 @@ __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova",
            "ancova"]
 
 
-def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
+def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707,
+          confidence=0.95):
     """T-test.
 
     Parameters
@@ -44,6 +45,10 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         sizes are expected a priori; larger values of r are appropriate when
         large effect sizes are expected (Rouder et al 2009).
         The default is 0.707 (= :math:`\\sqrt{2} / 2`).
+    confidence : float
+        Confidence level for the confidence intervals (0.95 = 95%)
+
+        .. versionadded:: 0.3.9
 
     Returns
     -------
@@ -53,7 +58,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         * ``'p-val'``: p-value
         * ``'dof'``: degrees of freedom
         * ``'cohen-d'``: Cohen d effect size
-        * ``'CI95%'``: 95% confidence intervals of the difference in means
+        * ``'CI95%'``: confidence intervals of the difference in means
         * ``'power'``: achieved power of the test ( = 1 - type II error)
         * ``'BF10'``: Bayes Factor of the alternative hypothesis
 
@@ -188,9 +193,10 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
                                    _equal_var_ttest_denom)
     from pingouin import (power_ttest, power_ttest2n, compute_effsize)
 
-    # Check tails
+    # Check arguments
     possible_tails = ['two-sided', 'one-sided', 'greater', 'less']
     assert tail in possible_tails, 'Invalid tail argument.'
+    assert 0 < confidence < 1, "confidence must be between 0 and 1."
 
     x = np.asarray(x)
     y = np.asarray(y)
@@ -250,9 +256,13 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
     # Effect size
     d = compute_effsize(x, y, paired=paired, eftype='cohen')
 
-    # 95% confidence interval for the (difference in) means
+    # Confidence interval for the (difference in) means
     # Compare to the t.test r function
-    conf = 0.975 if tail == 'two-sided' else 0.95
+    if tail == "two-sided":
+        alpha = 1 - confidence
+        conf = 1 - alpha / 2  # 0.975
+    else:
+        conf = confidence
     tcrit = t.ppf(conf, dof)
     ci = np.array([tval - tcrit, tval + tcrit]) * se
     if ny == 1:
@@ -262,6 +272,9 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
         ci[1] = np.inf
     elif tail == 'less':
         ci[0] = -np.inf
+
+    # Rename CI
+    ci_name = 'CI%.0f%%' % (100 * confidence)
 
     # Achieved power
     if ny == 1:
@@ -292,12 +305,12 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707):
              'p-val': pval,
              'tail': tail,
              'cohen-d': abs(d),
-             'CI95%': [ci],
+             ci_name: [ci],
              'power': power,
              'BF10': bf}
 
     # Convert to dataframe
-    col_order = ['T', 'dof', 'tail', 'p-val', 'CI95%', 'cohen-d', 'BF10',
+    col_order = ['T', 'dof', 'tail', 'p-val', ci_name, 'cohen-d', 'BF10',
                  'power']
     stats = pd.DataFrame.from_records(stats, columns=col_order,
                                       index=['T-test'])

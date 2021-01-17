@@ -27,6 +27,7 @@ b. :py:func:`pingouin.linear_regression` now handles a rank deficient design mat
 c. :py:func:`pingouin.friedman` now has an option to choose between Chi square test or F test method.
 d. Several minor improvements to the documentation and GitHub Actions. See `PR150 <https://github.com/raphaelvallat/pingouin/pull/150>`_
 e. Added support for kwargs in :py:func:`pingouin.corr` (see `issue 138 <https://github.com/raphaelvallat/pingouin/issues/138>`_).
+f. Added "confidence" parameter in :py:func:`pingouin.ttest` to allow for custom CI (see `issue 152 <https://github.com/raphaelvallat/pingouin/issues/152>`_).
 
 v0.3.8 (September 2020)
 -----------------------
