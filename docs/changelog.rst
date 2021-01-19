@@ -25,9 +25,9 @@ See `issue 139 <https://github.com/raphaelvallat/pingouin/issues/139>`_.
 a. :py:func:`pingouin.plot_paired` now supports an arbitrary number of within-levels as well as horizontal plotting. See `PR 133 <https://github.com/raphaelvallat/pingouin/pull/133>`_.
 b. :py:func:`pingouin.linear_regression` now handles a rank deficient design matrix X by producing a warning and trying to calculate the sum of squared residuals without relying on :py:func:`np.linalg.lstsq`. See `issue 130 <https://github.com/raphaelvallat/pingouin/issues/130>`_.
 c. :py:func:`pingouin.friedman` now has an option to choose between Chi square test or F test method.
-d. Several minor improvements to the documentation and GitHub Actions. See `PR150 <https://github.com/raphaelvallat/pingouin/pull/150>`_
-e. Added support for kwargs in :py:func:`pingouin.corr` (see `issue 138 <https://github.com/raphaelvallat/pingouin/issues/138>`_).
-f. Added "confidence" parameter in :py:func:`pingouin.ttest` to allow for custom CI (see `issue 152 <https://github.com/raphaelvallat/pingouin/issues/152>`_).
+d. Several minor improvements to the documentation and GitHub Actions. See `PR150 <https://github.com/raphaelvallat/pingouin/pull/150>`_.
+e. Added support for ``kwargs`` in :py:func:`pingouin.corr` (see `issue 138 <https://github.com/raphaelvallat/pingouin/issues/138>`_).
+f. Added ``confidence`` argument in :py:func:`pingouin.ttest` to allow for custom CI (see `issue 152 <https://github.com/raphaelvallat/pingouin/issues/152>`_).
 
 v0.3.8 (September 2020)
 -----------------------
