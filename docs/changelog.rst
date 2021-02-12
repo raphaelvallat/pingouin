@@ -6,7 +6,7 @@ What's new
 v0.3.9 (January 2021)
 ---------------------
 
-**Bugfixes**
+**Bugfix**
 
 This release fixes a CRITICAL ERROR in the :py:func:`pingouin.pairwise_ttests` function (see `issue 151 <https://github.com/raphaelvallat/pingouin/issues/151>`_). The bug concerns one-way and two-way repeated measures pairwise T-tests. Until now, Pingouin implicitly assumed that the dataframe was sorted such that the ordering of the subject was the same across all repeated measurements (e.g. the third values in the repeated measurements always belonged to the same subject).
 This led to incorrect results when the dataframe was not sorted in such a way.
@@ -14,8 +14,6 @@ This led to incorrect results when the dataframe was not sorted in such a way.
 We therefore strongly recommend that all users UPDATE Pingouin (:code:`pip install -U pingouin`) and CHECK ANY RESULTS obtained with the :py:func:`pingouin.pairwise_ttests` function. Note that the bug does not concern non-repeated measures pairwise T-test, since the ordering of the values does not matter in this case.
 
 Furthermore, and to prevent a similar issue, we have now disabled ``marginal=False`` in two-way repeated measure design. As of this release, ``marginal=False`` will therefore only have an impact on the between-factor T-test(s) of a mixed design.
-
-In addition, the internal function responsible for generating a significance Q value for :py:func:`pingouin.pairwise_ttests` has been replaced with an equivalent from statsmodels, as it was found to be substantially inaccurate for certain combinations of treatments, degrees of freedom, and significances.
 
 **Deprecation**
 
