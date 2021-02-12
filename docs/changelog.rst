@@ -15,7 +15,7 @@ We therefore strongly recommend that all users UPDATE Pingouin (:code:`pip insta
 
 Furthermore, and to prevent a similar issue, we have now disabled ``marginal=False`` in two-way repeated measure design. As of this release, ``marginal=False`` will therefore only have an impact on the between-factor T-test(s) of a mixed design.
 
-In addition, the internal function responsible for generating a significance Q value for :py:func:`pingouin.pairwise_ttests` has been replaced with an equivilant from statsmodels, as it was found to be substantially innacurate for certain combinations of treatments, degrees of freedom, and significances.
+In addition, the internal function responsible for generating a significance Q value for :py:func:`pingouin.pairwise_ttests` has been replaced with an equivalent from statsmodels, as it was found to be substantially inaccurate for certain combinations of treatments, degrees of freedom, and significances.
 
 **Deprecation**
 
