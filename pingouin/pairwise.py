@@ -652,10 +652,11 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     :math:`Q(\\sqrt2|t_i|, r, N - r)` where :math:`r` is the total number of
     groups and :math:`N` is the total sample size.
 
-    .. caution:: The p-values might be slightly different than those obtained
-        with R or Matlab because Pingouin uses the Gleason (1999)
-        algorithm [2]_ for the studentized range approximation, which is
-        more efficient and accurate.
+    .. warning:: Versions of Pingouin below 0.3.10 used a wrong algorithm for
+        the studentized range approximation, which resulted in (slightly)
+        incorrect p-values. Please make sure you're using the
+        LATEST VERSION of Pingouin, and always DOUBLE CHECK your results with
+        another statistical software.
 
     References
     ----------
@@ -812,10 +813,11 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
     The p-values are then approximated using the Studentized range distribution
     :math:`Q(\\sqrt2|t_i|, r, v_i)`.
 
-    .. caution:: The p-values might be slightly different than those obtained
-        with R or Matlab because Pingouin uses the Gleason (1999)
-        algorithm [2]_ for the studentized range approximation, which is
-        more efficient and accurate.
+    .. warning:: Versions of Pingouin below 0.3.10 used a wrong algorithm for
+        the studentized range approximation, which resulted in (slightly)
+        incorrect p-values. Please make sure you're using the
+        LATEST VERSION of Pingouin, and always DOUBLE CHECK your results with
+        another statistical software.
 
     References
     ----------
