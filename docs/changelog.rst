@@ -8,9 +8,11 @@ v0.3.10 (February 2021)
 
 **Bugfix**
 
-This release fixes an error in the calculation of the p-values in the :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell` functions (see `PR156 <https://github.com/raphaelvallat/pingouin/pull/156>`_). Old versions of Pingouin used an incorrect algorithm for the studentized range approximation.
+This release fixes an error in the calculation of the p-values in the :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell` functions (see `PR156 <https://github.com/raphaelvallat/pingouin/pull/156>`_). Old versions of Pingouin used an incorrect algorithm for the studentized range approximation, which resulted in (slightly) incorrect p-values. In most cases, the error did not seem to affect the significance of the p-values. The new version of Pingouin now uses `statsmodels internal implementation <https://github.com/statsmodels/statsmodels/blob/master/statsmodels/stats/libqsturng/qsturng_.py>`_ of the Gleason (1999) algorithm to estimate the p-values.
 
-We therefore strongly recommend that all users UPDATE Pingouin (:code:`pip install -U pingouin`) and CHECK ANY RESULTS obtained with the :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell` functions.
+Please note that the Pingouin p-values may be slightly different than R (and JASP), because it uses a different algorithm. However, this does not seem to affect the significance levels of the p-values (i.e. a p-value below 0.05 in JASP is likely to be below 0.05 in Pingouin, and vice versa).
+
+We therefore recommend that all users UPDATE Pingouin (:code:`pip install -U pingouin`) and CHECK ANY RESULTS obtained with the :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell` functions.
 
 v0.3.9 (January 2021)
 ---------------------

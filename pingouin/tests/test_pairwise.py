@@ -378,9 +378,13 @@ class TestPairwise(TestCase):
         significance should be the same.
         """
         # Compare with R package `userfriendlyscience` - Hair color dataset
+        # Update Feb 2021: The userfriendlyscience package has been removed
+        # from CRAN.
         df = read_dataset('anova')
         stats = pairwise_tukey(dv='Pain threshold', between='Hair color',
                                data=df)
+        # JASP: [0.0741, 0.4356, 0.4147, 0.0037, 0.7893, 0.0366]
+        # Pingouin: [0.0742, 0.4369, 0.4160, 0.0037, 0.7697, 0.0367]
         assert np.allclose([0.074, 0.435, 0.415, 0.004, 0.789, 0.037],
                            stats.loc[:, 'p-tukey'].to_numpy().round(3),
                            atol=0.05)
@@ -394,6 +398,8 @@ class TestPairwise(TestCase):
         # SE is different for each group (Tukey-Kramer)
         assert np.array_equal(stats['se'], [67.5117, 56.1480, 69.8569])
         assert np.array_equal(stats['T'], [-0.4803, -24.4952, -19.2240])
+        # P-values JASP: [0.8807, 0.0000, 0.0000]
+        # P-values Pingouin: [0.8694, 0.0010, 0.0010]
         sig = stats['p-tukey'].apply(lambda x: 'Yes' if x < 0.05 else
                                      'No').to_numpy()
         assert np.array_equal(sig, ['No', 'Yes', 'Yes'])
@@ -410,6 +416,8 @@ class TestPairwise(TestCase):
         # SE is the same for all groups (Tukey HSD)
         assert np.array_equal(stats['se'], [142.9475, 142.9475, 142.9475])
         assert np.array_equal(stats['T'], [-0.9969, -10.1961, -9.1992])
+        # P-values JASP: [0.5818, 0.0000, 0.0000]
+        # P-values Pingouin: [0.5766, 0.0010, 0.0010]
         sig = stats['p-tukey'].apply(lambda x: 'Yes' if x < 0.05 else
                                      'No').to_numpy()
         assert np.array_equal(sig, ['No', 'Yes', 'Yes'])
@@ -422,6 +430,8 @@ class TestPairwise(TestCase):
         significance should be the same.
         """
         # Compare with R package `userfriendlyscience` - Hair color dataset
+        # Update Feb 2021: The userfriendlyscience package has been removed
+        # from CRAN.
         df = read_dataset('anova')
         stats = pairwise_gameshowell(dv='Pain threshold', between='Hair color',
                                      data=df)
@@ -429,10 +439,14 @@ class TestPairwise(TestCase):
                               [2.47, 1.42, 1.75, 4.09, 1.11, 3.56])
         assert np.array_equal(stats['df'].round(2),
                               [7.91, 7.94, 6.56, 8.0, 6.82, 6.77])
+        # JASP: [0.1401, 0.5228, 0.3715, 0.0148, 0.6980, 0.0378]
+        # Pingouin: [0.1401, 0.5220, 0.3722, 0.0148, 0.6848, 0.0378]
+        assert np.allclose([0.1401, 0.5228, 0.3715, 0.0148, 0.6980, 0.0378],
+                           stats.loc[:, 'pval'].to_numpy().round(3),
+                           atol=0.05)
         sig = stats['pval'].apply(lambda x: 'Yes' if x < 0.05 else
                                   'No').to_numpy()
         assert np.array_equal(sig, ['No', 'No', 'No', 'Yes', 'No', 'Yes'])
-
         # Compare with JASP in the Palmer Penguins dataset
         df = read_dataset("penguins")
         stats = pairwise_gameshowell(data=df, dv="body_mass_g",
@@ -443,6 +457,8 @@ class TestPairwise(TestCase):
         assert np.array_equal(stats['se'], [59.7064, 58.8109, 65.1028])
         assert np.array_equal(stats['df'], [152.4548, 249.6426, 170.4044])
         assert np.array_equal(stats['T'], [-0.5431, -23.3860, -20.6278])
+        # P-values JASP: [0.8502, 0.0000, 0.0000]
+        # P-values Pingouin: [0.8339, 0.0010, 0.0010]
         sig = stats['pval'].apply(lambda x: 'Yes' if x < 0.05 else
                                   'No').to_numpy()
         assert np.array_equal(sig, ['No', 'Yes', 'Yes'])
@@ -459,6 +475,8 @@ class TestPairwise(TestCase):
         assert np.array_equal(stats['se'], [104.5589, 163.1546, 154.1104])
         assert np.array_equal(stats['df'], [35.5510, 30.8479, 26.4576])
         assert np.array_equal(stats['T'], [-1.3629, -8.9332, -8.5328])
+        # P-values JASP: [0.3709, 0.0000, 0.0000]
+        # P-values Pingouin: [0.3719, 0.0010, 0.0010]
         sig = stats['pval'].apply(lambda x: 'Yes' if x < 0.05 else
                                   'No').to_numpy()
         assert np.array_equal(sig, ['No', 'Yes', 'Yes'])
