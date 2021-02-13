@@ -34,7 +34,6 @@ INSTALL_REQUIRES = [
 PACKAGES = [
     'pingouin',
     'pingouin.datasets',
-    'pingouin.external',
 ]
 
 CLASSIFIERS = [

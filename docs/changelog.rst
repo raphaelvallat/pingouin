@@ -3,6 +3,17 @@
 What's new
 ##########
 
+v0.3.10 (February 2021)
+---------------------
+
+**Bugfix**
+
+This release replaces the internal function responsible for generating significance Q values for :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell` which could output significantly erroneous p-values for some inputs. It has been replaced with an accurate equivalent from statsmodels.
+
+This change will impact p-values obtained from :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell`.
+
+We therefore strongly recommend that all users UPDATE Pingouin (:code:`pip install -U pingouin`) and CHECK ANY RESULTS obtained with the :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell` functions.
+
 v0.3.9 (January 2021)
 ---------------------
 
