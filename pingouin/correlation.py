@@ -508,6 +508,8 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
     y = np.asarray(y)
     assert x.ndim == y.ndim == 1, 'x and y must be 1D array.'
     assert x.size == y.size, 'x and y must have the same length.'
+    _msg = 'tail must be "two-sided" or "one-sided".'
+    assert tail.lower() in ['two-sided', 'one-sided'], _msg
 
     # Remove rows with missing values
     x, y = remove_na(x, y, paired=True)
