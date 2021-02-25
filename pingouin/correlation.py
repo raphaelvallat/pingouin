@@ -509,7 +509,7 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
     assert x.ndim == y.ndim == 1, 'x and y must be 1D array.'
     assert x.size == y.size, 'x and y must have the same length.'
     _msg = 'tail must be "two-sided" or "one-sided".'
-    assert tail.lower() in ['two-sided', 'one-sided'], _msg
+    assert tail in ['two-sided', 'one-sided'], _msg
 
     # Remove rows with missing values
     x, y = remove_na(x, y, paired=True)
@@ -531,7 +531,7 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
     elif method == 'skipped':
         r, pval, outliers = skipped(x, y, **kwargs)
     else:
-        raise ValueError('Method not recognized.')
+        raise ValueError(f'Method "{method}" not recognized.')
 
     if np.isnan(r):
         # Correlation failed -- new in version v0.3.4, instead of raising an
