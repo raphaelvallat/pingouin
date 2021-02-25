@@ -3,6 +3,15 @@
 What's new
 ##########
 
+v0.3.11 (unreleased)
+--------------------
+
+**Bugfixes**
+
+a. Passing a wrong ``tail`` argument to :py:func:`pingouin.correlation.corr` now *always* raises an error (see `PR 160 <https://github.com/raphaelvallat/pingouin/pull/160>`_).
+   In previous versions of ``pingouin``, using any ``method`` other than ``"pearson"`` and a wrong ``tail`` argument such as ``"two-tailed"`` or ``"both"``
+   (instead of the correct ``"two-sided"``) may have resulted in silently returning a one-sided p-value.
+
 v0.3.10 (February 2021)
 -----------------------
 
