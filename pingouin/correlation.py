@@ -719,6 +719,9 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     assert x != covar, 'x and covar must be independent'
     assert y != covar, 'y and covar must be independent'
     assert x != y, 'x and y must be independent'
+    if isinstance(covar, list):
+        assert x not in covar, 'x and covar must be independent'
+        assert y not in covar, 'y and covar must be independent'
     # Check that columns exist
     col = _flatten_list([x, y, covar, x_covar, y_covar])
     if isinstance(covar, str):
