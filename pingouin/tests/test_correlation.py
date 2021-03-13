@@ -92,6 +92,9 @@ class TestCorrelation(TestCase):
                      y_covar=['cv2', 'cv3'], method='spearman')
         with pytest.raises(ValueError):
             partial_corr(data=df, x='x', y='y', covar='cv2', x_covar='cv1')
+        with pytest.raises(AssertionError) as error_info:
+            partial_corr(data=df, x='cv1', y='y', covar=['cv1', 'cv2'])
+        assert str(error_info.value) == "x and covar must be independent"
 
     def test_rmcorr(self):
         """Test function rm_corr"""
