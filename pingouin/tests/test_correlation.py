@@ -14,30 +14,42 @@ class TestCorrelation(TestCase):
         np.random.seed(123)
         mean, cov = [4, 6], [(1, .6), (.6, 1)]
         x, y = np.random.multivariate_normal(mean, cov, 30).T
+        x2, y2 = x.copy(), y.copy()
         x[3], y[5] = 12, -8
+        x2[3], y2[5] = 7, 2.6
         corr(x, y, method='pearson', tail='one-sided')
         corr(x, y, method='spearman', tail='two-sided')
         corr(x, y, method='kendall')
         corr(x, y, method='shepherd', tail='two-sided')
-        # Compare with robust corr toolbox
+        # Skipped correlation -- compare with robust corr toolbox
+        # https://sourceforge.net/projects/robustcorrtool/
         stats = corr(x, y, method='skipped')
-        assert np.round(stats['r'].to_numpy(), 3) == 0.512
+        assert np.round(stats['r'].to_numpy(), 4) == 0.5123
         assert stats['outliers'].to_numpy() == 2
-        # Changing the method using kwargs
-        sk_sp = corr(x, y, method='skipped', corr_type='spearman')
-        sk_pe = corr(x, y, method='skipped', corr_type='pearson')
+        sk_sp = corr(x2, y2, method='skipped')
+        assert np.round(sk_sp['r'].to_numpy(), 4) == 0.5123
+        assert sk_sp['outliers'].to_numpy() == 2
+        # Pearson skipped correlation
+        sk_pe = corr(x2, y2, method='skipped', corr_type='pearson')
+        assert np.round(sk_pe['r'].to_numpy(), 4) == 0.5254
+        assert sk_pe['outliers'].to_numpy() == 2
         assert not sk_sp.equals(sk_pe)
+        # Shepherd -- cannot directly compare because based on random bootstrap
         stats = corr(x, y, method='shepherd')
         assert stats['outliers'].to_numpy() == 2
         _, _, outliers = skipped(x, y, corr_type='pearson')
         assert outliers.size == x.size
         assert stats['n'].to_numpy() == 30
+        # Percbend -- compare with robust corr toolbox
         stats = corr(x, y, method='percbend')
-        assert np.round(stats['r'].to_numpy(), 3) == 0.484
+        assert np.round(stats['r'].to_numpy(), 4) == 0.4843
+        stats = corr(x2, y2, method='percbend')
+        assert np.round(stats['r'].to_numpy(), 4) == 0.4843
+        stats = corr(x, y, method='percbend', beta=.5)
+        assert np.round(stats['r'].to_numpy(), 4) == 0.4848
         # Compare biweight correlation to astropy
         stats = corr(x, y, method='bicor')
         assert np.isclose(stats['r'].to_numpy(), 0.4951417784979)
-        # Changing the value of C using kwargs
         stats = corr(x, y, method='bicor', c=5)
         assert np.isclose(stats['r'].to_numpy(), 0.4940706950017)
         # Not normally distributed

@@ -73,13 +73,13 @@ def skipped(x, y, corr_type='spearman'):
     # Compute center and distance to center
     center = MinCovDet(random_state=42).fit(X).location_
     B = X - center
-    B2 = B**2
-    bot = B2.sum(axis=1)
+    bot = (B**2).sum(axis=1)
     # Loop over rows
     dis = np.zeros(shape=(nrows, nrows))
     for i in np.arange(nrows):
         if bot[i] != 0:  # Avoid division by zero error
-            dis[i, :] = np.linalg.norm(B * B2[i, :] / bot[i], axis=1)
+            dis[i, :] = np.linalg.norm(
+                B.dot(B[i, :, None]) * B[i, :] / bot[i], axis=1)
 
     # Detect outliers
     def idealf(x):
