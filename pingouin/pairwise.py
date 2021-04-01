@@ -927,10 +927,7 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
         Covariate(s) for partial correlation. Must be one or more columns
         in data. Use a list if there are more than one covariate. If
         ``covar`` is not None, a partial correlation will be computed using
-        :py:func:`pingouin.partial_corr` function. Covariate(s) overlapping
-        with specific combinations of columns will be disregarded for these
-        combinations. If ``covar`` is None, a non-partial correlation will be
-        computed using :py:func:`pingouin.corr` function.
+        :py:func:`pingouin.partial_corr` function.
     tail : string
         Specify whether to return ``'one-sided'`` or ``'two-sided'`` p-value.
         Note that the former are simply half the latter.
@@ -1072,7 +1069,6 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     >>> pcor = pairwise_corr(data, covar='Neuroticism')  # One covariate
     >>> pcor = pairwise_corr(data, covar=['Neuroticism', 'Openness'])  # Two
-    >>> pcor = pairwise_corr(data, covar=data.columns)  # All, except x and y
 
     7. Pairwise partial correlation matrix using :py:func:`pingouin.pcorr`
 
@@ -1203,15 +1199,22 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
             covar = covar.tolist()
         # Check that columns exist and are numeric
         assert all([c in keys for c in covar]), (
-            'covar not in data, not num or single unique value.'
+            'Covariate(s) are either not in data or not numeric.'
         )
+        # And we make sure that X or Y does not contain covar
+        stats = stats[~stats[['X', 'Y']].isin(covar).any(1)]
+        stats = stats.reset_index(drop=True)
+        if stats.shape[0] == 0:
+            raise ValueError("No column combination found. Please make sure "
+                             "that the specified columns and covar exist in "
+                             "the dataframe, are numeric, and contains at "
+                             "least two unique values.")
 
     # Listwise deletion of missing values
     if nan_policy == 'listwise':
         all_cols = np.unique(stats[['X', 'Y']].to_numpy()).tolist()
         if covar is not None:
-            # Extend cols to check for NaN by covar if they do not overlap
-            all_cols.extend([_cvr for _cvr in covar if _cvr not in all_cols])
+            all_cols.extend(covar)
         data = data[all_cols].dropna()
 
     # For max precision, make sure rounding is disabled
@@ -1222,20 +1225,17 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     dvs = ['n', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'power']
     dvs_out = dvs + ['outliers']
     dvs_bf10 = dvs + ['BF10']
-    covar_strings = []  # List for strings of covar combinations
+
     for i in range(stats.shape[0]):
         col1, col2 = stats.at[i, 'X'], stats.at[i, 'Y']
         if covar is None:
             cor_st = corr(data[col1].to_numpy(), data[col2].to_numpy(),
                           tail=tail, method=method)
         else:
-            # Select non-overlapping covars for the current x- and y-columns
-            # and calculate partial correlation
-            _covar = [_cvr for _cvr in covar if _cvr not in (col1, col2)]
-            cor_st = partial_corr(data=data, x=col1, y=col2, covar=_covar,
+            cor_st = partial_corr(data=data, x=col1, y=col2, covar=covar,
                                   tail=tail, method=method)
-            covar_strings.append(str(_covar))  # Store used covars in list
         cor_st_keys = cor_st.columns.tolist()
+
         if 'BF10' in cor_st_keys:
             stats.loc[i, dvs_bf10] = cor_st[dvs_bf10].to_numpy()
         elif 'outliers' in cor_st_keys:
@@ -1274,6 +1274,6 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     # Add covariates names if present
     if covar is not None:
-        stats.insert(loc=3, column='covar', value=covar_strings)
+        stats.insert(loc=3, column='covar', value=str(covar))
 
     return _postprocess_dataframe(stats)
