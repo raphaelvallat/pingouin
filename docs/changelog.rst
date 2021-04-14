@@ -8,7 +8,7 @@ v0.3.11 (April 2021)
 
 **Bugfixes**
 
-a. Fix invalid computation of the robust skipped correlation in :py:func:`pingouin.correlation.corr` (see `issue 164 <https://github.com/raphaelvallat/pingouin/issues/164>`_).
+a. Fix invalid computation of the robust skipped correlation in :py:func:`pingouin.corr` (see `issue 164 <https://github.com/raphaelvallat/pingouin/issues/164>`_).
 b. Passing a wrong ``tail`` argument to :py:func:`pingouin.corr` now *always* raises an error (see `PR 160 <https://github.com/raphaelvallat/pingouin/pull/160>`_).
    In previous versions of pingouin, using any ``method`` other than ``"pearson"`` and a wrong ``tail`` argument such as ``"two-tailed"`` or ``"both"``
    (instead of the correct ``"two-sided"``) may have resulted in silently returning a one-sided p-value.
