@@ -3,7 +3,7 @@
 What's new
 ##########
 
-v0.3.11 (unreleased)
+v0.3.11 (April 2021)
 --------------------
 
 **Bugfixes**
