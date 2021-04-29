@@ -19,27 +19,43 @@ __all__ = ["plot_blandaltman", "qqplot", "plot_paired",
            "plot_shift", "plot_rm_corr", "plot_circmean"]
 
 
-def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
-                     dpi=100, ax=None):
+def plot_blandaltman(x, y, agreement=1.96, xaxis="mean", confidence=.95,
+                     annotate=True,
+                     scatter_kws=dict(color="tab:blue", alpha=0.8),
+                     figsize=(4.5, 4.5), dpi=100, ax=None):
     """
     Generate a Bland-Altman plot to compare two sets of measurements.
 
     Parameters
     ----------
-    x, y : np.array or list
+    x, y : pd.Series, np.array, or list
         First and second measurements.
     agreement : float
-        Multiple of the standard deviation to plot limit of agreement bounds.
-        The defaults is 1.96.
+        Multiple of the standard deviation to plot agreement limits.
+        The defaults is 1.96, which corresponds to 95% confidence interval if
+        the differences are normally distributed.
+    xaxis : str
+        Define which measurements should be used as the reference (x-axis).
+        Default is to use the average of x and y ("mean"). Accepted values are
+        "mean", "x" or "y".
     confidence : float
-        If not ``None``, plot the specified percentage confidence interval on
-        the mean and limits of agreement.
+        If not None, plot the specified percentage confidence interval of
+        the mean and limits of agreement. The CIs of the mean difference and
+        agreement limits describe a possible error in the
+        estimate due to a sampling error. The greater the sample size,
+        the narrower the CIs will be.
+    annotate : bool
+        If True (default), annotate the values for the mean difference
+        and agreement limits.
+    scatter_kws : dict
+        Additional keyword arguments passed to
+        :py:func:`matplotlib.pyplot.scatter`.
     figsize : tuple
         Figsize in inches
     dpi : int
         Resolution of the figure in dots per inches.
     ax : matplotlib axes
-        Axis on which to draw the plot
+        Axis on which to draw the plot.
 
     Returns
     -------
@@ -53,12 +69,12 @@ def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
     They allow identification of any systematic difference between the
     measurements (i.e., fixed bias) or possible outliers.
 
-    The mean difference is the estimated bias, and the SD of the differences
-    measures the random fluctuations around this mean. If the mean value of the
-    difference differs significantly from 0 on the basis of a 1-sample t-test,
-    this indicates the presence of fixed bias. If there is a consistent bias,
-    it can be adjusted for by subtracting the mean difference from the new
-    method.
+    The mean difference (= x - y) is the estimated bias, and the SD of the
+    differences measures the random fluctuations around this mean.
+    If the mean value of the difference differs significantly from 0 on the
+    basis of a 1-sample t-test, this indicates the presence of fixed bias.
+    If there is a consistent bias, it can be adjusted for by subtracting the
+    mean difference from the new method.
 
     It is common to compute 95% limits of agreement for each comparison
     (average difference ± 1.96 standard deviation of the difference), which
@@ -68,7 +84,7 @@ def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
     The 95% limits of agreement can be unreliable estimates of the population
     parameters especially for small sample sizes so, when comparing methods
     or assessing repeatability, it is important to calculate confidence
-    intervals for 95% limits of agreement.
+    intervals for the 95% limits of agreement.
 
     The code is an adaptation of the
     `PyCompare <https://github.com/jaketmp/pyCompare>`_ package. The present
@@ -81,93 +97,106 @@ def plot_blandaltman(x, y, agreement=1.96, confidence=.95, figsize=(5, 4),
            agreement between two methods of clinical measurement. The lancet,
            327(8476), 307-310.
 
+    .. [2] Giavarina, D. (2015). Understanding bland altman analysis.
+           Biochemia medica, 25(2), 141-151.
+
     Examples
     --------
-    Bland-Altman plot
+    Bland-Altman plot (example data from [2]_)
 
     .. plot::
 
-        >>> import numpy as np
         >>> import pingouin as pg
-        >>> np.random.seed(123)
-        >>> mean, cov = [10, 11], [[1, 0.8], [0.8, 1]]
-        >>> x, y = np.random.multivariate_normal(mean, cov, 30).T
-        >>> ax = pg.plot_blandaltman(x, y)
+        >>> df = pg.read_dataset("blandaltman")
+        >>> ax = pg.plot_blandaltman(df['A'], df['B'])
+        >>> plt.tight_layout()
     """
     # Safety check
+    assert xaxis in ["mean", "x", "y"]
+    # Get names before converting to NumPy array
+    xname = x.name if isinstance(x, pd.Series) else "x"
+    yname = y.name if isinstance(y, pd.Series) else "y"
     x = np.asarray(x)
     y = np.asarray(y)
     assert x.ndim == 1 and y.ndim == 1
     assert x.size == y.size
-    n = x.size
-    mean = np.vstack((x, y)).mean(0)
-    diff = x - y
-    md = diff.mean()
-    sd = diff.std(axis=0, ddof=1)
+    assert not np.isnan(x).any(), "Missing values in x or y are not supported."
+    assert not np.isnan(y).any(), "Missing values in x or y are not supported."
 
-    # Confidence intervals
-    if confidence is not None:
-        assert 0 < confidence < 1
-        ci = dict()
-        ci['mean'] = stats.norm.interval(confidence, loc=md,
-                                         scale=sd / np.sqrt(n))
-        seLoA = ((1 / n) + (agreement**2 / (2 * (n - 1)))) * (sd**2)
-        loARange = np.sqrt(seLoA) * stats.t.ppf((1 - confidence) / 2, n - 1)
-        ci['upperLoA'] = ((md + agreement * sd) + loARange,
-                          (md + agreement * sd) - loARange)
-        ci['lowerLoA'] = ((md - agreement * sd) + loARange,
-                          (md - agreement * sd) - loARange)
+    # Calculate mean, STD and SEM of x - y
+    n = x.size
+    dof = n - 1
+    diff = x - y
+    mean_diff = np.mean(diff)
+    std_diff = np.std(diff, ddof=1)
+    mean_diff_se = np.sqrt(std_diff**2 / n)
+    # Limits of agreements
+    high = mean_diff + agreement * std_diff
+    low = mean_diff - agreement * std_diff
+    high_low_se = np.sqrt(3 * std_diff**2 / n)
+
+    # Define x-axis
+    if xaxis == "mean":
+        xval = np.vstack((x, y)).mean(0)
+        xlabel = f"Mean of {xname} and {yname}"
+    elif xaxis == "x":
+        xval = x
+        xlabel = xname
+    else:
+        xval = y
+        xlabel = yname
 
     # Start the plot
     if ax is None:
         fig, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
 
     # Plot the mean diff, limits of agreement and scatter
-    ax.axhline(md, color='#6495ED', linestyle='--')
-    ax.axhline(md + agreement * sd, color='coral', linestyle='--')
-    ax.axhline(md - agreement * sd, color='coral', linestyle='--')
-    ax.scatter(mean, diff, alpha=0.5)
+    ax.scatter(xval, diff, **scatter_kws)
+    ax.axhline(mean_diff, color='k', linestyle='-', lw=2)
+    ax.axhline(high, color='k', linestyle=':', lw=1.5)
+    ax.axhline(low, color='k', linestyle=':', lw=1.5)
 
-    loa_range = (md + (agreement * sd)) - (md - agreement * sd)
-    offset = (loa_range / 100.0) * 1.5
+    # Annotate values
+    if annotate:
+        loa_range = high - low
+        offset = (loa_range / 100.0) * 1.5
+        trans = transforms.blended_transform_factory(
+            ax.transAxes, ax.transData)
+        xloc = 0.98
+        ax.text(xloc, mean_diff + offset, 'Mean', ha="right", va="bottom",
+                transform=trans)
+        ax.text(xloc, mean_diff - offset, '%.2f' % mean_diff, ha="right",
+                va="top", transform=trans)
+        ax.text(xloc, high + offset, '+%.2f SD' % agreement, ha="right",
+                va="bottom", transform=trans)
+        ax.text(xloc, high - offset, '%.2f' % high, ha="right", va="top",
+                transform=trans)
+        ax.text(xloc, low - offset, '-%.2f SD' % agreement, ha="right",
+                va="top", transform=trans)
+        ax.text(xloc, low + offset, '%.2f' % low, ha="right", va="bottom",
+                transform=trans)
 
-    trans = transforms.blended_transform_factory(ax.transAxes, ax.transData)
-
-    ax.text(0.98, md + offset, 'Mean', ha="right", va="bottom",
-            transform=trans)
-    ax.text(0.98, md - offset, '%.2f' % md, ha="right", va="top",
-            transform=trans)
-
-    ax.text(0.98, md + (agreement * sd) + offset, '+%.2f SD' % agreement,
-            ha="right", va="bottom", transform=trans)
-    ax.text(0.98, md + (agreement * sd) - offset,
-            '%.2f' % (md + agreement * sd), ha="right", va="top",
-            transform=trans)
-
-    ax.text(0.98, md - (agreement * sd) - offset, '-%.2f SD' % agreement,
-            ha="right", va="top", transform=trans)
-    ax.text(0.98, md - (agreement * sd) + offset,
-            '%.2f' % (md - agreement * sd), ha="right", va="bottom",
-            transform=trans)
-
+    # Add 95% confidence intervals for mean bias and limits of agreement
     if confidence is not None:
-        ax.axhspan(ci['mean'][0], ci['mean'][1],
-                   facecolor='#6495ED', alpha=0.2)
-
-        ax.axhspan(ci['upperLoA'][0], ci['upperLoA'][1],
-                   facecolor='coral', alpha=0.2)
-
-        ax.axhspan(ci['lowerLoA'][0], ci['lowerLoA'][1],
-                   facecolor='coral', alpha=0.2)
+        assert 0 < confidence < 1
+        ci = dict()
+        ci['mean'] = stats.t.interval(
+            confidence, dof, loc=mean_diff, scale=mean_diff_se)
+        ci['high'] = stats.t.interval(
+            confidence, dof, loc=high, scale=high_low_se)
+        ci['low'] = stats.t.interval(
+            confidence, dof, loc=low, scale=high_low_se)
+        ax.axhspan(
+            ci['mean'][0], ci['mean'][1], facecolor='tab:grey', alpha=0.2)
+        ax.axhspan(
+            ci['high'][0], ci['high'][1], facecolor='tab:blue', alpha=0.2)
+        ax.axhspan(
+            ci['low'][0], ci['low'][1], facecolor='tab:blue', alpha=0.2)
 
     # Labels and title
-    ax.set_ylabel('Difference between methods')
-    ax.set_xlabel('Mean of methods')
-    ax.set_title('Bland-Altman plot')
-
-    # Despine and trim
-    sns.despine(trim=True, ax=ax)
-
+    ax.set_ylabel(f"{xname} - {yname}")
+    ax.set_xlabel(xlabel)
+    sns.despine(ax=ax)
     return ax
 
 

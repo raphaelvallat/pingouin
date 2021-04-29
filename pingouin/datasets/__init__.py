@@ -75,6 +75,7 @@ def list_dataset():
      'anova2_unbalanced',
      'anova3',
      'anova3_unbalanced',
+     'blandaltman',
      'chi2_independence',
      'chi2_mcnemar',
      'circular',

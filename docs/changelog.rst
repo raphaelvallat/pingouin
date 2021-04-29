@@ -3,6 +3,13 @@
 What's new
 ##########
 
+v0.3.12 (dev)
+-------------
+
+**Enhancements**
+
+a. Major refactoring of :py:func:`pingouin.plot_blandaltman`, which now has many additional parameters. It also uses a T distribution instead of a normal distribution to estimate the 95% confidence intervals of the mean difference and agreement limits. See `issue 167 <https://github.com/raphaelvallat/pingouin/issues/167>`_.
+
 v0.3.11 (April 2021)
 --------------------
 
