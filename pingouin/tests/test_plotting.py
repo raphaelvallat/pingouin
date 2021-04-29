@@ -19,6 +19,7 @@ class TestPlotting(TestCase):
 
     def test_plot_blandaltman(self):
         """Test plot_blandaltman()"""
+        # With random data
         np.random.seed(123)
         mean, cov = [10, 11], [[1, 0.8], [0.8, 1]]
         x, y = np.random.multivariate_normal(mean, cov, 30).T
@@ -27,6 +28,14 @@ class TestPlotting(TestCase):
         _, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4))
         plot_blandaltman(x, y, agreement=2, confidence=None, ax=ax1)
         plot_blandaltman(x, y, agreement=2, confidence=.68, dpi=200, ax=ax2)
+        plt.close('all')
+        # With Pingouin's dataset
+        df_ba = read_dataset("blandaltman")
+        x, y = df_ba['A'], df_ba['B']
+        plot_blandaltman(x, y)
+        plot_blandaltman(x, y, annotate=False)
+        plot_blandaltman(x, y, xaxis="x", confidence=None)
+        plot_blandaltman(x, y, xaxis="y")
         plt.close('all')
 
     def test_ppoints(self):
