@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import pandas_flavor as pf
+from scipy.special import btdtr
 from scipy.spatial.distance import pdist, squareform
 from scipy.stats import pearsonr, spearmanr, kendalltau
 
@@ -216,7 +217,6 @@ def percbend(x, y, beta=.2):
        Toolbox. Frontiers in Psychology. 2012;3:606.
        doi:10.3389/fpsyg.2012.00606.
     """
-    from scipy.stats import t
     X = np.column_stack((x, y))
     nx = X.shape[0]
     M = np.tile(np.median(X, axis=0), nx).reshape(X.shape)
@@ -243,11 +243,18 @@ def percbend(x, y, beta=.2):
     a[a <= -1] = -1
     a[a >= 1] = 1
 
-    # Get r, tval and pval
+    # Correlation coefficient
     a, b = a
     r = (a * b).sum() / np.sqrt((a**2).sum() * (b**2).sum())
-    tval = r * np.sqrt((nx - 2) / (1 - r**2))
-    pval = 2 * t.sf(abs(tval), nx - 2)
+    # Two-sided p-value
+    # Method 1: using a student T distribution
+    # https://en.wikipedia.org/wiki/Pearson_correlation_coefficient#Testing_using_Student's_t-distribution
+    # tval = r * np.sqrt((nx - 2) / (1 - r**2))
+    # pval = 2 * t.sf(abs(tval), nx - 2)
+    # Method 2: beta distribution (similar to scipy.stats.pearsonr, faster)
+    # https://en.wikipedia.org/wiki/Pearson_correlation_coefficient#Using_the_exact_distribution
+    ab = nx / 2 - 1
+    pval = 2 * btdtr(ab, ab, 0.5 * (1 - abs(np.float64(r))))
     return r, pval
 
 
@@ -283,11 +290,11 @@ def bicor(x, y, c=9):
     Correlations and Hierarchical Clustering. Journal of Statistical Software,
     46(11). https://www.ncbi.nlm.nih.gov/pubmed/23050260
     """
-    from scipy.stats import t
     # Calculate median
     nx = x.size
     x_median = np.median(x)
     y_median = np.median(y)
+
     # Raw median absolute deviation
     x_mad = np.median(np.abs(x - x_median))
     y_mad = np.median(np.abs(y - y_median))
@@ -296,19 +303,30 @@ def bicor(x, y, c=9):
         # "Strictly speaking, a call to bicor in R should return a missing
         # value if mad(x) = 0 or mad(y) = 0." This avoids division by zero.
         return np.nan, np.nan
+
     # Calculate weights
     u = (x - x_median) / (c * x_mad)
     v = (y - y_median) / (c * y_mad)
     w_x = (1 - u**2)**2 * ((1 - np.abs(u)) > 0)
     w_y = (1 - v**2)**2 * ((1 - np.abs(v)) > 0)
+
     # Normalize x and y by weights
     x_norm = (x - x_median) * w_x
     y_norm = (y - y_median) * w_y
     denom = (np.sqrt((x_norm**2).sum()) * np.sqrt((y_norm**2).sum()))
-    # Calculate r, t and two-sided p-value
+
+    # Correlation coefficient
     r = (x_norm * y_norm).sum() / denom
-    tval = r * np.sqrt((nx - 2) / (1 - r**2))
-    pval = 2 * t.sf(abs(tval), nx - 2)
+    # Two-sided p-value
+
+    # Method 1: using a student T distribution
+    # https://en.wikipedia.org/wiki/Pearson_correlation_coefficient#Testing_using_Student's_t-distribution
+    # tval = r * np.sqrt((nx - 2) / (1 - r**2))
+    # pval = 2 * t.sf(abs(tval), nx - 2)
+    # Method 2: beta distribution (similar to scipy.stats.pearsonr, faster)
+    # https://en.wikipedia.org/wiki/Pearson_correlation_coefficient#Using_the_exact_distribution
+    ab = nx / 2 - 1
+    pval = 2 * btdtr(ab, ab, 0.5 * (1 - abs(np.float64(r))))
     return r, pval
 
 
@@ -350,7 +368,7 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
         * ``'p-val'``: tail of the test
         * ``'BF10'``: Bayes Factor of the alternative hypothesis
           (only for Pearson correlation)
-        * ``'power'``: achieved power of the test (= 1 - type II error).
+        * ``'power'``: achieved power of the test with an alpha of 0.05.
 
     See also
     --------
