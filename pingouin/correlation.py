@@ -317,8 +317,8 @@ def bicor(x, y, c=9):
 
     # Correlation coefficient
     r = (x_norm * y_norm).sum() / denom
-    # Two-sided p-value
 
+    # Two-sided p-value
     # Method 1: using a student T distribution
     # https://en.wikipedia.org/wiki/Pearson_correlation_coefficient#Testing_using_Student's_t-distribution
     # tval = r * np.sqrt((nx - 2) / (1 - r**2))
