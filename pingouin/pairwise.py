@@ -971,9 +971,6 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
         * ``'n'``: Sample size (after removal of missing values).
         * ``'r'``: Correlation coefficients.
         * ``'CI95'``: 95% parametric confidence intervals.
-        * ``'r2'``: R-squared values.
-        * ``'adj_r2'``: Adjusted R-squared values.
-        * ``'z'``: Standardized correlation coefficients.
         * ``'p-unc'``: Uncorrected p-values.
         * ``'p-corr'``: Corrected p-values.
         * ``'p-adjust'``: P-values correction method.
@@ -1022,44 +1019,44 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     >>> data = pg.read_dataset('pairwise_corr').iloc[:, 1:]
     >>> pg.pairwise_corr(data, method='spearman', tail='one-sided',
     ...                  padjust='bonf').round(3)
-                   X                  Y    method       tail    n      r           CI95%     r2  adj_r2      z  p-unc  p-corr p-adjust  power
-    0    Neuroticism       Extraversion  spearman  one-sided  500 -0.325   [-0.4, -0.24]  0.106   0.102 -0.338  0.000   0.000     bonf  1.000
-    1    Neuroticism           Openness  spearman  one-sided  500 -0.028   [-0.12, 0.06]  0.001  -0.003 -0.028  0.265   1.000     bonf  0.154
-    2    Neuroticism      Agreeableness  spearman  one-sided  500 -0.151  [-0.24, -0.06]  0.023   0.019 -0.152  0.000   0.004     bonf  0.959
-    3    Neuroticism  Conscientiousness  spearman  one-sided  500 -0.356  [-0.43, -0.28]  0.127   0.123 -0.372  0.000   0.000     bonf  1.000
-    4   Extraversion           Openness  spearman  one-sided  500  0.243    [0.16, 0.32]  0.059   0.055  0.248  0.000   0.000     bonf  1.000
-    5   Extraversion      Agreeableness  spearman  one-sided  500  0.062   [-0.03, 0.15]  0.004  -0.000  0.062  0.083   0.832     bonf  0.398
-    6   Extraversion  Conscientiousness  spearman  one-sided  500  0.056   [-0.03, 0.14]  0.003  -0.001  0.056  0.106   1.000     bonf  0.345
-    7       Openness      Agreeableness  spearman  one-sided  500  0.170    [0.08, 0.25]  0.029   0.025  0.171  0.000   0.001     bonf  0.985
-    8       Openness  Conscientiousness  spearman  one-sided  500 -0.007   [-0.09, 0.08]  0.000  -0.004 -0.007  0.440   1.000     bonf  0.068
-    9  Agreeableness  Conscientiousness  spearman  one-sided  500  0.161    [0.07, 0.24]  0.026   0.022  0.162  0.000   0.002     bonf  0.976
+                   X                  Y    method       tail    n      r           CI95%  p-unc  p-corr p-adjust  power
+    0    Neuroticism       Extraversion  spearman  one-sided  500 -0.325   [-0.4, -0.24]  0.000   0.000     bonf  1.000
+    1    Neuroticism           Openness  spearman  one-sided  500 -0.028   [-0.12, 0.06]  0.265   1.000     bonf  0.154
+    2    Neuroticism      Agreeableness  spearman  one-sided  500 -0.151  [-0.24, -0.06]  0.000   0.004     bonf  0.959
+    3    Neuroticism  Conscientiousness  spearman  one-sided  500 -0.356  [-0.43, -0.28]  0.000   0.000     bonf  1.000
+    4   Extraversion           Openness  spearman  one-sided  500  0.243    [0.16, 0.32]  0.000   0.000     bonf  1.000
+    5   Extraversion      Agreeableness  spearman  one-sided  500  0.062   [-0.03, 0.15]  0.083   0.832     bonf  0.398
+    6   Extraversion  Conscientiousness  spearman  one-sided  500  0.056   [-0.03, 0.14]  0.106   1.000     bonf  0.345
+    7       Openness      Agreeableness  spearman  one-sided  500  0.170    [0.08, 0.25]  0.000   0.001     bonf  0.985
+    8       Openness  Conscientiousness  spearman  one-sided  500 -0.007   [-0.09, 0.08]  0.440   1.000     bonf  0.068
+    9  Agreeableness  Conscientiousness  spearman  one-sided  500  0.161    [0.07, 0.24]  0.000   0.002     bonf  0.976
 
     2. Robust two-sided biweight midcorrelation with uncorrected p-values
 
     >>> pcor = pg.pairwise_corr(data, columns=['Openness', 'Extraversion',
     ...                                        'Neuroticism'], method='bicor')
     >>> pcor.round(3)
-                  X             Y method       tail    n      r           CI95%     r2  adj_r2      z  p-unc  power
-    0      Openness  Extraversion  bicor  two-sided  500  0.247    [0.16, 0.33]  0.061   0.057  0.252  0.000  1.000
-    1      Openness   Neuroticism  bicor  two-sided  500 -0.028   [-0.12, 0.06]  0.001  -0.003 -0.028  0.535  0.095
-    2  Extraversion   Neuroticism  bicor  two-sided  500 -0.343  [-0.42, -0.26]  0.118   0.114 -0.358  0.000  1.000
+                  X             Y method       tail    n      r           CI95%  p-unc  power
+    0      Openness  Extraversion  bicor  two-sided  500  0.247    [0.16, 0.33]  0.000  1.000
+    1      Openness   Neuroticism  bicor  two-sided  500 -0.028   [-0.12, 0.06]  0.535  0.095
+    2  Extraversion   Neuroticism  bicor  two-sided  500 -0.343  [-0.42, -0.26]  0.000  1.000
 
     3. One-versus-all pairwise correlations
 
     >>> pg.pairwise_corr(data, columns=['Neuroticism']).round(3)
-                 X                  Y   method       tail    n      r           CI95%     r2  adj_r2      z  p-unc       BF10  power
-    0  Neuroticism       Extraversion  pearson  two-sided  500 -0.350  [-0.42, -0.27]  0.123   0.119 -0.366  0.000  6.765e+12  1.000
-    1  Neuroticism           Openness  pearson  two-sided  500 -0.010    [-0.1, 0.08]  0.000  -0.004 -0.010  0.817      0.058  0.056
-    2  Neuroticism      Agreeableness  pearson  two-sided  500 -0.134  [-0.22, -0.05]  0.018   0.014 -0.135  0.003      5.122  0.854
-    3  Neuroticism  Conscientiousness  pearson  two-sided  500 -0.368  [-0.44, -0.29]  0.135   0.132 -0.386  0.000  2.644e+14  1.000
+                 X                  Y   method       tail    n      r           CI95%  p-unc       BF10  power
+    0  Neuroticism       Extraversion  pearson  two-sided  500 -0.350  [-0.42, -0.27]  0.000  6.765e+12  1.000
+    1  Neuroticism           Openness  pearson  two-sided  500 -0.010    [-0.1, 0.08]  0.817      0.058  0.056
+    2  Neuroticism      Agreeableness  pearson  two-sided  500 -0.134  [-0.22, -0.05]  0.003      5.122  0.854
+    3  Neuroticism  Conscientiousness  pearson  two-sided  500 -0.368  [-0.44, -0.29]  0.000  2.644e+14  1.000
 
     4. Pairwise correlations between two lists of columns (cartesian product)
 
     >>> columns = [['Neuroticism', 'Extraversion'], ['Openness']]
     >>> pg.pairwise_corr(data, columns).round(3)
-                  X         Y   method       tail    n      r         CI95%     r2  adj_r2      z  p-unc       BF10  power
-    0   Neuroticism  Openness  pearson  two-sided  500 -0.010  [-0.1, 0.08]  0.000  -0.004 -0.010  0.817      0.058  0.056
-    1  Extraversion  Openness  pearson  two-sided  500  0.267  [0.18, 0.35]  0.071   0.068  0.274  0.000  5.277e+06  1.000
+                  X         Y   method       tail    n      r         CI95%  p-unc       BF10  power
+    0   Neuroticism  Openness  pearson  two-sided  500 -0.010  [-0.1, 0.08]  0.817      0.058  0.056
+    1  Extraversion  Openness  pearson  two-sided  500  0.267  [0.18, 0.35]  0.000  5.277e+06  1.000
 
     5. As a Pandas method
 
@@ -1067,8 +1064,11 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
     6. Pairwise partial correlation
 
-    >>> pcor = pairwise_corr(data, covar='Neuroticism')  # One covariate
-    >>> pcor = pairwise_corr(data, covar=['Neuroticism', 'Openness'])  # Two
+    >>> pg.pairwise_corr(data, covar=['Neuroticism', 'Openness'])
+                   X                  Y   method                        covar       tail    n         r          CI95%     p-unc
+    0   Extraversion      Agreeableness  pearson  ['Neuroticism', 'Openness']  two-sided  500 -0.038737  [-0.13, 0.05]  0.388361
+    1   Extraversion  Conscientiousness  pearson  ['Neuroticism', 'Openness']  two-sided  500 -0.071427  [-0.16, 0.02]  0.111389
+    2  Agreeableness  Conscientiousness  pearson  ['Neuroticism', 'Openness']  two-sided  500  0.123108   [0.04, 0.21]  0.005944
 
     7. Pairwise partial correlation matrix using :py:func:`pingouin.pcorr`
 
@@ -1185,8 +1185,7 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     stats = pd.DataFrame({'X': X, 'Y': Y, 'method': method, 'tail': tail},
                          index=range(len(combs)),
                          columns=['X', 'Y', 'method', 'tail', 'n', 'outliers',
-                                  'r', 'CI95%', 'r2', 'adj_r2', 'p-val',
-                                  'BF10', 'power'])
+                                  'r', 'CI95%', 'p-val', 'BF10', 'power'])
 
     # Now we check if covariates are present
     if covar is not None:
@@ -1222,10 +1221,6 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     options['round'] = None
 
     # Compute pairwise correlations and fill dataframe
-    dvs = ['n', 'r', 'CI95%', 'r2', 'adj_r2', 'p-val', 'power']
-    dvs_out = dvs + ['outliers']
-    dvs_bf10 = dvs + ['BF10']
-
     for i in range(stats.shape[0]):
         col1, col2 = stats.at[i, 'X'], stats.at[i, 'Y']
         if covar is None:
@@ -1236,38 +1231,33 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
                                   tail=tail, method=method)
         cor_st_keys = cor_st.columns.tolist()
 
-        if 'BF10' in cor_st_keys:
-            stats.loc[i, dvs_bf10] = cor_st[dvs_bf10].to_numpy()
-        elif 'outliers' in cor_st_keys:
-            stats.loc[i, dvs_out] = cor_st[dvs_out].to_numpy()
-        else:
-            stats.loc[i, dvs] = cor_st[dvs].to_numpy()
+        for c in cor_st_keys:
+            stats.loc[i, c] = cor_st.loc[method, c]
 
     options.update(old_options)  # restore options
 
     # Force conversion to numeric
-    stats = stats.astype({'r': float, 'r2': float, 'adj_r2': float,
-                          'n': int, 'p-val': float, 'outliers': float,
-                          'power': float})
+    stats = stats.astype({
+        'r': float, 'n': int, 'p-val': float, 'outliers': float,
+        'power': float})
 
     # Multiple comparisons
     stats = stats.rename(columns={'p-val': 'p-unc'})
     padjust = None if stats['p-unc'].size <= 1 else padjust
     if padjust is not None:
         if padjust.lower() != 'none':
-            reject, stats['p-corr'] = multicomp(stats['p-unc'].to_numpy(),
-                                                method=padjust)
+            reject, stats['p-corr'] = multicomp(
+                stats['p-unc'].to_numpy(), method=padjust)
             stats['p-adjust'] = padjust
     else:
         stats['p-corr'] = None
         stats['p-adjust'] = None
 
     # Standardize correlation coefficients (Fisher z-transformation)
-    stats['z'] = np.arctanh(stats['r'].to_numpy())
+    # stats['z'] = np.arctanh(stats['r'].to_numpy())
 
     col_order = ['X', 'Y', 'method', 'tail', 'n', 'outliers', 'r', 'CI95%',
-                 'r2', 'adj_r2', 'z', 'p-unc', 'p-corr', 'p-adjust',
-                 'BF10', 'power']
+                 'p-unc', 'p-corr', 'p-adjust', 'BF10', 'power']
 
     # Reorder columns and remove empty ones
     stats = stats.reindex(columns=col_order).dropna(how='all', axis=1)

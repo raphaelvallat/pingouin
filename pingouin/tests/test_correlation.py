@@ -79,29 +79,75 @@ class TestCorrelation(TestCase):
 
     def test_partial_corr(self):
         """Test function partial_corr.
-        Compare with the R package ppcor and JASP.
+
+        Compare with the R package ppcor (which is also used by JASP).
         """
         df = read_dataset('partial_corr')
+        #######################################################################
+        # PARTIAL CORRELATION
+        #######################################################################
+        # With one covariate
         pc = partial_corr(data=df, x='x', y='y', covar='cv1')
-        assert round(pc.at['pearson', 'r'], 3) == 0.568
-        pc = df.partial_corr(x='x', y='y', covar='cv1', method='spearman')
+        assert round(pc.at['pearson', 'r'], 7) == 0.5681692
+        assert round(pc.at['pearson', 'p-val'], 9) == 0.001303059
+        # With two covariates
+        pc = partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2'])
+        assert round(pc.at['pearson', 'r'], 7) == 0.5344372
+        assert round(pc.at['pearson', 'p-val'], 9) == 0.003392904
+        # With three covariates
+        # in R: pcor.test(x=df$x, y=df$y, z=df[, c("cv1", "cv2", "cv3")])
+        pc = partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'])
+        assert round(pc.at['pearson', 'r'], 7) == 0.4926007
+        assert round(pc.at['pearson', 'p-val'], 9) == 0.009044164
+        # Method == "spearman"
+        # Warning: Spearman slightly different than ppcor package. I think this
+        # is because the latter uses an inverse covariance matrix instead of a
+        # residual approach:
+        # https://github.com/cran/ppcor/blob/master/R/ppcor_v1.01.R
+        # >>> cvx <- cov(x, method=method)
+        # >>> icvx < - ginv(cvx)
+        # >>> pcor < - -cov2cor(icvx)
+        pc = partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'],
+                          method="spearman")
+        # assert round(pc.at['spearman', 'r'], 7) == 0.5209208
+        # assert round(pc.at['spearman', 'p-val'], 9) == 0.005336187
+
+        # Test with other method
+        for method in ['kendall', 'bicor', 'skipped', 'percbend', 'shepherd']:
+            partial_corr(data=df, x='x', y='y', covar=['cv1'], method=method)
+
+        #######################################################################
+        # SEMI-PARTIAL CORRELATION
+        #######################################################################
+        # With one covariate
+        pc = partial_corr(data=df, x='x', y='y', y_covar='cv1')
+        assert round(pc.at['pearson', 'r'], 7) == 0.5670793
+        assert round(pc.at['pearson', 'p-val'], 9) == 0.001337718
+        # With two covariates
+        pc = partial_corr(data=df, x='x', y='y', y_covar=['cv1', 'cv2'])
+        assert round(pc.at['pearson', 'r'], 7) == 0.5097489
+        assert round(pc.at['pearson', 'p-val'], 9) == 0.005589687
+        # With three covariates
+        # in R: spcor.test(x=df$x, y=df$y, z=df[, c("cv1", "cv2", "cv3")])
+        pc = partial_corr(data=df, x='x', y='y', y_covar=['cv1', 'cv2', 'cv3'])
+        assert round(pc.at['pearson', 'r'], 7) == 0.4212351
+        assert round(pc.at['pearson', 'p-val'], 8) == 0.02865483
+        # With three covariates (x_covar)
+        pc = partial_corr(data=df, x='x', y='y', x_covar=['cv1', 'cv2', 'cv3'])
+        assert round(pc.at['pearson', 'r'], 7) == 0.4631883
+        assert round(pc.at['pearson', 'p-val'], 8) == 0.01496857
+
+        # Method == "spearman"
         # Warning: Spearman slightly different than ppcor package, is this
         # caused by difference in Python / R when computing ranks?
-        # assert pc.at['spearman', 'r'] == 0.578
-        # Partial correlation of x and y controlling for multiple covariates
-        pc = partial_corr(data=df, x='x', y='y', covar=['cv1'])
-        pc = partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'])
-        assert round(pc.at['pearson', 'r'], 3) == 0.493
-        pc = partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'],
-                          method='percbend')
-        # Semi-partial correlation
-        df.partial_corr(x='x', y='y', y_covar='cv1')
-        pc = df.partial_corr(x='x', y='y', x_covar=['cv1', 'cv2', 'cv3'])
-        assert round(pc.at['pearson', 'r'], 3) == 0.463
-        pc = df.partial_corr(x='x', y='y', y_covar=['cv1', 'cv2', 'cv3'])
-        assert round(pc.at['pearson', 'r'], 3) == 0.421
-        partial_corr(data=df, x='x', y='y', x_covar='cv1',
-                     y_covar=['cv2', 'cv3'], method='spearman')
+        pc = partial_corr(data=df, x='x', y='y', y_covar=['cv1', 'cv2', 'cv3'],
+                          method="spearman")
+        # assert round(pc.at['spearman', 'r'], 7) == 0.4597143
+        # assert round(pc.at['spearman', 'p-val'], 8) == 0.01584262
+
+        #######################################################################
+        # ERROR
+        #######################################################################
         with pytest.raises(ValueError):
             partial_corr(data=df, x='x', y='y', covar='cv2', x_covar='cv1')
         with pytest.raises(AssertionError) as error_info:
