@@ -79,6 +79,9 @@ class TestBayesian(TestCase):
         # assert bfp(r, n, tail='l')) == 1.677e-26
 
         # Compare the integral solving method (Wetzels)
+        # In R:
+        # >>> library(BayesFactor)
+        # >>> exp(linearReg.R2stat(N=20, p=1, R2=0.36, rscale = 1)[['bf']])
         assert bfp(0.6, 20, method='wetzels') == appr(8.221)
         assert bfp(-0.6, 20, method='wetzels') == appr(8.221)
         assert bfp(0.6, 10, method='wetzels') == appr(1.278)
