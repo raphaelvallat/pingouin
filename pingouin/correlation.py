@@ -514,14 +514,14 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
     6. Shepherd's pi correlation (robust)
 
     >>> pg.corr(x, y, method='shepherd').round(3)
-               n  outliers      r         CI95%  p-val  power
-    shepherd  30         2  0.437  [0.09, 0.69]   0.02  0.694
+               n  outliers      r        CI95%  p-val  power
+    shepherd  30         2  0.437  [0.08, 0.7]   0.02  0.662
 
     7. Skipped spearman correlation (robust)
 
     >>> pg.corr(x, y, method='skipped').round(3)
-              n  outliers      r         CI95%  p-val  power
-    skipped  30         2  0.437  [0.09, 0.69]   0.02  0.694
+              n  outliers      r        CI95%  p-val  power
+    skipped  30         2  0.437  [0.08, 0.7]   0.02  0.662
 
     8. One-tailed Pearson correlation
 
@@ -547,7 +547,7 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
 
     # Remove rows with missing values
     x, y = remove_na(x, y, paired=True)
-    nx = x.size
+    n = x.size
 
     # Compute correlation coefficient
     if method == 'pearson':
@@ -571,16 +571,20 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
         # Correlation failed -- new in version v0.3.4, instead of raising an
         # error we just return a dataframe full of NaN (except sample size).
         # This avoid sudden stop in pingouin.pairwise_corr.
-        return pd.DataFrame({'n': nx, 'r': np.nan, 'CI95%': np.nan,
+        return pd.DataFrame({'n': n, 'r': np.nan, 'CI95%': np.nan,
                              'p-val': np.nan, 'BF10': np.nan,
                              'power': np.nan}, index=[method])
 
+    # Sample size after outlier removal
+    n_outliers = sum(outliers) if "outliers" in locals() else 0
+    n_clean = n - n_outliers
+
     # Compute the parametric 95% confidence interval and power
-    ci = compute_esci(stat=r, nx=nx, ny=nx, eftype='r', decimals=6)
-    pr = power_corr(r=r, n=nx, power=None, alpha=0.05, tail=tail),
+    ci = compute_esci(stat=r, nx=n_clean, ny=n_clean, eftype='r', decimals=6)
+    pr = power_corr(r=r, n=n_clean, power=None, alpha=0.05, tail=tail),
 
     # Create dictionnary
-    stats = {'n': nx,
+    stats = {'n': n,
              'r': r,
              'CI95%': [ci],
              'p-val': pval if tail == 'two-sided' else .5 * pval,
@@ -588,11 +592,11 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
              }
 
     if method in ['shepherd', 'skipped']:
-        stats['outliers'] = sum(outliers)
+        stats['outliers'] = n_outliers
 
     # Compute the BF10 for Pearson correlation only
     if method == 'pearson':
-        stats['BF10'] = bayesfactor_pearson(r, nx, tail=tail)
+        stats['BF10'] = bayesfactor_pearson(r, n_clean, tail=tail)
 
     # Convert to DataFrame
     stats = pd.DataFrame.from_records(stats, index=[method])
@@ -814,11 +818,16 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         return pd.DataFrame({'n': n, 'r': np.nan, 'CI95%': np.nan,
                              'p-val': np.nan}, index=[method])
 
+    # Sample size after outlier removal
+    n_outliers = sum(outliers) if "outliers" in locals() else 0
+    n_clean = n - n_outliers
+
     # Compute the two-sided p-value
-    pval = _correl_pvalue(r, n, k)
+    pval = _correl_pvalue(r, n_clean, k)
     # Compute the parametric 95% confidence interval
     # https://online.stat.psu.edu/stat505/lesson/6/6.3
-    ci = compute_esci(stat=r, nx=(n - k), ny=(n - k), eftype='r', decimals=6)
+    ci = compute_esci(
+        stat=r, nx=(n_clean - k), ny=(n_clean - k), eftype='r', decimals=6)
 
     # Create dictionnary
     stats = {
@@ -829,7 +838,7 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     }
 
     if method in ['shepherd', 'skipped']:
-        stats['outliers'] = sum(outliers)
+        stats['outliers'] = n_outliers
 
     # Convert to DataFrame
     stats = pd.DataFrame.from_records(stats, index=[method])

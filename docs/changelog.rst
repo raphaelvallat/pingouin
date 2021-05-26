@@ -12,6 +12,8 @@ This release fixes a critical error in :py:func:`pingouin.partial_corr`: the num
 
 In addition with fixing the p-values and 95% confidence intervals, the statistical power and Bayes Factor have been removed from the output of a partial correlation, at least temporary until we can make sure that these give exact results.
 
+We have also fixed a minor bug in the robust skipped and shepherd correlation (see :py:func:`pingouin.corr`), for which the calculation of the confidence intervals and statistical power did not take into account the number of outliers. These are now calculated only on the cleaned data.
+
 **Enhancements**
 
 a. Major refactoring of :py:func:`pingouin.plot_blandaltman`, which now has many additional parameters. It also uses a T distribution instead of a normal distribution to estimate the 95% confidence intervals of the mean difference and agreement limits. See `issue 167 <https://github.com/raphaelvallat/pingouin/issues/167>`_.
