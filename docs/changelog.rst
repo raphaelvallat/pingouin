@@ -3,20 +3,24 @@
 What's new
 ##########
 
-v0.3.12 (dev)
--------------
+v0.3.12 (May 2021)
+------------------
 
 **Bugfixes**
 
 This release fixes a critical error in :py:func:`pingouin.partial_corr`: the number of covariates was not taken into account when calculating the degrees of freedom of the partial correlation, thus leading to incorrect results (except for the correlation coefficient which remained unaffected). For more details, please see `issue 171 <https://github.com/raphaelvallat/pingouin/issues/171>`_.
 
-In addition with fixing the p-values and 95% confidence intervals, the statistical power and Bayes Factor have been removed from the output of a partial correlation, at least temporary until we can make sure that these give exact results.
+In addition to fixing the p-values and 95% confidence intervals, the statistical power and Bayes Factor have been removed from the output of :py:func:`pingouin.partial_corr`, at least temporary until we can make sure that these give exact results.
 
 We have also fixed a minor bug in the robust skipped and shepherd correlation (see :py:func:`pingouin.corr`), for which the calculation of the confidence intervals and statistical power did not take into account the number of outliers. These are now calculated only on the cleaned data.
+
+.. warning:: We therefore strongly recommend that all users UPDATE Pingouin (:code:`pip install -U pingouin`) and CHECK ANY RESULTS obtained with the :py:func:`pingouin.partial_corr` function.
 
 **Enhancements**
 
 a. Major refactoring of :py:func:`pingouin.plot_blandaltman`, which now has many additional parameters. It also uses a T distribution instead of a normal distribution to estimate the 95% confidence intervals of the mean difference and agreement limits. See `issue 167 <https://github.com/raphaelvallat/pingouin/issues/167>`_.
+b. For clarity, the `z`, `r2` and `adj_r2` have been removed from the output of :py:func:`pingouin.corr` and :py:func:`pingouin.pairwise_corr`, as these can be readily calculated from the correlation coefficient.
+c. Better testing against R for :py:func:`pingouin.partial_corr` and :py:func:`pingouin.corr`.
 
 v0.3.11 (April 2021)
 --------------------

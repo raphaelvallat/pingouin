@@ -371,7 +371,7 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
         * ``'shepherd'``: Shepherd's pi correlation (robust)
         * ``'skipped'``: Skipped correlation (robust)
     **kwargs : optional
-        Optional argument(s) passed to the lower-level functions.
+        Optional argument(s) passed to the lower-level correlation functions.
 
     Returns
     -------
@@ -450,8 +450,10 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
     (which requires scikit-learn). Note that these two methods are
     significantly slower than the previous ones.
 
-    .. important:: Please note that rows with missing values (NaN) are
-        automatically removed.
+    The confidence intervals for the correlation coefficient are estimated
+    using the Fisher transformation.
+
+    .. important:: Rows with missing values (NaN) are automatically removed.
 
     References
     ----------
@@ -615,9 +617,9 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     Parameters
     ----------
     data : :py:class:`pandas.DataFrame`
-        Dataframe. Note that this function can also directly be used as a
-        :py:class:`pandas.DataFrame` method, in which case this argument is
-        no longer needed.
+        Panddas Dataframe. Note that this function can also directly be used
+        as a :py:class:`pandas.DataFrame` method, in which case this argument
+        is no longer needed.
     x, y : string
         x and y. Must be names of columns in ``data``.
     covar : string or list
@@ -626,16 +628,16 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     x_covar : string or list
         Covariate(s) for the ``x`` variable. This is used to compute
         semi-partial correlation (i.e. the effect of ``x_covar`` is removed
-        from ``x`` but not from ``y``). Note that you cannot specify both
-        ``covar`` and ``x_covar``.
+        from ``x`` but not from ``y``). Only one of ``covar``,  ``x_covar`` and
+        ``y_covar`` can be specified.
     y_covar : string or list
         Covariate(s) for the ``y`` variable. This is used to compute
         semi-partial correlation (i.e. the effect of ``y_covar`` is removed
-        from ``y`` but not from ``x``). Note that you cannot specify both
-        ``covar`` and ``y_covar``.
+        from ``y`` but not from ``x``). Only one of ``covar``,  ``x_covar`` and
+        ``y_covar`` can be specified.
     tail : string
         Specify whether to return `'one-sided'` or `'two-sided'` p-value.
-        Note that the former are simply half the latter.
+        The former are simply half the latter.
     method : string
         Correlation type:
 
@@ -648,7 +650,7 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         * ``'shepherd'``: Shepherd's pi correlation (robust)
         * ``'skipped'``: Skipped correlation (robust)
     **kwargs : optional
-        Optional argument(s) passed to the lower-level functions.
+        Optional argument(s) passed to the lower-level correlation functions.
 
     Returns
     -------
@@ -659,6 +661,10 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         * ``'r'``: Correlation coefficient
         * ``'CI95'``: 95% parametric confidence intervals around :math:`r`
         * ``'p-val'``: tail of the test
+
+    See also
+    --------
+    corr, pairwise_corr, rm_corr
 
     Notes
     -----
@@ -672,9 +678,9 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         two residuals. A semi-partial correlation is computed between one
         residual and another raw (or unresidualized) variable.*
 
-    Note that if you are not interested in calculating the statistics and
-    p-values but only the partial correlation matrix, a (faster)
-    alternative is to use the :py:func:`pingouin.pcorr` method (see example 4).
+    Note that if you are not interested in calculating the p-values [2]_
+    but only the partial correlation matrix, a faster
+    alternative is to use :py:func:`pingouin.pcorr` (see example 4).
 
     Rows with missing values are automatically removed from data. Results have
     been tested against the
@@ -684,6 +690,8 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     References
     ----------
     .. [1] http://faculty.cas.usf.edu/mbrannick/regression/Partial.html
+
+    .. [2] https://online.stat.psu.edu/stat505/lesson/6/6.3
 
     Examples
     --------
@@ -822,10 +830,9 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     n_outliers = sum(outliers) if "outliers" in locals() else 0
     n_clean = n - n_outliers
 
-    # Compute the two-sided p-value
-    pval = _correl_pvalue(r, n_clean, k)
-    # Compute the parametric 95% confidence interval
+    # Compute the two-sided p-value and confidence intervals
     # https://online.stat.psu.edu/stat505/lesson/6/6.3
+    pval = _correl_pvalue(r, n_clean, k)
     ci = compute_esci(
         stat=r, nx=(n_clean - k), ny=(n_clean - k), eftype='r', decimals=6)
 
@@ -1109,8 +1116,8 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     Results have been tested against the
     `rmcorr <https://github.com/cran/rmcorr>`_ R package.
 
-    Please note that missing values are automatically removed from the
-    dataframe (listwise deletion).
+    Missing values are automatically removed from the dataframe
+    (listwise deletion).
 
     Examples
     --------

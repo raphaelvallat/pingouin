@@ -284,7 +284,7 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
     location and relative scale of the samples.
 
     .. warning:: Be extra careful when using fancier distributions with several
-        parameters. If you can, always double-check your results with another
+        parameters. Always double-check your results with another
         software or package.
 
     References
