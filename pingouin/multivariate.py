@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import scipy
 from collections import namedtuple
 from pingouin.utils import remove_na, _postprocess_dataframe
 
@@ -254,3 +255,93 @@ def multivariate_ttest(X, Y=None, paired=False):
     stats = {'T2': t2, 'F': fval, 'df1': df1, 'df2': df2, 'pval': pval}
     stats = pd.DataFrame(stats, index=['hotelling'])
     return _postprocess_dataframe(stats)
+
+    def boxM (covs,sizes, alpha=.001):
+    """Test equality of covariance matrices.
+
+    Parameters
+    ----------
+    covs : :py:class:`numpy.array`
+        covariance matrices, the shape of covs is (number of covariance matrices, length of a covariance matrix, length of a covariance matrix)
+    
+    sizes: list or :py:class:`numpy.array`
+        sample size of the covariance matrices. It is ordered as [size of sample whose covariance matrix is covs[0],size of sample whose covariance matrix is covs[0],...]
+    alpha : float
+        Significance level.
+
+    Returns
+    -------
+    stats : :py:class:`pandas.DataFrame`
+
+        * ``'Chi2'``: Test statistic 
+        * ``'pval'``: p-value
+        * ``'df'``: The Chi-Square statistic's degree of freedom
+        * ``'equal_cov'``: True if ``data`` has equal covariance
+        
+    Notes
+    -----
+    
+    Mathematical expression can be found in [1]
+    
+    References
+    ----------
+    .. [1] Rencher, A. C. (2003). Methods of multivariate analysis (Vol. 492). John Wiley & Sons.
+
+
+    Examples
+    --------
+    1. Box's M testing 3 covariance matrices from 'tip' dataset
+
+    >>> import numpy as np
+    >>> import pingouin as pg
+    >>> import scipy.stats
+    >>> data=pg.read_dataset('tips')[['total_bill','tip','size']]
+    >>> cov_size2 = data[data['size']==2][['total_bill','tip']].cov().values
+    >>> cov_size3 = data[data['size']==3][['total_bill','tip']].cov().values
+    >>> cov_size4 = data[data['size']==4][['total_bill','tip']].cov().values
+    >>> sizes = [data[data['size']==2].shape[0],data[data['size']==3].shape[0],data[data['size']==4].shape[0]]
+    >>> boxM(np.array([cov_size2,cov_size3,cov_size4]),sizes)
+    
+        Chi2	df	pval	equal_cov
+        Box's M	35.391249	6.0	0.000004	False
+
+    """
+    
+    assert isinstance(covs, np.ndarray)
+    if isinstance(sizes,list):
+        sizes = np.array(sizes)
+        
+    # calculate pooled S and M statistics
+    ## covs.shape[0] is the number of covariance matrices
+    ## covs.shape[1] is the number of variables
+    ## np.sum(sizes) is the total number of observations
+    E = np.zeros(covs[0].shape)
+    M=1
+    for idx_cov in range(covs.shape[0]):
+        E+=(sizes[idx_cov]-1)*covs[idx_cov]
+    pooledS = (1/(np.sum(sizes)-covs.shape[0]))*E
+   
+    for idx_cov in range(covs.shape[0]):
+        M*=(np.linalg.det(covs[idx_cov])/np.linalg.det(pooledS))**((sizes[idx_cov]-1)/2)
+        
+    # calculate C
+    k1 = (2*covs.shape[1]^2+3*covs.shape[1]-1)/(6*(covs.shape[1]+1)*(covs.shape[0]-1))
+    k2 = ((covs.shape[0]+1)*(2*covs.shape[1]^2+3*covs.shape[1]-1))/(6*covs.shape[0]*(covs.shape[1]+1)*(np.sum(sizes)/covs.shape[0]-1))
+    T=0
+    if (sizes==sizes.mean()).all():
+        C=k2
+    else:
+        for idx_cov in range(covs.shape[0]):
+            T+=(1/(sizes[idx_cov]-1))
+        c=k1*(T-(1/(np.sum(sizes)-covs.shape[0])))
+        
+    # calculate U statistics and degree of fredom
+    u =-2*(1-c)*np.log(M)
+    df = 0.5*covs.shape[1]*(covs.shape[1]+1)*(covs.shape[0]-1)
+    p = 1-scipy.stats.chi2.cdf(u,df)
+    equal_cov = True if p > alpha else False
+    stats = pd.DataFrame(data={'Chi2':[u], 'df':[df],'pval':[p],'equal_cov':[equal_cov]},index=["Box's M"])
+    
+    return _postprocess_dataframe(stats)
+
+
