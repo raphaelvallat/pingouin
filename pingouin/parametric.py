@@ -881,13 +881,8 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
         \\eta_p^2 = \\frac{SS_{\\text{effect}}}{SS_{\\text{effect}} +
         SS_{\\text{error}}}
 
-    Note that missing values are automatically removed. Results have been
-    tested against R, Matlab and JASP.
-
-    .. warning :: Versions of Pingouin below 0.2.5 gave wrong results for
-        **unbalanced N-way ANOVA**. This issue has been resolved in
-        Pingouin>=0.2.5. In such cases, the ANOVA is calculated via an
-        internal call to the statsmodels package.
+    Missing values are automatically removed. Results have been tested against
+    R, Matlab and JASP.
 
     Examples
     --------

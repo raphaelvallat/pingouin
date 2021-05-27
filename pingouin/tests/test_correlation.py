@@ -165,8 +165,7 @@ class TestCorrelation(TestCase):
         assert round(pc.at['pearson', 'p-val'], 8) == 0.01496857
 
         # Method == "spearman"
-        # Warning: Spearman slightly different than ppcor package, is this
-        # caused by difference in Python / R when computing ranks?
+        # Warning: Spearman slightly different than ppcor package.
         pc = partial_corr(data=df, x='x', y='y', y_covar=['cv1', 'cv2', 'cv3'],
                           method="spearman")
         # assert round(pc.at['spearman', 'r'], 7) == 0.4597143

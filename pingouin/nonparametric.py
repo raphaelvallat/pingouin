@@ -364,11 +364,6 @@ def wilcoxon(x, y, tail='two-sided'):
     When tail is ``'less'``, the CLES is then set to :math:`1 - \\text{CL}`,
     which gives the proportion of pairs where ``x`` is *lower* than ``y``.
 
-    .. warning :: Versions of Pingouin below 0.2.6 gave wrong two-sided
-        p-values for the Wilcoxon test. P-values were accidentally squared, and
-        therefore smaller. This issue has been resolved in Pingouin>=0.2.6.
-        Make sure to always use the latest release.
-
     References
     ----------
     .. [1] Wilcoxon, F. (1945). Individual comparisons by ranking methods.
