@@ -256,7 +256,7 @@ def multivariate_ttest(X, Y=None, paired=False):
     stats = pd.DataFrame(stats, index=['hotelling'])
     return _postprocess_dataframe(stats)
 
-    def boxM (covs,sizes, alpha=.001):
+def box_m (covs,sizes, alpha=.001):
     """Test equality of covariance matrices.
 
     Parameters
@@ -300,7 +300,7 @@ def multivariate_ttest(X, Y=None, paired=False):
     >>> cov_size3 = data[data['size']==3][['total_bill','tip']].cov().values
     >>> cov_size4 = data[data['size']==4][['total_bill','tip']].cov().values
     >>> sizes = [data[data['size']==2].shape[0],data[data['size']==3].shape[0],data[data['size']==4].shape[0]]
-    >>> boxM(np.array([cov_size2,cov_size3,cov_size4]),sizes)
+    >>> box_m(np.array([cov_size2,cov_size3,cov_size4]),sizes)
     
         Chi2	df	pval	equal_cov
         Box's M	35.391249	6.0	0.000004	False
@@ -326,22 +326,20 @@ def multivariate_ttest(X, Y=None, paired=False):
         
     # calculate C
     k1 = (2*covs.shape[1]^2+3*covs.shape[1]-1)/(6*(covs.shape[1]+1)*(covs.shape[0]-1))
-    k2 = ((covs.shape[0]+1)*(2*covs.shape[1]^2+3*covs.shape[1]-1))/(6*covs.shape[0]*(covs.shape[1]+1)*(np.sum(sizes)/covs.shape[0]-1))
+    k2 = -((covs.shape[0]+1)*(2*covs.shape[1]**2+3*covs.shape[1]-1))/(6*covs.shape[0]*(covs.shape[1]+1)*(np.sum(sizes)/covs.shape[0]-1))
     T=0
     if (sizes==sizes.mean()).all():
-        C=k2
+        c=-k2
     else:
         for idx_cov in range(covs.shape[0]):
-            T+=(1/(sizes[idx_cov]-1))
-        c=k1*(T-(1/(np.sum(sizes)-covs.shape[0])))
-        
+            T=-T+(1/(sizes[idx_cov]-1))
+        c=-k1*(T-(1/(np.sum(sizes)-covs.shape[0])))      
     # calculate U statistics and degree of fredom
     u =-2*(1-c)*np.log(M)
+    
     df = 0.5*covs.shape[1]*(covs.shape[1]+1)*(covs.shape[0]-1)
     p = 1-scipy.stats.chi2.cdf(u,df)
     equal_cov = True if p > alpha else False
     stats = pd.DataFrame(data={'Chi2':[u], 'df':[df],'pval':[p],'equal_cov':[equal_cov]},index=["Box's M"])
     
     return _postprocess_dataframe(stats)
-
-

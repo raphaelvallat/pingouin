@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+from sklearn import datasets
 from unittest import TestCase
 from pingouin import read_dataset
 from pingouin.multivariate import multivariate_normality, multivariate_ttest
@@ -66,3 +68,23 @@ class TestMultivariate(TestCase):
         stats = multivariate_ttest(X_na, Y, paired=True)
         assert stats.at['hotelling', 'df1'] == 3
         assert stats.at['hotelling', 'df2'] == X.shape[0] - 1 - X.shape[1]
+
+    def test_box_m(self):
+        """Test function box_m.
+        Tested against the R package biotools (iris dataset).
+        """
+        
+        iris = datasets.load_iris()
+        df = pd.DataFrame(data= np.c_[iris['data'], iris['target']],
+                            columns= iris['feature_names'] + ['target'])
+        #calculate covariance matrices
+        cov_target0 = df[df['target']==0].iloc[:,:4].cov().values
+        cov_target1 = df[df['target']==1].iloc[:,:4].cov().values
+        cov_target2 = df[df['target']==2].iloc[:,:4].cov().values
+        #calculate the sample size for each 'group'
+        sizes = [df[df['target']==0].shape[0],df[df['target']==1].shape[0],df[df['target']==2].shape[0]]
+        stats = box_m(np.array([cov_target0,cov_target1,cov_target2]),sizes)
+        assert round(stats.at["Box's M", 'Chi2'], 5) == 140.94305
+        assert stats.at["Box's M", 'df'] == 20
+        assert stats.at["Box's M", 'pval'] < 2.2e-16
+        
