@@ -1200,7 +1200,7 @@ def distance_corr(x, y, tail='greater', n_boot=1000, seed=None):
         ``x`` and ``y`` must have the same number of samples and must not
         contain missing values.
     tail : str
-        Tail for p-value. Can be either `'two-sided'` (default), or `'greater'`
+        Tail for p-value. Can be either `'two-sided'`, or `'greater'` (default)
         or `'less'` for directional tests. To be consistent
         with the original R implementation, the default is to calculate the
         one-sided `'greater'` p-value.
