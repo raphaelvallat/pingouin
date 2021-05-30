@@ -280,8 +280,12 @@ def box_m (covs,sizes, alpha=.001):
         
     Notes
     -----
-    
-    Mathematical expression can be found in [1]
+    Pooled sample covariance matrix :math:`S_{\\text{pl}}` is calculated as
+    .. math::
+
+        S_{\\text{pl}} = \\frac{\sum_{i=1}^k(n_i-1)\\textbf{S}_i}{\\sum_{i=1}^k(n_i-1)},
+    where :math:`n_i` and :math:`S_i` are the sample size and covariance matrix of the :math:`i^{th}` sample, :math:`k` is the number of independent samples.
+    More mathematical expressions can be found in [1]
     
     References
     ----------
