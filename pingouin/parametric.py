@@ -1431,6 +1431,18 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     2  Interaction  5.167    2  116  2.584  2.728  0.070  0.029    NaN
     """
     assert effsize in ['n2', 'np2', 'ng2'], "effsize must be n2, np2 or ng2."
+
+    # Check that only a single within and between factor are provided
+    one_is_list = isinstance(within, list) or isinstance(between, list)
+    both_are_str = isinstance(within, str) and isinstance(between, str)
+    if one_is_list or not both_are_str:
+        raise ValueError("within and between factors must both be strings "
+                         "referring to a column in the data. Specifying "
+                         "multiple within and between factors is currently "
+                         "not supported. For more information, see: "
+                         "https://github.com/raphaelvallat/pingouin/issues/136"
+                         )
+
     # Check data
     _check_dataframe(dv=dv, within=within, between=between, data=data,
                      subject=subject, effects='interaction')
