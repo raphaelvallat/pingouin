@@ -423,6 +423,11 @@ class TestParametric(TestCase):
         """Test function anova.
         Compare with JASP and ezANOVA.
         """
+        # trigger error when specifying more than one within or between factor
+        with pytest.raises(ValueError, match="/pingouin/issues/136"):
+            mixed_anova(dv='Scores', within=['Time'], subject='Subject',
+                        between='Group', data=df,)
+
         # Balanced design, two groups, three within factors
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
                           between='Group', data=df, correction=True).round(3)
