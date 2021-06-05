@@ -73,11 +73,6 @@ class TestMultivariate(TestCase):
         """Test function box_m.
         Tested against the R package biotools (iris dataset).
         """
-        
-        iris = datasets.load_iris()
-        df = pd.DataFrame(data= np.c_[iris['data'], iris['target']],
-                            columns= iris['feature_names'] + ['target'])
-
         iris = datasets.load_iris()
         df = pd.DataFrame(data= np.c_[iris['data'], iris['target']],
                             columns= iris['feature_names'] + ['target'])
@@ -91,7 +86,7 @@ class TestMultivariate(TestCase):
         #calculate the sample size for each 'group'
         #sizes = [df[df['target']==0].shape[0],df[df['target']==1].shape[0],df[df['target']==2].shape[0]]
         #stats = box_m(np.array([cov_target0,cov_target1,cov_target2]),sizes)
-        assert round(stats.at["Box's M", 'Chi2'], 5) == 140.94305
+        assert round(stats.at["Box's M", 'Chi2'], 2) == 140.94
         assert stats.at["Box's M", 'df'] == 20
         assert stats.at["Box's M", 'pval'] < 2.2e-16
         
