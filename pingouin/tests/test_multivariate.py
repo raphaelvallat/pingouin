@@ -77,7 +77,7 @@ class TestMultivariate(TestCase):
         iris = datasets.load_iris()
         df = pd.DataFrame(data=np.c_[iris['data'], iris['target']],
                           columns=iris['feature_names'] + ['target'])
-        stats = box_m(df, vars=['sepal length (cm)', 'sepal width (cm)',
+        stats = box_m(df, dvs=['sepal length (cm)', 'sepal width (cm)',
                       'petal length (cm)', 'petal width (cm)'], group='target')
 
         '''
