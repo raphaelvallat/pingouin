@@ -91,6 +91,6 @@ class TestMultivariate(TestCase):
                  df[df['target']==1].shape[0],df[df['target']==2].shape[0]]
         stats = box_m(np.array([cov_target0,cov_target1,cov_target2]),sizes)'''
 
-        assert round(stats.at["Box's M", 'Chi2'], 2) == 140.94
-        assert stats.at["Box's M", 'df'] == 20
-        assert stats.at["Box's M", 'pval'] < 2.2e-16
+        assert round(stats.at["box", 'Chi2'], 2) == 140.94
+        assert stats.at["box", 'df'] == 20
+        assert stats.at["box", 'pval'] < 2.2e-16
