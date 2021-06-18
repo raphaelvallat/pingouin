@@ -5,8 +5,9 @@ What's new
 
 v0.3.13 (In progress)
 ------------------
+
 **New functions**
-a. Box'M for testing equal covariance matrices was implemented.
+a. Box'M function for testing equal covariance matrices was implemented.
 
 v0.3.12 (May 2021)
 ------------------
