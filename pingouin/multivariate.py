@@ -282,6 +282,9 @@ def box_m(data, dvs=None, group=None, alpha=.001):
 
     Notes
     -----
+    This function does not handle missing values. Please
+    handle them (e.g. remove or impute these values)
+    prior to perform the Box's M test.
     Pooled sample covariance matrix :math:`S_{\\text{pl}}`
     is calculated as
     .. math::
@@ -311,7 +314,7 @@ def box_m(data, dvs=None, group=None, alpha=.001):
             Chi2	df	    pval	    equal_cov
     box	45.842377	15.0	0.000056	False
     """
-    
+
     from scipy.stats import chi2
     assert isinstance(data, (pd.DataFrame, list, dict))
     if isinstance(data, pd.DataFrame):
@@ -360,5 +363,5 @@ def box_m(data, dvs=None, group=None, alpha=.001):
     p = 1 - chi2.cdf(u, df)
     equal_cov = True if p > alpha else False
     stats = pd.DataFrame(data={'Chi2': [u], 'df': [df],
-                         'pval': [p], 'equal_cov': [equal_cov]}, index=["box"])
+                               'pval': [p], 'equal_cov': [equal_cov]}, index=["box"])
     return _postprocess_dataframe(stats)
