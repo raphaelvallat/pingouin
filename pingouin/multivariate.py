@@ -269,7 +269,7 @@ def box_m(data, dvs=None, group=None, alpha=.001):
     group : str
         Grouping variable (only when ``data`` is a long-format dataframe).
     alpha : float
-        Significance level.
+        Significance level. Default is 0.001 as recommended in [2].
 
     Returns
     -------
@@ -287,10 +287,12 @@ def box_m(data, dvs=None, group=None, alpha=.001):
     prior to perform the Box's M test.
     Pooled sample covariance matrix :math:`S_{\\text{pl}}`
     is calculated as
+
     .. math::
 
         S_{\\text{pl}} = \\frac{\\sum_{i=1}^k(n_i-1)
         \\textbf{S}_i}{\\sum_{i=1}^k(n_i-1)},
+
     where :math:`n_i` and :math:`S_i` are the sample size and covariance matrix
     of the :math:`i^{th}` sample, :math:`k` is
     the number of independent samples.
@@ -301,20 +303,18 @@ def box_m(data, dvs=None, group=None, alpha=.001):
     .. [1] Rencher, A. C. (2003). Methods of multivariate analysis (Vol. 492).
     John Wiley & Sons.
 
+    ..[2] Hahs-Vaughn, D. (2016). Applied Multivariate Statistical Concepts. Taylor & Francis.
+
     Examples
     --------
     1. Box's M testing 3 covariance matrices from 'tip' dataset
 
-    >>> import numpy as np
     >>> import pingouin as pg
-    >>> import scipy.stats
     >>> data = pg.read_dataset('tips')[['total_bill','tip','size']]
-    >>> box_m(data,dvs=['total_bill','tip'],group='size')
-
+    >>> pg.box_m(data,dvs=['total_bill','tip'],group='size')
             Chi2	df	    pval	    equal_cov
     box	45.842377	15.0	0.000056	False
     """
-
     from scipy.stats import chi2
     assert isinstance(data, (pd.DataFrame, list, dict))
     if isinstance(data, pd.DataFrame):
@@ -360,7 +360,7 @@ def box_m(data, dvs=None, group=None, alpha=.001):
     # calculate U statistics and degree of fredom
     u = - 2 * (1 - c) * np.log(M)
     df = 0.5 * num_dvs * (num_dvs + 1) * (num_covs - 1)
-    p = 1 - chi2.cdf(u, df)
+    p = chi2.sf(u, df)
     equal_cov = True if p > alpha else False
     stats = pd.DataFrame(data={'Chi2': [u], 'df': [df],
                                'pval': [p], 'equal_cov': [equal_cov]}, index=["box"])
