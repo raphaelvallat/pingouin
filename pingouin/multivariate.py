@@ -254,3 +254,114 @@ def multivariate_ttest(X, Y=None, paired=False):
     stats = {'T2': t2, 'F': fval, 'df1': df1, 'df2': df2, 'pval': pval}
     stats = pd.DataFrame(stats, index=['hotelling'])
     return _postprocess_dataframe(stats)
+
+
+def box_m(data, dvs=None, group=None, alpha=.001):
+    """Test equality of covariance matrices.
+
+    Parameters
+    ----------
+    data : :py:class:`pandas.DataFrame`,
+    should be a long-format pandas dataframe.
+    dvs : str
+        Variables of covariance matrix (only when ``data``
+        is a long-format dataframe).
+    group : str
+        Grouping variable (only when ``data`` is a long-format dataframe).
+    alpha : float
+        Significance level. Default is 0.001 as recommended in [2].
+
+    Returns
+    -------
+    stats : :py:class:`pandas.DataFrame`
+
+        * ``'Chi2'``: Test statistic
+        * ``'pval'``: p-value
+        * ``'df'``: The Chi-Square statistic's degree of freedom
+        * ``'equal_cov'``: True if ``data`` has equal covariance
+
+    Notes
+    -----
+    This function does not handle missing values. Please
+    handle them (e.g. remove or impute these values)
+    prior to perform the Box's M test.
+    Pooled sample covariance matrix :math:`S_{\\text{pl}}`
+    is calculated as
+
+    .. math::
+
+        S_{\\text{pl}} = \\frac{\\sum_{i=1}^k(n_i-1)
+        \\textbf{S}_i}{\\sum_{i=1}^k(n_i-1)},
+
+    where :math:`n_i` and :math:`S_i` are the sample size and covariance matrix
+    of the :math:`i^{th}` sample, :math:`k` is
+    the number of independent samples.
+    More mathematical expressions can be found in [1]
+
+    References
+    ----------
+    .. [1] Rencher, A. C. (2003). Methods of multivariate analysis (Vol. 492).
+    John Wiley & Sons.
+
+    ..[2] Hahs-Vaughn, D. (2016). Applied Multivariate Statistical Concepts. Taylor & Francis.
+
+    Examples
+    --------
+    1. Box's M testing 3 covariance matrices from 'tip' dataset
+
+    >>> import pingouin as pg
+    >>> data = pg.read_dataset('tips')[['total_bill','tip','size']]
+    >>> pg.box_m(data,dvs=['total_bill','tip'],group='size')
+            Chi2	df	    pval	    equal_cov
+    box	45.842377	15.0	0.000056	False
+    """
+    from scipy.stats import chi2
+    assert isinstance(data, (pd.DataFrame, list, dict))
+    if isinstance(data, pd.DataFrame):
+        assert dvs is not None and group is not None, \
+            'data should be in the long-format'
+        # Long-format Pandas DataFrame
+        assert group in data.columns
+        assert set(dvs).issubset(data.columns)
+        grp = data.groupby(group, observed=True)[dvs]
+        assert grp.ngroups > 1, 'Data must have at least two columns.'
+        covs = grp.cov()
+        num_covs, num_dvs = covs.index.levshape
+        sizes = grp.count().iloc[:, 0]
+
+    # calculate pooled S and M statistics
+    # num_covs is the number of covariance matrices
+    # num_dvs is the number of variables
+    # np.sum(sizes) is the total number of observations
+    E = np.zeros([num_dvs, num_dvs])
+    M = 1
+    for idx_cov in range(num_covs):
+        E += (sizes.iloc[idx_cov] - 1) \
+            * covs.loc[list(grp.groups.keys())[idx_cov]]
+    pooledS = (1 / (np.sum(sizes) - num_covs)) * E
+
+    for idx_cov in range(num_covs):
+        M *= (np.linalg.det(covs.loc[list(grp.groups.keys())[idx_cov]])
+              / np.linalg.det(pooledS)) ** ((sizes.iloc[idx_cov] - 1) / 2)
+
+    # calculate C in reference [1]
+    k1 = (2 * num_dvs ** 2 + 3 * num_dvs - 1) / (6 * (num_dvs + 1)
+                                                 * (num_covs - 1))
+    k2 = - ((num_covs + 1) * (2 * num_dvs ** 2 + 3 * num_dvs - 1)) \
+        / (6 * num_covs * (num_dvs + 1) * (np.sum(sizes) / num_covs - 1))
+    T = 0
+    if (sizes == sizes.mean()).all():
+        c = - k2
+    else:
+        for idx_cov in range(num_covs):
+            T = - T + (1 / (sizes.iloc[idx_cov] - 1))
+        c = - k1 * (T - (1 / (np.sum(sizes) - num_covs)))
+
+    # calculate U statistics and degree of fredom
+    u = - 2 * (1 - c) * np.log(M)
+    df = 0.5 * num_dvs * (num_dvs + 1) * (num_covs - 1)
+    p = chi2.sf(u, df)
+    equal_cov = True if p > alpha else False
+    stats = pd.DataFrame(data={'Chi2': [u], 'df': [df],
+                               'pval': [p], 'equal_cov': [equal_cov]}, index=["box"])
+    return _postprocess_dataframe(stats)
