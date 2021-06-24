@@ -72,25 +72,38 @@ class TestMultivariate(TestCase):
 
     def test_box_m(self):
         """Test function box_m.
+
         Tested against the R package biotools (iris dataset).
         """
+        # Test 1: Iris dataset
         iris = datasets.load_iris()
         df = pd.DataFrame(data=np.c_[iris['data'], iris['target']],
                           columns=iris['feature_names'] + ['target'])
         stats = box_m(df, dvs=['sepal length (cm)', 'sepal width (cm)',
                       'petal length (cm)', 'petal width (cm)'], group='target')
-
-        '''
-        test for generic box_m
-        calculate covariance matrices
-        cov_target0 = df[df['target']==0].iloc[:,:4].cov().values
-        cov_target1 = df[df['target']==1].iloc[:,:4].cov().values
-        cov_target2 = df[df['target']==2].iloc[:,:4].cov().values
-        calculate the sample size for each 'group'
-        sizes = [df[df['target']==0].shape[0],
-                 df[df['target']==1].shape[0],df[df['target']==2].shape[0]]
-        stats = box_m(np.array([cov_target0,cov_target1,cov_target2]),sizes)'''
-
-        assert round(stats.at["box", 'Chi2'], 2) == 140.94
+        assert round(stats.at["box", 'Chi2'], 3) == 140.943
         assert stats.at["box", 'df'] == 20
-        assert stats.at["box", 'pval'] < 2.2e-16
+        assert np.isclose(stats.at["box", 'pval'], 3.352034e-20)
+
+        # Test 2: Multivariate normal dist with balanced sample size
+        # In R:
+        # >>> library(biotools)
+        # >>> data < - read.csv("data.csv")
+        # >>> boxM(data[, c('A', 'B', 'C')], grouping=data[, c('group')])
+        from scipy.stats import multivariate_normal as mvn
+        data = pd.DataFrame(mvn.rvs(size=(100, 3), random_state=42),
+                            columns=['A', 'B', 'C'])
+        data['group'] = [1] * 25 + [2] * 25 + [3] * 25 + [4] * 25
+        stats = box_m(data, dvs=['A', 'B', 'C'], group='group')
+        assert round(stats.at["box", 'Chi2'], 5) == 11.63419
+        assert stats.at["box", 'df'] == 18
+        assert round(stats.at["box", 'pval'], 7) == 0.8655372
+
+        # Test 3: Multivariate normal dist with unbalanced sample size
+        data = pd.DataFrame(mvn.rvs(size=(30, 2), random_state=42),
+                            columns=['A', 'B'])
+        data['group'] = [1] * 20 + [2] * 10
+        stats = box_m(data, dvs=['A', 'B'], group='group')
+        assert round(stats.at["box", 'Chi2'], 5) == 0.70671
+        assert stats.at["box", 'df'] == 3
+        assert round(stats.at["box", 'pval'], 7) == 0.8716249

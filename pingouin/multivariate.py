@@ -283,24 +283,18 @@ def box_m(data, dvs, group, alpha=.001):
 
     Notes
     -----
-    This function does not handle missing values. Please
-    remove or impute missing values prior to perform the Box's M test.
-
-    The pooled sample covariance matrix :math:`S_{\\text{pl}}` is calculated
-    as:
-
-    .. math::
-
-        S_{\\text{pl}} = \\frac{\\sum_{i=1}^k(n_i-1)
-        \\textbf{S}_i}{\\sum_{i=1}^k(n_i-1)},
-
-    where :math:`n_i` and :math:`S_i` are the sample size and covariance matrix
-    of the :math:`i^{th}` sample, :math:`k` is the number of independent
-    samples. More mathematical expressions can be found in [1]_.
-
     .. warning:: Box's M test is susceptible to errors if the data does not
         meet the assumption of multivariate normality or if the sample size is
         too large or small [3]_.
+
+    Pingouin uses :py:meth:`pandas.DataFrameGroupBy.cov` to calculate the
+    variance-covariance matrix of each group. Missing values are automatically
+    excluded from the calculation by Pandas.
+
+    Mathematical expressions can be found in [1]_.
+
+    This function has been tested against the boxM package of the `biotools`
+    R package [4]_.
 
     References
     ----------
@@ -312,55 +306,79 @@ def box_m(data, dvs, group, alpha=.001):
 
     .. [3] https://en.wikipedia.org/wiki/Box%27s_M_test
 
+    .. [4] https://cran.r-project.org/web/packages/biotools/index.html
+
     Examples
     --------
+    1. Box M test with 3 dependent variables of 4 groups (equal sample size)
+
+    >>> import pandas as pd
     >>> import pingouin as pg
-    >>> data = pg.read_dataset('tips')[['total_bill', 'tip', 'size']]
-    >>> pg.box_m(data, dvs=['total_bill', 'tip'], group='size')
+    >>> from scipy.stats import multivariate_normal as mvn
+    >>> data = pd.DataFrame(mvn.rvs(size=(100, 3), random_state=42),
+    ...                     columns=['A', 'B', 'C'])
+    >>> data['group'] = [1] * 25 + [2] * 25 + [3] * 25 + [4] * 25
+    >>> data.head()
+              A         B         C  group
+    0  0.496714 -0.138264  0.647689      1
+    1  1.523030 -0.234153 -0.234137      1
+    2  1.579213  0.767435 -0.469474      1
+    3  0.542560 -0.463418 -0.465730      1
+    4  0.241962 -1.913280 -1.724918      1
+
+    >>> pg.box_m(data, dvs=['A', 'B', 'C'], group='group')
               Chi2    df      pval  equal_cov
-    box  45.842377  15.0  0.000056      False
+    box  11.634185  18.0  0.865537       True
+
+    2. Box M test with 3 dependent variables of 2 groups (unequal sample size)
+
+    >>> data = pd.DataFrame(mvn.rvs(size=(30, 2), random_state=42),
+    ...                     columns=['A', 'B'])
+    >>> data['group'] = [1] * 20 + [2] * 10
+    >>> pg.box_m(data, dvs=['A', 'B'], group='group')
+             Chi2   df      pval  equal_cov
+    box  0.706709  3.0  0.871625       True
     """
+    # Safety checks
     from scipy.stats import chi2
     assert isinstance(data, pd.DataFrame), "data must be a pandas dataframe."
-    assert group in data.columns
-    assert set(dvs).issubset(data.columns)
+    assert group in data.columns, "The grouping variable is not in data."
+    assert set(dvs).issubset(data.columns), "The DVs are not in data."
     grp = data.groupby(group, observed=True)[dvs]
     assert grp.ngroups > 1, 'Data must have at least two columns.'
+
+    # Calculate covariance matrix and descriptive statistics
+    # - n_covs is the number of covariance matrices
+    # - n_dvs is the number of variables
+    # - n_samp is the number of samples in each covariance matrix
+    # - nobs is the total number of observations
     covs = grp.cov()
-    num_covs, num_dvs = covs.index.levshape
-    sizes = grp.count().iloc[:, 0]
+    n_covs, n_dvs = covs.index.levshape
+    n_samp = grp.count().iloc[:, 0].to_numpy()  # NaN are excluded by .count
+    nobs = n_samp.sum()
+    v = n_samp - 1
 
-    # Calculate pooled S and M statistics
-    # num_covs is the number of covariance matrices
-    # num_dvs is the number of variables
-    # np.sum(sizes) is the total number of observations
-    E = np.zeros([num_dvs, num_dvs])
-    M = 1
-    for idx_cov in range(num_covs):
-        E += (sizes.iloc[idx_cov] - 1) \
-            * covs.loc[list(grp.groups.keys())[idx_cov]]
-    pooledS = (1 / (np.sum(sizes) - num_covs)) * E
+    # Calculate pooled covariance matrix (S) and M statistics
+    covs = covs.to_numpy().reshape(n_covs, n_dvs, -1)
+    S = (covs * v[..., None, None]).sum(axis=0) / (nobs - n_covs)
+    # The following lines might raise an error if the covariance matrices are
+    # not invertible (e.g. missing values in input).
+    S_det = np.linalg.det(S)
+    M = ((np.linalg.det(covs) / S_det)**(v / 2)).prod()
 
-    for idx_cov in range(num_covs):
-        M *= (np.linalg.det(covs.loc[list(grp.groups.keys())[idx_cov]])
-              / np.linalg.det(pooledS)) ** ((sizes.iloc[idx_cov] - 1) / 2)
-
-    # calculate C in reference [1]
-    k1 = (2 * num_dvs ** 2 + 3 * num_dvs - 1) / (6 * (num_dvs + 1)
-                                                 * (num_covs - 1))
-    k2 = - ((num_covs + 1) * (2 * num_dvs ** 2 + 3 * num_dvs - 1)) \
-        / (6 * num_covs * (num_dvs + 1) * (np.sum(sizes) / num_covs - 1))
-    T = 0
-    if (sizes == sizes.mean()).all():
-        c = - k2
+    # Calculate C in reference [1] (page 257-259)
+    if len(np.unique(n_samp)) == 1:
+        # All groups have same number of samples
+        c = ((n_covs + 1) * (2 * n_dvs ** 2 + 3 * n_dvs - 1)) \
+            / (6 * n_covs * (n_dvs + 1) * (nobs / n_covs - 1))
     else:
-        for idx_cov in range(num_covs):
-            T = -T + (1 / (sizes.iloc[idx_cov] - 1))
-        c = -k1 * (T - (1 / (np.sum(sizes) - num_covs)))
+        # Unequal sample size
+        c = (2 * n_dvs ** 2 + 3 * n_dvs - 1) / (6 * (n_dvs + 1) * (n_covs - 1))
+        c *= ((1 / v).sum() - 1 / v.sum())
 
-    # calculate U statistics and degree of fredom
+    # Calculate U statistics and degree of fredom
     u = -2 * (1 - c) * np.log(M)
-    df = 0.5 * num_dvs * (num_dvs + 1) * (num_covs - 1)
+    df = 0.5 * n_dvs * (n_dvs + 1) * (n_covs - 1)
     p = chi2.sf(u, df)
     equal_cov = True if p > alpha else False
     stats = pd.DataFrame(index=["box"], data={
