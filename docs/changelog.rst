@@ -3,12 +3,12 @@
 What's new
 ##########
 
-v0.3.13 (In progress)
----------------------
+v0.3.13 (dev)
+-------------
 
 **New functions**
 
-a. Box'M function for testing equal covariance matrices was implemented.
+a. Added the :py:func:`pingouin.box_m` function to calculate `Box's M test <https://en.wikipedia.org/wiki/Box%27s_M_test>`_ for equality of covariance matrices. See `PR 175 <https://github.com/raphaelvallat/pingouin/pull/175>`_.
 
 v0.3.12 (May 2021)
 ------------------

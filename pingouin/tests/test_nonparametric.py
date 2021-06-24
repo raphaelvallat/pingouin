@@ -177,9 +177,10 @@ class TestNonParametric(TestCase):
         """
         a = [77, 87, 88, 114, 151, 210, 219, 246, 253, 262, 296, 299,
              306, 376, 428, 515, 666, 1310, 2611]
-        assert harrelldavis(a, quantile=0.5) == 271.72120054908913
+        assert np.isclose(harrelldavis(a, quantile=0.5), 271.72120054908913)
         harrelldavis(x=x, quantile=np.arange(0.1, 1, 0.1))
-        assert harrelldavis(a, [0.25, 0.5, 0.75])[1] == 271.72120054908913
+        assert np.isclose(harrelldavis(a, [0.25, 0.5, 0.75])[1],
+                          271.72120054908913)
         # Test multiple axis
         p = np.random.normal(0, 1, (10, 100))
 

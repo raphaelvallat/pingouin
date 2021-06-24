@@ -3,7 +3,7 @@ import pandas as pd
 from collections import namedtuple
 from pingouin.utils import remove_na, _postprocess_dataframe
 
-__all__ = ["multivariate_normality", "multivariate_ttest"]
+__all__ = ["multivariate_normality", "multivariate_ttest", "box_m"]
 
 
 def multivariate_normality(X, alpha=.05):
@@ -256,20 +256,21 @@ def multivariate_ttest(X, Y=None, paired=False):
     return _postprocess_dataframe(stats)
 
 
-def box_m(data, dvs=None, group=None, alpha=.001):
-    """Test equality of covariance matrices.
+def box_m(data, dvs, group, alpha=.001):
+    """Test equality of covariance matrices using the Box's M test.
 
     Parameters
     ----------
     data : :py:class:`pandas.DataFrame`,
-    should be a long-format pandas dataframe.
-    dvs : str
-        Variables of covariance matrix (only when ``data``
-        is a long-format dataframe).
+        Long-format dataframe.
+    dvs : list
+        Dependent variables.
     group : str
-        Grouping variable (only when ``data`` is a long-format dataframe).
+        Grouping variable.
     alpha : float
-        Significance level. Default is 0.001 as recommended in [2].
+        Significance level. Default is 0.001 as recommended in [2]_. A
+        non-significant p-value (higher than alpha) indicates that the
+        covariance matrices are homogenous (= equal).
 
     Returns
     -------
@@ -283,10 +284,10 @@ def box_m(data, dvs=None, group=None, alpha=.001):
     Notes
     -----
     This function does not handle missing values. Please
-    handle them (e.g. remove or impute these values)
-    prior to perform the Box's M test.
-    Pooled sample covariance matrix :math:`S_{\\text{pl}}`
-    is calculated as
+    remove or impute missing values prior to perform the Box's M test.
+
+    The pooled sample covariance matrix :math:`S_{\\text{pl}}` is calculated
+    as:
 
     .. math::
 
@@ -294,42 +295,42 @@ def box_m(data, dvs=None, group=None, alpha=.001):
         \\textbf{S}_i}{\\sum_{i=1}^k(n_i-1)},
 
     where :math:`n_i` and :math:`S_i` are the sample size and covariance matrix
-    of the :math:`i^{th}` sample, :math:`k` is
-    the number of independent samples.
-    More mathematical expressions can be found in [1]
+    of the :math:`i^{th}` sample, :math:`k` is the number of independent
+    samples. More mathematical expressions can be found in [1]_.
+
+    .. warning:: Box's M test is susceptible to errors if the data does not
+        meet the assumption of multivariate normality or if the sample size is
+        too large or small [3]_.
 
     References
     ----------
     .. [1] Rencher, A. C. (2003). Methods of multivariate analysis (Vol. 492).
-    John Wiley & Sons.
+           John Wiley & Sons.
 
-    ..[2] Hahs-Vaughn, D. (2016). Applied Multivariate Statistical Concepts. Taylor & Francis.
+    .. [2] Hahs-Vaughn, D. (2016). Applied Multivariate Statistical Concepts.
+           Taylor & Francis.
+
+    .. [3] https://en.wikipedia.org/wiki/Box%27s_M_test
 
     Examples
     --------
-    1. Box's M testing 3 covariance matrices from 'tip' dataset
-
     >>> import pingouin as pg
-    >>> data = pg.read_dataset('tips')[['total_bill','tip','size']]
-    >>> pg.box_m(data,dvs=['total_bill','tip'],group='size')
-            Chi2	df	    pval	    equal_cov
-    box	45.842377	15.0	0.000056	False
+    >>> data = pg.read_dataset('tips')[['total_bill', 'tip', 'size']]
+    >>> pg.box_m(data, dvs=['total_bill', 'tip'], group='size')
+              Chi2    df      pval  equal_cov
+    box  45.842377  15.0  0.000056      False
     """
     from scipy.stats import chi2
-    assert isinstance(data, (pd.DataFrame, list, dict))
-    if isinstance(data, pd.DataFrame):
-        assert dvs is not None and group is not None, \
-            'data should be in the long-format'
-        # Long-format Pandas DataFrame
-        assert group in data.columns
-        assert set(dvs).issubset(data.columns)
-        grp = data.groupby(group, observed=True)[dvs]
-        assert grp.ngroups > 1, 'Data must have at least two columns.'
-        covs = grp.cov()
-        num_covs, num_dvs = covs.index.levshape
-        sizes = grp.count().iloc[:, 0]
+    assert isinstance(data, pd.DataFrame), "data must be a pandas dataframe."
+    assert group in data.columns
+    assert set(dvs).issubset(data.columns)
+    grp = data.groupby(group, observed=True)[dvs]
+    assert grp.ngroups > 1, 'Data must have at least two columns.'
+    covs = grp.cov()
+    num_covs, num_dvs = covs.index.levshape
+    sizes = grp.count().iloc[:, 0]
 
-    # calculate pooled S and M statistics
+    # Calculate pooled S and M statistics
     # num_covs is the number of covariance matrices
     # num_dvs is the number of variables
     # np.sum(sizes) is the total number of observations
@@ -354,14 +355,14 @@ def box_m(data, dvs=None, group=None, alpha=.001):
         c = - k2
     else:
         for idx_cov in range(num_covs):
-            T = - T + (1 / (sizes.iloc[idx_cov] - 1))
-        c = - k1 * (T - (1 / (np.sum(sizes) - num_covs)))
+            T = -T + (1 / (sizes.iloc[idx_cov] - 1))
+        c = -k1 * (T - (1 / (np.sum(sizes) - num_covs)))
 
     # calculate U statistics and degree of fredom
-    u = - 2 * (1 - c) * np.log(M)
+    u = -2 * (1 - c) * np.log(M)
     df = 0.5 * num_dvs * (num_dvs + 1) * (num_covs - 1)
     p = chi2.sf(u, df)
     equal_cov = True if p > alpha else False
-    stats = pd.DataFrame(data={'Chi2': [u], 'df': [df],
-                               'pval': [p], 'equal_cov': [equal_cov]}, index=["box"])
+    stats = pd.DataFrame(index=["box"], data={
+        'Chi2': [u], 'df': [df], 'pval': [p], 'equal_cov': [equal_cov]})
     return _postprocess_dataframe(stats)

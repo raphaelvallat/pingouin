@@ -135,6 +135,7 @@ Multivariate tests
 .. autosummary::
    :toctree: generated/
 
+    box_m
     multivariate_normality
     multivariate_ttest
 
