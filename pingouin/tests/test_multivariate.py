@@ -107,3 +107,9 @@ class TestMultivariate(TestCase):
         assert round(stats.at["box", 'Chi2'], 5) == 0.70671
         assert stats.at["box", 'df'] == 3
         assert round(stats.at["box", 'pval'], 7) == 0.8716249
+
+        # Test 4: with missing values
+        # In R, biotools return NA for Chi2 and p-value
+        data.loc[[1, 3], ['A', 'B']] = np.nan
+        stats = box_m(data, dvs=['A', 'B'], group='group')
+        assert stats.at["box", 'df'] == 3
