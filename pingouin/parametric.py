@@ -1132,9 +1132,13 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
     data = data.reset_index(drop=True)
 
     # Create R-like formula
-    formula = dv + ' ~ '
+    # https://patsy.readthedocs.io/en/latest/builtins-reference.html
+    # C marks the data as categorical
+    # Q allows to quote variable that do not meet Python variable name rule
+    # e.g. if variable is "weight.in.kg" or "2A"
+    formula = "Q('%s') ~ " % dv
     for fac in between:
-        formula += 'C(' + fac + ', Sum) * '
+        formula += "C(Q('%s'), Sum) * " % fac
     formula = formula[:-3]  # Remove last * and space
 
     # Fit using statsmodels
@@ -1166,7 +1170,7 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
 
     def format_source(x):
         for fac in between:
-            x = x.replace('C(%s, Sum)' % fac, fac)
+            x = x.replace("C(Q('%s'), Sum)" % fac, fac)
         return x.replace(':', ' * ')
 
     aov['Source'] = aov['Source'].apply(format_source)
