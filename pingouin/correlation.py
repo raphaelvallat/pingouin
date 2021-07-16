@@ -2,7 +2,6 @@
 import numpy as np
 import pandas as pd
 import pandas_flavor as pf
-from scipy.linalg import lstsq
 from scipy.spatial.distance import pdist, squareform
 from scipy.stats import pearsonr, spearmanr, kendalltau
 
@@ -629,7 +628,7 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     Parameters
     ----------
     data : :py:class:`pandas.DataFrame`
-        Panddas Dataframe. Note that this function can also directly be used
+        Pandas Dataframe. Note that this function can also directly be used
         as a :py:class:`pandas.DataFrame` method, in which case this argument
         is no longer needed.
     x, y : string
@@ -655,55 +654,52 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
 
         * ``'pearson'``: Pearson :math:`r` product-moment correlation
         * ``'spearman'``: Spearman :math:`\\rho` rank-order correlation
-        * ``'kendall'``: Kendall's :math:`\\tau_B` correlation
-          (for ordinal data)
-        * ``'bicor'``: Biweight midcorrelation (robust)
-        * ``'percbend'``: Percentage bend correlation (robust)
-        * ``'shepherd'``: Shepherd's pi correlation (robust)
-        * ``'skipped'``: Skipped correlation (robust)
-    **kwargs : optional
-        Optional argument(s) passed to the lower-level correlation functions.
 
     Returns
     -------
     stats : :py:class:`pandas.DataFrame`
 
         * ``'n'``: Sample size (after removal of missing values)
-        * ``'outliers'``: number of outliers, only if a robust method was used
         * ``'r'``: Correlation coefficient
         * ``'CI95'``: 95% parametric confidence intervals around :math:`r`
         * ``'p-val'``: tail of the test
 
     See also
     --------
-    corr, pairwise_corr, rm_corr
+    corr, pcorr, pairwise_corr, rm_corr
 
     Notes
     -----
-    From [1]_:
+    Partial correlation [1]_ measures the degree of association between ``x``
+    and ``y``, after removing the effect of one or more controlling variables
+    (``covar``, or :math:`Z`). Practically, this is achieved by calculating the
+    correlation coefficient between the residuals of two linear regressions:
 
-        *With partial correlation, we find the correlation between x
-        and y holding C constant for both x and
-        y. Sometimes, however, we want to hold C constant for
-        just x or just y. In that case, we compute a
-        semi-partial correlation. A partial correlation is computed between
-        two residuals. A semi-partial correlation is computed between one
-        residual and another raw (or unresidualized) variable.*
+    .. math:: x \\sim Z, y \\sim Z
 
-    Note that if you are not interested in calculating the p-values [2]_
-    but only the partial correlation matrix, a faster
-    alternative is to use :py:func:`pingouin.pcorr` (see example 4).
+    Like the correlation coefficient, the partial correlation
+    coefficient takes on a value in the range from –1 to 1, where 1 indicates a
+    perfect positive association.
 
-    Rows with missing values are automatically removed from data. Results have
-    been tested against the
+    The semipartial correlation is similar to the partial correlation,
+    with the exception that the set of controlling variables is only
+    removed for either ``x`` or ``y``, but not both.
+
+    Pingouin uses the method described in [2]_ to calculate the (semi)partial
+    correlation coefficients and associated p-values. This method is based on
+    the inverse covariance matrix and is significantly faster than the
+    traditional regression-based method. Results have been tested against the
     `ppcor <https://cran.r-project.org/web/packages/ppcor/index.html>`_
     R package.
 
+    .. important:: Rows with missing values are automatically removed from
+        data.
+
     References
     ----------
-    .. [1] http://faculty.cas.usf.edu/mbrannick/regression/Partial.html
+    .. [1] https://en.wikipedia.org/wiki/Partial_correlation
 
-    .. [2] https://online.stat.psu.edu/stat505/lesson/6/6.3
+    .. [2] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4681537/
 
     Examples
     --------
@@ -721,14 +717,14 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     >>> pg.partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'],
     ...                 method='spearman').round(3)
                n      r         CI95%  p-val
-    spearman  30  0.491  [0.14, 0.73]  0.009
+    spearman  30  0.521  [0.18, 0.75]  0.005
 
     3. As a pandas method
 
     >>> df.partial_corr(x='x', y='y', covar=['cv1'],
     ...                 method='spearman').round(3)
                n      r         CI95%  p-val
-    spearman  30  0.568  [0.26, 0.77]  0.001
+    spearman  30  0.578  [0.27, 0.78]  0.001
 
     4. Partial correlation matrix (returns only the correlation coefficients)
 
@@ -751,6 +747,8 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     # Safety check
     assert tail in ['two-sided', 'one-sided'], (
         'tail must be "two-sided" or "one-sided".')
+    assert method in ['pearson', 'spearman'], (
+        'only "pearson" and "spearman" are supported for partial correlation.')
     assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
     assert data.shape[0] > 2, 'Data must have at least 3 samples.'
     assert isinstance(x, (str, tuple)), 'x must be a string.'
@@ -770,13 +768,6 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         assert y not in covar, 'y and covar must be independent'
     # Check that columns exist
     col = _flatten_list([x, y, covar, x_covar, y_covar])
-    if isinstance(covar, str):
-        covar = [covar]
-    if isinstance(x_covar, str):
-        x_covar = [x_covar]
-    if isinstance(y_covar, str):
-        y_covar = [y_covar]
-
     assert all([c in data for c in col]), 'columns are not in dataframe.'
     # Check that columns are numeric
     assert all([data[c].dtype.kind in 'bfiu' for c in col])
@@ -785,68 +776,42 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     data = data[col].dropna()
     n = data.shape[0]  # Number of samples
     k = data.shape[1] - 2  # Number of covariates
-    # dof = n - k - 2
     assert n > 2, 'Data must have at least 3 non-NAN samples.'
 
-    # Standardize (= no need for an intercept in least-square regression)
-    C = (data[col] - data[col].mean(axis=0)) / data[col].std(axis=0)
+    # Calculate the partial corrrelation matrix - similar to pingouin.pcorr()
+    if method == "spearman":
+        # Convert the data to rank, similar to R cov()
+        V = data.rank(na_option='keep').cov()
+    else:
+        V = data.cov()
+    Vi = np.linalg.pinv(V)  # Inverse covariance matrix
+    Vi_diag = Vi.diagonal()
+    D = np.diag(np.sqrt(1 / Vi_diag))
+    pcor = -1 * (D @ Vi @ D)  # Partial correlation matrix
 
     if covar is not None:
-        # PARTIAL CORRELATION
-        cvar = np.atleast_2d(C[covar].to_numpy())
-        beta_x = lstsq(cvar, C[x].to_numpy(), cond=None)[0]
-        beta_y = lstsq(cvar, C[y].to_numpy(), cond=None)[0]
-        res_x = C[x].to_numpy() - cvar @ beta_x
-        res_y = C[y].to_numpy() - cvar @ beta_y
+        r = pcor[0, 1]
     else:
-        # SEMI-PARTIAL CORRELATION
-        # Initialize "fake" residuals
-        res_x, res_y = data[x].to_numpy(), data[y].to_numpy()
-        if x_covar is not None:
-            cvar = np.atleast_2d(C[x_covar].to_numpy())
-            beta_x = lstsq(cvar, C[x].to_numpy(), cond=None)[0]
-            res_x = C[x].to_numpy() - cvar @ beta_x
+        # Semi-partial correlation matrix
+        with np.errstate(divide='ignore'):
+            spcor = pcor / \
+                np.sqrt(np.diag(V))[..., None] / \
+                np.sqrt(np.abs(Vi_diag - Vi ** 2 / Vi_diag[..., None])).T
         if y_covar is not None:
-            cvar = np.atleast_2d(C[y_covar].to_numpy())
-            beta_y = lstsq(cvar, C[y].to_numpy(), cond=None)[0]
-            res_y = C[y].to_numpy() - cvar @ beta_y
-
-    # Compute partial correlation coefficient
-    # We do not extract the p-values at this stage because they do not account
-    # for the number of covariates in the degrees of freedom
-    if method == 'pearson':
-        r, _ = pearsonr(res_x, res_y)
-    elif method == 'spearman':
-        r, _ = spearmanr(res_x, res_y, **kwargs)
-    elif method == 'kendall':
-        r, _ = kendalltau(res_x, res_y, **kwargs)
-    elif method == 'bicor':
-        r, _ = bicor(res_x, res_y, **kwargs)
-    elif method == 'percbend':
-        r, _ = percbend(res_x, res_y, **kwargs)
-    elif method == 'shepherd':
-        r, _, outliers = shepherd(res_x, res_y, **kwargs)
-    elif method == 'skipped':
-        r, _, outliers = skipped(res_x, res_y, **kwargs)
-    else:
-        raise ValueError(f'Method "{method}" not recognized.')
+            r = spcor[0, 1]  # y_covar is removed from y
+        else:
+            r = spcor[1, 0]  # x_covar is removed from x
 
     if np.isnan(r):
-        # Correlation failed -- new in version v0.3.4, instead of raising an
-        # error we just return a dataframe full of NaN (except sample size).
-        # This avoid sudden stop in pingouin.pairwise_corr.
+        # Correlation failed. Return NaN. When would this happen?
         return pd.DataFrame({'n': n, 'r': np.nan, 'CI95%': np.nan,
                              'p-val': np.nan}, index=[method])
 
-    # Sample size after outlier removal
-    n_outliers = sum(outliers) if "outliers" in locals() else 0
-    n_clean = n - n_outliers
-
     # Compute the two-sided p-value and confidence intervals
     # https://online.stat.psu.edu/stat505/lesson/6/6.3
-    pval = _correl_pvalue(r, n_clean, k)
+    pval = _correl_pvalue(r, n, k)
     ci = compute_esci(
-        stat=r, nx=(n_clean - k), ny=(n_clean - k), eftype='r', decimals=6)
+        stat=r, nx=(n - k), ny=(n - k), eftype='r', decimals=6)
 
     # Create dictionnary
     stats = {
@@ -856,14 +821,11 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         'p-val': pval if tail == 'two-sided' else .5 * pval,
     }
 
-    if method in ['shepherd', 'skipped']:
-        stats['outliers'] = n_outliers
-
     # Convert to DataFrame
     stats = pd.DataFrame.from_records(stats, index=[method])
 
     # Define order
-    col_keep = ['n', 'outliers', 'r', 'CI95%', 'p-val']
+    col_keep = ['n', 'r', 'CI95%', 'p-val']
     col_order = [k for k in col_keep if k in stats.keys().tolist()]
     return _postprocess_dataframe(stats)[col_order]
 
@@ -889,10 +851,7 @@ def pcorr(self):
     coefficient. If you want to calculate the test statistic and p-values, or
     use more robust estimates of the correlation coefficient, please refer to
     the :py:func:`pingouin.pairwise_corr` or :py:func:`pingouin.partial_corr`
-    functions. The :py:func:`pingouin.pcorr` function uses the inverse of
-    the variance-covariance matrix to calculate the partial correlation matrix
-    and is therefore much faster than the two latter functions which are based
-    on the residuals of a linear regression.
+    functions.
 
     Examples
     --------

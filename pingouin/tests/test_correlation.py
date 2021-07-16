@@ -7,7 +7,10 @@ from pingouin import read_dataset
 
 
 class TestCorrelation(TestCase):
-    """Test correlation.py."""
+    """Test correlation.py.
+
+    See the test_correlation.R file.
+    """
 
     def test_corr(self):
         """Test function corr
@@ -95,6 +98,10 @@ class TestCorrelation(TestCase):
         df = read_dataset('pairwise_corr')
         stats = corr(df['Neuroticism'], df['Extraversion'])
         assert np.isclose(1 / float(stats['BF10'].to_numpy()), 1.478e-13)
+        # Perfect correlation, CI and power should be 1, BF should be Inf
+        stats = corr(x, x)
+        assert stats.at['pearson', 'r'] == 1
+        assert stats.at['pearson', 'power'] == 1
         # When one column is a constant, the correlation is not defined
         # and Pingouin return a DataFrame full of NaN, except for ``n``
         x, y = [1, 1, 1], [1, 2, 3]
@@ -127,21 +134,10 @@ class TestCorrelation(TestCase):
         assert round(pc.at['pearson', 'r'], 7) == 0.4926007
         assert round(pc.at['pearson', 'p-val'], 9) == 0.009044164
         # Method == "spearman"
-        # Warning: Spearman slightly different than ppcor package. I think this
-        # is because the latter uses an inverse covariance matrix instead of a
-        # residual approach:
-        # https://github.com/cran/ppcor/blob/master/R/ppcor_v1.01.R
-        # >>> cvx <- cov(x, method=method)
-        # >>> icvx < - ginv(cvx)
-        # >>> pcor < - -cov2cor(icvx)
         pc = partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'],
                           method="spearman")
-        # assert round(pc.at['spearman', 'r'], 7) == 0.5209208
-        # assert round(pc.at['spearman', 'p-val'], 9) == 0.005336187
-
-        # Test with other method
-        for method in ['kendall', 'bicor', 'skipped', 'percbend', 'shepherd']:
-            partial_corr(data=df, x='x', y='y', covar=['cv1'], method=method)
+        assert round(pc.at['spearman', 'r'], 7) == 0.5209208
+        assert round(pc.at['spearman', 'p-val'], 9) == 0.005336187
 
         #######################################################################
         # SEMI-PARTIAL CORRELATION
@@ -165,17 +161,18 @@ class TestCorrelation(TestCase):
         assert round(pc.at['pearson', 'p-val'], 8) == 0.01496857
 
         # Method == "spearman"
-        # Warning: Spearman slightly different than ppcor package.
         pc = partial_corr(data=df, x='x', y='y', y_covar=['cv1', 'cv2', 'cv3'],
                           method="spearman")
-        # assert round(pc.at['spearman', 'r'], 7) == 0.4597143
-        # assert round(pc.at['spearman', 'p-val'], 8) == 0.01584262
+        assert round(pc.at['spearman', 'r'], 7) == 0.4597143
+        assert round(pc.at['spearman', 'p-val'], 8) == 0.01584262
 
         #######################################################################
         # ERROR
         #######################################################################
         with pytest.raises(ValueError):
             partial_corr(data=df, x='x', y='y', covar='cv2', x_covar='cv1')
+        with pytest.raises(ValueError):
+            partial_corr(data=df, x='x', y='y', x_covar='cv2', y_covar='cv1')
         with pytest.raises(AssertionError) as error_info:
             partial_corr(data=df, x='cv1', y='y', covar=['cv1', 'cv2'])
         assert str(error_info.value) == "x and covar must be independent"

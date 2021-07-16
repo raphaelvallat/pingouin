@@ -928,6 +928,9 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
         in data. Use a list if there are more than one covariate. If
         ``covar`` is not None, a partial correlation will be computed using
         :py:func:`pingouin.partial_corr` function.
+
+        .. important:: Only ``method='pearson'`` and ``method='spearman'``
+            are currently supported in partial correlation.
     tail : string
         Specify whether to return ``'one-sided'`` or ``'two-sided'`` p-value.
         Note that the former are simply half the latter.
@@ -981,8 +984,8 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     Notes
     -----
     Please refer to the :py:func:`pingouin.corr()` function for a description
-    of the different methods. NaN are automatically removed from the data using
-    a pairwise deletion.
+    of the different methods. Missing values are automatically removed from the
+    data using a pairwise deletion.
 
     This function is more flexible and gives a much more detailed
     output than the :py:func:`pandas.DataFrame.corr()` method (i.e. p-values,
