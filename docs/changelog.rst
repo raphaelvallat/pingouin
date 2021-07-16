@@ -10,6 +10,11 @@ v0.3.13 (dev)
 
 a. Added the :py:func:`pingouin.box_m` function to calculate `Box's M test <https://en.wikipedia.org/wiki/Box%27s_M_test>`_ for equality of covariance matrices. See `PR 175 <https://github.com/raphaelvallat/pingouin/pull/175>`_.
 
+**Enhancements**
+
+a. Avoid RuntimeWarning when calculating CI and power of a perfect correlation in :py:func:`pingouin.corr` (see `issue 183 <https://github.com/raphaelvallat/pingouin/issues/183>`_).
+b. Use :py:func:`scipy.linalg.lstsq` instead of :py:func:`np.linalg.lstsq` whenever possible to better check for NaN and Inf in input (see `issue 184 <https://github.com/raphaelvallat/pingouin/issues/184>`_).
+
 v0.3.12 (May 2021)
 ------------------
 

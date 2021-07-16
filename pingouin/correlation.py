@@ -532,7 +532,13 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
               n      r          CI95%  p-val   BF10  power
     pearson  30  0.147  [-0.23, 0.48]   0.22  0.467  0.194
 
-    9. Using columns of a pandas dataframe
+    9. Perfect correlation
+
+    >>> pg.corr(x, -x).round(3)
+              n    r         CI95%  p-val BF10  power
+    pearson  30 -1.0  [-1.0, -1.0]    0.0  inf      1
+
+    10. Using columns of a pandas dataframe
 
     >>> import pandas as pd
     >>> data = pd.DataFrame({'x': x, 'y': y})
@@ -583,8 +589,13 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
     n_clean = n - n_outliers
 
     # Compute the parametric 95% confidence interval and power
-    ci = compute_esci(stat=r, nx=n_clean, ny=n_clean, eftype='r', decimals=6)
-    pr = power_corr(r=r, n=n_clean, power=None, alpha=0.05, tail=tail),
+    if abs(r) == 1:
+        ci = [r, r]
+        pr = 1
+    else:
+        ci = compute_esci(
+            stat=r, nx=n_clean, ny=n_clean, eftype='r', decimals=6)
+        pr = power_corr(r=r, n=n_clean, power=None, alpha=0.05, tail=tail)
 
     # Create dictionnary
     stats = {'n': n,
