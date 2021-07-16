@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pd
 import pandas_flavor as pf
 from scipy.stats import t, norm
-from scipy.linalg import pinvh
+from scipy.linalg import pinvh, lstsq
+
 from pingouin.config import options
 from pingouin.utils import remove_na as rm_na
 from pingouin.utils import _flatten_list as _fl
@@ -120,7 +121,7 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     -----
     The :math:`\\beta` coefficients are estimated using an ordinary least
     squares (OLS) regression, as implemented in the
-    :py:func:`np.linalg.lstsq` function. The OLS method minimizes
+    :py:func:`scipy.linalg.lstsq` function. The OLS method minimizes
     the sum of squared residuals, and leads to a closed-form expression for
     the estimated :math:`\\beta`:
 
@@ -399,8 +400,8 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
         Xw = X
         yw = y
 
-    # FIT (WEIGHTED) LEAST SQUARES REGRESSION USING NP.LINALG.LSTST
-    coef, ss_res, rank, _ = np.linalg.lstsq(Xw, yw, rcond=None)
+    # FIT (WEIGHTED) LEAST SQUARES REGRESSION
+    coef, ss_res, rank, _ = lstsq(Xw, yw, cond=None)
     ss_res = ss_res[0] if ss_res.shape == (1,) else ss_res
     if coef_only:
         return coef

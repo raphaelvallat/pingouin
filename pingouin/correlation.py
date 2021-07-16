@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import pandas_flavor as pf
+from scipy.linalg import lstsq
 from scipy.spatial.distance import pdist, squareform
 from scipy.stats import pearsonr, spearmanr, kendalltau
 
@@ -782,8 +783,8 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     if covar is not None:
         # PARTIAL CORRELATION
         cvar = np.atleast_2d(C[covar].to_numpy())
-        beta_x = np.linalg.lstsq(cvar, C[x].to_numpy(), rcond=None)[0]
-        beta_y = np.linalg.lstsq(cvar, C[y].to_numpy(), rcond=None)[0]
+        beta_x = lstsq(cvar, C[x].to_numpy(), cond=None)[0]
+        beta_y = lstsq(cvar, C[y].to_numpy(), cond=None)[0]
         res_x = C[x].to_numpy() - cvar @ beta_x
         res_y = C[y].to_numpy() - cvar @ beta_y
     else:
@@ -792,11 +793,11 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         res_x, res_y = data[x].to_numpy(), data[y].to_numpy()
         if x_covar is not None:
             cvar = np.atleast_2d(C[x_covar].to_numpy())
-            beta_x = np.linalg.lstsq(cvar, C[x].to_numpy(), rcond=None)[0]
+            beta_x = lstsq(cvar, C[x].to_numpy(), cond=None)[0]
             res_x = C[x].to_numpy() - cvar @ beta_x
         if y_covar is not None:
             cvar = np.atleast_2d(C[y_covar].to_numpy())
-            beta_y = np.linalg.lstsq(cvar, C[y].to_numpy(), rcond=None)[0]
+            beta_y = lstsq(cvar, C[y].to_numpy(), cond=None)[0]
             res_y = C[y].to_numpy() - cvar @ beta_y
 
     # Compute partial correlation coefficient
