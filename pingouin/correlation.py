@@ -102,16 +102,12 @@ def skipped(x, y, corr_type='spearman'):
     from pingouin.utils import _is_sklearn_installed
     _is_sklearn_installed(raise_error=True)
     from scipy.stats import chi2
-    from sklearn.covariance import fast_mcd
+    from sklearn.covariance import MinCovDet
     X = np.column_stack((x, y))
     nrows, ncols = X.shape
     gval = np.sqrt(chi2.ppf(0.975, 2))
     # Compute center and distance to center
-    # MinCovDet scales by N, numpy.cov scales by N-1 (similar to Matlab)
-    # See https://github.com/raphaelvallat/pingouin/issues/164
-    # center = MinCovDet(random_state=42).fit(X).location_
-    center = fast_mcd(
-        X, cov_computation_method=lambda x: np.cov(x, rowvar=False))[0]
+    center = MinCovDet(random_state=42).fit(X).location_
     B = X - center
     bot = (B**2).sum(axis=1)
     # Loop over rows

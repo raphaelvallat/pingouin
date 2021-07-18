@@ -13,9 +13,8 @@ a. Added the :py:func:`pingouin.box_m` function to calculate `Box's M test <http
 **Enhancements**
 
 a. Major refactoring of :py:func:`pingouin.partial_corr` which now uses the exact same method as the R `ppcor <https://cran.r-project.org/web/packages/ppcor/ppcor.pdf>`_ package, i.e. based on the inverse covariance matrix rather than the residuals of a linear regression. This new approach is faster and works better in some cases (such as Spearman partial correlation with binary variables, see `issue 147 <https://github.com/raphaelvallat/pingouin/issues/147>`_). One caveat of this new approach is that only the Pearson and Spearman correlation type are now supported in partial/semi-partial correlation.
-b. Fix inconsistencies between Matlab and Pingouin in Skipped correlation (:py:func:`pingouin.corr` with ``method="skipped"``). This was caused by a different normalization in the estimation of the robust covariance (see `issue 164 <https://github.com/raphaelvallat/pingouin/issues/164>`_).
-c. Avoid RuntimeWarning when calculating CI and power of a perfect correlation in :py:func:`pingouin.corr` (see `issue 183 <https://github.com/raphaelvallat/pingouin/issues/183>`_).
-d. Use :py:func:`scipy.linalg.lstsq` instead of :py:func:`numpy.linalg.lstsq` whenever possible to better check for NaN and Inf in input (see `issue 184 <https://github.com/raphaelvallat/pingouin/issues/184>`_).
+b. Avoid RuntimeWarning when calculating CI and power of a perfect correlation in :py:func:`pingouin.corr` (see `issue 183 <https://github.com/raphaelvallat/pingouin/issues/183>`_).
+c. Use :py:func:`scipy.linalg.lstsq` instead of :py:func:`numpy.linalg.lstsq` whenever possible to better check for NaN and Inf in input (see `issue 184 <https://github.com/raphaelvallat/pingouin/issues/184>`_).
 
 v0.3.12 (May 2021)
 ------------------
