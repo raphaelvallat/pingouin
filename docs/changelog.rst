@@ -15,6 +15,7 @@ a. Added the :py:func:`pingouin.box_m` function to calculate `Box's M test <http
 a. Major refactoring of :py:func:`pingouin.partial_corr` which now uses the exact same method as the R `ppcor <https://cran.r-project.org/web/packages/ppcor/ppcor.pdf>`_ package, i.e. based on the inverse covariance matrix rather than the residuals of a linear regression. This new approach is faster and works better in some cases (such as Spearman partial correlation with binary variables, see `issue 147 <https://github.com/raphaelvallat/pingouin/issues/147>`_). One caveat of this new approach is that only the Pearson and Spearman correlation type are now supported in partial/semi-partial correlation.
 b. Avoid RuntimeWarning when calculating CI and power of a perfect correlation in :py:func:`pingouin.corr` (see `issue 183 <https://github.com/raphaelvallat/pingouin/issues/183>`_).
 c. Use :py:func:`scipy.linalg.lstsq` instead of :py:func:`numpy.linalg.lstsq` whenever possible to better check for NaN and Inf in input (see `issue 184 <https://github.com/raphaelvallat/pingouin/issues/184>`_).
+d. Added warning in :py:func:`pingouin.partial_corr` with ``method="skipped"``: the MCD algorithm does not give the same output in Python (scikit-learn) than in the original Matlab library (LIBRA), and this can lead to skipped correlations that are different in Pingouin than in the Matlab robust correlation toolbox (see `issue 164 <https://github.com/raphaelvallat/pingouin/issues/164>`_).
 
 v0.3.12 (May 2021)
 ------------------

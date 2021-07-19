@@ -1,4 +1,5 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
+import warnings
 import numpy as np
 import pandas as pd
 import pandas_flavor as pf
@@ -108,6 +109,18 @@ def skipped(x, y, corr_type='spearman'):
     gval = np.sqrt(chi2.ppf(0.975, 2))
     # Compute center and distance to center
     center = MinCovDet(random_state=42).fit(X).location_
+
+    # https://github.com/raphaelvallat/pingouin/issues/164
+    warnings.warn(
+        "The skipped correlation relies on the Minimum Covariance Determinant "
+        "algorithm, which gives slightly different results in Python "
+        "(scikit-learn) than in the original Matlab library (LIBRA). As such, "
+        "the skipped correlation may be different from the Matlab robust "
+        "correlation toolbox (see issue 164 on Pingouin's GitHub). "
+        "Make sure to double check your results or use another robust "
+        "correlation method."
+    )
+
     B = X - center
     bot = (B**2).sum(axis=1)
     # Loop over rows
