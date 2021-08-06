@@ -21,7 +21,7 @@ f. :py:func:`pingouin.wilcoxon` now supports a pre-computed array of differences
 
 **Dependencies**
 
-This release requires SciPy 1.7+, NumPy 1.19+ and Pandas 1.0+.
+This release requires Python 3.7+, SciPy 1.7+, NumPy 1.19+ and Pandas 1.0+.
 
 v0.3.12 (May 2021)
 ------------------

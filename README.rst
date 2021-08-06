@@ -83,21 +83,21 @@ Dependencies
 
 The main dependencies of Pingouin are :
 
-* `NumPy <https://numpy.org/>`_ (>= 1.16.5)
-* `SciPy <https://www.scipy.org/>`_ (>= 1.3.0)
-* `Pandas <https://pandas.pydata.org/>`_ (>= 0.24)
-* `Pandas-flavor <https://github.com/Zsailer/pandas_flavor>`_ (>= 0.1.2)
-* `Matplotlib <https://matplotlib.org/>`_ (>= 3.0.2)
-* `Seaborn <https://seaborn.pydata.org/>`_ (>= 0.9.0)
+* `NumPy <https://numpy.org/>`_
+* `SciPy <https://www.scipy.org/>`_
+* `Pandas <https://pandas.pydata.org/>`_
+* `Pandas-flavor <https://github.com/Zsailer/pandas_flavor>`_
+* `Statsmodels <https://www.statsmodels.org/>`_
+* `Matplotlib <https://matplotlib.org/>`_
+* `Seaborn <https://seaborn.pydata.org/>`_
 * `Outdated <https://github.com/alexmojaki/outdated>`_
 
 In addition, some functions require :
 
-* `Statsmodels <https://www.statsmodels.org/>`_
 * `Scikit-learn <https://scikit-learn.org/>`_
 * `Mpmath <http://mpmath.org/>`_
 
-Pingouin is a Python 3 package and is currently tested for Python 3.6 and 3.7. Pingouin does not work with Python 2.7.
+Pingouin is a Python 3 package and is currently tested for Python 3.7-3.9. It does not support Python 2.
 
 User installation
 -----------------
