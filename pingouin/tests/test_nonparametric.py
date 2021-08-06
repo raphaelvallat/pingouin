@@ -84,6 +84,13 @@ class TestNonParametric(TestCase):
         wc_pg = wilcoxon(x2, y2, tail='two-sided')
         assert wc_scp[0] == wc_pg.at['Wilcoxon', 'W-val'] == 20.5  # JASP
         assert wc_scp[1] == wc_pg.at['Wilcoxon', 'p-val']
+        # Same but using the pre-computed difference
+        # The W and p-values should be similar
+        wc_pg2 = wilcoxon(np.array(x2) - np.array(y2))
+        assert wc_pg.at['Wilcoxon', 'W-val'] == wc_pg2.at['Wilcoxon', 'W-val']
+        assert wc_pg.at['Wilcoxon', 'p-val'] == wc_pg2.at['Wilcoxon', 'p-val']
+        assert wc_pg.at['Wilcoxon', 'RBC'] == wc_pg2.at['Wilcoxon', 'RBC']
+        assert np.isnan(wc_pg2.at['Wilcoxon', 'CLES'])
         wc_pg_less = wilcoxon(x2, y2, tail='less')
         wc_pg_greater = wilcoxon(x2, y2, tail='greater')
         wc_pg_ones = wilcoxon(x2, y2, tail='one-sided')

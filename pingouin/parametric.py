@@ -1576,11 +1576,11 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
         DataFrame. Note that this function can also directly be used as a
         Pandas method, in which case this argument is no longer needed.
     dv : string
-        Name of column containing the dependent variable.
+        Name of column in data with the dependent variable.
     between : string
-        Name of column containing the between factor.
+        Name of column in data with the between factor.
     covar : string or list
-        Name(s) of column(s) containing the covariate.
+        Name(s) of column(s) in data with the covariate.
     effsize : str
         Effect size. Must be 'np2' (partial eta-squared) or 'n2'
         (eta-squared).
@@ -1606,11 +1606,11 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     controlling for the effects of other continuous variables that are not
     of primary interest, known as covariates or nuisance variables (covar).
 
-    Note that in the case of one covariate, Pingouin will use a built-in
-    function. However, if there are more than one covariate, Pingouin will
-    use the statsmodels package to compute the ANCOVA.
+    Pingouin uses :py:class:`statsmodels.regression.linear_model.OLS` to
+    compute the ANCOVA.
 
-    Rows with missing values are automatically removed (listwise deletion).
+    .. important:: Rows with missing values are automatically removed
+        (listwise deletion).
 
     See Also
     --------
@@ -1649,6 +1649,10 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     # Safety checks
     assert effsize in ['np2', 'n2'], "effsize must be 'np2' or 'n2'."
     assert isinstance(data, pd.DataFrame), "data must be a pandas dataframe."
+    assert isinstance(between, str), (
+        "between must be a string. Pingouin does not support multiple "
+        "between factors. For more details, please see "
+        "https://github.com/raphaelvallat/pingouin/issues/173.")
     assert dv in data.columns, '%s is not in data.' % dv
     assert between in data.columns, '%s is not in data.' % between
     assert isinstance(covar, (str, list)), 'covar must be a str or a list.'

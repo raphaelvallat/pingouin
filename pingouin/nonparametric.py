@@ -301,17 +301,21 @@ def mwu(x, y, tail='two-sided'):
     return _postprocess_dataframe(stats)
 
 
-def wilcoxon(x, y, tail='two-sided'):
+def wilcoxon(x, y=None, tail='two-sided'):
     """Wilcoxon signed-rank test. It is the non-parametric version of the
     paired T-test.
 
     Parameters
     ----------
-    x, y : array_like
-        First and second set of observations. ``x`` and ``y`` must be
-        related (e.g repeated measures) and, therefore, have the same number
-        of samples. Note that a listwise deletion of missing values
-        is automatically applied.
+    x : array_like
+        Either the first set of measurements
+        (in which case y is the second set of measurements),
+        or the differences between two sets of measurements
+        (in which case y is not to be specified.) Must be one-dimensional.
+    y : array_like
+        Either the second set of measurements (if x is the first set of
+        measurements), or not specified (if x is the differences between
+        two sets of measurements.) Must be one-dimensional.
     tail : string
         Specify whether to return `'one-sided'` or `'two-sided'` p-value.
         Can also be `'greater'` or `'less'` to specify the direction of the
@@ -339,13 +343,18 @@ def wilcoxon(x, y, tail='two-sided'):
     The Wilcoxon signed-rank test [1]_ tests the null hypothesis that two
     related paired samples come from the same distribution. In particular,
     it tests whether the distribution of the differences x - y is symmetric
-    about zero. A continuity correction is applied by default
-    (see :py:func:`scipy.stats.wilcoxon` for details).
+    about zero.
 
-    The matched pairs rank biserial correlation [2]_ is the simple difference
-    between the proportion of favorable and unfavorable evidence; in the case
-    of the Wilcoxon signed-rank test, the evidence consists of rank sums
-    (Kerby 2014):
+    .. important:: Pingouin automatically applies a continuity correction.
+        Therefore, the p-values will be slightly different than
+        :py:func:`scipy.stats.wilcoxon` unless ``correction=True`` is
+        explicitly passed to the latter.
+
+    In addition to the test statistic and p-values, Pingouin also computes two
+    measures of effect size. The matched pairs rank biserial correlation [2]_
+    is the simple difference between the proportion of favorable and
+    unfavorable evidence; in the case of the Wilcoxon signed-rank test,
+    the evidence consists of rank sums (Kerby 2014):
 
     .. math:: r = f - u
 
@@ -389,11 +398,18 @@ def wilcoxon(x, y, tail='two-sided'):
 
     >>> import numpy as np
     >>> import pingouin as pg
-    >>> x = [20, 22, 19, 20, 22, 18, 24, 20, 19, 24, 26, 13]
-    >>> y = [38, 37, 33, 29, 14, 12, 20, 22, 17, 25, 26, 16]
+    >>> x = np.array([20, 22, 19, 20, 22, 18, 24, 20, 19, 24, 26, 13])
+    >>> y = np.array([38, 37, 33, 29, 14, 12, 20, 22, 17, 25, 26, 16])
     >>> pg.wilcoxon(x, y, tail='two-sided')
               W-val       tail     p-val       RBC      CLES
     Wilcoxon   20.5  two-sided  0.285765 -0.378788  0.395833
+
+    Same but using pre-computed differences. However, the CLES effect size
+    cannot be computed as it requires the raw data.
+
+    >>> pg.wilcoxon(x - y)
+              W-val       tail     p-val       RBC  CLES
+    Wilcoxon   20.5  two-sided  0.285765 -0.378788   NaN
 
     Compare with SciPy
 
@@ -426,8 +442,11 @@ def wilcoxon(x, y, tail='two-sided'):
     Wilcoxon   20.5  less  0.142883 -0.378788  0.604167
     """
     x = np.asarray(x)
-    y = np.asarray(y)
-    x, y = remove_na(x, y, paired=True)  # Remove NA
+    if y is not None:
+        y = np.asarray(y)
+        x, y = remove_na(x, y, paired=True)  # Remove NA
+    else:
+        x = x[~np.isnan(x)]
 
     # Check tails
     possible_tails = ['two-sided', 'one-sided', 'greater', 'less']
@@ -437,23 +456,30 @@ def wilcoxon(x, y, tail='two-sided'):
         tail = 'less' if np.median(x - y) < 0 else 'greater'
 
     # Compute test
-    wval, pval = scipy.stats.wilcoxon(x, y, zero_method='wilcox',
-                                      correction=True, alternative=tail)
+    wval, pval = scipy.stats.wilcoxon(
+        x=x, y=y, zero_method='wilcox', correction=True, alternative=tail)
 
     # Effect size 1: Common Language Effect Size
     # Since Pingouin v0.3.5, CLES is tail-specific and calculated
     # according to the formula given in Vargha and Delaney 2000 which
     # works with ordinal data.
-    diff = x[:, None] - y
-    # cles = max((diff < 0).sum(), (diff > 0).sum()) / diff.size
-    # Tail = 'greater', with ties set to 0.5
-    # Note that tail = 'two-sided' gives same output as tail = 'greater'
-    cles = np.where(diff == 0, 0.5, diff > 0).mean()
-    cles = 1 - cles if tail == 'less' else cles
+    if y is not None:
+        diff = x[:, None] - y
+        # cles = max((diff < 0).sum(), (diff > 0).sum()) / diff.size
+        # Tail = 'greater', with ties set to 0.5
+        # Note that tail = 'two-sided' gives same output as tail = 'greater'
+        cles = np.where(diff == 0, 0.5, diff > 0).mean()
+        cles = 1 - cles if tail == 'less' else cles
+    else:
+        # CLES cannot be computed if y is None
+        cles = np.nan
 
     # Effect size 2: matched-pairs rank biserial correlation (Kerby 2014)
-    d = x - y
-    d = d[d != 0]
+    if y is not None:
+        d = x - y
+        d = d[d != 0]
+    else:
+        d = x[x != 0]
     r = scipy.stats.rankdata(abs(d))
     rsum = r.sum()
     r_plus = np.sum((d > 0) * r)

@@ -17,6 +17,7 @@ b. :py:func:`pingouin.ancova` always uses statsmodels, regardless of the number 
 c. Avoid RuntimeWarning when calculating CI and power of a perfect correlation in :py:func:`pingouin.corr` (see `issue 183 <https://github.com/raphaelvallat/pingouin/issues/183>`_).
 d. Use :py:func:`scipy.linalg.lstsq` instead of :py:func:`numpy.linalg.lstsq` whenever possible to better check for NaN and Inf in input (see `issue 184 <https://github.com/raphaelvallat/pingouin/issues/184>`_).
 e. Added warning in :py:func:`pingouin.partial_corr` with ``method="skipped"``: the MCD algorithm does not give the same output in Python (scikit-learn) than in the original Matlab library (LIBRA), and this can lead to skipped correlations that are different in Pingouin than in the Matlab robust correlation toolbox (see `issue 164 <https://github.com/raphaelvallat/pingouin/issues/164>`_).
+f. :py:func:`pingouin.wilcoxon` now supports a pre-computed array of differences, similar to :py:func:`scipy.stats.wilcoxon` (`issue 186 <https://github.com/raphaelvallat/pingouin/issues/186>`_).
 
 v0.3.12 (May 2021)
 ------------------
