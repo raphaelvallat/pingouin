@@ -9,6 +9,9 @@
 .. image:: https://img.shields.io/github/license/raphaelvallat/pingouin.svg
   :target: https://github.com/raphaelvallat/pingouin/blob/master/LICENSE
 
+.. image:: https://github.com/raphaelvallat/pingouin/actions/workflows/python_tests.yml/badge.svg
+  :target: https://github.com/raphaelvallat/pingouin/actions
+
 .. image:: https://codecov.io/gh/raphaelvallat/pingouin/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/raphaelvallat/pingouin
 
@@ -20,6 +23,7 @@
 
 .. image:: https://badges.gitter.im/owner/repo.png
     :target: https://gitter.im/pingouin-stats/Lobby
+
 
 ----------------
 
