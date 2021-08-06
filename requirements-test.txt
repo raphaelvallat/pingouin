@@ -4,4 +4,3 @@ pytest-cov
 pytest-travis-fold
 openpyxl
 mpmath
-scipy>=1.5.0

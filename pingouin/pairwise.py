@@ -1118,9 +1118,7 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
             yield o
 
     # Check if columns index has multiple levels
-    pdv = pd.__version__
-    mindex = pd.MultiIndex if pdv.startswith('1') else pd.core.index.MultiIndex
-    if isinstance(data.columns, mindex):
+    if isinstance(data.columns, pd.MultiIndex):
         multi_index = True
         if columns is not None:
             # Simple List with one element: [('L0', 'L1')]

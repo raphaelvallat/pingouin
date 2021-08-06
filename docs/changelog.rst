@@ -19,6 +19,10 @@ d. Use :py:func:`scipy.linalg.lstsq` instead of :py:func:`numpy.linalg.lstsq` wh
 e. Added warning in :py:func:`pingouin.partial_corr` with ``method="skipped"``: the MCD algorithm does not give the same output in Python (scikit-learn) than in the original Matlab library (LIBRA), and this can lead to skipped correlations that are different in Pingouin than in the Matlab robust correlation toolbox (see `issue 164 <https://github.com/raphaelvallat/pingouin/issues/164>`_).
 f. :py:func:`pingouin.wilcoxon` now supports a pre-computed array of differences, similar to :py:func:`scipy.stats.wilcoxon` (`issue 186 <https://github.com/raphaelvallat/pingouin/issues/186>`_).
 
+**Dependencies**
+
+This release requires SciPy 1.7+, NumPy 1.19+ and Pandas 1.0+.
+
 v0.3.12 (May 2021)
 ------------------
 
