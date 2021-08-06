@@ -1640,122 +1640,41 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     2       BMI    60.013656   1   1.053790  0.312842  0.015409
     3  Residual  1708.508657  30        NaN       NaN       NaN
     """
-    # Safety checks
-    assert effsize in ['np2', 'n2'], "effsize must be 'np2' or 'n2'."
-    assert isinstance(data, pd.DataFrame)
-    assert dv in data.columns, '%s is not in data.' % dv
-    assert between in data.columns, '%s is not in data.' % between
-    assert isinstance(covar, (str, list)), 'covar must be a str or a list.'
-
-    # Drop missing values
-    data = data[_flatten_list([dv, between, covar])].dropna()
-
-    # Check the number of covariates
-    if isinstance(covar, list):
-        if len(covar) > 1:
-            return ancovan(dv=dv, covar=covar, between=between, data=data,
-                           effsize=effsize)
-        else:
-            covar = covar[0]
-
-    # Assert that covariate is numeric
-    assert data[covar].dtype.kind in 'fi', 'Covariate must be numeric.'
-
-    # Compute slopes
-    groups = data[between].unique()
-    slopes = np.zeros(shape=groups.shape)
-    ss = np.zeros(shape=groups.shape)
-    for i, b in enumerate(groups):
-        dt_covar = data[data[between] == b][covar].to_numpy()
-        ss[i] = ((dt_covar - dt_covar.mean())**2).sum()
-        slopes[i] = np.polyfit(dt_covar, data[data[between] == b][dv], 1)[0]
-    ss_slopes = ss * slopes
-    bw = np.nansum(ss_slopes) / np.sum(ss)
-    bt = np.polyfit(data[covar], data[dv], 1)[0]
-
-    # Run the ANOVA
-    aov_dv = anova(data=data, dv=dv, between=between, detailed=True)
-    aov_covar = anova(data=data, dv=covar, between=between, detailed=True)
-
-    # Create full ANCOVA
-    ss_t_dv = aov_dv.at[0, 'SS'] + aov_dv.at[1, 'SS']
-    ss_t_covar = aov_covar.at[0, 'SS'] + aov_covar.at[1, 'SS']
-    # Sums of squares
-    ss_t = ss_t_dv - bt**2 * ss_t_covar
-    ss_w = aov_dv.at[1, 'SS'] - bw**2 * aov_covar.at[1, 'SS']
-    ss_b = ss_t - ss_w
-    ss_c = np.nansum(ss_slopes) * bw
-    # DOF
-    df_c = 1
-    df_b = aov_dv.at[0, 'DF']
-    df_w = aov_dv.at[1, 'DF'] - 1
-    # Mean squares
-    ms_c = ss_c / df_c
-    ms_b = ss_b / df_b
-    ms_w = ss_w / df_w
-    # F-values
-    f_c = ms_c / ms_w
-    f_b = ms_b / ms_w
-    # P-values
-    p_c = f(df_c, df_w).sf(f_c)
-    p_b = f(df_b, df_w).sf(f_b)
-    # Effect sizes
-    if effsize == "n2":
-        ss_tot = ss_b + ss_c + ss_w
-        n2_b = ss_b / ss_tot
-        n2_c = ss_c / ss_tot
-        all_effsize = [n2_b, n2_c, np.nan]
-    else:
-        np2_b = ss_b / (ss_b + ss_w)
-        np2_c = ss_c / (ss_c + ss_w)
-        all_effsize = [np2_b, np2_c, np.nan]
-
-    # Create dataframe
-    aov = pd.DataFrame({'Source': [between, covar, 'Residual'],
-                        'SS': [ss_b, ss_c, ss_w],
-                        'DF': [df_b, df_c, df_w],
-                        'F': [f_b, f_c, np.nan],
-                        'p-unc': [p_b, p_c, np.nan],
-                        effsize: all_effsize
-                        })
-
-    # Add bw as an attribute (for rm_corr function)
-    aov = _postprocess_dataframe(aov)
-    aov.bw_ = bw
-    return aov
-
-
-def ancovan(data=None, dv=None, covar=None, between=None, effsize="np2"):
-    """ANCOVA with n covariates.
-
-    This is an internal function. The main call to this function should be done
-    by the :py:func:`pingouin.ancova` function.
-    """
-    # Check that stasmodels is installed
+    # Import
     from pingouin.utils import _is_statsmodels_installed
     _is_statsmodels_installed(raise_error=True)
     from statsmodels.api import stats
     from statsmodels.formula.api import ols
 
-    # Check that covariates are numeric ('float', 'int')
-    assert all([data[covar[i]].dtype.kind in 'fi' for i in range(len(covar))])
+    # Safety checks
+    assert effsize in ['np2', 'n2'], "effsize must be 'np2' or 'n2'."
+    assert isinstance(data, pd.DataFrame), "data must be a pandas dataframe."
+    assert dv in data.columns, '%s is not in data.' % dv
+    assert between in data.columns, '%s is not in data.' % between
+    assert isinstance(covar, (str, list)), 'covar must be a str or a list.'
+    if isinstance(covar, str):
+        covar = [covar]
+    for c in covar:
+        assert c in data.columns, "covariate %s is not in data" % c
+        assert data[c].dtype.kind in "bfi", "covariate %s is not numeric" % c
+
+    # Drop missing values
+    data = data[_flatten_list([dv, between, covar])].dropna()
 
     # Fit ANCOVA model
-    # formula = dv + ' ~ C(' + between + ')'
+    # formula = dv ~ 1 + between + covar1 + covar2 + ...
     formula = "Q('%s') ~ C(Q('%s'))" % (dv, between)
     for c in covar:
         formula += " + Q('%s')" % (c)
     model = ols(formula, data=data).fit()
-    aov = stats.anova_lm(model, typ=2).reset_index()
 
+    # Create output dataframe
+    aov = stats.anova_lm(model, typ=2).reset_index()
     aov.rename(columns={'index': 'Source', 'sum_sq': 'SS',
                         'df': 'DF', 'PR(>F)': 'p-unc'}, inplace=True)
-
     aov.at[0, 'Source'] = between
-
     for i in range(len(covar)):
         aov.at[i + 1, 'Source'] = covar[i]
-
     aov['DF'] = aov['DF'].astype(int)
 
     # Add effect sizes
@@ -1767,4 +1686,8 @@ def ancovan(data=None, dv=None, covar=None, between=None, effsize="np2"):
         all_effsize = aov['SS'].apply(lambda x: x / (x + ss_resid)).to_numpy()
         all_effsize[-1] = np.nan
     aov[effsize] = all_effsize
-    return _postprocess_dataframe(aov)
+
+    # Add bw as an attribute (for rm_corr function)
+    aov = _postprocess_dataframe(aov)
+    aov.bw_ = model.params.iloc[-1]
+    return aov
