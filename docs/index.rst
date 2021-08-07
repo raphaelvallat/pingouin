@@ -138,11 +138,11 @@ Quick start
 .. table:: Output
    :widths: auto
 
-   ======  =====  =========  =======  =============  =========  ======  =======
-        T    dof  tail         p-val  CI95%            cohen-d    BF10    power
-   ======  =====  =========  =======  =============  =========  ======  =======
-   -3.401     58  two-sided    0.001  [-1.68 -0.43]      0.878  26.155    0.917
-   ======  =====  =========  =======  =============  =========  ======  =======
+   ======  =====  =============  =======  =============  =========  ======  =======
+        T    dof  alternative      p-val  CI95%            cohen-d    BF10    power
+   ======  =====  =============  =======  =============  =========  ======  =======
+   -3.401     58  two-sided        0.001  [-1.68 -0.43]      0.878  26.155    0.917
+   ======  =====  =============  =======  =============  =========  ======  =======
 
 ------------
 
@@ -211,7 +211,7 @@ The :py:func:`pingouin.normality` function works with lists, arrays, or pandas D
 ------------
 
 5. Q-Q plot
-############
+###########
 
 .. plot::
 
@@ -281,13 +281,13 @@ The :py:func:`pingouin.normality` function works with lists, arrays, or pandas D
 .. table:: Output
   :widths: auto
 
-  ==========  =======  =======  ========  ============  ======  ======  =========  =======  ========  ==========  ======  ========
-  Contrast    A        B        Paired    Parametric         T     dof  Tail         p-unc    p-corr  p-adjust      BF10    hedges
-  ==========  =======  =======  ========  ============  ======  ======  =========  =======  ========  ==========  ======  ========
-  Time        August   January  True      True          -1.740  59.000  two-sided    0.087     0.131  fdr_bh       0.582    -0.328
-  Time        August   June     True      True          -2.743  59.000  two-sided    0.008     0.024  fdr_bh       4.232    -0.485
-  Time        January  June     True      True          -1.024  59.000  two-sided    0.310     0.310  fdr_bh       0.232    -0.170
-  ==========  =======  =======  ========  ============  ======  ======  =========  =======  ========  ==========  ======  ========
+  ==========  =======  =======  ========  ============  ======  ======  =============  =======  ========  ==========  ======  ========
+  Contrast    A        B        Paired    Parametric         T     dof  alternative      p-unc    p-corr  p-adjust      BF10    hedges
+  ==========  =======  =======  ========  ============  ======  ======  =============  =======  ========  ==========  ======  ========
+  Time        August   January  True      True          -1.740  59.000  two-sided        0.087     0.131  fdr_bh       0.582    -0.328
+  Time        August   June     True      True          -2.743  59.000  two-sided        0.008     0.024  fdr_bh       4.232    -0.483
+  Time        January  June     True      True          -1.024  59.000  two-sided        0.310     0.310  fdr_bh       0.232    -0.170
+  ==========  =======  =======  ========  ============  ======  ======  =============  =======  ========  ==========  ======  ========
 
 ------------
 
@@ -328,16 +328,16 @@ The :py:func:`pingouin.normality` function works with lists, arrays, or pandas D
 .. table:: Output
   :widths: auto
 
-  ===  ===  ========  =========  ===  =====  =============  =======  ======  =======
-  X    Y    method    tail         n      r  CI95%            p-unc    BF10    power
-  ===  ===  ========  =========  ===  =====  =============  =======  ======  =======
-  X    Y    pearson   two-sided   30  0.366  [0.01 0.64]      0.047   1.500    0.525
-  X    Z    pearson   two-sided   30  0.251  [-0.12  0.56]    0.181   0.534    0.272
-  Y    Z    pearson   two-sided   30  0.020  [-0.34  0.38]    0.916   0.228    0.051
-  ===  ===  ========  =========  ===  =====  =============  =======  ======  =======
+  ===  ===  ========  =============  ===  =====  =============  =======  ======  =======
+  X    Y    method    alternative      n      r  CI95%            p-unc    BF10    power
+  ===  ===  ========  =============  ===  =====  =============  =======  ======  =======
+  X    Y    pearson   two-sided       30  0.366  [0.01 0.64]      0.047   1.500    0.525
+  X    Z    pearson   two-sided       30  0.251  [-0.12  0.56]    0.181   0.534    0.272
+  Y    Z    pearson   two-sided       30  0.020  [-0.34  0.38]    0.916   0.228    0.051
+  ===  ===  ========  =============  ===  =====  =============  =======  ======  =======
 
-11. Convert between effect sizes
-################################
+11.  Convert between effect sizes
+#################################
 
 .. code-block:: python
 
@@ -436,7 +436,7 @@ Plot the curve of achieved power given the effect size (Cohen d) and the sample 
     d = 0.5  # Fixed effect size
     n = np.arange(5, 80, 5)  # Incrementing sample size
     # Compute the achieved power
-    pwr = pg.power_ttest(d=d, n=n, contrast='paired', tail='two-sided')
+    pwr = pg.power_ttest(d=d, n=n, contrast='paired')
     # Start the plot
     plt.plot(n, pwr, 'ko-.')
     plt.axhline(0.8, color='r', ls=':')
@@ -445,8 +445,8 @@ Plot the curve of achieved power given the effect size (Cohen d) and the sample 
     plt.title('Achieved power of a paired T-test')
     sns.despine()
 
-17. Paired plot
-###############
+17.  Paired plot
+################
 
 .. plot::
 

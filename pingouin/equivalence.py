@@ -76,10 +76,8 @@ def tost(x, y, bound=1, paired=False, correction=False):
     assert isinstance(bound, (int, float)), 'bound must be int or float.'
 
     # T-tests
-    df_a = ttest(x + bound, y, paired=paired, correction=correction,
-                 tail='greater')
-    df_b = ttest(x - bound, y, paired=paired, correction=correction,
-                 tail='less')
+    df_a = ttest(x + bound, y, paired=paired, correction=correction, alternative='greater')
+    df_b = ttest(x - bound, y, paired=paired, correction=correction, alternative='less')
     pval = max(df_a.at['T-test', 'p-val'], df_b.at['T-test', 'p-val'])
 
     # Create output dataframe

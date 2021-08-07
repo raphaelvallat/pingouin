@@ -10,11 +10,10 @@ __all__ = ["power_ttest", "power_ttest2n", "power_anova", "power_rm_anova",
 
 
 def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
-                tail='two-sided'):
+                alternative='two-sided'):
     """
-    Evaluate power, sample size, effect size or
-    significance level of a one-sample T-test, a paired T-test or an
-    independent two-samples T-test with equal sample sizes.
+    Evaluate power, sample size, effect size or significance level of a one-sample T-test,
+    a paired T-test or an independent two-samples T-test with equal sample sizes.
 
     Parameters
     ----------
@@ -32,9 +31,9 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
     contrast : str
         Can be `"one-sample"`, `"two-samples"` or `"paired"`.
         Note that `"one-sample"` and `"paired"` have the same behavior.
-    tail : str
-        Indicates the alternative of the test. Can be either `'two-sided'`,
-        `'greater'` or `'less'`.
+    alternative : string
+        Defines the alternative hypothesis, or tail of the test. Must be one of
+        "two-sided" (default), "greater" or "less".
 
     Notes
     -----
@@ -100,7 +99,7 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
 
     2. Compute required sample size given ``d``, ``power`` and ``alpha``
 
-    >>> print('n: %.4f' % power_ttest(d=0.5, power=0.80, tail='greater'))
+    >>> print('n: %.4f' % power_ttest(d=0.5, power=0.80, alternative='greater'))
     n: 50.1508
 
     3. Compute achieved ``d`` given ``n``, ``power`` and ``alpha`` level
@@ -117,10 +116,10 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
     5. One-sided tests
 
     >>> from pingouin import power_ttest
-    >>> print('power: %.4f' % power_ttest(d=0.5, n=20, tail='greater'))
+    >>> print('power: %.4f' % power_ttest(d=0.5, n=20, alternative='greater'))
     power: 0.4634
 
-    >>> print('power: %.4f' % power_ttest(d=0.5, n=20, tail='less'))
+    >>> print('power: %.4f' % power_ttest(d=0.5, n=20, alternative='less'))
     power: 0.0007
     """
     # Check the number of arguments that are None
@@ -129,11 +128,11 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
         raise ValueError('Exactly one of n, d, power, and alpha must be None.')
 
     # Safety checks
-    possible_tails = ['two-sided', 'greater', 'less']
-    assert tail in possible_tails, 'Invalid tail argument.'
+    assert alternative in ['two-sided', 'greater', 'less'], (
+        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
     assert contrast.lower() in ['one-sample', 'paired', 'two-samples']
     tsample = 2 if contrast.lower() == 'two-samples' else 1
-    tside = 2 if tail == 'two-sided' else 1
+    tside = 2 if alternative == 'two-sided' else 1
     if d is not None and tside == 2:
         d = abs(d)
     if alpha is not None:
@@ -141,7 +140,7 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
     if power is not None:
         assert 0 < power <= 1
 
-    if tail == 'less':
+    if alternative == 'less':
 
         def func(d, n, power, alpha):
             dof = (n - 1) * tsample
@@ -149,7 +148,7 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
             tcrit = stats.t.ppf(alpha / tside, dof)
             return stats.nct.cdf(tcrit, dof, nc)
 
-    elif tail == 'two-sided':
+    elif alternative == 'two-sided':
 
         def func(d, n, power, alpha):
             dof = (n - 1) * tsample
@@ -158,7 +157,7 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
             return (stats.nct.sf(tcrit, dof, nc) +
                     stats.nct.cdf(-tcrit, dof, nc))
 
-    else:  # Tail = greater
+    else:  # Alternative = 'greater'
 
         def func(d, n, power, alpha):
             dof = (n - 1) * tsample
@@ -184,9 +183,9 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
 
     elif d is None:
         # Compute achieved d given sample size, power and alpha level
-        if tail == 'two-sided':
+        if alternative == 'two-sided':
             b0, b1 = 1e-07, 10
-        elif tail == 'less':
+        elif alternative == 'less':
             b0, b1 = -10, 5
         else:
             b0, b1 = -5, 10
@@ -211,10 +210,10 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
             return np.nan
 
 
-def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
+def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative='two-sided'):
     """
-    Evaluate power, effect size or  significance level of an independent
-    two-samples T-test with unequal sample sizes.
+    Evaluate power, effect size or  significance level of an independent two-samples T-test
+    with unequal sample sizes.
 
     Parameters
     ----------
@@ -229,9 +228,9 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
     alpha : float
         Significance level (type I error probability).
         The default is 0.05.
-    tail : str
-        Indicates the alternative of the test. Can be either `'two-sided'`,
-        `'greater'` or `'less'`.
+    alternative : string
+        Defines the alternative hypothesis, or tail of the test. Must be one of
+        "two-sided" (default), "greater" or "less".
 
     Notes
     -----
@@ -283,8 +282,7 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
     1. Compute achieved power of a T-test given ``d``, ``n`` and ``alpha``
 
     >>> from pingouin import power_ttest2n
-    >>> print('power: %.4f' % power_ttest2n(nx=20, ny=15, d=0.5,
-    ...                                     tail='greater'))
+    >>> print('power: %.4f' % power_ttest2n(nx=20, ny=15, d=0.5, alternative='greater'))
     power: 0.4164
 
     2. Compute achieved ``d`` given ``n``, ``power`` and ``alpha`` level
@@ -294,8 +292,7 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
 
     3. Compute achieved alpha level given ``d``, ``n`` and ``power``
 
-    >>> print('alpha: %.4f' % power_ttest2n(nx=20, ny=15, d=0.5,
-    ...                                     power=0.80, alpha=None))
+    >>> print('alpha: %.4f' % power_ttest2n(nx=20, ny=15, d=0.5, power=0.80, alpha=None))
     alpha: 0.5000
     """
     # Check the number of arguments that are None
@@ -304,9 +301,9 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
         raise ValueError('Exactly one of d, power, and alpha must be None')
 
     # Safety checks
-    possible_tails = ['two-sided', 'greater', 'less']
-    assert tail in possible_tails, 'Invalid tail argument.'
-    tside = 2 if tail == 'two-sided' else 1
+    assert alternative in ['two-sided', 'greater', 'less'], (
+        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+    tside = 2 if alternative == 'two-sided' else 1
     if d is not None and tside == 2:
         d = abs(d)
     if alpha is not None:
@@ -314,7 +311,7 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
     if power is not None:
         assert 0 < power <= 1
 
-    if tail == 'less':
+    if alternative == 'less':
 
         def func(d, nx, ny, power, alpha):
             dof = nx + ny - 2
@@ -322,7 +319,7 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
             tcrit = stats.t.ppf(alpha / tside, dof)
             return stats.nct.cdf(tcrit, dof, nc)
 
-    elif tail == 'two-sided':
+    elif alternative == 'two-sided':
 
         def func(d, nx, ny, power, alpha):
             dof = nx + ny - 2
@@ -331,7 +328,7 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
             return (stats.nct.sf(tcrit, dof, nc) +
                     stats.nct.cdf(-tcrit, dof, nc))
 
-    else:  # Tail = greater
+    else:  # Alternative = 'greater'
 
         def func(d, nx, ny, power, alpha):
             dof = nx + ny - 2
@@ -346,9 +343,9 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
 
     elif d is None:
         # Compute achieved d given sample size, power and alpha level
-        if tail == 'two-sided':
+        if alternative == 'two-sided':
             b0, b1 = 1e-07, 10
-        elif tail == 'less':
+        elif alternative == 'less':
             b0, b1 = -10, 5
         else:
             b0, b1 = -5, 10
@@ -368,8 +365,7 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, tail='two-sided'):
             return func(d, nx, ny, power, alpha) - power
 
         try:
-            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(d, nx, ny,
-                                                               power))
+            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(d, nx, ny, power))
         except ValueError:  # pragma: no cover
             return np.nan
 
@@ -558,8 +554,7 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
             return np.nan
 
 
-def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05,
-                   corr=0.5, epsilon=1):
+def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05, corr=0.5, epsilon=1):
     """
     Evaluate power, sample size, effect size or
     significance level of a balanced one-way repeated measures ANOVA.
@@ -725,8 +720,7 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05,
     negative. However, it will most likely be positive with real data. Let's
     now compute the final power of the repeated measures ANOVA:
 
-    >>> round(pg.power_rm_anova(eta=0.394, m=m, n=n, epsilon=0.694,
-    ...                         corr=avgcorr), 3)
+    >>> round(pg.power_rm_anova(eta=0.394, m=m, n=n, epsilon=0.694, corr=avgcorr), 3)
     0.855
     """
     # Check the number of arguments that are None
@@ -810,7 +804,7 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05,
             return np.nan
 
 
-def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
+def power_corr(r=None, n=None, power=None, alpha=0.05, alternative='two-sided'):
     """
     Evaluate power, sample size, correlation coefficient or
     significance level of a correlation test.
@@ -826,8 +820,12 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
     alpha : float
         Significance level (type I error probability).
         The default is 0.05.
-    tail : str
-        Indicates whether the test is `'two-sided'` or `'one-sided'`.
+    alternative : string
+        Defines the alternative hypothesis, or tail of the correlation. Must be one of
+        "two-sided" (default), "greater" or "less". Both "greater" and "less" return a one-sided
+        p-value. "greater" tests against the alternative hypothesis that the correlation is
+        positive (greater than zero), "less" tests against the hypothesis that the correlation is
+        negative.
 
     Notes
     -----
@@ -853,21 +851,27 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
     >>> print('power: %.4f' % power_corr(r=0.5, n=20))
     power: 0.6379
 
-    2. Compute required sample size given ``r``, ``power`` and ``alpha``
+    2. Same but one-sided test
 
-    >>> print('n: %.4f' % power_corr(r=0.5, power=0.80,
-    ...                                tail='one-sided'))
-    n: 22.6091
+    >>> print('power: %.4f' % power_corr(r=0.5, n=20, alternative="greater"))
+    power: 0.7510
 
-    3. Compute achieved ``r`` given ``n``, ``power`` and ``alpha`` level
+    >>> print('power: %.4f' % power_corr(r=0.5, n=20, alternative="less"))
+    power: 0.0000
+
+    3. Compute required sample size given ``r``, ``power`` and ``alpha``
+
+    >>> print('n: %.4f' % power_corr(r=0.5, power=0.80))
+    n: 28.2484
+
+    4. Compute achieved ``r`` given ``n``, ``power`` and ``alpha`` level
 
     >>> print('r: %.4f' % power_corr(n=20, power=0.80, alpha=0.05))
     r: 0.5822
 
-    4. Compute achieved alpha level given ``r``, ``n`` and ``power``
+    5. Compute achieved alpha level given ``r``, ``n`` and ``power``
 
-    >>> print('alpha: %.4f' % power_corr(r=0.5, n=20, power=0.80,
-    ...                                    alpha=None))
+    >>> print('alpha: %.4f' % power_corr(r=0.5, n=20, power=0.80, alpha=None))
     alpha: 0.1377
     """
     # Check the number of arguments that are None
@@ -876,9 +880,13 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
         raise ValueError('Exactly one of n, r, power, and alpha must be None')
 
     # Safety checks
+    assert alternative in ['two-sided', 'greater', 'less'], (
+        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+
     if r is not None:
         assert -1 <= r <= 1
-        r = abs(r)
+        if alternative == "two-sided":
+            r = abs(r)
     if alpha is not None:
         assert 0 < alpha <= 1
     if power is not None:
@@ -890,7 +898,7 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
             return np.nan
 
     # Define main function
-    if tail == 'two-sided':
+    if alternative == 'two-sided':
 
         def func(r, n, power, alpha):
             dof = n - 2
@@ -902,9 +910,21 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
                 stats.norm.cdf((-zr - zrc) * np.sqrt(n - 3))
             return power
 
-    else:
+    elif alternative == "greater":
 
         def func(r, n, power, alpha):
+            dof = n - 2
+            ttt = stats.t.ppf(1 - alpha, dof)
+            rc = np.sqrt(ttt**2 / (ttt**2 + dof))
+            zr = np.arctanh(r) + r / (2 * (n - 1))
+            zrc = np.arctanh(rc)
+            power = stats.norm.cdf((zr - zrc) * np.sqrt(n - 3))
+            return power
+
+    else:  # alternative == "less":
+
+        def func(r, n, power, alpha):
+            r = -r
             dof = n - 2
             ttt = stats.t.ppf(1 - alpha, dof)
             rc = np.sqrt(ttt**2 / (ttt**2 + dof))
@@ -936,7 +956,10 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, tail='two-sided'):
             return func(r, n, power, alpha) - power
 
         try:
-            return brenth(_eval_r, 1e-10, 1 - 1e-10, args=(n, power, alpha))
+            if alternative == "two-sided":
+                return brenth(_eval_r, 1e-10, 1 - 1e-10, args=(n, power, alpha))
+            else:
+                return brenth(_eval_r, -1 + 1e-10, 1 - 1e-10, args=(n, power, alpha))
         except ValueError:  # pragma: no cover
             return np.nan
 

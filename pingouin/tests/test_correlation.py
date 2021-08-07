@@ -15,7 +15,7 @@ class TestCorrelation(TestCase):
     def test_corr(self):
         """Test function corr
 
-        Compare to R `correlation` package.
+        Compare to R `correlation` package. See test_correlation.R file.
         """
         np.random.seed(123)
         mean, cov = [4, 6], [(1, .6), (.6, 1)]
@@ -23,16 +23,26 @@ class TestCorrelation(TestCase):
         x2, y2 = x.copy(), y.copy()
         x[3], y[5] = 12, -8
         x2[3], y2[5] = 7, 2.6
+
         # Pearson correlation
         stats = corr(x, y, method='pearson')
         assert np.isclose(stats.loc['pearson', 'r'], 0.1761221)
         assert np.isclose(stats.loc['pearson', 'p-val'], 0.3518659)
         assert stats.loc['pearson', 'CI95%'][0] == round(-0.1966232, 2)
         assert stats.loc['pearson', 'CI95%'][1] == round(0.5043872, 2)
-        # One-sided
-        stats = corr(x, y, method='pearson', tail='one-sided')
+        # - One-sided: greater
+        stats = corr(x, y, method='pearson', alternative='greater')
         assert np.isclose(stats.loc['pearson', 'r'], 0.1761221)
         assert np.isclose(stats.loc['pearson', 'p-val'], 0.175933)
+        assert stats.loc['pearson', 'CI95%'][0] == round(-0.1376942, 2)
+        assert stats.loc['pearson', 'CI95%'][1] == 1
+        # - One-sided: less
+        stats = corr(x, y, method='pearson', alternative='less')
+        assert np.isclose(stats.loc['pearson', 'r'], 0.1761221)
+        assert np.isclose(stats.loc['pearson', 'p-val'], 0.824067)
+        assert stats.loc['pearson', 'CI95%'][0] == -1
+        assert stats.loc['pearson', 'CI95%'][1] == round(0.4578044, 2)
+
         # Spearman correlation
         stats = corr(x, y, method='spearman')
         assert np.isclose(stats.loc['spearman', 'r'], 0.4740823)
@@ -40,6 +50,7 @@ class TestCorrelation(TestCase):
         # CI are calculated using a different formula for Spearman in R
         # assert stats.loc['spearman', 'CI95%'][0] == round(0.1262988, 2)
         # assert stats.loc['spearman', 'CI95%'][1] == round(0.7180799, 2)
+
         # Kendall correlation
         # R uses a different estimation method than scipy for the p-value
         stats = corr(x, y, method='kendall')
@@ -94,6 +105,8 @@ class TestCorrelation(TestCase):
         # Wrong argument
         with pytest.raises(ValueError):
             corr(x, y, method='error')
+        with pytest.raises(ValueError):
+            corr(x, y, tail='error')
         # Compare BF10 with JASP
         df = read_dataset('pairwise_corr')
         stats = corr(df['Neuroticism'], df['Extraversion'])
@@ -134,8 +147,7 @@ class TestCorrelation(TestCase):
         assert round(pc.at['pearson', 'r'], 7) == 0.4926007
         assert round(pc.at['pearson', 'p-val'], 9) == 0.009044164
         # Method == "spearman"
-        pc = partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'],
-                          method="spearman")
+        pc = partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'], method="spearman")
         assert round(pc.at['spearman', 'r'], 7) == 0.5209208
         assert round(pc.at['spearman', 'p-val'], 9) == 0.005336187
 
@@ -161,14 +173,15 @@ class TestCorrelation(TestCase):
         assert round(pc.at['pearson', 'p-val'], 8) == 0.01496857
 
         # Method == "spearman"
-        pc = partial_corr(data=df, x='x', y='y', y_covar=['cv1', 'cv2', 'cv3'],
-                          method="spearman")
+        pc = partial_corr(data=df, x='x', y='y', y_covar=['cv1', 'cv2', 'cv3'], method="spearman")
         assert round(pc.at['spearman', 'r'], 7) == 0.4597143
         assert round(pc.at['spearman', 'p-val'], 8) == 0.01584262
 
         #######################################################################
         # ERROR
         #######################################################################
+        with pytest.raises(ValueError):
+            partial_corr(data=df, x='x', y='y', covar='cv1', tail='error')
         with pytest.raises(ValueError):
             partial_corr(data=df, x='x', y='y', covar='cv2', x_covar='cv1')
         with pytest.raises(ValueError):
@@ -203,7 +216,7 @@ class TestCorrelation(TestCase):
         assert dcor1 == dcor
         assert np.round(dcor, 7) == 0.7626762
         assert 0.25 < pval < 0.40
-        _, pval_low = distance_corr(a, b, seed=9, tail='less')
+        _, pval_low = distance_corr(a, b, seed=9, alternative='less')
         assert pval < pval_low
         # With 2D arrays
         np.random.seed(123)

@@ -16,10 +16,9 @@ __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
 
 
 @pf.register_dataframe_method
-def pairwise_ttests(data=None, dv=None, between=None, within=None,
-                    subject=None, parametric=True, marginal=True, alpha=.05,
-                    tail='two-sided', padjust='none', effsize='hedges',
-                    correction='auto', nan_policy='listwise',
+def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
+                    parametric=True, marginal=True, alpha=.05, alternative='two-sided',
+                    padjust='none', effsize='hedges', correction='auto', nan_policy='listwise',
                     return_desc=False, interaction=True, within_first=True):
     """Pairwise T-tests.
 
@@ -58,13 +57,11 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         .. versionadded:: 0.3.2
     alpha : float
         Significance level
-    tail : string
-        Specify whether the alternative hypothesis is `'two-sided'` or
-        `'one-sided'`. Can also be `'greater'` or `'less'` to specify the
-        direction of the test. `'greater'` tests the alternative that ``x``
-        has a larger mean than ``y``. If tail is `'one-sided'`, Pingouin will
-        automatically infer the one-sided alternative hypothesis of the test
-        based on the test statistic.
+    alternative : string
+        Defines the alternative hypothesis, or tail of the test. Must be one of
+        "two-sided" (default), "greater" or "less". Both "greater" and "less" return one-sided
+        p-values. "greater" tests against the alternative hypothesis that the mean of ``x``
+        is greater than the mean of ``y``.
     padjust : string
         Method used for testing and adjustment of pvalues.
 
@@ -123,12 +120,12 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         * ``'Paired'``: indicates whether the two measurements are paired or
           independent
         * ``'Parametric'``: indicates if (non)-parametric tests were used
-        * ``'Tail'``: indicate whether the p-values are one-sided or two-sided
         * ``'T'``: T statistic (only if parametric=True)
         * ``'U-val'``: Mann-Whitney U stat (if parametric=False and unpaired
           data)
         * ``'W-val'``: Wilcoxon W stat (if parametric=False and paired data)
         * ``'dof'``: degrees of freedom (only if parametric=True)
+        * ``'alternative'``: tail of the test
         * ``'p-unc'``: Uncorrected p-values
         * ``'p-corr'``: Corrected p-values
         * ``'p-adjust'``: p-values correction method
@@ -190,68 +187,65 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     >>> pd.set_option('max_columns', 20)
     >>> df = pg.read_dataset('mixed_anova.csv')
     >>> pg.pairwise_ttests(dv='Scores', between='Group', data=df).round(3)
-      Contrast        A           B  Paired  Parametric     T    dof       Tail  p-unc   BF10  hedges
-    0    Group  Control  Meditation   False        True -2.29  178.0  two-sided  0.023  1.813   -0.34
+      Contrast        A           B  Paired  Parametric     T    dof alternative  p-unc   BF10  hedges
+    0    Group  Control  Meditation   False        True -2.29  178.0   two-sided  0.023  1.813   -0.34
 
     2. One within-subject factor
 
-    >>> post_hocs = pg.pairwise_ttests(dv='Scores', within='Time',
-    ...                                subject='Subject', data=df)
+    >>> post_hocs = pg.pairwise_ttests(dv='Scores', within='Time', subject='Subject', data=df)
     >>> post_hocs.round(3)
-      Contrast        A        B  Paired  Parametric      T   dof       Tail  p-unc   BF10  hedges
-    0     Time   August  January    True        True -1.740  59.0  two-sided  0.087  0.582  -0.328
-    1     Time   August     June    True        True -2.743  59.0  two-sided  0.008  4.232  -0.483
-    2     Time  January     June    True        True -1.024  59.0  two-sided  0.310  0.232  -0.170
+      Contrast        A        B  Paired  Parametric      T   dof alternative  p-unc   BF10  hedges
+    0     Time   August  January    True        True -1.740  59.0   two-sided  0.087  0.582  -0.328
+    1     Time   August     June    True        True -2.743  59.0   two-sided  0.008  4.232  -0.483
+    2     Time  January     June    True        True -1.024  59.0   two-sided  0.310  0.232  -0.170
 
     3. Non-parametric pairwise paired test (wilcoxon)
 
     >>> pg.pairwise_ttests(dv='Scores', within='Time', subject='Subject',
     ...                    data=df, parametric=False).round(3)
-      Contrast        A        B  Paired  Parametric  W-val       Tail  p-unc  hedges
-    0     Time   August  January    True       False  716.0  two-sided  0.144  -0.328
-    1     Time   August     June    True       False  564.0  two-sided  0.010  -0.483
-    2     Time  January     June    True       False  887.0  two-sided  0.840  -0.170
+      Contrast        A        B  Paired  Parametric  W-val alternative  p-unc  hedges
+    0     Time   August  January    True       False  716.0   two-sided  0.144  -0.328
+    1     Time   August     June    True       False  564.0   two-sided  0.010  -0.483
+    2     Time  January     June    True       False  887.0   two-sided  0.840  -0.170
 
     4. Mixed design (within and between) with bonferroni-corrected p-values
 
-    >>> posthocs = pg.pairwise_ttests(dv='Scores', within='Time',
-    ...                               subject='Subject', between='Group',
-    ...                               padjust='bonf', data=df)
+    >>> posthocs = pg.pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+    ...                               between='Group', padjust='bonf', data=df)
     >>> posthocs.round(3)
-           Contrast     Time        A           B Paired  Parametric      T   dof       Tail  p-unc  p-corr p-adjust   BF10  hedges
-    0          Time        -   August     January   True        True -1.740  59.0  two-sided  0.087   0.261     bonf  0.582  -0.328
-    1          Time        -   August        June   True        True -2.743  59.0  two-sided  0.008   0.024     bonf  4.232  -0.483
-    2          Time        -  January        June   True        True -1.024  59.0  two-sided  0.310   0.931     bonf  0.232  -0.170
-    3         Group        -  Control  Meditation  False        True -2.248  58.0  two-sided  0.028     NaN      NaN  2.096  -0.573
-    4  Time * Group   August  Control  Meditation  False        True  0.316  58.0  two-sided  0.753   1.000     bonf  0.274   0.081
-    5  Time * Group  January  Control  Meditation  False        True -1.434  58.0  two-sided  0.157   0.471     bonf  0.619  -0.365
-    6  Time * Group     June  Control  Meditation  False        True -2.744  58.0  two-sided  0.008   0.024     bonf  5.593  -0.699
+           Contrast     Time        A           B Paired  Parametric      T   dof alternative  p-unc  p-corr p-adjust   BF10  hedges
+    0          Time        -   August     January   True        True -1.740  59.0   two-sided  0.087   0.261     bonf  0.582  -0.328
+    1          Time        -   August        June   True        True -2.743  59.0   two-sided  0.008   0.024     bonf  4.232  -0.483
+    2          Time        -  January        June   True        True -1.024  59.0   two-sided  0.310   0.931     bonf  0.232  -0.170
+    3         Group        -  Control  Meditation  False        True -2.248  58.0   two-sided  0.028     NaN      NaN  2.096  -0.573
+    4  Time * Group   August  Control  Meditation  False        True  0.316  58.0   two-sided  0.753   1.000     bonf  0.274   0.081
+    5  Time * Group  January  Control  Meditation  False        True -1.434  58.0   two-sided  0.157   0.471     bonf  0.619  -0.365
+    6  Time * Group     June  Control  Meditation  False        True -2.744  58.0   two-sided  0.008   0.024     bonf  5.593  -0.699
 
-    5. Two between-subject factors. The order of the list matters!
+    5. Two between-subject factors. The order of the ``between`` factors matters!
 
-    >>> pg.pairwise_ttests(dv='Scores', between=['Group', 'Time'],
-    ...                    data=df).round(3)
-           Contrast       Group        A           B Paired  Parametric      T    dof       Tail  p-unc     BF10  hedges
-    0         Group           -  Control  Meditation  False        True -2.290  178.0  two-sided  0.023    1.813  -0.340
-    1          Time           -   August     January  False        True -1.806  118.0  two-sided  0.074    0.839  -0.328
-    2          Time           -   August        June  False        True -2.660  118.0  two-sided  0.009    4.499  -0.483
-    3          Time           -  January        June  False        True -0.934  118.0  two-sided  0.352    0.288  -0.170
-    4  Group * Time     Control   August     January  False        True -0.383   58.0  two-sided  0.703    0.279  -0.098
-    5  Group * Time     Control   August        June  False        True -0.292   58.0  two-sided  0.771    0.272  -0.074
-    6  Group * Time     Control  January        June  False        True  0.045   58.0  two-sided  0.964    0.263   0.011
-    7  Group * Time  Meditation   August     January  False        True -2.188   58.0  two-sided  0.033    1.884  -0.558
-    8  Group * Time  Meditation   August        June  False        True -4.040   58.0  two-sided  0.000  148.302  -1.030
-    9  Group * Time  Meditation  January        June  False        True -1.442   58.0  two-sided  0.155    0.625  -0.367
+    >>> pg.pairwise_ttests(dv='Scores', between=['Group', 'Time'], data=df).round(3)
+           Contrast       Group        A           B Paired  Parametric      T    dof alternative  p-unc     BF10  hedges
+    0         Group           -  Control  Meditation  False        True -2.290  178.0   two-sided  0.023    1.813  -0.340
+    1          Time           -   August     January  False        True -1.806  118.0   two-sided  0.074    0.839  -0.328
+    2          Time           -   August        June  False        True -2.660  118.0   two-sided  0.009    4.499  -0.483
+    3          Time           -  January        June  False        True -0.934  118.0   two-sided  0.352    0.288  -0.170
+    4  Group * Time     Control   August     January  False        True -0.383   58.0   two-sided  0.703    0.279  -0.098
+    5  Group * Time     Control   August        June  False        True -0.292   58.0   two-sided  0.771    0.272  -0.074
+    6  Group * Time     Control  January        June  False        True  0.045   58.0   two-sided  0.964    0.263   0.011
+    7  Group * Time  Meditation   August     January  False        True -2.188   58.0   two-sided  0.033    1.884  -0.558
+    8  Group * Time  Meditation   August        June  False        True -4.040   58.0   two-sided  0.000  148.302  -1.030
+    9  Group * Time  Meditation  January        June  False        True -1.442   58.0   two-sided  0.155    0.625  -0.367
 
-    6. Same but without the interaction
+    6. Same but without the interaction, and using a directional test
 
-    >>> df.pairwise_ttests(dv='Scores', between=['Group', 'Time'],
+    >>> df.pairwise_ttests(dv='Scores', between=['Group', 'Time'], alternative="less",
     ...                    interaction=False).round(3)
-      Contrast        A           B  Paired  Parametric      T    dof       Tail  p-unc   BF10  hedges
-    0    Group  Control  Meditation   False        True -2.290  178.0  two-sided  0.023  1.813  -0.340
-    1     Time   August     January   False        True -1.806  118.0  two-sided  0.074  0.839  -0.328
-    2     Time   August        June   False        True -2.660  118.0  two-sided  0.009  4.499  -0.483
-    3     Time  January        June   False        True -0.934  118.0  two-sided  0.352  0.288  -0.170
+      Contrast        A           B  Paired  Parametric      T    dof alternative  p-unc   BF10  hedges
+    0    Group  Control  Meditation   False        True -2.290  178.0        less  0.012  3.626  -0.340
+    1     Time   August     January   False        True -1.806  118.0        less  0.037  1.679  -0.328
+    2     Time   August        June   False        True -2.660  118.0        less  0.004  8.998  -0.483
+    3     Time  January        June   False        True -0.934  118.0        less  0.176  0.577  -0.170
     """
     from .parametric import ttest
     from .nonparametric import wilcoxon, mwu
@@ -259,7 +253,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     # Safety checks
     _check_dataframe(dv=dv, between=between, within=within, subject=subject,
                      effects='all', data=data)
-    assert tail in ['one-sided', 'two-sided', 'greater', 'less']
+    assert alternative in ['two-sided', 'greater', 'less'], (
+        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
     assert isinstance(alpha, float), 'alpha must be float.'
     assert nan_policy in ['listwise', 'pairwise']
 
@@ -302,7 +297,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
     # Reorganize column order
     col_order = ['Contrast', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
                  'std(B)', 'Paired', 'Parametric', 'T', 'U-val', 'W-val',
-                 'dof', 'Tail', 'p-unc', 'p-corr', 'p-adjust', 'BF10',
+                 'dof', 'alternative', 'p-unc', 'p-corr', 'p-adjust', 'BF10',
                  effsize]
 
     if contrast in ['simple_within', 'simple_between']:
@@ -354,7 +349,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                              columns=col_order)
 
         # Force dtype conversion
-        cols_str = ['Contrast', 'Time', 'A', 'B', 'Tail', 'p-adjust', 'BF10']
+        cols_str = ['Contrast', 'Time', 'A', 'B', 'alternative', 'p-adjust', 'BF10']
         cols_bool = ['Parametric', 'Paired']
         stats[cols_str] = stats[cols_str].astype(object)
         stats[cols_bool] = stats[cols_bool].astype(bool)
@@ -363,7 +358,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
         stats.loc[:, 'A'] = A
         stats.loc[:, 'B'] = B
         stats.loc[:, 'Contrast'] = col
-        stats.loc[:, 'Tail'] = tail
+        stats.loc[:, 'alternative'] = alternative
         stats.loc[:, 'Paired'] = paired
 
         # For max precision, make sure rounding is disabled
@@ -376,17 +371,17 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             y = grp_col.get_group(col2).to_numpy(dtype=np.float64)
             if parametric:
                 stat_name = 'T'
-                df_ttest = ttest(x, y, paired=paired, tail=tail,
+                df_ttest = ttest(x, y, paired=paired, alternative=alternative,
                                  correction=correction)
                 stats.at[i, 'BF10'] = df_ttest.at['T-test', 'BF10']
                 stats.at[i, 'dof'] = df_ttest.at['T-test', 'dof']
             else:
                 if paired:
                     stat_name = 'W-val'
-                    df_ttest = wilcoxon(x, y, tail=tail)
+                    df_ttest = wilcoxon(x, y, alternative=alternative)
                 else:
                     stat_name = 'U-val'
-                    df_ttest = mwu(x, y, tail=tail)
+                    df_ttest = mwu(x, y, alternative=alternative)
 
             options.update(old_options)  # restore options
 
@@ -467,7 +462,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                                                  parametric=parametric,
                                                  marginal=marginal,
                                                  alpha=alpha,
-                                                 tail=tail,
+                                                 alternative=alternative,
                                                  padjust=padjust,
                                                  effsize=effsize,
                                                  correction=correction,
@@ -508,7 +503,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
             stats.loc[idxiter, 'Contrast'] = factors[0] + ' * ' + factors[1]
             stats.loc[idxiter, 'Time'] = combs[:, 0]
             stats.loc[idxiter, 'Paired'] = paired
-            stats.loc[idxiter, 'Tail'] = tail
+            stats.loc[idxiter, 'alternative'] = alternative
             stats.loc[idxiter, 'A'] = combs[:, 1]
             stats.loc[idxiter, 'B'] = combs[:, 2]
 
@@ -524,17 +519,17 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None,
                 ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
                 if parametric:
                     stat_name = 'T'
-                    df_ttest = ttest(x, y, paired=paired, tail=tail,
+                    df_ttest = ttest(x, y, paired=paired, alternative=alternative,
                                      correction=correction)
                     stats.at[ic, 'BF10'] = df_ttest.at['T-test', 'BF10']
                     stats.at[ic, 'dof'] = df_ttest.at['T-test', 'dof']
                 else:
                     if paired:
                         stat_name = 'W-val'
-                        df_ttest = wilcoxon(x, y, tail=tail)
+                        df_ttest = wilcoxon(x, y, alternative=alternative)
                     else:
                         stat_name = 'U-val'
-                        df_ttest = mwu(x, y, tail=tail)
+                        df_ttest = mwu(x, y, alternative=alternative)
 
                 options.update(old_options)  # restore options
 
@@ -900,7 +895,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
 
 
 @pf.register_dataframe_method
-def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
+def pairwise_corr(data, columns=None, covar=None, alternative='two-sided',
                   method='pearson', padjust='none', nan_policy='pairwise'):
     """Pairwise (partial) correlations between columns of a pandas dataframe.
 
@@ -931,9 +926,12 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
 
         .. important:: Only ``method='pearson'`` and ``method='spearman'``
             are currently supported in partial correlation.
-    tail : string
-        Specify whether to return ``'one-sided'`` or ``'two-sided'`` p-value.
-        Note that the former are simply half the latter.
+    alternative : string
+        Defines the alternative hypothesis, or tail of the correlation. Must be one of
+        "two-sided" (default), "greater" or "less". Both "greater" and "less" return a one-sided
+        p-value. "greater" tests against the alternative hypothesis that the correlation is
+        positive (greater than zero), "less" tests against the hypothesis that the correlation is
+        negative.
     method : string
         Correlation type:
 
@@ -968,17 +966,15 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
         * ``'X'``: Name(s) of first columns.
         * ``'Y'``: Name(s) of second columns.
         * ``'method'``: Correlation type.
-        * ``'covar'``: List of specified covariate(s), only when covariates
-          are passed.
-        * ``'tail'``: Tail of the test.
+        * ``'covar'``: List of specified covariate(s), only when covariates are passed.
+        * ``'alternative'``: Tail of the test.
         * ``'n'``: Sample size (after removal of missing values).
         * ``'r'``: Correlation coefficients.
         * ``'CI95'``: 95% parametric confidence intervals.
         * ``'p-unc'``: Uncorrected p-values.
         * ``'p-corr'``: Corrected p-values.
         * ``'p-adjust'``: P-values correction method.
-        * ``'BF10'``: Bayes Factor of the alternative hypothesis
-          (only for Pearson correlation)
+        * ``'BF10'``: Bayes Factor of the alternative hypothesis (only for Pearson correlation)
         * ``'power'``: achieved power of the test (= 1 - type II error).
 
     Notes
@@ -1020,46 +1016,45 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     >>> pd.set_option('expand_frame_repr', False)
     >>> pd.set_option('max_columns', 20)
     >>> data = pg.read_dataset('pairwise_corr').iloc[:, 1:]
-    >>> pg.pairwise_corr(data, method='spearman', tail='one-sided',
-    ...                  padjust='bonf').round(3)
-                   X                  Y    method       tail    n      r           CI95%  p-unc  p-corr p-adjust  power
-    0    Neuroticism       Extraversion  spearman  one-sided  500 -0.325   [-0.4, -0.24]  0.000   0.000     bonf  1.000
-    1    Neuroticism           Openness  spearman  one-sided  500 -0.028   [-0.12, 0.06]  0.265   1.000     bonf  0.154
-    2    Neuroticism      Agreeableness  spearman  one-sided  500 -0.151  [-0.24, -0.06]  0.000   0.004     bonf  0.959
-    3    Neuroticism  Conscientiousness  spearman  one-sided  500 -0.356  [-0.43, -0.28]  0.000   0.000     bonf  1.000
-    4   Extraversion           Openness  spearman  one-sided  500  0.243    [0.16, 0.32]  0.000   0.000     bonf  1.000
-    5   Extraversion      Agreeableness  spearman  one-sided  500  0.062   [-0.03, 0.15]  0.083   0.832     bonf  0.398
-    6   Extraversion  Conscientiousness  spearman  one-sided  500  0.056   [-0.03, 0.14]  0.106   1.000     bonf  0.345
-    7       Openness      Agreeableness  spearman  one-sided  500  0.170    [0.08, 0.25]  0.000   0.001     bonf  0.985
-    8       Openness  Conscientiousness  spearman  one-sided  500 -0.007   [-0.09, 0.08]  0.440   1.000     bonf  0.068
-    9  Agreeableness  Conscientiousness  spearman  one-sided  500  0.161    [0.07, 0.24]  0.000   0.002     bonf  0.976
+    >>> pg.pairwise_corr(data, method='spearman', alternative='greater', padjust='bonf').round(3)
+                   X                  Y    method alternative    n      r         CI95%  p-unc  p-corr p-adjust  power
+    0    Neuroticism       Extraversion  spearman     greater  500 -0.325  [-0.39, 1.0]  1.000   1.000     bonf  0.000
+    1    Neuroticism           Openness  spearman     greater  500 -0.028   [-0.1, 1.0]  0.735   1.000     bonf  0.012
+    2    Neuroticism      Agreeableness  spearman     greater  500 -0.151  [-0.22, 1.0]  1.000   1.000     bonf  0.000
+    3    Neuroticism  Conscientiousness  spearman     greater  500 -0.356  [-0.42, 1.0]  1.000   1.000     bonf  0.000
+    4   Extraversion           Openness  spearman     greater  500  0.243   [0.17, 1.0]  0.000   0.000     bonf  1.000
+    5   Extraversion      Agreeableness  spearman     greater  500  0.062  [-0.01, 1.0]  0.083   0.832     bonf  0.398
+    6   Extraversion  Conscientiousness  spearman     greater  500  0.056  [-0.02, 1.0]  0.106   1.000     bonf  0.345
+    7       Openness      Agreeableness  spearman     greater  500  0.170    [0.1, 1.0]  0.000   0.001     bonf  0.985
+    8       Openness  Conscientiousness  spearman     greater  500 -0.007  [-0.08, 1.0]  0.560   1.000     bonf  0.036
+    9  Agreeableness  Conscientiousness  spearman     greater  500  0.161   [0.09, 1.0]  0.000   0.002     bonf  0.976
 
     2. Robust two-sided biweight midcorrelation with uncorrected p-values
 
     >>> pcor = pg.pairwise_corr(data, columns=['Openness', 'Extraversion',
     ...                                        'Neuroticism'], method='bicor')
     >>> pcor.round(3)
-                  X             Y method       tail    n      r           CI95%  p-unc  power
-    0      Openness  Extraversion  bicor  two-sided  500  0.247    [0.16, 0.33]  0.000  1.000
-    1      Openness   Neuroticism  bicor  two-sided  500 -0.028   [-0.12, 0.06]  0.535  0.095
-    2  Extraversion   Neuroticism  bicor  two-sided  500 -0.343  [-0.42, -0.26]  0.000  1.000
+                  X             Y method alternative    n      r           CI95%  p-unc  power
+    0      Openness  Extraversion  bicor   two-sided  500  0.247    [0.16, 0.33]  0.000  1.000
+    1      Openness   Neuroticism  bicor   two-sided  500 -0.028   [-0.12, 0.06]  0.535  0.095
+    2  Extraversion   Neuroticism  bicor   two-sided  500 -0.343  [-0.42, -0.26]  0.000  1.000
 
     3. One-versus-all pairwise correlations
 
     >>> pg.pairwise_corr(data, columns=['Neuroticism']).round(3)
-                 X                  Y   method       tail    n      r           CI95%  p-unc       BF10  power
-    0  Neuroticism       Extraversion  pearson  two-sided  500 -0.350  [-0.42, -0.27]  0.000  6.765e+12  1.000
-    1  Neuroticism           Openness  pearson  two-sided  500 -0.010    [-0.1, 0.08]  0.817      0.058  0.056
-    2  Neuroticism      Agreeableness  pearson  two-sided  500 -0.134  [-0.22, -0.05]  0.003      5.122  0.854
-    3  Neuroticism  Conscientiousness  pearson  two-sided  500 -0.368  [-0.44, -0.29]  0.000  2.644e+14  1.000
+                 X                  Y   method alternative    n      r           CI95%  p-unc       BF10  power
+    0  Neuroticism       Extraversion  pearson   two-sided  500 -0.350  [-0.42, -0.27]  0.000  6.765e+12  1.000
+    1  Neuroticism           Openness  pearson   two-sided  500 -0.010    [-0.1, 0.08]  0.817      0.058  0.056
+    2  Neuroticism      Agreeableness  pearson   two-sided  500 -0.134  [-0.22, -0.05]  0.003      5.122  0.854
+    3  Neuroticism  Conscientiousness  pearson   two-sided  500 -0.368  [-0.44, -0.29]  0.000  2.644e+14  1.000
 
     4. Pairwise correlations between two lists of columns (cartesian product)
 
     >>> columns = [['Neuroticism', 'Extraversion'], ['Openness']]
     >>> pg.pairwise_corr(data, columns).round(3)
-                  X         Y   method       tail    n      r         CI95%  p-unc       BF10  power
-    0   Neuroticism  Openness  pearson  two-sided  500 -0.010  [-0.1, 0.08]  0.817      0.058  0.056
-    1  Extraversion  Openness  pearson  two-sided  500  0.267  [0.18, 0.35]  0.000  5.277e+06  1.000
+                  X         Y   method alternative    n      r         CI95%  p-unc       BF10  power
+    0   Neuroticism  Openness  pearson   two-sided  500 -0.010  [-0.1, 0.08]  0.817      0.058  0.056
+    1  Extraversion  Openness  pearson   two-sided  500  0.267  [0.18, 0.35]  0.000  5.277e+06  1.000
 
     5. As a Pandas method
 
@@ -1068,10 +1063,10 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     6. Pairwise partial correlation
 
     >>> pg.pairwise_corr(data, covar=['Neuroticism', 'Openness'])
-                   X                  Y   method                        covar       tail    n         r          CI95%     p-unc
-    0   Extraversion      Agreeableness  pearson  ['Neuroticism', 'Openness']  two-sided  500 -0.038737  [-0.13, 0.05]  0.388361
-    1   Extraversion  Conscientiousness  pearson  ['Neuroticism', 'Openness']  two-sided  500 -0.071427  [-0.16, 0.02]  0.111389
-    2  Agreeableness  Conscientiousness  pearson  ['Neuroticism', 'Openness']  two-sided  500  0.123108   [0.04, 0.21]  0.005944
+                   X                  Y   method                        covar alternative    n         r          CI95%     p-unc
+    0   Extraversion      Agreeableness  pearson  ['Neuroticism', 'Openness']   two-sided  500 -0.038737  [-0.13, 0.05]  0.388361
+    1   Extraversion  Conscientiousness  pearson  ['Neuroticism', 'Openness']   two-sided  500 -0.071427  [-0.16, 0.02]  0.111389
+    2  Agreeableness  Conscientiousness  pearson  ['Neuroticism', 'Openness']   two-sided  500  0.123108   [0.04, 0.21]  0.005944
 
     7. Pairwise partial correlation matrix using :py:func:`pingouin.pcorr`
 
@@ -1092,7 +1087,8 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     from pingouin.correlation import corr, partial_corr
 
     # Check arguments
-    assert tail in ['one-sided', 'two-sided']
+    assert alternative in ['two-sided', 'greater', 'less'], (
+        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
     assert nan_policy in ['listwise', 'pairwise']
 
     # Keep only numeric columns
@@ -1183,9 +1179,9 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     else:
         X = combs[:, 0]
         Y = combs[:, 1]
-    stats = pd.DataFrame({'X': X, 'Y': Y, 'method': method, 'tail': tail},
+    stats = pd.DataFrame({'X': X, 'Y': Y, 'method': method, 'alternative': alternative},
                          index=range(len(combs)),
-                         columns=['X', 'Y', 'method', 'tail', 'n', 'outliers',
+                         columns=['X', 'Y', 'method', 'alternative', 'n', 'outliers',
                                   'r', 'CI95%', 'p-val', 'BF10', 'power'])
 
     # Now we check if covariates are present
@@ -1226,10 +1222,10 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
         col1, col2 = stats.at[i, 'X'], stats.at[i, 'Y']
         if covar is None:
             cor_st = corr(data[col1].to_numpy(), data[col2].to_numpy(),
-                          tail=tail, method=method)
+                          alternative=alternative, method=method)
         else:
             cor_st = partial_corr(data=data, x=col1, y=col2, covar=covar,
-                                  tail=tail, method=method)
+                                  alternative=alternative, method=method)
         cor_st_keys = cor_st.columns.tolist()
 
         for c in cor_st_keys:
@@ -1257,7 +1253,7 @@ def pairwise_corr(data, columns=None, covar=None, tail='two-sided',
     # Standardize correlation coefficients (Fisher z-transformation)
     # stats['z'] = np.arctanh(stats['r'].to_numpy())
 
-    col_order = ['X', 'Y', 'method', 'tail', 'n', 'outliers', 'r', 'CI95%',
+    col_order = ['X', 'Y', 'method', 'alternative', 'n', 'outliers', 'r', 'CI95%',
                  'p-unc', 'p-corr', 'p-adjust', 'BF10', 'power']
 
     # Reorder columns and remove empty ones

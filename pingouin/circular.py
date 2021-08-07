@@ -10,8 +10,7 @@ from scipy.stats import norm
 
 from .utils import remove_na
 
-__all__ = ["convert_angles", "circ_axial",
-           "circ_mean", "circ_r", "circ_corrcc", "circ_corrcl",
+__all__ = ["convert_angles", "circ_axial", "circ_mean", "circ_r", "circ_corrcc", "circ_corrcl",
            "circ_rayleigh", "circ_vtest"]
 
 
@@ -448,7 +447,7 @@ def circ_r(angles, w=None, d=None, axis=0):
 # INFERENTIAL STATISTICS
 ###############################################################################
 
-def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
+def circ_corrcc(x, y, correction_uniform=False):
     """Correlation coefficient between two circular variables.
 
     Parameters
@@ -457,8 +456,6 @@ def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
         First circular variable (expressed in radians).
     y : 1-D array_like
         Second circular variable (expressed in radians).
-    tail : string
-        Specify whether to return 'one-sided' or 'two-sided' p-value.
     correction_uniform : bool
         Use correction for uniform marginals.
 
@@ -542,11 +539,10 @@ def circ_corrcc(x, y, tail='two-sided', correction_uniform=False):
 
     # Approximately distributed as a standard normal
     pval = 2 * norm.sf(abs(tval))
-    pval = pval / 2 if tail == 'one-sided' else pval
     return r, pval
 
 
-def circ_corrcl(x, y, tail='two-sided'):
+def circ_corrcl(x, y):
     """Correlation coefficient between one circular and one linear variable
     random variables.
 
@@ -561,8 +557,6 @@ def circ_corrcl(x, y, tail='two-sided'):
         function.
     y : 1-D array_like
         Second circular variable (linear)
-    tail : string
-        Specify whether to return 'one-sided' or 'two-sided' p-value.
 
     Returns
     -------
@@ -605,7 +599,6 @@ def circ_corrcl(x, y, tail='two-sided'):
 
     # Compute p-value
     pval = chi2.sf(n * r**2, 2)
-    pval = pval / 2 if tail == 'one-sided' else pval
     return r, pval
 
 

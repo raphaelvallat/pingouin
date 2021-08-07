@@ -42,10 +42,10 @@ class TestBayesian(TestCase):
         assert int(float(ttest(x, z).at['T-test', 'BF10'])) == 1290
         assert int(float(ttest(x, z, paired=True).at['T-test', 'BF10'])) == 420
         # Now check the alternative tails
-        assert bayesfactor_ttest(3.5, 20, 20, tail='greater') > 1
-        assert bayesfactor_ttest(3.5, 20, 20, tail='less') < 1
-        assert bayesfactor_ttest(-3.5, 20, 20, tail='greater') < 1
-        assert bayesfactor_ttest(-3.5, 20, 20, tail='less') > 1
+        assert bayesfactor_ttest(3.5, 20, 20, alternative='greater') > 1
+        assert bayesfactor_ttest(3.5, 20, 20, alternative='less') < 1
+        assert bayesfactor_ttest(-3.5, 20, 20, alternative='greater') < 1
+        assert bayesfactor_ttest(-3.5, 20, 20, alternative='less') > 1
         # Check with wrong T-value
         assert np.isnan(bayesfactor_ttest(np.nan, 20, paired=True))
 
@@ -57,26 +57,21 @@ class TestBayesian(TestCase):
         # (as this is how we store the values here)
         assert bfp(0.1, 83) == appr(0.204)
         assert bfp(-0.1, 83) == appr(0.204)
-        assert bfp(0.1, 83, tail='one-sided') == appr(0.332)
-        assert bfp(0.1, 83, tail='greater') == appr(0.332)
-        assert bfp(0.1, 83, tail='pos') == appr(0.332)
-        assert bfp(0.1, 83, tail='less') == appr(0.076)
-        assert bfp(0.1, 83, tail='neg') == appr(0.076)
-        assert bfp(-0.1, 83, tail='one-sided') == appr(0.332)
-        assert bfp(-0.1, 83, tail='pos') == appr(0.076)
+        assert bfp(0.1, 83, alternative='greater') == appr(0.332)
+        assert bfp(0.1, 83, alternative='less') == appr(0.076)
 
         # Example 2. Compare with JASP.
         r, _ = pearsonr(x, y)
         n = 100
         assert bfp(r, n) == appr(0.174)
-        assert bfp(r, n, tail='g') == appr(0.275)
-        assert bfp(r, n, tail='g', method='wetzels') == appr(0.275)
-        assert bfp(r, n, tail='l') == appr(0.073)
+        assert bfp(r, n, alternative='greater') == appr(0.275)
+        assert bfp(r, n, alternative='greater', method='wetzels') == appr(0.275)
+        assert bfp(r, n, alternative='less') == appr(0.073)
         r, _ = pearsonr(v, w)
         # relative tolerance here
         assert bfp(r, n) == appr(2.321e+22, rel=True)
-        assert bfp(r, n, tail='g') == appr(4.643e+22, rel=True)
-        # assert bfp(r, n, tail='l')) == 1.677e-26
+        assert bfp(r, n, alternative='greater') == appr(4.643e+22, rel=True)
+        # assert bfp(r, n, alternative='less')) == 1.677e-26
 
         # Compare the integral solving method (Wetzels)
         # In R:

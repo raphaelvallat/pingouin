@@ -11,9 +11,8 @@ __all__ = ["compute_esci", "compute_bootci", "convert_effsize",
 
 
 def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
-                 confidence=.95, decimals=2):
-    """Parametric confidence intervals around a Cohen d or a
-    correlation coefficient.
+                 confidence=.95, decimals=2, alternative="two-sided"):
+    """Parametric confidence intervals around a Cohen d or a correlation coefficient.
 
     Parameters
     ----------
@@ -26,12 +25,15 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
         Indicates if the effect size was estimated from a paired sample.
         This is only relevant for cohen or hedges effect size.
     eftype : string
-        Effect size type. Must be ``'r'`` (correlation) or ``'cohen'``
-        (Cohen d or Hedges g).
+        Effect size type. Must be "r" (correlation) or "cohen" (Cohen d or Hedges g).
     confidence : float
         Confidence level (0.95 = 95%)
     decimals : int
         Number of rounded decimals.
+    alternative : string
+        Defines the alternative hypothesis, or tail for the correlation coefficient. Must be one of
+        "two-sided" (default), "greater" or "less". This parameter only has an effect if ``eftype``
+        is "r".
 
     Returns
     -------
@@ -125,8 +127,9 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
     0.1538 [-0.737  1.045]
     """
     from scipy.stats import norm, t
-    assert eftype.lower() in ['r', 'pearson', 'spearman', 'cohen',
-                              'd', 'g', 'hedges']
+    assert eftype.lower() in ['r', 'pearson', 'spearman', 'cohen', 'd', 'g', 'hedges']
+    assert alternative in ['two-sided', 'greater', 'less'], (
+        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
     assert stat is not None and nx is not None
     assert isinstance(confidence, float)
     assert 0 < confidence < 1, 'confidence must be between 0 and 1.'
@@ -134,8 +137,16 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
     if eftype.lower() in ['r', 'pearson', 'spearman']:
         z = np.arctanh(stat)  # R-to-z transform
         se = 1 / np.sqrt(nx - 3)
-        crit = np.abs(norm.ppf((1 - confidence) / 2))
-        ci_z = np.array([z - crit * se, z + crit * se])
+        # See https://github.com/SurajGupta/r-source/blob/master/src/library/stats/R/cor.test.R
+        if alternative == "two-sided":
+            crit = np.abs(norm.ppf((1 - confidence) / 2))
+            ci_z = np.array([z - crit * se, z + crit * se])
+        elif alternative == "greater":
+            crit = norm.ppf(confidence)
+            ci_z = np.array([z - crit * se, np.inf])
+        else:  # alternative = "less"
+            crit = norm.ppf(confidence)
+            ci_z = np.array([-np.inf, z + crit * se])
         ci = np.tanh(ci_z)  # Transform back to r
     else:
         # Cohen d. Results are different than JASP which uses a non-central T

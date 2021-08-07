@@ -8,11 +8,10 @@ from pingouin import (_check_dataframe, remove_rm_na, remove_na, _flatten_list,
                       bayesfactor_ttest, epsilon, sphericity,
                       _postprocess_dataframe)
 
-__all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova",
-           "ancova"]
+__all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova", "ancova"]
 
 
-def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707,
+def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707,
           confidence=0.95):
     """T-test.
 
@@ -27,13 +26,11 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707,
     paired : boolean
         Specify whether the two observations are related (i.e. repeated
         measures) or independent.
-    tail : string
-        Specify whether the alternative hypothesis is `'two-sided'` or
-        `'one-sided'`. Can also be `'greater'` or `'less'` to specify the
-        direction of the test. `'greater'` tests the alternative that ``x``
-        has a larger mean than ``y``. If tail is `'one-sided'`, Pingouin will
-        automatically infer the one-sided alternative hypothesis based on the
-        test statistic.
+    alternative : string
+        Defines the alternative hypothesis, or tail of the test. Must be one of
+        "two-sided" (default), "greater" or "less". Both "greater" and "less" return one-sided
+        p-values. "greater" tests against the alternative hypothesis that the mean of ``x``
+        is greater than the mean of ``y``.
     correction : string or boolean
         For unpaired two sample T-tests, specify whether or not to correct for
         unequal variances using Welch separate variances T-test. If 'auto', it
@@ -55,12 +52,13 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707,
     stats : :py:class:`pandas.DataFrame`
 
         * ``'T'``: T-value
-        * ``'p-val'``: p-value
         * ``'dof'``: degrees of freedom
-        * ``'cohen-d'``: Cohen d effect size
+        * ``'alternative'``: alternative of the test
+        * ``'p-val'``: p-value
         * ``'CI95%'``: confidence intervals of the difference in means
-        * ``'power'``: achieved power of the test ( = 1 - type II error)
+        * ``'cohen-d'``: Cohen d effect size
         * ``'BF10'``: Bayes Factor of the alternative hypothesis
+        * ``'power'``: achieved power of the test ( = 1 - type II error)
 
     See also
     --------
@@ -139,54 +137,66 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707,
     >>> from pingouin import ttest
     >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> ttest(x, 4).round(2)
-              T  dof       tail  p-val         CI95%  cohen-d   BF10  power
-    T-test  1.4    4  two-sided   0.23  [2.32, 9.08]     0.62  0.766   0.19
+              T  dof alternative  p-val         CI95%  cohen-d   BF10  power
+    T-test  1.4    4   two-sided   0.23  [2.32, 9.08]     0.62  0.766   0.19
 
-    2. Paired T-test.
-
-    Note that in the example below, since ``tail='one-sided'``, Pingouin will
-    automatically infer the alternative hypothesis based on the T-value. In
-    the example below, the T-value is negative so the tail is set to `'less'`,
+    2. One sided paired T-test.
 
     >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
-    >>> ttest(pre, post, paired=True, tail='one-sided').round(2)
-               T  dof  tail  p-val          CI95%  cohen-d   BF10  power
-    T-test -2.31    4  less   0.04  [-inf, -0.05]     0.25  3.122   0.12
+    >>> ttest(pre, post, paired=True, alternative='less').round(2)
+               T  dof alternative  p-val          CI95%  cohen-d   BF10  power
+    T-test -2.31    4        less   0.04  [-inf, -0.05]     0.25  3.122   0.12
 
-    which is indeed equivalent to directly testing that ``x`` has a
-    smaller mean than ``y`` (``tail = 'less'``)
+    Now testing the opposite alternative hypothesis
 
-    >>> ttest(pre, post, paired=True, tail='less').round(2)
-               T  dof  tail  p-val          CI95%  cohen-d   BF10  power
-    T-test -2.31    4  less   0.04  [-inf, -0.05]     0.25  3.122   0.12
-
-    Now testing the opposite alternative hypothesis (``tail = 'greater'``)
-
-    >>> ttest(pre, post, paired=True, tail='greater').round(2)
-               T  dof     tail  p-val         CI95%  cohen-d  BF10  power
-    T-test -2.31    4  greater   0.96  [-1.35, inf]     0.25  0.32   0.02
+    >>> ttest(pre, post, paired=True, alternative='greater').round(2)
+               T  dof alternative  p-val         CI95%  cohen-d  BF10  power
+    T-test -2.31    4     greater   0.96  [-1.35, inf]     0.25  0.32   0.02
 
     3. Paired T-test with missing values.
 
     >>> import numpy as np
     >>> pre = [5.5, 2.4, np.nan, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
-    >>> stats = ttest(pre, post, paired=True)
+    >>> ttest(pre, post, paired=True).round(3)
+                T  dof alternative  p-val          CI95%  cohen-d   BF10  power
+    T-test -5.902    3   two-sided   0.01  [-1.5, -0.45]    0.306  7.169  0.073
 
-    4. Independent two-sample T-test (equal sample size).
+    Compare with SciPy
+
+    >>> from scipy.stats import ttest_rel
+    >>> np.round(ttest_rel(pre, post, nan_policy="omit"), 3)
+    array([-5.902,  0.01 ])
+
+    4. Independent two-sample T-test with equal sample size.
 
     >>> np.random.seed(123)
     >>> x = np.random.normal(loc=7, size=20)
     >>> y = np.random.normal(loc=4, size=20)
-    >>> stats = ttest(x, y, correction='auto')
+    >>> ttest(x, y)
+                   T  dof alternative         p-val         CI95%   cohen-d       BF10  power
+    T-test  9.106452   38   two-sided  4.306971e-11  [2.64, 4.15]  2.879713  1.366e+08    1.0
 
-    5. Independent two-sample T-test (unequal sample size).
+    5. Independent two-sample T-test with unequal sample size. A Welch's T-test is used.
 
     >>> np.random.seed(123)
-    >>> x = np.random.normal(loc=7, size=20)
     >>> y = np.random.normal(loc=6.5, size=15)
-    >>> stats = ttest(x, y, correction='auto')
+    >>> ttest(x, y)
+                   T        dof alternative     p-val          CI95%   cohen-d   BF10     power
+    T-test  1.996537  31.567592   two-sided  0.054561  [-0.02, 1.65]  0.673518  1.469  0.481867
+
+    6. However, the Welch's correction can be disabled:
+
+    >>> ttest(x, y, correction=False)
+                   T  dof alternative     p-val          CI95%   cohen-d   BF10     power
+    T-test  1.971859   33   two-sided  0.057056  [-0.03, 1.66]  0.673518  1.418  0.481867
+
+    Compare with SciPy
+
+    >>> from scipy.stats import ttest_ind
+    >>> np.round(ttest_ind(x, y, equal_var=True), 6)  # T value and p-value
+    array([1.971859, 0.057056])
     """
     from scipy.stats import t, ttest_rel, ttest_ind, ttest_1samp
     from scipy.stats.stats import (_unequal_var_ttest_denom,
@@ -194,8 +204,8 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707,
     from pingouin import (power_ttest, power_ttest2n, compute_effsize)
 
     # Check arguments
-    possible_tails = ['two-sided', 'one-sided', 'greater', 'less']
-    assert tail in possible_tails, 'Invalid tail argument.'
+    assert alternative in ['two-sided', 'greater', 'less'], (
+        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
     assert 0 < confidence < 1, "confidence must be between 0 and 1."
 
     x = np.asarray(x)
@@ -212,7 +222,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707,
 
     if ny == 1:
         # Case one sample T-test
-        tval, pval = ttest_1samp(x, y)
+        tval, pval = ttest_1samp(x, y, alternative=alternative)
         dof = nx - 1
         se = np.sqrt(x.var(ddof=1) / nx)
     if ny > 1 and paired is True:
@@ -222,7 +232,7 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707,
             warnings.warn("x and y are equals. Cannot compute T or p-value.")
             tval, pval = np.nan, np.nan
         else:
-            tval, pval = ttest_rel(x, y)
+            tval, pval = ttest_rel(x, y, alternative=alternative)
         dof = nx - 1
         se = np.sqrt(np.var(x - y, ddof=1) / nx)
         bf = bayesfactor_ttest(tval, nx, ny, paired=True, r=r)
@@ -232,33 +242,20 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707,
         # Case unpaired two samples T-test
         if correction is True or (correction == 'auto' and nx != ny):
             # Use the Welch separate variance T-test
-            tval, pval = ttest_ind(x, y, equal_var=False)
+            tval, pval = ttest_ind(x, y, equal_var=False, alternative=alternative)
             # Compute sample standard deviation
             # dof are approximated using Welch–Satterthwaite equation
             dof, se = _unequal_var_ttest_denom(vx, nx, vy, ny)
         else:
-            tval, pval = ttest_ind(x, y, equal_var=True)
+            tval, pval = ttest_ind(x, y, equal_var=True, alternative=alternative)
             _, se = _equal_var_ttest_denom(vx, nx, vy, ny)
-
-    # Tail of the test
-    # - Two-sided: default returned by SciPy
-    # - One-sided: 0.5 * two-sided
-    # - Greater / less: (1 - one-sided) or one-sided depending on the means
-    if tail == 'one-sided':
-        # Automatically decide which tail to use based on the T-value
-        tail = 'greater' if tval > 0 else 'less'
-
-    if tail == 'greater':
-        pval = pval / 2 if tval > 0 else 1 - pval / 2
-    elif tail == 'less':
-        pval = pval / 2 if tval < 0 else 1 - pval / 2
 
     # Effect size
     d = compute_effsize(x, y, paired=paired, eftype='cohen')
 
     # Confidence interval for the (difference in) means
     # Compare to the t.test r function
-    if tail == "two-sided":
+    if alternative == "two-sided":
         alpha = 1 - confidence
         conf = 1 - alpha / 2  # 0.975
     else:
@@ -268,9 +265,9 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707,
     if ny == 1:
         ci += y
 
-    if tail == 'greater':
+    if alternative == "greater":
         ci[1] = np.inf
-    elif tail == 'less':
+    elif alternative == "less":
         ci[0] = -np.inf
 
     # Rename CI
@@ -279,41 +276,38 @@ def ttest(x, y, paired=False, tail='two-sided', correction='auto', r=.707,
     # Achieved power
     if ny == 1:
         # One-sample
-        power = power_ttest(d=d, n=nx, power=None, alpha=0.05,
-                            contrast='one-sample', tail=tail)
+        power = power_ttest(
+            d=d, n=nx, power=None, alpha=0.05, contrast='one-sample', alternative=alternative)
     if ny > 1 and paired is True:
         # Paired two-sample
-        power = power_ttest(d=d, n=nx, power=None, alpha=0.05,
-                            contrast='paired', tail=tail)
+        power = power_ttest(
+            d=d, n=nx, power=None, alpha=0.05, contrast='paired', alternative=alternative)
     elif ny > 1 and paired is False:
         # Independent two-samples
         if nx == ny:
             # Equal sample sizes
-            power = power_ttest(d=d, n=nx, power=None, alpha=0.05,
-                                contrast='two-samples', tail=tail)
+            power = power_ttest(
+                d=d, n=nx, power=None, alpha=0.05, contrast='two-samples', alternative=alternative)
         else:
             # Unequal sample sizes
-            power = power_ttest2n(nx, ny, d=d, power=None, alpha=0.05,
-                                  tail=tail)
+            power = power_ttest2n(nx, ny, d=d, power=None, alpha=0.05, alternative=alternative)
 
     # Bayes factor
-    bf = bayesfactor_ttest(tval, nx, ny, paired=paired, tail=tail, r=r)
+    bf = bayesfactor_ttest(tval, nx, ny, paired=paired, alternative=alternative, r=r)
 
     # Create output dictionnary
     stats = {'dof': dof,
              'T': tval,
              'p-val': pval,
-             'tail': tail,
+             'alternative': alternative,
              'cohen-d': abs(d),
              ci_name: [ci],
              'power': power,
              'BF10': bf}
 
     # Convert to dataframe
-    col_order = ['T', 'dof', 'tail', 'p-val', ci_name, 'cohen-d', 'BF10',
-                 'power']
-    stats = pd.DataFrame.from_records(stats, columns=col_order,
-                                      index=['T-test'])
+    col_order = ['T', 'dof', 'alternative', 'p-val', ci_name, 'cohen-d', 'BF10', 'power']
+    stats = pd.DataFrame.from_records(stats, columns=col_order, index=['T-test'])
     return _postprocess_dataframe(stats)
 
 

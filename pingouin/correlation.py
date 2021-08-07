@@ -14,15 +14,16 @@ from pingouin.utils import remove_na, _perm_pval, _postprocess_dataframe
 from pingouin.bayesian import bayesfactor_pearson
 
 
-__all__ = ["corr", "partial_corr", "pcorr", "rcorr", "rm_corr",
-           "distance_corr"]
+__all__ = ["corr", "partial_corr", "pcorr", "rcorr", "rm_corr", "distance_corr"]
 
 
-def _correl_pvalue(r, n, k=0):
-    """Compute the two-sided p-value of a correlation coefficient.
+def _correl_pvalue(r, n, k=0, alternative="two-sided"):
+    """Compute the p-value of a correlation coefficient.
 
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html
     https://en.wikipedia.org/wiki/Pearson_correlation_coefficient#Using_the_exact_distribution
+
+    See also scipy.stats._ttest_finish
 
     Parameters
     ----------
@@ -32,25 +33,37 @@ def _correl_pvalue(r, n, k=0):
         Sample size
     k : int
         Number of covariates for (semi)-partial correlation.
+    alternative : string
+        Tail of the test.
 
     Returns
     -------
     pval : float
-        Two-tailed p-value.
+        p-value.
 
     Notes
     -----
     This uses the same approach as :py:func:`scipy.stats.pearsonr` to calculate
     the p-value (i.e. using a beta distribution)
     """
-    from scipy.special import btdtr
+    from scipy.stats import t
+    assert alternative in ['two-sided', 'greater', 'less'], (
+        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+
     # Method 1: using a student T distribution
-    # dof = n - k - 2
-    # tval = r * np.sqrt(dof / (1 - r**2))
-    # pval = 2 * t.sf(abs(tval), dof)
+    dof = n - k - 2
+    tval = r * np.sqrt(dof / (1 - r**2))
+    if alternative == 'less':
+        pval = t.cdf(tval, dof)
+    elif alternative == 'greater':
+        pval = t.sf(tval, dof)
+    elif alternative == 'two-sided':
+        pval = 2 * t.sf(np.abs(tval), dof)
+
     # Method 2: beta distribution (similar to scipy.stats.pearsonr, faster)
-    ab = (n - k) / 2 - 1
-    pval = 2 * btdtr(ab, ab, 0.5 * (1 - abs(np.float64(r))))
+    # from scipy.special import btdtr
+    # ab = (n - k) / 2 - 1
+    # pval = 2 * btdtr(ab, ab, 0.5 * (1 - abs(np.float64(r))))
     return pval
 
 
@@ -361,7 +374,7 @@ def bicor(x, y, c=9):
     return r, pval
 
 
-def corr(x, y, tail='two-sided', method='pearson', **kwargs):
+def corr(x, y, alternative='two-sided', method='pearson', **kwargs):
     """(Robust) correlation between two variables.
 
     Parameters
@@ -369,16 +382,18 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
     x, y : array_like
         First and second set of observations. ``x`` and ``y`` must be
         independent.
-    tail : string
-        Specify whether to return ``'one-sided'`` or ``'two-sided'`` p-value.
-        Note that the former are simply half the latter.
+    alternative : string
+        Defines the alternative hypothesis, or tail of the correlation. Must be one of
+        "two-sided" (default), "greater" or "less". Both "greater" and "less" return a one-sided
+        p-value. "greater" tests against the alternative hypothesis that the correlation is
+        positive (greater than zero), "less" tests against the hypothesis that the correlation is
+        negative.
     method : string
         Correlation type:
 
         * ``'pearson'``: Pearson :math:`r` product-moment correlation
         * ``'spearman'``: Spearman :math:`\\rho` rank-order correlation
-        * ``'kendall'``: Kendall's :math:`\\tau_B` correlation
-          (for ordinal data)
+        * ``'kendall'``: Kendall's :math:`\\tau_B` correlation (for ordinal data)
         * ``'bicor'``: Biweight midcorrelation (robust)
         * ``'percbend'``: Percentage bend correlation (robust)
         * ``'shepherd'``: Shepherd's pi correlation (robust)
@@ -394,9 +409,8 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
         * ``'outliers'``: number of outliers, only if a robust method was used
         * ``'r'``: Correlation coefficient
         * ``'CI95'``: 95% parametric confidence intervals around :math:`r`
-        * ``'p-val'``: tail of the test
-        * ``'BF10'``: Bayes Factor of the alternative hypothesis
-          (only for Pearson correlation)
+        * ``'p-val'``: p-value
+        * ``'BF10'``: Bayes Factor of the alternative hypothesis (only for Pearson correlation)
         * ``'power'``: achieved power of the test with an alpha of 0.05.
 
     See also
@@ -540,9 +554,13 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
 
     8. One-tailed Pearson correlation
 
-    >>> pg.corr(x, y, tail="one-sided", method='pearson').round(3)
-              n      r          CI95%  p-val   BF10  power
-    pearson  30  0.147  [-0.23, 0.48]   0.22  0.467  0.194
+    >>> pg.corr(x, y, alternative="greater", method='pearson').round(3)
+            n      r           CI95%  p-val   BF10  power
+    pearson  30  0.147  [-0.17, 1.0]   0.22  0.467  0.194
+
+    >>> pg.corr(x, y, alternative="less", method='pearson').round(3)
+            n        r         CI95%  p-val   BF10  power
+    pearson  30  0.147  [-1.0, 0.43]   0.78  0.137  0.008
 
     9. Perfect correlation
 
@@ -563,14 +581,17 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
     y = np.asarray(y)
     assert x.ndim == y.ndim == 1, 'x and y must be 1D array.'
     assert x.size == y.size, 'x and y must have the same length.'
-    _msg = 'tail must be "two-sided" or "one-sided".'
-    assert tail in ['two-sided', 'one-sided'], _msg
+    assert alternative in ['two-sided', 'greater', 'less'], (
+        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+    if "tail" in kwargs:
+        raise ValueError(
+            "Since Pingouin 0.4.0, the 'tail' argument has been renamed to 'alternative'.")
 
     # Remove rows with missing values
     x, y = remove_na(x, y, paired=True)
     n = x.size
 
-    # Compute correlation coefficient
+    # Compute correlation coefficient and two-sided p-value
     if method == 'pearson':
         r, pval = pearsonr(x, y)
     elif method == 'spearman':
@@ -592,9 +613,9 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
         # Correlation failed -- new in version v0.3.4, instead of raising an
         # error we just return a dataframe full of NaN (except sample size).
         # This avoid sudden stop in pingouin.pairwise_corr.
-        return pd.DataFrame({'n': n, 'r': np.nan, 'CI95%': np.nan,
-                             'p-val': np.nan, 'BF10': np.nan,
-                             'power': np.nan}, index=[method])
+        return pd.DataFrame({
+            'n': n, 'r': np.nan, 'CI95%': np.nan, 'p-val': np.nan, 'BF10': np.nan,
+            'power': np.nan}, index=[method])
 
     # Sample size after outlier removal
     n_outliers = sum(outliers) if "outliers" in locals() else 0
@@ -606,23 +627,22 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
         pr = 1
     else:
         ci = compute_esci(
-            stat=r, nx=n_clean, ny=n_clean, eftype='r', decimals=6)
-        pr = power_corr(r=r, n=n_clean, power=None, alpha=0.05, tail=tail)
+            stat=r, nx=n_clean, ny=n_clean, eftype='r', decimals=6, alternative=alternative)
+        pr = power_corr(r=r, n=n_clean, power=None, alpha=0.05, alternative=alternative)
+
+    # Recompute p-value if tail is one-sided
+    if alternative != "two-sided":
+        pval = _correl_pvalue(r, n_clean, k=0, alternative=alternative)
 
     # Create dictionnary
-    stats = {'n': n,
-             'r': r,
-             'CI95%': [ci],
-             'p-val': pval if tail == 'two-sided' else .5 * pval,
-             'power': pr
-             }
+    stats = {'n': n, 'r': r, 'CI95%': [ci], 'p-val': pval, 'power': pr}
 
     if method in ['shepherd', 'skipped']:
         stats['outliers'] = n_outliers
 
     # Compute the BF10 for Pearson correlation only
     if method == 'pearson':
-        stats['BF10'] = bayesfactor_pearson(r, n_clean, tail=tail)
+        stats['BF10'] = bayesfactor_pearson(r, n_clean, alternative=alternative)
 
     # Convert to DataFrame
     stats = pd.DataFrame.from_records(stats, index=[method])
@@ -635,7 +655,7 @@ def corr(x, y, tail='two-sided', method='pearson', **kwargs):
 
 @pf.register_dataframe_method
 def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
-                 y_covar=None, tail='two-sided', method='pearson', **kwargs):
+                 y_covar=None, alternative='two-sided', method='pearson', **kwargs):
     """Partial and semi-partial correlation.
 
     Parameters
@@ -659,9 +679,12 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         semi-partial correlation (i.e. the effect of ``y_covar`` is removed
         from ``y`` but not from ``x``). Only one of ``covar``,  ``x_covar`` and
         ``y_covar`` can be specified.
-    tail : string
-        Specify whether to return `'one-sided'` or `'two-sided'` p-value.
-        The former are simply half the latter.
+    alternative : string
+        Defines the alternative hypothesis, or tail of the partial correlation. Must be one of
+        "two-sided" (default), "greater" or "less". Both "greater" and "less" return a one-sided
+        p-value. "greater" tests against the alternative hypothesis that the partial correlation is
+        positive (greater than zero), "less" tests against the hypothesis that the partial
+        correlation is negative.
     method : string
         Correlation type:
 
@@ -673,9 +696,9 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     stats : :py:class:`pandas.DataFrame`
 
         * ``'n'``: Sample size (after removal of missing values)
-        * ``'r'``: Correlation coefficient
+        * ``'r'``: Partial correlation coefficient
         * ``'CI95'``: 95% parametric confidence intervals around :math:`r`
-        * ``'p-val'``: tail of the test
+        * ``'p-val'``: p-value
 
     See also
     --------
@@ -732,14 +755,25 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
                n      r         CI95%  p-val
     spearman  30  0.521  [0.18, 0.75]  0.005
 
-    3. As a pandas method
+    3. Same but one-sided test
 
-    >>> df.partial_corr(x='x', y='y', covar=['cv1'],
-    ...                 method='spearman').round(3)
+    >>> pg.partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'],
+    ...                 alternative="greater", method='spearman').round(3)
+               n      r        CI95%  p-val
+    spearman  30  0.521  [0.24, 1.0]  0.003
+
+    >>> pg.partial_corr(data=df, x='x', y='y', covar=['cv1', 'cv2', 'cv3'],
+    ...                 alternative="less", method='spearman').round(3)
+               n      r         CI95%  p-val
+    spearman  30  0.521  [-1.0, 0.72]  0.997
+
+    4. As a pandas method
+
+    >>> df.partial_corr(x='x', y='y', covar=['cv1'], method='spearman').round(3)
                n      r         CI95%  p-val
     spearman  30  0.578  [0.27, 0.78]  0.001
 
-    4. Partial correlation matrix (returns only the correlation coefficients)
+    5. Partial correlation matrix (returns only the correlation coefficients)
 
     >>> df.pcorr().round(3)
              x      y    cv1    cv2    cv3
@@ -749,17 +783,19 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     cv2  0.130  0.104 -0.241  1.000 -0.118
     cv3 -0.385 -0.002 -0.470 -0.118  1.000
 
-    5. Semi-partial correlation on x
+    6. Semi-partial correlation on x
 
-    >>> pg.partial_corr(data=df, x='x', y='y',
-    ...                 x_covar=['cv1', 'cv2', 'cv3']).round(3)
+    >>> pg.partial_corr(data=df, x='x', y='y', x_covar=['cv1', 'cv2', 'cv3']).round(3)
               n      r        CI95%  p-val
     pearson  30  0.463  [0.1, 0.72]  0.015
     """
     from pingouin.utils import _flatten_list
     # Safety check
-    assert tail in ['two-sided', 'one-sided'], (
-        'tail must be "two-sided" or "one-sided".')
+    assert alternative in ['two-sided', 'greater', 'less'], (
+        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+    if "tail" in kwargs:
+        raise ValueError(
+            "Since Pingouin 0.4.0, the 'tail' argument has been renamed to 'alternative'.")
     assert method in ['pearson', 'spearman'], (
         'only "pearson" and "spearman" are supported for partial correlation.')
     assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
@@ -817,21 +853,21 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
 
     if np.isnan(r):
         # Correlation failed. Return NaN. When would this happen?
-        return pd.DataFrame({'n': n, 'r': np.nan, 'CI95%': np.nan,
-                             'p-val': np.nan}, index=[method])
+        return pd.DataFrame(
+            {'n': n, 'r': np.nan, 'CI95%': np.nan, 'p-val': np.nan}, index=[method])
 
     # Compute the two-sided p-value and confidence intervals
     # https://online.stat.psu.edu/stat505/lesson/6/6.3
-    pval = _correl_pvalue(r, n, k)
+    pval = _correl_pvalue(r, n, k, alternative)
     ci = compute_esci(
-        stat=r, nx=(n - k), ny=(n - k), eftype='r', decimals=6)
+        stat=r, nx=(n - k), ny=(n - k), eftype='r', decimals=6, alternative=alternative)
 
     # Create dictionnary
     stats = {
         'n': n,
         'r': r,
         'CI95%': [ci],
-        'p-val': pval if tail == 'two-sided' else .5 * pval,
+        'p-val': pval,
     }
 
     # Convert to DataFrame
@@ -1023,8 +1059,7 @@ def rcorr(self, method='pearson', upper='pval', decimals=3, padjust=None,
 
         if padjust is not None:
             pvals = mat_upper.to_numpy()[tif(mat, k=1)]
-            mat_upper.to_numpy()[tif(mat, k=1)] = multicomp(pvals, alpha=0.05,
-                                                            method=padjust)[1]
+            mat_upper.to_numpy()[tif(mat, k=1)] = multicomp(pvals, alpha=0.05, method=padjust)[1]
 
     # Convert r to text
     mat = mat.astype(str)
@@ -1043,15 +1078,14 @@ def rcorr(self, method='pearson', upper='pval', decimals=3, padjust=None,
             # Replace p-values by stars
             mat_upper = mat_upper.applymap(replace_pval)
         else:
-            mat_upper = mat_upper.applymap(lambda x: ffp(x,
-                                                         precision=decimals))
+            mat_upper = mat_upper.applymap(lambda x: ffp(x, precision=decimals))
 
     # Replace upper triangle by p-values or n
     mat.to_numpy()[tif(mat, k=1)] = mat_upper.to_numpy()[tif(mat, k=1)]
     return mat
 
 
-def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
+def rm_corr(data=None, x=None, y=None, subject=None):
     """Repeated measures correlation.
 
     Parameters
@@ -1062,8 +1096,6 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
         Name of columns in ``data`` containing the two dependent variables.
     subject : string
         Name of column in ``data`` containing the subject indicator.
-    tail : string
-        Specify whether to return 'one-sided' or 'two-sided' p-value.
 
     Returns
     -------
@@ -1071,7 +1103,7 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
 
         * ``'r'``: Repeated measures correlation coefficient
         * ``'dof'``: Degrees of freedom
-        * ``'pval'``: one or two tailed p-value
+        * ``'pval'``: p-value
         * ``'CI95'``: 95% parametric confidence intervals
         * ``'power'``: achieved power of the test (= 1 - type II error).
 
@@ -1081,9 +1113,9 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
 
     Notes
     -----
-    Repeated measures correlation (rmcorr) is a statistical technique
-    for determining the common within-individual association for paired
-    measures assessed on two or more occasions for multiple individuals.
+    Repeated measures correlation (rmcorr) is a statistical technique for determining the common
+    within-individual association for paired measures assessed on two or more occasions for
+    multiple individuals.
 
     From `Bakdash and Marusich (2017)
     <https://doi.org/10.3389/fpsyg.2017.00456>`_:
@@ -1097,11 +1129,9 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
         is bounded by − 1 to 1 and represents the strength of the linear
         association between two variables.*
 
-    Results have been tested against the
-    `rmcorr <https://github.com/cran/rmcorr>`_ R package.
+    Results have been tested against the `rmcorr <https://github.com/cran/rmcorr>`_ R package.
 
-    Missing values are automatically removed from the dataframe
-    (listwise deletion).
+    Missing values are automatically removed from the dataframe (listwise deletion).
 
     Examples
     --------
@@ -1147,9 +1177,8 @@ def rm_corr(data=None, x=None, y=None, subject=None, tail='two-sided'):
     sserror = aov.at[2, 'SS']
     rm = sign * np.sqrt(ssfactor / (ssfactor + sserror))
     pval = aov.at[1, 'p-unc']
-    pval = pval * 0.5 if tail == 'one-sided' else pval
     ci = compute_esci(stat=rm, nx=n, eftype='pearson').tolist()
-    pwr = power_corr(r=rm, n=n, tail=tail)
+    pwr = power_corr(r=rm, n=n, alternative="two-sided")
     # Convert to Dataframe
     stats = pd.DataFrame({"r": rm,
                           "dof": int(dof),
@@ -1172,7 +1201,7 @@ def _dcorr(y, n2, A, dcov2_xx):
     return np.sqrt(dcov2_xy) / np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
 
 
-def distance_corr(x, y, tail='greater', n_boot=1000, seed=None):
+def distance_corr(x, y, alternative='greater', n_boot=1000, seed=None):
     """Distance correlation between two arrays.
 
     Statistical significance (p-value) is evaluated with a permutation test.
@@ -1183,16 +1212,14 @@ def distance_corr(x, y, tail='greater', n_boot=1000, seed=None):
         1D or 2D input arrays, shape (n_samples, n_features).
         ``x`` and ``y`` must have the same number of samples and must not
         contain missing values.
-    tail : str
-        Tail for p-value. Can be either `'two-sided'`, or `'greater'` (default)
-        or `'less'` for directional tests. To be consistent
-        with the original R implementation, the default is to calculate the
-        one-sided `'greater'` p-value.
+    alternative : str
+        Alternative of the test. Can be either "two-sided", "greater" (default) or "less".
+        To be consistent with the original R implementation, the default is to calculate the
+        one-sided "greater" p-value.
     n_boot : int or None
-        Number of bootstrap to perform.
-        If None, no bootstrapping is performed and the function
-        only returns the distance correlation (no p-value).
-        Default is 1000 (thus giving a precision of 0.001).
+        Number of bootstrap to perform. If None, no bootstrapping is performed and the function
+        only returns the distance correlation (no p-value). Default is 1000 (thus giving a
+        precision of 0.001).
     seed : int or None
         Random state seed.
 
@@ -1268,7 +1295,8 @@ def distance_corr(x, y, tail='greater', n_boot=1000, seed=None):
     >>> round(distance_corr(a, b, n_boot=None), 3)
     0.88
     """
-    assert tail in ['greater', 'less', 'two-sided'], 'Wrong tail argument.'
+    assert alternative in ['two-sided', 'greater', 'less'], (
+        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
     x = np.asarray(x)
     y = np.asarray(y)
     # Check for NaN values
@@ -1301,7 +1329,7 @@ def distance_corr(x, y, tail='greater', n_boot=1000, seed=None):
         for i in range(n_boot):
             bootstat[i] = _dcorr(y[bootsam[i, :]], n2, A, dcov2_xx)
 
-        pval = _perm_pval(bootstat, dcor, tail=tail)
+        pval = _perm_pval(bootstat, dcor, alternative=alternative)
         return dcor, pval
     else:
         return dcor

@@ -145,7 +145,7 @@ def madmedianrule(a):
     return (np.fabs(a - np.median(a)) / mad(a)) > k
 
 
-def mwu(x, y, tail='two-sided'):
+def mwu(x, y, alternative='two-sided', **kwargs):
     """Mann-Whitney U Test (= Wilcoxon rank-sum test). It is the non-parametric
     version of the independent T-test.
 
@@ -154,20 +154,19 @@ def mwu(x, y, tail='two-sided'):
     x, y : array_like
         First and second set of observations. ``x`` and ``y`` must be
         independent.
-    tail : string
-        Specify whether to return `'one-sided'` or `'two-sided'` p-value.
-        Can also be `'greater'` or `'less'` to specify the direction of the
-        test. If ``tail='one-sided'``, the alternative of the test will be
-        automatically detected by comparing the medians of ``x`` and ``y``.
-        For instance, if median(``x``) < median(``y``) and
-        ``tail='one-sided'``, Pingouin will automatically set ``tail='less'``,
-        and vice versa.
+    alternative : string
+        Defines the alternative hypothesis, or tail of the test. Must be one of
+        "two-sided" (default), "greater" or "less". See :py:func:`scipy.stats.mannwhitneyu` for
+        more details.
+    **kwargs : dict
+        Additional keywords arguments that are passed to :py:func:`scipy.stats.mannwhitneyu`.
 
     Returns
     -------
     stats : :py:class:`pandas.DataFrame`
 
         * ``'U-val'``: U-value
+        * ``'alternative'``: tail of the test
         * ``'p-val'``: p-value
         * ``'RBC'``   : rank-biserial correlation
         * ``'CLES'``  : common language effect size
@@ -183,8 +182,7 @@ def mwu(x, y, tail='two-sided'):
     a randomly selected value from one sample will be less than or greater
     than a randomly selected value from a second sample. The test assumes
     that the two samples are independent. This test corrects for ties and by
-    default uses a continuity correction
-    (see :py:func:`scipy.stats.mannwhitneyu` for details).
+    default uses a continuity correction (see :py:func:`scipy.stats.mannwhitneyu` for details).
 
     The rank biserial correlation [2]_ is the difference between
     the proportion of favorable evidence minus the proportion of unfavorable
@@ -232,35 +230,31 @@ def mwu(x, y, tail='two-sided'):
     >>> np.random.seed(123)
     >>> x = np.random.uniform(low=0, high=1, size=20)
     >>> y = np.random.uniform(low=0.2, high=1.2, size=20)
-    >>> pg.mwu(x, y, tail='two-sided')
-         U-val       tail    p-val    RBC    CLES
-    MWU   97.0  two-sided  0.00556  0.515  0.2425
+    >>> pg.mwu(x, y, alternative='two-sided')
+         U-val alternative    p-val    RBC    CLES
+    MWU   97.0   two-sided  0.00556  0.515  0.2425
 
     Compare with SciPy
 
     >>> import scipy
-    >>> scipy.stats.mannwhitneyu(x, y, use_continuity=True,
-    ...                          alternative='two-sided')
+    >>> scipy.stats.mannwhitneyu(x, y, use_continuity=True, alternative='two-sided')
     MannwhitneyuResult(statistic=97.0, pvalue=0.0055604599321374135)
 
-    One-sided tail: one can either manually specify the alternative hypothesis
+    One-sided test
 
-    >>> pg.mwu(x, y, tail='greater')
-         U-val     tail     p-val    RBC    CLES
-    MWU   97.0  greater  0.997442  0.515  0.2425
+    >>> pg.mwu(x, y, alternative='greater')
+         U-val alternative     p-val    RBC    CLES
+    MWU   97.0     greater  0.997442  0.515  0.2425
 
-    >>> pg.mwu(x, y, tail='less')
-         U-val  tail    p-val    RBC    CLES
-    MWU   97.0  less  0.00278  0.515  0.7575
+    >>> pg.mwu(x, y, alternative='less')
+         U-val alternative    p-val    RBC    CLES
+    MWU   97.0        less  0.00278  0.515  0.7575
 
-    Or simply leave it to Pingouin, using the `'one-sided'` argument, in which
-    case Pingouin will compare the medians of ``x`` and ``y`` and select the
-    most appropriate tail based on that:
+    Passing keyword arguments to :py:func:`scipy.stats.mannwhitneyu`:
 
-    >>> # Since np.median(x) < np.median(y), this is equivalent to tail='less'
-    >>> pg.mwu(x, y, tail='one-sided')
-         U-val  tail    p-val    RBC    CLES
-    MWU   97.0  less  0.00278  0.515  0.7575
+    >>> pg.mwu(x, y, alternative='two-sided', method='exact')
+         U-val alternative     p-val    RBC    CLES
+    MWU   97.0   two-sided  0.004681  0.515  0.2425
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -269,14 +263,12 @@ def mwu(x, y, tail='two-sided'):
     x, y = remove_na(x, y, paired=False)
 
     # Check tails
-    possible_tails = ['two-sided', 'one-sided', 'greater', 'less']
-    assert tail in possible_tails, 'Invalid tail argument.'
-    if tail == 'one-sided':
-        # Detect the direction of the test based on the median
-        tail = 'less' if np.median(x) < np.median(y) else 'greater'
-
-    uval, pval = scipy.stats.mannwhitneyu(x, y, use_continuity=True,
-                                          alternative=tail)
+    assert alternative in ['two-sided', 'greater', 'less'], (
+        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+    if "tail" in kwargs:
+        raise ValueError(
+            "Since Pingouin 0.4.0, the 'tail' argument has been renamed to 'alternative'.")
+    uval, pval = scipy.stats.mannwhitneyu(x, y, alternative=alternative, **kwargs)
 
     # Effect size 1: Common Language Effect Size
     # CLES is tail-specific and calculated according to the formula given in
@@ -286,7 +278,7 @@ def mwu(x, y, tail='two-sided'):
     # Tail = 'greater', with ties set to 0.5
     # Note that tail = 'two-sided' gives same output as tail = 'greater'
     cles = np.where(diff == 0, 0.5, diff > 0).mean()
-    cles = 1 - cles if tail == 'less' else cles
+    cles = 1 - cles if alternative == 'less' else cles
 
     # Effect size 2: rank biserial correlation (Wendt 1972)
     rbc = 1 - (2 * uval) / diff.size  # diff.size = x.size * y.size
@@ -294,16 +286,16 @@ def mwu(x, y, tail='two-sided'):
     # Fill output DataFrame
     stats = pd.DataFrame({
         'U-val': uval,
-        'tail': tail,
+        'alternative': alternative,
         'p-val': pval,
         'RBC': rbc,
         'CLES': cles}, index=['MWU'])
     return _postprocess_dataframe(stats)
 
 
-def wilcoxon(x, y=None, tail='two-sided'):
-    """Wilcoxon signed-rank test. It is the non-parametric version of the
-    paired T-test.
+def wilcoxon(x, y=None, alternative='two-sided', **kwargs):
+    """
+    Wilcoxon signed-rank test. It is the non-parametric version of the paired T-test.
 
     Parameters
     ----------
@@ -316,20 +308,19 @@ def wilcoxon(x, y=None, tail='two-sided'):
         Either the second set of measurements (if x is the first set of
         measurements), or not specified (if x is the differences between
         two sets of measurements.) Must be one-dimensional.
-    tail : string
-        Specify whether to return `'one-sided'` or `'two-sided'` p-value.
-        Can also be `'greater'` or `'less'` to specify the direction of the
-        test. If ``tail='one-sided'``, the alternative of the test will be
-        automatically detected by looking at the sign of the median of the
-        differences between ``x`` and ``y``.
-        For instance, if ``np.median(x - y) > 0`` and ``tail='one-sided'``,
-        Pingouin will automatically set ``tail='greater'`` and vice versa.
+    alternative : string
+        Defines the alternative hypothesis, or tail of the test. Must be one of
+        "two-sided" (default), "greater" or "less". See :py:func:`scipy.stats.wilcoxon` for
+        more details.
+    **kwargs : dict
+        Additional keywords arguments that are passed to :py:func:`scipy.stats.wilcoxon`.
 
     Returns
     -------
     stats : :py:class:`pandas.DataFrame`
 
         * ``'W-val'``: W-value
+        * ``'alternative'``: tail of the test
         * ``'p-val'``: p-value
         * ``'RBC'``   : matched pairs rank-biserial correlation (effect size)
         * ``'CLES'``  : common language effect size
@@ -400,46 +391,39 @@ def wilcoxon(x, y=None, tail='two-sided'):
     >>> import pingouin as pg
     >>> x = np.array([20, 22, 19, 20, 22, 18, 24, 20, 19, 24, 26, 13])
     >>> y = np.array([38, 37, 33, 29, 14, 12, 20, 22, 17, 25, 26, 16])
-    >>> pg.wilcoxon(x, y, tail='two-sided')
-              W-val       tail     p-val       RBC      CLES
-    Wilcoxon   20.5  two-sided  0.285765 -0.378788  0.395833
+    >>> pg.wilcoxon(x, y, alternative='two-sided')
+              W-val alternative     p-val       RBC      CLES
+    Wilcoxon   20.5   two-sided  0.285765 -0.378788  0.395833
 
     Same but using pre-computed differences. However, the CLES effect size
     cannot be computed as it requires the raw data.
 
     >>> pg.wilcoxon(x - y)
-              W-val       tail     p-val       RBC  CLES
-    Wilcoxon   20.5  two-sided  0.285765 -0.378788   NaN
+              W-val alternative     p-val       RBC  CLES
+    Wilcoxon   20.5   two-sided  0.285765 -0.378788   NaN
 
     Compare with SciPy
 
     >>> import scipy
-    >>> scipy.stats.wilcoxon(x, y, correction=True)
-    WilcoxonResult(statistic=20.5, pvalue=0.2857652190231508)
+    >>> scipy.stats.wilcoxon(x, y)
+    WilcoxonResult(statistic=20.5, pvalue=0.2661660677806492)
 
-    One-sided tail: one can either manually specify the alternative hypothesis
+    The p-value is not exactly similar to Pingouin. This is because Pingouin automatically applies
+    a continuity correction. Disabling it gives the same p-value as scipy:
 
-    >>> pg.wilcoxon(x, y, tail='greater')
-              W-val     tail     p-val       RBC      CLES
-    Wilcoxon   20.5  greater  0.876244 -0.378788  0.395833
+    >>> pg.wilcoxon(x, y, alternative='two-sided', correction=False)
+              W-val alternative     p-val       RBC      CLES
+    Wilcoxon   20.5   two-sided  0.266166 -0.378788  0.395833
 
-    >>> pg.wilcoxon(x, y, tail='less')
-              W-val  tail     p-val       RBC      CLES
-    Wilcoxon   20.5  less  0.142883 -0.378788  0.604167
+    One-sided test
 
-    Or simply leave it to Pingouin, using the `'one-sided'` argument, in which
-    case Pingouin will look at the sign of the median of the differences
-    between ``x`` and ``y`` and ajust the tail based on that:
+    >>> pg.wilcoxon(x, y, alternative='greater')
+              W-val alternative     p-val       RBC      CLES
+    Wilcoxon   20.5     greater  0.876244 -0.378788  0.395833
 
-    >>> np.median(np.array(x) - np.array(y))
-    -1.5
-
-    The median is negative, so Pingouin will test for the alternative
-    hypothesis that the median of the differences is negative (= less than 0).
-
-    >>> pg.wilcoxon(x, y, tail='one-sided')  # Equivalent to tail = 'less'
-              W-val  tail     p-val       RBC      CLES
-    Wilcoxon   20.5  less  0.142883 -0.378788  0.604167
+    >>> pg.wilcoxon(x, y, alternative='less')
+              W-val alternative     p-val       RBC      CLES
+    Wilcoxon   20.5        less  0.142883 -0.378788  0.604167
     """
     x = np.asarray(x)
     if y is not None:
@@ -449,15 +433,16 @@ def wilcoxon(x, y=None, tail='two-sided'):
         x = x[~np.isnan(x)]
 
     # Check tails
-    possible_tails = ['two-sided', 'one-sided', 'greater', 'less']
-    assert tail in possible_tails, 'Invalid tail argument.'
-    if tail == 'one-sided':
-        # Detect the direction of the test based on the median
-        tail = 'less' if np.median(x - y) < 0 else 'greater'
+    assert alternative in ['two-sided', 'greater', 'less'], (
+        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+    if "tail" in kwargs:
+        raise ValueError(
+            "Since Pingouin 0.4.0, the 'tail' argument has been renamed to 'alternative'.")
 
     # Compute test
-    wval, pval = scipy.stats.wilcoxon(
-        x=x, y=y, zero_method='wilcox', correction=True, alternative=tail)
+    if "correction" not in kwargs:
+        kwargs["correction"] = True
+    wval, pval = scipy.stats.wilcoxon(x=x, y=y, alternative=alternative, **kwargs)
 
     # Effect size 1: Common Language Effect Size
     # Since Pingouin v0.3.5, CLES is tail-specific and calculated
@@ -466,10 +451,10 @@ def wilcoxon(x, y=None, tail='two-sided'):
     if y is not None:
         diff = x[:, None] - y
         # cles = max((diff < 0).sum(), (diff > 0).sum()) / diff.size
-        # Tail = 'greater', with ties set to 0.5
-        # Note that tail = 'two-sided' gives same output as tail = 'greater'
+        # alternative = 'greater', with ties set to 0.5
+        # Note that alternative = 'two-sided' gives same output as alternative = 'greater'
         cles = np.where(diff == 0, 0.5, diff > 0).mean()
-        cles = 1 - cles if tail == 'less' else cles
+        cles = 1 - cles if alternative == 'less' else cles
     else:
         # CLES cannot be computed if y is None
         cles = np.nan
@@ -489,7 +474,7 @@ def wilcoxon(x, y=None, tail='two-sided'):
     # Fill output DataFrame
     stats = pd.DataFrame({
         'W-val': wval,
-        'tail': tail,
+        'alternative': alternative,
         'p-val': pval,
         'RBC': rbc,
         'CLES': cles}, index=['Wilcoxon'])

@@ -99,16 +99,16 @@ class TestUtils(TestCase):
         np.random.seed(123)
         bootstat = np.random.normal(size=1000)
         x = -2
-        up = _perm_pval(bootstat, x, tail='greater')
-        low = _perm_pval(bootstat, x, tail='less')
-        two = _perm_pval(bootstat, x, tail='two-sided')
+        up = _perm_pval(bootstat, x, alternative='greater')
+        low = _perm_pval(bootstat, x, alternative='less')
+        two = _perm_pval(bootstat, x, alternative='two-sided')
         assert up > low
         assert up + low == 1
         assert low < two < up
         x = 2.5
-        up = _perm_pval(bootstat, x, tail='greater')
-        low = _perm_pval(bootstat, x, tail='less')
-        two = _perm_pval(bootstat, x, tail='two-sided')
+        up = _perm_pval(bootstat, x, alternative='greater')
+        low = _perm_pval(bootstat, x, alternative='less')
+        two = _perm_pval(bootstat, x, alternative='two-sided')
         assert low > up
         assert up + low == 1
         assert up < two < low

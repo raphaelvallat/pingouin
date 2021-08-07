@@ -15,32 +15,32 @@ class TestPower(TestCase):
         # ONE-SAMPLE / PAIRED
         # Alternative = 'greater'
         assert np.allclose(power_ttest(d=0.5, n=20, contrast='one-sample',
-                                       tail='greater'), 0.6951493)
+                                       alternative='greater'), 0.6951493)
         assert np.allclose(power_ttest(d=0.5, n=20, contrast='paired',
-                                       tail='greater'), 0.6951493)
+                                       alternative='greater'), 0.6951493)
         assert np.allclose(power_ttest(d=0.5, power=0.80,
                                        contrast='one-sample',
-                                       tail='greater'), 26.13753)
+                                       alternative='greater'), 26.13753)
         assert np.allclose(power_ttest(n=20, power=0.80, contrast='one-sample',
-                                       tail='greater'), 0.5769185)
+                                       alternative='greater'), 0.5769185)
         assert np.allclose(power_ttest(d=0.5, n=20, power=0.80, alpha=None,
-                                       tail='greater',
+                                       alternative='greater',
                                        contrast='one-sample'),
                            0.09004593, rtol=1e-03)
         # Alternative = 'less'
         assert np.allclose(power_ttest(d=0.5, n=20, contrast='one-sample',
-                                       tail='less'), 7.083752e-05)
+                                       alternative='less'), 7.083752e-05)
         assert np.allclose(power_ttest(d=-0.5, n=20, contrast='one-sample',
-                                       tail='less'), 0.6951493)
+                                       alternative='less'), 0.6951493)
         assert np.allclose(power_ttest(d=0.5, n=20, contrast='paired',
-                                       tail='less'), 7.083752e-05)
+                                       alternative='less'), 7.083752e-05)
         assert np.allclose(power_ttest(d=-0.5, power=0.80,
                                        contrast='one-sample',
-                                       tail='less'), 26.13753)
+                                       alternative='less'), 26.13753)
         assert np.allclose(power_ttest(n=20, power=0.80, contrast='one-sample',
-                                       tail='less'), -0.5769185)
+                                       alternative='less'), -0.5769185)
         assert np.allclose(power_ttest(d=-0.5, n=20, power=0.80, alpha=None,
-                                       tail='less',
+                                       alternative='less',
                                        contrast='one-sample'),
                            0.09004593, rtol=1e-03)
         # Two-sided
@@ -57,23 +57,23 @@ class TestPower(TestCase):
         # TWO-SAMPLES
         # Alternative = 'greater'
         assert np.allclose(power_ttest(d=0.5, n=20,
-                                       tail='greater'), 0.4633743)
+                                       alternative='greater'), 0.4633743)
         assert np.allclose(power_ttest(d=0.5, power=0.80,
-                                       tail='greater'), 50.1508)
+                                       alternative='greater'), 50.1508)
         assert np.allclose(power_ttest(n=20, power=0.80,
-                                       tail='greater'), 0.8006879)
+                                       alternative='greater'), 0.8006879)
         assert np.allclose(power_ttest(d=0.5, n=20, power=0.80, alpha=None,
-                                       tail='greater'),
+                                       alternative='greater'),
                            0.2315111, rtol=1e-01)
         # Alternative = 'less'
         assert np.allclose(power_ttest(d=-0.5, n=20,
-                                       tail='less'), 0.4633743)
+                                       alternative='less'), 0.4633743)
         assert np.allclose(power_ttest(d=-0.5, power=0.80,
-                                       tail='less'), 50.1508)
+                                       alternative='less'), 50.1508)
         assert np.allclose(power_ttest(n=20, power=0.80,
-                                       tail='less'), -0.8006879)
+                                       alternative='less'), -0.8006879)
         assert np.allclose(power_ttest(d=-0.5, n=20, power=0.80, alpha=None,
-                                       tail='less'),
+                                       alternative='less'),
                            0.2315111, rtol=1e-01)
         # Two-sided
         assert np.allclose(power_ttest(d=0.5, n=20), 0.337939, rtol=1e-03)
@@ -92,28 +92,25 @@ class TestPower(TestCase):
         """
         # TWO-SAMPLES
         # alternative = 'greater'
-        assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5,
-                                         tail='greater'), 0.4463552)
+        assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5, alternative='greater'), 0.4463552)
         assert np.allclose(power_ttest2n(nx=20, ny=18, power=0.80,
-                                         tail='greater'), 0.8234684)
+                                         alternative='greater'), 0.8234684)
         assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5, power=0.80,
-                                         alpha=None, tail='greater'),
+                                         alpha=None, alternative='greater'),
                            0.2444025, rtol=1e-01)
         # alternative = 'less'
         assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5,
-                                         tail='less'), 0.0008011104)
+                                         alternative='less'), 0.0008011104)
         assert np.allclose(power_ttest2n(nx=20, ny=18, d=-0.5,
-                                         tail='less'), 0.4463552)
+                                         alternative='less'), 0.4463552)
         assert np.allclose(power_ttest2n(nx=20, ny=18, power=0.80,
-                                         tail='less'), -0.8234684)
+                                         alternative='less'), -0.8234684)
         assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5, power=0.80,
-                                         alpha=None, tail='less'),
+                                         alpha=None, alternative='less'),
                            0.989896, rtol=1e-01)
         # Two-sided
-        assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5),
-                           0.3223224, rtol=1e-03)
-        assert np.allclose(power_ttest2n(nx=20, ny=18, power=0.80),
-                           0.9354168)
+        assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5), 0.3223224, rtol=1e-03)
+        assert np.allclose(power_ttest2n(nx=20, ny=18, power=0.80), 0.9354168)
         assert np.allclose(power_ttest2n(nx=20, ny=18, d=0.5, power=0.80,
                                          alpha=None), 0.46372, rtol=1e-01)
         # Error
@@ -128,10 +125,8 @@ class TestPower(TestCase):
         assert np.allclose(power_anova(eta=eta, k=4, n=20), 0.5149793)
         assert np.allclose(power_anova(eta=eta, n=20, power=0.80), 10.70313)
         assert np.allclose(power_anova(eta=eta, k=4, power=0.80), 35.75789)
-        assert np.allclose(power_anova(k=4, n=20, power=0.80, alpha=0.05),
-                           0.1254838, rtol=1e-03)
-        assert np.allclose(power_anova(eta=eta, k=4, n=20, power=0.80,
-                                       alpha=None), 0.2268337)
+        assert np.allclose(power_anova(k=4, n=20, power=0.80, alpha=0.05), 0.1254838, rtol=1e-03)
+        assert np.allclose(power_anova(eta=eta, k=4, n=20, power=0.80, alpha=None), 0.2268337)
         # Error
         with pytest.raises(ValueError):
             power_anova(eta=eta, k=2)
@@ -144,22 +139,15 @@ class TestPower(TestCase):
         eta2 = 0.058823529411764705  # f = 0.25 (default in GPower)
 
         # Power
-        assert np.allclose(power_rm_anova(eta=eta, m=4, n=20, epsilon=1,
-                                          corr=0.5), 0.9998070)
-        assert np.allclose(power_rm_anova(eta=eta, m=3, n=20, epsilon=0.9,
-                                          corr=0.5), 0.9968277)
-        assert np.allclose(power_rm_anova(eta=eta2, m=3, n=10, epsilon=1,
-                                          corr=0.7), 0.5271828)
-        assert np.allclose(power_rm_anova(eta=eta2, m=2, n=18, epsilon=1,
-                                          corr=0.6), 0.6089353)
-        assert np.allclose(power_rm_anova(eta=eta2, m=3, n=10,
-                                          corr=-0.5), 0.13818)  # Negative corr
+        assert np.allclose(power_rm_anova(eta=eta, m=4, n=20, epsilon=1, corr=0.5), 0.9998070)
+        assert np.allclose(power_rm_anova(eta=eta, m=3, n=20, epsilon=0.9, corr=0.5), 0.9968277)
+        assert np.allclose(power_rm_anova(eta=eta2, m=3, n=10, epsilon=1, corr=0.7), 0.5271828)
+        assert np.allclose(power_rm_anova(eta=eta2, m=2, n=18, epsilon=1, corr=0.6), 0.6089353)
+        assert np.allclose(power_rm_anova(eta=eta2, m=3, n=10, corr=-0.5), 0.13818)
 
         # Number of repeated measures
-        assert np.allclose(power_rm_anova(eta=eta2, n=30, power=0.9),
-                           3.9274700428)
-        assert np.allclose(power_rm_anova(eta=eta2, n=20, power=0.8),
-                           5.129210021)
+        assert np.allclose(power_rm_anova(eta=eta2, n=30, power=0.9), 3.9274700428)
+        assert np.allclose(power_rm_anova(eta=eta2, n=20, power=0.8), 5.129210021)
 
         # Sample size
         assert np.ceil(power_rm_anova(eta=eta, m=3, power=0.80)) == 9
@@ -170,12 +158,10 @@ class TestPower(TestCase):
         # Effect size (eta-square)
         assert np.allclose(power_rm_anova(n=20, m=3, power=0.80), 0.0800112)
         assert np.allclose(power_rm_anova(n=20, m=2, power=0.90), 0.12747503)
-        assert np.allclose(power_rm_anova(n=50, m=4, power=0.95,
-                                          corr=0.7), 0.02576957)
+        assert np.allclose(power_rm_anova(n=50, m=4, power=0.95, corr=0.7), 0.02576957)
 
         # Alpha
-        assert np.allclose(power_rm_anova(eta=eta, m=3, n=50, power=0.95,
-                                          alpha=None), 3.652063e-9)
+        assert np.allclose(power_rm_anova(eta=eta, m=3, n=50, power=0.95, alpha=None), 3.652063e-9)
         assert np.allclose(power_rm_anova(eta=eta2, m=2, n=100, power=0.95,
                                           corr=0.6, alpha=None), 0.0001797)
 
@@ -191,16 +177,20 @@ class TestPower(TestCase):
         assert np.allclose(power_corr(r=0.5, n=20), 0.6378746)
         assert np.allclose(power_corr(r=0.5, power=0.80), 28.24841)
         assert np.allclose(power_corr(n=20, power=0.80), 0.5821478)
-        assert np.allclose(power_corr(r=0.5, n=20, power=0.80, alpha=None),
-                           0.1377332, rtol=1e-03)
+        assert np.allclose(power_corr(r=0.5, n=20, power=0.80, alpha=None), 0.1377332, rtol=1e-03)
 
-        # One-sided (e.g. = alternative = 'Greater' in R)
-        assert np.allclose(power_corr(r=0.5, n=20, tail='one-sided'),
-                           0.7509873)
-        assert np.allclose(power_corr(r=0.5, power=0.80, tail='one-sided'),
-                           22.60907)
-        assert np.allclose(power_corr(n=20, power=0.80, tail='one-sided'),
-                           0.5286949)
+        # Greater
+        assert np.allclose(power_corr(r=0.5, n=20, alternative='greater'), 0.7509873)
+        assert np.allclose(power_corr(r=-0.1, n=20, alternative='greater'), 0.01941224)
+        assert np.allclose(power_corr(r=0.5, power=0.80, alternative='greater'), 22.60907)
+        assert np.allclose(power_corr(n=20, power=0.80, alternative='greater'), 0.5286949)
+
+        # Less
+        assert np.allclose(power_corr(r=-0.5, n=20, alternative='less'), 0.7509873)
+        assert np.allclose(power_corr(r=-0.1, n=20, alternative='less'), 0.1118106)
+        assert np.allclose(power_corr(r=0.1, n=20, alternative='less'), 0.01941224)
+        assert np.allclose(power_corr(r=-0.5, power=0.80, alternative='less'), 22.60907)
+        assert np.allclose(power_corr(n=20, power=0.80, alternative='less'), -0.5286949)
 
         # Error & Warning
         with pytest.raises(ValueError):

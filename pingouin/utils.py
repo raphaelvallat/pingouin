@@ -13,7 +13,7 @@ __all__ = ["_perm_pval", "print_table", "_postprocess_dataframe",
            "_is_statsmodels_installed", "_is_mpmath_installed"]
 
 
-def _perm_pval(bootstat, estimate, tail='two-sided'):
+def _perm_pval(bootstat, estimate, alternative='two-sided'):
     """
     Compute p-values from a permutation test.
 
@@ -23,24 +23,23 @@ def _perm_pval(bootstat, estimate, tail='two-sided'):
         Permutation distribution.
     estimate : float or int
         Point estimate.
-    tail : str
-        Tail for p-value. Can be either `'two-sided'` (default), or `'greater'`
-        or `'less'` for directional tests.
+    alternative : str
+        Tail for p-value. Can be either `'two-sided'` (default), `'greater'` or `'less'`.
 
     Returns
     -------
     p : float
         P-value.
     """
-    assert tail in ['two-sided', 'greater', 'less'], 'Wrong tail argument.'
+    assert alternative in ['two-sided', 'greater', 'less'], 'Wrong tail argument.'
     assert isinstance(estimate, (int, float))
     bootstat = np.asarray(bootstat)
     assert bootstat.ndim == 1, 'bootstat must be a 1D array.'
     n_boot = bootstat.size
     assert n_boot >= 1, 'bootstat must have at least one value.'
-    if tail == 'greater':
+    if alternative == 'greater':
         p = np.greater_equal(bootstat, estimate).sum() / n_boot
-    elif tail == 'less':
+    elif alternative == 'less':
         p = np.less_equal(bootstat, estimate).sum() / n_boot
     else:
         p = np.greater_equal(np.fabs(bootstat), abs(estimate)).sum() / n_boot

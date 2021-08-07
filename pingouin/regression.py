@@ -15,8 +15,7 @@ __all__ = ['linear_regression', 'logistic_regression', 'mediation_analysis']
 
 
 def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
-                      alpha=0.05, as_dataframe=True, remove_na=False,
-                      relimp=False):
+                      alpha=0.05, as_dataframe=True, remove_na=False, relimp=False):
     """(Multiple) Linear regression.
 
     Parameters

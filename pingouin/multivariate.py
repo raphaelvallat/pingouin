@@ -261,7 +261,7 @@ def box_m(data, dvs, group, alpha=.001):
 
     Parameters
     ----------
-    data : :py:class:`pandas.DataFrame`,
+    data : :py:class:`pandas.DataFrame`
         Long-format dataframe.
     dvs : list
         Dependent variables.

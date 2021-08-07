@@ -88,8 +88,6 @@ class TestCircular(TestCase):
         # Compare with the CircStats MATLAB toolbox
         assert round(r, 3) == 0.942
         assert np.round(pval, 3) == 0.066
-        _, pval2 = circ_corrcc(x, y, tail='one-sided')
-        assert pval2 == pval / 2
         # With correction for uniform marginals
         circ_corrcc(x, y, correction_uniform=True)
 
@@ -101,8 +99,6 @@ class TestCircular(TestCase):
         # Compare with the CircStats MATLAB toolbox
         assert round(r, 3) == 0.109
         assert np.round(pval, 3) == 0.971
-        _, pval2 = circ_corrcl(x, y, tail='one-sided')
-        assert pval2 == pval / 2
 
     def test_circ_mean(self):
         """Test function circ_mean."""

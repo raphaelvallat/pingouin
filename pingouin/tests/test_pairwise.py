@@ -66,7 +66,7 @@ class TestPairwise(TestCase):
         pt = pairwise_ttests(dv='Scores', between='Group', data=df).round(3)
         assert pt.loc[0, 'p-unc'] == 0.023
         pairwise_ttests(dv='Scores', between='Group',
-                        data=df, padjust='bonf', tail='one-sided',
+                        data=df, padjust='bonf', alternative='greater',
                         effsize='cohen', parametric=False)
 
         # Same after random ordering of subject (issue 151)
@@ -128,8 +128,6 @@ class TestPairwise(TestCase):
         # However adjusted p-values are not equal because they are calculated
         # separately on each dataframe.
         assert not np.array_equal(pt_merged['p-corr'], pt['p-corr'].iloc[4:])
-        # I also manually checked the previous lines using parametric=False and
-        # one-sided test.
 
         # Other options
         pairwise_ttests(dv='Scores', within=['Time'], between=['Group'],
@@ -290,38 +288,28 @@ class TestPairwise(TestCase):
         # 1.1 Parametric
         # 1.1.1 Tail is greater
         pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
-                             data=df, tail='greater')
+                             data=df, alternative='greater')
         np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
                                       [0.907, 0.941, 0.405])
         assert all(pt.loc[:, 'BF10'].astype(float) < 1)
         # 1.1.2 Tail is less
         pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
-                             data=df, tail='less')
+                             data=df, alternative='less')
         np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
                                       [0.093, 0.059, 0.595])
         assert sum(pt.loc[:, 'BF10'].astype(float) > 1) == 2
-        # 1.1.3 Tail is one-sided: smallest p-value
-        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
-                             data=df, tail='one-sided')
-        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
-                                      [0.093, 0.059, 0.405])
 
         # 1.2 Non-parametric
         # 1.2.1 Tail is greater
         pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
-                             parametric=False, data=df, tail='greater')
+                             parametric=False, data=df, alternative='greater')
         np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
                                       [0.910, 0.951, 0.483])
         # 1.2.2 Tail is less
         pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
-                             parametric=False, data=df, tail='less')
+                             parametric=False, data=df, alternative='less')
         np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
                                       [0.108, 0.060, 0.551])
-        # 1.2.3 Tail is one-sided: smallest p-value
-        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
-                             parametric=False, data=df, tail='one-sided')
-        np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
-                                      [0.108, 0.060, 0.483])
 
         # Compare the RBC value for wilcoxon
         from pingouin.nonparametric import wilcoxon
@@ -336,32 +324,23 @@ class TestPairwise(TestCase):
         # 2.1 Parametric
         # 2.1.1 Tail is greater
         pt = pairwise_ttests(dv='Scores', between='Gender',
-                             data=df, tail='greater')
+                             data=df, alternative='greater')
         assert pt.loc[0, 'p-unc'].round(3) == 0.932
         assert float(pt.loc[0, 'BF10']) < 1
         # 2.1.2 Tail is less
         pt = pairwise_ttests(dv='Scores', between='Gender',
-                             data=df, tail='less')
-        assert pt.loc[0, 'p-unc'].round(3) == 0.068
-        assert float(pt.loc[0, 'BF10']) > 1
-        # 2.1.3 Tail is one-sided: smallest p-value
-        pt = pairwise_ttests(dv='Scores', between='Gender',
-                             data=df, tail='one-sided')
+                             data=df, alternative='less')
         assert pt.loc[0, 'p-unc'].round(3) == 0.068
         assert float(pt.loc[0, 'BF10']) > 1
 
         # 2.2 Non-parametric
         # 2.2.1 Tail is greater
         pt = pairwise_ttests(dv='Scores', between='Gender',
-                             parametric=False, data=df, tail='greater')
+                             parametric=False, data=df, alternative='greater')
         assert pt.loc[0, 'p-unc'].round(3) == 0.901
         # 2.2.2 Tail is less
         pt = pairwise_ttests(dv='Scores', between='Gender',
-                             parametric=False, data=df, tail='less')
-        assert pt.loc[0, 'p-unc'].round(3) == 0.105
-        # 2.2.3 Tail is one-sided: smallest p-value
-        pt = pairwise_ttests(dv='Scores', between='Gender',
-                             parametric=False, data=df, tail='one-sided')
+                             parametric=False, data=df, alternative='less')
         assert pt.loc[0, 'p-unc'].round(3) == 0.105
 
         # Compare the RBC value for MWU
@@ -485,14 +464,13 @@ class TestPairwise(TestCase):
         """Test function pairwise_corr"""
         # Load JASP Big 5 DataSets (remove subject column)
         data = read_dataset('pairwise_corr').iloc[:, 1:]
-        stats = pairwise_corr(data=data, method='pearson', tail='two-sided')
+        stats = pairwise_corr(data=data, method='pearson', alternative='two-sided')
         jasp_rval = [-0.350, -0.01, -.134, -.368, .267, .055, .065, .159,
                      -.013, .159]
         assert np.allclose(stats['r'].round(3).to_numpy(), jasp_rval)
         assert stats['n'].to_numpy()[0] == 500
         # Correct for multiple comparisons
-        pairwise_corr(data=data, method='spearman', tail='one-sided',
-                      padjust='bonf')
+        pairwise_corr(data=data, method='spearman', alternative='greater', padjust='bonf')
         # Check with a subset of columns
         pairwise_corr(data=data, columns=['Neuroticism', 'Extraversion'])
         with pytest.raises(ValueError):

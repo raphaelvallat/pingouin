@@ -1,3 +1,4 @@
+import pytest
 import scipy
 import numpy as np
 import pandas as pd
@@ -53,27 +54,24 @@ class TestNonParametric(TestCase):
 
     def test_mwu(self):
         """Test function mwu"""
-        mwu_scp = scipy.stats.mannwhitneyu(x, y, use_continuity=True,
-                                           alternative='two-sided')
-        mwu_pg = mwu(x, y, tail='two-sided')
-        mwu_pg_less = mwu(x, y, tail='less')
-        mwu_pg_greater = mwu(x, y, tail='greater')
+        mwu_scp = scipy.stats.mannwhitneyu(x, y, use_continuity=True, alternative='two-sided')
+        mwu_pg = mwu(x, y, alternative='two-sided')
+        mwu_pg_less = mwu(x, y, alternative='less')
+        mwu_pg_greater = mwu(x, y, alternative='greater')
         # Similar to R: wilcox.test(df$x, df$y, paired = FALSE, exact = FALSE)
         # Note that the RBC value are compared to JASP in test_pairwise.py
         assert mwu_scp[0] == mwu_pg.at['MWU', 'U-val']
         assert mwu_scp[1] == mwu_pg.at['MWU', 'p-val']
         # One-sided
-        assert np.median(x) > np.median(y)  # Tail = greater, x > y
-        assert (mwu(x, y, tail='one-sided').at['MWU', 'p-val'] ==
-                mwu_pg_greater.at['MWU', 'p-val'])
         assert (mwu_pg_less.at['MWU', 'p-val'] ==
-                scipy.stats.mannwhitneyu(x, y, use_continuity=True,
-                                         alternative='less')[1])
+                scipy.stats.mannwhitneyu(x, y, use_continuity=True, alternative='less')[1])
         # CLES is compared to:
         # https://janhove.github.io/reporting/2016/11/16/common-language-effect-sizes
         assert round(mwu_pg.at['MWU', 'CLES'], 4) == 0.5363
         assert round(mwu_pg_less.at['MWU', 'CLES'], 4) == 0.4637
         assert round(mwu_pg_greater.at['MWU', 'CLES'], 4) == 0.5363
+        with pytest.raises(ValueError):
+            mwu(x, y, tail='error')
 
     def test_wilcoxon(self):
         """Test function wilcoxon"""
@@ -81,7 +79,7 @@ class TestNonParametric(TestCase):
         # The V value is slightly different between SciPy and R
         # The p-value, however, is almost identical
         wc_scp = scipy.stats.wilcoxon(x2, y2, correction=True)
-        wc_pg = wilcoxon(x2, y2, tail='two-sided')
+        wc_pg = wilcoxon(x2, y2, alternative='two-sided')
         assert wc_scp[0] == wc_pg.at['Wilcoxon', 'W-val'] == 20.5  # JASP
         assert wc_scp[1] == wc_pg.at['Wilcoxon', 'p-val']
         # Same but using the pre-computed difference
@@ -91,10 +89,8 @@ class TestNonParametric(TestCase):
         assert wc_pg.at['Wilcoxon', 'p-val'] == wc_pg2.at['Wilcoxon', 'p-val']
         assert wc_pg.at['Wilcoxon', 'RBC'] == wc_pg2.at['Wilcoxon', 'RBC']
         assert np.isnan(wc_pg2.at['Wilcoxon', 'CLES'])
-        wc_pg_less = wilcoxon(x2, y2, tail='less')
-        wc_pg_greater = wilcoxon(x2, y2, tail='greater')
-        wc_pg_ones = wilcoxon(x2, y2, tail='one-sided')
-        pd.testing.assert_frame_equal(wc_pg_ones, wc_pg_less)
+        wc_pg_less = wilcoxon(x2, y2, alternative='less')
+        wc_pg_greater = wilcoxon(x2, y2, alternative='greater')
         # Note that the RBC value are compared to JASP in test_pairwise.py
         # The RBC values in JASP does not change according to the tail.
         assert round(wc_pg.at['Wilcoxon', 'RBC'], 3) == -0.379
@@ -105,6 +101,8 @@ class TestNonParametric(TestCase):
         assert round(wc_pg.at['Wilcoxon', 'CLES'], 3) == 0.396
         assert round(wc_pg_less.at['Wilcoxon', 'CLES'], 3) == 0.604
         assert round(wc_pg_greater.at['Wilcoxon', 'CLES'], 3) == 0.396
+        with pytest.raises(ValueError):
+            wilcoxon(x2, y2, tail='error')
 
     def test_friedman(self):
         """Test function friedman"""

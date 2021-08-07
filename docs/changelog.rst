@@ -3,25 +3,52 @@
 What's new
 ##########
 
+------------
 v0.4.0 (dev)
 ------------
 
-**New functions**
+Major upgrade of the dependencies. This release requires **Python 3.7+, SciPy 1.7+, NumPy 1.19+ and Pandas 1.0+**. Pingouin uses the ``alternative`` argument that has been added to several statistical functions of Scipy 1.7+ (see below). However, SciPy 1.7+ requires Python 3.7+. We recommend all users to upgrade to the latest version of Pingouin.
 
-a. Added the :py:func:`pingouin.box_m` function to calculate `Box's M test <https://en.wikipedia.org/wiki/Box%27s_M_test>`_ for equality of covariance matrices. See `PR 175 <https://github.com/raphaelvallat/pingouin/pull/175>`_.
+~~~~~~~~~~~~~~~~~~
+Major enhancements
+~~~~~~~~~~~~~~~~~~
 
-**Enhancements**
+**Directional testing**
 
-a. Major refactoring of :py:func:`pingouin.partial_corr` which now uses the exact same method as the R `ppcor <https://cran.r-project.org/web/packages/ppcor/ppcor.pdf>`_ package, i.e. based on the inverse covariance matrix rather than the residuals of a linear regression. This new approach is faster and works better in some cases (such as Spearman partial correlation with binary variables, see `issue 147 <https://github.com/raphaelvallat/pingouin/issues/147>`_). One caveat of this new approach is that only the Pearson and Spearman correlation type are now supported in partial/semi-partial correlation.
-b. :py:func:`pingouin.ancova` always uses statsmodels, regardless of the number of covariates. This fixes LinAlg errors in :py:func:`pingouin.ancova` and :py:func:`pingouin.rm_corr` (see `issue 184 <https://github.com/raphaelvallat/pingouin/issues/184>`_).
-c. Avoid RuntimeWarning when calculating CI and power of a perfect correlation in :py:func:`pingouin.corr` (see `issue 183 <https://github.com/raphaelvallat/pingouin/issues/183>`_).
-d. Use :py:func:`scipy.linalg.lstsq` instead of :py:func:`numpy.linalg.lstsq` whenever possible to better check for NaN and Inf in input (see `issue 184 <https://github.com/raphaelvallat/pingouin/issues/184>`_).
-e. Added warning in :py:func:`pingouin.partial_corr` with ``method="skipped"``: the MCD algorithm does not give the same output in Python (scikit-learn) than in the original Matlab library (LIBRA), and this can lead to skipped correlations that are different in Pingouin than in the Matlab robust correlation toolbox (see `issue 164 <https://github.com/raphaelvallat/pingouin/issues/164>`_).
-f. :py:func:`pingouin.wilcoxon` now supports a pre-computed array of differences, similar to :py:func:`scipy.stats.wilcoxon` (`issue 186 <https://github.com/raphaelvallat/pingouin/issues/186>`_).
+The ``tail`` argument has been renamed to ``alternative`` in all Pingouin functions to be consistent with SciPy and R (`#185 <https://github.com/raphaelvallat/pingouin/issues/185>`_). Furthermore, ``"alternative='one-sided'"`` has now been deprecated. Instead, ``alternative`` must be one of "two-sided" (default), "greater" or "less". Again, this is the same behavior as SciPy and R.
 
-**Dependencies**
+Added support for directional testing with ``"alternative='greater'"`` and ``"alternative='less'"`` in :py:func:`pingouin.corr` (`#176 <https://github.com/raphaelvallat/pingouin/issues/176>`_). As a result, the p-value, confidence intervals and power of the correlation will change depending on the directionality of the test. Support for directional testing has also been added to :py:func:`pingouin.power_corr` and :py:func:`pingouin.compute_esci`.
 
-This release requires Python 3.7+, SciPy 1.7+, NumPy 1.19+ and Pandas 1.0+.
+Finally, the ``tail`` argument has been removed from :py:func:`pingouin.rm_corr`, :py:func:`pingouin.circ_corrcc` and :py:func:`pingouin.circ_corrcl` to be consistent with the original R / Matlab implementations.
+
+**Partial correlation**
+
+Major refactoring of :py:func:`pingouin.partial_corr`, which now uses the same method as the R `ppcor <https://cran.r-project.org/web/packages/ppcor/ppcor.pdf>`_ package, i.e. based on the inverse covariance matrix rather than the residuals of a linear regression. This new approach is faster and works better in some cases (such as Spearman partial correlation with binary variables, see `issue 147 <https://github.com/raphaelvallat/pingouin/issues/147>`_).
+One caveat is that only the Pearson and Spearman correlation methods are now supported in partial/semi-partial correlation.
+
+**Box M test**
+
+Added the :py:func:`pingouin.box_m` function to calculate `Box's M test <https://en.wikipedia.org/wiki/Box%27s_M_test>`_ for equality of covariance matrices (`#175 <https://github.com/raphaelvallat/pingouin/pull/175>`_).
+
+~~~~~~~~~~~~~~~~~~
+Minor enhancements
+~~~~~~~~~~~~~~~~~~
+
+* :py:func:`pingouin.wilcoxon` now supports a pre-computed array of differences, similar to :py:func:`scipy.stats.wilcoxon` (`issue 186 <https://github.com/raphaelvallat/pingouin/issues/186>`_).
+
+* :py:func:`pingouin.mwu` and :py:func:`pingouin.wilcoxon` now support keywords arguments that are passed to the lower-level scipy functions.
+
+* Added warning in :py:func:`pingouin.partial_corr` with ``method="skipped"``: the MCD algorithm does not give the same output in Python (scikit-learn) than in the original Matlab library (LIBRA), and this can lead to skipped correlations that are different in Pingouin than in the Matlab robust correlation toolbox (see `issue 164 <https://github.com/raphaelvallat/pingouin/issues/164>`_).
+
+* :py:func:`pingouin.ancova` always uses statsmodels, regardless of the number of covariates. This fixes LinAlg errors in :py:func:`pingouin.ancova` and :py:func:`pingouin.rm_corr` (see `issue 184 <https://github.com/raphaelvallat/pingouin/issues/184>`_).
+
+* Avoid RuntimeWarning when calculating CI and power of a perfect correlation in :py:func:`pingouin.corr` (see `issue 183 <https://github.com/raphaelvallat/pingouin/issues/183>`_).
+
+* Use :py:func:`scipy.linalg.lstsq` instead of :py:func:`numpy.linalg.lstsq` whenever possible to better check for NaN and Inf in input (see `issue 184 <https://github.com/raphaelvallat/pingouin/issues/184>`_).
+
+* flake8 requirements for max line length has been changed from 80 to 100 characters.
+
+--------------------------------------------------------------------------------
 
 v0.3.12 (May 2021)
 ------------------

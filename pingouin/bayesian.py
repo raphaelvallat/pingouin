@@ -19,7 +19,7 @@ def _format_bf(bf, precision=3, trim='0'):
     return out
 
 
-def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
+def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative='two-sided', r=.707):
     """
     Bayes Factor of a T-test.
 
@@ -35,12 +35,12 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     paired : boolean
         Specify whether the two observations are related (i.e. repeated
         measures) or independent.
-    tail : string
-        Specify whether the test is `'one-sided'` or `'two-sided'`. Can also be
-        `'greater'` or `'less'` to specify the direction of the test.
+    alternative : string
+        Defines the alternative hypothesis, or tail of the test. Must be one of
+        "two-sided" (default), "greater" or "less".
 
         .. warning:: One-sided Bayes Factor (BF) are simply obtained by
-            doubling the two-sided BF, which is not exactly the same behavior
+            doubling the two-sided BF, which is not the same behavior
             as R or JASP. Be extra careful when interpretating one-sided BF,
             and if you can, always double-check your results.
     r : float
@@ -109,23 +109,17 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     >>> print("Bayes Factor: %.3f (two-sample paired)" % bf)
     Bayes Factor: 17.185 (two-sample paired)
 
-    3. Bayes Factor of an one-sided one-sample T-test
-
-    >>> bf = bayesfactor_ttest(3.5, 20, tail='one-sided')
-    >>> print("Bayes Factor: %.3f (one-sample)" % bf)
-    Bayes Factor: 34.369 (one-sample)
-
-    4. Now specifying the direction of the test
+    3. Now specifying the direction of the test
 
     >>> tval = -3.5
-    >>> bf_greater = bayesfactor_ttest(tval, 20, tail='greater')
-    >>> bf_less = bayesfactor_ttest(tval, 20, tail='less')
+    >>> bf_greater = bayesfactor_ttest(tval, 20, alternative='greater')
+    >>> bf_less = bayesfactor_ttest(tval, 20, alternative='less')
     >>> print("BF10-greater: %.3f | BF10-less: %.3f" % (bf_greater, bf_less))
     BF10-greater: 0.029 | BF10-less: 34.369
     """
-    # Check tails
-    possible_tails = ['two-sided', 'one-sided', 'greater', 'less']
-    assert tail in possible_tails, 'Invalid tail argument.'
+    # Check tail
+    assert alternative in ['two-sided', 'greater', 'less'], (
+        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
     one_sample = True if ny is None or ny == 1 else False
 
     # Check T-value
@@ -152,16 +146,15 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, tail='two-sided', r=.707):
     bf10 = 1 / ((1 + t**2 / df)**(-(df + 1) / 2) / integr)
 
     # Tail
-    tail_binary = 'two-sided' if tail == 'two-sided' else 'one-sided'
+    tail_binary = 'two-sided' if alternative == 'two-sided' else 'one-sided'
     bf10 = bf10 * (1 / 0.5) if tail_binary == 'one-sided' else bf10
     # Now check the direction of the test
-    if ((tail == 'greater' and t < 0) or (tail == 'less' and t > 0)) and bf10 > 1:  # noqa
+    if ((alternative == 'greater' and t < 0) or (alternative == 'less' and t > 0)) and bf10 > 1:
         bf10 = 1 / bf10
-
     return bf10
 
 
-def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
+def bayesfactor_pearson(r, n, alternative='two-sided', method='ly', kappa=1.):
     """
     Bayes Factor of a Pearson correlation.
 
@@ -171,20 +164,20 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
         Pearson correlation coefficient.
     n : int
         Sample size.
-    tail : float
-        Tail of the alternative hypothesis. Can be *'two-sided'*,
-        *'one-sided'*, *'greater'* or *'less'*. *'greater'* corresponds to a
-        positive correlation, *'less'* to a negative correlation.
-        If *'one-sided'*, the directionality is inferred based on the ``r``
-        value (= *'greater'* if ``r`` > 0, *'less'* if ``r`` < 0).
+    alternative : string
+        Defines the alternative hypothesis, or tail of the correlation. Must be one of
+        "two-sided" (default), "greater" or "less". Both "greater" and "less" return a one-sided
+        p-value. "greater" tests against the alternative hypothesis that the correlation is
+        positive (greater than zero), "less" tests against the hypothesis that the correlation is
+        negative.
     method : str
-        Method to compute the Bayes Factor. Can be *'ly'* (default) or
-        *'wetzels'*. The former has an exact analytical solution, while the
-        latter requires integral solving (and is therefore slower). *'wetzels'*
+        Method to compute the Bayes Factor. Can be "ly" (default) or
+        "wetzels". The former has an exact analytical solution, while the
+        latter requires integral solving (and is therefore slower). "wetzels"
         was the default in Pingouin <= 0.2.5. See Notes for details.
     kappa : float
         Kappa factor. This is sometimes called the *rscale* parameter, and
-        is only used when ``method`` is *'ly'*.
+        is only used when ``method`` is "ly".
 
     Returns
     -------
@@ -263,28 +256,22 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
 
     One-sided test
 
-    >>> bf10pos = bayesfactor_pearson(r, n, tail='greater')
-    >>> bf10neg = bayesfactor_pearson(r, n, tail='less')
+    >>> bf10pos = bayesfactor_pearson(r, n, alternative='greater')
+    >>> bf10neg = bayesfactor_pearson(r, n, alternative='less')
     >>> print("BF-pos: %.3f, BF-neg: %.3f" % (bf10pos, bf10neg))
     BF-pos: 21.185, BF-neg: 0.082
-
-    We can also only pass ``tail='one-sided'`` and Pingouin will automatically
-    infer the directionality of the test based on the ``r`` value.
-
-    >>> print("BF: %.3f" % bayesfactor_pearson(r, n, tail='one-sided'))
-    BF: 21.185
     """
     from scipy.special import gamma, betaln, hyp2f1
     assert method.lower() in ['ly', 'wetzels'], 'Method not recognized.'
-    assert tail.lower() in ['two-sided', 'one-sided', 'greater', 'less',
-                            'g', 'l', 'positive', 'negative', 'pos', 'neg']
+    assert alternative in ['two-sided', 'greater', 'less'], (
+        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
 
     # Wrong input
     if not np.isfinite(r) or n < 2:
         return np.nan
     assert -1 <= r <= 1, 'r must be between -1 and 1.'
 
-    if tail.lower() != 'two-sided' and method.lower() == 'wetzels':
+    if alternative != 'two-sided' and method.lower() == 'wetzels':
         warnings.warn("One-sided Bayes Factor are not supported by the "
                       "Wetzels's method. Switching to method='ly'.")
         method = 'ly'
@@ -310,25 +297,19 @@ def bayesfactor_pearson(r, n, tail='two-sided', method='ly', kappa=1.):
                    + lgamma((n + 2 / k - 1) / 2) - lgamma((n + 2 / k) / 2) +
                    log_hyperterm)
 
-        if tail.lower() != 'two-sided':
+        if alternative != 'two-sided':
             # Directional test.
             # We need mpmath for the generalized hypergeometric function
             from .utils import _is_mpmath_installed
             _is_mpmath_installed(raise_error=True)
             from mpmath import hyp3f2
-            hyper_term = float(hyp3f2(1, n / 2, n / 2, 3 / 2,
-                                      (2 + k * (n + 1)) / (2 * k),
-                                      r**2))
+            hyper_term = float(hyp3f2(1, n / 2, n / 2, 3 / 2, (2 + k * (n + 1)) / (2 * k), r**2))
             log_term = 2 * (lgamma(n / 2) - lgamma((n - 1) / 2)) - lbeta
-            C = 2**((3 * k - 2) / k) * k * r / (2 + (n - 1) * k) * \
-                exp(log_term) * hyper_term
+            C = 2**((3 * k - 2) / k) * k * r / (2 + (n - 1) * k) * exp(log_term) * hyper_term
 
             bf10neg = bf10 - C
             bf10pos = 2 * bf10 - bf10neg
-            if tail.lower() in ['one-sided']:
-                # Automatically find the directionality of the test based on r
-                bf10 = bf10pos if r >= 0 else bf10neg
-            elif tail.lower() in ['greater', 'g', 'positive', 'pos']:
+            if alternative == 'greater':
                 # We expect the correlation to be positive
                 bf10 = bf10pos
             else:
@@ -407,9 +388,9 @@ def bayesfactor_binom(k, n, p=.5):
     different results. It can be performed using the
     :py:func:`scipy.stats.binom_test` function:
 
-    >>> from scipy.stats import binom_test
-    >>> pval = binom_test(115, 200, p=0.5)
-    >>> round(pval, 5)
+    >>> from scipy.stats import binomtest
+    >>> result = binomtest(k=115, n=200, p=0.5)
+    >>> round(result.pvalue, 5)
     0.04004
 
     The binomial test rejects the null hypothesis that the coin is fair at the

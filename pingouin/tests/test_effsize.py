@@ -34,9 +34,20 @@ class TestEffsize(TestCase):
         estimate the SE of one-sample cohen D.
         """
         # Pearson correlation
-        r = 0.5543563
-        ci = compute_esci(stat=r, nx=6, eftype='r')
-        assert np.allclose(ci, [-0.47, 0.94])
+        # https://github.com/SurajGupta/r-source/blob/master/src/library/stats/R/cor.test.R
+        ci = compute_esci(stat=0.5543563, nx=6, eftype='r', decimals=6)
+        assert np.allclose(ci, [-0.4675554, 0.9420809])
+        # Alternative == "greater"
+        ci = compute_esci(stat=0.8, nx=20, eftype='r', alternative="greater", decimals=6)
+        assert np.allclose(ci, [0.6041625, 1])
+        ci = compute_esci(stat=-0.2, nx=30, eftype='r', alternative="greater", decimals=6)
+        assert np.allclose(ci, [-0.4771478, 1])
+        # Alternative == "less"
+        ci = compute_esci(stat=-0.8, nx=20, eftype='r', alternative="less", decimals=6)
+        assert np.allclose(ci, [-1, -0.6041625])
+        ci = compute_esci(stat=0.2, nx=30, eftype='r', alternative="less", decimals=6)
+        assert np.allclose(ci, [-1, 0.4771478])
+
         # Cohen d
         # .. One sample and paired
         # Cannot compare to R because cohen.d uses different formulas for
@@ -65,8 +76,7 @@ class TestEffsize(TestCase):
         # >>> y_m = lsat;
         x_m = [3.39, 3.3, 2.81, 3.03, 3.44, 3.07, 3.0, 3.43, 3.36, 3.13,
                3.12, 2.74, 2.76, 2.88, 2.96]
-        y_m = [576, 635, 558, 578, 666, 580, 555, 661, 651, 605, 653, 575,
-               545, 572, 594]
+        y_m = [576, 635, 558, 578, 666, 580, 555, 661, 651, 605, 653, 575, 545, 572, 594]
         # 1. bootci around a pearson correlation coefficient
         # Matlab: bootci(n_boot, {@corr, x_m, y_m}, 'type', 'norm');
         ci = compute_bootci(x_m, y_m, method='norm', seed=123)
@@ -99,14 +109,11 @@ class TestEffsize(TestCase):
         # 4. Bivariate custom function: paired T-test
         from scipy.stats import ttest_rel
         ci_n = compute_bootci(x_m, y_m, func=lambda x, y: ttest_rel(x, y)[0],
-                              method='norm', n_boot=n_boot, decimals=0,
-                              seed=42)
+                              method='norm', n_boot=n_boot, decimals=0, seed=42)
         ci_p = compute_bootci(x_m, y_m, func=lambda x, y: ttest_rel(x, y)[0],
-                              method='per', n_boot=n_boot, decimals=0,
-                              seed=42)
+                              method='per', n_boot=n_boot, decimals=0, seed=42)
         ci_c = compute_bootci(x_m, y_m, func=lambda x, y: ttest_rel(x, y)[0],
-                              method='cper', n_boot=n_boot, decimals=0,
-                              seed=42)
+                              method='cper', n_boot=n_boot, decimals=0, seed=42)
         assert ci_n[0] == -69 and ci_n[1] == -35
         assert ci_p[0] == -79 and ci_p[1] == -48
         assert ci_c[0] == -68 and ci_c[1] == -47
