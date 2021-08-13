@@ -96,7 +96,7 @@ or conda
 
   conda install -c conda-forge pingouin
 
-Pingouin is under heavy development and it is likely that bugs/mistakes will be discovered in future releases. Please always make sure that you are using the latest version of Pingouin (new releases are `frequent <https://pingouin-stats.org/changelog.html>`_, i.e. about one per month).
+Pingouin is under heavy development and it is likely that bugs/mistakes will be discovered in future releases. Please always make sure that you are using the latest version of Pingouin (new releases are `frequent <https://pingouin-stats.org/changelog.html>`_).
 Whenever a new release is out there, you can upgrade your version by typing the following line in a terminal window:
 
 .. code-block:: shell
@@ -497,7 +497,7 @@ The functions that are currently supported as pandas method are:
 Development
 ===========
 
-Pingouin was created and is maintained by `Raphael Vallat <https://raphaelvallat.github.io>`_, mostly during his spare time. Contributions are more than welcome so feel free to contact me, open an issue or submit a pull request!
+Pingouin was created and is maintained by `Raphael Vallat <https://raphaelvallat.github.io>`_, a postdoctoral researcher at UC Berkeley, mostly during his spare time. Contributions are more than welcome so feel free to contact me, open an issue or submit a pull request!
 
 To see the code or report a bug, please visit the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
 

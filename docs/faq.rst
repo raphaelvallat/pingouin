@@ -3,8 +3,8 @@
 FAQ
 ===
 
-Python
-------
+Installation
+------------
 
 .. ----------------------------- INTRO -----------------------------
 .. raw:: html
@@ -13,25 +13,19 @@ Python
       <div class="panel panel-default">
         <div class="panel-heading">
           <h5 class="panel-title">
-            <a data-toggle="collapse" href="#collapse_python">I am new to Python, how can I install Python and Pingouin on my computer?</a>
+            <a data-toggle="collapse" href="#collapse_python">How can I install Pingouin on my computer?</a>
           </h5>
         </div>
         <div id="collapse_python" class="panel-collapse collapse">
           <div class="panel-body">
 
-To install Python  on your computer, you should use `Anaconda <https://conda.io/docs/index.html>`_, a Python distribution which natively includes all the most important packages. Then, open the newly installed Anaconda prompt and type:
+To install Pingouin, open a command prompt (or Terminal or Anaconda Prompt) and type:
 
 .. code-block:: bash
 
-    conda install pip
+    pip install pingouin --upgrade
 
-This will install pip, the most-widely used package manager in Python. Once pip is installed, you should be able to install Pingouin. Still in Anaconda prompt, run the following command:
-
-.. code-block:: bash
-
-    pip install pingouin
-
-You are almost ready to use Pingouin. First, you need to open an interactive Python console (either `IPython <https://ipython.org/>`_ or `Jupyter <https://jupyter.readthedocs.io/en/latest/index.html>`_). To do so, type the following command:
+You should now be able to use Pingouin. To try it, you need to open an interactive Python console (either `IPython <https://ipython.org/>`_ or `Jupyter <https://jupyter.readthedocs.io/en/latest/index.html>`_). For example, type the following command in a command prompt:
 
 .. code-block:: bash
 
@@ -111,7 +105,7 @@ Now, let's do a simple paired T-test using Pingouin:
       <div id="collapse_scp" class="panel-collapse collapse">
         <div class="panel-body">
 
-The `scipy.stats <https://docs.scipy.org/doc/scipy/reference/stats.html>`_ module provides several low-level statistical functions. However, most of these functions do not return a very detailed output (e.g. only the T- and p-values for a T-test). Most of Pingouin function are using the low-level SciPy funtions to provide a richer, more exhaustive, output. See for yourself!:
+The `scipy.stats <https://docs.scipy.org/doc/scipy/reference/stats.html>`_ module provides several low-level statistical functions. However, most of these functions do not return a very detailed output (e.g. only the T- and p-values for a T-test). Most Pingouin functions are using the low-level SciPy funtions to provide a richer, more exhaustive, output. See for yourself!:
 
 .. code-block:: python
 
@@ -294,7 +288,7 @@ To read more about what you can do and cannot do with a GPL-3 license, please vi
       <div id="collapse_release" class="panel-collapse collapse">
         <div class="panel-body">
 
-To be notified whenever a new release of Pingouin is available, you can click on "Watch releases" on the `GitHub <https://github.com/raphaelvallat/pingouin>`_ of Pingouin (see below).
+Pingouin uses `outdated <https://github.com/alexmojaki/outdated>`_, a Python package that automatically checks if a newer version of Pingouin is available upon loading. Alternatively, you can click "Watch" on the `GitHub <https://github.com/raphaelvallat/pingouin>`_ of Pingouin.
 
 .. figure::  /pictures/github_watch_release.png
   :align:   center
@@ -341,7 +335,7 @@ There are many ways to contribute to Pingouin, even if you are not a programmer,
 
 To cite Pingouin, please use the publication in JOSS:
 
-Vallat, R. (2018). Pingouin: statistics in Python. *Journal of Open Source Software*, 3(31), 1026, `https://doi.org/10.21105/joss.01026 <https://doi.org/10.21105/joss.01026>`_
+* Vallat, R. (2018). Pingouin: statistics in Python. *Journal of Open Source Software*, 3(31), 1026, `https://doi.org/10.21105/joss.01026 <https://doi.org/10.21105/joss.01026>`_
 
 BibTeX:
 
