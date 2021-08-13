@@ -3,8 +3,11 @@
 What's new
 ##########
 
-v0.4.0 (dev)
-------------
+.. contents:: Table of Contents
+    :depth: 2
+
+v0.4.0 (August 2021)
+--------------------
 
 Major upgrade of the dependencies. This release requires **Python 3.7+, SciPy 1.7+, NumPy 1.19+ and Pandas 1.0+**. Pingouin uses the ``alternative`` argument that has been added to several statistical functions of Scipy 1.7+ (see below). However, SciPy 1.7+ requires Python 3.7+. We recommend all users to upgrade to the latest version of Pingouin.
 
