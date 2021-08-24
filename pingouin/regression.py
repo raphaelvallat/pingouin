@@ -627,10 +627,10 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     .. caution:: This function is a wrapper around the
         :py:class:`sklearn.linear_model.LogisticRegression` class. However,
         Pingouin internally disables the L2 regularization and changes the
-        default solver in order to get results that are similar to R and
+        default solver to 'newton-cg' to obtain results that are similar to R and
         statsmodels.
 
-    The logistic regression assumes that the log-odds (the logarithm of the
+    Logistic regression assumes that the log-odds (the logarithm of the
     odds) for the value labeled "1" in the response variable is a linear
     combination of the predictor variables. The log-odds are given by the
     `logit <https://en.wikipedia.org/wiki/Logit>`_ function,
