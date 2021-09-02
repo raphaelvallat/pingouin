@@ -16,6 +16,7 @@ MAINTAINER_EMAIL = 'raphaelvallat9@gmail.com'
 URL = 'https://pingouin-stats.org/index.html'
 DOWNLOAD_URL = 'https://github.com/raphaelvallat/pingouin/'
 VERSION = '0.4.0'
+LICENSE = 'GPL-3.0'
 PACKAGE_DATA = {'pingouin.data.icons': ['*.svg']}
 
 INSTALL_REQUIRES = [
@@ -62,7 +63,7 @@ if __name__ == "__main__":
           maintainer_email=MAINTAINER_EMAIL,
           description=DESCRIPTION,
           long_description=LONG_DESCRIPTION,
-          license=read('LICENSE'),
+          license=LICENSE,
           url=URL,
           version=VERSION,
           download_url=DOWNLOAD_URL,
