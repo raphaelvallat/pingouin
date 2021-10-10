@@ -655,7 +655,7 @@ def corr(x, y, alternative='two-sided', method='pearson', **kwargs):
 
 @pf.register_dataframe_method
 def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
-                 y_covar=None, alternative='two-sided', method='pearson', **kwargs):
+                 y_covar=None, alternative='two-sided', method='pearson'):
     """Partial and semi-partial correlation.
 
     Parameters
@@ -793,18 +793,10 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     # Safety check
     assert alternative in ['two-sided', 'greater', 'less'], (
         "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
-    if "tail" in kwargs:
-        raise ValueError(
-            "Since Pingouin 0.4.0, the 'tail' argument has been renamed to 'alternative'.")
     assert method in ['pearson', 'spearman'], (
         'only "pearson" and "spearman" are supported for partial correlation.')
     assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
     assert data.shape[0] > 2, 'Data must have at least 3 samples.'
-    assert isinstance(x, (str, tuple)), 'x must be a string.'
-    assert isinstance(y, (str, tuple)), 'y must be a string.'
-    assert isinstance(covar, (str, list, type(None)))
-    assert isinstance(x_covar, (str, list, type(None)))
-    assert isinstance(y_covar, (str, list, type(None)))
     if covar is not None and (x_covar is not None or y_covar is not None):
         raise ValueError('Cannot specify both covar and {x,y}_covar.')
     if x_covar is not None and y_covar is not None:

@@ -11,7 +11,8 @@ v0.4.1 (dev)
 
 **Bugfixes**
 
-a. Partial correlation functions (:py:func:`pingouin.pcorr` and :py:func:`pingouin.partial_corr`) now use :py:func:`numpy.linalg.pinv` with `hermitian=True`, which improves numerical stability. See `issue 198 <https://github.com/raphaelvallat/pingouin/issues/198>`_
+a. Partial correlation functions (:py:func:`pingouin.pcorr` and :py:func:`pingouin.partial_corr`) now use :py:func:`numpy.linalg.pinv` with `hermitian=True`, which improves numerical stability. See `issue 198 <https://github.com/raphaelvallat/pingouin/issues/198>`_.
+b. Disabled dtype check in :py:func:`pingouin.partial_corr` — previously, Pingouin could raise an error if the column names were integers. See `issue 201 <https://github.com/raphaelvallat/pingouin/issues/201>`_.
 
 v0.4.0 (August 2021)
 --------------------

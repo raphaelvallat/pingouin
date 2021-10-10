@@ -180,7 +180,8 @@ class TestCorrelation(TestCase):
         #######################################################################
         # ERROR
         #######################################################################
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
+            # TypeError: partial_corr() got an unexpected keyword argument 'tail'
             partial_corr(data=df, x='x', y='y', covar='cv1', tail='error')
         with pytest.raises(ValueError):
             partial_corr(data=df, x='x', y='y', covar='cv2', x_covar='cv1')
