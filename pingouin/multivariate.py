@@ -58,7 +58,7 @@ def multivariate_normality(X, alpha=.05):
     >>> data = pg.read_dataset('multivariate')
     >>> X = data[['Fever', 'Pressure', 'Aches']]
     >>> pg.multivariate_normality(X, alpha=.05)
-    HZResults(hz=0.5400861018514641, pval=0.7173686509624891, normal=True)
+    HZResults(hz=0.540086101851555, pval=0.7173686509622385, normal=True)
     """
     from scipy.stats import lognorm
 
@@ -72,7 +72,7 @@ def multivariate_normality(X, alpha=.05):
 
     # Covariance matrix
     S = np.cov(X, rowvar=False, bias=True)
-    S_inv = np.linalg.pinv(S).astype(X.dtype)  # Preserving original dtype
+    S_inv = np.linalg.pinv(S, hermitian=True).astype(X.dtype)  # Preserving original dtype
     difT = X - X.mean(0)
 
     # Squared-Mahalanobis distances
@@ -233,14 +233,14 @@ def multivariate_ttest(X, Y=None, paired=False):
             # Paired two sample
             cov = np.cov(x - y, rowvar=False)
             diff = x.mean(0) - y.mean(0)
-        inv_cov = np.linalg.pinv(cov)
+        inv_cov = np.linalg.pinv(cov, hermitian=True)
         t2 = (diff @ inv_cov) @ diff * n
     else:
         n = nx + ny - 1
         x_cov = np.cov(x, rowvar=False)
         y_cov = np.cov(y, rowvar=False)
         pooled_cov = ((nx - 1) * x_cov + (ny - 1) * y_cov) / (n - 1)
-        inv_cov = np.linalg.pinv((1 / nx + 1 / ny) * pooled_cov)
+        inv_cov = np.linalg.pinv((1 / nx + 1 / ny) * pooled_cov, hermitian=True)
         diff = x.mean(0) - y.mean(0)
         t2 = (diff @ inv_cov) @ diff
 

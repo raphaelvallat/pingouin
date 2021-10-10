@@ -833,7 +833,7 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         V = data.rank(na_option='keep').cov()
     else:
         V = data.cov()
-    Vi = np.linalg.pinv(V)  # Inverse covariance matrix
+    Vi = np.linalg.pinv(V, hermitian=True)  # Inverse covariance matrix
     Vi_diag = Vi.diagonal()
     D = np.diag(np.sqrt(1 / Vi_diag))
     pcor = -1 * (D @ Vi @ D)  # Partial correlation matrix
@@ -925,7 +925,7 @@ def pcorr(self):
     M  0.412804  0.540140  1.000000
     """
     V = self.cov()  # Covariance matrix
-    Vi = np.linalg.pinv(V)  # Inverse covariance matrix
+    Vi = np.linalg.pinv(V, hermitian=True)  # Inverse covariance matrix
     D = np.diag(np.sqrt(1 / np.diag(Vi)))
     pcor = -1 * (D @ Vi @ D)  # Partial correlation matrix
     pcor[np.diag_indices_from(pcor)] = 1

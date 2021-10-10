@@ -6,6 +6,13 @@ What's new
 .. contents:: Table of Contents
     :depth: 2
 
+v0.4.1 (dev)
+------------
+
+**Bugfixes**
+
+a. Partial correlation functions (:py:func:`pingouin.pcorr` and :py:func:`pingouin.partial_corr`) now use :py:func:`numpy.linalg.pinv` with `hermitian=True`, which improves numerical stability. See `issue 198 <https://github.com/raphaelvallat/pingouin/issues/198>`_
+
 v0.4.0 (August 2021)
 --------------------
 
