@@ -318,21 +318,21 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
     >>> data = pg.read_dataset('mediation')
     >>> pg.homoscedasticity(data[['X', 'Y', 'M']])
                    W      pval  equal_var
-    levene  0.434861  0.999997       True
+    levene  1.173518  0.310707       True
 
-    2. Bartlett test using a list of iterables
+    2. Same data but using a long-format dataframe
+
+    >>> data_long = data[['X', 'Y', 'M']].melt()
+    >>> pg.homoscedasticity(data_long, dv="value", group="variable")
+                   W      pval  equal_var
+    levene  1.173518  0.310707       True
+
+    3. Bartlett test using a list of iterables
 
     >>> data = [[4, 8, 9, 20, 14], np.array([5, 8, 15, 45, 12])]
     >>> pg.homoscedasticity(data, method="bartlett", alpha=.05)
                      T      pval  equal_var
     bartlett  2.873569  0.090045       True
-
-    3. Long-format dataframe
-
-    >>> data = pg.read_dataset('rm_anova2')
-    >>> pg.homoscedasticity(data, dv='Performance', group='Time')
-                   W      pval  equal_var
-    levene  3.192197  0.079217       True
     """
     assert isinstance(data, (pd.DataFrame, list, dict))
     assert method.lower() in ['levene', 'bartlett']
@@ -344,7 +344,7 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
             # Get numeric data only
             numdata = data._get_numeric_data()
             assert numdata.shape[1] > 1, 'Data must have at least two columns.'
-            statistic, p = func(*numdata.to_numpy())
+            statistic, p = func(*numdata.to_numpy().T)
         else:
             # Long-format
             assert group in data.columns
