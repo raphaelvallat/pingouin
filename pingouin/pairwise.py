@@ -1131,12 +1131,12 @@ def pairwise_corr(data, columns=None, covar=None, alternative='two-sided',
         combs = list(combinations(keys, 2))
     else:
         # Case B: column is specified
-        if isinstance(columns[0], list):
+        if isinstance(columns[0], (list, np.ndarray)):
             group1 = [e for e in columns[0] if e in keys]
             # Assert that column is two-dimensional
             if len(columns) == 1:
                 columns.append(None)
-            if isinstance(columns[1], list) and len(columns[1]):
+            if isinstance(columns[1], (list, np.ndarray)) and len(columns[1]):
                 # B1: [['a', 'b'], ['c', 'd']]
                 group2 = [e for e in columns[1] if e in keys]
             else:
@@ -1229,7 +1229,7 @@ def pairwise_corr(data, columns=None, covar=None, alternative='two-sided',
         cor_st_keys = cor_st.columns.tolist()
 
         for c in cor_st_keys:
-            stats.loc[i, c] = cor_st.loc[method, c]
+            stats.at[i, c] = cor_st.at[method, c]
 
     options.update(old_options)  # restore options
 
