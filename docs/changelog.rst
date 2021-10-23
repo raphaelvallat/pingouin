@@ -6,12 +6,38 @@ What's new
 .. contents:: Table of Contents
     :depth: 2
 
-v0.4.1 (dev)
+v0.5.0 (dev)
 ------------
 
-**Bugfixes**
+**BUGFIX - Repeated measurements**
 
-a. The :py:func:`pingouin.homoscedasticity` gave WRONG output for wide-format dataframes because the test was incorrectly calculated on the transposed data. See `issue 204 <https://github.com/raphaelvallat/pingouin/issues/204>`_.
+This release fixes several critical issues related to how Pingouin handles missing values in repeated measurements. The following funtions have been corrected:
+
+- :py:func:`pingouin.rm_anova`
+- :py:func:`pingouin.mixed_anova`
+- :py:func:`pingouin.pairwise_ttests`, only for mixed design or two-way repeated measures design.
+
+A full description of the issue, with code and example, can be found at: https://github.com/raphaelvallat/pingouin/issues/206. In short, in Pingouin <0.5.0, listwise deletion of subjects (or rows) with missing values was not strictly enforced in repeated measures or mixed ANOVA, depending on the input data format (if missing values were explicit or implicit).
+Pingouin 0.5.0 now uses a stricter complete-case analysis regardless of the input data format, which is the same behavior as JASP.
+
+Furthermore, the :py:func:`pingouin.remove_rm_na` has been deprecated. Instead, listwise deletion of rows with missing values in repeated measurements is now performed using:
+
+.. code-block:: python
+
+   data_piv = data.pivot_table(index=subject, columns=within, values=dv)
+   data_piv = data_piv.dropna()  # Listwise deletion
+   data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
+
+**BUGFIX - Strict listwise deletion in pairwise_ttests when repeated measures are present**
+
+This is related to the previous issue. In mixed design, listwise deletion (complete-case analysis) was not strictly enforced in :py:func:`pingouin.pairwise_ttests` for the between-subject and interaction T-tests. In other words, the between-subject and interaction T-tests were calculated using a pairwise-deletion approach, even with ``nan_policy="pairwise"``.
+The same issue occured in two-way repeated measures design, in which no strict listwise deletion was performed prior to calculating the T-tests, even with ``nan_policy="pairwise"``.
+
+This has now been fixed such that Pingouin will always perform a strict listwise deletion whenever repeated measurements are present when ``nan_policy="listwise"`` (default). This complete-case analysis behavior can be disabled with ``nan_policy="pairwise"``, in which case missing values will be removed separately for each contrast. This may not be appropriate for post-hoc analysis following a repeated measures or mixed ANOVA, which is always conducted on complete-case data.
+
+**BUGFIX - Homoscedasticity**
+
+a. The :py:func:`pingouin.homoscedasticity` gave WRONG results for wide-format dataframes because the test was incorrectly calculated on the transposed data. See `issue 204 <https://github.com/raphaelvallat/pingouin/issues/204>`_.
 
 **Enhancements**
 

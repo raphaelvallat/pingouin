@@ -4,9 +4,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import f
 import pandas_flavor as pf
-from pingouin import (_check_dataframe, remove_rm_na, remove_na, _flatten_list,
-                      bayesfactor_ttest, epsilon, sphericity,
-                      _postprocess_dataframe)
+from pingouin import (_check_dataframe, remove_na, _flatten_list, bayesfactor_ttest, epsilon,
+                      sphericity, _postprocess_dataframe)
 
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova", "ancova"]
 
@@ -428,19 +427,11 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         \\eta_p^2 = \\frac{SS_{\\text{effect}}}{SS_{\\text{effect}} +
         SS_{\\text{error}}}
 
-    Results have been tested against R and JASP. Note however that if the
-    dataset contains one or more other within subject factors, an automatic
-    collapsing to the mean is applied on the dependent variable (same behavior
-    as the ezANOVA R package). As such, results can differ from those of JASP.
-
-    Missing values are automatically removed (listwise deletion on the last
-    factor) using the :py:func:`pingouin.remove_rm_na` function.
-    This could drastically decrease the power of the ANOVA if many missing
-    values are present, especially when working with two factors.
-    In that case, we strongly recommend using either JASP to conduct the
-    repeated measures ANOVA (which takes into account the missing values),
-    or using more advanced statistical methods such as linear
-    mixed effect models.
+    Missing values are automatically removed using a strict listwise approach (= complete-case
+    analysis). In other words, any subject with one or more missing value(s) is completely removed
+    from the dataframe prior to running the test. This could drastically decrease the power of the
+    ANOVA if many missing values are present. In that case, we strongly recommend using linear
+    mixed effect modelling, which can handle missing values in repeated measures.
 
     .. warning:: The epsilon adjustement factor of the interaction in
         two-way repeated measures ANOVA where both factors have more than
@@ -495,30 +486,27 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     """
     assert effsize in ['n2', 'np2', 'ng2'], "effsize must be n2, np2 or ng2."
     if isinstance(within, list):
-        assert len(within) > 0, 'Within is empty.'
+        assert len(within) > 0, "Within cannot be empty."
         if len(within) == 1:
             within = within[0]
         elif len(within) == 2:
-            return rm_anova2(dv=dv, within=within, data=data, subject=subject,
-                             effsize=effsize)
+            return rm_anova2(dv=dv, within=within, data=data, subject=subject, effsize=effsize)
         else:
-            raise ValueError('Repeated measures ANOVA with three or more '
-                             'factors are not yet supported.')
+            raise ValueError(
+                "Repeated measures ANOVA with three or more factors is not supported.")
 
-    # Check data format
+    # Convert from wide to long-format, if needed
     if all([v is None for v in [dv, within, subject]]):
-        # Convert from wide to long format
         assert isinstance(data, pd.DataFrame)
         data = data._get_numeric_data().dropna()
-        assert data.shape[0] > 2, 'Data must have at least 3 rows.'
-        assert data.shape[1] > 1, 'Data must contain at least two columns.'
+        assert data.shape[0] > 2, "Data must have at least 3 rows."
+        assert data.shape[1] > 1, "Data must contain at least two columns."
         data['Subj'] = np.arange(data.shape[0])
         data = data.melt(id_vars='Subj', var_name='Within', value_name='DV')
         subject, within, dv = 'Subj', 'Within', 'DV'
 
     # Check dataframe
-    _check_dataframe(dv=dv, within=within, data=data, subject=subject,
-                     effects='within')
+    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects='within')
 
     # Convert Categorical columns to string
     # This is important otherwise all the groupby will return different results
@@ -527,15 +515,17 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         if data[c].dtype.name == 'category':
             data[c] = data[c].astype(str)
 
-    # Collapse to the mean
-    data = data.groupby([subject, within]).mean().reset_index()
+    assert not data[within].isnull().any(), "Cannot have missing values in `within`."
+    assert not data[subject].isnull().any(), "Cannot have missing values in `subject`."
 
-    # Remove NaN
-    if data[dv].isnull().any():
-        data = remove_rm_na(dv=dv, within=within, subject=subject,
-                            data=data[[subject, within, dv]])
-    assert not data[within].isnull().any(), 'Cannot have NaN in `within`.'
-    assert not data[subject].isnull().any(), 'Cannot have NaN in `subject`.'
+    # Pivot and melt the table. This has several effects:
+    # 1) Force missing values to be explicit (a NaN cell is created)
+    # 2) Automatic collapsing to the mean if multiple within factors are present
+    # 3) If using dropna, remove rows with missing values (listwise deletion).
+    # The latter is the same behavior as JASP (= strict complete-case analysis).
+    data_piv = data.pivot_table(index=subject, columns=within, values=dv)
+    data_piv = data_piv.dropna()
+    data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
 
     # Groupby
     grp_with = data.groupby(within)[dv]
@@ -572,65 +562,56 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         # (Partial) eta-squared, np2 == n2
         ef = ss_with / (ss_with + ss_reswith)
 
-    # Reshape and remove NAN for sphericity estimation and correction
-    data_pivot = data.pivot(index=subject, columns=within, values=dv).dropna()
-
-    # Compute sphericity using Mauchly test
+    # Compute sphericity using Mauchly test, on the wide-format dataframe
     # Sphericity assumption only applies if there are more than 2 levels
-    if correction == 'auto' or (correction is True and n_rm >= 3):
-        spher, W_spher, chi_sq_spher, ddof_spher, \
-            p_spher = sphericity(data_pivot, alpha=.05)
-        if correction == 'auto':
+    if correction == "auto" or (correction is True and n_rm >= 3):
+        spher, W_spher, chi_sq_spher, ddof_spher, p_spher = sphericity(data_piv, alpha=.05)
+        if correction == "auto":
             correction = True if not spher else False
     else:
         correction = False
 
     # Compute epsilon adjustement factor
-    eps = epsilon(data_pivot, correction='gg')
+    eps = epsilon(data_piv, correction='gg')
 
     # If required, apply Greenhouse-Geisser correction for sphericity
     if correction:
-        corr_ddof1, corr_ddof2 = [np.maximum(d * eps, 1.) for d in
-                                  (ddof1, ddof2)]
+        corr_ddof1, corr_ddof2 = [np.maximum(d * eps, 1.) for d in (ddof1, ddof2)]
         p_corr = f(corr_ddof1, corr_ddof2).sf(fval)
 
     # Create output dataframe
     if not detailed:
-        aov = pd.DataFrame({'Source': within,
-                            'ddof1': ddof1,
-                            'ddof2': ddof2,
-                            'F': fval,
-                            'p-unc': p_unc,
-                            effsize: ef,
-                            'eps': eps,
-                            }, index=[0])
+        aov = pd.DataFrame({
+            'Source': within, 'ddof1': ddof1, 'ddof2': ddof2, 'F': fval, 'p-unc': p_unc,
+            effsize: ef, 'eps': eps}, index=[0])
         if correction:
             aov['p-GG-corr'] = p_corr
             aov['W-spher'] = W_spher
             aov['p-spher'] = p_spher
             aov['sphericity'] = spher
 
-        col_order = ['Source', 'ddof1', 'ddof2', 'F', 'p-unc',
-                     'p-GG-corr', effsize, 'eps', 'sphericity', 'W-spher',
-                     'p-spher']
+        col_order = [
+            'Source', 'ddof1', 'ddof2', 'F', 'p-unc', 'p-GG-corr', effsize, 'eps', 'sphericity',
+            'W-spher', 'p-spher']
     else:
-        aov = pd.DataFrame({'Source': [within, 'Error'],
-                            'SS': [ss_with, ss_reswith],
-                            'DF': [ddof1, ddof2],
-                            'MS': [ms_with, ms_reswith],
-                            'F': [fval, np.nan],
-                            'p-unc': [p_unc, np.nan],
-                            effsize: [ef, np.nan],
-                            'eps': [eps, np.nan]
-                            })
+        aov = pd.DataFrame({
+            'Source': [within, 'Error'],
+            'SS': [ss_with, ss_reswith],
+            'DF': [ddof1, ddof2],
+            'MS': [ms_with, ms_reswith],
+            'F': [fval, np.nan],
+            'p-unc': [p_unc, np.nan],
+            effsize: [ef, np.nan],
+            'eps': [eps, np.nan]})
         if correction:
             aov['p-GG-corr'] = [p_corr, np.nan]
             aov['W-spher'] = [W_spher, np.nan]
             aov['p-spher'] = [p_spher, np.nan]
             aov['sphericity'] = [spher, np.nan]
 
-        col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'p-GG-corr',
-                     effsize, 'eps', 'sphericity', 'W-spher', 'p-spher']
+        col_order = [
+            'Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'p-GG-corr', effsize, 'eps', 'sphericity',
+            'W-spher', 'p-spher']
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
@@ -646,8 +627,7 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
     a, b = within
 
     # Validate the dataframe
-    _check_dataframe(dv=dv, within=within, data=data, subject=subject,
-                     effects='within')
+    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects='within')
 
     # Convert Categorical columns to string
     # This is important otherwise all the groupby will return different results
@@ -656,17 +636,18 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
         if data[c].dtype.name == 'category':
             data[c] = data[c].astype(str)
 
-    # Remove NaN
-    if data[[subject, a, b, dv]].isnull().any().any():
-        data = remove_rm_na(dv=dv, subject=subject, within=[a, b],
-                            data=data[[subject, a, b, dv]])
+    assert not data[a].isnull().any(), "Cannot have missing values in %s" % a
+    assert not data[b].isnull().any(), "Cannot have missing values in %s" % b
+    assert not data[subject].isnull().any(), "Cannot have missing values in %s" % subject
 
-    # Collapse to the mean (this is also done in remove_rm_na)
-    data = data.groupby([subject, a, b]).mean().reset_index()
-
-    assert not data[a].isnull().any(), 'Cannot have NaN in %s' % a
-    assert not data[b].isnull().any(), 'Cannot have NaN in %s' % b
-    assert not data[subject].isnull().any(), 'Cannot have NaN in %s' % subject
+    # Pivot and melt the table. This has several effects:
+    # 1) Force missing values to be explicit (a NaN cell is created)
+    # 2) Automatic collapsing to the mean if multiple within factors are present
+    # 3) If using dropna, remove rows with missing values (listwise deletion).
+    # The latter is the same behavior as JASP (= strict complete-case analysis).
+    data_piv = data.pivot_table(index=subject, columns=within, values=dv)
+    data_piv = data_piv.dropna()
+    data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
 
     # Group sizes and grandmean
     n_a = data[a].nunique()
@@ -747,13 +728,13 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
     # Epsilon
     piv_a = data.pivot_table(index=subject, columns=a, values=dv)
     piv_b = data.pivot_table(index=subject, columns=b, values=dv)
-    piv_ab = data.pivot_table(index=subject, columns=[a, b], values=dv)
+    # piv_ab = data.pivot_table(index=subject, columns=[a, b], values=dv)  # Same as data_piv
     eps_a = epsilon(piv_a, correction='gg')
     eps_b = epsilon(piv_b, correction='gg')
     # Note that the GG epsilon of the interaction slightly differs between
     # R and Pingouin. An alternative is to use the lower bound, which is
     # very conservative (same behavior as described on real-statistics.com).
-    eps_ab = epsilon(piv_ab, correction='gg')
+    eps_ab = epsilon(data_piv, correction='gg')
 
     # Greenhouse-Geisser correction
     df_a_c, df_as_c = [np.maximum(d * eps_a, 1.) for d in (df_a, df_as)]
@@ -764,17 +745,17 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
     p_ab_corr = f(df_ab_c, df_abs_c).sf(f_ab)
 
     # Create dataframe
-    aov = pd.DataFrame({'Source': [a, b, a + ' * ' + b],
-                        'SS': [ss_a, ss_b, ss_ab],
-                        'ddof1': [df_a, df_b, df_ab],
-                        'ddof2': [df_as, df_bs, df_abs],
-                        'MS': [ms_a, ms_b, ms_ab],
-                        'F': [f_a, f_b, f_ab],
-                        'p-unc': [p_a, p_b, p_ab],
-                        'p-GG-corr': [p_a_corr, p_b_corr, p_ab_corr],
-                        effsize: [ef_a, ef_b, ef_ab],
-                        'eps': [eps_a, eps_b, eps_ab],
-                        })
+    aov = pd.DataFrame({
+        'Source': [a, b, a + ' * ' + b],
+        'SS': [ss_a, ss_b, ss_ab],
+        'ddof1': [df_a, df_b, df_ab],
+        'ddof2': [df_as, df_bs, df_abs],
+        'MS': [ms_a, ms_b, ms_ab],
+        'F': [f_a, f_b, f_ab],
+        'p-unc': [p_a, p_b, p_ab],
+        'p-GG-corr': [p_a_corr, p_b_corr, p_ab_corr],
+        effsize: [ef_a, ef_b, ef_ab],
+        'eps': [eps_a, eps_b, eps_ab]})
     return _postprocess_dataframe(aov)
 
 
@@ -1388,17 +1369,15 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     If your data is in wide-format, you can use the :py:func:`pandas.melt()`
     function to convert from wide to long format.
 
-    Missing values are automatically removed (listwise deletion) using the
-    :py:func:`pingouin.remove_rm_na` function. This could drastically decrease
-    the power of the ANOVA if many missing values are present. In that case,
-    it might be better to use linear mixed effects models.
+    Missing values are automatically removed using a strict listwise approach (= complete-case
+    analysis). In other words, any subject with one or more missing value(s) is completely removed
+    from the dataframe prior to running the test. This could drastically decrease the power of the
+    ANOVA if many missing values are present. In that case, we strongly recommend using linear
+    mixed effect modelling, which can handle missing values in repeated measures.
 
-    Results have been tested against R and JASP.
-
-    .. warning :: If the between-subject groups are unbalanced
-        (= unequal sample sizes), a type II ANOVA will be computed.
-        Note however that SPSS, JAMOVI and JASP by default return a type III
-        ANOVA, which may lead to slightly different results.
+    .. warning :: If the between-subject groups are unbalanced (= unequal sample sizes),
+        a type II ANOVA will be computed. Note however that SPSS, JAMOVI and JASP by default
+        return a type III ANOVA, which may lead to slightly different results.
 
     Examples
     --------
@@ -1432,18 +1411,16 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
 
     # Check that only a single within and between factor are provided
     one_is_list = isinstance(within, list) or isinstance(between, list)
-    both_are_str = isinstance(within, str) and isinstance(between, str)
+    both_are_str = isinstance(within, (str, int)) and isinstance(between, (str, int))
     if one_is_list or not both_are_str:
-        raise ValueError("within and between factors must both be strings "
-                         "referring to a column in the data. Specifying "
-                         "multiple within and between factors is currently "
-                         "not supported. For more information, see: "
-                         "https://github.com/raphaelvallat/pingouin/issues/136"
-                         )
+        raise ValueError(
+            "within and between factors must both be strings referring to a column in the data. "
+            "Specifying multiple within and between factors is currently not supported. "
+            "For more information, see: https://github.com/raphaelvallat/pingouin/issues/136")
 
     # Check data
-    _check_dataframe(dv=dv, within=within, between=between, data=data,
-                     subject=subject, effects='interaction')
+    _check_dataframe(
+        dv=dv, within=within, between=between, data=data, subject=subject, effects='interaction')
 
     # Convert Categorical columns to string
     # This is important otherwise all the groupby will return different results
@@ -1452,14 +1429,14 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
         if data[c].dtype.name == 'category':
             data[c] = data[c].astype(str)
 
-    # Collapse to the mean
-    # Important to set observed = True when working with categorical
-    data = data.groupby([subject, within, between]).mean().reset_index()
-
-    # Remove NaN
-    if data[dv].isnull().any():
-        data = remove_rm_na(dv=dv, within=within, subject=subject,
-                            data=data[[subject, within, between, dv]])
+    # Pivot and melt the table. This has several effects:
+    # 1) Force missing values to be explicit (a NaN cell is created)
+    # 2) Automatic collapsing to the mean if multiple within factors are present
+    # 3) If using dropna, remove rows with missing values (listwise deletion).
+    # The latter is the same behavior as JASP (= strict complete-case analysis).
+    data_piv = data.pivot_table(index=[subject, between], columns=within, values=dv)
+    data_piv = data_piv.dropna()
+    data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
 
     # Check that subject IDs do not overlap between groups: the subject ID
     # should have a unique range / set of values for each between-subject
@@ -1474,8 +1451,8 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     grandmean = data[dv].mean()
     ss_total = ((data[dv] - grandmean)**2).sum()
     # Extract main effects of within and between factors
-    aov_with = rm_anova(dv=dv, within=within, subject=subject, data=data,
-                        correction=correction, detailed=True)
+    aov_with = rm_anova(
+        dv=dv, within=within, subject=subject, data=data, correction=correction, detailed=True)
     aov_betw = anova(dv=dv, between=between, data=data, detailed=True)
     ss_betw = aov_betw.at[0, 'SS']
     ss_with = aov_with.at[0, 'SS']
@@ -1532,31 +1509,25 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
         ef_with = ss_with / (ss_with + ss_reswith)
         ef_inter = ss_inter / (ss_inter + ss_reswith)
 
-    # 4) Generalized omega-squared (like JASP w2 output)
-    # From Olejnik and Algina 2003
-    # To be continued...
-
     # Stats table
-    aov = pd.concat([aov_betw.drop(1), aov_with.drop(1)], sort=False,
-                    ignore_index=True)
+    aov = pd.concat([aov_betw.drop(1), aov_with.drop(1)], sort=False, ignore_index=True)
     # Update values
     aov.rename(columns={'DF': 'DF1'}, inplace=True)
     aov.at[0, 'F'], aov.at[1, 'F'] = f_betw, f_with
     aov.at[0, 'p-unc'], aov.at[1, 'p-unc'] = p_betw, p_with
     aov.at[0, effsize], aov.at[1, effsize] = ef_betw, ef_with
-    aov = aov.append({'Source': 'Interaction', 'SS': ss_inter, 'DF1': df_inter,
-                      'MS': ms_inter, 'F': f_inter, 'p-unc': p_inter,
-                      effsize: ef_inter}, ignore_index=True)
+    aov = aov.append({
+        'Source': 'Interaction', 'SS': ss_inter, 'DF1': df_inter, 'MS': ms_inter, 'F': f_inter,
+        'p-unc': p_inter, effsize: ef_inter}, ignore_index=True)
 
     aov['DF2'] = [df_resbetw, df_reswith, df_reswith]
     aov['eps'] = [np.nan, aov_with.at[0, 'eps'], np.nan]
-    col_order = ['Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc',
-                 'p-GG-corr', effsize, 'eps', 'sphericity', 'W-spher',
-                 'p-spher']
+    col_order = [
+        'Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc', 'p-GG-corr', effsize, 'eps',
+        'sphericity', 'W-spher', 'p-spher']
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
-
     return _postprocess_dataframe(aov)
 
 

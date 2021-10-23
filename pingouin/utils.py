@@ -8,7 +8,7 @@ from tabulate import tabulate
 from .config import options
 
 __all__ = ["_perm_pval", "print_table", "_postprocess_dataframe",
-           "_check_eftype", "remove_rm_na", "remove_na", "_flatten_list",
+           "_check_eftype", "remove_na", "_flatten_list",
            "_check_dataframe", "_is_sklearn_installed",
            "_is_statsmodels_installed", "_is_mpmath_installed"]
 
@@ -173,8 +173,7 @@ def _remove_na_single(x, axis='rows'):
 
 
 def remove_na(x, y=None, paired=False, axis='rows'):
-    """Remove missing values along a given axis in one or more (paired) numpy
-    arrays.
+    """Remove missing values along a given axis in one or more (paired) numpy arrays.
 
     Parameters
     ----------
@@ -254,83 +253,6 @@ def remove_na(x, y=None, paired=False, axis='rows'):
         x = x.compress(both, axis=ax)
         y = y.compress(both, axis=ax)
     return x, y
-
-
-def remove_rm_na(data=None, dv=None, within=None, subject=None,
-                 aggregate='mean'):
-    """Remove missing values in long-format repeated-measures dataframe.
-
-    Parameters
-    ----------
-    data : :py:class:`pandas.DataFrame`
-        Long-format dataframe.
-    dv : string or list
-        Dependent variable(s), from which the missing values should be removed.
-        If ``dv`` is not specified, all the columns in the dataframe are
-        considered. ``dv`` must be numeric.
-    within : string or list
-        Within-subject factor(s).
-    subject : string
-        Subject identifier.
-    aggregate : string
-        Aggregation method if there are more within-factors in the data than
-        specified in the ``within`` argument. Can be `mean`, `median`, `sum`,
-        `first`, `last`, or any other function accepted by
-        :py:meth:`pandas.DataFrame.groupby`.
-
-    Returns
-    -------
-    stats : :py:class:`pandas.DataFrame`
-        Dataframe without the missing values.
-
-    Notes
-    -----
-    If multiple factors are specified, the missing values are removed on the
-    last factor, so the order of ``within`` is important.
-
-    In addition, if there are more within-factors in the data than specified in
-    the ``within`` argument, data will be aggregated using the function
-    specified in ``aggregate``. Note that in the default case (aggregation
-    using the mean), all the non-numeric column(s) will be dropped.
-    """
-    # Safety checks
-    assert isinstance(aggregate, str), 'aggregate must be a str.'
-    assert isinstance(within, (str, list)), 'within must be str or list.'
-    assert isinstance(subject, str), 'subject must be a string.'
-    assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame.'
-
-    idx_cols = _flatten_list([subject, within])
-    all_cols = data.columns
-
-    if data[idx_cols].isnull().any().any():
-        raise ValueError("NaN are present in the within-factors or in the "
-                         "subject column. Please remove them manually.")
-
-    # Check if more within-factors are present and if so, aggregate
-    if (data.groupby(idx_cols, observed=True).count() > 1).any().any():
-        # Make sure that we keep the non-numeric columns when aggregating
-        # This is disabled by default to avoid any confusion.
-        # all_others = all_cols.difference(idx_cols)
-        # all_num = data[all_others].select_dtypes(include='number').columns
-        # agg = {c: aggregate if c in all_num else 'first' for c in all_others}
-        data = data.groupby(idx_cols, observed=True).agg(aggregate)
-    else:
-        # Set subject + within factors as index.
-        # Sorting is done to avoid performance warning when dropping.
-        data = data.set_index(idx_cols).sort_index()
-
-    # Find index with missing values
-    if dv is None:
-        iloc_nan = data.isnull().to_numpy().nonzero()[0]
-    else:
-        iloc_nan = data[dv].isnull().to_numpy().nonzero()[0]
-
-    # Drop the last within level
-    idx_nan = data.index[iloc_nan].droplevel(-1)
-
-    # Drop and re-order
-    data = data.drop(idx_nan).reset_index(drop=False)
-    return data.reindex(columns=all_cols).dropna(how='all', axis=1)
 
 
 ###############################################################################

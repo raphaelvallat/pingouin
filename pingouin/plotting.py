@@ -422,9 +422,7 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
     dv : string
         Name of column containing the dependent variable.
     within : string
-        Name of column containing the within-subject factor. Note that
-        ``within`` must have exactly two within-subject levels
-        (= two unique values).
+        Name of column containing the within-subject factor.
     subject : string
         Name of column containing the subject identifier.
     order : list of str
@@ -469,7 +467,8 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
 
     Notes
     -----
-    Data must be a long-format pandas DataFrame.
+    Data must be a long-format pandas DataFrame. Missing values are automatically removed using a
+    strict listwise approach (= complete-case analysis).
 
     Examples
     --------
@@ -517,7 +516,7 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
         >>> ax = pg.plot_paired(data=df, dv='Scores', within='Time',
         ...                     subject='Subject', boxplot_in_front=True)
     """
-    from pingouin.utils import _check_dataframe, remove_rm_na
+    from pingouin.utils import _check_dataframe
 
     # Update default kwargs with specified inputs
     _pointplot_kwargs = {'scale': .6, 'marker': '.'}
@@ -542,11 +541,16 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
         })
 
     # Validate args
-    _check_dataframe(data=data, dv=dv, within=within, subject=subject,
-                     effects='within')
+    _check_dataframe(data=data, dv=dv, within=within, subject=subject, effects='within')
 
-    # Remove NaN values
-    data = remove_rm_na(dv=dv, within=within, subject=subject, data=data)
+    # Pivot and melt the table. This has several effects:
+    # 1) Force missing values to be explicit (a NaN cell is created)
+    # 2) Automatic collapsing to the mean if multiple within factors are present
+    # 3) If using dropna, remove rows with missing values (listwise deletion).
+    # The latter is the same behavior as JASP (= strict complete-case analysis).
+    data_piv = data.pivot_table(index=subject, columns=within, values=dv)
+    data_piv = data_piv.dropna()
+    data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
 
     # Extract within-subject level (alphabetical order)
     x_cat = np.unique(data[within])
@@ -555,15 +559,11 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
         order = x_cat
     else:
         assert len(order) == len(x_cat), (
-            'Order must have the same number of elements as the number '
-            'of levels in `within`.'
-        )
+            "Order must have the same number of elements as the number of levels in `within`.")
 
     # Substitue within by integer order of the ordered columns to allow for
     # changing the order of numeric withins.
-    data['wthn'] = data[within].replace(
-        {_ordr: i for i, _ordr in enumerate(order)}
-    )
+    data['wthn'] = data[within].replace({_ordr: i for i, _ordr in enumerate(order)})
     order_num = range(len(order))  # Make numeric order
 
     # Start the plot
@@ -582,22 +582,17 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
         y1 = data_now.loc[data_now['wthn'] == _order[0], dv].to_numpy()
         y2 = data_now.loc[data_now['wthn'] == _order[1], dv].to_numpy()
         # Line and scatter colors depending on subject dv trend
-        _colors = np.where(
-            y1 < y2, colors[0], np.where(y1 > y2, colors[2], colors[1])
-        )
+        _colors = np.where(y1 < y2, colors[0], np.where(y1 > y2, colors[2], colors[1]))
         # Line and scatter colors as hue-indexed dictionary
-        _colors = {
-            subj: clr for subj, clr in zip(data_now[subject].unique(), _colors)
-        }
+        _colors = {subj: clr for subj, clr in zip(data_now[subject].unique(), _colors)}
         # Plot individual lines using Seaborn
-        sns.lineplot(data=data_now, x=_x, y=_y, hue=subject,
-                     palette=_colors, ls='-', lw=lw,
-                     legend=False, ax=ax)
+        sns.lineplot(
+            data=data_now, x=_x, y=_y, hue=subject, palette=_colors, ls='-', lw=lw, legend=False,
+            ax=ax)
         # Plot individual markers using Seaborn
-        sns.scatterplot(data=data_now, x=_x, y=_y, hue=subject,
-                        palette=_colors, edgecolor='face', lw=mew,
-                        sizes=[markersize] * data_now.shape[0],
-                        legend=False, ax=ax, **_pointplot_kwargs)
+        sns.scatterplot(
+            data=data_now, x=_x, y=_y, hue=subject, palette=_colors, edgecolor='face', lw=mew,
+            sizes=[markersize] * data_now.shape[0], legend=False, ax=ax, **_pointplot_kwargs)
 
     # Set zorder and alpha of pointplot markers and lines
     _ = plt.setp(ax.collections, alpha=pp_alpha, zorder=2)  # Set marker alpha
@@ -607,8 +602,8 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
         # Set boxplot x and y depending on orientation
         _xbp = within if orient == 'v' else dv
         _ybp = dv if orient == 'v' else within
-        sns.boxplot(data=data, x=_xbp, y=_ybp, order=order, ax=ax,
-                    orient=orient, **_boxplot_kwargs)
+        sns.boxplot(
+            data=data, x=_xbp, y=_ybp, order=order, ax=ax, orient=orient, **_boxplot_kwargs)
 
         # Set alpha to patch of boxplot but not to whiskers
         for patch in ax.artists:
@@ -629,13 +624,11 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
             ax.yaxis.grid(False)
             ax.set_ylim(-.5, len(x_cat) - .5, auto=None)
             ax.invert_yaxis()
-
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
 
     # Despine and trim
     sns.despine(trim=True, ax=ax)
-
     return ax
 
 

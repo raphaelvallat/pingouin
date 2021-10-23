@@ -268,12 +268,6 @@ class TestPairwise(TestCase):
         # Tested against a simple for loop on combinations
         np.testing.assert_array_equal(st2['W-val'].to_numpy(), [9, 3, 21])
 
-        with pytest.raises(ValueError):
-            # Unbalanced design in repeated measurements
-            df_unbalanced = df.iloc[1:, :].copy()
-            pairwise_ttests(data=df_unbalanced, dv='Value', within='Condition',
-                            subject='Subject')
-
         # Two within factors from other datasets and with NaN values
         df2 = read_dataset('rm_anova')
         pairwise_ttests(dv='DesireToKill',

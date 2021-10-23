@@ -3,8 +3,7 @@
 import scipy
 import numpy as np
 import pandas as pd
-from pingouin import (remove_na, remove_rm_na, _check_dataframe,
-                      _postprocess_dataframe)
+from pingouin import (remove_na, _check_dataframe, _postprocess_dataframe)
 
 __all__ = ["mad", "madmedianrule", "mwu", "wilcoxon", "kruskal", "friedman",
            "cochran", "harrelldavis"]
@@ -604,16 +603,7 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
 
     Notes
     -----
-    The Friedman test is used for one-way repeated measures ANOVA by ranks.
-
-    Data are expected to be in long-format.
-
-    Note that if the dataset contains one or more other within subject
-    factors, an automatic collapsing to the mean is applied on the dependent
-    variable (same behavior as the ezANOVA R package). As such, results can
-    differ from those of JASP. If you can, always double-check the results.
-
-    NaN values are automatically removed.
+    The Friedman test is used for non-parametric (rank-based) one-way repeated measures ANOVA.
 
     The Friedman test is equivalent to the test of significance of Kendalls's
     coefficient of concordance (Kendall's W). Most commonly a Q statistic,
@@ -622,6 +612,11 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
     conservative for small numbers of samples and repeated measures. Instead
     they recommend the F test, which has the correct size and behaves like a
     permutation test, but is computationaly much easier.
+
+    Data are expected to be in long-format. Missing values are automatically removed using a
+    strict listwise approach (= complete-case analysis). In other words, any subject with one or
+    more missing value(s) is completely removed from the dataframe prior to running the
+    test.
 
     References
     ----------
@@ -654,8 +649,7 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
     lower. This is expected, since the F test is more powerful (see Notes).
     """
     # Check data
-    _check_dataframe(dv=dv, within=within, data=data, subject=subject,
-                     effects='within')
+    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects='within')
 
     # Convert Categorical columns to string
     # This is important otherwise all the groupby will return different results
@@ -664,13 +658,14 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
         if data[c].dtype.name == 'category':
             data[c] = data[c].astype(str)
 
-    # Collapse to the mean
-    data = data.groupby([subject, within]).mean().reset_index()
-
-    # Remove NaN
-    if data[dv].isnull().any():
-        data = remove_rm_na(dv=dv, within=within, subject=subject,
-                            data=data[[subject, within, dv]])
+    # Pivot and melt the table. This has several effects:
+    # 1) Force missing values to be explicit (a NaN cell is created)
+    # 2) Automatic collapsing to the mean if multiple within factors are present
+    # 3) If using dropna, remove rows with missing values (listwise deletion).
+    # The latter is the same behavior as JASP (= strict complete-case analysis).
+    data_piv = data.pivot_table(index=subject, columns=within, values=dv)
+    data_piv = data_piv.dropna()
+    data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
 
     # Extract number of groups and total sample size
     grp = data.groupby(within)[dv]
@@ -699,35 +694,23 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
     if method == 'chisq':
         # Compute the Q statistic
         Q = n * (k - 1) * W
-
         # Approximate the p-value
         ddof1 = k - 1
         p_unc = scipy.stats.chi2.sf(Q, ddof1)
-
         # Create output dataframe
-        stats = pd.DataFrame({'Source': within,
-                              'W': W,
-                              'ddof1': ddof1,
-                              'Q': Q,
-                              'p-unc': p_unc,
-                              }, index=['Friedman'])
+        stats = pd.DataFrame({
+            'Source': within, 'W': W, 'ddof1': ddof1, 'Q': Q, 'p-unc': p_unc}, index=['Friedman'])
     elif method == 'f':
         # Compute the F statistic
         F = W * (n - 1) / (1 - W)
-
         # Approximate the p-value
         ddof1 = k - 1 - 2 / n
         ddof2 = (n - 1) * ddof1
         p_unc = scipy.stats.f.sf(F, ddof1, ddof2)
-
         # Create output dataframe
-        stats = pd.DataFrame({'Source': within,
-                              'W': W,
-                              'ddof1': ddof1,
-                              'ddof2': ddof2,
-                              'F': F,
-                              'p-unc': p_unc,
-                              }, index=['Friedman'])
+        stats = pd.DataFrame({
+            'Source': within, 'W': W, 'ddof1': ddof1, 'ddof2': ddof2, 'F': F, 'p-unc': p_unc},
+            index=['Friedman'])
 
     return _postprocess_dataframe(stats)
 
@@ -760,9 +743,6 @@ def cochran(data=None, dv=None, within=None, subject=None):
     The Cochran Q test [1]_ is a non-parametric test for ANOVA with repeated
     measures where the dependent variable is binary.
 
-    Data are expected to be in long-format. NaN are automatically removed
-    from the data.
-
     The Q statistics is defined as:
 
     .. math:: Q = \\frac{(r-1)(r\\sum_j^rx_j^2-N^2)}{rN-\\sum_i^nx_i^2}
@@ -775,6 +755,11 @@ def cochran(data=None, dv=None, within=None, subject=None):
     :math:`r-1` degrees of freedom:
 
     .. math:: Q \\sim \\chi^2(r-1)
+
+    Data are expected to be in long-format. Missing values are automatically removed using a
+    strict listwise approach (= complete-case analysis). In other words, any subject with one or
+    more missing value(s) is completely removed from the dataframe prior to running the
+    test.
 
     References
     ----------
@@ -793,8 +778,7 @@ def cochran(data=None, dv=None, within=None, subject=None):
     cochran   Time    2  6.705882  0.034981
     """
     # Check data
-    _check_dataframe(dv=dv, within=within, data=data, subject=subject,
-                     effects='within')
+    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects='within')
 
     # Convert Categorical columns to string
     # This is important otherwise all the groupby will return different results
@@ -803,10 +787,14 @@ def cochran(data=None, dv=None, within=None, subject=None):
         if data[c].dtype.name == 'category':
             data[c] = data[c].astype(str)
 
-    # Remove NaN
-    if data[dv].isnull().any():
-        data = remove_rm_na(dv=dv, within=within, subject=subject,
-                            data=data[[subject, within, dv]])
+    # Pivot and melt the table. This has several effects:
+    # 1) Force missing values to be explicit (a NaN cell is created)
+    # 2) Automatic collapsing to the mean if multiple within factors are present
+    # 3) If using dropna, remove rows with missing values (listwise deletion).
+    # The latter is the same behavior as JASP (= strict complete-case analysis).
+    data_piv = data.pivot_table(index=subject, columns=within, values=dv)
+    data_piv = data_piv.dropna()
+    data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
 
     # Groupby and extract size
     grp = data.groupby(within)[dv]
@@ -821,12 +809,7 @@ def cochran(data=None, dv=None, within=None, subject=None):
     p_unc = scipy.stats.chi2.sf(q, dof)
 
     # Create output dataframe
-    stats = pd.DataFrame({'Source': within,
-                          'dof': dof,
-                          'Q': q,
-                          'p-unc': p_unc,
-                          }, index=['cochran'])
-
+    stats = pd.DataFrame({'Source': within, 'dof': dof, 'Q': q, 'p-unc': p_unc}, index=['cochran'])
     return _postprocess_dataframe(stats)
 
 

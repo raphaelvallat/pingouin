@@ -5,13 +5,10 @@ import pytest
 import pingouin
 
 from unittest import TestCase
-from pingouin import read_dataset
-from pingouin.utils import (print_table, _postprocess_dataframe,
-                            _get_round_setting_for,
-                            _perm_pval, remove_rm_na,
-                            _check_eftype, _check_dataframe,
-                            remove_na, _flatten_list, _is_sklearn_installed,
-                            _is_statsmodels_installed, _is_mpmath_installed)
+from pingouin.utils import (
+    print_table, _postprocess_dataframe, _get_round_setting_for,
+    _perm_pval, _check_eftype, _check_dataframe, remove_na, _flatten_list, _is_sklearn_installed,
+    _is_statsmodels_installed, _is_mpmath_installed)
 
 # Dataset
 df = pd.DataFrame({'Group': ['A', 'A', 'B', 'B'],
@@ -140,35 +137,6 @@ class TestUtils(TestCase):
         assert np.allclose(y_nan, [[6.], [3.], [2.]])
         # When y is None
         remove_na(x, None, paired=False)
-
-    def test_remove_rm_na(self):
-        """Test function remove_rm_na."""
-        # With one within factor
-        df = pd.DataFrame({'Time': ['A', 'A', 'B', 'B'],
-                           'Values': [1.52, np.nan, 8.2, 3.4],
-                           'Ss': [0, 1, 0, 1]})
-        df = remove_rm_na(dv='Values', within='Time', subject='Ss', data=df)
-        assert df['Ss'].nunique() == 1
-        # With multiple factor
-        df = read_dataset('rm_missing')
-        stats = remove_rm_na(data=df, dv='BOLD', within=['Session', 'Time'],
-                             subject='Subj')
-        assert stats['BOLD'].isnull().sum() == 0
-        assert stats['Memory'].isnull().sum() == 5
-        # Multiple factors
-        stats = remove_rm_na(data=df, within=['Time', 'Session'],
-                             subject='Subj')
-        assert stats['BOLD'].isnull().sum() == 0
-        assert stats['Memory'].isnull().sum() == 0
-        # Aggregation
-        remove_rm_na(data=df, dv='BOLD', within='Session', subject='Subj')
-        remove_rm_na(data=df, within='Session', subject='Subj',
-                     aggregate='sum')
-        remove_rm_na(data=df, within='Session', subject='Subj',
-                     aggregate='first')
-        df.loc['Subj', 1] = np.nan
-        with pytest.raises(ValueError):
-            remove_rm_na(data=df, within='Session', subject='Subj')
 
     def test_check_eftype(self):
         """Test function _check_eftype."""

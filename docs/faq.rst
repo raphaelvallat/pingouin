@@ -170,9 +170,7 @@ You need to use the :py:func:`pandas.read_csv` or :py:func:`pandas.read_excel` f
 
 Pingouin hates missing values almost as much as you do!
 
-Most functions of Pingouin will automatically remove the missing values. In the case of paired measurements (e.g. paired T-test, correlation, or repeated measures ANOVA), a listwise deletion of missing values is performed, meaning that the entire row is removed. This is generally the best strategy if you have a large sample size and only a few missing values. However, this can be quite drastic if there are a lot of missing values in your data. In that case, it might be useful to look at `imputation methods (see Pandas documentation) <https://pandas.pydata.org/pandas-docs/stable/user_guide/missing_data.html>`_.
-
-If you prefer to know what's going on under the hood, you can also remove the missing values a priori using the :py:func:`pingouin.remove_na` and :py:func:`pingouin.remove_rm_na` functions. The first one is a convenient and flexible function to remove rows or columns with missing values in 1D or 2D array(s), and the second one is specifically geared at long-format repeated measures dataframe, such as the ones required by the :py:func:`pingouin.rm_anova` function.
+Most functions of Pingouin will automatically remove the missing values. In the case of paired measurements (e.g. paired T-test, correlation, or repeated measures ANOVA), a listwise deletion of missing values is performed, meaning that the entire row is removed. This is generally the best strategy if you have a large sample size and only a few missing values. However, this can be quite drastic if there are a lot of missing values in your data. In that case, it might be useful to look at `imputation methods (see Pandas documentation) <https://pandas.pydata.org/pandas-docs/stable/user_guide/missing_data.html>`_, or use a linear mixed effect model instead, which natively supports missing values. However, the latter is not implemented in Pingouin.
 
 .. ----------------------------- LONG <--> WIDE FORMAT -----------------------------
 .. raw:: html

@@ -8,8 +8,7 @@ from pingouin.config import options
 from pingouin.parametric import anova
 from pingouin.multicomp import multicomp
 from pingouin.effsize import compute_effsize, convert_effsize
-from pingouin.utils import (remove_rm_na, _check_dataframe, _flatten_list,
-                            _postprocess_dataframe)
+from pingouin.utils import (_check_dataframe, _flatten_list, _postprocess_dataframe)
 
 __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
            "pairwise_corr"]
@@ -31,12 +30,6 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
         Name of column containing the dependent variable.
     between : string or list with 2 elements
         Name of column(s) containing the between-subject factor(s).
-
-        .. warning:: Note that Pingouin gives slightly different T and
-            p-values compared to JASP posthoc tests for 2-way factorial design,
-            because Pingouin does not pool the standard error for each factor,
-            but rather calculate each pairwise T-test completely independent
-            of others.
     within : string or list with 2 elements
         Name of column(s) containing the within-subject factor(s), i.e. the
         repeated measurements.
@@ -48,7 +41,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
         If False, use :py:func:`pingouin.wilcoxon` or :py:func:`pingouin.mwu`
         for paired or unpaired samples, respectively.
     marginal : boolean
-        If True, the between-subject pairwise T-test(s) will be calculated
+        If True (default), the between-subject pairwise T-test(s) will be calculated
         after averaging across all levels of the within-subject factor in mixed
         design. This is recommended to avoid violating the assumption of
         independence and conflating the degrees of freedom by the
@@ -83,7 +76,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
         * ``'AUC'``: Area Under the Curve
         * ``'CLES'``: Common Language Effect Size
     correction : string or boolean
-        For unpaired two sample T-tests, specify whether or not to correct for
+        For independent two sample T-tests, specify whether or not to correct for
         unequal variances using Welch separate variances T-test. If `'auto'`,
         it will automatically uses Welch T-test when the sample sizes are
         unequal, as recommended by Zimmerman 2004.
@@ -92,15 +85,17 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
     nan_policy : string
         Can be `'listwise'` for listwise deletion of missing values in repeated
         measures design (= complete-case analysis) or `'pairwise'` for the
-        more liberal pairwise deletion (= available-case analysis).
+        more liberal pairwise deletion (= available-case analysis). The former (default) is more
+        appropriate for post-hoc analysis following an ANOVA, however it can drastically reduce
+        the power of the test: any subject with one or more missing value(s) will be
+        completely removed from the analysis.
 
         .. versionadded:: 0.2.9
     return_desc : boolean
         If True, append group means and std to the output dataframe
     interaction : boolean
         If there are multiple factors and ``interaction`` is True (default),
-        Pingouin will also calculate T-tests for the interaction term (see
-        Notes).
+        Pingouin will also calculate T-tests for the interaction term (see Notes).
 
         .. versionadded:: 0.2.9
     within_first : boolean
@@ -163,16 +158,10 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
     between * within.
 
     Missing values in repeated measurements are automatically removed using a
-    listwise (default) or pairwise deletion strategy. However, you should be
-    very careful since it can result in undesired values removal (especially
-    for the interaction effect). We strongly recommend that you preprocess
-    your data and remove the missing values before using this function.
-
-    .. warning:: Versions of Pingouin below 0.3.9 gave INCORRECT RESULTS
-        for one-way and two-way repeated measures when the dataframe was not
-        sorted by subject (see issue 151). Please make sure you're using the
-        LATEST VERSION of Pingouin, and always DOUBLE CHECK your results with
-        another statistical software.
+    listwise (default) or pairwise deletion strategy. The former is more conservative, as any
+    subject with one or more missing value(s) will be completely removed from the dataframe prior
+    to calculating the T-tests. The ``nan_policy`` parameter can therefore have a huge impact
+    on the results.
 
     Examples
     --------
@@ -251,8 +240,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
     from .nonparametric import wilcoxon, mwu
 
     # Safety checks
-    _check_dataframe(dv=dv, between=between, within=within, subject=subject,
-                     effects='all', data=data)
+    _check_dataframe(
+        dv=dv, between=between, within=within, subject=subject, effects='all', data=data)
     assert alternative in ['two-sided', 'greater', 'less'], (
         "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
     assert isinstance(alpha, float), 'alpha must be float.'
@@ -262,7 +251,6 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
     multiple_between = False
     multiple_within = False
     contrast = None
-
     if isinstance(between, list):
         if len(between) > 1:
             multiple_between = True
@@ -270,7 +258,6 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
             assert all([b in data.keys() for b in between])
         else:
             between = between[0]
-
     if isinstance(within, list):
         if len(within) > 1:
             multiple_within = True
@@ -278,59 +265,45 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
             assert all([w in data.keys() for w in within])
         else:
             within = within[0]
-
     if all([multiple_within, multiple_between]):
-        raise ValueError("Multiple between and within factors are",
-                         "currently not supported. Please select only one.")
-
-    # Check the other cases
-    if isinstance(between, str) and within is None:
+        raise ValueError(
+            "Multiple between and within factors are currently not supported. "
+            "Please select only one.")
+    # Check the other cases. Between and within column names can be str or int (not float).
+    if isinstance(between, (str, int)) and within is None:
         contrast = 'simple_between'
         assert between in data.keys()
-    if isinstance(within, str) and between is None:
+    if isinstance(within, (str, int)) and between is None:
         contrast = 'simple_within'
         assert within in data.keys()
-    if isinstance(between, str) and isinstance(within, str):
+    if isinstance(between, (str, int)) and isinstance(within, (str, int)):
         contrast = 'within_between'
         assert all([between in data.keys(), within in data.keys()])
 
-    # Reorganize column order
-    col_order = ['Contrast', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)',
-                 'std(B)', 'Paired', 'Parametric', 'T', 'U-val', 'W-val',
-                 'dof', 'alternative', 'p-unc', 'p-corr', 'p-adjust', 'BF10',
-                 effsize]
+    # Create col_order
+    col_order = [
+        'Contrast', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)', 'std(B)', 'Paired',
+        'Parametric', 'T', 'U-val', 'W-val', 'dof', 'alternative', 'p-unc', 'p-corr', 'p-adjust',
+        'BF10', effsize]
+
+    # If repeated measures, pivot and melt the table. This has several effects:
+    # 1) Force missing values to be explicit (a NaN cell is created)
+    # 2) Automatic collapsing to the mean if multiple within factors are present
+    # 3) If using dropna, remove rows with missing values (listwise deletion).
+    # The latter is the same behavior as JASP (= strict complete-case analysis).
+    if within is not None:
+        idx_piv = subject if between is None else [subject, between]
+        data_piv = data.pivot_table(index=idx_piv, columns=within, values=dv, observed=True)
+        if nan_policy == "listwise":
+            # Remove rows (= subject) with missing values. For pairwise deletion, missing values
+            # will be removed directly in the lower-level functions (e.g. pg.ttest)
+            data_piv = data_piv.dropna()
+        data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
 
     if contrast in ['simple_within', 'simple_between']:
         # OPTION A: SIMPLE MAIN EFFECTS, WITHIN OR BETWEEN
         paired = True if contrast == 'simple_within' else False
         col = within if contrast == 'simple_within' else between
-
-        if contrast == 'simple_within':
-            # Check missing values
-            isna = data[dv].isnull().to_numpy().any()
-            # Only if nan_policy == 'listwise'. For pairwise deletion,
-            # missing values will be removed directly in the lower-level
-            # functions (e.g. pg.ttest)
-            if all([isna, nan_policy == 'listwise']):
-                data = remove_rm_na(dv=dv, within=within, subject=subject,
-                                    data=data)
-            else:
-                # BUGFIX 0.3.9: If repeated measures, we sort by subject and
-                # within and aggregate other repeated measures factor using
-                # the mean. Note that these two steps are already done in the
-                # remove_rm_na function.
-                data = data.groupby([subject, within], observed=True, sort=True
-                                    )[dv].mean().reset_index()
-            # Now we check that subjects are present in all conditions
-            # For example, if we have four subjects and 3 conditions,
-            # and if subject 2 have missing data at the third condition,
-            # we still need a row with missing values for this subject.
-            if data.groupby(within,
-                            observed=True)[subject].count().nunique() != 1:
-                raise ValueError("Repeated measures dataframe is not balanced."
-                                 " `Subjects` must have the same number of "
-                                 "elements in all conditions, "
-                                 "even when missing values are present.")
 
         # Extract levels of the grouping variable, sorted in alphabetical order
         grp_col = data.groupby(col, sort=True, observed=True)[dv]
@@ -345,8 +318,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
             raise ValueError('Columns must have at least two unique values.')
 
         # Initialize dataframe
-        stats = pd.DataFrame(dtype=np.float64, index=range(len(combs)),
-                             columns=col_order)
+        stats = pd.DataFrame(dtype=np.float64, index=range(len(combs)), columns=col_order)
 
         # Force dtype conversion
         cols_str = ['Contrast', 'Time', 'A', 'B', 'alternative', 'p-adjust', 'BF10']
@@ -371,8 +343,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
             y = grp_col.get_group(col2).to_numpy(dtype=np.float64)
             if parametric:
                 stat_name = 'T'
-                df_ttest = ttest(x, y, paired=paired, alternative=alternative,
-                                 correction=correction)
+                df_ttest = ttest(
+                    x, y, paired=paired, alternative=alternative, correction=correction)
                 stats.at[i, 'BF10'] = df_ttest.at['T-test', 'BF10']
                 stats.at[i, 'dof'] = df_ttest.at['T-test', 'dof']
             else:
@@ -401,8 +373,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
         padjust = None if stats['p-unc'].size <= 1 else padjust
         if padjust is not None:
             if padjust.lower() != 'none':
-                _, stats['p-corr'] = multicomp(stats['p-unc'].to_numpy(),
-                                               alpha=alpha, method=padjust)
+                _, stats['p-corr'] = multicomp(
+                    stats['p-unc'].to_numpy(), alpha=alpha, method=padjust)
                 stats['p-adjust'] = padjust
         else:
             stats['p-corr'] = None
@@ -449,26 +421,15 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
             # designs. Indeed, a similar groupby is applied by default on
             # each within-subject factor of a two-way repeated measures design.
             if all([agg[i], marginal]):
-                tmp = data.groupby([subject, f], as_index=False,
-                                   observed=True, sort=True).mean()
+                tmp = data.groupby([subject, f], as_index=False, observed=True, sort=True).mean()
             else:
                 tmp = data
             # Recursive call to pairwise_ttests
-            stats = stats.append(pairwise_ttests(dv=dv,
-                                                 between=fbt[i],
-                                                 within=fwt[i],
-                                                 subject=subject,
-                                                 data=tmp,
-                                                 parametric=parametric,
-                                                 marginal=marginal,
-                                                 alpha=alpha,
-                                                 alternative=alternative,
-                                                 padjust=padjust,
-                                                 effsize=effsize,
-                                                 correction=correction,
-                                                 nan_policy=nan_policy,
-                                                 return_desc=return_desc),
-                                 ignore_index=True, sort=False)
+            stats = stats.append(pairwise_ttests(
+                dv=dv, between=fbt[i], within=fwt[i], subject=subject, data=tmp,
+                parametric=parametric, marginal=marginal, alpha=alpha, alternative=alternative,
+                padjust=padjust, effsize=effsize, correction=correction, nan_policy=nan_policy,
+                return_desc=return_desc), ignore_index=True, sort=False)
 
         # Then compute the interaction between the factors
         if interaction:
@@ -497,8 +458,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
 
             # Append empty rows
             idxiter = np.arange(nrows, nrows + ncombs)
-            stats = stats.append(pd.DataFrame(columns=stats.columns,
-                                 index=idxiter), ignore_index=True)
+            stats = stats.append(
+                pd.DataFrame(columns=stats.columns, index=idxiter), ignore_index=True)
             # Update other columns
             stats.loc[idxiter, 'Contrast'] = factors[0] + ' * ' + factors[1]
             stats.loc[idxiter, 'Time'] = combs[:, 0]
@@ -519,8 +480,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
                 ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
                 if parametric:
                     stat_name = 'T'
-                    df_ttest = ttest(x, y, paired=paired, alternative=alternative,
-                                     correction=correction)
+                    df_ttest = ttest(
+                        x, y, paired=paired, alternative=alternative, correction=correction)
                     stats.at[ic, 'BF10'] = df_ttest.at['T-test', 'BF10']
                     stats.at[ic, 'dof'] = df_ttest.at['T-test', 'dof']
                 else:
@@ -545,8 +506,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
 
             # Multi-comparison columns
             if padjust is not None and padjust.lower() != 'none':
-                _, pcor = multicomp(stats.loc[idxiter, 'p-unc'].to_numpy(),
-                                    alpha=alpha, method=padjust)
+                _, pcor = multicomp(
+                    stats.loc[idxiter, 'p-unc'].to_numpy(), alpha=alpha, method=padjust)
                 stats.loc[idxiter, 'p-corr'] = pcor
                 stats.loc[idxiter, 'p-adjust'] = padjust
 
@@ -559,8 +520,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
     stats = stats.dropna(how='all', axis=1)
 
     # Rename Time columns
-    if (contrast in ['multiple_within', 'multiple_between', 'within_between']
-       and interaction):
+    if (contrast in ['multiple_within', 'multiple_between', 'within_between'] and interaction):
         stats['Time'].fillna('-', inplace=True)
         stats.rename(columns={'Time': factors[0]}, inplace=True)
 
@@ -716,16 +676,8 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
 
     # Create dataframe
     stats = pd.DataFrame({
-                         'A': labels[g1],
-                         'B': labels[g2],
-                         'mean(A)': gmeans[g1],
-                         'mean(B)': gmeans[g2],
-                         'diff': mn,
-                         'se': se,
-                         'T': tval,
-                         'p-tukey': pval,
-                         effsize: ef,
-                         })
+        'A': labels[g1], 'B': labels[g2], 'mean(A)': gmeans[g1], 'mean(B)': gmeans[g2], 'diff': mn,
+        'se': se, 'T': tval, 'p-tukey': pval, effsize: ef})
     return _postprocess_dataframe(stats)
 
 
@@ -880,17 +832,8 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
 
     # Create dataframe
     stats = pd.DataFrame({
-                         'A': labels[g1],
-                         'B': labels[g2],
-                         'mean(A)': gmeans[g1],
-                         'mean(B)': gmeans[g2],
-                         'diff': mn,
-                         'se': se,
-                         'T': tval,
-                         'df': df,
-                         'pval': pval,
-                         effsize: ef,
-                         })
+        'A': labels[g1], 'B': labels[g2], 'mean(A)': gmeans[g1], 'mean(B)': gmeans[g2],
+        'diff': mn, 'se': se, 'T': tval, 'df': df, 'pval': pval, effsize: ef})
     return _postprocess_dataframe(stats)
 
 
