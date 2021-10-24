@@ -524,8 +524,7 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
     Kruskal  Hair color      3  10.58863  0.014172
     """
     # Check data
-    _check_dataframe(dv=dv, between=between, data=data,
-                     effects='between')
+    _check_dataframe(dv=dv, between=between, data=data, effects='between')
 
     # Remove NaN values
     data = data[[dv, between]].dropna()
@@ -570,13 +569,16 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
     Parameters
     ----------
     data : :py:class:`pandas.DataFrame`
-        DataFrame
+        DataFrame. Both wide and long-format dataframe are supported for this test.
     dv : string
-        Name of column containing the dependent variable.
+        Name of column containing the dependent variable (only required if ``data`` is in
+        long format).
     within : string
-        Name of column containing the within-subject factor.
+        Name of column containing the within-subject factor (only required if ``data`` is in
+        long format). Two or more within-factor are not currently supported.
     subject : string
-        Name of column containing the subject identifier.
+        Name of column containing the subject/rater identifier (only required if ``data`` is in
+        long format).
     method : string
         Statistical test to perform. Must be ``'chisq'`` (chi-square test) or ``'f'`` (F test).
         See notes below for explanation.
@@ -589,31 +591,29 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
 
         If ``method='chisq'``
 
-            * ``'Q'``: The Friedman chi-square statistic, corrected for ties
-            * ``'dof'``: degrees of freedom
-            * ``'p-unc'``: Uncorrected p-value of the chi squared test
+        * ``'Q'``: The Friedman chi-square statistic, corrected for ties
+        * ``'dof'``: degrees of freedom
+        * ``'p-unc'``: Uncorrected p-value of the chi squared test
 
 
         If ``method='f'``
 
-            * ``'F'``: The Friedman F statistic, corrected for ties
-            * ``'dof1'``: degrees of freedom of the numerator
-            * ``'dof2'``: degrees of freedom of the denominator
-            * ``'p-unc'``: Uncorrected p-value of the F test
+        * ``'F'``: The Friedman F statistic, corrected for ties
+        * ``'dof1'``: degrees of freedom of the numerator
+        * ``'dof2'``: degrees of freedom of the denominator
+        * ``'p-unc'``: Uncorrected p-value of the F test
 
     Notes
     -----
     The Friedman test is used for non-parametric (rank-based) one-way repeated measures ANOVA.
 
-    The Friedman test is equivalent to the test of significance of Kendalls's
+    It is equivalent to the test of significance of Kendalls's
     coefficient of concordance (Kendall's W). Most commonly a Q statistic,
     which has asymptotical chi-squared distribution, is computed and used for
-    testing. However, in [1]_ they showed the chi-squared test to be overly
-    conservative for small numbers of samples and repeated measures. Instead
-    they recommend the F test, which has the correct size and behaves like a
-    permutation test, but is computationaly much easier.
+    testing. However, the chi-squared test tend to be overly conservative for small numbers
+    of samples and/or repeated measures, in which case a F-test is more adequate [1]_.
 
-    Data are expected to be in long-format. Missing values are automatically removed using a
+    Data can be in wide or long format. Missing values are automatically removed using a
     strict listwise approach (= complete-case analysis). In other words, any subject with one or
     more missing value(s) is completely removed from the dataframe prior to running the
     test.
@@ -624,31 +624,52 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
            criteria. Journal of Statistical Computation and Simulation,
            84(9), 1843–1850. https://doi.org/10.1080/00949655.2013.766189
 
+    .. [2] https://www.real-statistics.com/anova-repeated-measures/friedman-test/
+
     Examples
     --------
-    Compute the Friedman test for repeated measurements.
+    Compute the Friedman test for repeated measurements, using a wide-format dataframe
 
-    >>> from pingouin import friedman, read_dataset
-    >>> df = read_dataset('rm_anova')
-    >>> friedman(data=df, dv='DesireToKill', within='Disgustingness',
-    ...          subject='Subject')
-                      Source         W  ddof1         Q     p-unc
-    Friedman  Disgustingness  0.099224      1  9.227848  0.002384
+    >>> import pandas as pd
+    >>> import pingouin as pg
+    >>> df = pd.DataFrame({
+    ...    'white': {0: 10, 1: 8, 2: 7, 3: 9, 4: 7, 5: 4, 6: 5, 7: 6, 8: 5, 9: 10, 10: 4, 11: 7},
+    ...    'red': {0: 7, 1: 5, 2: 8, 3: 6, 4: 5, 5: 7, 6: 9, 7: 6, 8: 4, 9: 6, 10: 7, 11: 3},
+    ...    'rose': {0: 8, 1: 5, 2: 6, 3: 4, 4: 7, 5: 5, 6: 3, 7: 7, 8: 6, 9: 4, 10: 4, 11: 3}})
+    >>> pg.friedman(df)
+              Source         W  ddof1    Q     p-unc
+    Friedman  Within  0.083333      2  2.0  0.367879
 
+    Compare with SciPy
 
-    This time we will use the F test method.
+    >>> from scipy.stats import friedmanchisquare
+    >>> friedmanchisquare(*df.to_numpy().T)
+    FriedmanchisquareResult(statistic=1.9999999999999893, pvalue=0.3678794411714444)
 
-    >>> from pingouin import friedman, read_dataset
-    >>> df = read_dataset('rm_anova')
-    >>> friedman(data=df, dv='DesireToKill', within='Disgustingness',
-    ...          subject='Subject', method='f')
-                      Source         W     ddof1      ddof2         F     p-unc
-    Friedman  Disgustingness  0.099224  0.978495  90.021505  10.13418  0.002138
+    Using a long-format dataframe
 
-    We can see, compared to the previous example, that the p-value is slightly
-    lower. This is expected, since the F test is more powerful (see Notes).
+    >>> df_long = df.melt(ignore_index=False).reset_index()
+    >>> pg.friedman(data=df_long, dv="value", within="variable", subject="index")
+                Source         W  ddof1    Q     p-unc
+    Friedman  variable  0.083333      2  2.0  0.367879
+
+    Using the F-test method
+
+    >>> pg.friedman(df, method="f")
+              Source         W     ddof1      ddof2    F     p-unc
+    Friedman  Within  0.083333  1.833333  20.166667  1.0  0.378959
     """
-    # Check data
+    # Convert from wide to long-format, if needed
+    if all([v is None for v in [dv, within, subject]]):
+        assert isinstance(data, pd.DataFrame)
+        data = data._get_numeric_data().dropna()
+        assert data.shape[0] > 2, "Data must have at least 3 rows."
+        assert data.shape[1] > 1, "Data must contain at least two columns."
+        data['Subj'] = np.arange(data.shape[0])
+        data = data.melt(id_vars='Subj', var_name='Within', value_name='DV')
+        subject, within, dv = 'Subj', 'Within', 'DV'
+
+    # Check dataframe
     _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects='within')
 
     # Convert Categorical columns to string
@@ -658,27 +679,21 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
         if data[c].dtype.name == 'category':
             data[c] = data[c].astype(str)
 
-    # Pivot and melt the table. This has several effects:
+    assert not data[within].isnull().any(), "Cannot have missing values in `within`."
+    assert not data[subject].isnull().any(), "Cannot have missing values in `subject`."
+
+    # Pivot the table to a wide-format dataframe. This has several effects:
     # 1) Force missing values to be explicit (a NaN cell is created)
     # 2) Automatic collapsing to the mean if multiple within factors are present
     # 3) If using dropna, remove rows with missing values (listwise deletion).
     # The latter is the same behavior as JASP (= strict complete-case analysis).
     data_piv = data.pivot_table(index=subject, columns=within, values=dv)
     data_piv = data_piv.dropna()
-    data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
 
-    # Extract number of groups and total sample size
-    grp = data.groupby(within)[dv]
-    rm = list(data[within].unique())
-    k = len(rm)
-    X = np.array([grp.get_group(r).to_numpy() for r in rm]).T
-    n = X.shape[0]
-
-    # Rank per subject
-    ranked = np.zeros(X.shape)
-    for i in range(n):
-        ranked[i] = scipy.stats.rankdata(X[i, :])
-
+    # Extract data in numpy array and calculate ranks
+    X = data_piv.to_numpy()
+    n, k = X.shape
+    ranked = scipy.stats.rankdata(X, axis=1)
     ssbn = (ranked.sum(axis=0)**2).sum()
 
     # Correction for ties
@@ -689,7 +704,7 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
             ties += t * (t * t - 1)
 
     # Compute Kendall's W corrected for ties
-    W = (12 * ssbn - 3 * n * n * k * (k + 1) * (k + 1)) / (n * n * k * (k - 1) * (k + 1) - n * ties)
+    W = (12 * ssbn - 3 * n**2 * k * (k + 1)**2) / (n**2 * k * (k - 1) * (k + 1) - n * ties)
 
     if method == 'chisq':
         # Compute the Q statistic
@@ -711,7 +726,6 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
         stats = pd.DataFrame({
             'Source': within, 'W': W, 'ddof1': ddof1, 'ddof2': ddof2, 'F': F, 'p-unc': p_unc},
             index=['Friedman'])
-
     return _postprocess_dataframe(stats)
 
 

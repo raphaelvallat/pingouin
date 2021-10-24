@@ -104,58 +104,61 @@ class TestNonParametric(TestCase):
         with pytest.raises(ValueError):
             wilcoxon(x2, y2, tail='error')
 
-    def test_friedman(self):
-        """Test function friedman"""
-        df = pd.DataFrame({'DV': np.r_[x, y, z],
-                           'Time': np.repeat(['A', 'B', 'C'], 100),
-                           'Subject': np.tile(np.arange(100), 3)})
-        summary = friedman(data=df, dv='DV', within='Time', subject='Subject',
-                           method='chisq')
-        friedman(data=df, dv='DV', within='Time', subject='Subject',
-                 method='f')
-        # Compare with SciPy built-in function
-        from scipy import stats
-        Q, p = stats.friedmanchisquare(x, y, z)
-        assert np.isclose(Q, summary.at['Friedman', 'Q'])
-        assert np.isclose(p, summary.at['Friedman', 'p-unc'])
-        # With Categorical
-        df['Time'] = df['Time'].astype('category')
-        df['Time'] = df['Time'].cat.add_categories("Unused")
-        summary = friedman(data=df, dv='DV', within='Time', subject='Subject',
-                           method='chisq')
-        friedman(data=df, dv='DV', within='Time', subject='Subject',
-                 method='f')
-        Q, p = stats.friedmanchisquare(x, y, z)
-        assert np.isclose(Q, summary.at['Friedman', 'Q'])
-        assert np.isclose(p, summary.at['Friedman', 'p-unc'])
-        # Test with NaN
-        df.at[10, 'DV'] = np.nan
-        friedman(data=df, dv='DV', subject='Subject', within='Time',
-                 method='chisq')
-        friedman(data=df, dv='DV', within='Time', subject='Subject',
-                 method='f')
-        # test Kendall's W
-        a = np.array([0.13, 0.51, 0.93, 0.97, 0.24, 0.44, 0.91, 0.15, 0.04,
-                      0.5, 0.6, 0.27, 0.37, 0.03, 0.74, 0.34])
-        df = pd.DataFrame({'DV': a,
-                           'Time': np.repeat(['A', 'B', 'C', 'D'], 4),
-                           'Subject': np.tile(np.arange(4), 4)})
-        summary = friedman(data=df, dv='DV', subject='Subject', within='Time',
-                           method='chisq')
-        assert summary.at['Friedman', 'W'] == 0.325  # R synchrony::kendall.w
-
     def test_kruskal(self):
         """Test function kruskal"""
         x_nan = x.copy()
         x_nan[10] = np.nan
-        df = pd.DataFrame({'DV': np.r_[x_nan, y, z],
-                           'Group': np.repeat(['A', 'B', 'C'], 100)})
+        df = pd.DataFrame({
+            'DV': np.r_[x_nan, y, z],
+            'Group': np.repeat(['A', 'B', 'C'], 100)})
         kruskal(data=df, dv='DV', between='Group')
         summary = kruskal(data=df, dv='DV', between='Group')
         # Compare with SciPy built-in function
         H, p = scipy.stats.kruskal(x_nan, y, z, nan_policy='omit')
         assert np.isclose(H, summary.at['Kruskal', 'H'])
         assert np.allclose(p, summary.at['Kruskal', 'p-unc'])
+
+    def test_friedman(self):
+        """Test function friedman"""
+        df = pd.DataFrame({
+            'white': {0: 10, 1: 8, 2: 7, 3: 9, 4: 7, 5: 4, 6: 5, 7: 6, 8: 5, 9: 10, 10: 4, 11: 7},
+            'red': {0: 7, 1: 5, 2: 8, 3: 6, 4: 5, 5: 7, 6: 9, 7: 6, 8: 4, 9: 6, 10: 7, 11: 3},
+            'rose': {0: 8, 1: 5, 2: 6, 3: 4, 4: 7, 5: 5, 6: 3, 7: 7, 8: 6, 9: 4, 10: 4, 11: 3}
+        })
+
+        # Compare R and SciPy
+        # >>> friedman.test(data)
+        Q, p = scipy.stats.friedmanchisquare(*df.to_numpy().T)
+        assert np.isclose(Q, 2)
+        assert np.isclose(p, 0.3678794)
+
+        # Wide-format
+        stats = friedman(df)
+        assert np.isclose(stats.at['Friedman', 'Q'], Q)
+        assert np.isclose(stats.at['Friedman', 'p-unc'], p)
+        assert np.isclose(stats.at['Friedman', 'ddof1'], 2)
+
+        # Long format
+        df_long = df.melt(ignore_index=False).reset_index()
+        stats = friedman(data=df_long, dv="value", within="variable", subject="index")
+        assert np.isclose(stats.at['Friedman', 'Q'], Q)
+        assert np.isclose(stats.at['Friedman', 'p-unc'], p)
+        assert np.isclose(stats.at['Friedman', 'ddof1'], 2)
+
+        # Compare Kendall's W
+        # WARNING: I believe that the value in JASP is wrong (as of Oct 2021), because the W is
+        # calculated on the transposed dataset. Indeed, to get the correct W / Q / p, one must use:
+        # >>> library(DescTools)
+        # >>> KendallW(t(data), correct = T, test = T)
+        # Which gives the following output:
+        # Kendall chi - squared = 2, df = 2, subjects = 3, raters = 12, p - value = 0.3679
+        # alternative hypothesis: Wt is greater 0
+        # sample estimates: 0.08333333
+        assert np.isclose(stats.at['Friedman', 'W'], 0.08333333)
+
+        # Using the F-test method, which is more conservative
+        stats_f = friedman(df, method="f")
+        assert stats_f.at['Friedman', 'p-unc'] > stats.at['Friedman', 'p-unc']
 
     def test_cochran(self):
         """Test function cochran
