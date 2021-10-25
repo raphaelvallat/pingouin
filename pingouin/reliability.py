@@ -265,7 +265,7 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
     assert nan_policy in ['omit', 'raise']
 
     # Convert data to wide-format
-    data = data.pivot_table(index=targets, columns=raters, values=ratings)
+    data = data.pivot_table(index=targets, columns=raters, values=ratings, observed=True)
 
     # Listwise deletion of missing values
     nan_present = data.isna().any().any()

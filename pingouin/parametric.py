@@ -523,7 +523,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     # 2) Automatic collapsing to the mean if multiple within factors are present
     # 3) If using dropna, remove rows with missing values (listwise deletion).
     # The latter is the same behavior as JASP (= strict complete-case analysis).
-    data_piv = data.pivot_table(index=subject, columns=within, values=dv)
+    data_piv = data.pivot_table(index=subject, columns=within, values=dv, observed=True)
     data_piv = data_piv.dropna()
     data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
 
@@ -645,7 +645,7 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
     # 2) Automatic collapsing to the mean if multiple within factors are present
     # 3) If using dropna, remove rows with missing values (listwise deletion).
     # The latter is the same behavior as JASP (= strict complete-case analysis).
-    data_piv = data.pivot_table(index=subject, columns=within, values=dv)
+    data_piv = data.pivot_table(index=subject, columns=within, values=dv, observed=True)
     data_piv = data_piv.dropna()
     data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
 
@@ -726,8 +726,8 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
         ef_ab = (f_ab * df_ab) / (f_ab * df_ab + df_abs)
 
     # Epsilon
-    piv_a = data.pivot_table(index=subject, columns=a, values=dv)
-    piv_b = data.pivot_table(index=subject, columns=b, values=dv)
+    piv_a = data.pivot_table(index=subject, columns=a, values=dv, observed=True)
+    piv_b = data.pivot_table(index=subject, columns=b, values=dv, observed=True)
     # piv_ab = data.pivot_table(index=subject, columns=[a, b], values=dv)  # Same as data_piv
     eps_a = epsilon(piv_a, correction='gg')
     eps_b = epsilon(piv_b, correction='gg')
@@ -1434,7 +1434,7 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     # 2) Automatic collapsing to the mean if multiple within factors are present
     # 3) If using dropna, remove rows with missing values (listwise deletion).
     # The latter is the same behavior as JASP (= strict complete-case analysis).
-    data_piv = data.pivot_table(index=[subject, between], columns=within, values=dv)
+    data_piv = data.pivot_table(index=[subject, between], columns=within, values=dv, observed=True)
     data_piv = data_piv.dropna()
     data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
 

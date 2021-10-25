@@ -474,16 +474,12 @@ def _long_to_wide_rm(data, dv=None, within=None, subject=None):
     """Convert long-format dataframe to wide-format.
     This internal function is used in pingouin.epsilon and pingouin.sphericity.
     """
-    # Check arguments
-    assert isinstance(dv, str), 'dv must be a string.'
-    assert isinstance(subject, str), 'subject must be a string.'
-    assert isinstance(within, (str, list)), 'within must be a string or list.'
     # Check that all columns are present
     assert dv in data.columns, '%s not in data' % dv
     assert data[dv].dtype.kind in 'bfiu', '%s must be numeric' % dv
     assert subject in data.columns, '%s not in data' % subject
-    assert not data[subject].isnull().any(), 'Cannot have NaN in %s' % subject
-    if isinstance(within, str):
+    assert not data[subject].isnull().any(), 'Cannot have missing values in %s' % subject
+    if isinstance(within, (str, int)):
         within = [within]  # within = ['fac1'] or ['fac1', 'fac2']
     for w in within:
         assert w in data.columns, '%s not in data' % w
@@ -491,7 +487,7 @@ def _long_to_wide_rm(data, dv=None, within=None, subject=None):
     data = data[_fl([subject, within, dv])]
     # Convert to wide-format + collapse to the mean
     data = pd.pivot_table(data, index=subject, values=dv, columns=within,
-                          aggfunc='mean', dropna=True)
+                          aggfunc='mean', dropna=True, observed=True)
     return data
 
 

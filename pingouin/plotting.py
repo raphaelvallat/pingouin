@@ -548,7 +548,7 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
     # 2) Automatic collapsing to the mean if multiple within factors are present
     # 3) If using dropna, remove rows with missing values (listwise deletion).
     # The latter is the same behavior as JASP (= strict complete-case analysis).
-    data_piv = data.pivot_table(index=subject, columns=within, values=dv)
+    data_piv = data.pivot_table(index=subject, columns=within, values=dv, observed=True)
     data_piv = data_piv.dropna()
     data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
 
