@@ -790,8 +790,8 @@ def cochran(data=None, dv=None, within=None, subject=None):
 
     >>> df_wide = df.pivot_table(index="Subject", columns="Time", values="Energetic")
     >>> cochran(df_wide)
-            Source  dof         Q     p-unc
-    cochran   Time    2  6.705882  0.034981
+             Source  dof         Q     p-unc
+    cochran  Within    2  6.705882  0.034981
     """
     # Convert from wide to long-format, if needed
     if all([v is None for v in [dv, within, subject]]):
