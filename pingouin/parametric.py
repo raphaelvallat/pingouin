@@ -498,8 +498,8 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     # Convert from wide to long-format, if needed
     if all([v is None for v in [dv, within, subject]]):
         assert isinstance(data, pd.DataFrame)
-        data = data._get_numeric_data().dropna()
-        assert data.shape[0] > 2, "Data must have at least 3 rows."
+        data = data._get_numeric_data().dropna()  # Listwise deletion of missing values
+        assert data.shape[0] > 2, "Data must have at least 3 non-missing rows."
         assert data.shape[1] > 1, "Data must contain at least two columns."
         data['Subj'] = np.arange(data.shape[0])
         data = data.melt(id_vars='Subj', var_name='Within', value_name='DV')

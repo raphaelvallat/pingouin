@@ -662,8 +662,8 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
     # Convert from wide to long-format, if needed
     if all([v is None for v in [dv, within, subject]]):
         assert isinstance(data, pd.DataFrame)
-        data = data._get_numeric_data().dropna()
-        assert data.shape[0] > 2, "Data must have at least 3 rows."
+        data = data._get_numeric_data().dropna()  # Listwise deletion of missing values
+        assert data.shape[0] > 2, "Data must have at least 3 non-missing rows."
         assert data.shape[1] > 1, "Data must contain at least two columns."
         data['Subj'] = np.arange(data.shape[0])
         data = data.melt(id_vars='Subj', var_name='Within', value_name='DV')
@@ -671,14 +671,6 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
 
     # Check dataframe
     _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects='within')
-
-    # Convert Categorical columns to string
-    # This is important otherwise all the groupby will return different results
-    # unless we specify .groupby(..., observed = True).
-    for c in [subject, within]:
-        if data[c].dtype.name == 'category':
-            data[c] = data[c].astype(str)
-
     assert not data[within].isnull().any(), "Cannot have missing values in `within`."
     assert not data[subject].isnull().any(), "Cannot have missing values in `subject`."
 
@@ -687,7 +679,7 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
     # 2) Automatic collapsing to the mean if multiple within factors are present
     # 3) If using dropna, remove rows with missing values (listwise deletion).
     # The latter is the same behavior as JASP (= strict complete-case analysis).
-    data_piv = data.pivot_table(index=subject, columns=within, values=dv)
+    data_piv = data.pivot_table(index=subject, columns=within, values=dv, observed=True)
     data_piv = data_piv.dropna()
 
     # Extract data in numpy array and calculate ranks
@@ -736,13 +728,16 @@ def cochran(data=None, dv=None, within=None, subject=None):
     Parameters
     ----------
     data : :py:class:`pandas.DataFrame`
-        DataFrame
+        DataFrame. Both wide and long-format dataframe are supported for this test.
     dv : string
-        Name of column containing the binary dependent variable.
+        Name of column containing the dependent variable (only required if ``data`` is in
+        long format).
     within : string
-        Name of column containing the within-subject factor.
+        Name of column containing the within-subject factor (only required if ``data`` is in
+        long format). Two or more within-factor are not currently supported.
     subject : string
-        Name of column containing the subject identifier.
+        Name of column containing the subject/rater identifier (only required if ``data`` is in
+        long format).
 
     Returns
     -------
@@ -790,29 +785,41 @@ def cochran(data=None, dv=None, within=None, subject=None):
     >>> cochran(data=df, dv='Energetic', within='Time', subject='Subject')
             Source  dof         Q     p-unc
     cochran   Time    2  6.705882  0.034981
+
+    Same but using a wide-format dataframe
+
+    >>> df_wide = df.pivot_table(index="Subject", columns="Time", values="Energetic")
+    >>> cochran(df_wide)
+            Source  dof         Q     p-unc
+    cochran   Time    2  6.705882  0.034981
     """
+    # Convert from wide to long-format, if needed
+    if all([v is None for v in [dv, within, subject]]):
+        assert isinstance(data, pd.DataFrame)
+        data = data._get_numeric_data().dropna()  # Listwise deletion of missing values
+        assert data.shape[0] > 2, "Data must have at least 3 non-missing rows."
+        assert data.shape[1] > 1, "Data must contain at least two columns."
+        data['Subj'] = np.arange(data.shape[0])
+        data = data.melt(id_vars='Subj', var_name='Within', value_name='DV')
+        subject, within, dv = 'Subj', 'Within', 'DV'
+
     # Check data
     _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects='within')
-
-    # Convert Categorical columns to string
-    # This is important otherwise all the groupby will return different results
-    # unless we specify .groupby(..., observed = True).
-    for c in [subject, within]:
-        if data[c].dtype.name == 'category':
-            data[c] = data[c].astype(str)
+    assert not data[within].isnull().any(), "Cannot have missing values in `within`."
+    assert not data[subject].isnull().any(), "Cannot have missing values in `subject`."
 
     # Pivot and melt the table. This has several effects:
     # 1) Force missing values to be explicit (a NaN cell is created)
     # 2) Automatic collapsing to the mean if multiple within factors are present
     # 3) If using dropna, remove rows with missing values (listwise deletion).
     # The latter is the same behavior as JASP (= strict complete-case analysis).
-    data_piv = data.pivot_table(index=subject, columns=within, values=dv)
+    data_piv = data.pivot_table(index=subject, columns=within, values=dv, observed=True)
     data_piv = data_piv.dropna()
     data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
 
     # Groupby and extract size
-    grp = data.groupby(within)[dv]
-    grp_s = data.groupby(subject)[dv]
+    grp = data.groupby(within, observed=True)[dv]
+    grp_s = data.groupby(subject, observed=True)[dv]
     k = data[within].nunique()
     dof = k - 1
     # n = grp.count().unique()[0]
