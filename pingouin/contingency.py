@@ -131,8 +131,8 @@ def chi2_independence(data, x, y, correction=True):
     """
     # Python code inspired by SciPy's chi2_contingency
     assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
-    assert isinstance(x, str), 'x must be a string.'
-    assert isinstance(y, str), 'y must be a string.'
+    assert isinstance(x, (str, int)), 'x must be a string or int.'
+    assert isinstance(y, (str, int)), 'y must be a string or int.'
     assert all(col in data.columns for col in (x, y)),\
         'columns are not in dataframe.'
     assert isinstance(correction, bool), 'correction must be a boolean.'
@@ -297,8 +297,8 @@ def chi2_mcnemar(data, x, y, correction=True):
     """
     # Python code initially inspired by statsmodel's mcnemar
     assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
-    assert all(isinstance(column, str) for column in (x, y)),\
-        'procedures must contain strings, only.'
+    assert all(isinstance(column, (str, int)) for column in (x, y)),\
+        'column names must be string or int.'
     assert all(column in data.columns for column in (x, y)),\
         'columns are not in dataframe.'
 

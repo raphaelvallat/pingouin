@@ -317,8 +317,7 @@ def _check_eftype(eftype):
         return False
 
 
-def _check_dataframe(data=None, dv=None, between=None, within=None,
-                     subject=None, effects=None,):
+def _check_dataframe(data=None, dv=None, between=None, within=None, subject=None, effects=None):
     """Check dataframe"""
     # Check that data is a dataframe
     if not isinstance(data, pd.DataFrame):
@@ -332,22 +331,20 @@ def _check_dataframe(data=None, dv=None, between=None, within=None,
     # Check that effects is provided
     if effects not in ['within', 'between', 'interaction', 'all']:
         raise ValueError('Effects must be: within, between, interaction, all')
-    # Check that within is a string or a list (rm_anova2)
-    if effects == 'within' and not isinstance(within, (str, list)):
-        raise ValueError('within must be a string or a list.')
+    # Check that within is a string, int or a list (rm_anova2)
+    if effects == 'within' and not isinstance(within, (str, int, list)):
+        raise ValueError('within must be a string, int or a list.')
     # Check that subject identifier is provided in rm_anova and friedman.
     if effects == 'within' and subject is None:
         raise ValueError('subject must be specified when effects=within')
     # Check that between is a string or a list (anova2)
-    if effects == 'between' and not isinstance(between, (str,
-                                                         list)):
-        raise ValueError('between must be a string or a list.')
+    if effects == 'between' and not isinstance(between, (str, int, list)):
+        raise ValueError('between must be a string, int or a list.')
     # Check that both between and within are present for interaction
     if effects == 'interaction':
         for input in [within, between]:
-            if not isinstance(input, (str, list)):
-                raise ValueError('within and between must be specified when '
-                                 'effects=interaction')
+            if not isinstance(input, (str, int, list)):
+                raise ValueError('within and between must be specified when effects=interaction')
 
 
 ###############################################################################

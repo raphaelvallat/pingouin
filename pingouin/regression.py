@@ -1151,17 +1151,17 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     7  Indirect Mbin  0.000  0.010  0.952    -0.017      0.025   No
     """
     # Sanity check
-    assert isinstance(x, str), 'y must be a string.'
-    assert isinstance(y, str), 'y must be a string.'
-    assert isinstance(m, (list, str)), 'Mediator(s) must be a list or string.'
-    assert isinstance(covar, (type(None), str, list))
-    if isinstance(m, str):
+    assert isinstance(x, (str, int)), 'y must be a string or int.'
+    assert isinstance(y, (str, int)), 'y must be a string or int.'
+    assert isinstance(m, (list, str, int)), 'Mediator(s) must be a list, string or int.'
+    assert isinstance(covar, (type(None), str, list, int))
+    if isinstance(m, (str, int)):
         m = [m]
     n_mediator = len(m)
     assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame.'
     # Check for duplicates
     assert n_mediator == len(set(m)), 'Cannot have duplicates mediators.'
-    if isinstance(covar, str):
+    if isinstance(covar, (str, int)):
         covar = [covar]
     if isinstance(covar, list):
         assert len(covar) == len(set(covar)), 'Cannot have duplicates covar.'
@@ -1203,21 +1203,16 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     sxm = {}
     for idx, j in enumerate(m):
         if mtype == 'linear':
-            sxm[j] = linear_regression(X_val, M_val[:, idx],
-                                       alpha=alpha).loc[[1], cols]
+            sxm[j] = linear_regression(X_val, M_val[:, idx], alpha=alpha).loc[[1], cols]
         else:
-            sxm[j] = logistic_regression(X_val, M_val[:, idx],
-                                         alpha=alpha).loc[[1], cols]
+            sxm[j] = logistic_regression(X_val, M_val[:, idx], alpha=alpha).loc[[1], cols]
         sxm[j].at[1, 'names'] = '%s ~ X' % j
     sxm = pd.concat(sxm, ignore_index=True)
 
     # Y ~ M + covar
-    smy = linear_regression(data[_fl([m, covar])], y_val,
-                            alpha=alpha).loc[1:n_mediator, cols]
-
+    smy = linear_regression(data[_fl([m, covar])], y_val, alpha=alpha).loc[1:n_mediator, cols]
     # Average Total Effects (Y ~ X + covar)
     sxy = linear_regression(X_val, y_val, alpha=alpha).loc[[1], cols]
-
     # Average Direct Effects (Y ~ X + M + covar)
     direct = linear_regression(XM_val, y_val, alpha=alpha).loc[[1], cols]
 
@@ -1235,25 +1230,22 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     idx = rng.choice(np.arange(n), replace=True, size=(n_boot, n))
     ab_estimates = np.zeros(shape=(n_boot, n_mediator))
     for i in range(n_boot):
-        ab_estimates[i, :] = _point_estimate(X_val, XM_val, M_val, y_val,
-                                             idx[i, :], n_mediator, mtype)
+        ab_estimates[i, :] = _point_estimate(
+            X_val, XM_val, M_val, y_val, idx[i, :], n_mediator, mtype)
 
-    ab = _point_estimate(X_val, XM_val, M_val, y_val, np.arange(n),
-                         n_mediator, mtype)
+    ab = _point_estimate(X_val, XM_val, M_val, y_val, np.arange(n), n_mediator, mtype)
     indirect = {'names': m, 'coef': ab, 'se': ab_estimates.std(ddof=1, axis=0),
                 'pval': [], ll_name: [], ul_name: [], 'sig': []}
 
     for j in range(n_mediator):
-        ci_j = _bca(ab_estimates[:, j], indirect['coef'][j],
-                    alpha=alpha, n_boot=n_boot)
+        ci_j = _bca(ab_estimates[:, j], indirect['coef'][j], alpha=alpha, n_boot=n_boot)
         indirect[ll_name].append(min(ci_j))
         indirect[ul_name].append(max(ci_j))
         # Bootstrapped p-value of indirect effect
         # Note that this is less accurate than a permutation test because the
         # bootstrap distribution is not conditioned on a true null hypothesis.
         # For more details see Hayes and Rockwood 2017
-        indirect['pval'].append(_pval_from_bootci(ab_estimates[:, j],
-                                indirect['coef'][j]))
+        indirect['pval'].append(_pval_from_bootci(ab_estimates[:, j], indirect['coef'][j]))
         indirect['sig'].append('Yes' if indirect['pval'][j] < alpha else 'No')
 
     # Create output dataframe
@@ -1261,8 +1253,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     if n_mediator == 1:
         indirect['names'] = 'Indirect'
     else:
-        indirect['names'] = indirect['names'].apply(lambda x:
-                                                    'Indirect %s' % x)
+        indirect['names'] = indirect['names'].apply(lambda x: 'Indirect %s' % x)
     stats = stats.append(indirect, ignore_index=True)
     stats = stats.rename(columns={'names': 'path'})
 
