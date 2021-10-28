@@ -41,7 +41,7 @@ jobs:
     - name: Build docs
       if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == 3.8 }}
       run: |
-        pip install --upgrade sphinx sphinx_bootstrap_theme numpydoc sphinx-copybutton
+        pip install --upgrade sphinx sphinx_bootstrap_theme numpydoc sphinx-copybutton sphinx-panels
         make -C docs clean
         make -C docs html
 
