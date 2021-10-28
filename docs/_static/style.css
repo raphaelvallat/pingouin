@@ -45,3 +45,7 @@ code {
     -webkit-background-clip: content-box;
     background-clip: content-box;
 }
+
+.wy-nav-content {
+    max-width: None !important;
+}

@@ -168,7 +168,7 @@ You need to use the :py:func:`pandas.read_csv` or :py:func:`pandas.read_excel` f
       <div id="collapse_missing" class="panel-collapse collapse">
         <div class="panel-body">
 
-Pingouin hates missing values almost as much as you do!
+Pingouin hates missing values as much as you do!
 
 Most functions of Pingouin will automatically remove the missing values. In the case of paired measurements (e.g. paired T-test, correlation, or repeated measures ANOVA), a listwise deletion of missing values is performed, meaning that the entire row is removed. This is generally the best strategy if you have a large sample size and only a few missing values. However, this can be quite drastic if there are a lot of missing values in your data. In that case, it might be useful to look at `imputation methods (see Pandas documentation) <https://pandas.pydata.org/pandas-docs/stable/user_guide/missing_data.html>`_, or use a linear mixed effect model instead, which natively supports missing values. However, the latter is not implemented in Pingouin.
 

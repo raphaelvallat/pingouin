@@ -501,7 +501,7 @@ Pingouin was created and is maintained by `Raphael Vallat <https://raphaelvallat
 
 To see the code or report a bug, please visit the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
 
-Note that this program is provided with NO WARRANTY OF ANY KIND. If you can, always double check the results with another statistical software.
+This program is provided with NO WARRANTY OF ANY KIND. Pingouin is still under heavy development and there are likely hidden bugs. Always double check the results with another statistical software.
 
 **Contributors**
 

@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.abspath('sphinxext'))
 extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.doctest',
-    'sphinx.ext.viewcode',
+    # 'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'sphinx.ext.autosummary',
     'sphinx.ext.autodoc',
@@ -39,12 +39,16 @@ extensions = [
     'matplotlib.sphinxext.plot_directive',
     'numpydoc',
     'sphinx_copybutton',
+    'sphinx_panels'
 ]
 
 # configure sphinx-copybutton
 # https://github.com/executablebooks/sphinx-copybutton
 copybutton_prompt_text = r">>> |\.\.\. |\$ "
 copybutton_prompt_is_regexp = True
+
+# sphinx_panels
+panels_add_bootstrap_css = False
 
 # Generate the API documentation when building
 autosummary_generate = True
@@ -55,9 +59,6 @@ plot_include_source = True
 plot_formats = [("png", 90)]
 plot_html_show_formats = False
 plot_html_show_source_link = False
-
-# Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -133,36 +134,35 @@ html_favicon = 'pictures/pingouin_blue.svg'
 htmlhelp_basename = 'pingouindoc'
 html_static_path = ['_static']
 html_show_sourcelink = False
-html_add_permalinks = ""
-
+html_copy_source = False
 
 # -- Options for LaTeX output ---------------------------------------------
 
-latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #
-    # 'papersize': 'letterpaper',
+# latex_elements = {
+#     # The paper size ('letterpaper' or 'a4paper').
+#     #
+#     # 'papersize': 'letterpaper',
 
-    # The font size ('10pt', '11pt' or '12pt').
-    #
-    # 'pointsize': '10pt',
+#     # The font size ('10pt', '11pt' or '12pt').
+#     #
+#     # 'pointsize': '10pt',
 
-    # Additional stuff for the LaTeX preamble.
-    #
-    # 'preamble': '',
+#     # Additional stuff for the LaTeX preamble.
+#     #
+#     # 'preamble': '',
 
-    # Latex figure (float) alignment
-    #
-    # 'figure_align': 'htbp',
-}
+#     # Latex figure (float) alignment
+#     #
+#     # 'figure_align': 'htbp',
+# }
 
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title,
-#  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (master_doc, 'pingouin.tex', 'pingouin Documentation',
-     'Raphael Vallat', 'manual'),
-]
+# # Grouping the document tree into LaTeX files. List of tuples
+# # (source start file, target name, title,
+# #  author, documentclass [howto, manual, or own class]).
+# latex_documents = [
+#     (master_doc, 'pingouin.tex', 'pingouin Documentation',
+#      'Raphael Vallat', 'manual'),
+# ]
 
 
 # -- Options for manual page output ---------------------------------------
