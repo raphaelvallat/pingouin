@@ -128,7 +128,9 @@ html_theme_options = {
 html_logo = 'pictures/pingouin.png'
 html_favicon = 'pictures/pingouin_blue.svg'
 
-# -- Options for HTMLHelp output ------------------------------------------
+# IMPORTANT: There is a misalignement of the Navbar when using Sphinx > 3.0!
+
+# -- Options for HTML output ------------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'pingouindoc'
@@ -136,56 +138,6 @@ html_static_path = ['_static']
 html_show_sourcelink = False
 html_copy_source = False
 templates_path = ['templates']  # To remove the searchbar
-
-# -- Options for LaTeX output ---------------------------------------------
-
-# latex_elements = {
-#     # The paper size ('letterpaper' or 'a4paper').
-#     #
-#     # 'papersize': 'letterpaper',
-
-#     # The font size ('10pt', '11pt' or '12pt').
-#     #
-#     # 'pointsize': '10pt',
-
-#     # Additional stuff for the LaTeX preamble.
-#     #
-#     # 'preamble': '',
-
-#     # Latex figure (float) alignment
-#     #
-#     # 'figure_align': 'htbp',
-# }
-
-# # Grouping the document tree into LaTeX files. List of tuples
-# # (source start file, target name, title,
-# #  author, documentclass [howto, manual, or own class]).
-# latex_documents = [
-#     (master_doc, 'pingouin.tex', 'pingouin Documentation',
-#      'Raphael Vallat', 'manual'),
-# ]
-
-
-# -- Options for manual page output ---------------------------------------
-
-# One entry per manual page. List of tuples
-# (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'pingouin', 'pingouin Documentation',
-     [author], 1)
-]
-
-
-# -- Options for Texinfo output -------------------------------------------
-
-# Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
-#  dir menu entry, description, category)
-texinfo_documents = [
-    (master_doc, 'pingouin', 'pingouin Documentation',
-     author, 'pingouin', 'Statistics in Python 3.',
-     'Miscellaneous'),
-]
 
 
 def setup(app):

@@ -3,7 +3,7 @@
 .. currentmodule:: pingouin
 
 Functions
-=========
+#########
 
 .. contents:: Table of Contents
    :depth: 2
