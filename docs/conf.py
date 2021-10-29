@@ -135,6 +135,7 @@ htmlhelp_basename = 'pingouindoc'
 html_static_path = ['_static']
 html_show_sourcelink = False
 html_copy_source = False
+templates_path = ['templates']  # To remove the searchbar
 
 # -- Options for LaTeX output ---------------------------------------------
 
