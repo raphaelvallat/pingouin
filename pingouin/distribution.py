@@ -64,6 +64,9 @@ def gzscore(x, *, axis=0, ddof=1, nan_policy='propagate'):
     >>> print(round(z.mean(), 3), round(z.std(), 3))
     -0.0 0.995
     """
+    warnings.warn("gzscore is deprecated and will be removed in pingouin 0.7.0;"
+                  " use scipy.stats.gzscore instead.",
+                  warnings.DeprecationWarning)
     x = np.asanyarray(x)
     log = np.ma.log if isinstance(x, np.ma.MaskedArray) else np.log
     z = scipy.stats.zscore(log(x), axis=axis, ddof=ddof, nan_policy=nan_policy)
