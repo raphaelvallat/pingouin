@@ -697,11 +697,16 @@ def circ_moore_rayleigh(angles, w):
 
     Notes
     -----
-    The Moore's modified Rayleigh test is a non-parametric analogue of the Rayleigh test
-    for weighted vector data (Moore, 1980).
+    The Moore's modified Rayleigh test [1]_ is a non-parametric analogue of the
+    Rayleigh test for weighted vector data.
 
     H0: the population is uniformly distributed around the circle
     HA: the populatoin is not distributed uniformly around the circle
+
+    References
+    ----------
+    .. [1] Moore, B. R. (1980). A modification of the Rayleigh test for vector data.
+           Biometrika, 67(1), 175-180.
 
     Examples
     --------
