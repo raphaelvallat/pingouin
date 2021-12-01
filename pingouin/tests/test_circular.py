@@ -5,7 +5,7 @@ from scipy.stats import circmean
 from pingouin import read_dataset
 from pingouin.circular import convert_angles, _checkangles
 from pingouin.circular import (circ_axial, circ_corrcc, circ_corrcl, circ_mean,
-                               circ_r, circ_rayleigh, circ_vtest)
+                               circ_r, circ_rayleigh, circ_moore_rayleigh, circ_vtest)
 
 np.random.seed(123)
 a1 = [-1.2, 2.5, 3.1, -3.1, 0.2, -0.2]   # -np.pi / pi
@@ -133,6 +133,15 @@ class TestCircular(TestCase):
         z, pval = circ_rayleigh(x, w=[.1, .2, .3, .4, .5], d=0.2)
         assert round(z, 3) == 0.278
         assert round(pval, 4) == 0.8070
+
+    def test_circ_moore_rayleigh(self):
+        """Test function circ_moore_rayleigh."""
+        x = [0.785, 1.570, 3.141, 0.839, 5.934]
+        w = [.1, .2, .3, .4, .5]
+        r, pval = circ_moore_rayleigh(x, w)
+        # Compare with Oriana
+        assert round(r, 3) == 0.577
+        assert round(pval, 3) == 0.469
 
     def test_circ_vtest(self):
         """Test function circ_vtest."""

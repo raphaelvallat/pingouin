@@ -11,7 +11,7 @@ from scipy.stats import norm
 from .utils import remove_na
 
 __all__ = ["convert_angles", "circ_axial", "circ_mean", "circ_r", "circ_corrcc", "circ_corrcl",
-           "circ_rayleigh", "circ_vtest"]
+           "circ_rayleigh", "circ_moore_rayleigh", "circ_vtest"]
 
 
 ###############################################################################
@@ -672,6 +672,49 @@ def circ_rayleigh(angles, w=None, d=None):
     # Compute p value using approxation in Zar (1999), p. 617
     pval = np.exp(np.sqrt(1 + 4 * n + 4 * (n**2 - R**2)) - (1 + 2 * n))
     return z, pval
+
+
+def circ_moore_rayleigh(angles, w):
+    """Moore's modified Rayleigh test for non-uniformity of vector data.
+
+    Parameters
+    ----------
+    angles : 1-D array_like
+        Samples of angles in radians. The range of ``angles`` must be either
+        :math:`[0, 2\\pi]` or :math:`[-\\pi, \\pi]`. If ``angles`` is not
+        expressed in radians (e.g. degrees or 24-hours), please use the
+        :py:func:`pingouin.convert_angles` function prior to using the present
+        function.
+    w : 1-D array_like
+        Vector weights. Should be the same length as ``angles``.
+
+    Returns
+    -------
+    r : float
+        R\*-statistic
+    pval : float
+        P-value
+
+    Notes
+    -----
+    The Moore's modified Rayleigh test is a non-parametric analogue of the Rayleigh test
+    for weighted vector data (Moore, 1980).
+
+    H0: the population is uniformly distributed around the circle
+    HA: the populatoin is not distributed uniformly around the circle
+
+    Examples
+    --------
+    1. Simple Moore's modified Rayleigh test for non-uniformity of vector data.
+
+    >>> from pingouin import circ_moore_rayleigh
+    >>> x = [-3.1415, -1.5708, -1.8326, -2.1293, 1.4835, 2.7925, -0.9948, 3.1415]
+    >>> w = [.5, .7, .2, .3, .8, .9, 1., .2]
+    >>> r, pval = circ_moore_rayleigh(x, w)
+    >>> print(round(r, 3), round(pval, 3))
+    0.519 0.508
+    """
+    pass
 
 
 def circ_vtest(angles, dir=0., w=None, d=None):
