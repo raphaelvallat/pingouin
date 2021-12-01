@@ -52,6 +52,7 @@ Circular
     circ_mean
     circ_r
     circ_rayleigh
+    circ_moore_rayleigh
     circ_vtest
 
 Contingency
