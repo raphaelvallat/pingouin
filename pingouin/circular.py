@@ -714,7 +714,24 @@ def circ_moore_rayleigh(angles, w):
     >>> print(round(r, 3), round(pval, 3))
     0.519 0.508
     """
-    pass
+    angles = np.asarray(angles)
+    _checkangles(angles)  # Check that angles is in radians
+    assert len(angles) == len(w), "Input dimensions do not match"
+
+    n = len(angles)
+
+    # Compute Moore's modified Rayleigh statistic
+    ranked = angles[np.argsort(w)]
+    rank_weights = np.arange(1, n + 1)
+
+    x = np.sum(rank_weights * np.cos(ranked))
+    y = np.sum(rank_weights * np.sin(ranked))
+
+    r = np.sqrt(x * x + y * y) / n ** 1.5
+
+    # Compute p value using approxation in Moore (1980) (eq. 3.3)
+    pval = np.exp(-6 * (r ** 2) * (n ** 2) / ((n + 1) * (2 * n + 1)))
+    return r, pval
 
 
 def circ_vtest(angles, dir=0., w=None, d=None):
