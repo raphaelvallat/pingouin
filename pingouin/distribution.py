@@ -11,18 +11,30 @@ __all__ = ["gzscore", "normality", "homoscedasticity", "anderson",
            "epsilon", "sphericity"]
 
 
-def gzscore(x):
+def gzscore(x, *, axis=0, ddof=1, nan_policy='propagate'):
     """Geometric standard (Z) score.
 
     Parameters
     ----------
     x : array_like
-        Array of raw values
+        Array of raw values.
+    axis : int or None, optional
+        Axis along which to operate. Default is 0. If None, compute over
+        the whole array `x`.
+    ddof : int, optional
+        Degrees of freedom correction in the calculation of the
+        standard deviation. Default is 1.
+    nan_policy : {'propagate', 'raise', 'omit'}, optional
+        Defines how to handle when input contains nan. 'propagate' returns nan,
+        'raise' throws an error, 'omit' performs the calculations ignoring nan
+        values. Default is 'propagate'.  Note that when the value is 'omit',
+        nans in the input also propagate to the output, but they do not affect
+        the geometric z scores computed for the non-nan values.
 
     Returns
     -------
     gzscore : array_like
-        Array of geometric z-scores (same shape as x)
+        Array of geometric z-scores (same shape as x).
 
     Notes
     -----
@@ -52,12 +64,12 @@ def gzscore(x):
     >>> print(round(z.mean(), 3), round(z.std(), 3))
     -0.0 0.995
     """
-    # Geometric mean
-    geo_mean = scipy.stats.gmean(x)
-    # Geometric standard deviation
-    gstd = np.exp(np.sqrt(np.sum((np.log(x / geo_mean))**2) / (len(x) - 1)))
-    # Geometric z-score
-    return np.log(x / geo_mean) / np.log(gstd)
+    warnings.warn("gzscore is deprecated and will be removed in pingouin 0.7.0;"
+                  " use scipy.stats.gzscore instead.")
+    x = np.asanyarray(x)
+    log = np.ma.log if isinstance(x, np.ma.MaskedArray) else np.log
+    z = scipy.stats.zscore(log(x), axis=axis, ddof=ddof, nan_policy=nan_policy)
+    return z
 
 
 def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
