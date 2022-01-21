@@ -144,7 +144,7 @@ def madmedianrule(a):
     return (np.fabs(a - np.median(a)) / mad(a)) > k
 
 
-def mwu(x, y, alternative='two-sided', **kwargs):
+def mwu(x, y, alternative='two-sided',confidence=0.95, **kwargs):
     """Mann-Whitney U Test (= Wilcoxon rank-sum test). It is the non-parametric
     version of the independent T-test.
 
@@ -157,6 +157,8 @@ def mwu(x, y, alternative='two-sided', **kwargs):
         Defines the alternative hypothesis, or tail of the test. Must be one of
         "two-sided" (default), "greater" or "less". See :py:func:`scipy.stats.mannwhitneyu` for
         more details.
+    confidence : float
+        Confidence level on confidence interval of difference of medians between x and y.
     **kwargs : dict
         Additional keywords arguments that are passed to :py:func:`scipy.stats.mannwhitneyu`.
 
@@ -169,6 +171,7 @@ def mwu(x, y, alternative='two-sided', **kwargs):
         * ``'p-val'``: p-value
         * ``'RBC'``   : rank-biserial correlation
         * ``'CLES'``  : common language effect size
+        * ``'CI'``  : confidence interval of difference of medians
 
     See also
     --------
@@ -222,6 +225,10 @@ def mwu(x, y, alternative='two-sided', **kwargs):
         Association and the American Statistical Association, 25(2),
         101–132. https://doi.org/10.2307/1165329
 
+    .. [5] Campbell, M. J. & Gardner, M. J. (1988). Calculating confidence 
+           intervals for some non-parametric analyses.
+           British Medical Journal Volume 226, 1988.
+
     Examples
     --------
     >>> import numpy as np
@@ -229,9 +236,9 @@ def mwu(x, y, alternative='two-sided', **kwargs):
     >>> np.random.seed(123)
     >>> x = np.random.uniform(low=0, high=1, size=20)
     >>> y = np.random.uniform(low=0.2, high=1.2, size=20)
-    >>> pg.mwu(x, y, alternative='two-sided')
-         U-val alternative    p-val    RBC    CLES
-    MWU   97.0   two-sided  0.00556  0.515  0.2425
+    >>> pg.mwu(x, y, alternative='two-sided',confidence=0.95)
+         U-val alternative    p-val    RBC    CLES     CI95%
+    MWU   97.0   two-sided  0.00556  0.515  0.2425     [-0.39290395101879694, -0.09400270319896187]
 
     Compare with SciPy
 
@@ -241,19 +248,19 @@ def mwu(x, y, alternative='two-sided', **kwargs):
 
     One-sided test
 
-    >>> pg.mwu(x, y, alternative='greater')
-         U-val alternative     p-val    RBC    CLES
-    MWU   97.0     greater  0.997442  0.515  0.2425
+    >>> pg.mwu(x, y, alternative='greater',confidence=0.95)
+         U-val alternative     p-val    RBC    CLES    CI95%
+    MWU   97.0     greater  0.997442  0.515  0.2425    [-0.3711286134873304, inf]
 
-    >>> pg.mwu(x, y, alternative='less')
-         U-val alternative    p-val    RBC    CLES
-    MWU   97.0        less  0.00278  0.515  0.7575
+    >>> pg.mwu(x, y, alternative='less',confidence=0.95)
+         U-val alternative    p-val    RBC    CLES     CI95%
+    MWU   97.0        less  0.00278  0.515  0.7575     [-inf, -0.10192641647044609]
 
     Passing keyword arguments to :py:func:`scipy.stats.mannwhitneyu`:
 
-    >>> pg.mwu(x, y, alternative='two-sided', method='exact')
-         U-val alternative     p-val    RBC    CLES
-    MWU   97.0   two-sided  0.004681  0.515  0.2425
+    >>> pg.mwu(x, y, alternative='two-sided',confidence=0.95, method='exact')
+         U-val alternative     p-val    RBC    CLES    CI95%
+    MWU   97.0   two-sided  0.004681  0.515  0.2425    [-0.39290395101879694, -0.09400270319896187]
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -281,14 +288,33 @@ def mwu(x, y, alternative='two-sided', **kwargs):
 
     # Effect size 2: rank biserial correlation (Wendt 1972)
     rbc = 1 - (2 * uval) / diff.size  # diff.size = x.size * y.size
-
+    
+    # Confidence interval for the (difference in) medians 
+    # Campbell and Gardner 2000
+    if alternative == "two-sided":
+        alpha = 1.0 - confidence
+        conf = 1.0 - alpha / 2  # 0.975
+    else:
+        conf = confidence
+    N = scipy.stats.norm.ppf(conf) 
+    ct1, ct2 = len(x),len(y) # count samples 
+    diffs = sorted([i-j for i in x for j in y]) # get ct1xct2 difference
+    k = int(round(ct1*ct2/2 - (N * (ct1*ct2*(ct1+ct2+1)/12)**0.5)))
+    ci = [diffs[k], diffs[len(diffs)-k]]
+    if alternative == "greater":
+        ci[1] = np.inf
+    elif alternative == "less":
+        ci[0] = -np.inf
+    # Rename CI
+    ci_name = 'CI%.0f%%' % (100 * confidence)
     # Fill output DataFrame
     stats = pd.DataFrame({
         'U-val': uval,
         'alternative': alternative,
         'p-val': pval,
         'RBC': rbc,
-        'CLES': cles}, index=['MWU'])
+        'CLES': cles,
+        ci_name: [ci]}, index=['MWU'])
     return _postprocess_dataframe(stats)
 
 
