@@ -632,8 +632,8 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     >>> df.pairwise_tukey(dv='body_mass_g', between='species').round(3)
                A          B   mean(A)   mean(B)      diff      se       T  p-tukey  hedges
     0     Adelie  Chinstrap  3700.662  3733.088   -32.426  67.512  -0.480    0.881  -0.070
-    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148 -24.495   -0.000  -2.967
-    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857 -19.224   -0.000  -2.894
+    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148 -24.495    0.000  -2.967
+    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857 -19.224    0.000  -2.894
     """
 
     # First compute the ANOVA
@@ -664,6 +664,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     # Critical values and p-values
     # crit = studentized_range.ppf(1 - alpha, ng, df) / np.sqrt(2)
     pval = studentized_range.sf(np.sqrt(2) * np.abs(tval), ng, df)
+    pval = np.clip(pval, 0, 1)
 
     # Uncorrected p-values
     # from scipy.stats import t
@@ -785,7 +786,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
     ...                         between='species').round(3)
                A          B   mean(A)   mean(B)      diff      se       T       df  pval  hedges
     0     Adelie  Chinstrap  3700.662  3733.088   -32.426  59.706  -0.543  152.455  0.85  -0.079
-    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  58.811 -23.386  249.643 -0.00  -2.833
+    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  58.811 -23.386  249.643  0.00  -2.833
     2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  65.103 -20.628  170.404  0.00  -3.105
     """
 
@@ -819,6 +820,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
 
     # Compute corrected p-values
     pval = studentized_range.sf(np.sqrt(2) * np.abs(tval), ng, df)
+    pval = np.clip(pval, 0, 1)
 
     # Uncorrected p-values
     # from scipy.stats import t
