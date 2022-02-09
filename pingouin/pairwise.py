@@ -9,6 +9,7 @@ from pingouin.parametric import anova
 from pingouin.multicomp import multicomp
 from pingouin.effsize import compute_effsize, convert_effsize
 from pingouin.utils import (_check_dataframe, _flatten_list, _postprocess_dataframe)
+from scipy.stats import studentized_range
 
 __all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
            "pairwise_corr"]
@@ -630,11 +631,10 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     >>> df = pg.read_dataset('penguins')
     >>> df.pairwise_tukey(dv='body_mass_g', between='species').round(3)
                A          B   mean(A)   mean(B)      diff      se       T  p-tukey  hedges
-    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  67.512  -0.480    0.869  -0.070
-    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148 -24.495    0.001  -2.967
-    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857 -19.224    0.001  -2.894
+    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  67.512  -0.480    0.881  -0.070
+    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148 -24.495    0.000  -2.967
+    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857 -19.224    0.000  -2.894
     """
-    from statsmodels.stats.libqsturng import psturng
 
     # First compute the ANOVA
     # For max precision, make sure rounding is disabled
@@ -662,9 +662,9 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     tval = mn / se
 
     # Critical values and p-values
-    # from statsmodels.stats.libqsturng import qsturng
-    # crit = qsturng(1 - alpha, ng, df) / np.sqrt(2)
-    pval = psturng(np.sqrt(2) * np.abs(tval), ng, df)
+    # crit = studentized_range.ppf(1 - alpha, ng, df) / np.sqrt(2)
+    pval = studentized_range.sf(np.sqrt(2) * np.abs(tval), ng, df)
+    pval = np.clip(pval, 0, 1)
 
     # Uncorrected p-values
     # from scipy.stats import t
@@ -784,12 +784,11 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
     >>> df = pg.read_dataset('penguins')
     >>> pg.pairwise_gameshowell(data=df, dv='body_mass_g',
     ...                         between='species').round(3)
-               A          B   mean(A)   mean(B)      diff      se       T       df   pval  hedges
-    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  59.706  -0.543  152.455  0.834  -0.079
-    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  58.811 -23.386  249.643  0.001  -2.833
-    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  65.103 -20.628  170.404  0.001  -3.105
+               A          B   mean(A)   mean(B)      diff      se       T       df  pval  hedges
+    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  59.706  -0.543  152.455  0.85  -0.079
+    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  58.811 -23.386  249.643  0.00  -2.833
+    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  65.103 -20.628  170.404  0.00  -3.105
     """
-    from statsmodels.stats.libqsturng import psturng
 
     # Check the dataframe
     _check_dataframe(dv=dv, between=between, effects='between', data=data)
@@ -820,7 +819,8 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
           (((gvars[g2] / n[g2])**2) / (n[g2] - 1)))
 
     # Compute corrected p-values
-    pval = psturng(np.sqrt(2) * np.abs(tval), ng, df)
+    pval = studentized_range.sf(np.sqrt(2) * np.abs(tval), ng, df)
+    pval = np.clip(pval, 0, 1)
 
     # Uncorrected p-values
     # from scipy.stats import t

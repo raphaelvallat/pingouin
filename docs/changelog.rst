@@ -14,7 +14,7 @@ v0.6.0.dev
 **Enhancements**
 
 a. Faster implementation of :py:func:`pingouin.gzscore`, adding all options available in zscore: axis, ddof and nan_policy. Warning: this functions is deprecated and will be removed in pingouin 0.7.0 (use scipy.stats.gzscore instead). See `pull request 210 <https://github.com/raphaelvallat/pingouin/pull/210>`_.
-
+b. Replace use of statsmodels' studentized range distribution functions with more SciPy's more accurate `scipy.stats.studentized_range`. See `pull request 229 <https://github.com/raphaelvallat/pingouin/pull/229>`_.
 
 *************
 
