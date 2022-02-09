@@ -310,7 +310,7 @@ def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707
 
     # Convert to dataframe
     col_order = ['T', 'dof', 'alternative', 'p-val', ci_name, 'cohen-d', 'BF10', 'power']
-    stats = pd.DataFrame.from_records(stats, columns=col_order, index=['T-test'])
+    stats = pd.DataFrame(stats, columns=col_order, index=['T-test'])
     return _postprocess_dataframe(stats)
 
 
