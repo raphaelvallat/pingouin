@@ -459,8 +459,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
 
             # Append empty rows
             idxiter = np.arange(nrows, nrows + ncombs)
-            stats = stats.append(
-                pd.DataFrame(columns=stats.columns, index=idxiter), ignore_index=True)
+            stats = stats.reindex(stats.index.union(idxiter))
+
             # Update other columns
             stats.loc[idxiter, 'Contrast'] = factors[0] + ' * ' + factors[1]
             stats.loc[idxiter, 'Time'] = combs[:, 0]

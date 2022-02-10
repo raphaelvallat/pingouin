@@ -645,7 +645,7 @@ def corr(x, y, alternative='two-sided', method='pearson', **kwargs):
         stats['BF10'] = bayesfactor_pearson(r, n_clean, alternative=alternative)
 
     # Convert to DataFrame
-    stats = pd.DataFrame.from_records(stats, index=[method])
+    stats = pd.DataFrame(stats, index=[method])
 
     # Define order
     col_keep = ['n', 'outliers', 'r', 'CI95%', 'p-val', 'BF10', 'power']
@@ -863,7 +863,7 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     }
 
     # Convert to DataFrame
-    stats = pd.DataFrame.from_records(stats, index=[method])
+    stats = pd.DataFrame(stats, index=[method])
 
     # Define order
     col_keep = ['n', 'r', 'CI95%', 'p-val']

@@ -198,8 +198,12 @@ def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707
     array([1.971859, 0.057056])
     """
     from scipy.stats import t, ttest_rel, ttest_ind, ttest_1samp
-    from scipy.stats.stats import (_unequal_var_ttest_denom,
-                                   _equal_var_ttest_denom)
+    try:
+        from scipy.stats._stats_py import (_unequal_var_ttest_denom,
+                                       _equal_var_ttest_denom)
+    except ImportError:  # Fallback for scipy<1.8.0
+        from scipy.stats.stats import (_unequal_var_ttest_denom,
+                                       _equal_var_ttest_denom)
     from pingouin import (power_ttest, power_ttest2n, compute_effsize)
 
     # Check arguments
@@ -306,7 +310,7 @@ def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707
 
     # Convert to dataframe
     col_order = ['T', 'dof', 'alternative', 'p-val', ci_name, 'cohen-d', 'BF10', 'power']
-    stats = pd.DataFrame.from_records(stats, columns=col_order, index=['T-test'])
+    stats = pd.DataFrame(stats, columns=col_order, index=['T-test'])
     return _postprocess_dataframe(stats)
 
 

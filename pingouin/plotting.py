@@ -334,6 +334,11 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
         >>> sns.set_style('darkgrid')
         >>> ax = pg.qqplot(x, dist='norm', sparams=(mean, std))
     """
+    try:
+        from scipy.stats._morestats import _add_axis_labels_title
+    except ImportError:  # Fallback for scipy<1.8.0
+        from scipy.stats.morestats import _add_axis_labels_title
+
     if isinstance(dist, str):
         dist = getattr(stats, dist)
 
@@ -371,10 +376,10 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
 
     ax.plot(theor, observed, 'bo')
 
-    stats.morestats._add_axis_labels_title(ax,
-                                           xlabel='Theoretical quantiles',
-                                           ylabel='Ordered quantiles',
-                                           title='Q-Q Plot')
+    _add_axis_labels_title(ax,
+                           xlabel='Theoretical quantiles',
+                           ylabel='Ordered quantiles',
+                           title='Q-Q Plot')
 
     # Add diagonal line
     end_pts = [ax.get_xlim(), ax.get_ylim()]
