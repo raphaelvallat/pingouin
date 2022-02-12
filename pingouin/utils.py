@@ -225,6 +225,7 @@ def remove_na(x, y=None, paired=False, axis='rows'):
         return _remove_na_single(x, axis=axis), y
     else:  # y is list, np.array, pd.Series
         y = np.asarray(y)
+        assert y.size != 0, "y cannot be an empty list or array."
         # Make sure that we just pass-through if y have only 1 element
         if y.size == 1:
             return _remove_na_single(x, axis=axis), y

@@ -10,8 +10,7 @@ from pingouin import (_check_dataframe, remove_na, _flatten_list, bayesfactor_tt
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova", "ancova"]
 
 
-def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707,
-          confidence=0.95):
+def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707, confidence=0.95):
     """T-test.
 
     Parameters
@@ -202,7 +201,7 @@ def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707
         from scipy.stats._stats_py import _unequal_var_ttest_denom, _equal_var_ttest_denom
     except ImportError:  # Fallback for scipy<1.8.0
         from scipy.stats.stats import _unequal_var_ttest_denom, _equal_var_ttest_denom
-    from pingouin import (power_ttest, power_ttest2n, compute_effsize)
+    from pingouin import power_ttest, power_ttest2n, compute_effsize
 
     # Check arguments
     assert alternative in ['two-sided', 'greater', 'less'], (
@@ -213,8 +212,7 @@ def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707
     y = np.asarray(y)
 
     if x.size != y.size and paired:
-        warnings.warn("x and y have unequal sizes. Switching to "
-                      "paired == False. Check your data.")
+        warnings.warn("x and y have unequal sizes. Switching to paired == False. Check your data.")
         paired = False
 
     # Remove rows with missing values
