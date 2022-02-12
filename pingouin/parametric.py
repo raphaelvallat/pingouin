@@ -508,13 +508,6 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     # Check dataframe
     _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects='within')
 
-    # Convert Categorical columns to string
-    # This is important otherwise all the groupby will return different results
-    # unless we specify .groupby(..., observed = True).
-    for c in [subject, within]:
-        if data[c].dtype.name == 'category':
-            data[c] = data[c].astype(str)
-
     assert not data[within].isnull().any(), "Cannot have missing values in `within`."
     assert not data[subject].isnull().any(), "Cannot have missing values in `subject`."
 
@@ -528,10 +521,12 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
 
     # Groupby
-    grp_with = data.groupby(within)[dv]
+    # I think that observed=True is actually not needed here since we have already used
+    # `observed=True` in pivot_table.
+    grp_with = data.groupby(within, observed=True)[dv]
     rm = list(data[within].unique())
     n_rm = len(rm)
-    n_obs = int(data.groupby(within)[dv].count().max())
+    n_obs = int(grp_with.count().max())
     grandmean = data[dv].mean()
 
     # Calculate sums of squares
@@ -540,7 +535,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     # sstotal = sstime + ss_resall =  sstime + (sssubj + sserror)
     # ss_total = ((data[dv] - grandmean)**2).sum()
     # We can further divide the residuals into a within and between component:
-    grp_subj = data.groupby(subject)[dv]
+    grp_subj = data.groupby(subject, observed=True)[dv]
     ss_resbetw = n_rm * np.sum((grp_subj.mean() - grandmean)**2)
     ss_reswith = ss_resall - ss_resbetw
 
@@ -629,13 +624,6 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
     # Validate the dataframe
     _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects='within')
 
-    # Convert Categorical columns to string
-    # This is important otherwise all the groupby will return different results
-    # unless we specify .groupby(..., observed = True).
-    for c in [subject, a, b]:
-        if data[c].dtype.name == 'category':
-            data[c] = data[c].astype(str)
-
     assert not data[a].isnull().any(), "Cannot have missing values in %s" % a
     assert not data[b].isnull().any(), "Cannot have missing values in %s" % b
     assert not data[subject].isnull().any(), "Cannot have missing values in %s" % subject
@@ -656,12 +644,14 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
     mu = data[dv].mean()
 
     # Groupby means
-    grp_s = data.groupby(subject)[dv].mean()
-    grp_a = data.groupby([a])[dv].mean()
-    grp_b = data.groupby([b])[dv].mean()
-    grp_ab = data.groupby([a, b])[dv].mean()
-    grp_as = data.groupby([a, subject])[dv].mean()
-    grp_bs = data.groupby([b, subject])[dv].mean()
+    # I think that observed=True is actually not needed here since we have already used
+    # `observed=True` in pivot_table.
+    grp_s = data.groupby(subject, observed=True)[dv].mean()
+    grp_a = data.groupby([a], observed=True)[dv].mean()
+    grp_b = data.groupby([b], observed=True)[dv].mean()
+    grp_ab = data.groupby([a, b], observed=True)[dv].mean()
+    grp_as = data.groupby([a, subject], observed=True)[dv].mean()
+    grp_bs = data.groupby([b, subject], observed=True)[dv].mean()
 
     # Sums of squares
     ss_tot = np.sum((data[dv] - mu)**2)
@@ -728,7 +718,6 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
     # Epsilon
     piv_a = data.pivot_table(index=subject, columns=a, values=dv, observed=True)
     piv_b = data.pivot_table(index=subject, columns=b, values=dv, observed=True)
-    # piv_ab = data.pivot_table(index=subject, columns=[a, b], values=dv)  # Same as data_piv
     eps_a = epsilon(piv_a, correction='gg')
     eps_b = epsilon(piv_b, correction='gg')
     # Note that the GG epsilon of the interaction slightly differs between
@@ -927,12 +916,10 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
         elif len(between) == 2:
             # Two factors with balanced design = Pingouin implementation
             # Two factors with unbalanced design = statsmodels
-            return anova2(dv=dv, between=between, data=data, ss_type=ss_type,
-                          effsize=effsize)
+            return anova2(dv=dv, between=between, data=data, ss_type=ss_type, effsize=effsize)
         else:
             # 3 or more factors with (un)-balanced design = statsmodels
-            return anovan(dv=dv, between=between, data=data, ss_type=ss_type,
-                          effsize=effsize)
+            return anovan(dv=dv, between=between, data=data, ss_type=ss_type, effsize=effsize)
 
     # Check data
     _check_dataframe(dv=dv, between=between, data=data, effects='between')
@@ -1031,8 +1018,7 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
         df_resid = data[dv].size - (ng1 * ng2)
     else:
         # UNBALANCED DESIGN
-        return anovan(dv=dv, between=between, data=data, ss_type=ss_type,
-                      effsize=effsize)
+        return anovan(dv=dv, between=between, data=data, ss_type=ss_type, effsize=effsize)
 
     # Mean squares
     ms_fac1 = ss_fac1 / df_fac1
@@ -1065,8 +1051,7 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
         all_effsize = [np2_fac1, np2_fac2, np2_inter, np.nan]
 
     # Create output dataframe
-    aov = pd.DataFrame({'Source': [fac1, fac2, fac1 + ' * ' + fac2,
-                                   'Residual'],
+    aov = pd.DataFrame({'Source': [fac1, fac2, fac1 + ' * ' + fac2, 'Residual'],
                         'SS': [ss_fac1, ss_fac2, ss_inter, ss_resid],
                         'DF': [df_fac1, df_fac2, df_inter, df_resid],
                         'MS': [ms_fac1, ms_fac2, ms_inter, ms_resid],
@@ -1129,8 +1114,7 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
         aov = aov.iloc[1:, :]
 
     aov = aov.reset_index()
-    aov = aov.rename(columns={'index': 'Source', 'sum_sq': 'SS',
-                              'df': 'DF', 'PR(>F)': 'p-unc'})
+    aov = aov.rename(columns={'index': 'Source', 'sum_sq': 'SS', 'df': 'DF', 'PR(>F)': 'p-unc'})
     aov['MS'] = aov['SS'] / aov['DF']
 
     # Effect size
@@ -1140,8 +1124,7 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
         all_n2[-1] = np.nan
         aov['n2'] = all_n2
     else:
-        aov['np2'] = (aov['F'] * aov['DF']) / (aov['F'] * aov['DF'] +
-                                               aov.iloc[-1, 2])
+        aov['np2'] = (aov['F'] * aov['DF']) / (aov['F'] * aov['DF'] + aov.iloc[-1, 2])
 
     def format_source(x):
         for fac in between:
@@ -1422,13 +1405,6 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     _check_dataframe(
         dv=dv, within=within, between=between, data=data, subject=subject, effects='interaction')
 
-    # Convert Categorical columns to string
-    # This is important otherwise all the groupby will return different results
-    # unless we specify .groupby(..., observed = True).
-    for c in [within, between, subject]:
-        if data[c].dtype.name == 'category':
-            data[c] = data[c].astype(str)
-
     # Pivot and melt the table. This has several effects:
     # 1) Force missing values to be explicit (a NaN cell is created)
     # 2) Automatic collapsing to the mean if multiple within factors are present
@@ -1441,7 +1417,7 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     # Check that subject IDs do not overlap between groups: the subject ID
     # should have a unique range / set of values for each between-subject
     # group e.g. group1= 1 --> 20 and group2 = 21 --> 40.
-    if not (data.groupby([subject, within])[between].nunique() == 1).all():
+    if not (data.groupby([subject, within], observed=True)[between].nunique() == 1).all():
         raise ValueError("Subject IDs cannot overlap between groups: each "
                          "group in `%s` must have a unique set of "
                          "subject IDs, e.g. group1 = [1, 2, 3, ..., 10] "
@@ -1457,7 +1433,7 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     ss_betw = aov_betw.at[0, 'SS']
     ss_with = aov_with.at[0, 'SS']
     # Extract residuals and interactions
-    grp = data.groupby([between, within])[dv]
+    grp = data.groupby([between, within], observed=True)[dv]
     # ssresall = residuals within + residuals between
     ss_resall = grp.apply(lambda x: (x - x.mean())**2).sum()
     # Interaction
@@ -1466,10 +1442,10 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     ss_resbetw = ss_total - (ss_with + ss_betw + ss_reswith + ss_inter)
 
     # DEGREES OF FREEDOM
-    n_obs = data.groupby(within)[dv].count().max()
+    n_obs = data.groupby(within, observed=True)[dv].count().max()
     df_with = aov_with.at[0, 'DF']
     df_betw = aov_betw.at[0, 'DF']
-    df_resbetw = n_obs - data.groupby(between)[dv].count().count()
+    df_resbetw = n_obs - data.groupby(between, observed=True)[dv].count().count()
     df_reswith = df_with * df_resbetw
     df_inter = aov_with.at[0, 'DF'] * aov_betw.at[0, 'DF']
 
