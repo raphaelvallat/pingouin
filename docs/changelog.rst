@@ -8,13 +8,17 @@ What's new
 
 *************
 
-v0.6.0.dev
-----------
+v0.5.1 (February 2022)
+----------------------
+
+This is a minor release, with several bugfixes and improvements. This release is compatible with SciPy 1.8 and Pandas 1.4.
 
 **Enhancements**
 
 a. Faster implementation of :py:func:`pingouin.gzscore`, adding all options available in zscore: axis, ddof and nan_policy. Warning: this functions is deprecated and will be removed in pingouin 0.7.0 (use scipy.stats.gzscore instead). See `pull request 210 <https://github.com/raphaelvallat/pingouin/pull/210>`_.
 b. Replace use of statsmodels' studentized range distribution functions with more SciPy's more accurate `scipy.stats.studentized_range`. See `pull request 229 <https://github.com/raphaelvallat/pingouin/pull/229>`_.
+c. Bugfixes for SciPy 1.8 and Pandas 1.4. See `pull request 234 <https://github.com/raphaelvallat/pingouin/pull/234>`_.
+d. Add support for optional keywords argument in the :py:func:`pingouin.homoscedasticity` function (`issue 218 <https://github.com/raphaelvallat/pingouin/issues/218>`_).
 
 *************
 

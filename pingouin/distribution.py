@@ -234,7 +234,7 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
     return _postprocess_dataframe(stats)
 
 
-def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
+def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05, **kwargs):
     """Test equality of variance.
 
     Parameters
@@ -253,6 +253,8 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
         The former is more robust to departure from normality.
     alpha : float
         Significance level.
+    **kwargs : optional
+        Optional argument(s) passed to the lower-level :py:func:`scipy.stats.levene` function.
 
     Returns
     -------
@@ -339,7 +341,13 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
                    W      pval  equal_var
     levene  1.173518  0.310707       True
 
-    3. Bartlett test using a list of iterables
+    3. Same but using a mean center
+
+    >>> pg.homoscedasticity(data_long, dv="value", group="variable", center="mean")
+                   W      pval  equal_var
+    levene  1.572239  0.209303       True
+
+    4. Bartlett test using a list of iterables
 
     >>> data = [[4, 8, 9, 20, 14], np.array([5, 8, 15, 45, 12])]
     >>> pg.homoscedasticity(data, method="bartlett", alpha=.05)
@@ -356,30 +364,28 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05):
             # Get numeric data only
             numdata = data._get_numeric_data()
             assert numdata.shape[1] > 1, 'Data must have at least two columns.'
-            statistic, p = func(*numdata.to_numpy().T)
+            statistic, p = func(*numdata.to_numpy().T, **kwargs)
         else:
             # Long-format
             assert group in data.columns
             assert dv in data.columns
             grp = data.groupby(group, observed=True)[dv]
             assert grp.ngroups > 1, 'Data must have at least two columns.'
-            statistic, p = func(*grp.apply(list))
+            statistic, p = func(*grp.apply(list), **kwargs)
     elif isinstance(data, list):
         # Check that list contains other list or np.ndarray
         assert all(isinstance(el, (list, np.ndarray)) for el in data)
         assert len(data) > 1, 'Data must have at least two iterables.'
-        statistic, p = func(*data)
+        statistic, p = func(*data, **kwargs)
     else:
         # Data is a dict
         assert all(isinstance(el, (list, np.ndarray)) for el in data.values())
         assert len(data) > 1, 'Data must have at least two iterables.'
-        statistic, p = func(*data.values())
+        statistic, p = func(*data.values(), **kwargs)
 
     equal_var = True if p > alpha else False
     stat_name = 'W' if method.lower() == 'levene' else 'T'
-
-    stats = pd.DataFrame({stat_name: statistic, 'pval': p,
-                          'equal_var': equal_var}, index=[method])
+    stats = pd.DataFrame({stat_name: statistic, 'pval': p, 'equal_var': equal_var}, index=[method])
 
     return _postprocess_dataframe(stats)
 

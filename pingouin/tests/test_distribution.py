@@ -75,7 +75,9 @@ class TestDistribution(TestCase):
         hl = homoscedasticity(data=[x, y], alpha=.05)
         homoscedasticity(data=[x, y], method='bartlett', alpha=.05)
         hd = homoscedasticity(data={'x': x, 'y': y}, alpha=.05)
+        hd2 = homoscedasticity(data={'x': x, 'y': y}, alpha=.05, center="mean")
         assert hl.equals(hd)
+        assert not hd.equals(hd2)
         # Wide-format DataFrame
         homoscedasticity(df_pivot)
         # Long-format
