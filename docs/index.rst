@@ -269,7 +269,7 @@ The :py:func:`pingouin.normality` function works with lists, arrays, or pandas D
 .. code-block:: python
 
   # FDR-corrected post hocs with Hedges'g effect size
-  posthoc = pg.pairwise_ttests(data=df, dv='Scores', within='Time', subject='Subject',
+  posthoc = pg.pairwise_tests(data=df, dv='Scores', within='Time', subject='Subject',
                                parametric=True, padjust='fdr_bh', effsize='hedges')
 
   # Pretty printing of table
@@ -480,7 +480,7 @@ The functions that are currently supported as pandas method are:
 * :py:func:`pingouin.rm_anova`
 * :py:func:`pingouin.mixed_anova`
 * :py:func:`pingouin.welch_anova`
-* :py:func:`pingouin.pairwise_ttests`
+* :py:func:`pingouin.pairwise_tests`
 * :py:func:`pingouin.pairwise_tukey`
 * :py:func:`pingouin.pairwise_corr`
 * :py:func:`pingouin.partial_corr`
