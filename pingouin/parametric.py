@@ -1487,22 +1487,21 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
         ef_inter = ss_inter / (ss_inter + ss_reswith)
 
     # Stats table
-    aov = pd.concat([aov_betw.drop(1), aov_with.drop(1)], sort=False, ignore_index=True)
+    aov = pd.concat([aov_betw.drop(1), aov_with.drop(1)], axis=0, sort=False, ignore_index=True)
     # Update values
     aov.rename(columns={'DF': 'DF1'}, inplace=True)
     aov.at[0, 'F'], aov.at[1, 'F'] = f_betw, f_with
     aov.at[0, 'p-unc'], aov.at[1, 'p-unc'] = p_betw, p_with
     aov.at[0, effsize], aov.at[1, effsize] = ef_betw, ef_with
-    aov = aov.append({
+    aov_inter = pd.DataFrame({
         'Source': 'Interaction', 'SS': ss_inter, 'DF1': df_inter, 'MS': ms_inter, 'F': f_inter,
-        'p-unc': p_inter, effsize: ef_inter}, ignore_index=True)
-
+        'p-unc': p_inter, effsize: ef_inter}, index=[2])
+    aov = pd.concat([aov, aov_inter], axis=0, sort=False, ignore_index=True)
     aov['DF2'] = [df_resbetw, df_reswith, df_reswith]
     aov['eps'] = [np.nan, aov_with.at[0, 'eps'], np.nan]
     col_order = [
         'Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc', 'p-GG-corr', effsize, 'eps',
         'sphericity', 'W-spher', 'p-spher']
-
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
     return _postprocess_dataframe(aov)

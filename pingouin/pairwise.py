@@ -426,11 +426,12 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
             else:
                 tmp = data
             # Recursive call to pairwise_ttests
-            stats = stats.append(pairwise_ttests(
+            pt = pairwise_ttests(
                 dv=dv, between=fbt[i], within=fwt[i], subject=subject, data=tmp,
                 parametric=parametric, marginal=marginal, alpha=alpha, alternative=alternative,
                 padjust=padjust, effsize=effsize, correction=correction, nan_policy=nan_policy,
-                return_desc=return_desc), ignore_index=True, sort=False)
+                return_desc=return_desc)
+            stats = pd.concat([stats, pt], axis=0, ignore_index=True, sort=False)
 
         # Then compute the interaction between the factors
         if interaction:

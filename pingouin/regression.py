@@ -460,8 +460,8 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
 
     # Relative importance
     if relimp:
-        data = pd.concat([pd.DataFrame(y, columns=['y']),
-                          pd.DataFrame(X, columns=names)], sort=False, axis=1)
+        data = pd.concat(
+            [pd.DataFrame(y, columns=['y']), pd.DataFrame(X, columns=names)], sort=False, axis=1)
         if 'Intercept' in names:
             # Intercept is the first column
             reli = _relimp(data.drop(columns=['Intercept']).cov())
