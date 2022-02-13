@@ -23,6 +23,7 @@ b. Fixed bug where :py:func:`pingouin.rm_anova` and :py:func:`pingouin.mixed_ano
 a. Faster implementation of :py:func:`pingouin.gzscore`, adding all options available in zscore: axis, ddof and nan_policy. Warning: this functions is deprecated and will be removed in pingouin 0.7.0 (use scipy.stats.gzscore instead). See `pull request 210 <https://github.com/raphaelvallat/pingouin/pull/210>`_.
 b. Replace use of statsmodels' studentized range distribution functions with more SciPy's more accurate `scipy.stats.studentized_range`. See `pull request 229 <https://github.com/raphaelvallat/pingouin/pull/229>`_.
 c. Add support for optional keywords argument in the :py:func:`pingouin.homoscedasticity` function (`issue 218 <https://github.com/raphaelvallat/pingouin/issues/218>`_).
+d. Add support for the Jarque-Bera test in :py:func:`pingouin.normality` (`issue 216 <https://github.com/raphaelvallat/pingouin/issues/216>`_).
 
 *************
 

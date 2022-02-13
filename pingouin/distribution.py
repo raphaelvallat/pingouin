@@ -86,9 +86,11 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
         Grouping variable (only when ``data`` is a long-format dataframe).
     method : str
         Normality test. `'shapiro'` (default) performs the Shapiro-Wilk test
-        using :py:func:`scipy.stats.shapiro`, and `'normaltest'` performs the
-        omnibus test of normality using :py:func:`scipy.stats.normaltest`.
-        The latter is more appropriate for large samples.
+        using :py:func:`scipy.stats.shapiro`, `'normaltest'` performs the
+        omnibus test of normality using :py:func:`scipy.stats.normaltest`, `'jarque_bera'` performs
+        the Jarque-Bera test using :py:func:`scipy.stats.jarque_bera`.
+        The Omnibus and Jarque-Bera tests are more suitable than the Shapiro test for
+        large samples.
     alpha : float
         Significance level.
 
@@ -194,9 +196,16 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
                  W      pval  normal
     Pre   0.967718  0.478773    True
     Post  0.940728  0.095157    True
+
+    5. Same but using the Jarque-Bera test
+
+    >>> pg.normality(data, dv='Performance', group='Time', method="jarque_bera")
+                W      pval   normal
+    Pre   0.304021  0.858979    True
+    Post  1.265656  0.531088    True
     """
     assert isinstance(data, (pd.DataFrame, pd.Series, list, np.ndarray))
-    assert method in ['shapiro', 'normaltest']
+    assert method in ['shapiro', 'normaltest', 'jarque_bera']
     if isinstance(data, pd.Series):
         data = data.to_frame()
     col_names = ['W', 'pval']
@@ -227,9 +236,8 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
             grp = data.groupby(group, observed=True, sort=False)
             cols = grp.groups.keys()
             for _, tmp in grp:
-                stats = stats.append(normality(tmp[dv].to_numpy(),
-                                               method=method,
-                                               alpha=alpha))
+                st_grp = normality(tmp[dv].to_numpy(), method=method, alpha=alpha)
+                stats = pd.concat([stats, st_grp], axis=0, ignore_index=True)
             stats.index = cols
     return _postprocess_dataframe(stats)
 

@@ -62,13 +62,13 @@ class TestDistribution(TestCase):
         normality(x, alpha=.05)
         normality(x.tolist(), method='normaltest', alpha=.05)
         # Pandas DataFrame
-        df_nan_piv = df_nan.pivot(index='Subject', columns='Time',
-                                  values='Scores')
+        df_nan_piv = df_nan.pivot(index='Subject', columns='Time', values='Scores')
         normality(df_nan_piv)  # Wide-format dataframe
         normality(df_nan_piv['August'])  # pandas Series
         # The line below is disabled because test fails on python 3.5
         # assert stats_piv.equals(normality(df_nan, group='Time', dv='Scores'))
         normality(df_nan, group='Group', dv='Scores', method='normaltest')
+        normality(df_nan, group='Group', dv='Scores', method='jarque_bera')
 
     def test_homoscedasticity(self):
         """Test function test_homoscedasticity."""
