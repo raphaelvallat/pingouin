@@ -199,7 +199,8 @@ def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707
     from scipy.stats import t, ttest_rel, ttest_ind, ttest_1samp
     try:  # pragma: no cover
         from scipy.stats._stats_py import _unequal_var_ttest_denom, _equal_var_ttest_denom
-    except ImportError:  # Fallback for scipy<1.8.0
+    except ImportError:  # pragma: no cover
+        # Fallback for scipy<1.8.0
         from scipy.stats.stats import _unequal_var_ttest_denom, _equal_var_ttest_denom
     from pingouin import power_ttest, power_ttest2n, compute_effsize
 

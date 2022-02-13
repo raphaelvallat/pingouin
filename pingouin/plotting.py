@@ -336,7 +336,8 @@ def qqplot(x, dist='norm', sparams=(), confidence=.95, figsize=(5, 4),
     """
     try:  # pragma: no cover
         from scipy.stats._morestats import _add_axis_labels_title
-    except ImportError:  # Fallback for scipy<1.8.0
+    except ImportError:  # pragma: no cover
+        # Fallback for scipy<1.8.0
         from scipy.stats.morestats import _add_axis_labels_title
 
     if isinstance(dist, str):
