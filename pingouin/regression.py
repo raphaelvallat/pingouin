@@ -1254,7 +1254,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
         indirect['names'] = 'Indirect'
     else:
         indirect['names'] = indirect['names'].apply(lambda x: 'Indirect %s' % x)
-    stats = stats.append(indirect, ignore_index=True)
+    stats = pd.concat([stats, indirect], axis=0, ignore_index=True, sort=False)
     stats = stats.rename(columns={'names': 'path'})
 
     # Restore options
