@@ -609,12 +609,6 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     :math:`Q(\\sqrt2|t_i|, r, N - r)` where :math:`r` is the total number of
     groups and :math:`N` is the total sample size.
 
-    .. warning:: Versions of Pingouin below 0.3.10 used a wrong algorithm for
-        the studentized range approximation [2]_, which resulted in (slightly)
-        incorrect p-values. Please make sure you're using the
-        LATEST VERSION of Pingouin, and always DOUBLE CHECK your results with
-        another statistical software.
-
     References
     ----------
     .. [1] Tukey, John W. "Comparing individual means in the analysis of
@@ -759,12 +753,6 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
 
     The p-values are then approximated using the Studentized range distribution
     :math:`Q(\\sqrt2|t_i|, r, v_i)`.
-
-    .. warning:: Versions of Pingouin below 0.3.10 used a wrong algorithm for
-        the studentized range approximation [2]_, which resulted in (slightly)
-        incorrect p-values. Please make sure you're using the
-        LATEST VERSION of Pingouin, and always DOUBLE CHECK your results with
-        another statistical software.
 
     References
     ----------
