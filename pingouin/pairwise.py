@@ -173,8 +173,8 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
 
     >>> import pandas as pd
     >>> import pingouin as pg
-    >>> pd.set_option('expand_frame_repr', False)
-    >>> pd.set_option('max_columns', 20)
+    >>> pd.set_option('display.expand_frame_repr', False)
+    >>> pd.set_option('display.max_columns', 20)
     >>> df = pg.read_dataset('mixed_anova.csv')
     >>> pg.pairwise_ttests(dv='Scores', between='Group', data=df).round(3)
       Contrast        A           B  Paired  Parametric     T    dof alternative  p-unc   BF10  hedges
@@ -426,11 +426,12 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
             else:
                 tmp = data
             # Recursive call to pairwise_ttests
-            stats = stats.append(pairwise_ttests(
+            pt = pairwise_ttests(
                 dv=dv, between=fbt[i], within=fwt[i], subject=subject, data=tmp,
                 parametric=parametric, marginal=marginal, alpha=alpha, alternative=alternative,
                 padjust=padjust, effsize=effsize, correction=correction, nan_policy=nan_policy,
-                return_desc=return_desc), ignore_index=True, sort=False)
+                return_desc=return_desc)
+            stats = pd.concat([stats, pt], axis=0, ignore_index=True, sort=False)
 
         # Then compute the interaction between the factors
         if interaction:
@@ -608,12 +609,6 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     :math:`Q(\\sqrt2|t_i|, r, N - r)` where :math:`r` is the total number of
     groups and :math:`N` is the total sample size.
 
-    .. warning:: Versions of Pingouin below 0.3.10 used a wrong algorithm for
-        the studentized range approximation [2]_, which resulted in (slightly)
-        incorrect p-values. Please make sure you're using the
-        LATEST VERSION of Pingouin, and always DOUBLE CHECK your results with
-        another statistical software.
-
     References
     ----------
     .. [1] Tukey, John W. "Comparing individual means in the analysis of
@@ -635,7 +630,6 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148 -24.495    0.000  -2.967
     2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857 -19.224    0.000  -2.894
     """
-
     # First compute the ANOVA
     # For max precision, make sure rounding is disabled
     old_options = options.copy()
@@ -760,12 +754,6 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
     The p-values are then approximated using the Studentized range distribution
     :math:`Q(\\sqrt2|t_i|, r, v_i)`.
 
-    .. warning:: Versions of Pingouin below 0.3.10 used a wrong algorithm for
-        the studentized range approximation [2]_, which resulted in (slightly)
-        incorrect p-values. Please make sure you're using the
-        LATEST VERSION of Pingouin, and always DOUBLE CHECK your results with
-        another statistical software.
-
     References
     ----------
     .. [1] Games, Paul A., and John F. Howell. "Pairwise multiple comparison
@@ -789,7 +777,6 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
     1     Adelie     Gentoo  3700.662  5076.016 -1375.354  58.811 -23.386  249.643  0.00  -2.833
     2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  65.103 -20.628  170.404  0.00  -3.105
     """
-
     # Check the dataframe
     _check_dataframe(dv=dv, between=between, effects='between', data=data)
 
@@ -956,8 +943,8 @@ def pairwise_corr(data, columns=None, covar=None, alternative='two-sided',
 
     >>> import pandas as pd
     >>> import pingouin as pg
-    >>> pd.set_option('expand_frame_repr', False)
-    >>> pd.set_option('max_columns', 20)
+    >>> pd.set_option('display.expand_frame_repr', False)
+    >>> pd.set_option('display.max_columns', 20)
     >>> data = pg.read_dataset('pairwise_corr').iloc[:, 1:]
     >>> pg.pairwise_corr(data, method='spearman', alternative='greater', padjust='bonf').round(3)
                    X                  Y    method alternative    n      r         CI95%  p-unc  p-corr p-adjust  power

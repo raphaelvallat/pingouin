@@ -137,6 +137,12 @@ class TestUtils(TestCase):
         assert np.allclose(y_nan, [[6.], [3.], [2.]])
         # When y is None
         remove_na(x, None, paired=False)
+        # When x or y is an empty list
+        # See https://github.com/raphaelvallat/pingouin/issues/222
+        with pytest.raises(AssertionError):
+            remove_na(x=[], y=0)
+        with pytest.raises(AssertionError):
+            remove_na(x, y=[])
 
     def test_check_eftype(self):
         """Test function _check_eftype."""
