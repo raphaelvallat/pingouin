@@ -25,6 +25,8 @@ b. Replace use of statsmodels' studentized range distribution functions with mor
 c. Add support for optional keywords argument in the :py:func:`pingouin.homoscedasticity` function (`issue 218 <https://github.com/raphaelvallat/pingouin/issues/218>`_).
 d. Add support for the Jarque-Bera test in :py:func:`pingouin.normality` (`issue 216 <https://github.com/raphaelvallat/pingouin/issues/216>`_).
 
+Lastly, we have also deprecated the Gitter forum in favor of `GitHub Discussions <https://github.com/raphaelvallat/pingouin/discussions>`_. Please use Discussions to ask questions, share ideas / tips and/or engage with the Pingouin community!
+
 *************
 
 v0.5.0 (October 2021)
