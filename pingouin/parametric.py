@@ -328,7 +328,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     dv : string
         Name of column containing the dependent variable (only required if
         ``data`` is in long format).
-    within : string
+    within : string or list of string
         Name of column containing the within factor (only required if ``data``
         is in long format).
         If ``within`` is a single string, then compute a one-way repeated
@@ -349,7 +349,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         two-way design are not currently implemented in Pingouin.
     detailed : boolean
         If True, return a full ANOVA table.
-    effsize : str
+    effsize : string
         Effect size. Must be one of 'np2' (partial eta-squared), 'n2'
         (eta-squared) or 'ng2'(generalized eta-squared). Note that for
         one-way repeated measure ANOVA partial eta-squared is the
