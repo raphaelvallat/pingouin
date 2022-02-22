@@ -18,8 +18,8 @@ df_cat = df.copy()
 df_cat[['Time', 'Group', 'Subject']] = df_cat[[
     'Time', 'Group', 'Subject']].astype('category')
 # Let's complicate things even more and add "ghost" Categories
-df_cat['Time'].cat.add_categories('Casper', inplace=True)
-df_cat['Group'].cat.add_categories('The Friendly Ghost', inplace=True)
+df_cat['Time'] = df_cat['Time'].cat.add_categories('Casper')
+df_cat['Group'] = df_cat['Group'].cat.add_categories('The Friendly Ghost')
 
 # Create random normal variables
 np.random.seed(1234)
@@ -197,9 +197,8 @@ class TestParametric(TestCase):
         # Unbalanced and with missing values AND between as a categorical
         df_paincat = df_pain.copy()
         df_paincat['Hair color'] = df_paincat['Hair color'].astype('category')
-        df_paincat['Hair color'].cat.add_categories('Bald', inplace=True)
-        aov = df_paincat.anova(dv='Pain threshold',
-                               between='Hair color').round(3)
+        df_paincat['Hair color'] = df_paincat['Hair color'].cat.add_categories('Bald')
+        aov = df_paincat.anova(dv='Pain threshold', between='Hair color').round(3)
         assert aov.at[0, 'ddof1'] == 3
         assert aov.at[0, 'ddof2'] == 13
         assert aov.at[0, 'F'] == 4.359
@@ -381,7 +380,7 @@ class TestParametric(TestCase):
         data_cat = data.copy()
         data_cat[['Subject', 'Time', 'Metric']] = \
             data_cat[['Subject', 'Time', 'Metric']].astype('category')
-        data_cat['Time'].cat.add_categories('Casper', inplace=True)
+        data_cat['Time'] = data_cat['Time'].cat.add_categories('Casper')
         aov = rm_anova(data=data_cat, subject='Subject',
                        within=['Time', 'Metric'], dv='Performance').round(3)
         array_equal(aov.loc[:, 'MS'], [828.817, 682.617, 112.217])

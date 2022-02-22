@@ -21,9 +21,6 @@
 .. image:: http://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244/status.svg
     :target: http://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244
 
-.. image:: https://badges.gitter.im/owner/repo.png
-    :target: https://gitter.im/pingouin-stats/Lobby
-
 
 ----------------
 
@@ -108,7 +105,7 @@ Whenever a new release is out there, you can upgrade your version by typing the 
 Quick start
 ===========
 
-* If you have *questions*, please ask them in the public `Gitter chat <https://gitter.im/pingouin-stats/Lobby>`_.
+* If you have *questions*, please ask them in `GitHub Discussions <https://github.com/raphaelvallat/pingouin/discussions>`_.
 
 * If you want to *report a bug*, please open an issue on the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
 

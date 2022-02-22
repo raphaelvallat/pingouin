@@ -120,7 +120,7 @@ class TestPairwise(TestCase):
         pt_med = pairwise_ttests(dv='Scores', within='Time',
                                  subject='Subject', padjust='holm',
                                  data=df[df['Group'] == 'Meditation'])
-        pt_merged = pt_con.append(pt_med)
+        pt_merged = pd.concat([pt_con, pt_med], ignore_index=True, sort=False)
         # T, dof and p-values should be equal
         assert np.array_equal(pt_merged['T'], pt['T'].iloc[4:])
         assert np.array_equal(pt_merged['dof'], pt['dof'].iloc[4:])

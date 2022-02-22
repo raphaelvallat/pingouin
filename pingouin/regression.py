@@ -460,8 +460,8 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
 
     # Relative importance
     if relimp:
-        data = pd.concat([pd.DataFrame(y, columns=['y']),
-                          pd.DataFrame(X, columns=names)], sort=False, axis=1)
+        data = pd.concat(
+            [pd.DataFrame(y, columns=['y']), pd.DataFrame(X, columns=names)], sort=False, axis=1)
         if 'Intercept' in names:
             # Intercept is the first column
             reli = _relimp(data.drop(columns=['Intercept']).cov())
@@ -1254,7 +1254,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
         indirect['names'] = 'Indirect'
     else:
         indirect['names'] = indirect['names'].apply(lambda x: 'Indirect %s' % x)
-    stats = stats.append(indirect, ignore_index=True)
+    stats = pd.concat([stats, indirect], axis=0, ignore_index=True, sort=False)
     stats = stats.rename(columns={'names': 'path'})
 
     # Restore options

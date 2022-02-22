@@ -112,9 +112,10 @@ class TestCorrelation(TestCase):
         stats = corr(df['Neuroticism'], df['Extraversion'])
         assert np.isclose(1 / float(stats['BF10'].to_numpy()), 1.478e-13)
         # Perfect correlation, CI and power should be 1, BF should be Inf
+        # https://github.com/raphaelvallat/pingouin/issues/195
         stats = corr(x, x)
-        assert stats.at['pearson', 'r'] == 1
-        assert stats.at['pearson', 'power'] == 1
+        assert np.isclose(stats.at['pearson', 'r'], 1)
+        assert np.isclose(stats.at['pearson', 'power'], 1)
         # When one column is a constant, the correlation is not defined
         # and Pingouin return a DataFrame full of NaN, except for ``n``
         x, y = [1, 1, 1], [1, 2, 3]
