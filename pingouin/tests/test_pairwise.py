@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from unittest import TestCase
 from pingouin import read_dataset
-from pingouin.pairwise import (pairwise_tests, pairwise_corr, pairwise_tukey,
+from pingouin.pairwise import (pairwise_ttests, pairwise_tests, pairwise_corr, pairwise_tukey,
                                pairwise_gameshowell)
 
 
@@ -37,6 +37,17 @@ class TestPairwise(TestCase):
         df_unb = read_dataset('mixed_anova_unbalanced')
         df_rm2 = read_dataset('rm_anova2')  # 2-way rm design
         df_aov2 = read_dataset('anova2')  # 2-way factorial design
+
+        # -------------------------------------------------------------------
+        # Warning for deprecated pairwise_ttests()
+        # -------------------------------------------------------------------
+        with pytest.warns(UserWarning):
+            pt = pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+                             data=df, return_desc=True, padjust='holm')
+            np.testing.assert_array_equal(pt.loc[:, 'p-corr'].round(3),
+                                          [0.174, 0.024, 0.310])
+            np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                          [0.087, 0.008, 0.310])
 
         # -------------------------------------------------------------------
         # Simple within: EASY!
