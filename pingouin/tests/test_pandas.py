@@ -53,10 +53,10 @@ class TestParametric(TestCase):
                                       detailed=True, data=df))
 
         # FDR-corrected post hocs with Hedges'g effect size
-        ttests = df.pairwise_ttests(dv='Scores', within='Time',
+        ttests = df.pairwise_tests(dv='Scores', within='Time',
                                     subject='Subject', padjust='fdr_bh',
                                     effsize='hedges')
-        assert ttests.equals(pg.pairwise_ttests(dv='Scores', within='Time',
+        assert ttests.equals(pg.pairwise_tests(dv='Scores', within='Time',
                                                 subject='Subject',
                                                 padjust='fdr_bh',
                                                 effsize='hedges', data=df))

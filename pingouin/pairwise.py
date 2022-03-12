@@ -10,13 +10,20 @@ from pingouin.multicomp import multicomp
 from pingouin.effsize import compute_effsize, convert_effsize
 from pingouin.utils import (_check_dataframe, _flatten_list, _postprocess_dataframe)
 from scipy.stats import studentized_range
+import warnings
 
-__all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
+__all__ = ["pairwise_ttests", "pairwise_tests", "pairwise_tukey", "pairwise_gameshowell",
            "pairwise_corr"]
 
+@pf.register_dataframe_method
+def pairwise_ttests(*args, **kwargs):
+    """This function has been deprecated . Use :py:func:`pingouin.pairwise_tests` instead.
+    """
+    warnings.warn('pairwise_ttests is deprecated, use pairwise_tests instead.', UserWarning)
+    return pairwise_tests(*args, **kwargs)
 
 @pf.register_dataframe_method
-def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
+def pairwise_tests(data=None, dv=None, between=None, within=None, subject=None,
                     parametric=True, marginal=True, alpha=.05, alternative='two-sided',
                     padjust='none', effsize='hedges', correction='auto', nan_policy='listwise',
                     return_desc=False, interaction=True, within_first=True):
@@ -176,13 +183,13 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
     >>> pd.set_option('display.expand_frame_repr', False)
     >>> pd.set_option('display.max_columns', 20)
     >>> df = pg.read_dataset('mixed_anova.csv')
-    >>> pg.pairwise_ttests(dv='Scores', between='Group', data=df).round(3)
+    >>> pg.pairwise_tests(dv='Scores', between='Group', data=df).round(3)
       Contrast        A           B  Paired  Parametric     T    dof alternative  p-unc   BF10  hedges
     0    Group  Control  Meditation   False        True -2.29  178.0   two-sided  0.023  1.813   -0.34
 
     2. One within-subject factor
 
-    >>> post_hocs = pg.pairwise_ttests(dv='Scores', within='Time', subject='Subject', data=df)
+    >>> post_hocs = pg.pairwise_tests(dv='Scores', within='Time', subject='Subject', data=df)
     >>> post_hocs.round(3)
       Contrast        A        B  Paired  Parametric      T   dof alternative  p-unc   BF10  hedges
     0     Time   August  January    True        True -1.740  59.0   two-sided  0.087  0.582  -0.328
@@ -191,7 +198,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
 
     3. Non-parametric pairwise paired test (wilcoxon)
 
-    >>> pg.pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+    >>> pg.pairwise_tests(dv='Scores', within='Time', subject='Subject',
     ...                    data=df, parametric=False).round(3)
       Contrast        A        B  Paired  Parametric  W-val alternative  p-unc  hedges
     0     Time   August  January    True       False  716.0   two-sided  0.144  -0.328
@@ -200,7 +207,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
 
     4. Mixed design (within and between) with bonferroni-corrected p-values
 
-    >>> posthocs = pg.pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+    >>> posthocs = pg.pairwise_tests(dv='Scores', within='Time', subject='Subject',
     ...                               between='Group', padjust='bonf', data=df)
     >>> posthocs.round(3)
            Contrast     Time        A           B Paired  Parametric      T   dof alternative  p-unc  p-corr p-adjust   BF10  hedges
@@ -214,7 +221,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
 
     5. Two between-subject factors. The order of the ``between`` factors matters!
 
-    >>> pg.pairwise_ttests(dv='Scores', between=['Group', 'Time'], data=df).round(3)
+    >>> pg.pairwise_tests(dv='Scores', between=['Group', 'Time'], data=df).round(3)
            Contrast       Group        A           B Paired  Parametric      T    dof alternative  p-unc     BF10  hedges
     0         Group           -  Control  Meditation  False        True -2.290  178.0   two-sided  0.023    1.813  -0.340
     1          Time           -   August     January  False        True -1.806  118.0   two-sided  0.074    0.839  -0.328
@@ -229,7 +236,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
 
     6. Same but without the interaction, and using a directional test
 
-    >>> df.pairwise_ttests(dv='Scores', between=['Group', 'Time'], alternative="less",
+    >>> df.pairwise_tests(dv='Scores', between=['Group', 'Time'], alternative="less",
     ...                    interaction=False).round(3)
       Contrast        A           B  Paired  Parametric      T    dof alternative  p-unc   BF10  hedges
     0    Group  Control  Meditation   False        True -2.290  178.0        less  0.012  3.626  -0.340
@@ -425,8 +432,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
                 tmp = data.groupby([subject, f], as_index=False, observed=True, sort=True).mean()
             else:
                 tmp = data
-            # Recursive call to pairwise_ttests
-            pt = pairwise_ttests(
+            pt = pairwise_tests(
                 dv=dv, between=fbt[i], within=fwt[i], subject=subject, data=tmp,
                 parametric=parametric, marginal=marginal, alpha=alpha, alternative=alternative,
                 padjust=padjust, effsize=effsize, correction=correction, nan_policy=nan_policy,
@@ -571,7 +577,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
 
     See also
     --------
-    pairwise_ttests, pairwise_gameshowell
+    pairwise_tests, pairwise_gameshowell
 
     Notes
     -----
@@ -717,7 +723,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
 
     See also
     --------
-    pairwise_ttests, pairwise_tukey
+    pairwise_tests, pairwise_tukey
 
     Notes
     -----

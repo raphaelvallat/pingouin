@@ -60,7 +60,7 @@ def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707
 
     See also
     --------
-    mwu, wilcoxon, anova, rm_anova, pairwise_ttests, compute_effsize
+    mwu, wilcoxon, anova, rm_anova, pairwise_tests, compute_effsize
 
     Notes
     -----
@@ -1345,7 +1345,7 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
 
     See Also
     --------
-    anova, rm_anova, pairwise_ttests
+    anova, rm_anova, pairwise_tests
 
     Notes
     -----

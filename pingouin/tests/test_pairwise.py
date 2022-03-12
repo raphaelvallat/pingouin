@@ -3,15 +3,15 @@ import numpy as np
 import pandas as pd
 from unittest import TestCase
 from pingouin import read_dataset
-from pingouin.pairwise import (pairwise_ttests, pairwise_corr, pairwise_tukey,
+from pingouin.pairwise import (pairwise_ttests, pairwise_tests, pairwise_corr, pairwise_tukey,
                                pairwise_gameshowell)
 
 
 class TestPairwise(TestCase):
     """Test pairwise.py."""
 
-    def test_pairwise_ttests(self):
-        """Test function pairwise_ttests.
+    def test_pairwise_tests(self):
+        """Test function pairwise_tests.
         Tested against the pairwise.t.test R function, as well as JASP and
         JAMOVI.
 
@@ -39,22 +39,33 @@ class TestPairwise(TestCase):
         df_aov2 = read_dataset('anova2')  # 2-way factorial design
 
         # -------------------------------------------------------------------
+        # Warning for deprecated pairwise_ttests()
+        # -------------------------------------------------------------------
+        with pytest.warns(UserWarning):
+            pt = pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+                             data=df, return_desc=True, padjust='holm')
+            np.testing.assert_array_equal(pt.loc[:, 'p-corr'].round(3),
+                                          [0.174, 0.024, 0.310])
+            np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
+                                          [0.087, 0.008, 0.310])
+
+        # -------------------------------------------------------------------
         # Simple within: EASY!
         # -------------------------------------------------------------------
         # In R:
         # >>> pairwise.t.test(df$Scores, df$Time, pool.sd = FALSE,
         # ...                 p.adjust.method = 'holm', paired = TRUE)
-        pt = pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+        pt = pairwise_tests(dv='Scores', within='Time', subject='Subject',
                              data=df, return_desc=True, padjust='holm')
         np.testing.assert_array_equal(pt.loc[:, 'p-corr'].round(3),
                                       [0.174, 0.024, 0.310])
         np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
                                       [0.087, 0.008, 0.310])
-        pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+        pairwise_tests(dv='Scores', within='Time', subject='Subject',
                         data=df, parametric=False, return_desc=True)
 
         # Same after random ordering of subject (issue 151)
-        pt_sort = pairwise_ttests(dv='Scores', within='Time',
+        pt_sort = pairwise_tests(dv='Scores', within='Time',
                                   subject='Subject', data=df_sort,
                                   return_desc=True, padjust='holm')
         assert pt_sort.equals(pt)
@@ -63,14 +74,14 @@ class TestPairwise(TestCase):
         # Simple between: EASY!
         # -------------------------------------------------------------------
         # In R: >>> pairwise.t.test(df$Scores, df$Group, pool.sd = FALSE)
-        pt = pairwise_ttests(dv='Scores', between='Group', data=df).round(3)
+        pt = pairwise_tests(dv='Scores', between='Group', data=df).round(3)
         assert pt.loc[0, 'p-unc'] == 0.023
-        pairwise_ttests(dv='Scores', between='Group',
+        pairwise_tests(dv='Scores', between='Group',
                         data=df, padjust='bonf', alternative='greater',
                         effsize='cohen', parametric=False)
 
         # Same after random ordering of subject (issue 151)
-        pt_sort = pairwise_ttests(
+        pt_sort = pairwise_tests(
             dv='Scores', between='Group', data=df_sort).round(3)
         assert pt_sort.equals(pt)
 
@@ -79,7 +90,7 @@ class TestPairwise(TestCase):
         # -------------------------------------------------------------------
         # .Balanced data
         # ..With marginal means
-        pt = pairwise_ttests(dv='Scores', within='Time', between='Group',
+        pt = pairwise_tests(dv='Scores', within='Time', between='Group',
                              subject='Subject', data=df, padjust='holm',
                              interaction=False)
         # ...Within main effect: OK with JASP
@@ -96,11 +107,11 @@ class TestPairwise(TestCase):
         # ..Interaction: slightly different because JASP pool the error term
         #    across the between-subject groups. JASP does not compute the BF10
         #    for the interaction.
-        pt = pairwise_ttests(dv='Scores', within='Time', between='Group',
+        pt = pairwise_tests(dv='Scores', within='Time', between='Group',
                                 subject='Subject', data=df, padjust='holm',
                                 interaction=True).round(5)
         # Same after random ordering of subject (issue 151)
-        pt_sort = pairwise_ttests(dv='Scores', within='Time', between='Group',
+        pt_sort = pairwise_tests(dv='Scores', within='Time', between='Group',
                                   subject='Subject', data=df_sort,
                                   padjust='holm', interaction=True).round(5)
         assert pt_sort.equals(pt)
@@ -108,16 +119,16 @@ class TestPairwise(TestCase):
         # ..Changing the order of the model with ``within_first=False``.
         #   output model is now between + within + between * within.
         # https://github.com/raphaelvallat/pingouin/issues/102
-        pt = pairwise_ttests(dv='Scores', within='Time', between='Group',
+        pt = pairwise_tests(dv='Scores', within='Time', between='Group',
                              subject='Subject', data=df, padjust='holm',
                              within_first=False)
         # This should be equivalent to manually filtering dataframe to keep
         # only one level at a time of the between factor and then running
         # a within-subject pairwise T-tests.
-        pt_con = pairwise_ttests(dv='Scores', within='Time',
+        pt_con = pairwise_tests(dv='Scores', within='Time',
                                  subject='Subject', padjust='holm',
                                  data=df[df['Group'] == 'Control'])
-        pt_med = pairwise_ttests(dv='Scores', within='Time',
+        pt_med = pairwise_tests(dv='Scores', within='Time',
                                  subject='Subject', padjust='holm',
                                  data=df[df['Group'] == 'Meditation'])
         pt_merged = pd.concat([pt_con, pt_med], ignore_index=True, sort=False)
@@ -130,13 +141,13 @@ class TestPairwise(TestCase):
         assert not np.array_equal(pt_merged['p-corr'], pt['p-corr'].iloc[4:])
 
         # Other options
-        pairwise_ttests(dv='Scores', within=['Time'], between=['Group'],
+        pairwise_tests(dv='Scores', within=['Time'], between=['Group'],
                         subject='Subject', data=df, padjust='fdr_bh',
                         alpha=.01, return_desc=True, parametric=False)
 
         # .Unbalanced data
         # ..With marginal means
-        pt1 = pairwise_ttests(dv='Scores', within='Time', between='Group',
+        pt1 = pairwise_tests(dv='Scores', within='Time', between='Group',
                               subject='Subject', data=df_unb, padjust='bonf')
         # ...Within main effect: OK with JASP
         assert np.array_equal(pt1.loc[:5, 'T'].round(3),
@@ -158,14 +169,14 @@ class TestPairwise(TestCase):
         assert not pt1['dof'].apply(lambda x: x.is_integer()).all()
 
         # Same after random ordering of subject (issue 151)
-        pt_sort = pairwise_ttests(dv='Scores', within='Time', between='Group',
+        pt_sort = pairwise_tests(dv='Scores', within='Time', between='Group',
                                   subject='Subject',
                                   data=df_unb.sample(frac=1, replace=False),
                                   padjust='bonf')
         assert pt_sort.round(5).equals(pt1.round(5))
 
         # ..No marginal means
-        pt2 = pairwise_ttests(dv='Scores', within='Time', between='Group',
+        pt2 = pairwise_tests(dv='Scores', within='Time', between='Group',
                               subject='Subject', data=df_unb, padjust='bonf',
                               marginal=False)
 
@@ -176,14 +187,14 @@ class TestPairwise(TestCase):
         assert (pt1.loc[6:8, 'dof'] < pt2.loc[6:8, 'dof']).all()
 
         # Without the Welch correction, check that all the DF are integer
-        pt3 = pairwise_ttests(dv='Scores', within='Time', between='Group',
+        pt3 = pairwise_tests(dv='Scores', within='Time', between='Group',
                               subject='Subject', data=df_unb, correction=False)
         assert pt3['dof'].apply(lambda x: x.is_integer()).all()
 
         # -------------------------------------------------------------------
         # Two between factors (FACTORIAL)
         # -------------------------------------------------------------------
-        pt = df_aov2.pairwise_ttests(dv='Yield', between=['Blend', 'Crop'],
+        pt = df_aov2.pairwise_tests(dv='Yield', between=['Blend', 'Crop'],
                                      padjust='holm').round(3)
 
         # The T and p-values are close but not exactly the same as JASP /
@@ -198,12 +209,12 @@ class TestPairwise(TestCase):
                        [0.374, 0.533, 0.711, 2.287])
 
         # Using the Welch method (all df should be non-integer)
-        pt_c = df_aov2.pairwise_ttests(dv='Yield', between=['Blend', 'Crop'],
+        pt_c = df_aov2.pairwise_tests(dv='Yield', between=['Blend', 'Crop'],
                                        padjust='holm', correction=True)
         assert not pt_c['dof'].apply(lambda x: x.is_integer()).any()
 
         # The ``marginal`` option has no impact here.
-        assert pt.equals(df_aov2.pairwise_ttests(dv='Yield',
+        assert pt.equals(df_aov2.pairwise_tests(dv='Yield',
                                                  between=['Blend', 'Crop'],
                                                  padjust='holm',
                                                  marginal=True).round(3))
@@ -211,7 +222,7 @@ class TestPairwise(TestCase):
         # Two within subject factors
         # -------------------------------------------------------------------
         # .Marginal = True
-        ptw1 = pairwise_ttests(data=df_rm2, dv='Performance',
+        ptw1 = pairwise_tests(data=df_rm2, dv='Performance',
                                within=['Time', 'Metric'],
                                subject='Subject', padjust='bonf',
                                marginal=True).round(3)
@@ -222,14 +233,14 @@ class TestPairwise(TestCase):
                               [5.818, 1.559, 7.714, 5.110])
 
         # Random sorting of the dataframe (issue 151)
-        pt_sort = pairwise_ttests(data=df_rm2.sample(frac=1), dv='Performance',
+        pt_sort = pairwise_tests(data=df_rm2.sample(frac=1), dv='Performance',
                                   within=['Time', 'Metric'],
                                   subject='Subject', padjust='bonf',
                                   marginal=True).round(3)
         assert pt_sort.equals(ptw1)
 
         # Non-parametric (mostly for code coverage)
-        pairwise_ttests(data=df_rm2, dv='Performance',
+        pairwise_tests(data=df_rm2, dv='Performance',
                         within=['Time', 'Metric'], subject='Subject',
                         parametric=False)
 
@@ -238,31 +249,31 @@ class TestPairwise(TestCase):
         # -------------------------------------------------------------------
         # Both multiple between and multiple within
         with pytest.raises(ValueError):
-            pairwise_ttests(dv='Scores', between=['Time', 'Group'],
+            pairwise_tests(dv='Scores', between=['Time', 'Group'],
                             within=['Time', 'Group'], subject='Subject',
                             data=df)
 
         # Wrong input argument
         df['Group'] = 'Control'
         with pytest.raises(ValueError):
-            pairwise_ttests(dv='Scores', between='Group', data=df)
+            pairwise_tests(dv='Scores', between='Group', data=df)
 
         # -------------------------------------------------------------------
         # Missing values in repeated measurements
         # -------------------------------------------------------------------
         # 1. Parametric
-        df = read_dataset('pairwise_ttests_missing')
-        st = pairwise_ttests(dv='Value', within='Condition', subject='Subject',
+        df = read_dataset('pairwise_tests_missing')
+        st = pairwise_tests(dv='Value', within='Condition', subject='Subject',
                              data=df, nan_policy='listwise')
         np.testing.assert_array_equal(st['dof'].to_numpy(), [7, 7, 7])
-        st2 = pairwise_ttests(dv='Value', within='Condition', data=df,
+        st2 = pairwise_tests(dv='Value', within='Condition', data=df,
                               subject='Subject', nan_policy='pairwise')
         np.testing.assert_array_equal(st2['dof'].to_numpy(), [8, 7, 8])
         # 2. Non-parametric
-        st = pairwise_ttests(dv='Value', within='Condition', subject='Subject',
+        st = pairwise_tests(dv='Value', within='Condition', subject='Subject',
                              data=df, parametric=False, nan_policy='listwise')
         np.testing.assert_array_equal(st['W-val'].to_numpy(), [9, 3, 12])
-        st2 = pairwise_ttests(dv='Value', within='Condition', data=df,
+        st2 = pairwise_tests(dv='Value', within='Condition', data=df,
                               subject='Subject', nan_policy='pairwise',
                               parametric=False)
         # Tested against a simple for loop on combinations
@@ -270,24 +281,24 @@ class TestPairwise(TestCase):
 
         # Two within factors from other datasets and with NaN values
         df2 = read_dataset('rm_anova')
-        pairwise_ttests(dv='DesireToKill',
+        pairwise_tests(dv='DesireToKill',
                         within=['Disgustingness', 'Frighteningness'],
                         subject='Subject', padjust='holm', data=df2)
 
         # -------------------------------------------------------------------
         # Test tail / parametric argument (compare with JASP)
         # -------------------------------------------------------------------
-        df = read_dataset('pairwise_ttests')
+        df = read_dataset('pairwise_tests')
         # 1. Within
         # 1.1 Parametric
         # 1.1.1 Tail is greater
-        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+        pt = pairwise_tests(dv='Scores', within='Drug', subject='Subject',
                              data=df, alternative='greater')
         np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
                                       [0.907, 0.941, 0.405])
         assert all(pt.loc[:, 'BF10'].astype(float) < 1)
         # 1.1.2 Tail is less
-        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+        pt = pairwise_tests(dv='Scores', within='Drug', subject='Subject',
                              data=df, alternative='less')
         np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
                                       [0.093, 0.059, 0.595])
@@ -295,12 +306,12 @@ class TestPairwise(TestCase):
 
         # 1.2 Non-parametric
         # 1.2.1 Tail is greater
-        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+        pt = pairwise_tests(dv='Scores', within='Drug', subject='Subject',
                              parametric=False, data=df, alternative='greater')
         np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
                                       [0.910, 0.951, 0.483])
         # 1.2.2 Tail is less
-        pt = pairwise_ttests(dv='Scores', within='Drug', subject='Subject',
+        pt = pairwise_tests(dv='Scores', within='Drug', subject='Subject',
                              parametric=False, data=df, alternative='less')
         np.testing.assert_array_equal(pt.loc[:, 'p-unc'].round(3),
                                       [0.108, 0.060, 0.551])
@@ -317,23 +328,23 @@ class TestPairwise(TestCase):
         # 2. Between
         # 2.1 Parametric
         # 2.1.1 Tail is greater
-        pt = pairwise_ttests(dv='Scores', between='Gender',
+        pt = pairwise_tests(dv='Scores', between='Gender',
                              data=df, alternative='greater')
         assert pt.loc[0, 'p-unc'].round(3) == 0.932
         assert float(pt.loc[0, 'BF10']) < 1
         # 2.1.2 Tail is less
-        pt = pairwise_ttests(dv='Scores', between='Gender',
+        pt = pairwise_tests(dv='Scores', between='Gender',
                              data=df, alternative='less')
         assert pt.loc[0, 'p-unc'].round(3) == 0.068
         assert float(pt.loc[0, 'BF10']) > 1
 
         # 2.2 Non-parametric
         # 2.2.1 Tail is greater
-        pt = pairwise_ttests(dv='Scores', between='Gender',
+        pt = pairwise_tests(dv='Scores', between='Gender',
                              parametric=False, data=df, alternative='greater')
         assert pt.loc[0, 'p-unc'].round(3) == 0.901
         # 2.2.2 Tail is less
-        pt = pairwise_ttests(dv='Scores', between='Gender',
+        pt = pairwise_tests(dv='Scores', between='Gender',
                              parametric=False, data=df, alternative='less')
         assert pt.loc[0, 'p-unc'].round(3) == 0.105
 

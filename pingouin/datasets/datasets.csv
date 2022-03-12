@@ -18,8 +18,8 @@ mixed_anova,Memory scores in two groups at three time points,mixed_anova,Pingoui
 mixed_anova_unbalanced,Memory scores in three groups at four time points,mixed_anova,Pingouin
 multivariate,Multivariate health outcomes in drug and placebo conditions,multivariate statistics,www.real-statistics.com
 pairwise_corr,Big 5 personality traits,corr - pairwise_corr,Dolan et al 2009
-pairwise_ttests,Scores at 3 time points per gender,pairwise_ttests,Pingouin
-pairwise_ttests_missing,Scores at 3 time points with missing values,pairwise_ttests,Pingouin
+pairwise_tests,Scores at 3 time points per gender,pairwise_tests,Pingouin
+pairwise_tests_missing,Scores at 3 time points with missing values,pairwise_tests,Pingouin
 partial_corr,Scores at 4 time points,partial_corr,Pingouin
 penguins,Flipper length and boody mass for different species of penguins (Adelie - Chinstrap - Gentoo),everything!,https://github.com/allisonhorst/palmerpenguins
 rm_anova,Hostility towards insect,rm_anova - mixed_anova,Ryan et al 2013
