@@ -319,10 +319,16 @@ def bayesfactor_pearson(r, n, alternative='two-sided', method='ly', kappa=1.):
     return bf10
 
 
-def bayesfactor_binom(k, n, p=.5):
+def bayesfactor_binom(k, n, p=.5, a=1, b=1):
     """
     Bayes factor of a binomial test with :math:`k` successes,
-    :math:`n` trials and base probability :math:`p`.
+    :math:`n` trials and base probability :math:`p`.  This means that
+    the null hypothesis is that the probability is :math:`p`.  It is
+    compared against the alternative hypothesis that :math:`p` is from
+    the Beta distribution with parameters :math:`(a, b)`.  By default,
+    both :math:`a` and :math:`b` are 1, making the alternative
+    hypothesis equivalent to the uniform distribution, i.e., we are
+    completely uninformed about :math:`p`.
 
     Parameters
     ----------
@@ -332,6 +338,10 @@ def bayesfactor_binom(k, n, p=.5):
         Number of trials.
     p : float
         Base probability of success (range from 0 to 1).
+    a : float
+        The "a" parameter of the Beta distribution.
+    b : float
+        The "b" parameter of the Beta distribution.
 
     Returns
     -------
@@ -396,22 +406,32 @@ def bayesfactor_binom(k, n, p=.5):
     The binomial test rejects the null hypothesis that the coin is fair at the
     5% significance level (p=0.04). Thus, whereas a frequentist hypothesis test
     would yield significant results at the 5% significance level, the Bayes
-    factor does not find any evidence that the coin is unfair.
+    factor indicates preference of the null hypothesis to the alternative
+    hypothesis that we know nothing about p.
 
-    Last example using a different base probability of successes
+    We can use a more informed alternative hypothesis too, if desirable.  E.g.,
+    the original test using Beta(5, 4) as the alternative hypothesis:
+
+    >>> bf = pg.bayesfactor_binom(k=115, n=200, p=0.5, a=5, b=4)
+    >>> print("Bayes Factor: %.3f" % bf)
+    Bayes Factor: 1.930
+
+    Using a different base probability of successes:
 
     >>> bf = pg.bayesfactor_binom(k=100, n=1000, p=0.1)
     >>> print("Bayes Factor: %.3f" % bf)
     Bayes Factor: 0.024
     """
-    from scipy.stats import binom
+    from scipy.stats import beta, binom
     assert 0 < p < 1, 'p must be between 0 and 1.'
     assert isinstance(k, int), 'k must be int.'
     assert isinstance(n, int), 'n must be int.'
     assert k <= n, 'k (successes) cannot be higher than n (trials).'
+    assert a > 0, 'a must be positive.'
+    assert b > 0, 'b must be positive.'
 
-    def fun(g, k, n):
-        return binom.pmf(k, n, g)
+    def fun(g):
+        return beta.pdf(g, a, b) * binom.pmf(k, n, g)
 
-    bf10 = quad(fun, 0, 1, args=(k, n))[0] / binom.pmf(k, n, p)
+    bf10 = quad(fun, 0, 1)[0] / binom.pmf(k, n, p)
     return bf10
