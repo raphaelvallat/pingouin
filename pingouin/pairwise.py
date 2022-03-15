@@ -15,18 +15,19 @@ import warnings
 __all__ = ["pairwise_ttests", "pairwise_tests", "pairwise_tukey", "pairwise_gameshowell",
            "pairwise_corr"]
 
+
 @pf.register_dataframe_method
 def pairwise_ttests(*args, **kwargs):
-    """This function has been deprecated . Use :py:func:`pingouin.pairwise_tests` instead.
-    """
+    """This function has been deprecated . Use :py:func:`pingouin.pairwise_tests` instead."""
     warnings.warn('pairwise_ttests is deprecated, use pairwise_tests instead.', UserWarning)
     return pairwise_tests(*args, **kwargs)
 
+
 @pf.register_dataframe_method
 def pairwise_tests(data=None, dv=None, between=None, within=None, subject=None,
-                    parametric=True, marginal=True, alpha=.05, alternative='two-sided',
-                    padjust='none', effsize='hedges', correction='auto', nan_policy='listwise',
-                    return_desc=False, interaction=True, within_first=True):
+                   parametric=True, marginal=True, alpha=.05, alternative='two-sided',
+                   padjust='none', effsize='hedges', correction='auto', nan_policy='listwise',
+                   return_desc=False, interaction=True, within_first=True):
     """Pairwise T-tests.
 
     Parameters
