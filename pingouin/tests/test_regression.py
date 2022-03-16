@@ -407,6 +407,13 @@ class TestRegression(TestCase):
         with pytest.raises(ValueError):
             mediation_analysis(data=df, x='X', m='Mbin', y='Y', n_boot=2000,
                                logreg_kwargs=dict(max_iter=-1))
+        # Solve with 0 iterations and make sure that the results are different
+        ma = mediation_analysis(data=df, x='X', m='Mbin', y='Y', n_boot=2000,
+                                logreg_kwargs=dict(max_iter=0))
+        with pytest.raises(AssertionError):
+            assert_almost_equal(ma['coef'][0], -0.0208, decimal=2)
+        with pytest.raises(AssertionError):
+            assert_almost_equal(ma['coef'][4], 0.0033, decimal=3)
 
         # With multiple mediator
         np.random.seed(42)
