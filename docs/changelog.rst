@@ -8,6 +8,17 @@ What's new
 
 *************
 
+v0.6.0.dev
+----------
+
+This is a major release with several API-breaking changes.
+
+a. The :py:func:`pingouin.pairwise_ttests` has been renamed to :py:func:`pingouin.pairwise_tests`. Non-parametric tests are also supported in this function with the `parametric=False` argument, and thus the name "ttests" was misleading (see `issue 209 <https://github.com/raphaelvallat/pingouin/issues/209>`_).
+
+**Enhancements**
+
+a. Allow :py:func:`pingouin.bayesfactor_binom` to take Beta alternative model. `PR 252 <https://github.com/raphaelvallat/pingouin/pull/252>`_.
+
 v0.5.1 (February 2022)
 ----------------------
 

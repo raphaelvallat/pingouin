@@ -122,7 +122,7 @@ Multiple comparisons and post-hoc tests
    :toctree: generated/
 
     pairwise_corr
-    pairwise_ttests
+    pairwise_tests
     pairwise_tukey
     pairwise_gameshowell
     multicomp

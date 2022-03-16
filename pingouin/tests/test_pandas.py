@@ -23,67 +23,53 @@ class TestParametric(TestCase):
         """
         # Test the ANOVA (Pandas)
         aov = df.anova(dv='Scores', between='Group', detailed=True)
-        assert aov.equals(pg.anova(dv='Scores', between='Group', detailed=True,
-                                   data=df))
-        aov3_ss1 = df_aov3.anova(dv='Cholesterol', between=['Sex', 'Drug'],
-                                 ss_type=1)
-        aov3_ss2 = df_aov3.anova(dv='Cholesterol', between=['Sex', 'Drug'],
-                                 ss_type=2)
-        aov3_ss2_pg = pg.anova(dv='Cholesterol', between=['Sex', 'Drug'],
-                               data=df_aov3, ss_type=2)
+        assert aov.equals(pg.anova(dv='Scores', between='Group', detailed=True, data=df))
+        aov3_ss1 = df_aov3.anova(dv='Cholesterol', between=['Sex', 'Drug'], ss_type=1)
+        aov3_ss2 = df_aov3.anova(dv='Cholesterol', between=['Sex', 'Drug'], ss_type=2)
+        aov3_ss2_pg = pg.anova(dv='Cholesterol', between=['Sex', 'Drug'], data=df_aov3, ss_type=2)
         assert not aov3_ss1.equals(aov3_ss2)
         assert aov3_ss2.round(3).equals(aov3_ss2_pg.round(3))
 
         # Test the Welch ANOVA (Pandas)
         aov = df.welch_anova(dv='Scores', between='Group')
-        assert aov.equals(pg.welch_anova(dv='Scores', between='Group',
-                                         data=df))
+        assert aov.equals(pg.welch_anova(dv='Scores', between='Group', data=df))
 
         # Test the ANCOVA
-        aov = df_anc.ancova(dv='Scores', covar='Income',
-                            between='Method').round(3)
-        assert aov.equals(pg.ancova(data=df_anc, dv='Scores', covar='Income',
-                          between='Method').round(3))
+        aov = df_anc.ancova(dv='Scores', covar='Income', between='Method').round(3)
+        assert (aov.equals(
+                pg.ancova(data=df_anc, dv='Scores', covar='Income', between='Method').round(3)))
 
         # Test the repeated measures ANOVA (Pandas)
-        aov = df.rm_anova(dv='Scores', within='Time', subject='Subject',
-                          detailed=True)
-        assert aov.equals(pg.rm_anova(dv='Scores', within='Time',
-                                      subject='Subject',
-                                      detailed=True, data=df))
+        aov = df.rm_anova(dv='Scores', within='Time', subject='Subject', detailed=True)
+        assert (aov.equals(
+                pg.rm_anova(dv='Scores', within='Time', subject='Subject', detailed=True, data=df)))
 
         # FDR-corrected post hocs with Hedges'g effect size
-        ttests = df.pairwise_ttests(dv='Scores', within='Time',
-                                    subject='Subject', padjust='fdr_bh',
-                                    effsize='hedges')
-        assert ttests.equals(pg.pairwise_ttests(dv='Scores', within='Time',
-                                                subject='Subject',
-                                                padjust='fdr_bh',
-                                                effsize='hedges', data=df))
+        ttests = df.pairwise_tests(dv='Scores', within='Time', subject='Subject', padjust='fdr_bh',
+                                   effsize='hedges')
+        assert (ttests.equals(
+                pg.pairwise_tests(dv='Scores', within='Time', subject='Subject', padjust='fdr_bh',
+                                  effsize='hedges', data=df)))
 
         # Pairwise Tukey
         tukey = df.pairwise_tukey(dv='Scores', between='Group')
-        assert tukey.equals(pg.pairwise_tukey(data=df, dv='Scores',
-                                              between='Group'))
+        assert tukey.equals(pg.pairwise_tukey(data=df, dv='Scores', between='Group'))
 
         # Test two-way mixed ANOVA
-        aov = df.mixed_anova(dv='Scores', between='Group', within='Time',
-                             subject='Subject', correction=False)
-        assert aov.equals(pg.mixed_anova(dv='Scores', between='Group',
-                                         within='Time',
-                                         subject='Subject', correction=False,
-                                         data=df))
+        aov = df.mixed_anova(dv='Scores', between='Group', within='Time', subject='Subject',
+                             correction=False)
+        assert (aov.equals(
+                pg.mixed_anova(dv='Scores', between='Group', within='Time', subject='Subject',
+                               correction=False, data=df)))
 
         # Test parwise correlations
         corrs = data.pairwise_corr(columns=['X', 'M', 'Y'], method='spearman')
-        corrs2 = pg.pairwise_corr(data=data, columns=['X', 'M', 'Y'],
-                                  method='spearman')
+        corrs2 = pg.pairwise_corr(data=data, columns=['X', 'M', 'Y'], method='spearman')
         assert corrs['r'].equals(corrs2['r'])
 
         # Test partial correlation
         corrs = data.partial_corr(x='X', y='Y', covar='M', method='spearman')
-        corrs2 = pg.partial_corr(x='X', y='Y', covar='M', method='spearman',
-                                 data=data)
+        corrs2 = pg.partial_corr(x='X', y='Y', covar='M', method='spearman', data=data)
         assert corrs['r'].equals(corrs2['r'])
 
         # Test partial correlation matrix (compare with the ppcor package)
@@ -100,11 +86,9 @@ class TestParametric(TestCase):
         corrs = df_corr.rcorr(padjust='holm', decimals=4)
         corrs2 = df_corr.pairwise_corr(padjust='holm').round(4)
         assert corrs.at['Neuroticism', 'Agreeableness'] == '*'
-        assert (corrs.at['Agreeableness', 'Neuroticism'] ==
-                str(corrs2.at[2, 'r']))
+        assert (corrs.at['Agreeableness', 'Neuroticism'] == str(corrs2.at[2, 'r']))
         corrs = df_corr.rcorr(padjust='holm', stars=False, decimals=4)
-        assert (corrs.at['Neuroticism', 'Agreeableness'] ==
-                str(corrs2.at[2, 'p-corr'].round(4)))
+        assert (corrs.at['Neuroticism', 'Agreeableness'] == str(corrs2.at[2, 'p-corr'].round(4)))
         corrs = df_corr.rcorr(upper='n', decimals=5)
         corrs2 = df_corr.pairwise_corr().round(5)
         assert corrs.at['Extraversion', 'Openness'] == corrs2.at[4, 'n']
