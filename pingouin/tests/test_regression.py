@@ -403,6 +403,11 @@ class TestRegression(TestCase):
         assert_almost_equal(ma['CI[97.5%]'][3], 0.617, decimal=1)
         assert ma['sig'][3] == 'Yes'
 
+        # Check if `logreg_kwargs` is being passed on to `LogisticRegression`
+        with pytest.raises(ValueError):
+            mediation_analysis(data=df, x='X', m='Mbin', y='Y', n_boot=2000,
+                               logreg_kwargs=dict(max_iter=-1))
+
         # With multiple mediator
         np.random.seed(42)
         df.rename(columns={"M": "M1"}, inplace=True)
