@@ -1,10 +1,11 @@
 import pytest
 import numpy as np
-from numpy.testing import assert_array_equal as array_equal
 from unittest import TestCase
-from pingouin.parametric import (ttest, anova, rm_anova, mixed_anova,
-                                 ancova, welch_anova)
+from numpy.testing import assert_array_equal as array_equal
+
 from pingouin import read_dataset
+from pingouin.parametric import (ttest, anova, rm_anova, mixed_anova, ancova, welch_anova)
+
 
 # Generate random data for ANOVA
 df = read_dataset('mixed_anova.csv')
@@ -322,59 +323,68 @@ class TestParametric(TestCase):
 
     def test_rm_anova(self):
         """Test function rm_anova.
-        Compare with JASP
+
+        Compare with JAMOVI. As of March 2022, the calculation of the eta-squared is wrong in JASP.
+
+        https://github.com/raphaelvallat/pingouin/issues/251
         """
         rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
                  correction=False, detailed=False)
         rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
                  correction=True, detailed=False)
-        # Compare with JASP
+        # Compare with JAMOVI
         aov = rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
-                       correction='auto', detailed=True).round(3)
-        assert aov.at[0, 'F'] == 3.913
-        assert aov.at[0, 'p-unc'] == .023
-        assert aov.at[0, 'np2'] == .062
+                       correction='auto', detailed=True).round(5)
+        assert aov.at[0, 'F'] == 3.91280
+        assert aov.at[0, 'p-unc'] == .02263
+        assert aov.at[0, 'ng2'] == .03998
 
         # Same but with categorical columns
         aov = rm_anova(dv='Scores', within='Time', subject='Subject',
-                       data=df_cat, correction='auto', detailed=True).round(3)
-        assert aov.at[0, 'F'] == 3.913
-        assert aov.at[0, 'p-unc'] == .023
-        assert aov.at[0, 'np2'] == .062
+                       data=df_cat, correction='auto', detailed=True).round(5)
+        assert aov.at[0, 'F'] == 3.91280
+        assert aov.at[0, 'p-unc'] == .02263
+        assert aov.at[0, 'ng2'] == .03998
 
         # With different effect sizes
         aov = rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
-                       correction='auto', effsize="n2").round(3)
-        assert aov.at[0, 'n2'] == .062
+                       correction='auto', effsize="n2").round(5)
+        assert aov.at[0, 'n2'] == .03998  # n2 == ng2
         aov = rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
-                       correction='auto', detailed=True,
-                       effsize="ng2").round(3)
-        assert aov.at[0, 'ng2'] == .040
+                       correction='auto', detailed=True, effsize="np2").round(5)
+        assert aov.at[0, 'np2'] == .06219
 
         rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
                  correction=True, detailed=True)
         rm_anova(dv='Scores', within=['Time'], subject='Subject', data=df_nan)
-        # Using a wide dataframe with NaN and compare with JASP
+
+        # Using a wide dataframe with NaN and compare with JAMOVI
         data = read_dataset('rm_anova_wide')
-        aov = data.rm_anova(detailed=True, correction=True).round(3)
-        assert aov.at[0, 'F'] == 5.201
-        assert aov.at[0, 'p-unc'] == .007
-        assert aov.at[0, 'np2'] == .394
-        assert aov.at[0, 'eps'] == .694
-        assert aov.at[0, 'W-spher'] == .307
-        assert aov.at[0, 'p-GG-corr'] == .017
+        aov = data.rm_anova(detailed=True, correction=True).round(5)
+        assert aov.at[0, 'F'] == 5.20065
+        assert aov.at[0, 'p-unc'] == .00656
+        assert aov.at[0, 'ng2'] == .34639
+        assert aov.at[0, 'eps'] == .69433
+        assert aov.at[0, 'W-spher'] == .30678
+        assert aov.at[0, 'p-GG-corr'] == .01670
+        # With different effect sizes
+        aov = data.rm_anova(detailed=True, correction=True, effsize="n2").round(5)
+        assert aov.at[0, 'n2'] == .34639  # n2 == ng2
+        aov = data.rm_anova(detailed=True, correction=True, effsize="np2").round(5)
+        assert aov.at[0, 'np2'] == .39397  # np2 is bigger than n2
 
     def test_rm_anova2(self):
         """Test function rm_anova2.
-        Compare with JASP.
+
+        Compare with JAMOVI.
         """
         data = read_dataset('rm_anova2')
         aov = rm_anova(data=data, subject='Subject', within=['Time', 'Metric'],
-                       dv='Performance').round(3)
-        array_equal(aov.loc[:, 'MS'], [828.817, 682.617, 112.217])
-        array_equal(aov.loc[:, 'F'], [33.852, 26.959, 12.632])
-        array_equal(aov.loc[:, 'np2'], [0.790, 0.750, 0.584])
-        array_equal(aov.loc[:, 'eps'], [1., 0.969, 0.727])
+                       dv='Performance').round(5)
+        array_equal(aov.loc[:, 'MS'], [828.81667, 682.61667, 112.21667])
+        array_equal(aov.loc[:, 'F'], [33.85228, 26.95919, 12.63227])
+        array_equal(aov.loc[:, 'ng2'], [0.25401, 0.35933, 0.08442])
+        array_equal(aov.loc[:, 'eps'], [1., 0.96910, 0.72717])
 
         # With categorical
         data_cat = data.copy()
@@ -382,20 +392,20 @@ class TestParametric(TestCase):
             data_cat[['Subject', 'Time', 'Metric']].astype('category')
         data_cat['Time'] = data_cat['Time'].cat.add_categories('Casper')
         aov = rm_anova(data=data_cat, subject='Subject',
-                       within=['Time', 'Metric'], dv='Performance').round(3)
-        array_equal(aov.loc[:, 'MS'], [828.817, 682.617, 112.217])
-        array_equal(aov.loc[:, 'F'], [33.852, 26.959, 12.632])
-        array_equal(aov.loc[:, 'np2'], [0.790, 0.750, 0.584])
-        array_equal(aov.loc[:, 'eps'], [1., 0.969, 0.727])
+                       within=['Time', 'Metric'], dv='Performance').round(5)
+        array_equal(aov.loc[:, 'MS'], [828.81667, 682.61667, 112.21667])
+        array_equal(aov.loc[:, 'F'], [33.85228, 26.95919, 12.63227])
+        array_equal(aov.loc[:, 'ng2'], [0.25401, 0.35933, 0.08442])
+        array_equal(aov.loc[:, 'eps'], [1., 0.96910, 0.72717])
 
         # With different effect sizes
         aov = rm_anova(data=data, subject='Subject', within=['Time', 'Metric'],
-                       dv='Performance', effsize="n2").round(3)
-        array_equal(aov.loc[:, 'n2'], [0.255, 0.419, 0.069])
+                       dv='Performance', effsize="n2").round(5)
+        array_equal(aov.loc[:, 'n2'], [0.17080, 0.28134, 0.04625])
 
         aov = rm_anova(data=data, subject='Subject', within=['Time', 'Metric'],
-                       dv='Performance', effsize="ng2").round(3)
-        array_equal(aov.loc[:, 'ng2'], [0.254, 0.359, 0.084])
+                       dv='Performance', effsize="np2").round(5)
+        array_equal(aov.loc[:, 'np2'], [0.78998, 0.74972, 0.58395])
 
         # 2 factors with missing values. Cannot compare with JASP directly
         # because Pingouin applies an automatic removal of missing values
@@ -420,35 +430,35 @@ class TestParametric(TestCase):
 
         # Balanced design, two groups, three within factors
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
-                          between='Group', data=df, correction=True).round(3)
-        array_equal(aov.loc[:, 'SS'], [5.460, 7.628, 5.167])
+                          between='Group', data=df, correction=True).round(5)
+        array_equal(aov.loc[:, 'SS'], [5.45996, 7.62843, 5.16719])
         array_equal(aov.loc[:, 'DF1'], [1, 2, 2])
         array_equal(aov.loc[:, 'DF2'], [58, 116, 116])
-        array_equal(aov.loc[:, 'F'], [5.052, 4.027, 2.728])
-        array_equal(aov.loc[:, 'np2'], [0.080, 0.065, 0.045])
-        assert aov.at[1, 'eps'] == 0.999
-        assert aov.at[1, 'W-spher'] == 0.999
+        array_equal(aov.loc[:, 'F'], [5.05171, 4.02739, 2.72800])
+        array_equal(aov.loc[:, 'np2'], [0.08012, 0.06493, 0.04492])
+        assert round(aov.at[1, 'eps'], 3) == 0.999  # Pingouin = 0.99875, JAMOVI = 0.99812
+        assert round(aov.at[1, 'W-spher'], 3) == 0.999  # Pingouin = 0.99875, JAMOVI = 0.99812
         assert round(aov.at[1, 'p-GG-corr'], 2) == 0.02
         # With categorical: should be the same
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
                           between='Group', data=df_cat,
-                          correction=True).round(3)
-        array_equal(aov.loc[:, 'SS'], [5.460, 7.628, 5.167])
+                          correction=True).round(5)
+        array_equal(aov.loc[:, 'SS'], [5.45996, 7.62843, 5.16719])
         array_equal(aov.loc[:, 'DF1'], [1, 2, 2])
         array_equal(aov.loc[:, 'DF2'], [58, 116, 116])
-        array_equal(aov.loc[:, 'F'], [5.052, 4.027, 2.728])
-        array_equal(aov.loc[:, 'np2'], [0.080, 0.065, 0.045])
-        assert aov.at[1, 'eps'] == 0.999
-        assert aov.at[1, 'W-spher'] == 0.999
+        array_equal(aov.loc[:, 'F'], [5.05171, 4.02739, 2.72800])
+        array_equal(aov.loc[:, 'np2'], [0.08012, 0.06493, 0.04492])
+        assert round(aov.at[1, 'eps'], 3) == 0.999  # Pingouin = 0.99875, JAMOVI = 0.99812
+        assert round(aov.at[1, 'W-spher'], 3) == 0.999  # Pingouin = 0.99875, JAMOVI = 0.99812
         assert round(aov.at[1, 'p-GG-corr'], 2) == 0.02
 
-        # Same with different effect sizes (compare with JASP)
+        # Same with different effect sizes (compare with JAMOVI)
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
-                          between='Group', data=df, effsize="n2").round(3)
-        array_equal(aov.loc[:, 'n2'], [0.029, 0.040, 0.027])
+                          between='Group', data=df, effsize="n2").round(5)
+        array_equal(aov.loc[:, 'n2'], [0.02862, 0.03998, 0.02708])
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
-                          between='Group', data=df, effsize="ng2").round(3)
-        array_equal(aov.loc[:, 'ng2'], [0.031, 0.042, 0.029])
+                          between='Group', data=df, effsize="ng2").round(5)
+        array_equal(aov.loc[:, 'ng2'], [0.03067, 0.04234, 0.02908])
 
         # With missing values
         df_nan2 = df_nan.copy()
