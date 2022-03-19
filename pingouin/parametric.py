@@ -313,7 +313,7 @@ def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707
 
 @pf.register_dataframe_method
 def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
-             detailed=False, effsize="np2"):
+             detailed=False, effsize="ng2"):
     """One-way and two-way repeated measures ANOVA.
 
     Parameters
@@ -351,9 +351,8 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         If True, return a full ANOVA table.
     effsize : string
         Effect size. Must be one of 'np2' (partial eta-squared), 'n2'
-        (eta-squared) or 'ng2'(generalized eta-squared). Note that for
-        one-way repeated measure ANOVA partial eta-squared is the
-        same as eta-squared.
+        (eta-squared) or 'ng2'(generalized eta-squared, default). Note that for
+        one-way repeated measure ANOVA, eta-squared is the same as the generalized eta-squared.
 
     Returns
     -------
@@ -365,7 +364,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         * ``'ddof2'``: Degrees of freedom (denominator)
         * ``'F'``: F-value
         * ``'p-unc'``: Uncorrected p-value
-        * ``'np2'``: Partial eta-square effect size
+        * ``'ng2'``: Generalized eta-square effect size
         * ``'eps'``: Greenhouse-Geisser epsilon factor (= index of sphericity)
         * ``'p-GG-corr'``: Greenhouse-Geisser corrected p-value
         * ``'W-spher'``: Sphericity test statistic
@@ -421,12 +420,16 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     :math:`v_{\\text{effect}} = r - 1` and
     :math:`v_{\\text{error}} = (n - 1)(r - 1)` degrees of freedom.
 
-    The default effect size reported in Pingouin is the partial eta-squared,
-    which is equivalent to eta-square for one-way repeated measures ANOVA.
+    The default effect size reported in Pingouin is the generalized eta-squared,
+    which is equivalent to eta-squared for one-way repeated measures ANOVA.
 
     .. math::
-        \\eta_p^2 = \\frac{SS_{\\text{effect}}}{SS_{\\text{effect}} +
-        SS_{\\text{error}}}
+        \\eta_g^2 = \\frac{SS_{\\text{effect}}}{SS_{\\text{total}}}
+
+    The partial eta-squared is defined as:
+
+    .. math::
+        \\eta_p^2 = \\frac{SS_{\\text{effect}}}{SS_{\\text{effect}} + SS_{\\text{error}}}
 
     Missing values are automatically removed using a strict listwise approach (= complete-case
     analysis). In other words, any subject with one or more missing value(s) is completely removed
@@ -453,37 +456,34 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     >>> import pingouin as pg
     >>> data = pg.read_dataset('rm_anova_wide')
     >>> pg.rm_anova(data)
-       Source  ddof1  ddof2         F     p-unc       np2       eps
-    0  Within      3     24  5.200652  0.006557  0.393969  0.694329
+       Source  ddof1  ddof2         F     p-unc       ng2       eps
+    0  Within      3     24  5.200652  0.006557  0.346392  0.694329
 
     2. One-way repeated-measures ANOVA using a long-format dataset.
 
     We're also specifying two additional options here: ``detailed=True`` means
-    that we'll get a more detailed ANOVA table, and ``effsize='ng2'``
-    means that we want to get the generalized eta-squared effect size instead
-    of the default partial eta-squared.
+    that we'll get a more detailed ANOVA table, and ``effsize='np2'``
+    means that we want to get the partial eta-squared effect size instead
+    of the default (generalized) eta-squared.
 
     >>> df = pg.read_dataset('rm_anova')
     >>> aov = pg.rm_anova(dv='DesireToKill', within='Disgustingness',
-    ...                   subject='Subject', data=df, detailed=True,
-    ...                   effsize="ng2")
+    ...                   subject='Subject', data=df, detailed=True, effsize="np2")
     >>> aov.round(3)
-               Source       SS  DF      MS       F  p-unc    ng2  eps
-    0  Disgustingness   27.485   1  27.485  12.044  0.001  0.026  1.0
+               Source       SS  DF      MS       F  p-unc    np2  eps
+    0  Disgustingness   27.485   1  27.485  12.044  0.001  0.116  1.0
     1           Error  209.952  92   2.282     NaN    NaN    NaN  NaN
 
     3. Two-way repeated-measures ANOVA
 
-    >>> aov = pg.rm_anova(dv='DesireToKill',
-    ...                   within=['Disgustingness', 'Frighteningness'],
+    >>> aov = pg.rm_anova(dv='DesireToKill', within=['Disgustingness', 'Frighteningness'],
     ...                   subject='Subject', data=df)
 
     4. As a :py:class:`pandas.DataFrame` method
 
-    >>> df.rm_anova(dv='DesireToKill', within='Disgustingness',
-    ...             subject='Subject',  detailed=False)
-               Source  ddof1  ddof2          F     p-unc       np2  eps
-    0  Disgustingness      1     92  12.043878  0.000793  0.115758  1.0
+    >>> df.rm_anova(dv='DesireToKill', within='Disgustingness', subject='Subject',  detailed=False)
+               Source  ddof1  ddof2          F     p-unc       ng2  eps
+    0  Disgustingness      1     92  12.043878  0.000793  0.025784  1.0
     """
     assert effsize in ['n2', 'np2', 'ng2'], "effsize must be n2, np2 or ng2."
     if isinstance(within, list):
@@ -551,12 +551,13 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     p_unc = f(ddof1, ddof2).sf(fval)
 
     # Calculating effect sizes (see Bakeman 2005; Lakens 2013)
-    if effsize == "ng2":
-        # Generalized eta-squared
-        ef = ss_with / (ss_with + ss_resall)
-    else:
-        # (Partial) eta-squared, np2 == n2
+    # https://github.com/raphaelvallat/pingouin/issues/251
+    if effsize == "np2":
+        # Partial eta-squared
         ef = ss_with / (ss_with + ss_reswith)
+    else:
+        # (Generalized) eta-squared, ng2 == n2
+        ef = ss_with / (ss_with + ss_resall)
 
     # Compute sphericity using Mauchly test, on the wide-format dataframe
     # Sphericity assumption only applies if there are more than 2 levels
@@ -614,7 +615,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     return _postprocess_dataframe(aov)
 
 
-def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
+def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     """Two-way repeated measures ANOVA.
 
     This is an internal function. The main call to this function should be done
@@ -701,17 +702,16 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
     # Effect sizes
     if effsize == "n2":
         # ..Eta-squared
-        n2_denom = ss_a + ss_as + ss_b + ss_bs + ss_ab + ss_abs
-        ef_a = ss_a / n2_denom
-        ef_b = ss_b / n2_denom
-        ef_ab = ss_ab / n2_denom
+        ef_a = ss_a / ss_tot
+        ef_b = ss_b / ss_tot
+        ef_ab = ss_ab / ss_tot
     elif effsize == "ng2":
-        # .. Generalized eta-squared (from Bakeman 2005 Table 1)
+        # .. Generalized eta-squared (from Bakeman 2005 Table 1) -- default
         ef_a = ss_a / (ss_a + ss_s + ss_as + ss_bs + ss_abs)
         ef_b = ss_b / (ss_b + ss_s + ss_as + ss_bs + ss_abs)
         ef_ab = ss_ab / (ss_ab + ss_s + ss_as + ss_bs + ss_abs)
     else:
-        # .. Partial eta squared (default)
+        # .. Partial eta squared
         ef_a = (f_a * df_a) / (f_a * df_a + df_as)
         ef_b = (f_b * df_b) / (f_b * df_b + df_bs)
         ef_ab = (f_ab * df_ab) / (f_ab * df_ab + df_abs)
