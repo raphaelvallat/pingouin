@@ -938,9 +938,9 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
     ssbetween = ((grp.mean() - data[dv].mean())**2 * grp.count()).sum()
     # Within effect (= error between)
     #  = (grp.var(ddof=0) * grp.count()).sum()
-    sserror = grp.apply(lambda x: (x - x.mean())**2).sum()
+    error = grp.apply(lambda x: x - x.mean())
+    sserror = (error**2).sum()
     # In 1-way ANOVA, sstotal = ssbetween + sserror
-    # sstotal = ssbetween + sserror
 
     # Calculate DOF, MS, F and p-values
     ddof1 = n_groups - 1
@@ -978,7 +978,10 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
                             })
 
     aov.dropna(how='all', axis=1, inplace=True)
-    return _postprocess_dataframe(aov)
+    aov = _postprocess_dataframe(aov)
+    aov.residuals_ = 0  # Trick to avoid Pandas warning
+    aov.residuals_ = error  # Residuals is a hidden attribute
+    return aov
 
 
 def anova2(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
@@ -1010,7 +1013,8 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
         ss_fac1 = aov_fac1.at[0, 'SS']
         ss_fac2 = aov_fac2.at[0, 'SS']
         ss_tot = ((data[dv] - data[dv].mean())**2).sum()
-        ss_resid = np.sum(grp_both.apply(lambda x: (x - x.mean())**2))
+        resid = grp_both.apply(lambda x: (x - x.mean()))
+        ss_resid = (resid**2).sum()
         ss_inter = ss_tot - (ss_resid + ss_fac1 + ss_fac2)
         # Degrees of freedom
         df_fac1 = aov_fac1.at[0, 'DF']
@@ -1062,7 +1066,11 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
                         })
 
     aov.dropna(how='all', axis=1, inplace=True)
-    return _postprocess_dataframe(aov)
+    aov = _postprocess_dataframe(aov)
+
+    aov.residuals_ = 0
+    aov.residuals_ = resid
+    return aov
 
 
 def anovan(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
@@ -1142,6 +1150,10 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
     # Add formula to dataframe
     aov = _postprocess_dataframe(aov)
     aov.formula_ = formula
+
+    # Add residuals to dataframe
+    aov.residuals_ = 0
+    aov.residuals_ = lm.resid
     return aov
 
 
@@ -1276,7 +1288,8 @@ def welch_anova(data=None, dv=None, between=None):
     adj_grandmean = (weights * grp.mean()).sum() / weights.sum()
 
     # Sums of squares (regular and adjusted)
-    ss_res = grp.apply(lambda x: (x - x.mean())**2).sum()
+    resid = grp.apply(lambda x: x - x.mean())
+    ss_res = (resid**2).sum()
     ss_bet = ((grp.mean() - data[dv].mean())**2 * grp.count()).sum()
     ss_betadj = np.sum(weights * np.square(grp.mean() - adj_grandmean))
     ms_betadj = ss_betadj / ddof1
@@ -1296,7 +1309,12 @@ def welch_anova(data=None, dv=None, between=None):
                         'p-unc': pval,
                         'np2': np2
                         }, index=[0])
-    return _postprocess_dataframe(aov)
+
+    aov = _postprocess_dataframe(aov)
+    aov.residuals_ = 0
+    aov.residuals_ = resid
+
+    return aov
 
 
 @pf.register_dataframe_method
@@ -1436,7 +1454,8 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     # Extract residuals and interactions
     grp = data.groupby([between, within], observed=True)[dv]
     # ssresall = residuals within + residuals between
-    ss_resall = grp.apply(lambda x: (x - x.mean())**2).sum()
+    resid = grp.apply(lambda x: x - x.mean())
+    ss_resall = (resid**2).sum()
     # Interaction
     ss_inter = ss_total - (ss_resall + ss_with + ss_betw)
     ss_reswith = aov_with.at[1, 'SS'] - ss_inter
@@ -1504,7 +1523,12 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
         'sphericity', 'W-spher', 'p-spher']
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
-    return _postprocess_dataframe(aov)
+    aov = _postprocess_dataframe(aov)
+
+    aov.residuals_ = 0
+    aov.residuals_ = resid
+
+    return aov
 
 
 @pf.register_dataframe_method
@@ -1635,4 +1659,8 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     # Add bw as an attribute (for rm_corr function)
     aov = _postprocess_dataframe(aov)
     aov.bw_ = model.params.iloc[-1]
+
+    # Add residuals attribute
+    aov.residuals_ = 0
+    aov.residuals_ = model.resid
     return aov
