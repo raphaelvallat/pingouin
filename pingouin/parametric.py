@@ -793,6 +793,12 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
         * ``'p-unc'``: uncorrected p-values
         * ``'np2'``: Partial eta-square effect sizes
 
+    In adition, the output dataframe comes with hidden attribute
+    for the residuals that can be accessed as follows:
+
+    >>> aov = pg.anova() # doctest: +SKIP
+    >>> aov.residuals_ # doctest: +SKIP
+
     See Also
     --------
     rm_anova : One-way and two-way repeated measures ANOVA
