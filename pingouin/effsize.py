@@ -407,7 +407,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     ef : float
         Original effect size.
     input_type : string
-        Effect size type of ef. Must be ``'r'`` or ``'d'``.
+        Effect size type of ef. Must be ``'r'`` or ``'cohen'``.
     output_type : string
         Desired effect size type. Available methods are:
 
