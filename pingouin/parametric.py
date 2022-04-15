@@ -532,7 +532,8 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
 
     # Calculate sums of squares
     ss_with = ((grp_with.mean() - grandmean)**2 * grp_with.count()).sum()
-    ss_resall = grp_with.apply(lambda x: (x - x.mean())**2).sum()
+    resid = grp_with.apply(lambda x: (x - x.mean()))
+    ss_resall = (resid**2).sum()
     # sstotal = sstime + ss_resall =  sstime + (sssubj + sserror)
     # ss_total = ((data[dv] - grandmean)**2).sum()
     # We can further divide the residuals into a within and between component:
@@ -611,7 +612,11 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
 
     aov = aov.reindex(columns=col_order)
     aov.dropna(how='all', axis=1, inplace=True)
-    return _postprocess_dataframe(aov)
+    aov = _postprocess_dataframe(aov)
+
+    aov.residuals_ = 0
+    aov.residuals_ = resid
+    return aov
 
 
 def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
@@ -734,6 +739,9 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
     p_b_corr = f(df_b_c, df_bs_c).sf(f_b)
     p_ab_corr = f(df_ab_c, df_abs_c).sf(f_ab)
 
+    # Residuals
+    resid = data.groupby([a, b], observed=True)[dv].transform(lambda x: x - x.mean())
+
     # Create dataframe
     aov = pd.DataFrame({
         'Source': [a, b, a + ' * ' + b],
@@ -746,7 +754,11 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="np2"):
         'p-GG-corr': [p_a_corr, p_b_corr, p_ab_corr],
         effsize: [ef_a, ef_b, ef_ab],
         'eps': [eps_a, eps_b, eps_ab]})
-    return _postprocess_dataframe(aov)
+    aov = _postprocess_dataframe(aov)
+
+    aov.residuals_ = 0
+    aov.residuals_ = resid
+    return aov
 
 
 @pf.register_dataframe_method
