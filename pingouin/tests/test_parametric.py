@@ -363,6 +363,14 @@ class TestParametric(TestCase):
         assert aov.at[0, 'F'] == 3.913
         assert aov.at[0, 'p-unc'] == .023
         assert aov.at[0, 'np2'] == .062
+        # Compare residuals with R package rstatix
+        # ANOVA = rstatix::anova_test(DF, dv='Scores', within='Time', wid='Subject')
+        # attr(ANOVA, 'args')$model$residuals
+        resid = df.rm_anova(dv='Scores', within='Time', subject='Subject').residuals_
+        np.testing.assert_allclose(
+            resid[0:5],
+            [0.5011018, -1.1613091, 1.4623736, -0.2829853, -0.6909221]
+        )
 
         # Same but with categorical columns
         aov = rm_anova(dv='Scores', within='Time', subject='Subject',
@@ -404,6 +412,15 @@ class TestParametric(TestCase):
         array_equal(aov.loc[:, 'F'], [33.852, 26.959, 12.632])
         array_equal(aov.loc[:, 'np2'], [0.790, 0.750, 0.584])
         array_equal(aov.loc[:, 'eps'], [1., 0.969, 0.727])
+        # Compare residuals with R package rstatix
+        # ANOVA = rstatix::anova_test(DF, dv='Performance', within=c('Time', 'Metric'), wid='Subject')
+        # attr(ANOVA, 'args')$model$residuals
+        resid = data.rm_anova(dv='Performance', within=['Time', 'Metric'],
+                              subject='Subject').residuals_
+        np.testing.assert_allclose(
+            resid[0:5],
+            [1, -3, -1, 7, -6]
+        )
 
         # With categorical
         data_cat = data.copy()
@@ -478,6 +495,18 @@ class TestParametric(TestCase):
         aov = mixed_anova(dv='Scores', within='Time', subject='Subject',
                           between='Group', data=df, effsize="ng2").round(3)
         array_equal(aov.loc[:, 'ng2'], [0.031, 0.042, 0.029])
+
+        # Compare residuals with R package rstatix
+        # ANOVA <- rstatix::anova_test(DF, dv='Scores', between='Group',
+        #                              within='Time', wid='Subject')
+        # attr(ANOVA, 'args')$model$residuals
+        resid = df.mixed_anova(
+            dv='Scores', within='Time', between='Group', subject='Subject'
+        ).residuals_
+        np.testing.assert_allclose(
+            resid[0:5],
+            [0.4632507, -1.1991601, 1.4245225, -0.3208363, -0.7287732]
+        )
 
         # With missing values
         df_nan2 = df_nan.copy()
