@@ -187,9 +187,9 @@ class TestParametric(TestCase):
         resid = read_dataset('anova3').anova(
             dv='Cholesterol', between=['Risk']
         ).residuals_
-        np.testing.assert_allclose(
-            resid[0:5],
-            [-0.17746647, 1.81589256, -0.44351454, -1.46941184, 0.69341560]
+        array_equal(
+            resid[0:5].round(3),
+            [-0.177, 1.816, -0.444, -1.469, 0.693]
         )
 
         # Unbalanced and with missing values
@@ -234,9 +234,9 @@ class TestParametric(TestCase):
         resid = read_dataset('anova3').anova(
             dv='Cholesterol', between=['Risk', 'Drug']
         ).residuals_
-        np.testing.assert_allclose(
-            resid[0:5],
-            [-0.0215259162, 1.9718331168, -0.2875739782, -1.3134712822, 0.8493561588]
+        array_equal(
+            resid[0:5].round(3),
+            [-0.022, 1.972, -0.288, -1.313, 0.849]
         )
 
         # Two-way ANOVA with unbalanced design
@@ -284,9 +284,9 @@ class TestParametric(TestCase):
         # ANOVA = aov(Cholesterol~Sex*Risk*Drug, DF)$residuals
         resid = df_aov3.anova(dv="Cholesterol",
                               between=["Sex", "Risk", "Drug"]).residuals_
-        np.testing.assert_allclose(
-            resid[0:5],
-            [-0.261249536, 1.732109497, -0.527297598, -1.553194902, 0.609632539]
+        array_equal(
+            resid[0:5].round(3),
+            [-0.261, 1.732, -0.527, -1.553, 0.610]
         )
 
         # Unbalanced
@@ -367,9 +367,9 @@ class TestParametric(TestCase):
         # ANOVA = rstatix::anova_test(DF, dv='Scores', within='Time', wid='Subject')
         # attr(ANOVA, 'args')$model$residuals
         resid = df.rm_anova(dv='Scores', within='Time', subject='Subject').residuals_
-        np.testing.assert_allclose(
-            resid[0:5],
-            [0.5011018, -1.1613091, 1.4623736, -0.2829853, -0.6909221]
+        array_equal(
+            resid[0:5].round(3),
+            [0.501, -1.161, 1.462, -0.283, -0.691]
         )
 
         # Same but with categorical columns
@@ -417,7 +417,7 @@ class TestParametric(TestCase):
         # attr(ANOVA, 'args')$model$residuals
         resid = data.rm_anova(dv='Performance', within=['Time', 'Metric'],
                               subject='Subject').residuals_
-        np.testing.assert_allclose(
+        array_equal(
             resid[0:5],
             [1, -3, -1, 7, -6]
         )
@@ -503,9 +503,9 @@ class TestParametric(TestCase):
         resid = df.mixed_anova(
             dv='Scores', within='Time', between='Group', subject='Subject'
         ).residuals_
-        np.testing.assert_allclose(
-            resid[0:5],
-            [0.4632507, -1.1991601, 1.4245225, -0.3208363, -0.7287732]
+        array_equal(
+            resid[0:5].round(3),
+            [0.463, -1.199, 1.425, -0.321, -0.729]
         )
 
         # With missing values
