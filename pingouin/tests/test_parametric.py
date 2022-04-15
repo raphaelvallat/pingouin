@@ -182,9 +182,15 @@ class TestParametric(TestCase):
                     effsize="n2", detailed=True).round(3)
         assert aov.at[0, 'n2'] == .576
         # Compare residuals with R
-        # aov(`Pain threshold` ~ `Hair color`, DF)$residuals
-        resid = df_pain.anova(dv='Pain threshold', between=['Hair color']).residuals_
-        np.testing.assert_allclose(resid[0:5], [2.8, 0.8, 11.8, -4.2, -11.2])
+        # Use different dataset to produce residuals more than 3 decimal places
+        # aov(Cholesterol ~ Risk, DF)$residuals
+        resid = read_dataset('anova3').anova(
+            dv='Cholesterol', between=['Risk']
+        ).residuals_
+        np.testing.assert_allclose(
+            resid[0:5],
+            [-0.17746647, 1.81589256, -0.44351454, -1.46941184, 0.69341560]
+        )
 
         # Unbalanced and with missing values
         df_pain.loc[[17, 18], 'Pain threshold'] = np.nan
@@ -223,9 +229,15 @@ class TestParametric(TestCase):
                      data=df_aov2, effsize="n2").round(4)
         array_equal(aov2.loc[[0, 1, 2], 'n2'], [0.0001, 0.1843, 0.1589])
         # Compare residuals with R
-        # aov(Yield~Blend*Crop, DF)$residuals
-        resid = df_aov2.anova(dv="Yield", between=["Blend", "Crop"]).residuals_
-        np.testing.assert_allclose(resid[0:5], [0.25, 33.25, -10.75, -22.75, -14.00])
+        # Use different dataset to produce residuals more than 3 decimal places
+        # aov(Cholesterol ~ Risk * Drug, DF)$residuals
+        resid = read_dataset('anova3').anova(
+            dv='Cholesterol', between=['Risk', 'Drug']
+        ).residuals_
+        np.testing.assert_allclose(
+            resid[0:5],
+            [-0.0215259162, 1.9718331168, -0.2875739782, -1.3134712822, 0.8493561588]
+        )
 
         # Two-way ANOVA with unbalanced design
         df_aov2 = read_dataset('anova2_unbalanced')
