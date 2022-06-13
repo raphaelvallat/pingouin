@@ -105,7 +105,7 @@ def fdr(pvals, alpha=0.05, method='fdr_bh'):
         ecdffactor /= cm
 
     # Now we adjust the p-values
-    pvals_corr = np.diag(pvals_sorted / ecdffactor[..., None])
+    pvals_corr = pvals_sorted / ecdffactor
     pvals_corr = np.minimum.accumulate(pvals_corr[::-1])[::-1]
     pvals_corr = np.clip(pvals_corr, None, 1)
 
