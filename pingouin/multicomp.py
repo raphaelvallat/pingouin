@@ -105,7 +105,7 @@ def fdr(pvals, alpha=0.05, method='fdr_bh'):
         ecdffactor /= cm
 
     # Now we adjust the p-values
-    pvals_corr = pvals_sorted / ecdffactor
+    pvals_corr = pvals_sorted[:ntests] / ecdffactor
     pvals_corr = np.minimum.accumulate(pvals_corr[::-1])[::-1]
     pvals_corr = np.clip(pvals_corr, None, 1)
 
@@ -268,7 +268,7 @@ def holm(pvals, alpha=.05):
     ntests = pvals.size - num_nan
 
     # Now we adjust the p-values
-    pvals_corr = pvals_sorted * np.arange(ntests, 0, -1)
+    pvals_corr = pvals_sorted[:ntests] * np.arange(ntests, 0, -1)
     pvals_corr = np.maximum.accumulate(pvals_corr)
     pvals_corr = np.clip(pvals_corr, None, 1)
 
