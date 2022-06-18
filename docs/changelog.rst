@@ -27,6 +27,10 @@ b. Allow :py:func:`pingouin.bayesfactor_binom` to take Beta alternative model. `
 c. Allow keyword arguments for logistic regression in :py:func:`pingouin.mediation_analysis`. `PR 245 <https://github.com/raphaelvallat/pingouin/pull/245>`_.
 d. Major speed improvements for the Holm and FDR correction in :py:func:`pingouin.bayesfactor_binom`. `PR 271 <https://github.com/raphaelvallat/pingouin/pull/271>`_.
 
+**Dependencies**
+
+a. Force scikit-learn<1.1.0 to avoid bug in :py:func:`pingouin.logistic_regression`. `PR 272 <https://github.com/raphaelvallat/pingouin/issues/272>`_.
+
 v0.5.1 (February 2022)
 ----------------------
 

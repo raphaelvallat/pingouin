@@ -26,7 +26,7 @@ INSTALL_REQUIRES = [
     'matplotlib>=3.0.2',
     'seaborn>=0.11',
     'statsmodels>=0.13',
-    'scikit-learn',
+    'scikit-learn<1.1.0',
     'pandas_flavor>=0.2.0',
     'outdated',
     'tabulate'
