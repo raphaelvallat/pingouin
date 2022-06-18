@@ -68,23 +68,27 @@ class TestEffsize(TestCase):
 
     def test_compute_boot_esci(self):
         """Test function compute_bootci
+
         Compare with Matlab bootci function
+
+        See also scipy.stats.bootstrap
         """
         # This is the `lawdata` dataset in Matlab
         # >>> load lawdata
         # >>> x_m = gpa;
         # >>> y_m = lsat;
-        x_m = [3.39, 3.3, 2.81, 3.03, 3.44, 3.07, 3.0, 3.43, 3.36, 3.13,
-               3.12, 2.74, 2.76, 2.88, 2.96]
+        x_m = [
+            3.39, 3.3, 2.81, 3.03, 3.44, 3.07, 3.0, 3.43, 3.36, 3.13, 3.12, 2.74, 2.76, 2.88, 2.96]
         y_m = [576, 635, 558, 578, 666, 580, 555, 661, 651, 605, 653, 575, 545, 572, 594]
         # 1. bootci around a pearson correlation coefficient
         # Matlab: bootci(n_boot, {@corr, x_m, y_m}, 'type', 'norm');
-        ci = compute_bootci(x_m, y_m, method='norm', seed=123)
-        assert ci[0] == 0.52 and ci[1] == 1.05
-        ci = compute_bootci(x_m, y_m, method='per', seed=123)
-        assert ci[0] == 0.45 and ci[1] == 0.96
-        ci = compute_bootci(x_m, y_m, method='cper', seed=123)
-        assert ci[0] == 0.39 and ci[1] == 0.95
+        ci = compute_bootci(x_m, y_m, func="pearson", paired=True, method='norm', seed=123)
+        assert ci[0] == 0.52 and ci[1] == 1.04
+        ci = compute_bootci(x_m, y_m, func="pearson", paired=True, method='per', seed=123)
+        assert ci[0] == 0.46 and ci[1] == 0.96
+        ci = compute_bootci(x_m, y_m, func="pearson", paired=True, method='cper', seed=123)
+        assert ci[0] == 0.41 and ci[1] == 0.95
+
         # 2. Univariate function: mean
         ci_n = compute_bootci(x_m, func='mean', method='norm', seed=42)
         ci_p = compute_bootci(x_m, func='mean', method='per', seed=42)
@@ -96,51 +100,65 @@ class TestEffsize(TestCase):
         # 3. Univariate custom function: skewness
         from scipy.stats import skew
         n_boot = 10000
-        ci_n = compute_bootci(x_m, func=skew, method='norm', n_boot=n_boot,
-                              decimals=1, seed=42)
-        ci_p = compute_bootci(x_m, func=skew, method='per', n_boot=n_boot,
-                              decimals=1, seed=42)
-        ci_c = compute_bootci(x_m, func=skew, method='cper', n_boot=n_boot,
-                              decimals=1, seed=42)
+        ci_n = compute_bootci(
+            x_m, func=skew, method='norm', n_boot=n_boot, decimals=1, seed=42)
+        ci_p = compute_bootci(
+            x_m, func=skew, method='per', n_boot=n_boot, decimals=1, seed=42)
+        ci_c = compute_bootci(
+            x_m, func=skew, method='cper', n_boot=n_boot, decimals=1, seed=42)
         assert ci_n[0] == -0.7 and ci_n[1] == 0.8
         assert ci_p[0] == -0.7 and ci_p[1] == 0.8
         assert ci_c[0] == -0.7 and ci_c[1] == 0.8
 
         # 4. Bivariate custom function: paired T-test
         from scipy.stats import ttest_rel
-        ci_n = compute_bootci(x_m, y_m, func=lambda x, y: ttest_rel(x, y)[0],
-                              method='norm', n_boot=n_boot, decimals=0, seed=42)
-        ci_p = compute_bootci(x_m, y_m, func=lambda x, y: ttest_rel(x, y)[0],
-                              method='per', n_boot=n_boot, decimals=0, seed=42)
-        ci_c = compute_bootci(x_m, y_m, func=lambda x, y: ttest_rel(x, y)[0],
-                              method='cper', n_boot=n_boot, decimals=0, seed=42)
-        assert ci_n[0] == -69 and ci_n[1] == -35
+        ci_n = compute_bootci(
+            x_m, y_m, func=lambda x, y: ttest_rel(x, y)[0], method='norm', paired=True,
+            n_boot=n_boot, decimals=0, seed=42)
+        ci_p = compute_bootci(
+            x_m, y_m, func=lambda x, y: ttest_rel(x, y)[0], method='per', paired=True,
+            n_boot=n_boot, decimals=0, seed=42)
+        ci_c = compute_bootci(
+            x_m, y_m, func=lambda x, y: ttest_rel(x, y)[0], method='cper', paired=True,
+            n_boot=n_boot, decimals=3, seed=42)
+        assert ci_n[0] == -70 and ci_n[1] == -34
         assert ci_p[0] == -79 and ci_p[1] == -48
-        assert ci_c[0] == -68 and ci_c[1] == -47
+        assert round(ci_c[0]) == -69 and round(ci_c[1]) == -46
+
+        # Make sure that we use different results when using paired=False, because resampling
+        # is then done separately for x and y.
+        ci_c_unpaired = compute_bootci(
+            x_m, y_m, func=lambda x, y: ttest_rel(x, y)[0], method='cper', paired=False,
+            n_boot=n_boot, decimals=3, seed=42)
+        assert ci_c[0] != ci_c_unpaired[0]
+        assert ci_c[1] != ci_c_unpaired[1]
 
         # 5. Test all combinations
         from itertools import product
         methods = ['norm', 'per', 'cper']
-        funcs = ['spearman', 'pearson', 'cohen', 'hedges']
+        funcs = ['cohen', 'hedges']
         paired = [True, False]
         pr = list(product(methods, funcs, paired))
         for m, f, p in pr:
             compute_bootci(x, y, func=f, method=m, seed=123, n_boot=100)
 
-        # Now the univariate function
+        # Now the univariate functions
         funcs = ['mean', 'std', 'var']
         for m, f in list(product(methods, funcs)):
             compute_bootci(x, func=f, method=m, seed=123, n_boot=100)
 
+        # Using a custom function
+        _, bdist = compute_bootci(
+            x, y, func=lambda x, y: np.sum(np.exp(x) / np.exp(y)),
+            n_boot=10000, decimals=4, confidence=.68, seed=None, return_dist=True)
+        assert bdist.size == 10000
+
+        # ERRORS
         with pytest.raises(ValueError):
             compute_bootci(x, y, func='wrong')
-        # Using a custom function
-        compute_bootci(x, y,
-                       func=lambda x, y: np.sum(np.exp(x) / np.exp(y)),
-                       n_boot=10000, decimals=4, confidence=.68, seed=None)
-        # Get the bootstrapped distribution
-        _, bdist = compute_bootci(x, y, return_dist=True, n_boot=1500)
-        assert bdist.size == 1500
+
+        with pytest.raises(AssertionError):
+            compute_bootci(x, y, func='pearson', paired=False)
 
     def test_convert_effsize(self):
         """Test function convert_effsize.

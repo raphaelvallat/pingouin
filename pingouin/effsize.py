@@ -171,9 +171,8 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
     return np.round(ci, decimals)
 
 
-def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
-                   confidence=.95, n_boot=2000, decimals=2, seed=None,
-                   return_dist=False):
+def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence=.95,
+                   n_boot=2000, decimals=2, seed=None, return_dist=False):
     """Bootstrapped confidence intervals of univariate and bivariate functions.
 
     Parameters
@@ -186,23 +185,24 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
         Function to compute the bootstrapped statistic.
         Accepted string values are:
 
-        * ``'pearson'``: Pearson correlation (bivariate, requires x and y)
-        * ``'spearman'``: Spearman correlation (bivariate)
-        * ``'cohen'``: Cohen d effect size (bivariate)
-        * ``'hedges'``: Hedges g effect size (bivariate)
-        * ``'mean'``: Mean (univariate, requires only x)
+        * ``'pearson'``: Pearson correlation (bivariate, paired x and y)
+        * ``'spearman'``: Spearman correlation (bivariate, paired x and y)
+        * ``'cohen'``: Cohen d effect size (bivariate, paired or unpaired x and y)
+        * ``'hedges'``: Hedges g effect size (bivariate, paired or unpaired x and y)
+        * ``'mean'``: Mean (univariate = only x)
         * ``'std'``: Standard deviation (univariate)
         * ``'var'``: Variance (univariate)
     method : str
         Method to compute the confidence intervals:
 
-        * ``'norm'``: Normal approximation with bootstrapped bias and
-          standard error
+        * ``'norm'``: Normal approximation with bootstrapped bias and standard error
         * ``'per'``: Basic percentile method
         * ``'cper'``: Bias corrected percentile method (default)
     paired : boolean
-        Indicates whether x and y are paired or not. Only useful when computing
-        bivariate Cohen d or Hedges g bootstrapped confidence intervals.
+        Indicates whether x and y are paired or not. For example, for correlation functions or
+        paired T-test, x and y are assumed to be paired. Pingouin will resample the pairs
+        (x_i, y_i) when paired=True, and resample x and y separately when paired=False.
+        If paired=True, x and y must have the same number of elements.
     confidence : float
         Confidence level (0.95 = 95%)
     n_boot : int
@@ -212,8 +212,8 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
     seed : int or None
         Random seed for generating bootstrap samples.
     return_dist : boolean
-        If True, return the confidence intervals and the bootstrapped
-        distribution  (e.g. for plotting purposes).
+        If True, return the confidence intervals and the bootstrapped distribution (e.g. for
+        plotting purposes).
 
     Returns
     -------
@@ -223,8 +223,13 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
     Notes
     -----
     Results have been tested against the
-    `bootci <https://www.mathworks.com/help/stats/bootci.html>`_
-    Matlab function.
+    `bootci <https://www.mathworks.com/help/stats/bootci.html>`_ Matlab function.
+
+    Since version 1.7, SciPy also includes a built-in bootstrap function
+    :py:func:`scipy.stats.bootstrap`. The SciPy implementation has two advantages over Pingouin: it
+    is faster when using ``vectorized=True``, and it supports the bias-corrected and accelerated
+    (BCa) confidence intervals for univariate functions. However, unlike Pingouin, it does not
+    return the bootstrap distribution.
 
     References
     ----------
@@ -239,79 +244,116 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
     1. Bootstrapped 95% confidence interval of a Pearson correlation
 
     >>> import pingouin as pg
-    >>> x = [3, 4, 6, 7, 5, 6, 7, 3, 5, 4, 2]
-    >>> y = [4, 6, 6, 7, 6, 5, 5, 2, 3, 4, 1]
+    >>> import numpy as np
+    >>> rng = np.random.default_rng(42)
+    >>> x = rng.normal(loc=4, scale=2, size=100)
+    >>> y = rng.normal(loc=3, scale=1, size=100)
     >>> stat = np.corrcoef(x, y)[0][1]
-    >>> ci = pg.compute_bootci(x, y, func='pearson', seed=42)
-    >>> print(stat, ci)
-    0.7468280049029223 [0.27 0.93]
+    >>> ci = pg.compute_bootci(x, y, func='pearson', paired=True, seed=42, decimals=4)
+    >>> print(round(stat, 4), ci)
+    0.0945 [-0.098   0.2738]
+
+    Let's compare to SciPy's built-in bootstrap function
+
+    >>> from scipy.stats import bootstrap
+    >>> bt_scipy = bootstrap(
+    ...       data=(x, y), statistic=lambda x, y: np.corrcoef(x, y)[0][1],
+    ...       method="basic", vectorized=False, n_resamples=2000, paired=True, random_state=42)
+    >>> np.round(bt_scipy.confidence_interval, 4)
+    array([-0.0952,  0.2883])
 
     2. Bootstrapped 95% confidence interval of a Cohen d
 
     >>> stat = pg.compute_effsize(x, y, eftype='cohen')
     >>> ci = pg.compute_bootci(x, y, func='cohen', seed=42, decimals=3)
-    >>> print(stat, ci)
-    0.1537753990658328 [-0.327  0.562]
+    >>> print(round(stat, 4), ci)
+    0.7009 [0.403 1.009]
 
     3. Bootstrapped confidence interval of a standard deviation (univariate)
 
     >>> import numpy as np
     >>> stat = np.std(x, ddof=1)
     >>> ci = pg.compute_bootci(x, func='std', seed=123)
-    >>> print(stat, ci)
-    1.6787441193290351 [1.21 2.16]
+    >>> print(round(stat, 4), ci)
+    1.5534 [1.38 1.8 ]
+
+    Compare to SciPy's built-in bootstrap function, which makes use of vectorization for
+    faster performance and return the bias-corrected and accelerated CIs (see Notes).
+
+    >>> def std(x, axis):
+    ...     return np.std(x, ddof=1, axis=axis)
+    >>> bt_scipy = bootstrap(data=(x, ), statistic=std, n_resamples=2000, random_state=123)
+    >>> np.round(bt_scipy.confidence_interval, 2)
+    array([1.39, 1.81])
+
+    Changing the confidence intervals type in Pingouin
+
+    >>> pg.compute_bootci(x, func='std', seed=123, method="norm")  # Normal approximation
+    array([1.37, 1.76])
+
+    >>> pg.compute_bootci(x, func='std', seed=123, method="percentile")
+    array([1.35, 1.75])
 
     4. Bootstrapped confidence interval using a custom univariate function
 
     >>> from scipy.stats import skew
-    >>> skew(x), pg.compute_bootci(x, func=skew, n_boot=10000, seed=123)
-    (-0.08244607271328411, array([-1.03,  0.77]))
+    >>> round(skew(x), 4), pg.compute_bootci(x, func=skew, n_boot=10000, seed=123)
+    (-0.137, array([-0.55,  0.32]))
 
     5. Bootstrapped confidence interval using a custom bivariate function
 
     >>> stat = np.sum(np.exp(x) / np.exp(y))
     >>> ci = pg.compute_bootci(x, y, func=lambda x, y: np.sum(np.exp(x)
     ...                           / np.exp(y)), n_boot=10000, seed=123)
-    >>> print(stat, ci)
-    26.80405184881793 [12.76 45.15]
+    >>> print(round(stat, 4), ci)
+    1116.6278 [ 678.99 2607.99]
 
+    6. Get the bootstrapped distribution around a Spearman correlation
 
-    6. Get the bootstrapped distribution around a Pearson correlation
-
-    >>> ci, bstat = pg.compute_bootci(x, y, return_dist=True)
+    >>> ci, bstat = pg.compute_bootci(x, y, func="spearman", paired=True, return_dist=True)
     >>> print(bstat.size)
     2000
     """
     from inspect import isfunction
     from scipy.stats import norm
 
-    x = np.asarray(x)
-    n = x.size
-    assert x.ndim == 1
-    assert n > 1
+    # Check other arguments
+    assert isinstance(confidence, float)
+    assert 0 < confidence < 1, "confidence must be between 0 and 1."
+    assert method in ['norm', 'normal', 'percentile', 'per', 'cpercentile', 'cper']
+    assert isfunction(func) or isinstance(func, str), (
+        "func must be a function (e.g. np.mean, custom function) or a string (e.g. 'pearson'). "
+        "See documentation for more details.")
 
+    # Check x
+    x = np.asarray(x)
+    nx = x.size
+    assert x.ndim == 1, "x must be one-dimensional."
+    assert nx > 1, "x must have more than one element."
+
+    # Check y
     if y is not None:
         y = np.asarray(y)
         ny = y.size
-        assert y.ndim == 1
-        assert ny > 1
-        n = min(n, ny)
+        assert y.ndim == 1, "y must be one-dimensional."
+        assert ny > 1, "y must have more than one element."
+        if paired:
+            assert nx == ny, "x and y must have the same number of elements when paired=True."
 
-    assert isinstance(confidence, float)
-    assert 0 < confidence < 1
-    assert method in ['norm', 'normal', 'percentile', 'per', 'cpercentile',
-                      'cper']
-    assert isfunction(func) or isinstance(func, str)
-
+    # Check string functions
     if isinstance(func, str):
         func_str = '%s' % func
         if func == 'pearson':
+
+            assert paired, "Paired should be True if using correlation functions."
 
             def func(x, y):
                 return np.corrcoef(x, y)[0][1]
 
         elif func == 'spearman':
             from scipy.stats import spearmanr
+
+            assert paired, "Paired should be True if using correlation functions."
 
             def func(x, y):
                 spr, _ = spearmanr(x, y)
@@ -341,58 +383,57 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
             raise ValueError('Function string not recognized.')
 
     # Bootstrap
-    rng = np.random.RandomState(seed)  # Random seed
-    bootsam = rng.choice(np.arange(n), size=(n, n_boot), replace=True)
     bootstat = np.empty(n_boot)
+    rng = np.random.default_rng(seed)  # Random seed
+    boot_x = rng.choice(np.arange(nx), size=(nx, n_boot), replace=True)
 
     if y is not None:
         reference = func(x, y)
-        for i in range(n_boot):
-            # Note that here we use a bootstrapping procedure with replacement
-            # of all the pairs (Xi, Yi). This is NOT suited for
-            # hypothesis testing such as p-value estimation). Instead, for the
-            # latter, one must only shuffle the Y values while keeping the X
-            # values constant, i.e.:
-            # >>> bootsam = rng.random_sample((n_boot, n)).argsort(axis=1)
-            # >>> for i in range(n_boot):
-            # >>>   bootstat[i] = func(x, y[bootsam[i, :]])
-            bootstat[i] = func(x[bootsam[:, i]], y[bootsam[:, i]])
+        if paired:
+            for i in range(n_boot):
+                # Note that here we use a bootstrapping procedure with replacement
+                # of all the pairs (Xi, Yi). This is NOT suited for
+                # hypothesis testing such as p-value estimation). Instead, for the
+                # latter, one must only shuffle the Y values while keeping the X
+                # values constant, i.e.:
+                # >>> boot_x = rng.random_sample((n_boot, n)).argsort(axis=1)
+                # >>> for i in range(n_boot):
+                # >>>   bootstat[i] = func(x, y[boot_x[i, :]])
+                bootstat[i] = func(x[boot_x[:, i]], y[boot_x[:, i]])
+        else:
+            boot_y = rng.choice(np.arange(ny), size=(ny, n_boot), replace=True)
+            for i in range(n_boot):
+                bootstat[i] = func(x[boot_x[:, i]], y[boot_y[:, i]])
     else:
         reference = func(x)
         for i in range(n_boot):
-            bootstat[i] = func(x[bootsam[:, i]])
+            bootstat[i] = func(x[boot_x[:, i]])
 
     # CONFIDENCE INTERVALS
-    alpha = 1 - confidence
-    dist_sorted = np.sort(bootstat)
+    alpha = (1 - confidence) / 2
 
     if method in ['norm', 'normal']:
         # Normal approximation
-        za = norm.ppf(alpha / 2)
+        za = norm.ppf(alpha)
         se = np.std(bootstat, ddof=1)
-
         bias = np.mean(bootstat - reference)
-        ll = reference - bias + se * za
-        ul = reference - bias - se * za
-        ci = [ll, ul]
+        ci = np.array([reference - bias + se * za, reference - bias - se * za])
     elif method in ['percentile', 'per']:
         # Uncorrected percentile
-        pct_ll = int(n_boot * (alpha / 2))
-        pct_ul = int(n_boot * (1 - alpha / 2))
-        ci = [dist_sorted[pct_ll], dist_sorted[pct_ul]]
+        interval = 100 * np.array([alpha, 1 - alpha])
+        ci = np.percentile(bootstat, interval)
+        pass
     else:
         # Corrected percentile bootstrap
         # Compute bias-correction constant z0
-        z_0 = norm.ppf(np.mean(bootstat < reference) +
-                       np.mean(bootstat == reference) / 2)
-        z_alpha = norm.ppf(alpha / 2)
+        z_0 = norm.ppf(np.mean(bootstat < reference) + np.mean(bootstat == reference) / 2)
+        z_alpha = norm.ppf(alpha)
         pct_ul = 100 * norm.cdf(2 * z_0 - z_alpha)
         pct_ll = 100 * norm.cdf(2 * z_0 + z_alpha)
-        ll = np.percentile(bootstat, pct_ll)
-        ul = np.percentile(bootstat, pct_ul)
-        ci = [ll, ul]
+        ci = np.percentile(bootstat, [pct_ll, pct_ul])
 
     ci = np.round(ci, decimals)
+
     if return_dist:
         return ci, bootstat
     else:
