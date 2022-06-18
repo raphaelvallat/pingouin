@@ -685,9 +685,9 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05, corr=0.5, e
     measures ANOVA:
 
     >>> data = data.dropna()
-    >>> pg.rm_anova(data).round(3)
-       Source  ddof1  ddof2      F  p-unc    np2    eps
-    0  Within      3     24  5.201  0.007  0.394  0.694
+    >>> pg.rm_anova(data, effsize="n2").round(3)
+       Source  ddof1  ddof2      F  p-unc     n2    eps
+    0  Within      3     24  5.201  0.007  0.346  0.694
 
     The repeated measures ANOVA is significant at the 0.05 level. Now, we can
     easily compute the power of the ANOVA with the information in the ANOVA
@@ -695,8 +695,8 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05, corr=0.5, e
 
     >>> # n is the sample size and m is the number of repeated measures
     >>> n, m = data.shape
-    >>> round(pg.power_rm_anova(eta=0.394, m=m, n=n, epsilon=0.694), 3)
-    0.998
+    >>> round(pg.power_rm_anova(eta=0.346, m=m, n=n, epsilon=0.694), 3)
+    0.99
 
     Our ANOVA has a very high statistical power. However, to be even more
     accurate in our power calculation, we should also fill in the average
@@ -720,8 +720,8 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05, corr=0.5, e
     negative. However, it will most likely be positive with real data. Let's
     now compute the final power of the repeated measures ANOVA:
 
-    >>> round(pg.power_rm_anova(eta=0.394, m=m, n=n, epsilon=0.694, corr=avgcorr), 3)
-    0.855
+    >>> round(pg.power_rm_anova(eta=0.346, m=m, n=n, epsilon=0.694, corr=avgcorr), 3)
+    0.771
     """
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [eta, m, n, power, alpha]])
