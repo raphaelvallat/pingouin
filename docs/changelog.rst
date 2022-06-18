@@ -26,6 +26,7 @@ a. The :py:func:`pingouin.pairwise_ttests` has been renamed to :py:func:`pingoui
 b. Allow :py:func:`pingouin.bayesfactor_binom` to take Beta alternative model. `PR 252 <https://github.com/raphaelvallat/pingouin/pull/252>`_.
 c. Allow keyword arguments for logistic regression in :py:func:`pingouin.mediation_analysis`. `PR 245 <https://github.com/raphaelvallat/pingouin/pull/245>`_.
 d. Major speed improvements for the Holm and FDR correction in :py:func:`pingouin.bayesfactor_binom`. `PR 271 <https://github.com/raphaelvallat/pingouin/pull/271>`_.
+e. Rename ``eta`` to ``eta_squared`` in :py:func:`pingouin.power_anova` and :py:func:`pingouin.power_rm_anova` to avoid any confusion. `PR 280 <https://github.com/raphaelvallat/pingouin/pull/280>`_.
 
 **Dependencies**
 
