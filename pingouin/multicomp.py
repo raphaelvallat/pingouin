@@ -1,6 +1,7 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 import numpy as np
+from pandas import Series
 
 __all__ = ["multicomp"]
 
@@ -104,7 +105,7 @@ def fdr(pvals, alpha=0.05, method='fdr_bh'):
         ecdffactor /= cm
 
     # Now we adjust the p-values
-    pvals_corr = np.diag(pvals_sorted / ecdffactor[..., None])
+    pvals_corr = pvals_sorted[:ntests] / ecdffactor
     pvals_corr = np.minimum.accumulate(pvals_corr[::-1])[::-1]
     pvals_corr = np.clip(pvals_corr, None, 1)
 
@@ -267,7 +268,7 @@ def holm(pvals, alpha=.05):
     ntests = pvals.size - num_nan
 
     # Now we adjust the p-values
-    pvals_corr = np.diag(pvals_sorted * np.arange(ntests, 0, -1)[..., None])
+    pvals_corr = pvals_sorted[:ntests] * np.arange(ntests, 0, -1)
     pvals_corr = np.maximum.accumulate(pvals_corr)
     pvals_corr = np.clip(pvals_corr, None, 1)
 
@@ -470,11 +471,11 @@ def multicomp(pvals, alpha=0.05, method='holm'):
     [False  True False False  True] [0.5    0.009     nan 0.108  0.0012]
     """
     # Safety check
-    assert isinstance(pvals, (list, np.ndarray)), "pvals must be list or array"
-    pvals = np.squeeze(np.asarray(pvals))
+    assert isinstance(pvals, (list, np.ndarray, Series)), "pvals must be list or array"
     assert isinstance(alpha, float), 'alpha must be a float.'
     assert isinstance(method, str), 'method must be a string.'
     assert 0 < alpha < 1, 'alpha must be between 0 and 1.'
+    pvals = np.asarray(pvals)
 
     if method.lower() in ['b', 'bonf', 'bonferroni']:
         reject, pvals_corrected = bonf(pvals, alpha=alpha)

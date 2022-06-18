@@ -25,6 +25,7 @@ a. The eta-squared (``n2``) effect size was not properly calculated in one-way a
 a. The :py:func:`pingouin.pairwise_ttests` has been renamed to :py:func:`pingouin.pairwise_tests`. Non-parametric tests are also supported in this function with the `parametric=False` argument, and thus the name "ttests" was misleading (see `issue 209 <https://github.com/raphaelvallat/pingouin/issues/209>`_).
 b. Allow :py:func:`pingouin.bayesfactor_binom` to take Beta alternative model. `PR 252 <https://github.com/raphaelvallat/pingouin/pull/252>`_.
 c. Allow keyword arguments for logistic regression in :py:func:`pingouin.mediation_analysis`. `PR 245 <https://github.com/raphaelvallat/pingouin/pull/245>`_.
+d. Major speed improvements for the Holm and FDR correction in :py:func:`pingouin.bayesfactor_binom`. `PR 271 <https://github.com/raphaelvallat/pingouin/pull/271>`_.
 
 v0.5.1 (February 2022)
 ----------------------
