@@ -88,6 +88,7 @@ class TestEffsize(TestCase):
         assert ci[0] == 0.46 and ci[1] == 0.96
         ci = compute_bootci(x_m, y_m, func="pearson", paired=True, method='cper', seed=123)
         assert ci[0] == 0.41 and ci[1] == 0.95
+        ci = compute_bootci(x_m, y_m, func="spearman", paired=True)  # Spearman correlation
 
         # 2. Univariate function: mean
         ci_n = compute_bootci(x_m, func='mean', method='norm', seed=42)
