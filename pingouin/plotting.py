@@ -15,8 +15,8 @@ import matplotlib.transforms as transforms
 # See https://github.com/raphaelvallat/pingouin/issues/85
 # sns.set(style='ticks', context='notebook')
 
-__all__ = ["plot_blandaltman", "qqplot", "plot_paired",
-           "plot_shift", "plot_rm_corr", "plot_circmean"]
+__all__ = [
+    "plot_blandaltman", "qqplot", "plot_paired", "plot_shift", "plot_rm_corr", "plot_circmean"]
 
 
 def plot_blandaltman(x, y, agreement=1.96, xaxis="mean", confidence=.95,
@@ -631,9 +631,8 @@ def plot_paired(data=None, dv=None, within=None, subject=None, order=None,
     return ax
 
 
-def plot_shift(x, y, paired=False, n_boot=1000,
-               percentiles=np.arange(10, 100, 10),
-               ci=.95, seed=None, show_median=True, violin=True):
+def plot_shift(x, y, paired=False, n_boot=1000, percentiles=np.arange(10, 100, 10), confidence=.95,
+               seed=None, show_median=True, violin=True):
     """Shift plot.
 
     Parameters
@@ -641,25 +640,22 @@ def plot_shift(x, y, paired=False, n_boot=1000,
     x, y : array_like
         First and second set of observations.
     paired : bool
-        Specify whether ``x`` and ``y`` are related (i.e. repeated
-        measures) or independent.
+        Specify whether ``x`` and ``y`` are related (i.e. repeated measures) or independent.
 
         .. versionadded:: 0.3.0
     n_boot : int
         Number of bootstrap iterations. The higher, the better, the slower.
     percentiles: array_like
-        Sequence of percentiles to compute, which must be between 0 and 100
-        inclusive. Default set to [10, 20, 30, 40, 50, 60, 70, 80, 90].
-    ci: float
-        Confidence level (0.95 = 95%).
+        Sequence of percentiles to compute, which must be between 0 and 100 inclusive.
+        Default set to [10, 20, 30, 40, 50, 60, 70, 80, 90].
+    confidence : float
+        Confidence level (0.95 = 95%) for the confidence intervals.
     seed : int or None
-        Random seed for generating bootstrap samples, can be integer or
-        None for no seed (default).
+        Random seed for generating bootstrap samples, can be integer or None for no seed (default).
     show_median: boolean
         If True (default), show the median with black lines.
     violin: boolean
-        If True (default), plot the density of X and Y distributions.
-        Defaut set to True.
+        If True (default), plot the density of X and Y distributions. Defaut set to True.
 
     Returns
     -------
@@ -672,9 +668,8 @@ def plot_shift(x, y, paired=False, n_boot=1000,
 
     Notes
     -----
-    The shift plot is described in [1]_.
-    It computes a shift function [2]_ for two (in)dependent groups using the
-    robust Harrell-Davis quantile estimator in conjunction with bias-corrected
+    The shift plot is described in [1]_. It computes a shift function [2]_ for two (in)dependent
+    groups using the robust Harrell-Davis quantile estimator in conjunction with bias-corrected
     bootstrap confidence intervals.
 
     References
@@ -708,11 +703,10 @@ def plot_shift(x, y, paired=False, n_boot=1000,
         >>> np.random.seed(42)
         >>> x = np.random.normal(5.5, 2, 30)
         >>> y = np.random.normal(6, 1.5, 30)
-        >>> fig = pg.plot_shift(x, y, paired=True, n_boot=2000,
-        ...                     percentiles=[25, 50, 75],
+        >>> fig = pg.plot_shift(x, y, paired=True, n_boot=2000, percentiles=[25, 50, 75],
         ...                     show_median=False, seed=456, violin=False)
     """
-    from pingouin.regression import _bca
+    from pingouin.regression import _bias_corrected_ci
     from pingouin.nonparametric import harrelldavis as hd
 
     # Safety check
@@ -726,7 +720,7 @@ def plot_shift(x, y, paired=False, n_boot=1000,
     assert not np.isnan(y).any(), 'Missing values are not allowed.'
     assert nx >= 10, 'x must have at least 10 samples.'
     assert ny >= 10, 'y must have at least 10 samples.'
-    assert 0 < ci < 1, 'ci must be between 0 and 1.'
+    assert 0 < confidence < 1, 'confidence must be between 0 and 1.'
     if paired:
         assert nx == ny, 'x and y must have the same size when paired=True.'
 
@@ -739,20 +733,18 @@ def plot_shift(x, y, paired=False, n_boot=1000,
     rng = np.random.RandomState(seed)
     if paired:
         bootsam = rng.choice(np.arange(nx), size=(nx, n_boot), replace=True)
-        bootstat = (hd(y[bootsam], percentiles, axis=0) -
-                    hd(x[bootsam], percentiles, axis=0))
+        bootstat = hd(y[bootsam], percentiles, axis=0) - hd(x[bootsam], percentiles, axis=0)
     else:
         x_list = rng.choice(x, size=(nx, n_boot), replace=True)
         y_list = rng.choice(y, size=(ny, n_boot), replace=True)
-        bootstat = (hd(y_list, percentiles, axis=0) -
-                    hd(x_list, percentiles, axis=0))
+        bootstat = hd(y_list, percentiles, axis=0) - hd(x_list, percentiles, axis=0)
 
     # Find upper and lower confidence interval for each quantiles
-    # Bias-corrected confidence interval
+    # Bias-corrected bootstrapped confidence interval
     lower, median_per, upper = [], [], []
     for i, d in enumerate(delta):
-        ci = _bca(bootstat[i, :], d, n_boot)
-        median_per.append(_bca(bootstat[i, :], d, n_boot, alpha=1)[0])
+        ci = _bias_corrected_ci(bootstat[i, :], d, alpha=(1 - confidence))
+        median_per.append(_bias_corrected_ci(bootstat[i, :], d, alpha=1)[0])
         lower.append(ci[0])
         upper.append(ci[1])
 
@@ -761,8 +753,7 @@ def plot_shift(x, y, paired=False, n_boot=1000,
     upper = np.asarray(upper)
 
     # Create long-format dataFrame for use with Seaborn
-    data = pd.DataFrame({'value': np.concatenate([x, y]),
-                         'variable': ['X'] * nx + ['Y'] * ny})
+    data = pd.DataFrame({'value': np.concatenate([x, y]), 'variable': ['X'] * nx + ['Y'] * ny})
 
     #############################
     # Plots X and Y distributions
@@ -783,14 +774,12 @@ def plot_shift(x, y, paired=False, n_boot=1000,
         qrt1, medians, qrt3 = np.percentile(dis, [25, 50, 75])
         whiskers = adjacent_values(np.sort(dis), qrt1, qrt3)
         ax1.plot(medians, pos, marker='o', color='white', zorder=10)
-        ax1.hlines(pos, qrt1, qrt3, color='k',
-                   linestyle='-', lw=7, zorder=9)
-        ax1.hlines(pos, whiskers[0], whiskers[1],
-                   color='k', linestyle='-', lw=2, zorder=9)
+        ax1.hlines(pos, qrt1, qrt3, color='k', linestyle='-', lw=7, zorder=9)
+        ax1.hlines(pos, whiskers[0], whiskers[1], color='k', linestyle='-', lw=2, zorder=9)
 
-    ax1 = sns.stripplot(data=data, x='value', y='variable',
-                        orient='h', order=['Y', 'X'],
-                        palette=['#88bedc', '#cfcfcf'])
+    ax1 = sns.stripplot(
+        data=data, x='value', y='variable', orient='h', order=['Y', 'X'],
+        palette=['#88bedc', '#cfcfcf'])
 
     if violin:
         vl = plt.violinplot([y, x], showextrema=False, vert=False, widths=1)
@@ -822,8 +811,7 @@ def plot_shift(x, y, paired=False, n_boot=1000,
             col = '#c34e52'
         else:
             col = 'darkgray'
-        plt.plot([y_per[i], x_per[i]], [0.2, 0.8],
-                 marker='o', color=col, zorder=10)
+        plt.plot([y_per[i], x_per[i]], [0.2, 0.8], marker='o', color=col, zorder=10)
         # X quantiles
         plt.plot([x_per[i], x_per[i]], [0.8, 1.2], 'k--', zorder=9)
         # Y quantiles

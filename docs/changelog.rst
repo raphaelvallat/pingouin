@@ -18,6 +18,7 @@ a. The eta-squared (``n2``) effect size was not properly calculated in one-way a
 .. warning:: Please double check any effect sizes previously obtained with the :py:func:`pingouin.rm_anova` function.
 
 b. Fixed invalid resampling behavior for bivariate functions in :py:func:`pingouin.compute_bootci` when x and y were not paired. `PR 281 <https://github.com/raphaelvallat/pingouin/pull/281>`_.
+c. Fixed bug where ``confidence`` (previously ``ci``) was ignored when calculating the bootstrapped confidence intervals in :py:func:`pingouin.plot_shift`. `PR 282 <https://github.com/raphaelvallat/pingouin/pull/282>`_.
 
 **Enhancements**
 

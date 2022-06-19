@@ -937,37 +937,43 @@ def _point_estimate(X_val, XM_val, M_val, y_val, idx, n_mediator,
     return beta_m * beta_y
 
 
-def _bca(ab_estimates, sample_point, n_boot, alpha=0.05):
-    """Get (1 - alpha) * 100 bias-corrected confidence interval estimate
-
-    Note that this is similar to the "cper" module implemented in
-    :py:func:`pingouin.compute_bootci`.
+def _bias_corrected_ci(bootdist, sample_point, alpha=0.05):
+    """Bias-corrected confidence intervals
 
     Parameters
     ----------
-    ab_estimates : 1d array-like
+    bootdist : array-like
         Array with bootstrap estimates for each sample.
     sample_point : float
-        Indirect effect point estimate based on full sample.
-    n_boot : int
-        Number of bootstrap samples
+        Point estimate based on full sample.
     alpha : float
-        Alpha for confidence interval
+        Alpha for confidence interval.
 
     Returns
     -------
     CI : 1d array-like
-        Lower limit and upper limit bias-corrected confidence interval
-        estimates.
+        Lower and upper bias-corrected confidence interval estimates.
+
+    Notes
+    -----
+    This is what's used in the "cper" method implemented in :py:func:`pingouin.compute_bootci`.
+
+    This differs from the bias-corrected and accelerated method (BCa, default in Matlab and
+    SciPy) because it does not correct for skewness. Indeed, the acceleration parameter, a,
+    is proportional to the skewness of the bootstrap distribution. The bias-correction parameter,
+    z0, is related to the proportion of bootstrap estimates that are less than the observed
+    statistic.
     """
     # Bias of bootstrap estimates
-    z0 = norm.ppf(np.sum(ab_estimates < sample_point) / n_boot)
+    # In Matlab bootci they also count when bootdist == sample_point
+    # >>> z0 = norminv(mean(bstat < stat,1) + mean(bstat == stat,1)/2);
+    z0 = norm.ppf(np.mean(bootdist < sample_point))
     # Adjusted intervals
     adjusted_ll = norm.cdf(2 * z0 + norm.ppf(alpha / 2)) * 100
     adjusted_ul = norm.cdf(2 * z0 + norm.ppf(1 - alpha / 2)) * 100
-    ll = np.percentile(ab_estimates, q=adjusted_ll)
-    ul = np.percentile(ab_estimates, q=adjusted_ul)
-    return np.array([ll, ul])
+    # Adjusted percentiles
+    ci = np.percentile(bootdist, q=[adjusted_ll, adjusted_ul])
+    return ci
 
 
 def _pval_from_bootci(boot, estimate):
@@ -1248,7 +1254,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
                 'pval': [], ll_name: [], ul_name: [], 'sig': []}
 
     for j in range(n_mediator):
-        ci_j = _bca(ab_estimates[:, j], indirect['coef'][j], alpha=alpha, n_boot=n_boot)
+        ci_j = _bias_corrected_ci(ab_estimates[:, j], indirect['coef'][j], alpha=alpha)
         indirect[ll_name].append(min(ci_j))
         indirect[ul_name].append(max(ci_j))
         # Bootstrapped p-value of indirect effect
