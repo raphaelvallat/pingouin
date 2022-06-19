@@ -2,6 +2,7 @@
 # Date: April 2018
 import warnings
 import numpy as np
+from scipy.stats import pearsonr
 from pingouin.utils import _check_eftype, remove_na
 # from pingouin.distribution import homoscedasticity
 
@@ -291,7 +292,7 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
     >>> pg.compute_bootci(x, func='std', seed=123, method="norm")  # Normal approximation
     array([1.37, 1.76])
 
-    >>> pg.compute_bootci(x, func='std', seed=123, method="percentile")
+    >>> pg.compute_bootci(x, func='std', seed=123, method="percentile")  # Unadjusted percentile
     array([1.35, 1.75])
 
     4. Bootstrapped confidence interval using a custom univariate function
@@ -300,19 +301,22 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
     >>> round(skew(x), 4), pg.compute_bootci(x, func=skew, n_boot=10000, seed=123)
     (-0.137, array([-0.55,  0.32]))
 
-    5. Bootstrapped confidence interval using a custom bivariate function
+    5. Bootstrapped confidence interval using a custom bivariate function. Here, x and y are not
+    paired and can therefore have different sizes.
 
-    >>> stat = np.sum(np.exp(x) / np.exp(y))
-    >>> ci = pg.compute_bootci(x, y, func=lambda x, y: np.sum(np.exp(x)
-    ...                           / np.exp(y)), n_boot=10000, seed=123)
-    >>> print(round(stat, 4), ci)
-    1116.6278 [ 678.99 2607.99]
+    >>> def mean_diff(x, y):
+    ...     return np.mean(x) - np.mean(y)
+    >>> y2 = rng.normal(loc=3, scale=1, size=200)  # y2 has 200 samples, x has 100
+    >>> ci = pg.compute_bootci(x, y2, func=mean_diff, n_boot=10000, seed=123)
+    >>> print(round(mean_diff(x, y2), 2), ci)
+    0.88 [0.54 1.21]
 
-    6. Get the bootstrapped distribution around a Spearman correlation
+    We can also get the bootstrapped distribution
 
-    >>> ci, bstat = pg.compute_bootci(x, y, func="spearman", paired=True, return_dist=True)
-    >>> print(bstat.size)
-    2000
+    >>> ci, bt = pg.compute_bootci(x, y2, func=mean_diff, n_boot=10000, return_dist=True, seed=9)
+    >>> print(f"The bootstrap distribution has {bt.size} samples. The mean and standard "
+    ...       f"{bt.mean():.4f} ± {bt.std():.4f}")
+    The bootstrap distribution has 10000 samples. The mean and standard 0.8807 ± 0.1704
     """
     from inspect import isfunction
     from scipy.stats import norm
@@ -324,6 +328,7 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
     assert isfunction(func) or isinstance(func, str), (
         "func must be a function (e.g. np.mean, custom function) or a string (e.g. 'pearson'). "
         "See documentation for more details.")
+    vectorizable = False
 
     # Check x
     x = np.asarray(x)
@@ -348,7 +353,7 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
             assert paired, "Paired should be True if using correlation functions."
 
             def func(x, y):
-                return np.corrcoef(x, y)[0][1]
+                return pearsonr(x, y)[0]  # Faster than np.corrcoef
 
         elif func == 'spearman':
             from scipy.stats import spearmanr
@@ -356,8 +361,7 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
             assert paired, "Paired should be True if using correlation functions."
 
             def func(x, y):
-                spr, _ = spearmanr(x, y)
-                return spr
+                return spearmanr(x, y)[0]
 
         elif func in ['cohen', 'hedges']:
             from pingouin.effsize import compute_effsize
@@ -366,19 +370,22 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
                 return compute_effsize(x, y, paired=paired, eftype=func_str)
 
         elif func == 'mean':
+            vectorizable = True
 
             def func(x):
-                return np.mean(x)
+                return np.mean(x, axis=0)
 
         elif func == 'std':
+            vectorizable = True
 
             def func(x):
-                return np.std(x, ddof=1)
+                return np.std(x, ddof=1, axis=0)
 
         elif func == 'var':
+            vectorizable = True
 
             def func(x):
-                return np.var(x, ddof=1)
+                return np.var(x, ddof=1, axis=0)
         else:
             raise ValueError('Function string not recognized.')
 
@@ -406,8 +413,11 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
                 bootstat[i] = func(x[boot_x[:, i]], y[boot_y[:, i]])
     else:
         reference = func(x)
-        for i in range(n_boot):
-            bootstat[i] = func(x[boot_x[:, i]])
+        if vectorizable:
+            bootstat = func(x[boot_x])
+        else:
+            for i in range(n_boot):
+                bootstat[i] = func(x[boot_x[:, i]])
 
     # CONFIDENCE INTERVALS
     alpha = (1 - confidence) / 2
@@ -733,7 +743,6 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         return d
     if eftype.lower() == 'r':
         # Return correlation coefficient (useful for CI bootstrapping)
-        from scipy.stats import pearsonr
         r, _ = pearsonr(x, y)
         return r
     elif eftype.lower() == 'cles':
