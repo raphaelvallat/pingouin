@@ -294,8 +294,8 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
     >>> print(round(stat, 4), ci)
     1.5534 [1.38 1.8 ]
 
-    Compare to SciPy's built-in bootstrap function, which makes use of vectorization for
-    faster performance and return the bias-corrected and accelerated CIs (see Notes).
+    Compare to SciPy's built-in bootstrap function, which returns the bias-corrected and
+    accelerated CIs (see Notes).
 
     >>> def std(x, axis):
     ...     return np.std(x, ddof=1, axis=axis)
@@ -305,10 +305,10 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
 
     Changing the confidence intervals type in Pingouin
 
-    >>> pg.compute_bootci(x, func='std', seed=123, method="norm")  # Normal approximation
+    >>> pg.compute_bootci(x, func='std', seed=123, method="norm")
     array([1.37, 1.76])
 
-    >>> pg.compute_bootci(x, func='std', seed=123, method="percentile")  # Unadjusted percentile
+    >>> pg.compute_bootci(x, func='std', seed=123, method="percentile")
     array([1.35, 1.75])
 
     4. Bootstrapped confidence interval using a custom univariate function
