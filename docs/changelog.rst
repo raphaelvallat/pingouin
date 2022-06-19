@@ -8,17 +8,16 @@ What's new
 
 *************
 
-v0.6.0.dev
-----------
-
-This is a major release with several API-breaking changes. We recommend all users to upgrade to this new version as soon as possible.
+v0.5.2
+------
 
 **Bugfixes**
 
 a. The eta-squared (``n2``) effect size was not properly calculated in one-way and two-way repeated measures ANOVAs. Specifically, Pingouin followed the same behavior as JASP, i.e. the eta-squared was the same as the partial eta-squared. However, as explained in `issue 251 <https://github.com/raphaelvallat/pingouin/issues/251>`_, this behavior is not valid. In one-way ANOVA design, the eta-squared should be equal to the generalized eta-squared. Note that, as of March 2022, this bug is also present in JASP. We have therefore updated the unit tests to use JAMOVI instead.
 
-.. warning:: Please make sure to double check any effect sizes previously obtained with the :py:func:`pingouin.rm_anova` function.
+.. warning:: Please double check any effect sizes previously obtained with the :py:func:`pingouin.rm_anova` function.
 
+b. Fixed invalid resampling behavior for bivariate functions in :py:func:`pingouin.compute_bootci` when x and y were not paired. `PR 281 <https://github.com/raphaelvallat/pingouin/pull/281>`_.
 
 **Enhancements**
 
