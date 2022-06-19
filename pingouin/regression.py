@@ -1021,8 +1021,7 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     seed : int or None
         Random state seed.
     logreg_kwargs : dict or None
-        Dictionary with optional arguments passed to
-        :py:func:`logistic_regression()`
+        Dictionary with optional arguments passed to :py:func:`pingouin.logistic_regression`
     return_dist : bool
         If True, the function also returns the indirect bootstrapped beta
         samples (size = n_boot). Can be plotted for instance using

@@ -235,15 +235,15 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
     The percentile bootstrap method (``per``) is defined as the
     :math:`100 \\times \\frac{\\alpha}{2}` and :math:`100 \\times \\frac{1 - \\alpha}{2}`
     percentiles of the distribution of :math:`\\theta` estimates obtained from resampling, where
-    :math:`\\alpha` is the level of significance (1 - confidence, default 0.05 for 95% CIs).
+    :math:`\\alpha` is the level of significance (1 - confidence, default = 0.05 for 95% CIs).
 
     The bias-corrected percentile method (``cper``) corrects for bias of the bootstrap
     distribution. This method is different from the BCa method — the default in Matlab and SciPy —
-    which corrects for both bias and skewness of the bootstrap distribution, using jackknife
+    which corrects for both bias and skewness of the bootstrap distribution using jackknife
     resampling.
 
     The normal approximation method (``norm``) calculates the confidence intervals with the
-    standard normal distribution, using bootstrapped bias and standard error.
+    standard normal distribution using bootstrapped bias and standard error.
 
     References
     ----------
