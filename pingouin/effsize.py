@@ -194,11 +194,11 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
         * ``'std'``: Standard deviation (univariate)
         * ``'var'``: Variance (univariate)
     method : str
-        Method to compute the confidence intervals:
+        Method to compute the confidence intervals (see Notes):
 
+        * ``'cper'``: Bias-corrected percentile method (default)
         * ``'norm'``: Normal approximation with bootstrapped bias and standard error
-        * ``'per'``: Basic percentile method
-        * ``'cper'``: Bias corrected percentile method (default)
+        * ``'per'``: Simple percentile
     paired : boolean
         Indicates whether x and y are paired or not. For example, for correlation functions or
         paired T-test, x and y are assumed to be paired. Pingouin will resample the pairs
@@ -219,7 +219,7 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
     Returns
     -------
     ci : array
-        Desired converted effect size
+        Bootstrapped confidence intervals.
 
     Notes
     -----
@@ -232,13 +232,29 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
     (BCa) confidence intervals for univariate functions. However, unlike Pingouin, it does not
     return the bootstrap distribution.
 
+    The percentile bootstrap method (``per``) is defined as the
+    :math:`100 \\times \\frac{\\alpha}{2}` and :math:`100 \\times \\frac{1 - \\alpha}{2}`
+    percentiles of the distribution of :math:`\\theta` estimates obtained from resampling, where
+    :math:`\\alpha` is the level of significance (1 - confidence, default = 0.05 for 95% CIs).
+
+    The bias-corrected percentile method (``cper``) corrects for bias of the bootstrap
+    distribution. This method is different from the BCa method — the default in Matlab and SciPy —
+    which corrects for both bias and skewness of the bootstrap distribution using jackknife
+    resampling.
+
+    The normal approximation method (``norm``) calculates the confidence intervals with the
+    standard normal distribution using bootstrapped bias and standard error.
+
     References
     ----------
-    * DiCiccio, T. J., & Efron, B. (1996). Bootstrap confidence intervals.
-      Statistical science, 189-212.
+    * DiCiccio, T. J., & Efron, B. (1996). Bootstrap confidence intervals. Statistical science,
+      189-212.
 
-    * Davison, A. C., & Hinkley, D. V. (1997). Bootstrap methods and their
-      application (Vol. 1). Cambridge university press.
+    * Davison, A. C., & Hinkley, D. V. (1997). Bootstrap methods and their application (Vol. 1).
+      Cambridge university press.
+
+    * Jung, Lee, Gupta, & Cho (2019). Comparison of bootstrap confidence interval methods for
+      GSCA using a Monte Carlo simulation. Frontiers in psychology, 10, 2215.
 
     Examples
     --------
@@ -420,27 +436,23 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
                 bootstat[i] = func(x[boot_x[:, i]])
 
     # CONFIDENCE INTERVALS
+    # See Matlab bootci function
     alpha = (1 - confidence) / 2
-
     if method in ['norm', 'normal']:
         # Normal approximation
-        za = norm.ppf(alpha)
+        za = norm.ppf(alpha)  # = 1.96
         se = np.std(bootstat, ddof=1)
         bias = np.mean(bootstat - reference)
         ci = np.array([reference - bias + se * za, reference - bias - se * za])
     elif method in ['percentile', 'per']:
-        # Uncorrected percentile
+        # Simple percentile
         interval = 100 * np.array([alpha, 1 - alpha])
         ci = np.percentile(bootstat, interval)
         pass
     else:
-        # Corrected percentile bootstrap
-        # Compute bias-correction constant z0
-        z_0 = norm.ppf(np.mean(bootstat < reference) + np.mean(bootstat == reference) / 2)
-        z_alpha = norm.ppf(alpha)
-        pct_ul = 100 * norm.cdf(2 * z_0 - z_alpha)
-        pct_ll = 100 * norm.cdf(2 * z_0 + z_alpha)
-        ci = np.percentile(bootstat, [pct_ll, pct_ul])
+        # Bias-corrected percentile bootstrap
+        from pingouin.regression import _bias_corrected_ci
+        ci = _bias_corrected_ci(bootstat, reference, alpha=(1 - confidence))
 
     ci = np.round(ci, decimals)
 

@@ -28,7 +28,7 @@ def pairwise_tests(data=None, dv=None, between=None, within=None, subject=None,
                    parametric=True, marginal=True, alpha=.05, alternative='two-sided',
                    padjust='none', effsize='hedges', correction='auto', nan_policy='listwise',
                    return_desc=False, interaction=True, within_first=True):
-    """Pairwise T-tests.
+    """Pairwise tests.
 
     Parameters
     ----------

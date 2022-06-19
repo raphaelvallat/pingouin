@@ -60,7 +60,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative='two-sided', r=.
     See also
     --------
     ttest : T-test
-    pairwise_ttest : Pairwise T-tests
+    pairwise_test : Pairwise T-tests
     bayesfactor_pearson : Bayes Factor of a correlation
     bayesfactor_binom : Bayes Factor of a binomial test
 
