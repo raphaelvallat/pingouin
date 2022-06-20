@@ -374,7 +374,7 @@ class TestParametric(TestCase):
         # Compare with JAMOVI
         aov = rm_anova(
             dv="Scores", within="Time", subject="Subject", data=df, correction="auto", detailed=True
-        ).round(3)
+        ).round(5)
         assert aov.at[0, "F"] == 3.91280
         assert aov.at[0, "p-unc"] == 0.02263
         assert aov.at[0, "ng2"] == 0.03998
