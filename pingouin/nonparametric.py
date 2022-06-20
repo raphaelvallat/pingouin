@@ -234,7 +234,7 @@ def mwu(x, y, alternative="two-sided", confidence=0.95, **kwargs):
         Association and the American Statistical Association, 25(2),
         101–132. https://doi.org/10.2307/1165329
 
-    .. [5] Campbell, M. J. & Gardner, M. J. (1988). Calculating confidence 
+    .. [5] Campbell, M. J. & Gardner, M. J. (1988). Calculating confidence
            intervals for some non-parametric analyses.
            British Medical Journal Volume 226, 1988.
 
@@ -301,25 +301,25 @@ def mwu(x, y, alternative="two-sided", confidence=0.95, **kwargs):
 
     # Effect size 2: rank biserial correlation (Wendt 1972)
     rbc = 1 - (2 * uval) / diff.size  # diff.size = x.size * y.size
-    
-    # Confidence interval for the (difference in) medians 
+
+    # Confidence interval for the (difference in) medians
     # Campbell and Gardner 2000
     if alternative == "two-sided":
         alpha = 1.0 - confidence
         conf = 1.0 - alpha / 2  # 0.975
     else:
         conf = confidence
-    N = scipy.stats.norm.ppf(conf) 
-    ct1, ct2 = len(x),len(y) # count samples 
-    diffs = sorted([i-j for i in x for j in y]) # get ct1xct2 difference
-    k = int(round(ct1*ct2/2 - (N * (ct1*ct2*(ct1+ct2+1)/12)**0.5)))
-    ci = [diffs[k], diffs[len(diffs)-k]]
+    N = scipy.stats.norm.ppf(conf)
+    ct1, ct2 = len(x), len(y)  # count samples
+    diffs = sorted([i - j for i in x for j in y])  # get ct1xct2 difference
+    k = int(round(ct1 * ct2 / 2 - (N * (ct1 * ct2 * (ct1 + ct2 + 1) / 12) ** 0.5)))
+    ci = [diffs[k], diffs[len(diffs) - k]]
     if alternative == "greater":
         ci[1] = np.inf
     elif alternative == "less":
         ci[0] = -np.inf
     # Rename CI
-    ci_name = 'CI%.0f%%' % (100 * confidence)
+    ci_name = "CI%.0f%%" % (100 * confidence)
     # Fill output DataFrame
     stats = pd.DataFrame(
         {"U-val": uval, "alternative": alternative, "p-val": pval, "RBC": rbc, "CLES": cles},
