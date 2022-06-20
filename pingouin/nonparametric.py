@@ -3,10 +3,18 @@
 import scipy
 import numpy as np
 import pandas as pd
-from pingouin import (remove_na, _check_dataframe, _postprocess_dataframe)
+from pingouin import remove_na, _check_dataframe, _postprocess_dataframe
 
-__all__ = ["mad", "madmedianrule", "mwu", "wilcoxon", "kruskal", "friedman",
-           "cochran", "harrelldavis"]
+__all__ = [
+    "mad",
+    "madmedianrule",
+    "mwu",
+    "wilcoxon",
+    "kruskal",
+    "friedman",
+    "cochran",
+    "harrelldavis",
+]
 
 
 def mad(a, normalize=True, axis=0):
@@ -84,7 +92,7 @@ def mad(a, normalize=True, axis=0):
         # Calculate the MAD over the entire array
         a = np.ravel(a)
         axis = 0
-    c = scipy.stats.norm.ppf(3 / 4.) if normalize else 1
+    c = scipy.stats.norm.ppf(3 / 4.0) if normalize else 1
     center = np.apply_over_axes(np.nanmedian, a, axis)
     return np.nanmedian((np.fabs(a - center)) / c, axis=axis)
 
@@ -139,12 +147,12 @@ def madmedianrule(a):
     array([False, False, False, False, False,  True, False, False])
     """
     a = np.asarray(a)
-    assert a.ndim == 1, 'Only 1D array / list are supported for this function.'
+    assert a.ndim == 1, "Only 1D array / list are supported for this function."
     k = np.sqrt(scipy.stats.chi2.ppf(0.975, 1))
     return (np.fabs(a - np.median(a)) / mad(a)) > k
 
 
-def mwu(x, y, alternative='two-sided', **kwargs):
+def mwu(x, y, alternative="two-sided", **kwargs):
     """Mann-Whitney U Test (= Wilcoxon rank-sum test). It is the non-parametric
     version of the independent T-test.
 
@@ -262,11 +270,15 @@ def mwu(x, y, alternative='two-sided', **kwargs):
     x, y = remove_na(x, y, paired=False)
 
     # Check tails
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
     if "tail" in kwargs:
         raise ValueError(
-            "Since Pingouin 0.4.0, the 'tail' argument has been renamed to 'alternative'.")
+            "Since Pingouin 0.4.0, the 'tail' argument has been renamed to 'alternative'."
+        )
     uval, pval = scipy.stats.mannwhitneyu(x, y, alternative=alternative, **kwargs)
 
     # Effect size 1: Common Language Effect Size
@@ -277,22 +289,20 @@ def mwu(x, y, alternative='two-sided', **kwargs):
     # Tail = 'greater', with ties set to 0.5
     # Note that tail = 'two-sided' gives same output as tail = 'greater'
     cles = np.where(diff == 0, 0.5, diff > 0).mean()
-    cles = 1 - cles if alternative == 'less' else cles
+    cles = 1 - cles if alternative == "less" else cles
 
     # Effect size 2: rank biserial correlation (Wendt 1972)
     rbc = 1 - (2 * uval) / diff.size  # diff.size = x.size * y.size
 
     # Fill output DataFrame
-    stats = pd.DataFrame({
-        'U-val': uval,
-        'alternative': alternative,
-        'p-val': pval,
-        'RBC': rbc,
-        'CLES': cles}, index=['MWU'])
+    stats = pd.DataFrame(
+        {"U-val": uval, "alternative": alternative, "p-val": pval, "RBC": rbc, "CLES": cles},
+        index=["MWU"],
+    )
     return _postprocess_dataframe(stats)
 
 
-def wilcoxon(x, y=None, alternative='two-sided', **kwargs):
+def wilcoxon(x, y=None, alternative="two-sided", **kwargs):
     """
     Wilcoxon signed-rank test. It is the non-parametric version of the paired T-test.
 
@@ -432,11 +442,15 @@ def wilcoxon(x, y=None, alternative='two-sided', **kwargs):
         x = x[~np.isnan(x)]
 
     # Check tails
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
     if "tail" in kwargs:
         raise ValueError(
-            "Since Pingouin 0.4.0, the 'tail' argument has been renamed to 'alternative'.")
+            "Since Pingouin 0.4.0, the 'tail' argument has been renamed to 'alternative'."
+        )
 
     # Compute test
     if "correction" not in kwargs:
@@ -453,7 +467,7 @@ def wilcoxon(x, y=None, alternative='two-sided', **kwargs):
         # alternative = 'greater', with ties set to 0.5
         # Note that alternative = 'two-sided' gives same output as alternative = 'greater'
         cles = np.where(diff == 0, 0.5, diff > 0).mean()
-        cles = 1 - cles if alternative == 'less' else cles
+        cles = 1 - cles if alternative == "less" else cles
     else:
         # CLES cannot be computed if y is None
         cles = np.nan
@@ -471,12 +485,10 @@ def wilcoxon(x, y=None, alternative='two-sided', **kwargs):
     rbc = r_plus / rsum - r_minus / rsum
 
     # Fill output DataFrame
-    stats = pd.DataFrame({
-        'W-val': wval,
-        'alternative': alternative,
-        'p-val': pval,
-        'RBC': rbc,
-        'CLES': cles}, index=['Wilcoxon'])
+    stats = pd.DataFrame(
+        {"W-val": wval, "alternative": alternative, "p-val": pval, "RBC": rbc, "CLES": cles},
+        index=["Wilcoxon"],
+    )
     return _postprocess_dataframe(stats)
 
 
@@ -524,7 +536,7 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
     Kruskal  Hair color      3  10.58863  0.014172
     """
     # Check data
-    _check_dataframe(dv=dv, between=between, data=data, effects='between')
+    _check_dataframe(dv=dv, between=between, data=data, effects="between")
 
     # Remove NaN values
     data = data[[dv, between]].dropna()
@@ -537,10 +549,10 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
     n = data[dv].size
 
     # Rank data, dealing with ties appropriately
-    data['rank'] = scipy.stats.rankdata(data[dv])
+    data["rank"] = scipy.stats.rankdata(data[dv])
 
     # Find the total of rank per groups
-    grp = data.groupby(between, observed=True)['rank']
+    grp = data.groupby(between, observed=True)["rank"]
     sum_rk_grp = grp.sum().to_numpy()
     n_per_grp = grp.count().to_numpy()
 
@@ -548,22 +560,26 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
     H = (12 / (n * (n + 1)) * np.sum(sum_rk_grp**2 / n_per_grp)) - 3 * (n + 1)
 
     # Correct for ties
-    H /= scipy.stats.tiecorrect(data['rank'].to_numpy())
+    H /= scipy.stats.tiecorrect(data["rank"].to_numpy())
 
     # Calculate DOF and p-value
     ddof1 = n_groups - 1
     p_unc = scipy.stats.chi2.sf(H, ddof1)
 
     # Create output dataframe
-    stats = pd.DataFrame({'Source': between,
-                          'ddof1': ddof1,
-                          'H': H,
-                          'p-unc': p_unc,
-                          }, index=['Kruskal'])
+    stats = pd.DataFrame(
+        {
+            "Source": between,
+            "ddof1": ddof1,
+            "H": H,
+            "p-unc": p_unc,
+        },
+        index=["Kruskal"],
+    )
     return _postprocess_dataframe(stats)
 
 
-def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
+def friedman(data=None, dv=None, within=None, subject=None, method="chisq"):
     """Friedman test for repeated measurements.
 
     Parameters
@@ -665,12 +681,12 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
         data = data._get_numeric_data().dropna()  # Listwise deletion of missing values
         assert data.shape[0] > 2, "Data must have at least 3 non-missing rows."
         assert data.shape[1] > 1, "Data must contain at least two columns."
-        data['Subj'] = np.arange(data.shape[0])
-        data = data.melt(id_vars='Subj', var_name='Within', value_name='DV')
-        subject, within, dv = 'Subj', 'Within', 'DV'
+        data["Subj"] = np.arange(data.shape[0])
+        data = data.melt(id_vars="Subj", var_name="Within", value_name="DV")
+        subject, within, dv = "Subj", "Within", "DV"
 
     # Check dataframe
-    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects='within')
+    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
     assert not data[within].isnull().any(), "Cannot have missing values in `within`."
     assert not data[subject].isnull().any(), "Cannot have missing values in `subject`."
 
@@ -686,7 +702,7 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
     X = data_piv.to_numpy()
     n, k = X.shape
     ranked = scipy.stats.rankdata(X, axis=1)
-    ssbn = (ranked.sum(axis=0)**2).sum()
+    ssbn = (ranked.sum(axis=0) ** 2).sum()
 
     # Correction for ties
     ties = 0
@@ -696,18 +712,19 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
             ties += t * (t * t - 1)
 
     # Compute Kendall's W corrected for ties
-    W = (12 * ssbn - 3 * n**2 * k * (k + 1)**2) / (n**2 * k * (k - 1) * (k + 1) - n * ties)
+    W = (12 * ssbn - 3 * n**2 * k * (k + 1) ** 2) / (n**2 * k * (k - 1) * (k + 1) - n * ties)
 
-    if method == 'chisq':
+    if method == "chisq":
         # Compute the Q statistic
         Q = n * (k - 1) * W
         # Approximate the p-value
         ddof1 = k - 1
         p_unc = scipy.stats.chi2.sf(Q, ddof1)
         # Create output dataframe
-        stats = pd.DataFrame({
-            'Source': within, 'W': W, 'ddof1': ddof1, 'Q': Q, 'p-unc': p_unc}, index=['Friedman'])
-    elif method == 'f':
+        stats = pd.DataFrame(
+            {"Source": within, "W": W, "ddof1": ddof1, "Q": Q, "p-unc": p_unc}, index=["Friedman"]
+        )
+    elif method == "f":
         # Compute the F statistic
         F = W * (n - 1) / (1 - W)
         # Approximate the p-value
@@ -715,9 +732,10 @@ def friedman(data=None, dv=None, within=None, subject=None, method='chisq'):
         ddof2 = (n - 1) * ddof1
         p_unc = scipy.stats.f.sf(F, ddof1, ddof2)
         # Create output dataframe
-        stats = pd.DataFrame({
-            'Source': within, 'W': W, 'ddof1': ddof1, 'ddof2': ddof2, 'F': F, 'p-unc': p_unc},
-            index=['Friedman'])
+        stats = pd.DataFrame(
+            {"Source": within, "W": W, "ddof1": ddof1, "ddof2": ddof2, "F": F, "p-unc": p_unc},
+            index=["Friedman"],
+        )
     return _postprocess_dataframe(stats)
 
 
@@ -799,12 +817,12 @@ def cochran(data=None, dv=None, within=None, subject=None):
         data = data._get_numeric_data().dropna()  # Listwise deletion of missing values
         assert data.shape[0] > 2, "Data must have at least 3 non-missing rows."
         assert data.shape[1] > 1, "Data must contain at least two columns."
-        data['Subj'] = np.arange(data.shape[0])
-        data = data.melt(id_vars='Subj', var_name='Within', value_name='DV')
-        subject, within, dv = 'Subj', 'Within', 'DV'
+        data["Subj"] = np.arange(data.shape[0])
+        data = data.melt(id_vars="Subj", var_name="Within", value_name="DV")
+        subject, within, dv = "Subj", "Within", "DV"
 
     # Check data
-    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects='within')
+    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
     assert not data[within].isnull().any(), "Cannot have missing values in `within`."
     assert not data[subject].isnull().any(), "Cannot have missing values in `subject`."
 
@@ -825,12 +843,13 @@ def cochran(data=None, dv=None, within=None, subject=None):
     # n = grp.count().unique()[0]
 
     # Q statistic and p-value
-    q = (dof * (k * np.sum(grp.sum()**2) - grp.sum().sum()**2)) / \
-        (k * grp.sum().sum() - np.sum(grp_s.sum()**2))
+    q = (dof * (k * np.sum(grp.sum() ** 2) - grp.sum().sum() ** 2)) / (
+        k * grp.sum().sum() - np.sum(grp_s.sum() ** 2)
+    )
     p_unc = scipy.stats.chi2.sf(q, dof)
 
     # Create output dataframe
-    stats = pd.DataFrame({'Source': within, 'dof': dof, 'Q': q, 'p-unc': p_unc}, index=['cochran'])
+    stats = pd.DataFrame({"Source": within, "dof": dof, "Q": q, "p-unc": p_unc}, index=["cochran"])
     return _postprocess_dataframe(stats)
 
 
@@ -918,8 +937,8 @@ def harrelldavis(x, quantile=0.5, axis=-1):
     (100,)
     """
     x = np.asarray(x)
-    assert x.ndim <= 2, 'Only 1D or 2D array are supported for this function.'
-    assert axis in [0, 1, -1], 'Axis must be 0, 1 or -1.'
+    assert x.ndim <= 2, "Only 1D or 2D array are supported for this function."
+    assert axis in [0, 1, -1], "Axis must be 0, 1 or -1."
 
     # Sort the input array
     x = np.sort(x, axis=axis)
@@ -934,8 +953,7 @@ def harrelldavis(x, quantile=0.5, axis=-1):
         # Harrell-Davis estimate of the qth quantile
         m1 = (n + 1) * q
         m2 = (n + 1) * (1 - q)
-        w = (scipy.stats.beta.cdf((vec + 1) / n, m1, m2) -
-             scipy.stats.beta.cdf((vec) / n, m1, m2))
+        w = scipy.stats.beta.cdf((vec + 1) / n, m1, m2) - scipy.stats.beta.cdf((vec) / n, m1, m2)
         if axis != 0:
             y.append((w * x).sum(axis))
         else:

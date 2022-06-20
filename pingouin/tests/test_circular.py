@@ -4,14 +4,21 @@ from unittest import TestCase
 from scipy.stats import circmean
 from pingouin import read_dataset
 from pingouin.circular import convert_angles, _checkangles
-from pingouin.circular import (circ_axial, circ_corrcc, circ_corrcl, circ_mean,
-                               circ_r, circ_rayleigh, circ_vtest)
+from pingouin.circular import (
+    circ_axial,
+    circ_corrcc,
+    circ_corrcl,
+    circ_mean,
+    circ_r,
+    circ_rayleigh,
+    circ_vtest,
+)
 
 np.random.seed(123)
-a1 = [-1.2, 2.5, 3.1, -3.1, 0.2, -0.2]   # -np.pi / pi
-a2 = np.pi + np.array(a1)                # 0 / 2 * np.pi
-a3 = [150, 180, 32, 340, 54, 0, 360]     # 0 / 360 deg
-a4 = [22, 23, 0.5, 1.2, 0, 24]           # Hours (0 - 24)
+a1 = [-1.2, 2.5, 3.1, -3.1, 0.2, -0.2]  # -np.pi / pi
+a2 = np.pi + np.array(a1)  # 0 / 2 * np.pi
+a3 = [150, 180, 32, 340, 54, 0, 360]  # 0 / 360 deg
+a4 = [22, 23, 0.5, 1.2, 0, 24]  # Hours (0 - 24)
 a5 = np.random.randint(0, 1440, (2, 4))  # Minutes, 2D array
 a3_nan = np.array([150, 180, 32, 340, 54, np.nan, 0, 360])
 a5_nan = a5.astype(float)
@@ -31,11 +38,10 @@ class TestCircular(TestCase):
         with pytest.raises(ValueError):
             _checkangles(a3, axis=None)
         # Convert angles
-        np.testing.assert_array_almost_equal(a1, convert_angles(a1, low=-np.pi,
-                                                                high=np.pi))
-        np.testing.assert_array_almost_equal(a2, convert_angles(a2, low=0,
-                                                                high=2 * np.pi,
-                                                                positive=True))
+        np.testing.assert_array_almost_equal(a1, convert_angles(a1, low=-np.pi, high=np.pi))
+        np.testing.assert_array_almost_equal(
+            a2, convert_angles(a2, low=0, high=2 * np.pi, positive=True)
+        )
         _checkangles(convert_angles(a2, low=0, high=2 * np.pi))
         _checkangles(convert_angles(a3, low=0, high=360))
         _checkangles(convert_angles(a3_nan, low=0, high=360))
@@ -54,8 +60,9 @@ class TestCircular(TestCase):
 
         # Compare with scipy.stats.circmean
         def assert_circmean(x, low, high, axis=-1):
-            m1 = convert_angles(circmean(x, low=low, high=high, axis=axis,
-                                         nan_policy='omit'), low, high)
+            m1 = convert_angles(
+                circmean(x, low=low, high=high, axis=axis, nan_policy="omit"), low, high
+            )
             m2 = circ_mean(convert_angles(x, low, high), axis=axis)
             assert (np.round(m1, 4) == np.round(m2, 4)).all()
 
@@ -73,12 +80,12 @@ class TestCircular(TestCase):
 
     def test_circ_axial(self):
         """Test function circ_axial."""
-        df = read_dataset('circular')
-        angles = df['Orientation'].to_numpy()
+        df = read_dataset("circular")
+        angles = df["Orientation"].to_numpy()
         angles = circ_axial(np.deg2rad(angles), 2)
-        assert np.allclose(np.round(angles, 4),
-                           [0, 0.7854, 1.5708, 2.3562, 3.1416, 3.9270, 4.7124,
-                           5.4978])
+        assert np.allclose(
+            np.round(angles, 4), [0, 0.7854, 1.5708, 2.3562, 3.1416, 3.9270, 4.7124, 5.4978]
+        )
 
     def test_circ_corrcc(self):
         """Test function circ_corrcc."""
@@ -130,7 +137,7 @@ class TestCircular(TestCase):
         # Compare with the CircStats MATLAB toolbox
         assert round(z, 3) == 1.236
         assert round(pval, 4) == 0.3048
-        z, pval = circ_rayleigh(x, w=[.1, .2, .3, .4, .5], d=0.2)
+        z, pval = circ_rayleigh(x, w=[0.1, 0.2, 0.3, 0.4, 0.5], d=0.2)
         assert round(z, 3) == 0.278
         assert round(pval, 4) == 0.8070
 
@@ -141,6 +148,6 @@ class TestCircular(TestCase):
         # Compare with the CircStats MATLAB toolbox
         assert round(v, 3) == 2.486
         assert round(pval, 4) == 0.0579
-        v, pval = circ_vtest(x, dir=0.5, w=[.1, .2, .3, .4, .5], d=0.2)
+        v, pval = circ_vtest(x, dir=0.5, w=[0.1, 0.2, 0.3, 0.4, 0.5], d=0.2)
         assert round(v, 3) == 0.637
         assert round(pval, 4) == 0.2309

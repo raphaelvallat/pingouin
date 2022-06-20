@@ -8,17 +8,31 @@ What's new
 
 *************
 
-v0.6.0.dev
-----------
+v0.5.2 (June 2022)
+------------------
 
-This is a major release with several API-breaking changes.
+**Bugfixes**
 
-a. The :py:func:`pingouin.pairwise_ttests` has been renamed to :py:func:`pingouin.pairwise_tests`. Non-parametric tests are also supported in this function with the `parametric=False` argument, and thus the name "ttests" was misleading (see `issue 209 <https://github.com/raphaelvallat/pingouin/issues/209>`_).
+a. The eta-squared (``n2``) effect size was not properly calculated in one-way and two-way repeated measures ANOVAs. Specifically, Pingouin followed the same behavior as JASP, i.e. the eta-squared was the same as the partial eta-squared. However, as explained in `issue 251 <https://github.com/raphaelvallat/pingouin/issues/251>`_, this behavior is not valid. In one-way ANOVA design, the eta-squared should be equal to the generalized eta-squared. Note that, as of March 2022, this bug is also present in JASP. We have therefore updated the unit tests to use JAMOVI instead.
+
+.. warning:: Please double check any effect sizes previously obtained with the :py:func:`pingouin.rm_anova` function.
+
+b. Fixed invalid resampling behavior for bivariate functions in :py:func:`pingouin.compute_bootci` when x and y were not paired. `PR 281 <https://github.com/raphaelvallat/pingouin/pull/281>`_.
+c. Fixed bug where ``confidence`` (previously ``ci``) was ignored when calculating the bootstrapped confidence intervals in :py:func:`pingouin.plot_shift`. `PR 282 <https://github.com/raphaelvallat/pingouin/pull/282>`_.
 
 **Enhancements**
 
-a. Allow :py:func:`pingouin.bayesfactor_binom` to take Beta alternative model. `PR 252 <https://github.com/raphaelvallat/pingouin/pull/252>`_.
-b. Allow keyword arguments for logistic regression in :py:func:`pingouin.mediation_analysis`. `PR 245 <https://github.com/raphaelvallat/pingouin/pull/245>`_.
+a. The :py:func:`pingouin.pairwise_ttests` has been renamed to :py:func:`pingouin.pairwise_tests`. Non-parametric tests are also supported in this function with the `parametric=False` argument, and thus the name "ttests" was misleading (see `issue 209 <https://github.com/raphaelvallat/pingouin/issues/209>`_).
+b. Allow :py:func:`pingouin.bayesfactor_binom` to take Beta alternative model. `PR 252 <https://github.com/raphaelvallat/pingouin/pull/252>`_.
+c. Allow keyword arguments for logistic regression in :py:func:`pingouin.mediation_analysis`. `PR 245 <https://github.com/raphaelvallat/pingouin/pull/245>`_.
+d. Speed improvements for the Holm and FDR correction in :py:func:`pingouin.multicomp`. `PR 271 <https://github.com/raphaelvallat/pingouin/pull/271>`_.
+e. Speed improvements univariate functions in :py:func:`pingouin.compute_bootci` (e.g. ``func="mean"`` is now vectorized).
+f. Rename ``eta`` to ``eta_squared`` in :py:func:`pingouin.power_anova` and :py:func:`pingouin.power_rm_anova` to avoid any confusion. `PR 280 <https://github.com/raphaelvallat/pingouin/pull/280>`_.
+g. Use `black <https://black.readthedocs.io/en/stable/>`_ code formatting.
+
+**Dependencies**
+
+a. Force scikit-learn<1.1.0 to avoid bug in :py:func:`pingouin.logistic_regression`. `PR 272 <https://github.com/raphaelvallat/pingouin/issues/272>`_.
 
 v0.5.1 (February 2022)
 ----------------------

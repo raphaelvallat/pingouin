@@ -255,9 +255,9 @@ The :py:func:`pingouin.normality` function works with lists, arrays, or pandas D
   :widths: auto
 
   ========  =======  ====  =====  =======  =======  =======  =======
-  Source         SS    DF     MS        F    p-unc      np2      eps
+  Source         SS    DF     MS        F    p-unc      ng2      eps
   ========  =======  ====  =====  =======  =======  =======  =======
-  Time        7.628     2  3.814    3.913    0.023    0.062    0.999
+  Time        7.628     2  3.814    3.913    0.023     0.04    0.999
   Error     115.027   118  0.975      nan      nan      nan      nan
   ========  =======  ====  =====  =======  =======  =======  =======
 

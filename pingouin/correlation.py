@@ -47,17 +47,21 @@ def _correl_pvalue(r, n, k=0, alternative="two-sided"):
     the p-value (i.e. using a beta distribution)
     """
     from scipy.stats import t
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
 
     # Method 1: using a student T distribution
     dof = n - k - 2
     tval = r * np.sqrt(dof / (1 - r**2))
-    if alternative == 'less':
+    if alternative == "less":
         pval = t.cdf(tval, dof)
-    elif alternative == 'greater':
+    elif alternative == "greater":
         pval = t.sf(tval, dof)
-    elif alternative == 'two-sided':
+    elif alternative == "two-sided":
         pval = 2 * t.sf(np.abs(tval), dof)
 
     # Method 2: beta distribution (similar to scipy.stats.pearsonr, faster)
@@ -67,7 +71,7 @@ def _correl_pvalue(r, n, k=0, alternative="two-sided"):
     return pval
 
 
-def skipped(x, y, corr_type='spearman'):
+def skipped(x, y, corr_type="spearman"):
     """Skipped correlation (Rousselet and Pernet 2012).
 
     Parameters
@@ -114,9 +118,11 @@ def skipped(x, y, corr_type='spearman'):
     """
     # Check that sklearn is installed
     from pingouin.utils import _is_sklearn_installed
+
     _is_sklearn_installed(raise_error=True)
     from scipy.stats import chi2
     from sklearn.covariance import MinCovDet
+
     X = np.column_stack((x, y))
     nrows, ncols = X.shape
     gval = np.sqrt(chi2.ppf(0.975, 2))
@@ -140,13 +146,11 @@ def skipped(x, y, corr_type='spearman'):
     dis = np.zeros(shape=(nrows, nrows))
     for i in np.arange(nrows):
         if bot[i] != 0:  # Avoid division by zero error
-            dis[i, :] = np.linalg.norm(
-                B.dot(B[i, :, None]) * B[i, :] / bot[i], axis=1)
+            dis[i, :] = np.linalg.norm(B.dot(B[i, :, None]) * B[i, :] / bot[i], axis=1)
 
     # Detect outliers
     def idealf(x):
-        """Compute the ideal fourths IQR (Wilcox 2012).
-        """
+        """Compute the ideal fourths IQR (Wilcox 2012)."""
         n = len(x)
         j = int(np.floor(n / 4 + 5 / 12))
         y = np.sort(x)
@@ -159,10 +163,10 @@ def skipped(x, y, corr_type='spearman'):
     # One can either use the MAD or the IQR (see Wilcox 2012)
     # MAD = mad(dis, axis=1)
     iqr = np.apply_along_axis(idealf, 1, dis)
-    thresh = (np.median(dis, axis=1) + gval * iqr)
+    thresh = np.median(dis, axis=1) + gval * iqr
     outliers = np.apply_along_axis(np.greater, 0, dis, thresh).any(axis=0)
     # Compute correlation on remaining data
-    if corr_type == 'spearman':
+    if corr_type == "spearman":
         r, pval = spearmanr(X[~outliers, 0], X[~outliers, 1])
     else:
         r, pval = pearsonr(X[~outliers, 0], X[~outliers, 1])
@@ -237,7 +241,7 @@ def shepherd(x, y, n_boot=200):
     # Bootstrapping on Mahalanobis distance
     m = bsmahal(X, X, n_boot)
     # Determine outliers
-    outliers = (m >= 6)
+    outliers = m >= 6
     # Compute correlation
     r, pval = spearmanr(x[~outliers], y[~outliers])
     # (optional) double the p-value to achieve a nominal false alarm rate
@@ -246,7 +250,7 @@ def shepherd(x, y, n_boot=200):
     return r, pval, outliers
 
 
-def percbend(x, y, beta=.2):
+def percbend(x, y, beta=0.2):
     """
     Percentage bend correlation (Wilcox 1994).
 
@@ -360,13 +364,13 @@ def bicor(x, y, c=9):
     # Calculate weights
     u = (x - x_median) / (c * x_mad)
     v = (y - y_median) / (c * y_mad)
-    w_x = (1 - u**2)**2 * ((1 - np.abs(u)) > 0)
-    w_y = (1 - v**2)**2 * ((1 - np.abs(v)) > 0)
+    w_x = (1 - u**2) ** 2 * ((1 - np.abs(u)) > 0)
+    w_y = (1 - v**2) ** 2 * ((1 - np.abs(v)) > 0)
 
     # Normalize x and y by weights
     x_norm = (x - x_median) * w_x
     y_norm = (y - y_median) * w_y
-    denom = (np.sqrt((x_norm**2).sum()) * np.sqrt((y_norm**2).sum()))
+    denom = np.sqrt((x_norm**2).sum()) * np.sqrt((y_norm**2).sum())
 
     # Correlation coefficient
     r = (x_norm * y_norm).sum() / denom
@@ -374,7 +378,7 @@ def bicor(x, y, c=9):
     return r, pval
 
 
-def corr(x, y, alternative='two-sided', method='pearson', **kwargs):
+def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
     """(Robust) correlation between two variables.
 
     Parameters
@@ -579,32 +583,36 @@ def corr(x, y, alternative='two-sided', method='pearson', **kwargs):
     # Safety check
     x = np.asarray(x)
     y = np.asarray(y)
-    assert x.ndim == y.ndim == 1, 'x and y must be 1D array.'
-    assert x.size == y.size, 'x and y must have the same length.'
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+    assert x.ndim == y.ndim == 1, "x and y must be 1D array."
+    assert x.size == y.size, "x and y must have the same length."
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
     if "tail" in kwargs:
         raise ValueError(
-            "Since Pingouin 0.4.0, the 'tail' argument has been renamed to 'alternative'.")
+            "Since Pingouin 0.4.0, the 'tail' argument has been renamed to 'alternative'."
+        )
 
     # Remove rows with missing values
     x, y = remove_na(x, y, paired=True)
     n = x.size
 
     # Compute correlation coefficient and two-sided p-value
-    if method == 'pearson':
+    if method == "pearson":
         r, pval = pearsonr(x, y)
-    elif method == 'spearman':
+    elif method == "spearman":
         r, pval = spearmanr(x, y, **kwargs)
-    elif method == 'kendall':
+    elif method == "kendall":
         r, pval = kendalltau(x, y, **kwargs)
-    elif method == 'bicor':
+    elif method == "bicor":
         r, pval = bicor(x, y, **kwargs)
-    elif method == 'percbend':
+    elif method == "percbend":
         r, pval = percbend(x, y, **kwargs)
-    elif method == 'shepherd':
+    elif method == "shepherd":
         r, pval, outliers = shepherd(x, y, **kwargs)
-    elif method == 'skipped':
+    elif method == "skipped":
         r, pval, outliers = skipped(x, y, **kwargs)
     else:
         raise ValueError(f'Method "{method}" not recognized.')
@@ -613,9 +621,17 @@ def corr(x, y, alternative='two-sided', method='pearson', **kwargs):
         # Correlation failed -- new in version v0.3.4, instead of raising an
         # error we just return a dataframe full of NaN (except sample size).
         # This avoid sudden stop in pingouin.pairwise_corr.
-        return pd.DataFrame({
-            'n': n, 'r': np.nan, 'CI95%': np.nan, 'p-val': np.nan, 'BF10': np.nan,
-            'power': np.nan}, index=[method])
+        return pd.DataFrame(
+            {
+                "n": n,
+                "r": np.nan,
+                "CI95%": np.nan,
+                "p-val": np.nan,
+                "BF10": np.nan,
+                "power": np.nan,
+            },
+            index=[method],
+        )
 
     # Sample size after outlier removal
     n_outliers = sum(outliers) if "outliers" in locals() else 0
@@ -627,7 +643,8 @@ def corr(x, y, alternative='two-sided', method='pearson', **kwargs):
         pr = 1
     else:
         ci = compute_esci(
-            stat=r, nx=n_clean, ny=n_clean, eftype='r', decimals=6, alternative=alternative)
+            stat=r, nx=n_clean, ny=n_clean, eftype="r", decimals=6, alternative=alternative
+        )
         pr = power_corr(r=r, n=n_clean, power=None, alpha=0.05, alternative=alternative)
 
     # Recompute p-value if tail is one-sided
@@ -635,27 +652,35 @@ def corr(x, y, alternative='two-sided', method='pearson', **kwargs):
         pval = _correl_pvalue(r, n_clean, k=0, alternative=alternative)
 
     # Create dictionnary
-    stats = {'n': n, 'r': r, 'CI95%': [ci], 'p-val': pval, 'power': pr}
+    stats = {"n": n, "r": r, "CI95%": [ci], "p-val": pval, "power": pr}
 
-    if method in ['shepherd', 'skipped']:
-        stats['outliers'] = n_outliers
+    if method in ["shepherd", "skipped"]:
+        stats["outliers"] = n_outliers
 
     # Compute the BF10 for Pearson correlation only
-    if method == 'pearson':
-        stats['BF10'] = bayesfactor_pearson(r, n_clean, alternative=alternative)
+    if method == "pearson":
+        stats["BF10"] = bayesfactor_pearson(r, n_clean, alternative=alternative)
 
     # Convert to DataFrame
     stats = pd.DataFrame(stats, index=[method])
 
     # Define order
-    col_keep = ['n', 'outliers', 'r', 'CI95%', 'p-val', 'BF10', 'power']
+    col_keep = ["n", "outliers", "r", "CI95%", "p-val", "BF10", "power"]
     col_order = [k for k in col_keep if k in stats.keys().tolist()]
     return _postprocess_dataframe(stats)[col_order]
 
 
 @pf.register_dataframe_method
-def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
-                 y_covar=None, alternative='two-sided', method='pearson'):
+def partial_corr(
+    data=None,
+    x=None,
+    y=None,
+    covar=None,
+    x_covar=None,
+    y_covar=None,
+    alternative="two-sided",
+    method="pearson",
+):
     """Partial and semi-partial correlation.
 
     Parameters
@@ -790,39 +815,45 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
     pearson  30  0.463  [0.1, 0.72]  0.015
     """
     from pingouin.utils import _flatten_list
+
     # Safety check
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
-    assert method in ['pearson', 'spearman'], (
-        'only "pearson" and "spearman" are supported for partial correlation.')
-    assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
-    assert data.shape[0] > 2, 'Data must have at least 3 samples.'
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    assert method in [
+        "pearson",
+        "spearman",
+    ], 'only "pearson" and "spearman" are supported for partial correlation.'
+    assert isinstance(data, pd.DataFrame), "data must be a pandas DataFrame."
+    assert data.shape[0] > 2, "Data must have at least 3 samples."
     if covar is not None and (x_covar is not None or y_covar is not None):
-        raise ValueError('Cannot specify both covar and {x,y}_covar.')
+        raise ValueError("Cannot specify both covar and {x,y}_covar.")
     if x_covar is not None and y_covar is not None:
-        raise ValueError('Cannot specify both x_covar and y_covar.')
-    assert x != covar, 'x and covar must be independent'
-    assert y != covar, 'y and covar must be independent'
-    assert x != y, 'x and y must be independent'
+        raise ValueError("Cannot specify both x_covar and y_covar.")
+    assert x != covar, "x and covar must be independent"
+    assert y != covar, "y and covar must be independent"
+    assert x != y, "x and y must be independent"
     if isinstance(covar, list):
-        assert x not in covar, 'x and covar must be independent'
-        assert y not in covar, 'y and covar must be independent'
+        assert x not in covar, "x and covar must be independent"
+        assert y not in covar, "y and covar must be independent"
     # Check that columns exist
     col = _flatten_list([x, y, covar, x_covar, y_covar])
-    assert all([c in data for c in col]), 'columns are not in dataframe.'
+    assert all([c in data for c in col]), "columns are not in dataframe."
     # Check that columns are numeric
-    assert all([data[c].dtype.kind in 'bfiu' for c in col])
+    assert all([data[c].dtype.kind in "bfiu" for c in col])
 
     # Drop rows with NaN
     data = data[col].dropna()
     n = data.shape[0]  # Number of samples
     k = data.shape[1] - 2  # Number of covariates
-    assert n > 2, 'Data must have at least 3 non-NAN samples.'
+    assert n > 2, "Data must have at least 3 non-NAN samples."
 
     # Calculate the partial corrrelation matrix - similar to pingouin.pcorr()
     if method == "spearman":
         # Convert the data to rank, similar to R cov()
-        V = data.rank(na_option='keep').cov()
+        V = data.rank(na_option="keep").cov()
     else:
         V = data.cov()
     Vi = np.linalg.pinv(V, hermitian=True)  # Inverse covariance matrix
@@ -834,10 +865,12 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
         r = pcor[0, 1]
     else:
         # Semi-partial correlation matrix
-        with np.errstate(divide='ignore'):
-            spcor = pcor / \
-                np.sqrt(np.diag(V))[..., None] / \
-                np.sqrt(np.abs(Vi_diag - Vi ** 2 / Vi_diag[..., None])).T
+        with np.errstate(divide="ignore"):
+            spcor = (
+                pcor
+                / np.sqrt(np.diag(V))[..., None]
+                / np.sqrt(np.abs(Vi_diag - Vi**2 / Vi_diag[..., None])).T
+            )
         if y_covar is not None:
             r = spcor[0, 1]  # y_covar is removed from y
         else:
@@ -845,28 +878,28 @@ def partial_corr(data=None, x=None, y=None, covar=None, x_covar=None,
 
     if np.isnan(r):
         # Correlation failed. Return NaN. When would this happen?
-        return pd.DataFrame(
-            {'n': n, 'r': np.nan, 'CI95%': np.nan, 'p-val': np.nan}, index=[method])
+        return pd.DataFrame({"n": n, "r": np.nan, "CI95%": np.nan, "p-val": np.nan}, index=[method])
 
     # Compute the two-sided p-value and confidence intervals
     # https://online.stat.psu.edu/stat505/lesson/6/6.3
     pval = _correl_pvalue(r, n, k, alternative)
     ci = compute_esci(
-        stat=r, nx=(n - k), ny=(n - k), eftype='r', decimals=6, alternative=alternative)
+        stat=r, nx=(n - k), ny=(n - k), eftype="r", decimals=6, alternative=alternative
+    )
 
     # Create dictionnary
     stats = {
-        'n': n,
-        'r': r,
-        'CI95%': [ci],
-        'p-val': pval,
+        "n": n,
+        "r": r,
+        "CI95%": [ci],
+        "p-val": pval,
     }
 
     # Convert to DataFrame
     stats = pd.DataFrame(stats, index=[method])
 
     # Define order
-    col_keep = ['n', 'r', 'CI95%', 'p-val']
+    col_keep = ["n", "r", "CI95%", "p-val"]
     col_order = [k for k in col_keep if k in stats.keys().tolist()]
     return _postprocess_dataframe(stats)[col_order]
 
@@ -925,8 +958,15 @@ def pcorr(self):
 
 
 @pf.register_dataframe_method
-def rcorr(self, method='pearson', upper='pval', decimals=3, padjust=None,
-          stars=True, pval_stars={0.001: '***', 0.01: '**', 0.05: '*'}):
+def rcorr(
+    self,
+    method="pearson",
+    upper="pval",
+    decimals=3,
+    padjust=None,
+    stars=True,
+    pval_stars={0.001: "***", 0.01: "**", 0.05: "*"},
+):
     """
     Correlation matrix of a dataframe with p-values and/or sample size on the
     upper triangle (:py:class:`pandas.DataFrame` method).
@@ -1035,15 +1075,15 @@ def rcorr(self, method='pearson', upper='pval', decimals=3, padjust=None,
     from scipy.stats import pearsonr, spearmanr
 
     # Safety check
-    assert isinstance(pval_stars, dict), 'pval_stars must be a dictionnary.'
-    assert isinstance(decimals, int), 'decimals must be an int.'
-    assert method in ['pearson', 'spearman'], 'Method is not recognized.'
-    assert upper in ['pval', 'n'], 'upper must be either `pval` or `n`.'
+    assert isinstance(pval_stars, dict), "pval_stars must be a dictionnary."
+    assert isinstance(decimals, int), "decimals must be an int."
+    assert method in ["pearson", "spearman"], "Method is not recognized."
+    assert upper in ["pval", "n"], "upper must be either `pval` or `n`."
     mat = self.corr(method=method).round(decimals)
-    if upper == 'n':
+    if upper == "n":
         mat_upper = self.corr(method=lambda x, y: len(x)).astype(int)
     else:
-        if method == 'pearson':
+        if method == "pearson":
             mat_upper = self.corr(method=lambda x, y: pearsonr(x, y)[1])
         else:
             # Method = 'spearman'
@@ -1056,15 +1096,15 @@ def rcorr(self, method='pearson', upper='pval', decimals=3, padjust=None,
     # Convert r to text
     mat = mat.astype(str)
     # Inplace modification of the diagonal
-    np.fill_diagonal(mat.to_numpy(), '-')
+    np.fill_diagonal(mat.to_numpy(), "-")
 
-    if upper == 'pval':
+    if upper == "pval":
 
         def replace_pval(x):
             for key, value in pval_stars.items():
                 if x < key:
                     return value
-            return ''
+            return ""
 
         if stars:
             # Replace p-values by stars
@@ -1142,15 +1182,16 @@ def rm_corr(data=None, x=None, y=None, subject=None):
         >>> g = pg.plot_rm_corr(data=df, x='pH', y='PacO2', subject='Subject')
     """
     from pingouin import ancova, power_corr
+
     # Safety checks
-    assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame'
-    assert x in data.columns, 'The %s column is not in data.' % x
-    assert y in data.columns, 'The %s column is not in data.' % y
-    assert data[x].dtype.kind in 'bfiu', '%s must be numeric.' % x
-    assert data[y].dtype.kind in 'bfiu', '%s must be numeric.' % y
-    assert subject in data.columns, 'The %s column is not in data.' % subject
+    assert isinstance(data, pd.DataFrame), "Data must be a DataFrame"
+    assert x in data.columns, "The %s column is not in data." % x
+    assert y in data.columns, "The %s column is not in data." % y
+    assert data[x].dtype.kind in "bfiu", "%s must be numeric." % x
+    assert data[y].dtype.kind in "bfiu", "%s must be numeric." % y
+    assert subject in data.columns, "The %s column is not in data." % subject
     if data[subject].nunique() < 3:
-        raise ValueError('rm_corr requires at least 3 unique subjects.')
+        raise ValueError("rm_corr requires at least 3 unique subjects.")
 
     # Remove missing values
     data = data[[x, y, subject]].dropna(axis=0)
@@ -1158,33 +1199,30 @@ def rm_corr(data=None, x=None, y=None, subject=None):
     # Using PINGOUIN
     # For max precision, make sure rounding is disabled
     old_options = options.copy()
-    options['round'] = None
+    options["round"] = None
     aov = ancova(dv=y, covar=x, between=subject, data=data)
     options.update(old_options)  # restore options
     bw = aov.bw_  # Beta within parameter
     sign = np.sign(bw)
-    dof = int(aov.at[2, 'DF'])
+    dof = int(aov.at[2, "DF"])
     n = dof + 2
-    ssfactor = aov.at[1, 'SS']
-    sserror = aov.at[2, 'SS']
+    ssfactor = aov.at[1, "SS"]
+    sserror = aov.at[2, "SS"]
     rm = sign * np.sqrt(ssfactor / (ssfactor + sserror))
-    pval = aov.at[1, 'p-unc']
-    ci = compute_esci(stat=rm, nx=n, eftype='pearson').tolist()
+    pval = aov.at[1, "p-unc"]
+    ci = compute_esci(stat=rm, nx=n, eftype="pearson").tolist()
     pwr = power_corr(r=rm, n=n, alternative="two-sided")
     # Convert to Dataframe
-    stats = pd.DataFrame({"r": rm,
-                          "dof": int(dof),
-                          "pval": pval,
-                          "CI95%": [ci],
-                          "power": pwr}, index=["rm_corr"])
+    stats = pd.DataFrame(
+        {"r": rm, "dof": int(dof), "pval": pval, "CI95%": [ci], "power": pwr}, index=["rm_corr"]
+    )
     return _postprocess_dataframe(stats)
 
 
 def _dcorr(y, n2, A, dcov2_xx):
-    """Helper function for distance correlation bootstrapping.
-    """
+    """Helper function for distance correlation bootstrapping."""
     # Pairwise Euclidean distances
-    b = squareform(pdist(y, metric='euclidean'))
+    b = squareform(pdist(y, metric="euclidean"))
     # Double centering
     B = b - b.mean(axis=0)[None, :] - b.mean(axis=1)[:, None] + b.mean()
     # Compute squared distance covariances
@@ -1193,7 +1231,7 @@ def _dcorr(y, n2, A, dcov2_xx):
     return np.sqrt(dcov2_xy) / np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
 
 
-def distance_corr(x, y, alternative='greater', n_boot=1000, seed=None):
+def distance_corr(x, y, alternative="greater", n_boot=1000, seed=None):
     """Distance correlation between two arrays.
 
     Statistical significance (p-value) is evaluated with a permutation test.
@@ -1287,25 +1325,28 @@ def distance_corr(x, y, alternative='greater', n_boot=1000, seed=None):
     >>> round(distance_corr(a, b, n_boot=None), 3)
     0.88
     """
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
     x = np.asarray(x)
     y = np.asarray(y)
     # Check for NaN values
     if any([np.isnan(np.min(x)), np.isnan(np.min(y))]):
-        raise ValueError('Input arrays must not contain NaN values.')
+        raise ValueError("Input arrays must not contain NaN values.")
     if x.ndim == 1:
         x = x[:, None]
     if y.ndim == 1:
         y = y[:, None]
-    assert x.shape[0] == y.shape[0], 'x and y must have same number of samples'
+    assert x.shape[0] == y.shape[0], "x and y must have same number of samples"
 
     # Extract number of samples
     n = x.shape[0]
     n2 = n**2
 
     # Process first array to avoid redundancy when performing bootstrap
-    a = squareform(pdist(x, metric='euclidean'))
+    a = squareform(pdist(x, metric="euclidean"))
     A = a - a.mean(axis=0)[None, :] - a.mean(axis=1)[:, None] + a.mean()
     dcov2_xx = np.vdot(A, A) / n2
 

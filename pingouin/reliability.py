@@ -8,8 +8,9 @@ from pingouin.utils import _postprocess_dataframe
 __all__ = ["cronbach_alpha", "intraclass_corr"]
 
 
-def cronbach_alpha(data=None, items=None, scores=None, subject=None,
-                   nan_policy='pairwise', ci=.95):
+def cronbach_alpha(
+    data=None, items=None, scores=None, subject=None, nan_policy="pairwise", ci=0.95
+):
     """Cronbach's alpha reliability measure.
 
     Parameters
@@ -121,8 +122,8 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     (0.5917188485995826, array([0.195, 0.84 ]))
     """
     # Safety check
-    assert isinstance(data, pd.DataFrame), 'data must be a dataframe.'
-    assert nan_policy in ['pairwise', 'listwise']
+    assert isinstance(data, pd.DataFrame), "data must be a dataframe."
+    assert nan_policy in ["pairwise", "listwise"]
 
     if all([v is not None for v in [items, scores, subject]]):
         # Data in long-format: we first convert to a wide format
@@ -130,13 +131,13 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
 
     # From now we assume that data is in wide format
     n, k = data.shape
-    assert k >= 2, 'At least two items are required.'
-    assert n >= 2, 'At least two raters/subjects are required.'
-    err = 'All columns must be numeric.'
-    assert all([data[c].dtype.kind in 'bfiu' for c in data.columns]), err
-    if data.isna().any().any() and nan_policy == 'listwise':
+    assert k >= 2, "At least two items are required."
+    assert n >= 2, "At least two raters/subjects are required."
+    err = "All columns must be numeric."
+    assert all([data[c].dtype.kind in "bfiu" for c in data.columns]), err
+    if data.isna().any().any() and nan_policy == "listwise":
         # In R = psych:alpha(data, use="complete.obs")
-        data = data.dropna(axis=0, how='any')
+        data = data.dropna(axis=0, how="any")
 
     # Compute covariance matrix and Cronbach's alpha
     C = data.cov()
@@ -155,8 +156,7 @@ def cronbach_alpha(data=None, items=None, scores=None, subject=None,
     return cronbach, np.round([lower, upper], 3)
 
 
-def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
-                    nan_policy='raise'):
+def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_policy="raise"):
     """Intraclass correlation.
 
     Parameters
@@ -259,10 +259,10 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
     from pingouin import anova
 
     # Safety check
-    assert isinstance(data, pd.DataFrame), 'data must be a dataframe.'
+    assert isinstance(data, pd.DataFrame), "data must be a dataframe."
     assert all([v is not None for v in [targets, raters, ratings]])
     assert all([v in data.columns for v in [targets, raters, ratings]])
-    assert nan_policy in ['omit', 'raise']
+    assert nan_policy in ["omit", "raise"]
 
     # Convert data to wide-format
     data = data.pivot_table(index=targets, columns=raters, values=ratings, observed=True)
@@ -270,19 +270,21 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
     # Listwise deletion of missing values
     nan_present = data.isna().any().any()
     if nan_present:
-        if nan_policy == 'omit':
-            data = data.dropna(axis=0, how='any')
+        if nan_policy == "omit":
+            data = data.dropna(axis=0, how="any")
         else:
-            raise ValueError("Either missing values are present in data or "
-                             "data are unbalanced. Please remove them "
-                             "manually or use nan_policy='omit'.")
+            raise ValueError(
+                "Either missing values are present in data or "
+                "data are unbalanced. Please remove them "
+                "manually or use nan_policy='omit'."
+            )
 
     # Back to long-format
     # data_wide = data.copy()  # Optional, for PCA
     data = data.reset_index().melt(id_vars=targets, value_name=ratings)
 
     # Check that ratings is a numeric variable
-    assert data[ratings].dtype.kind in 'bfiu', 'Ratings must be numeric.'
+    assert data[ratings].dtype.kind in "bfiu", "Ratings must be numeric."
     # Check that data are fully balanced
     # This behavior is ensured by the long-to-wide-to-long transformation
     # Unbalanced data will result in rows with missing values.
@@ -293,20 +295,18 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
     n = data[targets].nunique()
 
     # Two-way ANOVA
-    with np.errstate(invalid='ignore'):
+    with np.errstate(invalid="ignore"):
         # For max precision, make sure rounding is disabled
         old_options = options.copy()
-        options['round'] = None
-        aov = anova(data=data, dv=ratings, between=[targets, raters],
-                    ss_type=2)
+        options["round"] = None
+        aov = anova(data=data, dv=ratings, between=[targets, raters], ss_type=2)
         options.update(old_options)  # restore options
 
     # Extract mean squares
-    msb = aov.at[0, 'MS']
-    msw = (aov.at[1, 'SS'] + aov.at[2, 'SS']) / (aov.at[1, 'DF'] +
-                                                 aov.at[2, 'DF'])
-    msj = aov.at[1, 'MS']
-    mse = aov.at[2, 'MS']
+    msb = aov.at[0, "MS"]
+    msw = (aov.at[1, "SS"] + aov.at[2, "SS"]) / (aov.at[1, "DF"] + aov.at[2, "DF"])
+    msj = aov.at[1, "MS"]
+    mse = aov.at[2, "MS"]
 
     # Calculate ICCs
     icc1 = (msb - msw) / (msb + (k - 1) * msw)
@@ -328,15 +328,20 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
 
     # Create output dataframe
     stats = {
-        'Type': ['ICC1', 'ICC2', 'ICC3', 'ICC1k', 'ICC2k', 'ICC3k'],
-        'Description': ['Single raters absolute', 'Single random raters',
-                        'Single fixed raters', 'Average raters absolute',
-                        'Average random raters', 'Average fixed raters'],
-        'ICC': [icc1, icc2, icc3, icc1k, icc2k, icc3k],
-        'F': [f1k, f2k, f2k, f1k, f2k, f2k],
-        'df1': n - 1,
-        'df2': [df1kd, df2kd, df2kd, df1kd, df2kd, df2kd],
-        'pval': [p1k, p2k, p2k, p1k, p2k, p2k]
+        "Type": ["ICC1", "ICC2", "ICC3", "ICC1k", "ICC2k", "ICC3k"],
+        "Description": [
+            "Single raters absolute",
+            "Single random raters",
+            "Single fixed raters",
+            "Average raters absolute",
+            "Average random raters",
+            "Average fixed raters",
+        ],
+        "ICC": [icc1, icc2, icc3, icc1k, icc2k, icc3k],
+        "F": [f1k, f2k, f2k, f1k, f2k, f2k],
+        "df1": n - 1,
+        "df2": [df1kd, df2kd, df2kd, df1kd, df2kd, df2kd],
+        "pval": [p1k, p2k, p2k, p1k, p2k, p2k],
     }
 
     stats = pd.DataFrame(stats)
@@ -354,24 +359,21 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None,
     u3 = (f3u - 1) / (f3u + (k - 1))
     # Case 2
     fj = msj / mse
-    vn = df2kd * ((k * icc2 * fj + n * (1 + (k - 1) * icc2) - k * icc2))**2
-    vd = df1 * k**2 * icc2**2 * fj**2 + \
-        (n * (1 + (k - 1) * icc2) - k * icc2)**2
+    vn = df2kd * ((k * icc2 * fj + n * (1 + (k - 1) * icc2) - k * icc2)) ** 2
+    vd = df1 * k**2 * icc2**2 * fj**2 + (n * (1 + (k - 1) * icc2) - k * icc2) ** 2
     v = vn / vd
     f2u = f.ppf(1 - alpha / 2, n - 1, v)
     f2l = f.ppf(1 - alpha / 2, v, n - 1)
-    l2 = n * (msb - f2u * mse) / (f2u * (k * msj + (k * n - k - n) * mse) +
-                                  n * msb)
-    u2 = n * (f2l * msb - mse) / (k * msj + (k * n - k - n) * mse + n * f2l *
-                                  msb)
+    l2 = n * (msb - f2u * mse) / (f2u * (k * msj + (k * n - k - n) * mse) + n * msb)
+    u2 = n * (f2l * msb - mse) / (k * msj + (k * n - k - n) * mse + n * f2l * msb)
 
-    stats['CI95%'] = [
+    stats["CI95%"] = [
         np.array([l1, u1]),
         np.array([l2, u2]),
         np.array([l3, u3]),
         np.array([1 - 1 / f1l, 1 - 1 / f1u]),
         np.array([l2 * k / (1 + l2 * (k - 1)), u2 * k / (1 + u2 * (k - 1))]),
-        np.array([1 - 1 / f3l, 1 - 1 / f3u])
+        np.array([1 - 1 / f3l, 1 - 1 / f3u]),
     ]
 
     return _postprocess_dataframe(stats)

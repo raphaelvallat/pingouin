@@ -5,12 +5,19 @@ import numpy as np
 from scipy import stats
 from scipy.optimize import brenth
 
-__all__ = ["power_ttest", "power_ttest2n", "power_anova", "power_rm_anova",
-           "power_corr", "power_chi2"]
+__all__ = [
+    "power_ttest",
+    "power_ttest2n",
+    "power_anova",
+    "power_rm_anova",
+    "power_corr",
+    "power_chi2",
+]
 
 
-def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
-                alternative='two-sided'):
+def power_ttest(
+    d=None, n=None, power=None, alpha=0.05, contrast="two-samples", alternative="two-sided"
+):
     """
     Evaluate power, sample size, effect size or significance level of a one-sample T-test,
     a paired T-test or an independent two-samples T-test with equal sample sizes.
@@ -37,32 +44,27 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
 
     Notes
     -----
-    Exactly ONE of the parameters ``d``, ``n``, ``power`` and ``alpha`` must
-    be passed as None, and that parameter is determined from the others.
+    Exactly ONE of the parameters ``d``, ``n``, ``power`` and ``alpha`` must be passed as None, and
+    that parameter is determined from the others.
 
-    For a paired T-test, the sample size ``n`` corresponds to the number of
-    pairs. For an independent two-sample T-test with equal sample sizes, ``n``
-    corresponds to the sample size of each group (i.e. number of observations
-    in one group). If the sample sizes are unequal, please use the
-    :py:func:`power_ttest2n` function instead.
+    For a paired T-test, the sample size ``n`` corresponds to the number of pairs. For an
+    independent two-sample T-test with equal sample sizes, ``n`` corresponds to the sample size of
+    each group (i.e. number of observations in one group). If the sample sizes are unequal, please
+    use the :py:func:`power_ttest2n` function instead.
 
-    Notice that ``alpha`` has a default value of 0.05 so None must be
-    explicitly passed if you want to compute it.
+    ``alpha`` has a default value of 0.05 so None must be explicitly passed if you want to
+    compute it.
 
-    This function is a Python adaptation of the `pwr.t.test`
-    function implemented in the
+    This function is a Python adaptation of the `pwr.t.test` function implemented in the
     `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
 
-    Statistical power is the likelihood that a study will
-    detect an effect when there is an effect there to be detected.
-    A high statistical power means that there is a low probability of
-    concluding that there is no effect when there is one.
-    Statistical power is mainly affected by the effect size and the sample
-    size.
+    Statistical power is the likelihood that a study will detect an effect when there is an effect
+    there to be detected. A high statistical power means that there is a low probability of
+    concluding that there is no effect when there is one. Statistical power is mainly affected by
+    the effect size and the sample size.
 
-    The first step is to use the Cohen's d to calculate the non-centrality
-    parameter :math:`\\delta` and degrees of freedom :math:`v`.
-    In case of paired groups, this is:
+    The first step is to use the Cohen's d to calculate the non-centrality parameter
+    :math:`\\delta` and degrees of freedom :math:`v`. In case of paired groups, this is:
 
     .. math:: \\delta = d * \\sqrt n
     .. math:: v = n - 1
@@ -74,17 +76,16 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
 
     where :math:`d` is the Cohen d and :math:`n` the sample size.
 
-    The critical value is then found using the percent point function of the T
-    distribution with :math:`q = 1 - alpha` and :math:`v`
-    degrees of freedom.
+    The critical value is then found using the percent point function of the T distribution with
+    :math:`q = 1 - alpha` and :math:`v` degrees of freedom.
 
-    Finally, the power of the test is given by the survival function of the
-    non-central distribution using the previously calculated critical value,
-    degrees of freedom and non-centrality parameter.
+    Finally, the power of the test is given by the survival function of the non-central
+    distribution using the previously calculated critical value, degrees of freedom and
+    non-centrality parameter.
 
-    :py:func:`scipy.optimize.brenth` is used to solve power equations for other
-    variables (i.e. sample size, effect size, or significance level). If the
-    solving fails, a nan value is returned.
+    :py:func:`scipy.optimize.brenth` is used to solve power equations for other variables (i.e.
+    sample size, effect size, or significance level). If the solving fails, a nan value is
+    returned.
 
     Results have been tested against GPower and the
     `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
@@ -104,8 +105,7 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
 
     3. Compute achieved ``d`` given ``n``, ``power`` and ``alpha`` level
 
-    >>> print('d: %.4f' % power_ttest(n=20, power=0.80, alpha=0.05,
-    ...                               contrast='paired'))
+    >>> print('d: %.4f' % power_ttest(n=20, power=0.80, alpha=0.05, contrast='paired'))
     d: 0.6604
 
     4. Compute achieved alpha level given ``d``, ``n`` and ``power``
@@ -125,14 +125,17 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [d, n, power, alpha]])
     if n_none != 1:
-        raise ValueError('Exactly one of n, d, power, and alpha must be None.')
+        raise ValueError("Exactly one of n, d, power, and alpha must be None.")
 
     # Safety checks
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
-    assert contrast.lower() in ['one-sample', 'paired', 'two-samples']
-    tsample = 2 if contrast.lower() == 'two-samples' else 1
-    tside = 2 if alternative == 'two-sided' else 1
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    assert contrast.lower() in ["one-sample", "paired", "two-samples"]
+    tsample = 2 if contrast.lower() == "two-samples" else 1
+    tside = 2 if alternative == "two-sided" else 1
     if d is not None and tside == 2:
         d = abs(d)
     if alpha is not None:
@@ -140,7 +143,7 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
     if power is not None:
         assert 0 < power <= 1
 
-    if alternative == 'less':
+    if alternative == "less":
 
         def func(d, n, power, alpha):
             dof = (n - 1) * tsample
@@ -148,14 +151,13 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
             tcrit = stats.t.ppf(alpha / tside, dof)
             return stats.nct.cdf(tcrit, dof, nc)
 
-    elif alternative == 'two-sided':
+    elif alternative == "two-sided":
 
         def func(d, n, power, alpha):
             dof = (n - 1) * tsample
             nc = d * np.sqrt(n / tsample)
             tcrit = stats.t.ppf(1 - alpha / tside, dof)
-            return (stats.nct.sf(tcrit, dof, nc) +
-                    stats.nct.cdf(-tcrit, dof, nc))
+            return stats.nct.sf(tcrit, dof, nc) + stats.nct.cdf(-tcrit, dof, nc)
 
     else:  # Alternative = 'greater'
 
@@ -177,15 +179,15 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
             return func(d, n, power, alpha) - power
 
         try:
-            return brenth(_eval_n, 2 + 1e-10, 1e+07, args=(d, power, alpha))
+            return brenth(_eval_n, 2 + 1e-10, 1e07, args=(d, power, alpha))
         except ValueError:  # pragma: no cover
             return np.nan
 
     elif d is None:
         # Compute achieved d given sample size, power and alpha level
-        if alternative == 'two-sided':
+        if alternative == "two-sided":
             b0, b1 = 1e-07, 10
-        elif alternative == 'less':
+        elif alternative == "less":
             b0, b1 = -10, 5
         else:
             b0, b1 = -5, 10
@@ -210,7 +212,7 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
             return np.nan
 
 
-def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative='two-sided'):
+def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative="two-sided"):
     """
     Evaluate power, effect size or  significance level of an independent two-samples T-test
     with unequal sample sizes.
@@ -218,42 +220,37 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative='two-sided
     Parameters
     ----------
     nx, ny : int
-        Sample sizes. Must be specified.
-        If the sample sizes are equal, you should use the
+        Sample sizes. Must be specified. If the sample sizes are equal, you should use the
         :py:func:`power_ttest` function instead.
     d : float
         Cohen d effect size
     power : float
         Test power (= 1 - type II error).
     alpha : float
-        Significance level (type I error probability).
-        The default is 0.05.
+        Significance level (type I error probability). The default is 0.05.
     alternative : string
-        Defines the alternative hypothesis, or tail of the test. Must be one of
-        "two-sided" (default), "greater" or "less".
+        Defines the alternative hypothesis, or tail of the test. Must be one of "two-sided"
+        (default), "greater" or "less".
 
     Notes
     -----
-    Exactly ONE of the parameters ``d``, ``power`` and ``alpha`` must
-    be passed as None, and that parameter is determined from the others.
+    Exactly ONE of the parameters ``d``, ``power`` and ``alpha`` must be passed as None, and that
+    parameter is determined from the others.
 
-    Notice that ``alpha`` has a default value of 0.05 so None must be
-    explicitly passed if you want to compute it.
+    ``alpha`` has a default value of 0.05 so None must be explicitly passed if you want to compute
+    it.
 
-    This function is a Python adaptation of the `pwr.t2n.test`
-    function implemented in the
+    This function is a Python adaptation of the `pwr.t2n.test` function implemented in the
     `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
 
-    Statistical power is the likelihood that a study will
-    detect an effect when there is an effect there to be detected.
-    A high statistical power means that there is a low probability of
-    concluding that there is no effect when there is one.
-    Statistical power is mainly affected by the effect size and the sample
-    size.
+    Statistical power is the likelihood that a study will detect an effect when there is an effect
+    there to be detected. A high statistical power means that there is a low probability of
+    concluding that there is no effect when there is one. Statistical power is mainly affected by
+    the effect size and the sample size.
 
-    The first step is to use the Cohen's d to calculate the non-centrality
-    parameter :math:`\\delta` and degrees of freedom :math:`v`.
-    In case of two independent groups with unequal sample sizes, this is:
+    The first step is to use the Cohen's d to calculate the non-centrality parameter
+    :math:`\\delta` and degrees of freedom :math:`v`.cIn case of two independent groups with
+    unequal sample sizes, this is:
 
     .. math:: \\delta = d * \\sqrt{\\frac{n_i * n_j}{n_i + n_j}}
     .. math:: v = n_i + n_j - 2
@@ -262,17 +259,16 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative='two-sided
     :math:`n_i` the sample size of the first group and
     :math:`n_j` the sample size of the second group,
 
-    The critical value is then found using the percent point function of the T
-    distribution with :math:`q = 1 - alpha` and :math:`v`
-    degrees of freedom.
+    The critical value is then found using the percent point function of the T distribution with
+    :math:`q = 1 - alpha` and :math:`v` degrees of freedom.
 
-    Finally, the power of the test is given by the survival function of the
-    non-central distribution using the previously calculated critical value,
-    degrees of freedom and non-centrality parameter.
+    Finally, the power of the test is given by the survival function of the non-central
+    distribution using the previously calculated critical value, degrees of freedom and
+    non-centrality parameter.
 
-    :py:func:`scipy.optimize.brenth` is used to solve power equations for other
-    variables (i.e. sample size, effect size, or significance level). If the
-    solving fails, a nan value is returned.
+    :py:func:`scipy.optimize.brenth` is used to solve power equations for other variables (i.e.
+    sample size, effect size, or significance level). If the solving fails, a nan value is
+    returned.
 
     Results have been tested against GPower and the
     `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
@@ -298,12 +294,15 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative='two-sided
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [d, power, alpha]])
     if n_none != 1:
-        raise ValueError('Exactly one of d, power, and alpha must be None')
+        raise ValueError("Exactly one of d, power, and alpha must be None")
 
     # Safety checks
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
-    tside = 2 if alternative == 'two-sided' else 1
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    tside = 2 if alternative == "two-sided" else 1
     if d is not None and tside == 2:
         d = abs(d)
     if alpha is not None:
@@ -311,7 +310,7 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative='two-sided
     if power is not None:
         assert 0 < power <= 1
 
-    if alternative == 'less':
+    if alternative == "less":
 
         def func(d, nx, ny, power, alpha):
             dof = nx + ny - 2
@@ -319,14 +318,13 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative='two-sided
             tcrit = stats.t.ppf(alpha / tside, dof)
             return stats.nct.cdf(tcrit, dof, nc)
 
-    elif alternative == 'two-sided':
+    elif alternative == "two-sided":
 
         def func(d, nx, ny, power, alpha):
             dof = nx + ny - 2
             nc = d * (1 / np.sqrt(1 / nx + 1 / ny))
             tcrit = stats.t.ppf(1 - alpha / tside, dof)
-            return (stats.nct.sf(tcrit, dof, nc) +
-                    stats.nct.cdf(-tcrit, dof, nc))
+            return stats.nct.sf(tcrit, dof, nc) + stats.nct.cdf(-tcrit, dof, nc)
 
     else:  # Alternative = 'greater'
 
@@ -343,9 +341,9 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative='two-sided
 
     elif d is None:
         # Compute achieved d given sample size, power and alpha level
-        if alternative == 'two-sided':
+        if alternative == "two-sided":
             b0, b1 = 1e-07, 10
-        elif alternative == 'less':
+        elif alternative == "less":
             b0, b1 = -10, 5
         else:
             b0, b1 = -5, 10
@@ -370,68 +368,59 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative='two-sided
             return np.nan
 
 
-def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
+def power_anova(eta_squared=None, k=None, n=None, power=None, alpha=0.05):
     """
-    Evaluate power, sample size, effect size or
-    significance level of a one-way balanced ANOVA.
+    Evaluate power, sample size, effect size or significance level of a one-way balanced ANOVA.
 
     Parameters
     ----------
-    eta : float
-        ANOVA effect size (eta-square = :math:`\\eta^2`).
+    eta_squared : float
+        ANOVA effect size (eta-squared, :math:`\\eta^2`).
     k : int
         Number of groups
     n : int
-        Sample size per group. Groups are assumed to be balanced
-        (i.e. same sample size).
+        Sample size per group. Groups are assumed to be balanced (i.e. same sample size).
     power : float
         Test power (= 1 - type II error).
     alpha : float
-        Significance level :math:`\\alpha` (type I error probability).
-        The default is 0.05.
+        Significance level :math:`\\alpha` (type I error probability). The default is 0.05.
 
     Notes
     -----
-    Exactly ONE of the parameters ``eta``, ``k``, ``n``, ``power`` and
-    ``alpha`` must be passed as None, and that parameter is determined from
-    the others.
+    Exactly ONE of the parameters ``eta_squared``, ``k``, ``n``, ``power`` and ``alpha``
+    must be passed as None, and that parameter is determined from the others.
 
-    Notice that ``alpha`` has a default value of 0.05 so None must be
-    explicitly passed if you want to compute it.
+    ``alpha`` has a default value of 0.05 so None must be explicitly passed if you want to
+    compute it.
 
-    This function is a Python adaptation of the `pwr.anova.test`
-    function implemented in the
+    This function is a Python adaptation of the `pwr.anova.test` function implemented in the
     `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
 
-    Statistical power is the likelihood that a study will
-    detect an effect when there is an effect there to be detected.
-    A high statistical power means that there is a low probability of
-    concluding that there is no effect when there is one.
-    Statistical power is mainly affected by the effect size and the sample
-    size.
+    Statistical power is the likelihood that a study will detect an effect when there is an
+    effect there to be detected. A high statistical power means that there is a low probability of
+    concluding that there is no effect when there is one. Statistical power is mainly affected by
+    the effect size and the sample size.
 
-    For one-way ANOVA, eta-square is the same as partial
-    eta-square. It can be evaluated from the F-value (:math:`F^*`) and the
-    degrees of freedom of the ANOVA (:math:`v_1, v_2`) using the following
-    formula:
+    For one-way ANOVA, eta-squared is the same as partial eta-squared. It can be evaluated from the
+    F-value (:math:`F^*`) and the degrees of freedom of the ANOVA (:math:`v_1, v_2`) using the
+    following formula:
 
     .. math:: \\eta^2 = \\frac{v_1 F^*}{v_1 F^* + v_2}
 
-    Note that GPower uses the :math:`f` effect size instead of the
-    :math:`\\eta^2`. The formula to convert from one to the other are given
-    below:
+    GPower uses the :math:`f` effect size instead of the :math:`\\eta^2`. The formula to convert
+    from one to the other are given below:
 
     .. math:: f = \\sqrt{\\frac{\\eta^2}{1 - \\eta^2}}
 
     .. math:: \\eta^2 = \\frac{f^2}{1 + f^2}
 
-    Using :math:`\\eta^2` and the total sample size :math:`N`, the
-    non-centrality parameter is defined by:
+    Using :math:`\\eta^2` and the total sample size :math:`N`, the non-centrality parameter is
+    defined by:
 
     .. math:: \\delta = N * \\frac{\\eta^2}{1 - \\eta^2}
 
-    Then the critical value of the non-central F-distribution is computed using
-    the percentile point function of the F-distribution with:
+    Then the critical value of the non-central F-distribution is computed using the percentile
+    point function of the F-distribution with:
 
     .. math:: q = 1 - \\alpha
     .. math:: v_1 = k - 1
@@ -439,13 +428,13 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
 
     where :math:`k` is the number of groups.
 
-    Finally, the power of the ANOVA is calculated using the survival function
-    of the non-central F-distribution using the previously computed critical
-    value, non-centrality parameter, and degrees of freedom.
+    Finally, the power of the ANOVA is calculated using the survival function of the non-central
+    F-distribution using the previously computed critical value, non-centrality parameter, and
+    degrees of freedom.
 
-    :py:func:`scipy.optimize.brenth` is used to solve power equations for other
-    variables (i.e. sample size, effect size, or significance level). If the
-    solving fails, a nan value is returned.
+    :py:func:`scipy.optimize.brenth` is used to solve power equations for other variables (i.e.
+    sample size, effect size, or significance level). If the solving fails, a nan value is
+    returned.
 
     Results have been tested against GPower and the
     `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
@@ -455,40 +444,39 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
     1. Compute achieved power
 
     >>> from pingouin import power_anova
-    >>> print('power: %.4f' % power_anova(eta=0.1, k=3, n=20))
+    >>> print('power: %.4f' % power_anova(eta_squared=0.1, k=3, n=20))
     power: 0.6082
 
     2. Compute required number of groups
 
-    >>> print('k: %.4f' % power_anova(eta=0.1, n=20, power=0.80))
+    >>> print('k: %.4f' % power_anova(eta_squared=0.1, n=20, power=0.80))
     k: 6.0944
 
     3. Compute required sample size
 
-    >>> print('n: %.4f' % power_anova(eta=0.1, k=3, power=0.80))
+    >>> print('n: %.4f' % power_anova(eta_squared=0.1, k=3, power=0.80))
     n: 29.9255
 
     4. Compute achieved effect size
 
-    >>> print('eta: %.4f' % power_anova(n=20, k=4, power=0.80, alpha=0.05))
-    eta: 0.1255
+    >>> print('eta-squared: %.4f' % power_anova(n=20, k=4, power=0.80, alpha=0.05))
+    eta-squared: 0.1255
 
     5. Compute achieved alpha (significance)
 
-    >>> print('alpha: %.4f' % power_anova(eta=0.1, n=20, k=4, power=0.80,
-    ...                                   alpha=None))
+    >>> print('alpha: %.4f' % power_anova(eta_squared=0.1, n=20, k=4, power=0.80, alpha=None))
     alpha: 0.1085
     """
     # Check the number of arguments that are None
-    n_none = sum([v is None for v in [eta, k, n, power, alpha]])
+    n_none = sum([v is None for v in [eta_squared, k, n, power, alpha]])
     if n_none != 1:
-        err = 'Exactly one of eta, k, n, power, and alpha must be None.'
+        err = "Exactly one of eta, k, n, power, and alpha must be None."
         raise ValueError(err)
 
     # Safety checks
-    if eta is not None:
-        eta = abs(eta)
-        f_sq = eta / (1 - eta)
+    if eta_squared is not None:
+        eta_squared = abs(eta_squared)
+        f_sq = eta_squared / (1 - eta_squared)
     if alpha is not None:
         assert 0 < alpha <= 1
     if power is not None:
@@ -524,19 +512,18 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
             return func(f_sq, k, n, power, alpha) - power
 
         try:
-            return brenth(_eval_n, 2, 1e+07, args=(f_sq, k, power, alpha))
+            return brenth(_eval_n, 2, 1e07, args=(f_sq, k, power, alpha))
         except ValueError:  # pragma: no cover
             return np.nan
 
-    elif eta is None:
-        # Compute achieved eta
+    elif eta_squared is None:
+        # Compute achieved eta-squared
 
         def _eval_eta(f_sq, k, n, power, alpha):
             return func(f_sq, k, n, power, alpha) - power
 
         try:
-            f_sq = brenth(_eval_eta, 1e-10, 1 - 1e-10, args=(k, n, power,
-                                                             alpha))
+            f_sq = brenth(_eval_eta, 1e-10, 1 - 1e-10, args=(k, n, power, alpha))
             return f_sq / (f_sq + 1)  # Return eta-square
         except ValueError:  # pragma: no cover
             return np.nan
@@ -548,91 +535,75 @@ def power_anova(eta=None, k=None, n=None, power=None, alpha=0.05):
             return func(f_sq, k, n, power, alpha) - power
 
         try:
-            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(f_sq, k, n,
-                                                               power))
+            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(f_sq, k, n, power))
         except ValueError:  # pragma: no cover
             return np.nan
 
 
-def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05, corr=0.5, epsilon=1):
+def power_rm_anova(eta_squared=None, m=None, n=None, power=None, alpha=0.05, corr=0.5, epsilon=1):
     """
-    Evaluate power, sample size, effect size or
-    significance level of a balanced one-way repeated measures ANOVA.
+    Evaluate power, sample size, effect size or significance level of a balanced one-way
+    repeated measures ANOVA.
 
     Parameters
     ----------
-    eta : float
-        ANOVA effect size (eta-square = :math:`\\eta^2`).
+    eta_squared : float
+        ANOVA effect size (eta-squared, :math:`\\eta^2`).
     m : int
         Number of repeated measurements.
     n : int
-        Sample size per measurement. All measurements must have the same
-        sample size.
+        Sample size per measurement. All measurements must have the same sample size.
     power : float
         Test power (= 1 - type II error).
     alpha : float
-        Significance level :math:`\\alpha` (type I error probability).
-        The default is 0.05.
+        Significance level :math:`\\alpha` (type I error probability). The default is 0.05.
     corr : float
-        Average correlation coefficient among repeated measurements.
-        The default is :math:`r=0.5`.
+        Average correlation coefficient among repeated measurements. The default is :math:`r=0.5`.
     epsilon : float
-        Epsilon adjustement factor for sphericity. This can be
-        calculated using the :py:func:`pingouin.epsilon` function.
+        Epsilon adjustement factor for sphericity. This can be calculated using the
+        :py:func:`pingouin.epsilon` function.
 
     Notes
     -----
-    Exactly ONE of the parameters ``eta``, ``m``, ``n``, ``power`` and
-    ``alpha`` must be passed as None, and that parameter is determined from
-    the others.
+    Exactly ONE of the parameters ``eta_squared``, ``m``, ``n``, ``power`` and ``alpha`` must be
+    passed as None, and that parameter is determined from the others.
 
-    Notice that ``alpha`` has a default value of 0.05 so None must be
-    explicitly passed if you want to compute it.
+    ``alpha`` has a default value of 0.05 so None must be explicitly passed if you want to
+    compute it.
 
-    Statistical power is the likelihood that a study will
-    detect an effect when there is an effect there to be detected.
-    A high statistical power means that there is a low probability of
-    concluding that there is no effect when there is one.
-    Statistical power is mainly affected by the effect size and the sample
-    size.
+    Statistical power is the likelihood that a study will detect an effect when there is an effect
+    there to be detected. A high statistical power means that there is a low probability of
+    concluding that there is no effect when there is one. Statistical power is mainly affected by
+    the effect size and the sample size.
 
-    For one-way repeated measure ANOVA, eta-square is the same as partial
-    eta-square. It can be evaluated from the F-value (:math:`F^*`) and the
-    degrees of freedom of the ANOVA (:math:`v_1, v_2`) using the following
-    formula:
-
-    .. math:: \\eta^2 = \\frac{v_1 F^*}{v_1 F^* + v_2}
-
-    Note that GPower uses the :math:`f` effect size instead of the
-    :math:`\\eta^2`. The formula to convert from one to the other are given
-    below:
+    GPower uses the :math:`f` effect size instead of the :math:`\\eta^2`. The formula to convert
+    from one to the other are given below:
 
     .. math:: f = \\sqrt{\\frac{\\eta^2}{1 - \\eta^2}}
 
     .. math:: \\eta^2 = \\frac{f^2}{1 + f^2}
 
-    Using :math:`\\eta^2`, the sample size :math:`N`, the number of repeated
-    measurements :math:`m`, the epsilon correction factor :math:`\\epsilon`
-    (see :py:func:`pingouin.epsilon`), and the average correlation between
-    the repeated measures :math:`c`, one can then calculate the
+    Using :math:`\\eta^2`, the sample size :math:`N`, the number of repeated measurements
+    :math:`m`, the epsilon correction factor :math:`\\epsilon` (see :py:func:`pingouin.epsilon`),
+    and the average correlation between the repeated measures :math:`c`, one can then calculate the
     non-centrality parameter as follow:
 
     .. math:: \\delta = \\frac{f^2 * N * m * \\epsilon}{1 - c}
 
-    Then the critical value of the non-central F-distribution is computed using
-    the percentile point function of the F-distribution with:
+    Then the critical value of the non-central F-distribution is computed using the percentile
+    point function of the F-distribution with:
 
     .. math:: q = 1 - \\alpha
     .. math:: v_1 = (m - 1) * \\epsilon
     .. math:: v_2 = (N - 1) * v_1
 
-    Finally, the power of the ANOVA is calculated using the survival function
-    of the non-central F-distribution using the previously computed critical
-    value, non-centrality parameter, and degrees of freedom.
+    Finally, the power of the ANOVA is calculated using the survival function of the non-central
+    F-distribution using the previously computed critical value, non-centrality parameter,
+    and degrees of freedom.
 
-    :py:func:`scipy.optimize.brenth` is used to solve power equations for other
-    variables (i.e. sample size, effect size, or significance level). If the
-    solving fails, a nan value is returned.
+    :py:func:`scipy.optimize.brenth` is used to solve power equations for other variables
+    (i.e. sample size, effect size, or significance level). If the solving fails, a nan value is
+    returned.
 
     Results have been tested against GPower and the
     `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
@@ -642,28 +613,27 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05, corr=0.5, e
     1. Compute achieved power
 
     >>> from pingouin import power_rm_anova
-    >>> print('power: %.4f' % power_rm_anova(eta=0.1, m=3, n=20))
+    >>> print('power: %.4f' % power_rm_anova(eta_squared=0.1, m=3, n=20))
     power: 0.8913
 
     2. Compute required number of groups
 
-    >>> print('m: %.4f' % power_rm_anova(eta=0.1, n=20, power=0.90))
+    >>> print('m: %.4f' % power_rm_anova(eta_squared=0.1, n=20, power=0.90))
     m: 3.1347
 
     3. Compute required sample size
 
-    >>> print('n: %.4f' % power_rm_anova(eta=0.1, m=3, power=0.80))
+    >>> print('n: %.4f' % power_rm_anova(eta_squared=0.1, m=3, power=0.80))
     n: 15.9979
 
     4. Compute achieved effect size
 
-    >>> print('eta: %.4f' % power_rm_anova(n=20, m=4, power=0.80, alpha=0.05))
-    eta: 0.0680
+    >>> print('eta-squared: %.4f' % power_rm_anova(n=20, m=4, power=0.80, alpha=0.05))
+    eta-squared: 0.0680
 
     5. Compute achieved alpha (significance)
 
-    >>> print('alpha: %.4f' % power_rm_anova(eta=0.1, n=20, m=4, power=0.80,
-    ...                                   alpha=None))
+    >>> print('alpha: %.4f' % power_rm_anova(eta_squared=0.1, n=20, m=4, power=0.80, alpha=None))
     alpha: 0.0081
 
     Let's take a more concrete example. First, we'll load a repeated measures
@@ -680,35 +650,31 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05, corr=0.5, e
     3     5.1     4.2     6.0     6.3
     4     3.8     3.6     4.8     6.8
 
-    Note that this dataset has some missing values. We'll simply delete any
-    row with one or more missing values, and then compute a repeated
-    measures ANOVA:
+    Note that this dataset has some missing values. We'll simply delete any row with one or more
+    missing values, and then compute a repeated measures ANOVA:
 
     >>> data = data.dropna()
-    >>> pg.rm_anova(data).round(3)
-       Source  ddof1  ddof2      F  p-unc    np2    eps
-    0  Within      3     24  5.201  0.007  0.394  0.694
+    >>> pg.rm_anova(data, effsize="n2").round(3)
+       Source  ddof1  ddof2      F  p-unc     n2    eps
+    0  Within      3     24  5.201  0.007  0.346  0.694
 
     The repeated measures ANOVA is significant at the 0.05 level. Now, we can
-    easily compute the power of the ANOVA with the information in the ANOVA
-    table:
+    easily compute the power of the ANOVA with the information in the ANOVA table:
 
     >>> # n is the sample size and m is the number of repeated measures
     >>> n, m = data.shape
-    >>> round(pg.power_rm_anova(eta=0.394, m=m, n=n, epsilon=0.694), 3)
-    0.998
+    >>> round(pg.power_rm_anova(eta_squared=0.346, m=m, n=n, epsilon=0.694), 3)
+    0.99
 
-    Our ANOVA has a very high statistical power. However, to be even more
-    accurate in our power calculation, we should also fill in the average
-    correlation among repeated measurements. Since our dataframe is in
-    wide-format (with each column being a successive measurement), this can
-    be done by taking the mean of the superdiagonal of the correlation matrix,
-    which is similar to manually calculating the correlation between each
-    successive pairwise measurements and then taking the mean.
-    Since correlation coefficients are not normally distributed, we
-    use the *r-to-z* transform prior to averaging (:py:func:`numpy.arctanh`),
-    and then the *z-to-r* transform (:py:func:`numpy.tanh`) to convert back to
-    a correlation coefficient. This gives a more precise estimate of the mean.
+    Our ANOVA has a very high statistical power. However, to be even more accurate in our power
+    calculation, we should also fill in the average correlation among repeated measurements.
+    Since our dataframe is in wide-format (with each column being a successive measurement), this
+    can be done by taking the mean of the superdiagonal of the correlation matrix, which is similar
+    to manually calculating the correlation between each successive pairwise measurements and then
+    taking the mean. Since correlation coefficients are not normally distributed, we use the
+    *r-to-z* transform prior to averaging (:py:func:`numpy.arctanh`), and then the *z-to-r*
+    transform (:py:func:`numpy.tanh`) to convert back to a correlation coefficient. This gives a
+    more precise estimate of the mean.
 
     >>> import numpy as np
     >>> corr = np.diag(data.corr(), k=1)
@@ -716,33 +682,33 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05, corr=0.5, e
     >>> round(avgcorr, 4)
     -0.1996
 
-    In this example, we're using a fake dataset and the average correlation is
-    negative. However, it will most likely be positive with real data. Let's
-    now compute the final power of the repeated measures ANOVA:
+    In this example, we're using a fake dataset and the average correlation is negative. However,
+    it will most likely be positive with real data. Let's now compute the final power of the
+    repeated measures ANOVA:
 
-    >>> round(pg.power_rm_anova(eta=0.394, m=m, n=n, epsilon=0.694, corr=avgcorr), 3)
-    0.855
+    >>> round(pg.power_rm_anova(eta_squared=0.346, m=m, n=n, epsilon=0.694, corr=avgcorr), 3)
+    0.771
     """
     # Check the number of arguments that are None
-    n_none = sum([v is None for v in [eta, m, n, power, alpha]])
+    n_none = sum([v is None for v in [eta_squared, m, n, power, alpha]])
     if n_none != 1:
-        msg = 'Exactly one of eta, m, n, power, and alpha must be None.'
+        msg = "Exactly one of eta, m, n, power, and alpha must be None."
         raise ValueError(msg)
 
     # Safety checks
-    assert 0 < epsilon <= 1, 'epsilon must be between 0 and 1.'
-    assert -1 < corr < 1, 'corr must be between -1 and 1.'
-    if eta is not None:
-        eta = abs(eta)
-        f_sq = eta / (1 - eta)
+    assert 0 < epsilon <= 1, "epsilon must be between 0 and 1."
+    assert -1 < corr < 1, "corr must be between -1 and 1."
+    if eta_squared is not None:
+        eta_squared = abs(eta_squared)
+        f_sq = eta_squared / (1 - eta_squared)
     if alpha is not None:
-        assert 0 < alpha <= 1, 'alpha must be between 0 and 1.'
+        assert 0 < alpha <= 1, "alpha must be between 0 and 1."
     if power is not None:
-        assert 0 < power <= 1, 'power must be between 0 and 1.'
+        assert 0 < power <= 1, "power must be between 0 and 1."
     if n is not None:
-        assert n > 1, 'The sample size n must be > 1.'
+        assert n > 1, "The sample size n must be > 1."
     if m is not None:
-        assert m > 1, 'The number of repeated measures m must be > 1.'
+        assert m > 1, "The number of repeated measures m must be > 1."
 
     def func(f_sq, m, n, power, alpha, corr):
         dof1 = (m - 1) * epsilon
@@ -774,19 +740,18 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05, corr=0.5, e
             return func(f_sq, m, n, power, alpha, corr) - power
 
         try:
-            return brenth(_eval_n, 5, 1e+6, args=(f_sq, m, power, alpha, corr))
+            return brenth(_eval_n, 5, 1e6, args=(f_sq, m, power, alpha, corr))
         except ValueError:  # pragma: no cover
             return np.nan
 
-    elif eta is None:
+    elif eta_squared is None:
         # Compute achieved eta
 
         def _eval_eta(f_sq, m, n, power, alpha, corr):
             return func(f_sq, m, n, power, alpha, corr) - power
 
         try:
-            f_sq = brenth(_eval_eta, 1e-10, 1 - 1e-10, args=(m, n, power,
-                                                             alpha, corr))
+            f_sq = brenth(_eval_eta, 1e-10, 1 - 1e-10, args=(m, n, power, alpha, corr))
             return f_sq / (f_sq + 1)  # Return eta-square
         except ValueError:  # pragma: no cover
             return np.nan
@@ -798,16 +763,15 @@ def power_rm_anova(eta=None, m=None, n=None, power=None, alpha=0.05, corr=0.5, e
             return func(f_sq, m, n, power, alpha, corr) - power
 
         try:
-            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(f_sq, m, n,
-                                                               power, corr))
+            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(f_sq, m, n, power, corr))
         except ValueError:  # pragma: no cover
             return np.nan
 
 
-def power_corr(r=None, n=None, power=None, alpha=0.05, alternative='two-sided'):
+def power_corr(r=None, n=None, power=None, alpha=0.05, alternative="two-sided"):
     """
-    Evaluate power, sample size, correlation coefficient or
-    significance level of a correlation test.
+    Evaluate power, sample size, correlation coefficient or significance level of a correlation
+    test.
 
     Parameters
     ----------
@@ -818,8 +782,7 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative='two-sided'):
     power : float
         Test power (= 1 - type II error).
     alpha : float
-        Significance level (type I error probability).
-        The default is 0.05.
+        Significance level (type I error probability). The default is 0.05.
     alternative : string
         Defines the alternative hypothesis, or tail of the correlation. Must be one of
         "two-sided" (default), "greater" or "less". Both "greater" and "less" return a one-sided
@@ -829,18 +792,17 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative='two-sided'):
 
     Notes
     -----
-    Exactly ONE of the parameters ``r``, ``n``, ``power`` and ``alpha`` must
-    be passed as None, and that parameter is determined from the others.
+    Exactly ONE of the parameters ``r``, ``n``, ``power`` and ``alpha`` must be passed as None,
+    and that parameter is determined from the others.
 
-    Notice that ``alpha`` has a default value of 0.05 so None must be
-    explicitly passed if you want to compute it.
+    ``alpha`` has a default value of 0.05 so None must be explicitly passed if you want to
+    compute it.
 
-    :py:func:`scipy.optimize.brenth` is used to solve power equations for other
-    variables (i.e. sample size, effect size, or significance level). If the
-    solving fails, a nan value is returned.
+    :py:func:`scipy.optimize.brenth` is used to solve power equations for other variables (i.e.
+    sample size, effect size, or significance level). If the solving fails, a nan value is
+    returned.
 
-    This function is a Python adaptation of the `pwr.r.test`
-    function implemented in the
+    This function is a Python adaptation of the `pwr.r.test` function implemented in the
     `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
 
     Examples
@@ -877,11 +839,14 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative='two-sided'):
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [r, n, power, alpha]])
     if n_none != 1:
-        raise ValueError('Exactly one of n, r, power, and alpha must be None')
+        raise ValueError("Exactly one of n, r, power, and alpha must be None")
 
     # Safety checks
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
 
     if r is not None:
         assert -1 <= r <= 1
@@ -893,12 +858,11 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative='two-sided'):
         assert 0 < power <= 1
     if n is not None:
         if n <= 4:
-            warnings.warn("Sample size is too small to estimate power "
-                          "(n <= 4). Returning NaN.")
+            warnings.warn("Sample size is too small to estimate power (n <= 4). Returning NaN.")
             return np.nan
 
     # Define main function
-    if alternative == 'two-sided':
+    if alternative == "two-sided":
 
         def func(r, n, power, alpha):
             dof = n - 2
@@ -906,8 +870,9 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative='two-sided'):
             rc = np.sqrt(ttt**2 / (ttt**2 + dof))
             zr = np.arctanh(r) + r / (2 * (n - 1))
             zrc = np.arctanh(rc)
-            power = stats.norm.cdf((zr - zrc) * np.sqrt(n - 3)) + \
-                stats.norm.cdf((-zr - zrc) * np.sqrt(n - 3))
+            power = stats.norm.cdf((zr - zrc) * np.sqrt(n - 3)) + stats.norm.cdf(
+                (-zr - zrc) * np.sqrt(n - 3)
+            )
             return power
 
     elif alternative == "greater":
@@ -945,7 +910,7 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative='two-sided'):
             return func(r, n, power, alpha) - power
 
         try:
-            return brenth(_eval_n, 4 + 1e-10, 1e+09, args=(r, power, alpha))
+            return brenth(_eval_n, 4 + 1e-10, 1e09, args=(r, power, alpha))
         except ValueError:  # pragma: no cover
             return np.nan
 
@@ -977,8 +942,7 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative='two-sided'):
 
 def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
     """
-    Evaluate power, sample size, effect size or
-    significance level of chi-squared tests.
+    Evaluate power, sample size, effect size or significance level of chi-squared tests.
 
     Parameters
     ----------
@@ -991,45 +955,39 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
     power : float
         Test power (= 1 - type II error).
     alpha : float
-        Significance level (type I error probability).
-        The default is 0.05.
+        Significance level (type I error probability). The default is 0.05.
 
     Notes
     -----
-    Exactly ONE of the parameters ``w``, ``n``, ``power`` and ``alpha`` must
-    be passed as None, and that parameter is determined from the others. The
-    degrees of freedom ``dof`` must always be specified.
+    Exactly ONE of the parameters ``w``, ``n``, ``power`` and ``alpha`` must be passed as None,
+    and that parameter is determined from the others. The degrees of freedom ``dof`` must always
+    be specified.
 
-    Notice that ``alpha`` has a default value of 0.05 so None must be
-    explicitly passed if you want to compute it.
+    ``alpha`` has a default value of 0.05 so None must be explicitly passed if you want to
+    compute it.
 
-    This function is a Python adaptation of the `pwr.chisq.test`
-    function implemented in the
+    This function is a Python adaptation of the `pwr.chisq.test` function implemented in the
     `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
 
-    Statistical power is the likelihood that a study will
-    detect an effect when there is an effect there to be detected.
-    A high statistical power means that there is a low probability of
-    concluding that there is no effect when there is one.
-    Statistical power is mainly affected by the effect size and the sample
-    size.
+    Statistical power is the likelihood that a study will detect an effect when there is an effect
+    there to be detected. A high statistical power means that there is a low probability of
+    concluding that there is no effect when there is one. Statistical power is mainly affected by
+    the effect size and the sample size.
 
     The non-centrality parameter is defined by:
 
     .. math:: \\delta = N * w^2
 
-    Then the critical value is computed using the percentile point function of
-    the :math:`\\chi^2` distribution with the alpha level and degrees of
-    freedom.
+    Then the critical value is computed using the percentile point function of the :math:`\\chi^2`
+    distribution with the alpha level and degrees of freedom.
 
-    Finally, the power of the chi-squared test is calculated using the survival
-    function of the non-central :math:`\\chi^2` distribution using the
-    previously computed critical value, non-centrality parameter, and the
-    degrees of freedom of the test.
+    Finally, the power of the chi-squared test is calculated using the survival function of the
+    non-central :math:`\\chi^2` distribution using the previously computed critical value,
+    non-centrality parameter, and the degrees of freedom of the test.
 
-    :py:func:`scipy.optimize.brenth` is used to solve power equations for other
-    variables (i.e. sample size, effect size, or significance level). If the
-    solving fails, a nan value is returned.
+    :py:func:`scipy.optimize.brenth` is used to solve power equations for other variables (i.e.
+    sample size, effect size, or significance level). If the solving fails, a nan value is
+    returned.
 
     Results have been tested against GPower and the
     `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
@@ -1054,15 +1012,14 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
 
     4. Compute achieved alpha (significance)
 
-    >>> print('alpha: %.4f' % power_chi2(dof=1, w=0.5, n=20, power=0.80,
-    ...                                   alpha=None))
+    >>> print('alpha: %.4f' % power_chi2(dof=1, w=0.5, n=20, power=0.80, alpha=None))
     alpha: 0.1630
     """
     assert isinstance(dof, (int, float))
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [w, n, power, alpha]])
     if n_none != 1:
-        err = 'Exactly one of w, n, power, and alpha must be None.'
+        err = "Exactly one of w, n, power, and alpha must be None."
         raise ValueError(err)
 
     # Safety checks
@@ -1090,7 +1047,7 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
             return func(w, n, power, alpha) - power
 
         try:
-            return brenth(_eval_n, 1, 1e+07, args=(w, power, alpha))
+            return brenth(_eval_n, 1, 1e07, args=(w, power, alpha))
         except ValueError:  # pragma: no cover
             return np.nan
 
@@ -1101,7 +1058,7 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
             return func(w, n, power, alpha) - power
 
         try:
-            return brenth(_eval_w, 1e-10, 1e+07, args=(n, power, alpha))
+            return brenth(_eval_w, 1e-10, 1e07, args=(n, power, alpha))
         except ValueError:  # pragma: no cover
             return np.nan
 

@@ -7,11 +7,10 @@ from pingouin.utils import _flatten_list as _fl
 from pingouin.utils import remove_na, _postprocess_dataframe
 
 
-__all__ = ["gzscore", "normality", "homoscedasticity", "anderson",
-           "epsilon", "sphericity"]
+__all__ = ["gzscore", "normality", "homoscedasticity", "anderson", "epsilon", "sphericity"]
 
 
-def gzscore(x, *, axis=0, ddof=1, nan_policy='propagate'):
+def gzscore(x, *, axis=0, ddof=1, nan_policy="propagate"):
     """Geometric standard (Z) score.
 
     Parameters
@@ -64,15 +63,17 @@ def gzscore(x, *, axis=0, ddof=1, nan_policy='propagate'):
     >>> print(round(z.mean(), 3), round(z.std(), 3))
     -0.0 0.995
     """
-    warnings.warn("gzscore is deprecated and will be removed in pingouin 0.7.0;"
-                  " use scipy.stats.gzscore instead.")
+    warnings.warn(
+        "gzscore is deprecated and will be removed in pingouin 0.7.0;"
+        " use scipy.stats.gzscore instead."
+    )
     x = np.asanyarray(x)
     log = np.ma.log if isinstance(x, np.ma.MaskedArray) else np.log
     z = scipy.stats.zscore(log(x), axis=axis, ddof=ddof, nan_policy=nan_policy)
     return z
 
 
-def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
+def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
     """Univariate normality test.
 
     Parameters
@@ -205,29 +206,28 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
     Post  1.265656  0.531088    True
     """
     assert isinstance(data, (pd.DataFrame, pd.Series, list, np.ndarray))
-    assert method in ['shapiro', 'normaltest', 'jarque_bera']
+    assert method in ["shapiro", "normaltest", "jarque_bera"]
     if isinstance(data, pd.Series):
         data = data.to_frame()
-    col_names = ['W', 'pval']
+    col_names = ["W", "pval"]
     func = getattr(scipy.stats, method)
     if isinstance(data, (list, np.ndarray)):
         data = np.asarray(data)
-        assert data.ndim == 1, 'Data must be 1D.'
-        assert data.size > 3, 'Data must have more than 3 samples.'
+        assert data.ndim == 1, "Data must be 1D."
+        assert data.size > 3, "Data must have more than 3 samples."
         data = remove_na(data)
         stats = pd.DataFrame(func(data)).T
         stats.columns = col_names
-        stats['normal'] = np.where(stats['pval'] > alpha, True, False)
+        stats["normal"] = np.where(stats["pval"] > alpha, True, False)
     else:
         # Data is a Pandas DataFrame
         if dv is None and group is None:
             # Wide-format
             # Get numeric data only
             numdata = data._get_numeric_data()
-            stats = numdata.apply(lambda x: func(x.dropna()),
-                                  result_type='expand', axis=0).T
+            stats = numdata.apply(lambda x: func(x.dropna()), result_type="expand", axis=0).T
             stats.columns = col_names
-            stats['normal'] = np.where(stats['pval'] > alpha, True, False)
+            stats["normal"] = np.where(stats["pval"] > alpha, True, False)
         else:
             # Long-format
             stats = pd.DataFrame([])
@@ -242,7 +242,7 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=.05):
     return _postprocess_dataframe(stats)
 
 
-def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05, **kwargs):
+def homoscedasticity(data, dv=None, group=None, method="levene", alpha=0.05, **kwargs):
     """Test equality of variance.
 
     Parameters
@@ -363,7 +363,7 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05, **kw
     bartlett  2.873569  0.090045       True
     """
     assert isinstance(data, (pd.DataFrame, list, dict))
-    assert method.lower() in ['levene', 'bartlett']
+    assert method.lower() in ["levene", "bartlett"]
     func = getattr(scipy.stats, method)
     if isinstance(data, pd.DataFrame):
         # Data is a Pandas DataFrame
@@ -371,34 +371,34 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=.05, **kw
             # Wide-format
             # Get numeric data only
             numdata = data._get_numeric_data()
-            assert numdata.shape[1] > 1, 'Data must have at least two columns.'
+            assert numdata.shape[1] > 1, "Data must have at least two columns."
             statistic, p = func(*numdata.to_numpy().T, **kwargs)
         else:
             # Long-format
             assert group in data.columns
             assert dv in data.columns
             grp = data.groupby(group, observed=True)[dv]
-            assert grp.ngroups > 1, 'Data must have at least two columns.'
+            assert grp.ngroups > 1, "Data must have at least two columns."
             statistic, p = func(*grp.apply(list), **kwargs)
     elif isinstance(data, list):
         # Check that list contains other list or np.ndarray
         assert all(isinstance(el, (list, np.ndarray)) for el in data)
-        assert len(data) > 1, 'Data must have at least two iterables.'
+        assert len(data) > 1, "Data must have at least two iterables."
         statistic, p = func(*data, **kwargs)
     else:
         # Data is a dict
         assert all(isinstance(el, (list, np.ndarray)) for el in data.values())
-        assert len(data) > 1, 'Data must have at least two iterables.'
+        assert len(data) > 1, "Data must have at least two iterables."
         statistic, p = func(*data.values(), **kwargs)
 
     equal_var = True if p > alpha else False
-    stat_name = 'W' if method.lower() == 'levene' else 'T'
-    stats = pd.DataFrame({stat_name: statistic, 'pval': p, 'equal_var': equal_var}, index=[method])
+    stat_name = "W" if method.lower() == "levene" else "T"
+    stats = pd.DataFrame({stat_name: statistic, "pval": p, "equal_var": equal_var}, index=[method])
 
     return _postprocess_dataframe(stats)
 
 
-def anderson(*args, dist='norm'):
+def anderson(*args, dist="norm"):
     """Anderson-Darling test of distribution.
 
     Parameters
@@ -432,7 +432,7 @@ def anderson(*args, dist='norm'):
     (array([False, False]), array([15., 15.]))
     """
     k = len(args)
-    from_dist = np.zeros(k, 'bool')
+    from_dist = np.zeros(k, "bool")
     sig_level = np.zeros(k)
     for j in range(k):
         st, cr, sig = scipy.stats.anderson(args[j], dist=dist)
@@ -444,12 +444,13 @@ def anderson(*args, dist='norm'):
         sig_level = float(sig_level)
     return from_dist, sig_level
 
+
 ###############################################################################
 # REPEATED MEASURES
 ###############################################################################
 
 
-def _check_multilevel_rm(data, func='epsilon'):
+def _check_multilevel_rm(data, func="epsilon"):
     """Check if data has multilevel columns for wide-format repeated measures.
     ``func`` can be either epsilon or mauchly
     """
@@ -465,7 +466,7 @@ def _check_multilevel_rm(data, func='epsilon'):
         levshape = np.sort(levshape)
         # The first factor can have only one level (see if .. below), however,
         # the second factor must have at least two levels.
-        assert levshape[1] >= 2, 'Factor must have at least two levels.'
+        assert levshape[1] >= 2, "Factor must have at least two levels."
         if levshape[0] == 1:
             # Two factors but first factor has only one level (= one-way)
             data = data.droplevel(level=0, axis=1)
@@ -481,16 +482,20 @@ def _check_multilevel_rm(data, func='epsilon'):
             data = data.droplevel(level=0, axis=1)
         else:
             # Both factors have more than 2 levels -- differ from R / JASP
-            if func == 'epsilon':
-                warnings.warn("Epsilon values might be innaccurate in "
-                              "two-way repeated measures design where each  "
-                              "factor has more than 2 levels. Please  "
-                              "double-check your results.")
+            if func == "epsilon":
+                warnings.warn(
+                    "Epsilon values might be innaccurate in "
+                    "two-way repeated measures design where each  "
+                    "factor has more than 2 levels. Please  "
+                    "double-check your results."
+                )
             else:
-                raise ValueError("If using two-way repeated measures design, "
-                                 "at least one factor must have exactly two "
-                                 "levels. More complex designs are not yet "
-                                 "supported.")
+                raise ValueError(
+                    "If using two-way repeated measures design, "
+                    "at least one factor must have exactly two "
+                    "levels. More complex designs are not yet "
+                    "supported."
+                )
         return data
     else:
         raise ValueError("Only one-way or two-way designs are supported.")
@@ -501,23 +506,24 @@ def _long_to_wide_rm(data, dv=None, within=None, subject=None):
     This internal function is used in pingouin.epsilon and pingouin.sphericity.
     """
     # Check that all columns are present
-    assert dv in data.columns, '%s not in data' % dv
-    assert data[dv].dtype.kind in 'bfiu', '%s must be numeric' % dv
-    assert subject in data.columns, '%s not in data' % subject
-    assert not data[subject].isnull().any(), 'Cannot have missing values in %s' % subject
+    assert dv in data.columns, "%s not in data" % dv
+    assert data[dv].dtype.kind in "bfiu", "%s must be numeric" % dv
+    assert subject in data.columns, "%s not in data" % subject
+    assert not data[subject].isnull().any(), "Cannot have missing values in %s" % subject
     if isinstance(within, (str, int)):
         within = [within]  # within = ['fac1'] or ['fac1', 'fac2']
     for w in within:
-        assert w in data.columns, '%s not in data' % w
+        assert w in data.columns, "%s not in data" % w
     # Keep all relevant columns and reset index
     data = data[_fl([subject, within, dv])]
     # Convert to wide-format + collapse to the mean
     data = pd.pivot_table(
-        data, index=subject, values=dv, columns=within, aggfunc='mean', dropna=True, observed=True)
+        data, index=subject, values=dv, columns=within, aggfunc="mean", dropna=True, observed=True
+    )
     return data
 
 
-def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
+def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
     """Epsilon adjustement factor for repeated measures.
 
     Parameters
@@ -662,7 +668,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
 
     which gives the same epsilon value as the long-format dataframe.
     """
-    assert isinstance(data, pd.DataFrame), 'Data must be a pandas Dataframe.'
+    assert isinstance(data, pd.DataFrame), "Data must be a pandas Dataframe."
 
     # If data is in long-format, convert to wide-format
     if all([v is not None for v in [dv, within, subject]]):
@@ -674,7 +680,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     data = data.dropna()
 
     # Support for two-way factor of shape (2, N)
-    data = _check_multilevel_rm(data, func='epsilon')
+    data = _check_multilevel_rm(data, func="epsilon")
 
     # Covariance matrix
     S = data.cov()
@@ -682,7 +688,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
 
     # Epsilon is always 1 with only two repeated measures.
     if k <= 2:
-        return 1.
+        return 1.0
 
     # Degrees of freedom
     if S.columns.nlevels == 1:
@@ -694,7 +700,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
         dof = (ka - 1) * (kb - 1)
 
     # Lower bound
-    if correction == 'lb':
+    if correction == "lb":
         return 1 / dof
 
     # Greenhouse-Geisser
@@ -702,8 +708,8 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     mean_var = np.diag(S).mean()
     S_mean = S.mean().mean()
     ss_mat = (S**2).sum().sum()
-    ss_rows = (S.mean(1)**2).sum().sum()
-    num = (k * (mean_var - S_mean))**2
+    ss_rows = (S.mean(1) ** 2).sum().sum()
+    num = (k * (mean_var - S_mean)) ** 2
     den = (k - 1) * (ss_mat - 2 * k * ss_rows + k**2 * S_mean**2)
     eps = np.min([num / den, 1])
 
@@ -716,15 +722,14 @@ def epsilon(data, dv=None, within=None, subject=None, correction='gg'):
     # eps = np.min([V / dof, 1])
 
     # Huynh-Feldt
-    if correction == 'hf':
+    if correction == "hf":
         num = n * dof * eps - 2
         den = dof * (n - 1 - dof * eps)
         eps = np.min([num / den, 1])
     return eps
 
 
-def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
-               alpha=.05):
+def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha=0.05):
     """Mauchly and JNS test for sphericity.
 
     Parameters
@@ -918,7 +923,7 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
 
     which gives the same output as the long-format dataframe.
     """
-    assert isinstance(data, pd.DataFrame), 'Data must be a pandas Dataframe.'
+    assert isinstance(data, pd.DataFrame), "Data must be a pandas Dataframe."
 
     # If data is in long-format, convert to wide-format
     if all([v is not None for v in [dv, within, subject]]):
@@ -930,7 +935,7 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
     data = data.dropna()
 
     # Support for two-way factor of shape (2, N)
-    data = _check_multilevel_rm(data, func='mauchly')
+    data = _check_multilevel_rm(data, func="mauchly")
 
     # From here, we work only with one-way design
     n, k = data.shape
@@ -938,13 +943,13 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
 
     # Sphericity is always met with only two repeated measures.
     if k <= 2:
-        return True, np.nan, np.nan, 1, 1.
+        return True, np.nan, np.nan, 1, 1.0
 
     # Compute dof of the test
     ddof = (d * (d + 1)) / 2 - 1
     ddof = 1 if ddof == 0 else ddof
 
-    if method.lower() == 'mauchly':
+    if method.lower() == "mauchly":
         # Method 1. Contrast matrix. Similar to R & Matlab implementation.
         # Only works for one-way design or two-way design with shape (2, N).
         # 1 - Compute the successive difference matrix Z.
@@ -969,26 +974,30 @@ def sphericity(data, dv=None, within=None, subject=None, method='mauchly',
         S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
         eig = np.linalg.eigvalsh(S_pop)[1:]
         eig = eig[eig > 0.001]  # Additional check to remove very low eig
-        W = np.product(eig) / (eig.sum() / d)**d
+        W = np.product(eig) / (eig.sum() / d) ** d
         logW = np.log(W)
 
         # Compute chi-square and p-value (adapted from the ezANOVA R package)
         f = 1 - (2 * d**2 + d + 2) / (6 * d * (n - 1))
-        w2 = ((d + 2) * (d - 1) * (d - 2) * (2 * d**3 + 6 * d**2 + 3 * k + 2)
-              / (288 * ((n - 1) * d * f)**2))
+        w2 = (
+            (d + 2)
+            * (d - 1)
+            * (d - 2)
+            * (2 * d**3 + 6 * d**2 + 3 * k + 2)
+            / (288 * ((n - 1) * d * f) ** 2)
+        )
         chi_sq = -(n - 1) * f * logW
         p1 = scipy.stats.chi2.sf(chi_sq, ddof)
         p2 = scipy.stats.chi2.sf(chi_sq, ddof + 4)
         pval = p1 + w2 * (p2 - p1)
     else:
         # Method = JNS
-        eps = epsilon(data, correction='gg')
+        eps = epsilon(data, correction="gg")
         W = eps * d
         chi_sq = 0.5 * n * d**2 * (W - 1 / d)
         pval = scipy.stats.chi2.sf(chi_sq, ddof)
 
     spher = True if pval > alpha else False
 
-    SpherResults = namedtuple(
-        'SpherResults', ['spher', 'W', 'chi2', 'dof', 'pval'])
+    SpherResults = namedtuple("SpherResults", ["spher", "W", "chi2", "dof", "pval"])
     return SpherResults(spher, W, chi_sq, int(ddof), pval)
