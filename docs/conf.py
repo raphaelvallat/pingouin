@@ -27,19 +27,19 @@ import sphinx_bootstrap_theme
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-sys.path.insert(0, os.path.abspath('sphinxext'))
+sys.path.insert(0, os.path.abspath("sphinxext"))
 extensions = [
-    'sphinx.ext.mathjax',
-    'sphinx.ext.doctest',
+    "sphinx.ext.mathjax",
+    "sphinx.ext.doctest",
     # 'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.intersphinx',
-    'matplotlib.sphinxext.plot_directive',
-    'numpydoc',
-    'sphinx_copybutton',
-    'sphinx_panels'
+    "sphinx.ext.githubpages",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "matplotlib.sphinxext.plot_directive",
+    "numpydoc",
+    "sphinx_copybutton",
+    "sphinx_panels",
 ]
 
 # configure sphinx-copybutton
@@ -64,15 +64,15 @@ plot_html_show_source_link = False
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = 'pingouin'
-author = 'Raphael Vallat'
-copyright = u'2018-{}, Raphael Vallat'.format(time.strftime("%Y"))
+project = "pingouin"
+author = "Raphael Vallat"
+copyright = "2018-{}, Raphael Vallat".format(time.strftime("%Y"))
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -94,10 +94,10 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -105,53 +105,55 @@ todo_include_todos = False
 # -- Options for HTML output ----------------------------------------------
 
 # Bootstrap theme
-html_theme = 'bootstrap'
+html_theme = "bootstrap"
 html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_theme_options = {
-    'source_link_position': "footer",
+    "source_link_position": "footer",
     # 'navbar_title': ' ',  # we replace this with an image
-    'bootswatch_theme': "readable",
-    'navbar_sidebarrel': False,
+    "bootswatch_theme": "readable",
+    "navbar_sidebarrel": False,
     # 'nosidebar': True,
     # 'navbar_site_name': "",
-    'navbar_pagenav': False,
-    'bootstrap_version': "3",
-    'navbar_class': "navbar",
-    'navbar_links': [
+    "navbar_pagenav": False,
+    "bootstrap_version": "3",
+    "navbar_class": "navbar",
+    "navbar_links": [
         ("Functions", "api"),
         ("Guidelines", "guidelines"),
         ("FAQ", "faq"),
         ("What's new", "changelog"),
-        ("Contribute", "contributing")],
+        ("Contribute", "contributing"),
+    ],
 }
 
-html_logo = 'pictures/pingouin.png'
-html_favicon = 'pictures/pingouin_blue.svg'
+html_logo = "pictures/pingouin.png"
+html_favicon = "pictures/pingouin_blue.svg"
 
 # IMPORTANT: There is a misalignement of the Navbar when using Sphinx > 3.0!
 
 # -- Options for HTML output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pingouindoc'
-html_static_path = ['_static']
+htmlhelp_basename = "pingouindoc"
+html_static_path = ["_static"]
 html_show_sourcelink = False
 html_copy_source = False
-templates_path = ['templates']  # To remove the searchbar
+templates_path = ["templates"]  # To remove the searchbar
 
 
 def setup(app):
     """Add custom CSS"""
-    app.add_css_file('style.css')
+    app.add_css_file("style.css")
 
 
 # -- Intersphinx ------------------------------------------------
 
 intersphinx_mapping = {
-    'numpy': ('http://docs.scipy.org/doc/numpy/', None),
-    'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
-    'matplotlib': ('http://matplotlib.org/', None),
-    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
-    'statsmodels': ('http://www.statsmodels.org/stable/', None),
-    'seaborn': ('https://seaborn.pydata.org/', None),
-    'sklearn': ('http://scikit-learn.org/stable', None)}
+    "numpy": ("http://docs.scipy.org/doc/numpy/", None),
+    "scipy": ("http://docs.scipy.org/doc/scipy/reference/", None),
+    "matplotlib": ("http://matplotlib.org/", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
+    "statsmodels": ("http://www.statsmodels.org/stable/", None),
+    "seaborn": ("https://seaborn.pydata.org/", None),
+    "sklearn": ("http://scikit-learn.org/stable", None),
+}
