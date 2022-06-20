@@ -10,20 +10,30 @@ from scipy.stats import norm
 
 from .utils import remove_na
 
-__all__ = ["convert_angles", "circ_axial", "circ_mean", "circ_r", "circ_corrcc", "circ_corrcl",
-           "circ_rayleigh", "circ_vtest"]
+__all__ = [
+    "convert_angles",
+    "circ_axial",
+    "circ_mean",
+    "circ_r",
+    "circ_corrcc",
+    "circ_corrcl",
+    "circ_rayleigh",
+    "circ_vtest",
+]
 
 
 ###############################################################################
 # HELPER FUNCTIONS
 ###############################################################################
 
+
 def _checkangles(angles, axis=None):
-    """Internal function to check that angles are in radians.
-    """
-    msg = ("Angles are not in unit of radians. Please use the "
-           "`pingouin.convert_angles` function to map your angles to "
-           "the [-pi, pi] range.")
+    """Internal function to check that angles are in radians."""
+    msg = (
+        "Angles are not in unit of radians. Please use the "
+        "`pingouin.convert_angles` function to map your angles to "
+        "the [-pi, pi] range."
+    )
     ptp_rad = np.nanmax(angles, axis=axis) - np.nanmin(angles, axis=axis)
     ptp_mask = ptp_rad <= 2 * np.pi
     if not ptp_mask.all():
@@ -111,13 +121,13 @@ def convert_angles(angles, low=0, high=360, positive=False):
            [-2.54818071, -2.35619449,  1.67551608,  1.97222205]])
     """
     assert isinstance(positive, bool)
-    assert isinstance(high, (int, float)), 'high must be numeric'
-    assert isinstance(low, (int, float)), 'low must be numeric'
+    assert isinstance(high, (int, float)), "high must be numeric"
+    assert isinstance(low, (int, float)), "low must be numeric"
     ptp = high - low
-    assert ptp > 0, 'high - low must be strictly positive.'
+    assert ptp > 0, "high - low must be strictly positive."
     angles = np.asarray(angles)
-    assert np.nanmin(angles) >= low, 'angles cannot be >= low.'
-    assert np.nanmax(angles) <= high, 'angles cannot be <= high.'
+    assert np.nanmin(angles) >= low, "angles cannot be >= low."
+    assert np.nanmax(angles) <= high, "angles cannot be <= high."
     # Map to [0, 2pi] range
     rad = angles * (2 * np.pi) / ptp
     if not positive:
@@ -169,6 +179,7 @@ def circ_axial(angles, n):
 ###############################################################################
 # DESCRIPTIVE STATISTICS
 ###############################################################################
+
 
 def circ_mean(angles, w=None, axis=0):
     """Mean direction for (binned) circular data.
@@ -447,6 +458,7 @@ def circ_r(angles, w=None, d=None, axis=0):
 # INFERENTIAL STATISTICS
 ###############################################################################
 
+
 def circ_corrcc(x, y, correction_uniform=False):
     """Correlation coefficient between two circular variables.
 
@@ -513,7 +525,7 @@ def circ_corrcc(x, y, correction_uniform=False):
     """
     x = np.asarray(x)
     y = np.asarray(y)
-    assert x.size == y.size, 'x and y must have the same length.'
+    assert x.size == y.size, "x and y must have the same length."
 
     # Remove NA
     x, y = remove_na(x, y, paired=True)
@@ -525,17 +537,18 @@ def circ_corrcc(x, y, correction_uniform=False):
 
     if not correction_uniform:
         # Similar to np.corrcoef(x_sin, y_sin)[0][1]
-        r = np.sum(x_sin * y_sin) / np.sqrt(np.sum(x_sin**2) *
-                                            np.sum(y_sin**2))
+        r = np.sum(x_sin * y_sin) / np.sqrt(np.sum(x_sin**2) * np.sum(y_sin**2))
     else:
         r_minus = np.abs(np.sum(np.exp((x - y) * 1j)))
         r_plus = np.abs(np.sum(np.exp((x + y) * 1j)))
-        denom = 2 * np.sqrt(np.sum(x_sin ** 2) * np.sum(y_sin ** 2))
+        denom = 2 * np.sqrt(np.sum(x_sin**2) * np.sum(y_sin**2))
         r = (r_minus - r_plus) / denom
 
     # Compute T- and p-values
-    tval = np.sqrt((n * (x_sin**2).mean() * (y_sin**2).mean())
-                   / np.mean(x_sin**2 * y_sin**2)) * r
+    tval = (
+        np.sqrt((n * (x_sin**2).mean() * (y_sin**2).mean()) / np.mean(x_sin**2 * y_sin**2))
+        * r
+    )
 
     # Approximately distributed as a standard normal
     pval = 2 * norm.sf(abs(tval))
@@ -581,9 +594,10 @@ def circ_corrcl(x, y):
     0.109 0.971
     """
     from scipy.stats import pearsonr, chi2
+
     x = np.asarray(x)
     y = np.asarray(y)
-    assert x.size == y.size, 'x and y must have the same length.'
+    assert x.size == y.size, "x and y must have the same length."
 
     # Remove NA
     x, y = remove_na(x, y, paired=True)
@@ -674,7 +688,7 @@ def circ_rayleigh(angles, w=None, d=None):
     return z, pval
 
 
-def circ_vtest(angles, dir=0., w=None, d=None):
+def circ_vtest(angles, dir=0.0, w=None, d=None):
     """V test for non-uniformity of circular data with a specified
     mean direction.
 

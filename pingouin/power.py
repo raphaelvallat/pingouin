@@ -5,12 +5,19 @@ import numpy as np
 from scipy import stats
 from scipy.optimize import brenth
 
-__all__ = ["power_ttest", "power_ttest2n", "power_anova", "power_rm_anova",
-           "power_corr", "power_chi2"]
+__all__ = [
+    "power_ttest",
+    "power_ttest2n",
+    "power_anova",
+    "power_rm_anova",
+    "power_corr",
+    "power_chi2",
+]
 
 
-def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
-                alternative='two-sided'):
+def power_ttest(
+    d=None, n=None, power=None, alpha=0.05, contrast="two-samples", alternative="two-sided"
+):
     """
     Evaluate power, sample size, effect size or significance level of a one-sample T-test,
     a paired T-test or an independent two-samples T-test with equal sample sizes.
@@ -118,14 +125,17 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [d, n, power, alpha]])
     if n_none != 1:
-        raise ValueError('Exactly one of n, d, power, and alpha must be None.')
+        raise ValueError("Exactly one of n, d, power, and alpha must be None.")
 
     # Safety checks
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
-    assert contrast.lower() in ['one-sample', 'paired', 'two-samples']
-    tsample = 2 if contrast.lower() == 'two-samples' else 1
-    tside = 2 if alternative == 'two-sided' else 1
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    assert contrast.lower() in ["one-sample", "paired", "two-samples"]
+    tsample = 2 if contrast.lower() == "two-samples" else 1
+    tside = 2 if alternative == "two-sided" else 1
     if d is not None and tside == 2:
         d = abs(d)
     if alpha is not None:
@@ -133,7 +143,7 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
     if power is not None:
         assert 0 < power <= 1
 
-    if alternative == 'less':
+    if alternative == "less":
 
         def func(d, n, power, alpha):
             dof = (n - 1) * tsample
@@ -141,7 +151,7 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
             tcrit = stats.t.ppf(alpha / tside, dof)
             return stats.nct.cdf(tcrit, dof, nc)
 
-    elif alternative == 'two-sided':
+    elif alternative == "two-sided":
 
         def func(d, n, power, alpha):
             dof = (n - 1) * tsample
@@ -169,15 +179,15 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
             return func(d, n, power, alpha) - power
 
         try:
-            return brenth(_eval_n, 2 + 1e-10, 1e+07, args=(d, power, alpha))
+            return brenth(_eval_n, 2 + 1e-10, 1e07, args=(d, power, alpha))
         except ValueError:  # pragma: no cover
             return np.nan
 
     elif d is None:
         # Compute achieved d given sample size, power and alpha level
-        if alternative == 'two-sided':
+        if alternative == "two-sided":
             b0, b1 = 1e-07, 10
-        elif alternative == 'less':
+        elif alternative == "less":
             b0, b1 = -10, 5
         else:
             b0, b1 = -5, 10
@@ -202,7 +212,7 @@ def power_ttest(d=None, n=None, power=None, alpha=0.05, contrast='two-samples',
             return np.nan
 
 
-def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative='two-sided'):
+def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative="two-sided"):
     """
     Evaluate power, effect size or  significance level of an independent two-samples T-test
     with unequal sample sizes.
@@ -284,12 +294,15 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative='two-sided
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [d, power, alpha]])
     if n_none != 1:
-        raise ValueError('Exactly one of d, power, and alpha must be None')
+        raise ValueError("Exactly one of d, power, and alpha must be None")
 
     # Safety checks
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
-    tside = 2 if alternative == 'two-sided' else 1
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    tside = 2 if alternative == "two-sided" else 1
     if d is not None and tside == 2:
         d = abs(d)
     if alpha is not None:
@@ -297,7 +310,7 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative='two-sided
     if power is not None:
         assert 0 < power <= 1
 
-    if alternative == 'less':
+    if alternative == "less":
 
         def func(d, nx, ny, power, alpha):
             dof = nx + ny - 2
@@ -305,7 +318,7 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative='two-sided
             tcrit = stats.t.ppf(alpha / tside, dof)
             return stats.nct.cdf(tcrit, dof, nc)
 
-    elif alternative == 'two-sided':
+    elif alternative == "two-sided":
 
         def func(d, nx, ny, power, alpha):
             dof = nx + ny - 2
@@ -328,9 +341,9 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative='two-sided
 
     elif d is None:
         # Compute achieved d given sample size, power and alpha level
-        if alternative == 'two-sided':
+        if alternative == "two-sided":
             b0, b1 = 1e-07, 10
-        elif alternative == 'less':
+        elif alternative == "less":
             b0, b1 = -10, 5
         else:
             b0, b1 = -5, 10
@@ -457,7 +470,7 @@ def power_anova(eta_squared=None, k=None, n=None, power=None, alpha=0.05):
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [eta_squared, k, n, power, alpha]])
     if n_none != 1:
-        err = 'Exactly one of eta, k, n, power, and alpha must be None.'
+        err = "Exactly one of eta, k, n, power, and alpha must be None."
         raise ValueError(err)
 
     # Safety checks
@@ -499,7 +512,7 @@ def power_anova(eta_squared=None, k=None, n=None, power=None, alpha=0.05):
             return func(f_sq, k, n, power, alpha) - power
 
         try:
-            return brenth(_eval_n, 2, 1e+07, args=(f_sq, k, power, alpha))
+            return brenth(_eval_n, 2, 1e07, args=(f_sq, k, power, alpha))
         except ValueError:  # pragma: no cover
             return np.nan
 
@@ -679,23 +692,23 @@ def power_rm_anova(eta_squared=None, m=None, n=None, power=None, alpha=0.05, cor
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [eta_squared, m, n, power, alpha]])
     if n_none != 1:
-        msg = 'Exactly one of eta, m, n, power, and alpha must be None.'
+        msg = "Exactly one of eta, m, n, power, and alpha must be None."
         raise ValueError(msg)
 
     # Safety checks
-    assert 0 < epsilon <= 1, 'epsilon must be between 0 and 1.'
-    assert -1 < corr < 1, 'corr must be between -1 and 1.'
+    assert 0 < epsilon <= 1, "epsilon must be between 0 and 1."
+    assert -1 < corr < 1, "corr must be between -1 and 1."
     if eta_squared is not None:
         eta_squared = abs(eta_squared)
         f_sq = eta_squared / (1 - eta_squared)
     if alpha is not None:
-        assert 0 < alpha <= 1, 'alpha must be between 0 and 1.'
+        assert 0 < alpha <= 1, "alpha must be between 0 and 1."
     if power is not None:
-        assert 0 < power <= 1, 'power must be between 0 and 1.'
+        assert 0 < power <= 1, "power must be between 0 and 1."
     if n is not None:
-        assert n > 1, 'The sample size n must be > 1.'
+        assert n > 1, "The sample size n must be > 1."
     if m is not None:
-        assert m > 1, 'The number of repeated measures m must be > 1.'
+        assert m > 1, "The number of repeated measures m must be > 1."
 
     def func(f_sq, m, n, power, alpha, corr):
         dof1 = (m - 1) * epsilon
@@ -727,7 +740,7 @@ def power_rm_anova(eta_squared=None, m=None, n=None, power=None, alpha=0.05, cor
             return func(f_sq, m, n, power, alpha, corr) - power
 
         try:
-            return brenth(_eval_n, 5, 1e+6, args=(f_sq, m, power, alpha, corr))
+            return brenth(_eval_n, 5, 1e6, args=(f_sq, m, power, alpha, corr))
         except ValueError:  # pragma: no cover
             return np.nan
 
@@ -755,7 +768,7 @@ def power_rm_anova(eta_squared=None, m=None, n=None, power=None, alpha=0.05, cor
             return np.nan
 
 
-def power_corr(r=None, n=None, power=None, alpha=0.05, alternative='two-sided'):
+def power_corr(r=None, n=None, power=None, alpha=0.05, alternative="two-sided"):
     """
     Evaluate power, sample size, correlation coefficient or significance level of a correlation
     test.
@@ -826,11 +839,14 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative='two-sided'):
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [r, n, power, alpha]])
     if n_none != 1:
-        raise ValueError('Exactly one of n, r, power, and alpha must be None')
+        raise ValueError("Exactly one of n, r, power, and alpha must be None")
 
     # Safety checks
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
 
     if r is not None:
         assert -1 <= r <= 1
@@ -846,7 +862,7 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative='two-sided'):
             return np.nan
 
     # Define main function
-    if alternative == 'two-sided':
+    if alternative == "two-sided":
 
         def func(r, n, power, alpha):
             dof = n - 2
@@ -854,8 +870,9 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative='two-sided'):
             rc = np.sqrt(ttt**2 / (ttt**2 + dof))
             zr = np.arctanh(r) + r / (2 * (n - 1))
             zrc = np.arctanh(rc)
-            power = stats.norm.cdf((zr - zrc) * np.sqrt(n - 3)) + \
-                stats.norm.cdf((-zr - zrc) * np.sqrt(n - 3))
+            power = stats.norm.cdf((zr - zrc) * np.sqrt(n - 3)) + stats.norm.cdf(
+                (-zr - zrc) * np.sqrt(n - 3)
+            )
             return power
 
     elif alternative == "greater":
@@ -893,7 +910,7 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative='two-sided'):
             return func(r, n, power, alpha) - power
 
         try:
-            return brenth(_eval_n, 4 + 1e-10, 1e+09, args=(r, power, alpha))
+            return brenth(_eval_n, 4 + 1e-10, 1e09, args=(r, power, alpha))
         except ValueError:  # pragma: no cover
             return np.nan
 
@@ -1002,7 +1019,7 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [w, n, power, alpha]])
     if n_none != 1:
-        err = 'Exactly one of w, n, power, and alpha must be None.'
+        err = "Exactly one of w, n, power, and alpha must be None."
         raise ValueError(err)
 
     # Safety checks
@@ -1030,7 +1047,7 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
             return func(w, n, power, alpha) - power
 
         try:
-            return brenth(_eval_n, 1, 1e+07, args=(w, power, alpha))
+            return brenth(_eval_n, 1, 1e07, args=(w, power, alpha))
         except ValueError:  # pragma: no cover
             return np.nan
 
@@ -1041,7 +1058,7 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
             return func(w, n, power, alpha) - power
 
         try:
-            return brenth(_eval_w, 1e-10, 1e+07, args=(n, power, alpha))
+            return brenth(_eval_w, 1e-10, 1e07, args=(n, power, alpha))
         except ValueError:  # pragma: no cover
             return np.nan
 

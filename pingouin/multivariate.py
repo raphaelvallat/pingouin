@@ -6,7 +6,7 @@ from pingouin.utils import remove_na, _postprocess_dataframe
 __all__ = ["multivariate_normality", "multivariate_ttest", "box_m"]
 
 
-def multivariate_normality(X, alpha=.05):
+def multivariate_normality(X, alpha=0.05):
     """Henze-Zirkler multivariate normality test.
 
     Parameters
@@ -64,11 +64,11 @@ def multivariate_normality(X, alpha=.05):
 
     # Check input and remove missing values
     X = np.asarray(X)
-    assert X.ndim == 2, 'X must be of shape (n_samples, n_features).'
+    assert X.ndim == 2, "X must be of shape (n_samples, n_features)."
     X = X[~np.isnan(X).any(axis=1)]
     n, p = X.shape
-    assert n >= 3, 'X must have at least 3 rows.'
-    assert p >= 2, 'X must have at least two columns.'
+    assert n >= 3, "X must have at least 3 rows."
+    assert p >= 2, "X must have at least two columns."
 
     # Covariance matrix
     S = np.cov(X, rowvar=False, bias=True)
@@ -78,31 +78,37 @@ def multivariate_normality(X, alpha=.05):
     # Squared-Mahalanobis distances
     Dj = np.diag(np.linalg.multi_dot([difT, S_inv, difT.T]))
     Y = np.linalg.multi_dot([X, S_inv, X.T])
-    Djk = -2 * Y.T + np.repeat(np.diag(Y.T), n).reshape(n, -1) + \
-        np.tile(np.diag(Y.T), (n, 1))
+    Djk = -2 * Y.T + np.repeat(np.diag(Y.T), n).reshape(n, -1) + np.tile(np.diag(Y.T), (n, 1))
 
     # Smoothing parameter
-    b = 1 / (np.sqrt(2)) * ((2 * p + 1) / 4)**(1 / (p + 4)) * \
-        (n**(1 / (p + 4)))
+    b = 1 / (np.sqrt(2)) * ((2 * p + 1) / 4) ** (1 / (p + 4)) * (n ** (1 / (p + 4)))
 
     # Is matrix full-rank (columns are linearly independent)?
     if np.linalg.matrix_rank(S) == p:
-        hz = n * (1 / (n**2) * np.sum(np.sum(np.exp(-(b**2) / 2 * Djk))) - 2
-                  * ((1 + (b**2))**(-p / 2)) * (1 / n)
-                  * (np.sum(np.exp(-((b**2) / (2 * (1 + (b**2)))) * Dj)))
-                  + ((1 + (2 * (b**2)))**(-p / 2)))
+        hz = n * (
+            1 / (n**2) * np.sum(np.sum(np.exp(-(b**2) / 2 * Djk)))
+            - 2
+            * ((1 + (b**2)) ** (-p / 2))
+            * (1 / n)
+            * (np.sum(np.exp(-((b**2) / (2 * (1 + (b**2)))) * Dj)))
+            + ((1 + (2 * (b**2))) ** (-p / 2))
+        )
     else:
         hz = n * 4
 
     wb = (1 + b**2) * (1 + 3 * b**2)
     a = 1 + 2 * b**2
     # Mean and variance
-    mu = 1 - a**(-p / 2) * (1 + p * b**2 / a + (p * (p + 2)
-                                                * (b**4)) / (2 * a**2))
-    si2 = 2 * (1 + 4 * b**2)**(-p / 2) + 2 * a**(-p) * \
-        (1 + (2 * p * b**4) / a**2 + (3 * p * (p + 2) * b**8) / (4 * a**4)) \
-        - 4 * wb**(-p / 2) * (1 + (3 * p * b**4) / (2 * wb)
-                              + (p * (p + 2) * b**8) / (2 * wb**2))
+    mu = 1 - a ** (-p / 2) * (1 + p * b**2 / a + (p * (p + 2) * (b**4)) / (2 * a**2))
+    si2 = (
+        2 * (1 + 4 * b**2) ** (-p / 2)
+        + 2
+        * a ** (-p)
+        * (1 + (2 * p * b**4) / a**2 + (3 * p * (p + 2) * b**8) / (4 * a**4))
+        - 4
+        * wb ** (-p / 2)
+        * (1 + (3 * p * b**4) / (2 * wb) + (p * (p + 2) * b**8) / (2 * wb**2))
+    )
 
     # Lognormal mean and variance
     pmu = np.log(np.sqrt(mu**4 / (si2 + mu**2)))
@@ -112,7 +118,7 @@ def multivariate_normality(X, alpha=.05):
     pval = lognorm.sf(hz, psi, scale=np.exp(pmu))
     normal = True if pval > alpha else False
 
-    HZResults = namedtuple('HZResults', ['hz', 'pval', 'normal'])
+    HZResults = namedtuple("HZResults", ["hz", "pval", "normal"])
     return HZResults(hz=hz, pval=pval, normal=normal)
 
 
@@ -194,8 +200,9 @@ def multivariate_ttest(X, Y=None, paired=False):
     hotelling  253.230991  74.479703    3   15  3.081281e-09
     """
     from scipy.stats import f
+
     x = np.asarray(X)
-    assert x.ndim == 2, 'x must be of shape (n_samples, n_features)'
+    assert x.ndim == 2, "x must be of shape (n_samples, n_features)"
 
     if Y is None:
         y = np.zeros(x.shape[1])
@@ -204,24 +211,24 @@ def multivariate_ttest(X, Y=None, paired=False):
     else:
         nx, kx = x.shape
         y = np.asarray(Y)
-        assert y.ndim in [1, 2], 'Y must be 1D or 2D.'
+        assert y.ndim in [1, 2], "Y must be 1D or 2D."
         if y.ndim == 1:
             # One sample with specified null
             assert y.size == kx
         else:
             # Two-sample
-            err = 'X and Y must have the same number of features (= columns).'
+            err = "X and Y must have the same number of features (= columns)."
             assert y.shape[1] == kx, err
             if paired:
-                err = 'X and Y must have the same number of rows if paired.'
+                err = "X and Y must have the same number of rows if paired."
                 assert y.shape[0] == nx, err
         # Remove rows with missing values in both x and y
-        x, y = remove_na(x, y, paired=paired, axis='rows')
+        x, y = remove_na(x, y, paired=paired, axis="rows")
 
     # Shape of arrays
     nx, k = x.shape
     ny = y.shape[0]
-    assert nx >= 5, 'At least five samples are required.'
+    assert nx >= 5, "At least five samples are required."
 
     if y.ndim == 1 or paired is True:
         n = nx
@@ -251,12 +258,12 @@ def multivariate_ttest(X, Y=None, paired=False):
     pval = f.sf(fval, df1, df2)
 
     # Create output dictionnary
-    stats = {'T2': t2, 'F': fval, 'df1': df1, 'df2': df2, 'pval': pval}
-    stats = pd.DataFrame(stats, index=['hotelling'])
+    stats = {"T2": t2, "F": fval, "df1": df1, "df2": df2, "pval": pval}
+    stats = pd.DataFrame(stats, index=["hotelling"])
     return _postprocess_dataframe(stats)
 
 
-def box_m(data, dvs, group, alpha=.001):
+def box_m(data, dvs, group, alpha=0.001):
     """Test equality of covariance matrices using the Box's M test.
 
     Parameters
@@ -341,11 +348,12 @@ def box_m(data, dvs, group, alpha=.001):
     """
     # Safety checks
     from scipy.stats import chi2
+
     assert isinstance(data, pd.DataFrame), "data must be a pandas dataframe."
     assert group in data.columns, "The grouping variable is not in data."
     assert set(dvs).issubset(data.columns), "The DVs are not in data."
     grp = data.groupby(group, observed=True)[dvs]
-    assert grp.ngroups > 1, 'Data must have at least two columns.'
+    assert grp.ngroups > 1, "Data must have at least two columns."
 
     # Calculate covariance matrix and descriptive statistics
     # - n_covs is the number of covariance matrices
@@ -364,23 +372,25 @@ def box_m(data, dvs, group, alpha=.001):
     # The following lines might raise an error if the covariance matrices are
     # not invertible (e.g. missing values in input).
     S_det = np.linalg.det(S)
-    M = ((np.linalg.det(covs) / S_det)**(v / 2)).prod()
+    M = ((np.linalg.det(covs) / S_det) ** (v / 2)).prod()
 
     # Calculate C in reference [1] (page 257-259)
     if len(np.unique(n_samp)) == 1:
         # All groups have same number of samples
-        c = ((n_covs + 1) * (2 * n_dvs ** 2 + 3 * n_dvs - 1)) \
-            / (6 * n_covs * (n_dvs + 1) * (nobs / n_covs - 1))
+        c = ((n_covs + 1) * (2 * n_dvs**2 + 3 * n_dvs - 1)) / (
+            6 * n_covs * (n_dvs + 1) * (nobs / n_covs - 1)
+        )
     else:
         # Unequal sample size
-        c = (2 * n_dvs ** 2 + 3 * n_dvs - 1) / (6 * (n_dvs + 1) * (n_covs - 1))
-        c *= ((1 / v).sum() - 1 / v.sum())
+        c = (2 * n_dvs**2 + 3 * n_dvs - 1) / (6 * (n_dvs + 1) * (n_covs - 1))
+        c *= (1 / v).sum() - 1 / v.sum()
 
     # Calculate U statistics and degree of fredom
     u = -2 * (1 - c) * np.log(M)
     df = 0.5 * n_dvs * (n_dvs + 1) * (n_covs - 1)
     p = chi2.sf(u, df)
     equal_cov = True if p > alpha else False
-    stats = pd.DataFrame(index=["box"], data={
-        'Chi2': [u], 'df': [df], 'pval': [p], 'equal_cov': [equal_cov]})
+    stats = pd.DataFrame(
+        index=["box"], data={"Chi2": [u], "df": [df], "pval": [p], "equal_cov": [equal_cov]}
+    )
     return _postprocess_dataframe(stats)
