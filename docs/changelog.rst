@@ -28,6 +28,7 @@ c. Allow keyword arguments for logistic regression in :py:func:`pingouin.mediati
 d. Speed improvements for the Holm and FDR correction in :py:func:`pingouin.multicomp`. `PR 271 <https://github.com/raphaelvallat/pingouin/pull/271>`_.
 e. Speed improvements univariate functions in :py:func:`pingouin.compute_bootci` (e.g. ``func="mean"`` is now vectorized).
 f. Rename ``eta`` to ``eta_squared`` in :py:func:`pingouin.power_anova` and :py:func:`pingouin.power_rm_anova` to avoid any confusion. `PR 280 <https://github.com/raphaelvallat/pingouin/pull/280>`_.
+g. Use `black <https://black.readthedocs.io/en/stable/>`_ code formatting.
 
 **Dependencies**
 
