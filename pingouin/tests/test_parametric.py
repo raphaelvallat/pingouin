@@ -371,13 +371,13 @@ class TestParametric(TestCase):
         rm_anova(
             dv="Scores", within="Time", subject="Subject", data=df, correction=True, detailed=False
         )
-        # Compare with JASP
+        # Compare with JAMOVI
         aov = rm_anova(
             dv="Scores", within="Time", subject="Subject", data=df, correction="auto", detailed=True
         ).round(3)
-        assert aov.at[0, "F"] == 3.913
-        assert aov.at[0, "p-unc"] == 0.023
-        assert aov.at[0, "np2"] == 0.062
+        assert aov.at[0, "F"] == 3.91280
+        assert aov.at[0, "p-unc"] == 0.02263
+        assert aov.at[0, "ng2"] == 0.03998
         # Compare residuals with R package rstatix
         # ANOVA = rstatix::anova_test(DF, dv='Scores', within='Time', wid='Subject')
         # attr(ANOVA, 'args')$model$residuals
@@ -441,11 +441,11 @@ class TestParametric(TestCase):
         data = read_dataset("rm_anova2")
         aov = rm_anova(
             data=data, subject="Subject", within=["Time", "Metric"], dv="Performance"
-        ).round(3)
-        array_equal(aov.loc[:, "MS"], [828.817, 682.617, 112.217])
-        array_equal(aov.loc[:, "F"], [33.852, 26.959, 12.632])
-        array_equal(aov.loc[:, "np2"], [0.790, 0.750, 0.584])
-        array_equal(aov.loc[:, "eps"], [1.0, 0.969, 0.727])
+        ).round(5)
+        array_equal(aov.loc[:, "MS"], [828.81667, 682.61667, 112.21667])
+        array_equal(aov.loc[:, "F"], [33.85228, 26.95919, 12.63227])
+        array_equal(aov.loc[:, "ng2"], [0.25401, 0.35933, 0.08442])
+        array_equal(aov.loc[:, "eps"], [1.0, 0.96910, 0.72717])
         # Compare residuals with R package rstatix
         # ANOVA = rstatix::anova_test(DF, dv='Performance', within=c('Time', 'Metric'), wid='Subject')
         # attr(ANOVA, 'args')$model$residuals
