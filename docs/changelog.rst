@@ -8,13 +8,50 @@ What's new
 
 *************
 
-v0.6.0.dev
-----------
+v0.5.2 (June 2022)
+------------------
+
+**Bugfixes**
+
+a. The eta-squared (``n2``) effect size was not properly calculated in one-way and two-way repeated measures ANOVAs. Specifically, Pingouin followed the same behavior as JASP, i.e. the eta-squared was the same as the partial eta-squared. However, as explained in `issue 251 <https://github.com/raphaelvallat/pingouin/issues/251>`_, this behavior is not valid. In one-way ANOVA design, the eta-squared should be equal to the generalized eta-squared. Note that, as of March 2022, this bug is also present in JASP. We have therefore updated the unit tests to use JAMOVI instead.
+
+.. warning:: Please double check any effect sizes previously obtained with the :py:func:`pingouin.rm_anova` function.
+
+b. Fixed invalid resampling behavior for bivariate functions in :py:func:`pingouin.compute_bootci` when x and y were not paired. `PR 281 <https://github.com/raphaelvallat/pingouin/pull/281>`_.
+c. Fixed bug where ``confidence`` (previously ``ci``) was ignored when calculating the bootstrapped confidence intervals in :py:func:`pingouin.plot_shift`. `PR 282 <https://github.com/raphaelvallat/pingouin/pull/282>`_.
 
 **Enhancements**
 
-a. Faster implementation of :py:func:`pingouin.gzscore`, adding all options available in zscore: axis, ddof and nan_policy. Warning: this functions is deprecated and will be removed in pingouin 0.7.0 (use scipy.stats.gzscore instead). See `pull request 210 <https://github.com/raphaelvallat/pingouin/pull/210>`_.
+a. The :py:func:`pingouin.pairwise_ttests` has been renamed to :py:func:`pingouin.pairwise_tests`. Non-parametric tests are also supported in this function with the `parametric=False` argument, and thus the name "ttests" was misleading (see `issue 209 <https://github.com/raphaelvallat/pingouin/issues/209>`_).
+b. Allow :py:func:`pingouin.bayesfactor_binom` to take Beta alternative model. `PR 252 <https://github.com/raphaelvallat/pingouin/pull/252>`_.
+c. Allow keyword arguments for logistic regression in :py:func:`pingouin.mediation_analysis`. `PR 245 <https://github.com/raphaelvallat/pingouin/pull/245>`_.
+d. Speed improvements for the Holm and FDR correction in :py:func:`pingouin.multicomp`. `PR 271 <https://github.com/raphaelvallat/pingouin/pull/271>`_.
+e. Speed improvements univariate functions in :py:func:`pingouin.compute_bootci` (e.g. ``func="mean"`` is now vectorized).
+f. Rename ``eta`` to ``eta_squared`` in :py:func:`pingouin.power_anova` and :py:func:`pingouin.power_rm_anova` to avoid any confusion. `PR 280 <https://github.com/raphaelvallat/pingouin/pull/280>`_.
+g. Use `black <https://black.readthedocs.io/en/stable/>`_ code formatting.
 
+**Dependencies**
+
+a. Force scikit-learn<1.1.0 to avoid bug in :py:func:`pingouin.logistic_regression`. `PR 272 <https://github.com/raphaelvallat/pingouin/issues/272>`_.
+
+v0.5.1 (February 2022)
+----------------------
+
+This is a minor release, with several bugfixes and improvements. This release is compatible with SciPy 1.8 and Pandas 1.4.
+
+**Bugfixes**
+
+a. Added support for SciPy 1.8 and Pandas 1.4. `PR 234 <https://github.com/raphaelvallat/pingouin/pull/234>`_.
+b. Fixed bug where :py:func:`pingouin.rm_anova` and :py:func:`pingouin.mixed_anova` changed the dtypes of categorical columns in-place (`issue 224 <https://github.com/raphaelvallat/pingouin/issues/224>`_).
+
+**Enhancements**
+
+a. Faster implementation of :py:func:`pingouin.gzscore`, adding all options available in zscore: axis, ddof and nan_policy. Warning: this functions is deprecated and will be removed in pingouin 0.7.0 (use :py:func:`scipy.stats.gzscore` instead). `PR 210 <https://github.com/raphaelvallat/pingouin/pull/210>`_.
+b. Replace use of statsmodels' studentized range distribution functions with more SciPy's more accurate :py:func:`scipy.stats.studentized_range`. `PR 229 <https://github.com/raphaelvallat/pingouin/pull/229>`_.
+c. Add support for optional keywords argument in the :py:func:`pingouin.homoscedasticity` function (`issue 218 <https://github.com/raphaelvallat/pingouin/issues/218>`_).
+d. Add support for the Jarque-Bera test in :py:func:`pingouin.normality` (`issue 216 <https://github.com/raphaelvallat/pingouin/issues/216>`_).
+
+Lastly, we have also deprecated the Gitter forum in favor of `GitHub Discussions <https://github.com/raphaelvallat/pingouin/discussions>`_. Please use Discussions to ask questions, share ideas / tips and engage with the Pingouin community!
 
 *************
 

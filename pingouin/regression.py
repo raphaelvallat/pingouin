@@ -11,11 +11,20 @@ from pingouin.utils import remove_na as rm_na
 from pingouin.utils import _flatten_list as _fl
 from pingouin.utils import _postprocess_dataframe
 
-__all__ = ['linear_regression', 'logistic_regression', 'mediation_analysis']
+__all__ = ["linear_regression", "logistic_regression", "mediation_analysis"]
 
 
-def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
-                      alpha=0.05, as_dataframe=True, remove_na=False, relimp=False):
+def linear_regression(
+    X,
+    y,
+    add_intercept=True,
+    weights=None,
+    coef_only=False,
+    alpha=0.05,
+    as_dataframe=True,
+    remove_na=False,
+    relimp=False,
+):
     """(Multiple) Linear regression.
 
     Parameters
@@ -313,7 +322,7 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     # Convert input to numpy array
     X = np.asarray(X)
     y = np.asarray(y)
-    assert y.ndim == 1, 'y must be one-dimensional.'
+    assert y.ndim == 1, "y must be one-dimensional."
     assert 0 < alpha < 1
 
     if X.ndim == 1:
@@ -322,20 +331,22 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
 
     # Check for NaN / Inf
     if remove_na:
-        X, y = rm_na(X, y[..., np.newaxis], paired=True, axis='rows')
+        X, y = rm_na(X, y[..., np.newaxis], paired=True, axis="rows")
         y = np.squeeze(y)
     y_gd = np.isfinite(y).all()
     X_gd = np.isfinite(X).all()
-    assert y_gd, ("Target (y) contains NaN or Inf. Please remove them "
-                  "manually or use remove_na=True.")
-    assert X_gd, ("Predictors (X) contain NaN or Inf. Please remove them "
-                  "manually or use remove_na=True.")
+    assert y_gd, (
+        "Target (y) contains NaN or Inf. Please remove them " "manually or use remove_na=True."
+    )
+    assert X_gd, (
+        "Predictors (X) contain NaN or Inf. Please remove them " "manually or use remove_na=True."
+    )
 
     # Check that X and y have same length
-    assert y.shape[0] == X.shape[0], 'X and y must have same number of samples'
+    assert y.shape[0] == X.shape[0], "X and y must have same number of samples"
 
     if not names:
-        names = ['x' + str(i + 1) for i in range(X.shape[1])]
+        names = ["x" + str(i + 1) for i in range(X.shape[1])]
 
     if add_intercept:
         # Add intercept
@@ -373,19 +384,18 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
 
     # 4. Check that we have enough samples / features
     n, p = X.shape[0], X.shape[1]
-    assert n >= 3, 'At least three valid samples are required in X.'
-    assert p >= 1, 'X must have at least one valid column.'
+    assert n >= 3, "At least three valid samples are required in X."
+    assert p >= 1, "X must have at least one valid column."
 
     # 5. Handle weights
     if weights is not None:
         if relimp:
-            raise ValueError("relimp = True is not supported when using "
-                             "weights.")
+            raise ValueError("relimp = True is not supported when using " "weights.")
         w = np.asarray(weights)
-        assert w.ndim == 1, 'weights must be a 1D array.'
-        assert w.size == n, 'weights must be of shape n_samples.'
-        assert not np.isnan(w).any(), 'Missing weights are not accepted.'
-        assert not (w < 0).any(), 'Negative weights are not accepted.'
+        assert w.ndim == 1, "weights must be a 1D array."
+        assert w.size == n, "weights must be of shape n_samples."
+        assert not np.isnan(w).any(), "Missing weights are not accepted."
+        assert not (w < 0).any(), "Negative weights are not accepted."
         # Do not count weights == 0 in dof
         # This gives similar results as R lm() but different from statsmodels
         n = np.count_nonzero(w)
@@ -407,11 +417,13 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     calc_ss_res = False
     if rank < Xw.shape[1]:
         # in this case, ss_res is of shape (0,), i.e., an empty array
-        warnings.warn('Design matrix supplied with `X` parameter is rank '
-                      f'deficient (rank {rank} with {Xw.shape[1]} columns). '
-                      'That means that one or more of the columns in `X` '
-                      'are a linear combination of one of more of the '
-                      'other columns.')
+        warnings.warn(
+            "Design matrix supplied with `X` parameter is rank "
+            f"deficient (rank {rank} with {Xw.shape[1]} columns). "
+            "That means that one or more of the columns in `X` "
+            "are a linear combination of one of more of the "
+            "other columns."
+        )
         calc_ss_res = True
 
     # Degrees of freedom
@@ -423,11 +435,11 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     resid = yw - pred
     if calc_ss_res:
         # In case we did not get ss_res from lstsq due to rank deficiency
-        ss_res = (resid ** 2).sum()
+        ss_res = (resid**2).sum()
 
     # Calculate total (weighted) sums of squares and R^2
     ss_tot = yw @ yw
-    ss_wtot = np.sum(w * (y - np.average(y, weights=w))**2)
+    ss_wtot = np.sum(w * (y - np.average(y, weights=w)) ** 2)
     if constant:
         r2 = 1 - ss_res / ss_wtot
     else:
@@ -450,24 +462,33 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
     ul = coef + marg_error
 
     # Rename CI
-    ll_name = 'CI[%.1f%%]' % (100 * alpha / 2)
-    ul_name = 'CI[%.1f%%]' % (100 * (1 - alpha / 2))
+    ll_name = "CI[%.1f%%]" % (100 * alpha / 2)
+    ul_name = "CI[%.1f%%]" % (100 * (1 - alpha / 2))
 
     # Create dict
-    stats = {'names': names, 'coef': coef, 'se': beta_se, 'T': T,
-             'pval': pval, 'r2': r2, 'adj_r2': adj_r2, ll_name: ll,
-             ul_name: ul}
+    stats = {
+        "names": names,
+        "coef": coef,
+        "se": beta_se,
+        "T": T,
+        "pval": pval,
+        "r2": r2,
+        "adj_r2": adj_r2,
+        ll_name: ll,
+        ul_name: ul,
+    }
 
     # Relative importance
     if relimp:
-        data = pd.concat([pd.DataFrame(y, columns=['y']),
-                          pd.DataFrame(X, columns=names)], sort=False, axis=1)
-        if 'Intercept' in names:
+        data = pd.concat(
+            [pd.DataFrame(y, columns=["y"]), pd.DataFrame(X, columns=names)], sort=False, axis=1
+        )
+        if "Intercept" in names:
             # Intercept is the first column
-            reli = _relimp(data.drop(columns=['Intercept']).cov())
-            reli['names'] = ['Intercept'] + reli['names']
-            reli['relimp'] = np.insert(reli['relimp'], 0, np.nan)
-            reli['relimp_perc'] = np.insert(reli['relimp_perc'], 0, np.nan)
+            reli = _relimp(data.drop(columns=["Intercept"]).cov())
+            reli["names"] = ["Intercept"] + reli["names"]
+            reli["relimp"] = np.insert(reli["relimp"], 0, np.nan)
+            reli["relimp_perc"] = np.insert(reli["relimp_perc"], 0, np.nan)
         else:
             reli = _relimp(data.cov())
         stats.update(reli)
@@ -479,15 +500,15 @@ def linear_regression(X, y, add_intercept=True, weights=None, coef_only=False,
         stats.residuals_ = 0  # Trick to avoid Pandas warning
         stats.residuals_ = resid  # Residuals is a hidden attribute
     else:
-        stats['df_model'] = df_model
-        stats['df_resid'] = df_resid
-        stats['residuals'] = resid
-        stats['X'] = X
-        stats['y'] = y
-        stats['pred'] = pred
+        stats["df_model"] = df_model
+        stats["df_resid"] = df_resid
+        stats["residuals"] = resid
+        stats["X"] = X
+        stats["y"] = y
+        stats["pred"] = pred
         if weights is not None:
-            stats['yw'] = yw
-            stats['Xw'] = Xw
+            stats["yw"] = yw
+            stats["Xw"] = Xw
     return stats
 
 
@@ -517,8 +538,9 @@ def _relimp(S):
     # Note that the R^2 that we calculate below is always the R^2 of the model
     # INCLUDING the intercept!
     ss_tot = S.iat[target_int, target_int]
-    betas = (np.linalg.pinv(S.iloc[predictors_int, predictors_int])
-             @ S.iloc[predictors_int, target_int])
+    betas = (
+        np.linalg.pinv(S.iloc[predictors_int, predictors_int]) @ S.iloc[predictors_int, target_int]
+    )
     r2_full = betas @ S.iloc[target_int, predictors_int] / ss_tot
 
     # Pre-computed SSreg dictionnary
@@ -545,13 +567,11 @@ def _relimp(S):
                     ss_reg_without = ss_reg_precomp[str(sorted(p))]
                 else:
                     S_without = S.iloc[p, target_int]
-                    ss_reg_without = (np.linalg.pinv(S.iloc[p, p]) @ S_without
-                                      @ S_without)
+                    ss_reg_without = np.linalg.pinv(S.iloc[p, p]) @ S_without @ S_without
                     ss_reg_precomp[str(sorted(p))] = ss_reg_without
 
                 S_with = S.iloc[p_with, target_int]
-                ss_reg_with = (pinvh(S.iloc[p_with, p_with]) @ S_with
-                               @ S_with)
+                ss_reg_with = pinvh(S.iloc[p_with, p_with]) @ S_with @ S_with
                 ss_reg_precomp[str(sorted(p_with))] = ss_reg_with
 
                 # Calculate R^2
@@ -570,15 +590,18 @@ def _relimp(S):
         r2_seq_mean.append(r2_seq)
         all_preds.append(np.mean(r2_seq_mean))
 
-    stats_relimp = {'names': predictors,
-                    'relimp': all_preds,
-                    'relimp_perc': all_preds / sum(all_preds) * 100}
+    stats_relimp = {
+        "names": predictors,
+        "relimp": all_preds,
+        "relimp_perc": all_preds / sum(all_preds) * 100,
+    }
 
     return stats_relimp
 
 
-def logistic_regression(X, y, coef_only=False, alpha=0.05,
-                        as_dataframe=True, remove_na=False, **kwargs):
+def logistic_regression(
+    X, y, coef_only=False, alpha=0.05, as_dataframe=True, remove_na=False, **kwargs
+):
     """(Multiple) Binary logistic regression.
 
     Parameters
@@ -801,6 +824,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     """
     # Check that sklearn is installed
     from pingouin.utils import _is_sklearn_installed
+
     _is_sklearn_installed(raise_error=True)
     from sklearn.linear_model import LogisticRegression
 
@@ -815,8 +839,8 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     # Convert to numpy array
     X = np.asarray(X)
     y = np.asarray(y)
-    assert y.ndim == 1, 'y must be one-dimensional.'
-    assert 0 < alpha < 1, 'alpha must be between 0 and 1.'
+    assert y.ndim == 1, "y must be one-dimensional."
+    assert 0 < alpha < 1, "alpha must be between 0 and 1."
 
     # Add axis if only one-dimensional array
     if X.ndim == 1:
@@ -824,24 +848,26 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
 
     # Check for NaN /  Inf
     if remove_na:
-        X, y = rm_na(X, y[..., np.newaxis], paired=True, axis='rows')
+        X, y = rm_na(X, y[..., np.newaxis], paired=True, axis="rows")
         y = np.squeeze(y)
     y_gd = np.isfinite(y).all()
     X_gd = np.isfinite(X).all()
-    assert y_gd, ("Target (y) contains NaN or Inf. Please remove them "
-                  "manually or use remove_na=True.")
-    assert X_gd, ("Predictors (X) contain NaN or Inf. Please remove them "
-                  "manually or use remove_na=True.")
+    assert y_gd, (
+        "Target (y) contains NaN or Inf. Please remove them " "manually or use remove_na=True."
+    )
+    assert X_gd, (
+        "Predictors (X) contain NaN or Inf. Please remove them " "manually or use remove_na=True."
+    )
 
     # Check that X and y have same length
-    assert y.shape[0] == X.shape[0], 'X and y must have same number of samples'
+    assert y.shape[0] == X.shape[0], "X and y must have same number of samples"
 
     # Check that y is binary
     if np.unique(y).size != 2:
-        raise ValueError('Dependent variable must be binary.')
+        raise ValueError("Dependent variable must be binary.")
 
     if not names:
-        names = ['x' + str(i + 1) for i in range(X.shape[1])]
+        names = ["x" + str(i + 1) for i in range(X.shape[1])]
 
     # We also want to make sure that there is no column
     # with only one unique value, otherwise the regression fails
@@ -862,16 +888,16 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
             names = np.delete(names, idx_duplicate).tolist()
 
     # Initialize and fit
-    if 'solver' not in kwargs:
+    if "solver" not in kwargs:
         # https://stats.stackexchange.com/a/204324/253579
         # Updated in Pingouin > 0.3.6 to be consistent with R
-        kwargs['solver'] = 'newton-cg'
-    if 'penalty' not in kwargs:
-        kwargs['penalty'] = 'none'
+        kwargs["solver"] = "newton-cg"
+    if "penalty" not in kwargs:
+        kwargs["penalty"] = "none"
     lom = LogisticRegression(**kwargs)
     lom.fit(X, y)
 
-    if lom.get_params()['fit_intercept']:
+    if lom.get_params()["fit_intercept"]:
         names.insert(0, "Intercept")
         X_design = np.column_stack((np.ones(X.shape[0]), X))
         coef = np.append(lom.intercept_, lom.coef_)
@@ -884,7 +910,7 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
 
     # Fisher Information Matrix
     n, p = X_design.shape
-    denom = (2 * (1 + np.cosh(lom.decision_function(X))))
+    denom = 2 * (1 + np.cosh(lom.decision_function(X)))
     denom = np.tile(denom, (p, 1)).T
     fim = (X_design / denom).T @ X_design
     crao = np.linalg.pinv(fim)
@@ -904,70 +930,81 @@ def logistic_regression(X, y, coef_only=False, alpha=0.05,
     ul = coef + crit * se
 
     # Rename CI
-    ll_name = 'CI[%.1f%%]' % (100 * alpha / 2)
-    ul_name = 'CI[%.1f%%]' % (100 * (1 - alpha / 2))
+    ll_name = "CI[%.1f%%]" % (100 * alpha / 2)
+    ul_name = "CI[%.1f%%]" % (100 * (1 - alpha / 2))
 
     # Create dict
-    stats = {'names': names, 'coef': coef, 'se': se, 'z': z_scores,
-             'pval': pval, ll_name: ll, ul_name: ul}
+    stats = {
+        "names": names,
+        "coef": coef,
+        "se": se,
+        "z": z_scores,
+        "pval": pval,
+        ll_name: ll,
+        ul_name: ul,
+    }
     if as_dataframe:
         return _postprocess_dataframe(pd.DataFrame(stats))
     else:
         return stats
 
 
-def _point_estimate(X_val, XM_val, M_val, y_val, idx, n_mediator,
-                    mtype='linear'):
+def _point_estimate(X_val, XM_val, M_val, y_val, idx, n_mediator, mtype="linear", **logreg_kwargs):
     """Point estimate of indirect effect based on bootstrap sample."""
     # Mediator(s) model (M(j) ~ X + covar)
     beta_m = []
     for j in range(n_mediator):
-        if mtype == 'linear':
-            beta_m.append(linear_regression(X_val[idx], M_val[idx, j],
-                                            coef_only=True)[1])
+        if mtype == "linear":
+            beta_m.append(linear_regression(X_val[idx], M_val[idx, j], coef_only=True)[1])
         else:
-            beta_m.append(logistic_regression(X_val[idx], M_val[idx, j],
-                                              coef_only=True)[1])
+            beta_m.append(
+                logistic_regression(X_val[idx], M_val[idx, j], coef_only=True, **logreg_kwargs)[1]
+            )
 
     # Full model (Y ~ X + M + covar)
-    beta_y = linear_regression(XM_val[idx], y_val[idx],
-                               coef_only=True)[2:(2 + n_mediator)]
+    beta_y = linear_regression(XM_val[idx], y_val[idx], coef_only=True)[2 : (2 + n_mediator)]
 
     # Point estimate
     return beta_m * beta_y
 
 
-def _bca(ab_estimates, sample_point, n_boot, alpha=0.05):
-    """Get (1 - alpha) * 100 bias-corrected confidence interval estimate
-
-    Note that this is similar to the "cper" module implemented in
-    :py:func:`pingouin.compute_bootci`.
+def _bias_corrected_ci(bootdist, sample_point, alpha=0.05):
+    """Bias-corrected confidence intervals
 
     Parameters
     ----------
-    ab_estimates : 1d array-like
+    bootdist : array-like
         Array with bootstrap estimates for each sample.
     sample_point : float
-        Indirect effect point estimate based on full sample.
-    n_boot : int
-        Number of bootstrap samples
+        Point estimate based on full sample.
     alpha : float
-        Alpha for confidence interval
+        Alpha for confidence interval.
 
     Returns
     -------
     CI : 1d array-like
-        Lower limit and upper limit bias-corrected confidence interval
-        estimates.
+        Lower and upper bias-corrected confidence interval estimates.
+
+    Notes
+    -----
+    This is what's used in the "cper" method implemented in :py:func:`pingouin.compute_bootci`.
+
+    This differs from the bias-corrected and accelerated method (BCa, default in Matlab and
+    SciPy) because it does not correct for skewness. Indeed, the acceleration parameter, a,
+    is proportional to the skewness of the bootstrap distribution. The bias-correction parameter,
+    z0, is related to the proportion of bootstrap estimates that are less than the observed
+    statistic.
     """
     # Bias of bootstrap estimates
-    z0 = norm.ppf(np.sum(ab_estimates < sample_point) / n_boot)
+    # In Matlab bootci they also count when bootdist == sample_point
+    # >>> z0 = norminv(mean(bstat < stat,1) + mean(bstat == stat,1)/2);
+    z0 = norm.ppf(np.mean(bootdist < sample_point))
     # Adjusted intervals
     adjusted_ll = norm.cdf(2 * z0 + norm.ppf(alpha / 2)) * 100
     adjusted_ul = norm.cdf(2 * z0 + norm.ppf(1 - alpha / 2)) * 100
-    ll = np.percentile(ab_estimates, q=adjusted_ll)
-    ul = np.percentile(ab_estimates, q=adjusted_ul)
-    return np.array([ll, ul])
+    # Adjusted percentiles
+    ci = np.percentile(bootdist, q=[adjusted_ll, adjusted_ul])
+    return ci
 
 
 def _pval_from_bootci(boot, estimate):
@@ -984,8 +1021,18 @@ def _pval_from_bootci(boot, estimate):
 
 
 @pf.register_dataframe_method
-def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
-                       alpha=0.05, n_boot=500, seed=None, return_dist=False):
+def mediation_analysis(
+    data=None,
+    x=None,
+    m=None,
+    y=None,
+    covar=None,
+    alpha=0.05,
+    n_boot=500,
+    seed=None,
+    return_dist=False,
+    logreg_kwargs=None,
+):
     """Mediation analysis using a bias-correct non-parametric bootstrap method.
 
     Parameters
@@ -1013,6 +1060,8 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
         estimation. The greater, the slower.
     seed : int or None
         Random state seed.
+    logreg_kwargs : dict or None
+        Dictionary with optional arguments passed to :py:func:`pingouin.logistic_regression`
     return_dist : bool
         If True, the function also returns the indirect bootstrapped beta
         samples (size = n_boot). Can be plotted for instance using
@@ -1151,43 +1200,46 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     7  Indirect Mbin  0.000  0.010  0.952    -0.017      0.025   No
     """
     # Sanity check
-    assert isinstance(x, (str, int)), 'y must be a string or int.'
-    assert isinstance(y, (str, int)), 'y must be a string or int.'
-    assert isinstance(m, (list, str, int)), 'Mediator(s) must be a list, string or int.'
+    assert isinstance(x, (str, int)), "y must be a string or int."
+    assert isinstance(y, (str, int)), "y must be a string or int."
+    assert isinstance(m, (list, str, int)), "Mediator(s) must be a list, string or int."
     assert isinstance(covar, (type(None), str, list, int))
     if isinstance(m, (str, int)):
         m = [m]
     n_mediator = len(m)
-    assert isinstance(data, pd.DataFrame), 'Data must be a DataFrame.'
+    assert isinstance(data, pd.DataFrame), "Data must be a DataFrame."
     # Check for duplicates
-    assert n_mediator == len(set(m)), 'Cannot have duplicates mediators.'
+    assert n_mediator == len(set(m)), "Cannot have duplicates mediators."
     if isinstance(covar, (str, int)):
         covar = [covar]
     if isinstance(covar, list):
-        assert len(covar) == len(set(covar)), 'Cannot have duplicates covar.'
-        assert set(m).isdisjoint(covar), 'Mediator cannot be in covar.'
+        assert len(covar) == len(set(covar)), "Cannot have duplicates covar."
+        assert set(m).isdisjoint(covar), "Mediator cannot be in covar."
     # Check that columns are in dataframe
     columns = _fl([x, m, y, covar])
     keys = data.columns
-    assert all([c in keys for c in columns]), 'Column(s) are not in DataFrame.'
+    assert all([c in keys for c in columns]), "Column(s) are not in DataFrame."
     # Check that columns are numeric
     err_msg = "Columns must be numeric or boolean."
-    assert all([data[c].dtype.kind in 'bfiu' for c in columns]), err_msg
+    assert all([data[c].dtype.kind in "bfiu" for c in columns]), err_msg
 
     # Drop rows with NAN Values
     data = data[columns].dropna()
     n = data.shape[0]
-    assert n > 5, 'DataFrame must have at least 5 samples (rows).'
+    assert n > 5, "DataFrame must have at least 5 samples (rows)."
 
     # Check if mediator is binary
-    mtype = 'logistic' if all(data[m].nunique() == 2) else 'linear'
+    mtype = "logistic" if all(data[m].nunique() == 2) else "linear"
+
+    # Check if a dict with kwargs for logistic_regression has been passed
+    logreg_kwargs = {} if logreg_kwargs is None else logreg_kwargs
 
     # Name of CI
-    ll_name = 'CI[%.1f%%]' % (100 * alpha / 2)
-    ul_name = 'CI[%.1f%%]' % (100 * (1 - alpha / 2))
+    ll_name = "CI[%.1f%%]" % (100 * alpha / 2)
+    ul_name = "CI[%.1f%%]" % (100 * (1 - alpha / 2))
 
     # Compute regressions
-    cols = ['names', 'coef', 'se', 'pval', ll_name, ul_name]
+    cols = ["names", "coef", "se", "pval", ll_name, ul_name]
 
     # For speed, we pass np.array instead of pandas DataFrame
     X_val = data[_fl([x, covar])].to_numpy()  # X + covar as predictors
@@ -1197,16 +1249,18 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
 
     # For max precision, make sure rounding is disabled
     old_options = options.copy()
-    options['round'] = None
+    options["round"] = None
 
     # M(j) ~ X + covar
     sxm = {}
     for idx, j in enumerate(m):
-        if mtype == 'linear':
+        if mtype == "linear":
             sxm[j] = linear_regression(X_val, M_val[:, idx], alpha=alpha).loc[[1], cols]
         else:
-            sxm[j] = logistic_regression(X_val, M_val[:, idx], alpha=alpha).loc[[1], cols]
-        sxm[j].at[1, 'names'] = '%s ~ X' % j
+            sxm[j] = logistic_regression(X_val, M_val[:, idx], alpha=alpha, **logreg_kwargs).loc[
+                [1], cols
+            ]
+        sxm[j].at[1, "names"] = "%s ~ X" % j
     sxm = pd.concat(sxm, ignore_index=True)
 
     # Y ~ M + covar
@@ -1217,13 +1271,13 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     direct = linear_regression(XM_val, y_val, alpha=alpha).loc[[1], cols]
 
     # Rename paths
-    smy['names'] = smy['names'].apply(lambda x: 'Y ~ %s' % x)
-    direct.at[1, 'names'] = 'Direct'
-    sxy.at[1, 'names'] = 'Total'
+    smy["names"] = smy["names"].apply(lambda x: "Y ~ %s" % x)
+    direct.at[1, "names"] = "Direct"
+    sxy.at[1, "names"] = "Total"
 
     # Concatenate and create sig column
     stats = pd.concat((sxm, smy, sxy, direct), ignore_index=True)
-    stats['sig'] = np.where(stats['pval'] < alpha, 'Yes', 'No')
+    stats["sig"] = np.where(stats["pval"] < alpha, "Yes", "No")
 
     # Bootstrap confidence intervals
     rng = np.random.RandomState(seed)
@@ -1231,31 +1285,41 @@ def mediation_analysis(data=None, x=None, m=None, y=None, covar=None,
     ab_estimates = np.zeros(shape=(n_boot, n_mediator))
     for i in range(n_boot):
         ab_estimates[i, :] = _point_estimate(
-            X_val, XM_val, M_val, y_val, idx[i, :], n_mediator, mtype)
+            X_val, XM_val, M_val, y_val, idx[i, :], n_mediator, mtype, **logreg_kwargs
+        )
 
-    ab = _point_estimate(X_val, XM_val, M_val, y_val, np.arange(n), n_mediator, mtype)
-    indirect = {'names': m, 'coef': ab, 'se': ab_estimates.std(ddof=1, axis=0),
-                'pval': [], ll_name: [], ul_name: [], 'sig': []}
+    ab = _point_estimate(
+        X_val, XM_val, M_val, y_val, np.arange(n), n_mediator, mtype, **logreg_kwargs
+    )
+    indirect = {
+        "names": m,
+        "coef": ab,
+        "se": ab_estimates.std(ddof=1, axis=0),
+        "pval": [],
+        ll_name: [],
+        ul_name: [],
+        "sig": [],
+    }
 
     for j in range(n_mediator):
-        ci_j = _bca(ab_estimates[:, j], indirect['coef'][j], alpha=alpha, n_boot=n_boot)
+        ci_j = _bias_corrected_ci(ab_estimates[:, j], indirect["coef"][j], alpha=alpha)
         indirect[ll_name].append(min(ci_j))
         indirect[ul_name].append(max(ci_j))
         # Bootstrapped p-value of indirect effect
         # Note that this is less accurate than a permutation test because the
         # bootstrap distribution is not conditioned on a true null hypothesis.
         # For more details see Hayes and Rockwood 2017
-        indirect['pval'].append(_pval_from_bootci(ab_estimates[:, j], indirect['coef'][j]))
-        indirect['sig'].append('Yes' if indirect['pval'][j] < alpha else 'No')
+        indirect["pval"].append(_pval_from_bootci(ab_estimates[:, j], indirect["coef"][j]))
+        indirect["sig"].append("Yes" if indirect["pval"][j] < alpha else "No")
 
     # Create output dataframe
     indirect = pd.DataFrame.from_dict(indirect)
     if n_mediator == 1:
-        indirect['names'] = 'Indirect'
+        indirect["names"] = "Indirect"
     else:
-        indirect['names'] = indirect['names'].apply(lambda x: 'Indirect %s' % x)
-    stats = stats.append(indirect, ignore_index=True)
-    stats = stats.rename(columns={'names': 'path'})
+        indirect["names"] = indirect["names"].apply(lambda x: "Indirect %s" % x)
+    stats = pd.concat([stats, indirect], axis=0, ignore_index=True, sort=False)
+    stats = stats.rename(columns={"names": "path"})
 
     # Restore options
     options.update(old_options)

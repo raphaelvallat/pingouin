@@ -1,6 +1,7 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 import numpy as np
+from pandas import Series
 
 __all__ = ["multicomp"]
 
@@ -9,7 +10,8 @@ __all__ = ["multicomp"]
 # INTERNAL FUNCTIONS
 ##############################################################################
 
-def fdr(pvals, alpha=0.05, method='fdr_bh'):
+
+def fdr(pvals, alpha=0.05, method="fdr_bh"):
     """P-values FDR correction with Benjamini/Hochberg and
     Benjamini/Yekutieli procedure.
 
@@ -83,7 +85,7 @@ def fdr(pvals, alpha=0.05, method='fdr_bh'):
     >>> print(reject, pvals_corr)
     [False  True False False  True] [0.5    0.0075 0.4    0.09   0.0015]
     """
-    assert method.lower() in ['fdr_bh', 'fdr_by']
+    assert method.lower() in ["fdr_bh", "fdr_by"]
     # Convert to array and save original shape
     pvals = np.asarray(pvals)
     shape_init = pvals.shape
@@ -99,19 +101,19 @@ def fdr(pvals, alpha=0.05, method='fdr_bh'):
     # Empirical CDF factor
     ecdffactor = np.arange(1, ntests + 1) / float(ntests)
 
-    if method.lower() == 'fdr_by':
-        cm = np.sum(1. / np.arange(1, ntests + 1))
+    if method.lower() == "fdr_by":
+        cm = np.sum(1.0 / np.arange(1, ntests + 1))
         ecdffactor /= cm
 
     # Now we adjust the p-values
-    pvals_corr = np.diag(pvals_sorted / ecdffactor[..., None])
+    pvals_corr = pvals_sorted[:ntests] / ecdffactor
     pvals_corr = np.minimum.accumulate(pvals_corr[::-1])[::-1]
     pvals_corr = np.clip(pvals_corr, None, 1)
 
     # And revert to the original shape and order
     pvals_corr = np.append(pvals_corr, np.full(num_nan, np.nan))
     pvals_corrected = pvals_corr[sortrevind].reshape(shape_init)
-    with np.errstate(invalid='ignore'):
+    with np.errstate(invalid="ignore"):
         reject = np.less(pvals_corrected, alpha)
     # reject = reject[sortrevind].reshape(shape_init)
     return reject, pvals_corrected
@@ -185,12 +187,12 @@ def bonf(pvals, alpha=0.05):
     num_nan = np.isnan(pvals).sum()
     pvals_corrected = pvals * (float(pvals.size) - num_nan)
     pvals_corrected = np.clip(pvals_corrected, None, 1)
-    with np.errstate(invalid='ignore'):
+    with np.errstate(invalid="ignore"):
         reject = np.less(pvals_corrected, alpha)
     return reject, pvals_corrected
 
 
-def holm(pvals, alpha=.05):
+def holm(pvals, alpha=0.05):
     """P-values correction with Holm method.
 
     Parameters
@@ -267,14 +269,14 @@ def holm(pvals, alpha=.05):
     ntests = pvals.size - num_nan
 
     # Now we adjust the p-values
-    pvals_corr = np.diag(pvals_sorted * np.arange(ntests, 0, -1)[..., None])
+    pvals_corr = pvals_sorted[:ntests] * np.arange(ntests, 0, -1)
     pvals_corr = np.maximum.accumulate(pvals_corr)
     pvals_corr = np.clip(pvals_corr, None, 1)
 
     # And revert to the original shape and order
     pvals_corr = np.append(pvals_corr, np.full(num_nan, np.nan))
     pvals_corrected = pvals_corr[sortrevind].reshape(shape_init)
-    with np.errstate(invalid='ignore'):
+    with np.errstate(invalid="ignore"):
         reject = np.less(pvals_corrected, alpha)
     return reject, pvals_corrected
 
@@ -332,10 +334,10 @@ def sidak(pvals, alpha=0.05):
     """
     pvals = np.asarray(pvals)
     num_nan = np.isnan(pvals).sum()
-    ntests = (float(pvals.size) - num_nan)
-    pvals_corrected = 1 - np.power((1. - pvals), ntests)
+    ntests = float(pvals.size) - num_nan
+    pvals_corrected = 1 - np.power((1.0 - pvals), ntests)
     pvals_corrected = np.clip(pvals_corrected, None, 1)
-    with np.errstate(invalid='ignore'):
+    with np.errstate(invalid="ignore"):
         reject = np.less(pvals_corrected, alpha)
     return reject, pvals_corrected
 
@@ -344,7 +346,8 @@ def sidak(pvals, alpha=0.05):
 # EXTERNAL FUNCTION
 ##############################################################################
 
-def multicomp(pvals, alpha=0.05, method='holm'):
+
+def multicomp(pvals, alpha=0.05, method="holm"):
     """P-values correction for multiple comparisons.
 
     Parameters
@@ -470,26 +473,26 @@ def multicomp(pvals, alpha=0.05, method='holm'):
     [False  True False False  True] [0.5    0.009     nan 0.108  0.0012]
     """
     # Safety check
-    assert isinstance(pvals, (list, np.ndarray)), "pvals must be list or array"
-    pvals = np.squeeze(np.asarray(pvals))
-    assert isinstance(alpha, float), 'alpha must be a float.'
-    assert isinstance(method, str), 'method must be a string.'
-    assert 0 < alpha < 1, 'alpha must be between 0 and 1.'
+    assert isinstance(pvals, (list, np.ndarray, Series)), "pvals must be list or array"
+    assert isinstance(alpha, float), "alpha must be a float."
+    assert isinstance(method, str), "method must be a string."
+    assert 0 < alpha < 1, "alpha must be between 0 and 1."
+    pvals = np.asarray(pvals)
 
-    if method.lower() in ['b', 'bonf', 'bonferroni']:
+    if method.lower() in ["b", "bonf", "bonferroni"]:
         reject, pvals_corrected = bonf(pvals, alpha=alpha)
-    elif method.lower() in ['h', 'holm']:
+    elif method.lower() in ["h", "holm"]:
         reject, pvals_corrected = holm(pvals, alpha=alpha)
-    elif method.lower() in ['s', 'sidak']:
+    elif method.lower() in ["s", "sidak"]:
         reject, pvals_corrected = sidak(pvals, alpha=alpha)
-    elif method.lower() in ['fdr', 'fdr_bh', 'bh']:
-        reject, pvals_corrected = fdr(pvals, alpha=alpha, method='fdr_bh')
-    elif method.lower() in ['fdr_by', 'by']:
-        reject, pvals_corrected = fdr(pvals, alpha=alpha, method='fdr_by')
-    elif method.lower() == 'none':
+    elif method.lower() in ["fdr", "fdr_bh", "bh"]:
+        reject, pvals_corrected = fdr(pvals, alpha=alpha, method="fdr_bh")
+    elif method.lower() in ["fdr_by", "by"]:
+        reject, pvals_corrected = fdr(pvals, alpha=alpha, method="fdr_by")
+    elif method.lower() == "none":
         pvals_corrected = pvals
-        with np.errstate(invalid='ignore'):
+        with np.errstate(invalid="ignore"):
             reject = np.less(pvals_corrected, alpha)
     else:
-        raise ValueError('Multiple comparison method not recognized')
+        raise ValueError("Multiple comparison method not recognized")
     return reject, pvals_corrected

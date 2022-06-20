@@ -7,13 +7,21 @@ import collections.abc
 from tabulate import tabulate
 from .config import options
 
-__all__ = ["_perm_pval", "print_table", "_postprocess_dataframe",
-           "_check_eftype", "remove_na", "_flatten_list",
-           "_check_dataframe", "_is_sklearn_installed",
-           "_is_statsmodels_installed", "_is_mpmath_installed"]
+__all__ = [
+    "_perm_pval",
+    "print_table",
+    "_postprocess_dataframe",
+    "_check_eftype",
+    "remove_na",
+    "_flatten_list",
+    "_check_dataframe",
+    "_is_sklearn_installed",
+    "_is_statsmodels_installed",
+    "_is_mpmath_installed",
+]
 
 
-def _perm_pval(bootstat, estimate, alternative='two-sided'):
+def _perm_pval(bootstat, estimate, alternative="two-sided"):
     """
     Compute p-values from a permutation test.
 
@@ -31,26 +39,27 @@ def _perm_pval(bootstat, estimate, alternative='two-sided'):
     p : float
         P-value.
     """
-    assert alternative in ['two-sided', 'greater', 'less'], 'Wrong tail argument.'
+    assert alternative in ["two-sided", "greater", "less"], "Wrong tail argument."
     assert isinstance(estimate, (int, float))
     bootstat = np.asarray(bootstat)
-    assert bootstat.ndim == 1, 'bootstat must be a 1D array.'
+    assert bootstat.ndim == 1, "bootstat must be a 1D array."
     n_boot = bootstat.size
-    assert n_boot >= 1, 'bootstat must have at least one value.'
-    if alternative == 'greater':
+    assert n_boot >= 1, "bootstat must have at least one value."
+    if alternative == "greater":
         p = np.greater_equal(bootstat, estimate).sum() / n_boot
-    elif alternative == 'less':
+    elif alternative == "less":
         p = np.less_equal(bootstat, estimate).sum() / n_boot
     else:
         p = np.greater_equal(np.fabs(bootstat), abs(estimate)).sum() / n_boot
     return p
+
 
 ###############################################################################
 # PRINT & EXPORT OUTPUT TABLE
 ###############################################################################
 
 
-def print_table(df, floatfmt=".3f", tablefmt='simple'):
+def print_table(df, floatfmt=".3f", tablefmt="simple"):
     """Pretty display of table.
 
     Parameters
@@ -64,14 +73,13 @@ def print_table(df, floatfmt=".3f", tablefmt='simple'):
         For a full list of available formats, please refer to
         https://pypi.org/project/tabulate/
     """
-    if 'F' in df.keys():
-        print('\n=============\nANOVA SUMMARY\n=============\n')
-    if 'A' in df.keys():
-        print('\n==============\nPOST HOC TESTS\n==============\n')
+    if "F" in df.keys():
+        print("\n=============\nANOVA SUMMARY\n=============\n")
+    if "A" in df.keys():
+        print("\n==============\nPOST HOC TESTS\n==============\n")
 
-    print(tabulate(df, headers="keys", showindex=False, floatfmt=floatfmt,
-                   tablefmt=tablefmt))
-    print('')
+    print(tabulate(df, headers="keys", showindex=False, floatfmt=floatfmt, tablefmt=tablefmt))
+    print("")
 
 
 def _postprocess_dataframe(df):
@@ -127,8 +135,7 @@ def _postprocess_dataframe(df):
             # No rounding if value is not a Number or an array
             continue
         if is_array:
-            is_float_array = issubclass(df.at[row, col].dtype.type,
-                                        np.floating)
+            is_float_array = issubclass(df.at[row, col].dtype.type, np.floating)
             if not is_float_array:
                 # No rounding if value is not a float array
                 continue
@@ -138,14 +145,16 @@ def _postprocess_dataframe(df):
 
 def _get_round_setting_for(row, col):
     keys_to_check = (
-        'round.cell.[{}]x[{}]'.format(row, col),
-        'round.column.{}'.format(col), 'round.row.{}'.format(row))
+        "round.cell.[{}]x[{}]".format(row, col),
+        "round.column.{}".format(col),
+        "round.row.{}".format(row),
+    )
     for key in keys_to_check:
         try:
             return options[key]
         except KeyError:
             pass
-    return options['round']
+    return options["round"]
 
 
 ###############################################################################
@@ -153,7 +162,7 @@ def _get_round_setting_for(row, col):
 ###############################################################################
 
 
-def _remove_na_single(x, axis='rows'):
+def _remove_na_single(x, axis="rows"):
     """Remove NaN in a single array.
     This is an internal Pingouin function.
     """
@@ -162,17 +171,17 @@ def _remove_na_single(x, axis='rows'):
         x_mask = ~np.isnan(x)
     else:
         # 2D arrays
-        ax = 1 if axis == 'rows' else 0
+        ax = 1 if axis == "rows" else 0
         x_mask = ~np.any(np.isnan(x), axis=ax)
     # Check if missing values are present
     if ~x_mask.all():
-        ax = 0 if axis == 'rows' else 1
+        ax = 0 if axis == "rows" else 1
         ax = 0 if x.ndim == 1 else ax
         x = x.compress(x_mask, axis=ax)
     return x
 
 
-def remove_na(x, y=None, paired=False, axis='rows'):
+def remove_na(x, y=None, paired=False, axis="rows"):
     """Remove missing values along a given axis in one or more (paired) numpy arrays.
 
     Parameters
@@ -216,8 +225,8 @@ def remove_na(x, y=None, paired=False, axis='rows'):
     """
     # Safety checks
     x = np.asarray(x)
-    assert x.size > 1, 'x must have more than one element.'
-    assert axis in ['rows', 'columns'], 'axis must be rows or columns.'
+    assert x.size > 1, "x must have more than one element."
+    assert axis in ["rows", "columns"], "axis must be rows or columns."
 
     if y is None:
         return _remove_na_single(x, axis=axis)
@@ -225,6 +234,7 @@ def remove_na(x, y=None, paired=False, axis='rows'):
         return _remove_na_single(x, axis=axis), y
     else:  # y is list, np.array, pd.Series
         y = np.asarray(y)
+        assert y.size != 0, "y cannot be an empty list or array."
         # Make sure that we just pass-through if y have only 1 element
         if y.size == 1:
             return _remove_na_single(x, axis=axis), y
@@ -241,13 +251,13 @@ def remove_na(x, y=None, paired=False, axis='rows'):
         y_mask = ~np.isnan(y)
     else:
         # 2D arrays
-        ax = 1 if axis == 'rows' else 0
+        ax = 1 if axis == "rows" else 0
         x_mask = ~np.any(np.isnan(x), axis=ax)
         y_mask = ~np.any(np.isnan(y), axis=ax)
 
     # Check if missing values are present
     if ~x_mask.all() or ~y_mask.all():
-        ax = 0 if axis == 'rows' else 1
+        ax = 0 if axis == "rows" else 1
         ax = 0 if x.ndim == 1 else ax
         both = np.logical_and(x_mask, y_mask)
         x = x.compress(both, axis=ax)
@@ -258,6 +268,7 @@ def remove_na(x, y=None, paired=False, axis='rows'):
 ###############################################################################
 # ARGUMENTS CHECK
 ###############################################################################
+
 
 def _flatten_list(x, include_tuple=False):
     """Flatten an arbitrarily nested list into a new list.
@@ -310,8 +321,16 @@ def _flatten_list(x, include_tuple=False):
 
 def _check_eftype(eftype):
     """Check validity of eftype"""
-    if eftype.lower() in ['none', 'hedges', 'cohen', 'r', 'eta-square',
-                          'odds-ratio', 'auc', 'cles']:
+    if eftype.lower() in [
+        "none",
+        "hedges",
+        "cohen",
+        "r",
+        "eta-square",
+        "odds-ratio",
+        "auc",
+        "cles",
+    ]:
         return True
     else:
         return False
@@ -321,30 +340,30 @@ def _check_dataframe(data=None, dv=None, between=None, within=None, subject=None
     """Check dataframe"""
     # Check that data is a dataframe
     if not isinstance(data, pd.DataFrame):
-        raise ValueError('Data must be a pandas dataframe.')
+        raise ValueError("Data must be a pandas dataframe.")
     # Check that both dv and data are provided.
     if any(v is None for v in [dv, data]):
-        raise ValueError('DV and data must be specified')
+        raise ValueError("DV and data must be specified")
     # Check that dv is a numeric variable
-    if data[dv].dtype.kind not in 'fi':
-        raise ValueError('DV must be numeric.')
+    if data[dv].dtype.kind not in "fi":
+        raise ValueError("DV must be numeric.")
     # Check that effects is provided
-    if effects not in ['within', 'between', 'interaction', 'all']:
-        raise ValueError('Effects must be: within, between, interaction, all')
+    if effects not in ["within", "between", "interaction", "all"]:
+        raise ValueError("Effects must be: within, between, interaction, all")
     # Check that within is a string, int or a list (rm_anova2)
-    if effects == 'within' and not isinstance(within, (str, int, list)):
-        raise ValueError('within must be a string, int or a list.')
+    if effects == "within" and not isinstance(within, (str, int, list)):
+        raise ValueError("within must be a string, int or a list.")
     # Check that subject identifier is provided in rm_anova and friedman.
-    if effects == 'within' and subject is None:
-        raise ValueError('subject must be specified when effects=within')
+    if effects == "within" and subject is None:
+        raise ValueError("subject must be specified when effects=within")
     # Check that between is a string or a list (anova2)
-    if effects == 'between' and not isinstance(between, (str, int, list)):
-        raise ValueError('between must be a string, int or a list.')
+    if effects == "between" and not isinstance(between, (str, int, list)):
+        raise ValueError("between must be a string, int or a list.")
     # Check that both between and within are present for interaction
-    if effects == 'interaction':
+    if effects == "interaction":
         for input in [within, between]:
             if not isinstance(input, (str, int, list)):
-                raise ValueError('within and between must be specified when effects=interaction')
+                raise ValueError("within and between must be specified when effects=interaction")
 
 
 ###############################################################################
@@ -356,13 +375,13 @@ def _is_statsmodels_installed(raise_error=False):
     """Check if statsmodels is installed."""
     try:
         import statsmodels  # noqa
+
         is_installed = True
     except IOError:  # pragma: no cover
         is_installed = False
     # Raise error (if needed) :
     if raise_error and not is_installed:  # pragma: no cover
-        raise IOError("statsmodels needs to be installed. Please use `pip "
-                      "install statsmodels`.")
+        raise IOError("statsmodels needs to be installed. Please use `pip " "install statsmodels`.")
     return is_installed
 
 
@@ -370,13 +389,13 @@ def _is_sklearn_installed(raise_error=False):
     """Check if sklearn is installed."""
     try:
         import sklearn  # noqa
+
         is_installed = True
     except IOError:  # pragma: no cover
         is_installed = False
     # Raise error (if needed) :
     if raise_error and not is_installed:  # pragma: no cover
-        raise IOError("sklearn needs to be installed. Please use `pip "
-                      "install scikit-learn`.")
+        raise IOError("sklearn needs to be installed. Please use `pip " "install scikit-learn`.")
     return is_installed
 
 
@@ -384,11 +403,11 @@ def _is_mpmath_installed(raise_error=False):
     """Check if mpmath is installed."""
     try:
         import mpmath  # noqa
+
         is_installed = True
     except IOError:  # pragma: no cover
         is_installed = False
     # Raise error (if needed) :
     if raise_error and not is_installed:  # pragma: no cover
-        raise IOError("mpmath needs to be installed. Please use `pip "
-                      "install mpmath`.")
+        raise IOError("mpmath needs to be installed. Please use `pip " "install mpmath`.")
     return is_installed

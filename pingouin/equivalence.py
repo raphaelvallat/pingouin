@@ -73,16 +73,15 @@ def tost(x, y, bound=1, paired=False, correction=False):
     """
     x = np.asarray(x)
     y = np.asarray(y)
-    assert isinstance(bound, (int, float)), 'bound must be int or float.'
+    assert isinstance(bound, (int, float)), "bound must be int or float."
 
     # T-tests
-    df_a = ttest(x + bound, y, paired=paired, correction=correction, alternative='greater')
-    df_b = ttest(x - bound, y, paired=paired, correction=correction, alternative='less')
-    pval = max(df_a.at['T-test', 'p-val'], df_b.at['T-test', 'p-val'])
+    df_a = ttest(x + bound, y, paired=paired, correction=correction, alternative="greater")
+    df_b = ttest(x - bound, y, paired=paired, correction=correction, alternative="less")
+    pval = max(df_a.at["T-test", "p-val"], df_b.at["T-test", "p-val"])
 
     # Create output dataframe
-    stats = pd.DataFrame({
-        'bound': bound,
-        'dof': df_a.at['T-test', 'dof'],
-        'pval': pval}, index=['TOST'])
+    stats = pd.DataFrame(
+        {"bound": bound, "dof": df_a.at["T-test", "dof"], "pval": pval}, index=["TOST"]
+    )
     return _postprocess_dataframe(stats)

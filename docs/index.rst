@@ -21,9 +21,6 @@
 .. image:: http://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244/status.svg
     :target: http://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244
 
-.. image:: https://badges.gitter.im/owner/repo.png
-    :target: https://gitter.im/pingouin-stats/Lobby
-
 
 ----------------
 
@@ -108,7 +105,7 @@ Whenever a new release is out there, you can upgrade your version by typing the 
 Quick start
 ===========
 
-* If you have *questions*, please ask them in the public `Gitter chat <https://gitter.im/pingouin-stats/Lobby>`_.
+* If you have *questions*, please ask them in `GitHub Discussions <https://github.com/raphaelvallat/pingouin/discussions>`_.
 
 * If you want to *report a bug*, please open an issue on the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
 
@@ -258,9 +255,9 @@ The :py:func:`pingouin.normality` function works with lists, arrays, or pandas D
   :widths: auto
 
   ========  =======  ====  =====  =======  =======  =======  =======
-  Source         SS    DF     MS        F    p-unc      np2      eps
+  Source         SS    DF     MS        F    p-unc      ng2      eps
   ========  =======  ====  =====  =======  =======  =======  =======
-  Time        7.628     2  3.814    3.913    0.023    0.062    0.999
+  Time        7.628     2  3.814    3.913    0.023     0.04    0.999
   Error     115.027   118  0.975      nan      nan      nan      nan
   ========  =======  ====  =====  =======  =======  =======  =======
 
@@ -272,7 +269,7 @@ The :py:func:`pingouin.normality` function works with lists, arrays, or pandas D
 .. code-block:: python
 
   # FDR-corrected post hocs with Hedges'g effect size
-  posthoc = pg.pairwise_ttests(data=df, dv='Scores', within='Time', subject='Subject',
+  posthoc = pg.pairwise_tests(data=df, dv='Scores', within='Time', subject='Subject',
                                parametric=True, padjust='fdr_bh', effsize='hedges')
 
   # Pretty printing of table
@@ -483,7 +480,7 @@ The functions that are currently supported as pandas method are:
 * :py:func:`pingouin.rm_anova`
 * :py:func:`pingouin.mixed_anova`
 * :py:func:`pingouin.welch_anova`
-* :py:func:`pingouin.pairwise_ttests`
+* :py:func:`pingouin.pairwise_tests`
 * :py:func:`pingouin.pairwise_tukey`
 * :py:func:`pingouin.pairwise_corr`
 * :py:func:`pingouin.partial_corr`

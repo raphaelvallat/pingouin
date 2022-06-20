@@ -2,16 +2,31 @@
 # Date: April 2018
 import warnings
 import numpy as np
+from scipy.stats import pearsonr
 from pingouin.utils import _check_eftype, remove_na
+
 # from pingouin.distribution import homoscedasticity
 
 
-__all__ = ["compute_esci", "compute_bootci", "convert_effsize",
-           "compute_effsize", "compute_effsize_from_t"]
+__all__ = [
+    "compute_esci",
+    "compute_bootci",
+    "convert_effsize",
+    "compute_effsize",
+    "compute_effsize_from_t",
+]
 
 
-def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
-                 confidence=.95, decimals=2, alternative="two-sided"):
+def compute_esci(
+    stat=None,
+    nx=None,
+    ny=None,
+    paired=False,
+    eftype="cohen",
+    confidence=0.95,
+    decimals=2,
+    alternative="two-sided",
+):
     """Parametric confidence intervals around a Cohen d or a correlation coefficient.
 
     Parameters
@@ -127,14 +142,18 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
     0.1538 [-0.737  1.045]
     """
     from scipy.stats import norm, t
-    assert eftype.lower() in ['r', 'pearson', 'spearman', 'cohen', 'd', 'g', 'hedges']
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+
+    assert eftype.lower() in ["r", "pearson", "spearman", "cohen", "d", "g", "hedges"]
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
     assert stat is not None and nx is not None
     assert isinstance(confidence, float)
-    assert 0 < confidence < 1, 'confidence must be between 0 and 1.'
+    assert 0 < confidence < 1, "confidence must be between 0 and 1."
 
-    if eftype.lower() in ['r', 'pearson', 'spearman']:
+    if eftype.lower() in ["r", "pearson", "spearman"]:
         z = np.arctanh(stat)  # R-to-z transform
         se = 1 / np.sqrt(nx - 3)
         # See https://github.com/SurajGupta/r-source/blob/master/src/library/stats/R/cor.test.R
@@ -171,9 +190,18 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
     return np.round(ci, decimals)
 
 
-def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
-                   confidence=.95, n_boot=2000, decimals=2, seed=None,
-                   return_dist=False):
+def compute_bootci(
+    x,
+    y=None,
+    func=None,
+    method="cper",
+    paired=False,
+    confidence=0.95,
+    n_boot=2000,
+    decimals=2,
+    seed=None,
+    return_dist=False,
+):
     """Bootstrapped confidence intervals of univariate and bivariate functions.
 
     Parameters
@@ -186,23 +214,24 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
         Function to compute the bootstrapped statistic.
         Accepted string values are:
 
-        * ``'pearson'``: Pearson correlation (bivariate, requires x and y)
-        * ``'spearman'``: Spearman correlation (bivariate)
-        * ``'cohen'``: Cohen d effect size (bivariate)
-        * ``'hedges'``: Hedges g effect size (bivariate)
-        * ``'mean'``: Mean (univariate, requires only x)
+        * ``'pearson'``: Pearson correlation (bivariate, paired x and y)
+        * ``'spearman'``: Spearman correlation (bivariate, paired x and y)
+        * ``'cohen'``: Cohen d effect size (bivariate, paired or unpaired x and y)
+        * ``'hedges'``: Hedges g effect size (bivariate, paired or unpaired x and y)
+        * ``'mean'``: Mean (univariate = only x)
         * ``'std'``: Standard deviation (univariate)
         * ``'var'``: Variance (univariate)
     method : str
-        Method to compute the confidence intervals:
+        Method to compute the confidence intervals (see Notes):
 
-        * ``'norm'``: Normal approximation with bootstrapped bias and
-          standard error
-        * ``'per'``: Basic percentile method
-        * ``'cper'``: Bias corrected percentile method (default)
+        * ``'cper'``: Bias-corrected percentile method (default)
+        * ``'norm'``: Normal approximation with bootstrapped bias and standard error
+        * ``'per'``: Simple percentile
     paired : boolean
-        Indicates whether x and y are paired or not. Only useful when computing
-        bivariate Cohen d or Hedges g bootstrapped confidence intervals.
+        Indicates whether x and y are paired or not. For example, for correlation functions or
+        paired T-test, x and y are assumed to be paired. Pingouin will resample the pairs
+        (x_i, y_i) when paired=True, and resample x and y separately when paired=False.
+        If paired=True, x and y must have the same number of elements.
     confidence : float
         Confidence level (0.95 = 95%)
     n_boot : int
@@ -212,187 +241,252 @@ def compute_bootci(x, y=None, func='pearson', method='cper', paired=False,
     seed : int or None
         Random seed for generating bootstrap samples.
     return_dist : boolean
-        If True, return the confidence intervals and the bootstrapped
-        distribution  (e.g. for plotting purposes).
+        If True, return the confidence intervals and the bootstrapped distribution (e.g. for
+        plotting purposes).
 
     Returns
     -------
     ci : array
-        Desired converted effect size
+        Bootstrapped confidence intervals.
 
     Notes
     -----
     Results have been tested against the
-    `bootci <https://www.mathworks.com/help/stats/bootci.html>`_
-    Matlab function.
+    `bootci <https://www.mathworks.com/help/stats/bootci.html>`_ Matlab function.
+
+    Since version 1.7, SciPy also includes a built-in bootstrap function
+    :py:func:`scipy.stats.bootstrap`. The SciPy implementation has two advantages over Pingouin: it
+    is faster when using ``vectorized=True``, and it supports the bias-corrected and accelerated
+    (BCa) confidence intervals for univariate functions. However, unlike Pingouin, it does not
+    return the bootstrap distribution.
+
+    The percentile bootstrap method (``per``) is defined as the
+    :math:`100 \\times \\frac{\\alpha}{2}` and :math:`100 \\times \\frac{1 - \\alpha}{2}`
+    percentiles of the distribution of :math:`\\theta` estimates obtained from resampling, where
+    :math:`\\alpha` is the level of significance (1 - confidence, default = 0.05 for 95% CIs).
+
+    The bias-corrected percentile method (``cper``) corrects for bias of the bootstrap
+    distribution. This method is different from the BCa method — the default in Matlab and SciPy —
+    which corrects for both bias and skewness of the bootstrap distribution using jackknife
+    resampling.
+
+    The normal approximation method (``norm``) calculates the confidence intervals with the
+    standard normal distribution using bootstrapped bias and standard error.
 
     References
     ----------
-    * DiCiccio, T. J., & Efron, B. (1996). Bootstrap confidence intervals.
-      Statistical science, 189-212.
+    * DiCiccio, T. J., & Efron, B. (1996). Bootstrap confidence intervals. Statistical science,
+      189-212.
 
-    * Davison, A. C., & Hinkley, D. V. (1997). Bootstrap methods and their
-      application (Vol. 1). Cambridge university press.
+    * Davison, A. C., & Hinkley, D. V. (1997). Bootstrap methods and their application (Vol. 1).
+      Cambridge university press.
+
+    * Jung, Lee, Gupta, & Cho (2019). Comparison of bootstrap confidence interval methods for
+      GSCA using a Monte Carlo simulation. Frontiers in psychology, 10, 2215.
 
     Examples
     --------
     1. Bootstrapped 95% confidence interval of a Pearson correlation
 
     >>> import pingouin as pg
-    >>> x = [3, 4, 6, 7, 5, 6, 7, 3, 5, 4, 2]
-    >>> y = [4, 6, 6, 7, 6, 5, 5, 2, 3, 4, 1]
+    >>> import numpy as np
+    >>> rng = np.random.default_rng(42)
+    >>> x = rng.normal(loc=4, scale=2, size=100)
+    >>> y = rng.normal(loc=3, scale=1, size=100)
     >>> stat = np.corrcoef(x, y)[0][1]
-    >>> ci = pg.compute_bootci(x, y, func='pearson', seed=42)
-    >>> print(stat, ci)
-    0.7468280049029223 [0.27 0.93]
+    >>> ci = pg.compute_bootci(x, y, func='pearson', paired=True, seed=42, decimals=4)
+    >>> print(round(stat, 4), ci)
+    0.0945 [-0.098   0.2738]
+
+    Let's compare to SciPy's built-in bootstrap function
+
+    >>> from scipy.stats import bootstrap
+    >>> bt_scipy = bootstrap(
+    ...       data=(x, y), statistic=lambda x, y: np.corrcoef(x, y)[0][1],
+    ...       method="basic", vectorized=False, n_resamples=2000, paired=True, random_state=42)
+    >>> np.round(bt_scipy.confidence_interval, 4)
+    array([-0.0952,  0.2883])
 
     2. Bootstrapped 95% confidence interval of a Cohen d
 
     >>> stat = pg.compute_effsize(x, y, eftype='cohen')
     >>> ci = pg.compute_bootci(x, y, func='cohen', seed=42, decimals=3)
-    >>> print(stat, ci)
-    0.1537753990658328 [-0.327  0.562]
+    >>> print(round(stat, 4), ci)
+    0.7009 [0.403 1.009]
 
     3. Bootstrapped confidence interval of a standard deviation (univariate)
 
     >>> import numpy as np
     >>> stat = np.std(x, ddof=1)
     >>> ci = pg.compute_bootci(x, func='std', seed=123)
-    >>> print(stat, ci)
-    1.6787441193290351 [1.21 2.16]
+    >>> print(round(stat, 4), ci)
+    1.5534 [1.38 1.8 ]
+
+    Compare to SciPy's built-in bootstrap function, which returns the bias-corrected and
+    accelerated CIs (see Notes).
+
+    >>> def std(x, axis):
+    ...     return np.std(x, ddof=1, axis=axis)
+    >>> bt_scipy = bootstrap(data=(x, ), statistic=std, n_resamples=2000, random_state=123)
+    >>> np.round(bt_scipy.confidence_interval, 2)
+    array([1.39, 1.81])
+
+    Changing the confidence intervals type in Pingouin
+
+    >>> pg.compute_bootci(x, func='std', seed=123, method="norm")
+    array([1.37, 1.76])
+
+    >>> pg.compute_bootci(x, func='std', seed=123, method="percentile")
+    array([1.35, 1.75])
 
     4. Bootstrapped confidence interval using a custom univariate function
 
     >>> from scipy.stats import skew
-    >>> skew(x), pg.compute_bootci(x, func=skew, n_boot=10000, seed=123)
-    (-0.08244607271328411, array([-1.03,  0.77]))
+    >>> round(skew(x), 4), pg.compute_bootci(x, func=skew, n_boot=10000, seed=123)
+    (-0.137, array([-0.55,  0.32]))
 
-    5. Bootstrapped confidence interval using a custom bivariate function
+    5. Bootstrapped confidence interval using a custom bivariate function. Here, x and y are not
+    paired and can therefore have different sizes.
 
-    >>> stat = np.sum(np.exp(x) / np.exp(y))
-    >>> ci = pg.compute_bootci(x, y, func=lambda x, y: np.sum(np.exp(x)
-    ...                           / np.exp(y)), n_boot=10000, seed=123)
-    >>> print(stat, ci)
-    26.80405184881793 [12.76 45.15]
+    >>> def mean_diff(x, y):
+    ...     return np.mean(x) - np.mean(y)
+    >>> y2 = rng.normal(loc=3, scale=1, size=200)  # y2 has 200 samples, x has 100
+    >>> ci = pg.compute_bootci(x, y2, func=mean_diff, n_boot=10000, seed=123)
+    >>> print(round(mean_diff(x, y2), 2), ci)
+    0.88 [0.54 1.21]
 
+    We can also get the bootstrapped distribution
 
-    6. Get the bootstrapped distribution around a Pearson correlation
-
-    >>> ci, bstat = pg.compute_bootci(x, y, return_dist=True)
-    >>> print(bstat.size)
-    2000
+    >>> ci, bt = pg.compute_bootci(x, y2, func=mean_diff, n_boot=10000, return_dist=True, seed=9)
+    >>> print(f"The bootstrap distribution has {bt.size} samples. The mean and standard "
+    ...       f"{bt.mean():.4f} ± {bt.std():.4f}")
+    The bootstrap distribution has 10000 samples. The mean and standard 0.8807 ± 0.1704
     """
     from inspect import isfunction
     from scipy.stats import norm
 
-    x = np.asarray(x)
-    n = x.size
-    assert x.ndim == 1
-    assert n > 1
+    # Check other arguments
+    assert isinstance(confidence, float)
+    assert 0 < confidence < 1, "confidence must be between 0 and 1."
+    assert method in ["norm", "normal", "percentile", "per", "cpercentile", "cper"]
+    assert isfunction(func) or isinstance(func, str), (
+        "func must be a function (e.g. np.mean, custom function) or a string (e.g. 'pearson'). "
+        "See documentation for more details."
+    )
+    vectorizable = False
 
+    # Check x
+    x = np.asarray(x)
+    nx = x.size
+    assert x.ndim == 1, "x must be one-dimensional."
+    assert nx > 1, "x must have more than one element."
+
+    # Check y
     if y is not None:
         y = np.asarray(y)
         ny = y.size
-        assert y.ndim == 1
-        assert ny > 1
-        n = min(n, ny)
+        assert y.ndim == 1, "y must be one-dimensional."
+        assert ny > 1, "y must have more than one element."
+        if paired:
+            assert nx == ny, "x and y must have the same number of elements when paired=True."
 
-    assert isinstance(confidence, float)
-    assert 0 < confidence < 1
-    assert method in ['norm', 'normal', 'percentile', 'per', 'cpercentile',
-                      'cper']
-    assert isfunction(func) or isinstance(func, str)
-
+    # Check string functions
     if isinstance(func, str):
-        func_str = '%s' % func
-        if func == 'pearson':
+        func_str = "%s" % func
+        if func == "pearson":
+
+            assert paired, "Paired should be True if using correlation functions."
 
             def func(x, y):
-                return np.corrcoef(x, y)[0][1]
+                return pearsonr(x, y)[0]  # Faster than np.corrcoef
 
-        elif func == 'spearman':
+        elif func == "spearman":
             from scipy.stats import spearmanr
 
-            def func(x, y):
-                spr, _ = spearmanr(x, y)
-                return spr
+            assert paired, "Paired should be True if using correlation functions."
 
-        elif func in ['cohen', 'hedges']:
+            def func(x, y):
+                return spearmanr(x, y)[0]
+
+        elif func in ["cohen", "hedges"]:
             from pingouin.effsize import compute_effsize
 
             def func(x, y):
                 return compute_effsize(x, y, paired=paired, eftype=func_str)
 
-        elif func == 'mean':
+        elif func == "mean":
+            vectorizable = True
 
             def func(x):
-                return np.mean(x)
+                return np.mean(x, axis=0)
 
-        elif func == 'std':
-
-            def func(x):
-                return np.std(x, ddof=1)
-
-        elif func == 'var':
+        elif func == "std":
+            vectorizable = True
 
             def func(x):
-                return np.var(x, ddof=1)
+                return np.std(x, ddof=1, axis=0)
+
+        elif func == "var":
+            vectorizable = True
+
+            def func(x):
+                return np.var(x, ddof=1, axis=0)
+
         else:
-            raise ValueError('Function string not recognized.')
+            raise ValueError("Function string not recognized.")
 
     # Bootstrap
-    rng = np.random.RandomState(seed)  # Random seed
-    bootsam = rng.choice(np.arange(n), size=(n, n_boot), replace=True)
     bootstat = np.empty(n_boot)
+    rng = np.random.default_rng(seed)  # Random seed
+    boot_x = rng.choice(np.arange(nx), size=(nx, n_boot), replace=True)
 
     if y is not None:
         reference = func(x, y)
-        for i in range(n_boot):
-            # Note that here we use a bootstrapping procedure with replacement
-            # of all the pairs (Xi, Yi). This is NOT suited for
-            # hypothesis testing such as p-value estimation). Instead, for the
-            # latter, one must only shuffle the Y values while keeping the X
-            # values constant, i.e.:
-            # >>> bootsam = rng.random_sample((n_boot, n)).argsort(axis=1)
-            # >>> for i in range(n_boot):
-            # >>>   bootstat[i] = func(x, y[bootsam[i, :]])
-            bootstat[i] = func(x[bootsam[:, i]], y[bootsam[:, i]])
+        if paired:
+            for i in range(n_boot):
+                # Note that here we use a bootstrapping procedure with replacement
+                # of all the pairs (Xi, Yi). This is NOT suited for
+                # hypothesis testing such as p-value estimation). Instead, for the
+                # latter, one must only shuffle the Y values while keeping the X
+                # values constant, i.e.:
+                # >>> boot_x = rng.random_sample((n_boot, n)).argsort(axis=1)
+                # >>> for i in range(n_boot):
+                # >>>   bootstat[i] = func(x, y[boot_x[i, :]])
+                bootstat[i] = func(x[boot_x[:, i]], y[boot_x[:, i]])
+        else:
+            boot_y = rng.choice(np.arange(ny), size=(ny, n_boot), replace=True)
+            for i in range(n_boot):
+                bootstat[i] = func(x[boot_x[:, i]], y[boot_y[:, i]])
     else:
         reference = func(x)
-        for i in range(n_boot):
-            bootstat[i] = func(x[bootsam[:, i]])
+        if vectorizable:
+            bootstat = func(x[boot_x])
+        else:
+            for i in range(n_boot):
+                bootstat[i] = func(x[boot_x[:, i]])
 
     # CONFIDENCE INTERVALS
-    alpha = 1 - confidence
-    dist_sorted = np.sort(bootstat)
-
-    if method in ['norm', 'normal']:
+    # See Matlab bootci function
+    alpha = (1 - confidence) / 2
+    if method in ["norm", "normal"]:
         # Normal approximation
-        za = norm.ppf(alpha / 2)
+        za = norm.ppf(alpha)  # = 1.96
         se = np.std(bootstat, ddof=1)
-
         bias = np.mean(bootstat - reference)
-        ll = reference - bias + se * za
-        ul = reference - bias - se * za
-        ci = [ll, ul]
-    elif method in ['percentile', 'per']:
-        # Uncorrected percentile
-        pct_ll = int(n_boot * (alpha / 2))
-        pct_ul = int(n_boot * (1 - alpha / 2))
-        ci = [dist_sorted[pct_ll], dist_sorted[pct_ul]]
+        ci = np.array([reference - bias + se * za, reference - bias - se * za])
+    elif method in ["percentile", "per"]:
+        # Simple percentile
+        interval = 100 * np.array([alpha, 1 - alpha])
+        ci = np.percentile(bootstat, interval)
+        pass
     else:
-        # Corrected percentile bootstrap
-        # Compute bias-correction constant z0
-        z_0 = norm.ppf(np.mean(bootstat < reference) +
-                       np.mean(bootstat == reference) / 2)
-        z_alpha = norm.ppf(alpha / 2)
-        pct_ul = 100 * norm.cdf(2 * z_0 - z_alpha)
-        pct_ll = 100 * norm.cdf(2 * z_0 + z_alpha)
-        ll = np.percentile(bootstat, pct_ll)
-        ul = np.percentile(bootstat, pct_ul)
-        ci = [ll, ul]
+        # Bias-corrected percentile bootstrap
+        from pingouin.regression import _bias_corrected_ci
+
+        ci = _bias_corrected_ci(bootstat, reference, alpha=(1 - confidence))
 
     ci = np.round(ci, decimals)
+
     if return_dist:
         return ci, bootstat
     else:
@@ -407,7 +501,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     ef : float
         Original effect size.
     input_type : string
-        Effect size type of ef. Must be ``'r'`` or ``'d'``.
+        Effect size type of ef. Must be ``'r'`` or ``'cohen'``.
     output_type : string
         Desired effect size type. Available methods are:
 
@@ -510,47 +604,50 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
         if not _check_eftype(input):
             err = "Could not interpret input '{}'".format(input)
             raise ValueError(err)
-    if it not in ['r', 'cohen']:
+    if it not in ["r", "cohen"]:
         raise ValueError("Input type must be 'r' or 'cohen'")
 
     # Pass-through option
-    if it == ot or ot == 'none':
+    if it == ot or ot == "none":
         return ef
 
     # Convert r to Cohen d (Rosenthal 1994)
-    d = (2 * ef) / np.sqrt(1 - ef**2) if it == 'r' else ef
+    d = (2 * ef) / np.sqrt(1 - ef**2) if it == "r" else ef
 
     # Then convert to the desired output type
-    if ot == 'cohen':
+    if ot == "cohen":
         return d
-    elif ot == 'hedges':
+    elif ot == "hedges":
         if all(v is not None for v in [nx, ny]):
             return d * (1 - (3 / (4 * (nx + ny) - 9)))
         else:
             # If shapes of x and y are not known, return cohen's d
-            warnings.warn("You need to pass nx and ny arguments to compute "
-                          "Hedges g. Returning Cohen's d instead")
+            warnings.warn(
+                "You need to pass nx and ny arguments to compute "
+                "Hedges g. Returning Cohen's d instead"
+            )
             return d
-    elif ot == 'r':
+    elif ot == "r":
         # McGrath and Meyer 2006
         if all(v is not None for v in [nx, ny]):
-            a = ((nx + ny)**2 - 2 * (nx + ny)) / (nx * ny)
+            a = ((nx + ny) ** 2 - 2 * (nx + ny)) / (nx * ny)
         else:
             a = 4
         return d / np.sqrt(d**2 + a)
-    elif ot == 'eta-square':
+    elif ot == "eta-square":
         # Cohen 1988
-        return (d / 2)**2 / (1 + (d / 2)**2)
-    elif ot == 'odds-ratio':
+        return (d / 2) ** 2 / (1 + (d / 2) ** 2)
+    elif ot == "odds-ratio":
         # Borenstein et al. 2009
         return np.exp(d * np.pi / np.sqrt(3))
     else:  # ['auc']
         # Ruscio 2008
         from scipy.stats import norm
+
         return norm.cdf(d / np.sqrt(2))
 
 
-def compute_effsize(x, y, paired=False, eftype='cohen'):
+def compute_effsize(x, y, paired=False, eftype="cohen"):
     """Calculate effect size between two set of observations.
 
     Parameters
@@ -678,8 +775,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
     y = np.asarray(y)
 
     if x.size != y.size and paired:
-        warnings.warn("x and y have unequal sizes. Switching to "
-                      "paired == False.")
+        warnings.warn("x and y have unequal sizes. Switching to " "paired == False.")
         paired = False
 
     # Remove rows with missing values
@@ -690,12 +786,11 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         # Case 1: One-sample Test
         d = (x.mean() - y) / x.std(ddof=1)
         return d
-    if eftype.lower() == 'r':
+    if eftype.lower() == "r":
         # Return correlation coefficient (useful for CI bootstrapping)
-        from scipy.stats import pearsonr
         r, _ = pearsonr(x, y)
         return r
-    elif eftype.lower() == 'cles':
+    elif eftype.lower() == "cles":
         # Compute exact CLES (see pingouin.wilcoxon)
         diff = x[:, None] - y
         return np.where(diff == 0, 0.5, diff > 0).mean()
@@ -704,20 +799,18 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         if not paired:
             # https://en.wikipedia.org/wiki/Effect_size
             dof = nx + ny - 2
-            poolsd = np.sqrt(((nx - 1) * x.var(ddof=1)
-                              + (ny - 1) * y.var(ddof=1)) / dof)
+            poolsd = np.sqrt(((nx - 1) * x.var(ddof=1) + (ny - 1) * y.var(ddof=1)) / dof)
             d = (x.mean() - y.mean()) / poolsd
         else:
             # Report Cohen d-avg (Cumming 2012; Lakens 2013)
             # Careful, the formula in Lakens 2013 is wrong. Updated in Pingouin
             # v0.3.4 to use the formula provided by Cummings 2012.
             # Before that the denominator was just (SD1 + SD2) / 2
-            d = (x.mean() - y.mean()) / np.sqrt((x.var(ddof=1) +
-                                                 y.var(ddof=1)) / 2)
-        return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)
+            d = (x.mean() - y.mean()) / np.sqrt((x.var(ddof=1) + y.var(ddof=1)) / 2)
+        return convert_effsize(d, "cohen", eftype, nx=nx, ny=ny)
 
 
-def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype='cohen'):
+def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype="cohen"):
     """Compute effect size from a T-value.
 
     Parameters
@@ -782,5 +875,5 @@ def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype='cohen'):
     elif N is not None:
         d = 2 * tval / np.sqrt(N)
     else:
-        raise ValueError('You must specify either nx + ny, or just N')
-    return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)
+        raise ValueError("You must specify either nx + ny, or just N")
+    return convert_effsize(d, "cohen", eftype, nx=nx, ny=ny)

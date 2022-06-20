@@ -3,9 +3,10 @@ import os.path as op
 from pingouin.utils import print_table
 
 ddir = op.dirname(op.realpath(__file__))
-dts = pd.read_csv(op.join(ddir, 'datasets.csv'), sep=',')
+dts = pd.read_csv(op.join(ddir, "datasets.csv"), sep=",")
 
 __all__ = ["read_dataset", "list_dataset"]
+
 
 def read_dataset(dname):
     """Read example datasets.
@@ -44,14 +45,15 @@ def read_dataset(dname):
     """
     # Check extension
     d, ext = op.splitext(dname)
-    if ext.lower() == '.csv':
+    if ext.lower() == ".csv":
         dname = d
     # Check that dataset exist
-    if dname not in dts['dataset'].to_numpy():
-        raise ValueError('Dataset does not exist. Valid datasets names are',
-                         dts['dataset'].to_numpy())
+    if dname not in dts["dataset"].to_numpy():
+        raise ValueError(
+            "Dataset does not exist. Valid datasets names are", dts["dataset"].to_numpy()
+        )
     # Load dataset
-    return pd.read_csv(op.join(ddir, dname + '.csv'), sep=',')
+    return pd.read_csv(op.join(ddir, dname + ".csv"), sep=",")
 
 
 def list_dataset():
@@ -88,8 +90,8 @@ def list_dataset():
      'mixed_anova_unbalanced',
      'multivariate',
      'pairwise_corr',
-     'pairwise_ttests',
-     'pairwise_ttests_missing',
+     'pairwise_tests',
+     'pairwise_tests_missing',
      'partial_corr',
      'penguins',
      'rm_anova',
@@ -98,5 +100,5 @@ def list_dataset():
      'rm_corr',
      'rm_missing',
      'tips']
-     """
-    return dts.set_index('dataset')
+    """
+    return dts.set_index("dataset")

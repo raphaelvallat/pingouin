@@ -7,9 +7,8 @@ from math import pi, exp, log, lgamma
 __all__ = ["bayesfactor_ttest", "bayesfactor_pearson", "bayesfactor_binom"]
 
 
-def _format_bf(bf, precision=3, trim='0'):
-    """Format BF10 to floating point or scientific notation.
-    """
+def _format_bf(bf, precision=3, trim="0"):
+    """Format BF10 to floating point or scientific notation."""
     if type(bf) == str:
         return bf
     if bf >= 1e4 or bf <= 1e-4:
@@ -19,7 +18,7 @@ def _format_bf(bf, precision=3, trim='0'):
     return out
 
 
-def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative='two-sided', r=.707):
+def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative="two-sided", r=0.707):
     """
     Bayes Factor of a T-test.
 
@@ -60,7 +59,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative='two-sided', r=.
     See also
     --------
     ttest : T-test
-    pairwise_ttest : Pairwise T-tests
+    pairwise_test : Pairwise T-tests
     bayesfactor_pearson : Bayes Factor of a correlation
     bayesfactor_binom : Bayes Factor of a binomial test
 
@@ -118,20 +117,27 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative='two-sided', r=.
     BF10-greater: 0.029 | BF10-less: 34.369
     """
     # Check tail
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
     one_sample = True if ny is None or ny == 1 else False
 
     # Check T-value
-    assert isinstance(t, (int, float)), 'The T-value must be a int or a float.'
+    assert isinstance(t, (int, float)), "The T-value must be a int or a float."
     if not np.isfinite(t):
         return np.nan
 
     # Function to be integrated
     def fun(g, t, n, r, df):
-        return (1 + n * g * r**2)**(-.5) * (1 + t**2 / ((1 + n * g * r**2)
-                                            * df))**(-(df + 1) / 2) *  \
-               (2 * pi)**(-.5) * g**(-3. / 2) * exp(-1 / (2 * g))
+        return (
+            (1 + n * g * r**2) ** (-0.5)
+            * (1 + t**2 / ((1 + n * g * r**2) * df)) ** (-(df + 1) / 2)
+            * (2 * pi) ** (-0.5)
+            * g ** (-3.0 / 2)
+            * exp(-1 / (2 * g))
+        )
 
     # Define n and degrees of freedom
     if one_sample or paired:
@@ -143,18 +149,18 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative='two-sided', r=.
 
     # JZS Bayes factor calculation: eq. 1 in Rouder et al. (2009)
     integr = quad(fun, 0, np.inf, args=(t, n, r, df))[0]
-    bf10 = 1 / ((1 + t**2 / df)**(-(df + 1) / 2) / integr)
+    bf10 = 1 / ((1 + t**2 / df) ** (-(df + 1) / 2) / integr)
 
     # Tail
-    tail_binary = 'two-sided' if alternative == 'two-sided' else 'one-sided'
-    bf10 = bf10 * (1 / 0.5) if tail_binary == 'one-sided' else bf10
+    tail_binary = "two-sided" if alternative == "two-sided" else "one-sided"
+    bf10 = bf10 * (1 / 0.5) if tail_binary == "one-sided" else bf10
     # Now check the direction of the test
-    if ((alternative == 'greater' and t < 0) or (alternative == 'less' and t > 0)) and bf10 > 1:
+    if ((alternative == "greater" and t < 0) or (alternative == "less" and t > 0)) and bf10 > 1:
         bf10 = 1 / bf10
     return bf10
 
 
-def bayesfactor_pearson(r, n, alternative='two-sided', method='ly', kappa=1.):
+def bayesfactor_pearson(r, n, alternative="two-sided", method="ly", kappa=1.0):
     """
     Bayes Factor of a Pearson correlation.
 
@@ -262,27 +268,36 @@ def bayesfactor_pearson(r, n, alternative='two-sided', method='ly', kappa=1.):
     BF-pos: 21.185, BF-neg: 0.082
     """
     from scipy.special import gamma, betaln, hyp2f1
-    assert method.lower() in ['ly', 'wetzels'], 'Method not recognized.'
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+
+    assert method.lower() in ["ly", "wetzels"], "Method not recognized."
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
 
     # Wrong input
     if not np.isfinite(r) or n < 2:
         return np.nan
-    assert -1 <= r <= 1, 'r must be between -1 and 1.'
+    assert -1 <= r <= 1, "r must be between -1 and 1."
 
-    if alternative != 'two-sided' and method.lower() == 'wetzels':
-        warnings.warn("One-sided Bayes Factor are not supported by the "
-                      "Wetzels's method. Switching to method='ly'.")
-        method = 'ly'
+    if alternative != "two-sided" and method.lower() == "wetzels":
+        warnings.warn(
+            "One-sided Bayes Factor are not supported by the "
+            "Wetzels's method. Switching to method='ly'."
+        )
+        method = "ly"
 
-    if method.lower() == 'wetzels':
+    if method.lower() == "wetzels":
         # Wetzels & Wagenmakers, 2012. Integral solving
 
         def fun(g, r, n):
-            return exp(((n - 2) / 2) * log(1 + g) + (-(n - 1) / 2)
-                       * log(1 + (1 - r**2) * g) + (-3 / 2)
-                       * log(g) + - n / (2 * g))
+            return exp(
+                ((n - 2) / 2) * log(1 + g)
+                + (-(n - 1) / 2) * log(1 + (1 - r**2) * g)
+                + (-3 / 2) * log(g)
+                + -n / (2 * g)
+            )
 
         integr = quad(fun, 0, np.inf, args=(r, n))[0]
         bf10 = np.sqrt((n / 2)) / gamma(1 / 2) * integr
@@ -291,25 +306,31 @@ def bayesfactor_pearson(r, n, alternative='two-sided', method='ly', kappa=1.):
         # Ly et al, 2016. Analytical solution.
         k = kappa
         lbeta = betaln(1 / k, 1 / k)
-        log_hyperterm = log(hyp2f1(((n - 1) / 2), ((n - 1) / 2),
-                                   ((n + 2 / k) / 2), r**2))
-        bf10 = exp((1 - 2 / k) * log(2) + 0.5 * log(pi) - lbeta
-                   + lgamma((n + 2 / k - 1) / 2) - lgamma((n + 2 / k) / 2) +
-                   log_hyperterm)
+        log_hyperterm = log(hyp2f1(((n - 1) / 2), ((n - 1) / 2), ((n + 2 / k) / 2), r**2))
+        bf10 = exp(
+            (1 - 2 / k) * log(2)
+            + 0.5 * log(pi)
+            - lbeta
+            + lgamma((n + 2 / k - 1) / 2)
+            - lgamma((n + 2 / k) / 2)
+            + log_hyperterm
+        )
 
-        if alternative != 'two-sided':
+        if alternative != "two-sided":
             # Directional test.
             # We need mpmath for the generalized hypergeometric function
             from .utils import _is_mpmath_installed
+
             _is_mpmath_installed(raise_error=True)
             from mpmath import hyp3f2
+
             hyper_term = float(hyp3f2(1, n / 2, n / 2, 3 / 2, (2 + k * (n + 1)) / (2 * k), r**2))
             log_term = 2 * (lgamma(n / 2) - lgamma((n - 1) / 2)) - lbeta
-            C = 2**((3 * k - 2) / k) * k * r / (2 + (n - 1) * k) * exp(log_term) * hyper_term
+            C = 2 ** ((3 * k - 2) / k) * k * r / (2 + (n - 1) * k) * exp(log_term) * hyper_term
 
             bf10neg = bf10 - C
             bf10pos = 2 * bf10 - bf10neg
-            if alternative == 'greater':
+            if alternative == "greater":
                 # We expect the correlation to be positive
                 bf10 = bf10pos
             else:
@@ -319,10 +340,16 @@ def bayesfactor_pearson(r, n, alternative='two-sided', method='ly', kappa=1.):
     return bf10
 
 
-def bayesfactor_binom(k, n, p=.5):
+def bayesfactor_binom(k, n, p=0.5, a=1, b=1):
     """
     Bayes factor of a binomial test with :math:`k` successes,
-    :math:`n` trials and base probability :math:`p`.
+    :math:`n` trials and base probability :math:`p`.  This means that
+    the null hypothesis is that the probability is :math:`p`.  It is
+    compared against the alternative hypothesis that :math:`p` is from
+    the Beta distribution with parameters :math:`(a, b)`.  By default,
+    both :math:`a` and :math:`b` are 1, making the alternative
+    hypothesis equivalent to the uniform distribution, i.e., we are
+    completely uninformed about :math:`p`.
 
     Parameters
     ----------
@@ -332,6 +359,10 @@ def bayesfactor_binom(k, n, p=.5):
         Number of trials.
     p : float
         Base probability of success (range from 0 to 1).
+    a : float
+        The "a" parameter of the Beta distribution.
+    b : float
+        The "b" parameter of the Beta distribution.
 
     Returns
     -------
@@ -396,22 +427,33 @@ def bayesfactor_binom(k, n, p=.5):
     The binomial test rejects the null hypothesis that the coin is fair at the
     5% significance level (p=0.04). Thus, whereas a frequentist hypothesis test
     would yield significant results at the 5% significance level, the Bayes
-    factor does not find any evidence that the coin is unfair.
+    factor indicates preference of the null hypothesis to the alternative
+    hypothesis that we know nothing about p.
 
-    Last example using a different base probability of successes
+    We can use a more informed alternative hypothesis too, if desirable.  E.g.,
+    the original test using Beta(5, 4) as the alternative hypothesis:
+
+    >>> bf = pg.bayesfactor_binom(k=115, n=200, p=0.5, a=5, b=4)
+    >>> print("Bayes Factor: %.3f" % bf)
+    Bayes Factor: 1.930
+
+    Using a different base probability of successes:
 
     >>> bf = pg.bayesfactor_binom(k=100, n=1000, p=0.1)
     >>> print("Bayes Factor: %.3f" % bf)
     Bayes Factor: 0.024
     """
-    from scipy.stats import binom
-    assert 0 < p < 1, 'p must be between 0 and 1.'
-    assert isinstance(k, int), 'k must be int.'
-    assert isinstance(n, int), 'n must be int.'
-    assert k <= n, 'k (successes) cannot be higher than n (trials).'
+    from scipy.stats import beta, binom
 
-    def fun(g, k, n):
-        return binom.pmf(k, n, g)
+    assert 0 < p < 1, "p must be between 0 and 1."
+    assert isinstance(k, int), "k must be int."
+    assert isinstance(n, int), "n must be int."
+    assert k <= n, "k (successes) cannot be higher than n (trials)."
+    assert a > 0, "a must be positive."
+    assert b > 0, "b must be positive."
 
-    bf10 = quad(fun, 0, 1, args=(k, n))[0] / binom.pmf(k, n, p)
+    def fun(g):
+        return beta.pdf(g, a, b) * binom.pmf(k, n, g)
+
+    bf10 = quad(fun, 0, 1)[0] / binom.pmf(k, n, p)
     return bf10

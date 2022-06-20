@@ -8,18 +8,46 @@ from pingouin.config import options
 from pingouin.parametric import anova
 from pingouin.multicomp import multicomp
 from pingouin.effsize import compute_effsize, convert_effsize
-from pingouin.utils import (_check_dataframe, _flatten_list, _postprocess_dataframe)
+from pingouin.utils import _check_dataframe, _flatten_list, _postprocess_dataframe
+from scipy.stats import studentized_range
+import warnings
 
-__all__ = ["pairwise_ttests", "pairwise_tukey", "pairwise_gameshowell",
-           "pairwise_corr"]
+__all__ = [
+    "pairwise_ttests",
+    "pairwise_tests",
+    "pairwise_tukey",
+    "pairwise_gameshowell",
+    "pairwise_corr",
+]
 
 
 @pf.register_dataframe_method
-def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
-                    parametric=True, marginal=True, alpha=.05, alternative='two-sided',
-                    padjust='none', effsize='hedges', correction='auto', nan_policy='listwise',
-                    return_desc=False, interaction=True, within_first=True):
-    """Pairwise T-tests.
+def pairwise_ttests(*args, **kwargs):
+    """This function has been deprecated . Use :py:func:`pingouin.pairwise_tests` instead."""
+    warnings.warn("pairwise_ttests is deprecated, use pairwise_tests instead.", UserWarning)
+    return pairwise_tests(*args, **kwargs)
+
+
+@pf.register_dataframe_method
+def pairwise_tests(
+    data=None,
+    dv=None,
+    between=None,
+    within=None,
+    subject=None,
+    parametric=True,
+    marginal=True,
+    alpha=0.05,
+    alternative="two-sided",
+    padjust="none",
+    effsize="hedges",
+    correction="auto",
+    nan_policy="listwise",
+    return_desc=False,
+    interaction=True,
+    within_first=True,
+):
+    """Pairwise tests.
 
     Parameters
     ----------
@@ -172,16 +200,16 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
 
     >>> import pandas as pd
     >>> import pingouin as pg
-    >>> pd.set_option('expand_frame_repr', False)
-    >>> pd.set_option('max_columns', 20)
+    >>> pd.set_option('display.expand_frame_repr', False)
+    >>> pd.set_option('display.max_columns', 20)
     >>> df = pg.read_dataset('mixed_anova.csv')
-    >>> pg.pairwise_ttests(dv='Scores', between='Group', data=df).round(3)
+    >>> pg.pairwise_tests(dv='Scores', between='Group', data=df).round(3)
       Contrast        A           B  Paired  Parametric     T    dof alternative  p-unc   BF10  hedges
     0    Group  Control  Meditation   False        True -2.29  178.0   two-sided  0.023  1.813   -0.34
 
     2. One within-subject factor
 
-    >>> post_hocs = pg.pairwise_ttests(dv='Scores', within='Time', subject='Subject', data=df)
+    >>> post_hocs = pg.pairwise_tests(dv='Scores', within='Time', subject='Subject', data=df)
     >>> post_hocs.round(3)
       Contrast        A        B  Paired  Parametric      T   dof alternative  p-unc   BF10  hedges
     0     Time   August  January    True        True -1.740  59.0   two-sided  0.087  0.582  -0.328
@@ -190,7 +218,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
 
     3. Non-parametric pairwise paired test (wilcoxon)
 
-    >>> pg.pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+    >>> pg.pairwise_tests(dv='Scores', within='Time', subject='Subject',
     ...                    data=df, parametric=False).round(3)
       Contrast        A        B  Paired  Parametric  W-val alternative  p-unc  hedges
     0     Time   August  January    True       False  716.0   two-sided  0.144  -0.328
@@ -199,7 +227,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
 
     4. Mixed design (within and between) with bonferroni-corrected p-values
 
-    >>> posthocs = pg.pairwise_ttests(dv='Scores', within='Time', subject='Subject',
+    >>> posthocs = pg.pairwise_tests(dv='Scores', within='Time', subject='Subject',
     ...                               between='Group', padjust='bonf', data=df)
     >>> posthocs.round(3)
            Contrast     Time        A           B Paired  Parametric      T   dof alternative  p-unc  p-corr p-adjust   BF10  hedges
@@ -213,7 +241,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
 
     5. Two between-subject factors. The order of the ``between`` factors matters!
 
-    >>> pg.pairwise_ttests(dv='Scores', between=['Group', 'Time'], data=df).round(3)
+    >>> pg.pairwise_tests(dv='Scores', between=['Group', 'Time'], data=df).round(3)
            Contrast       Group        A           B Paired  Parametric      T    dof alternative  p-unc     BF10  hedges
     0         Group           -  Control  Meditation  False        True -2.290  178.0   two-sided  0.023    1.813  -0.340
     1          Time           -   August     January  False        True -1.806  118.0   two-sided  0.074    0.839  -0.328
@@ -228,7 +256,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
 
     6. Same but without the interaction, and using a directional test
 
-    >>> df.pairwise_ttests(dv='Scores', between=['Group', 'Time'], alternative="less",
+    >>> df.pairwise_tests(dv='Scores', between=['Group', 'Time'], alternative="less",
     ...                    interaction=False).round(3)
       Contrast        A           B  Paired  Parametric      T    dof alternative  p-unc   BF10  hedges
     0    Group  Control  Meditation   False        True -2.290  178.0        less  0.012  3.626  -0.340
@@ -241,11 +269,15 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
 
     # Safety checks
     _check_dataframe(
-        dv=dv, between=between, within=within, subject=subject, effects='all', data=data)
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
-    assert isinstance(alpha, float), 'alpha must be float.'
-    assert nan_policy in ['listwise', 'pairwise']
+        dv=dv, between=between, within=within, subject=subject, effects="all", data=data
+    )
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    assert isinstance(alpha, float), "alpha must be float."
+    assert nan_policy in ["listwise", "pairwise"]
 
     # Check if we have multiple between or within factors
     multiple_between = False
@@ -254,37 +286,56 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
     if isinstance(between, list):
         if len(between) > 1:
             multiple_between = True
-            contrast = 'multiple_between'
+            contrast = "multiple_between"
             assert all([b in data.keys() for b in between])
         else:
             between = between[0]
     if isinstance(within, list):
         if len(within) > 1:
             multiple_within = True
-            contrast = 'multiple_within'
+            contrast = "multiple_within"
             assert all([w in data.keys() for w in within])
         else:
             within = within[0]
     if all([multiple_within, multiple_between]):
         raise ValueError(
             "Multiple between and within factors are currently not supported. "
-            "Please select only one.")
+            "Please select only one."
+        )
     # Check the other cases. Between and within column names can be str or int (not float).
     if isinstance(between, (str, int)) and within is None:
-        contrast = 'simple_between'
+        contrast = "simple_between"
         assert between in data.keys()
     if isinstance(within, (str, int)) and between is None:
-        contrast = 'simple_within'
+        contrast = "simple_within"
         assert within in data.keys()
     if isinstance(between, (str, int)) and isinstance(within, (str, int)):
-        contrast = 'within_between'
+        contrast = "within_between"
         assert all([between in data.keys(), within in data.keys()])
 
     # Create col_order
     col_order = [
-        'Contrast', 'Time', 'A', 'B', 'mean(A)', 'std(A)', 'mean(B)', 'std(B)', 'Paired',
-        'Parametric', 'T', 'U-val', 'W-val', 'dof', 'alternative', 'p-unc', 'p-corr', 'p-adjust',
-        'BF10', effsize]
+        "Contrast",
+        "Time",
+        "A",
+        "B",
+        "mean(A)",
+        "std(A)",
+        "mean(B)",
+        "std(B)",
+        "Paired",
+        "Parametric",
+        "T",
+        "U-val",
+        "W-val",
+        "dof",
+        "alternative",
+        "p-unc",
+        "p-corr",
+        "p-adjust",
+        "BF10",
+        effsize,
+    ]
 
     # If repeated measures, pivot and melt the table. This has several effects:
     # 1) Force missing values to be explicit (a NaN cell is created)
@@ -300,10 +351,10 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
             data_piv = data_piv.dropna()
         data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
 
-    if contrast in ['simple_within', 'simple_between']:
+    if contrast in ["simple_within", "simple_between"]:
         # OPTION A: SIMPLE MAIN EFFECTS, WITHIN OR BETWEEN
-        paired = True if contrast == 'simple_within' else False
-        col = within if contrast == 'simple_within' else between
+        paired = True if contrast == "simple_within" else False
+        col = within if contrast == "simple_within" else between
 
         # Extract levels of the grouping variable, sorted in alphabetical order
         grp_col = data.groupby(col, sort=True, observed=True)[dv]
@@ -315,44 +366,45 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
             A = combs[:, 0]
             B = combs[:, 1]
         else:
-            raise ValueError('Columns must have at least two unique values.')
+            raise ValueError("Columns must have at least two unique values.")
 
         # Initialize dataframe
         stats = pd.DataFrame(dtype=np.float64, index=range(len(combs)), columns=col_order)
 
         # Force dtype conversion
-        cols_str = ['Contrast', 'Time', 'A', 'B', 'alternative', 'p-adjust', 'BF10']
-        cols_bool = ['Parametric', 'Paired']
+        cols_str = ["Contrast", "Time", "A", "B", "alternative", "p-adjust", "BF10"]
+        cols_bool = ["Parametric", "Paired"]
         stats[cols_str] = stats[cols_str].astype(object)
         stats[cols_bool] = stats[cols_bool].astype(bool)
 
         # Fill str columns
-        stats.loc[:, 'A'] = A
-        stats.loc[:, 'B'] = B
-        stats.loc[:, 'Contrast'] = col
-        stats.loc[:, 'alternative'] = alternative
-        stats.loc[:, 'Paired'] = paired
+        stats.loc[:, "A"] = A
+        stats.loc[:, "B"] = B
+        stats.loc[:, "Contrast"] = col
+        stats.loc[:, "alternative"] = alternative
+        stats.loc[:, "Paired"] = paired
 
         # For max precision, make sure rounding is disabled
         old_options = options.copy()
-        options['round'] = None
+        options["round"] = None
 
         for i in range(stats.shape[0]):
-            col1, col2 = stats.at[i, 'A'], stats.at[i, 'B']
+            col1, col2 = stats.at[i, "A"], stats.at[i, "B"]
             x = grp_col.get_group(col1).to_numpy(dtype=np.float64)
             y = grp_col.get_group(col2).to_numpy(dtype=np.float64)
             if parametric:
-                stat_name = 'T'
+                stat_name = "T"
                 df_ttest = ttest(
-                    x, y, paired=paired, alternative=alternative, correction=correction)
-                stats.at[i, 'BF10'] = df_ttest.at['T-test', 'BF10']
-                stats.at[i, 'dof'] = df_ttest.at['T-test', 'dof']
+                    x, y, paired=paired, alternative=alternative, correction=correction
+                )
+                stats.at[i, "BF10"] = df_ttest.at["T-test", "BF10"]
+                stats.at[i, "dof"] = df_ttest.at["T-test", "dof"]
             else:
                 if paired:
-                    stat_name = 'W-val'
+                    stat_name = "W-val"
                     df_ttest = wilcoxon(x, y, alternative=alternative)
                 else:
-                    stat_name = 'U-val'
+                    stat_name = "U-val"
                     df_ttest = mwu(x, y, alternative=alternative)
 
             options.update(old_options)  # restore options
@@ -361,27 +413,28 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
             ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
 
             if return_desc:
-                stats.at[i, 'mean(A)'] = np.nanmean(x)
-                stats.at[i, 'mean(B)'] = np.nanmean(y)
-                stats.at[i, 'std(A)'] = np.nanstd(x, ddof=1)
-                stats.at[i, 'std(B)'] = np.nanstd(y, ddof=1)
+                stats.at[i, "mean(A)"] = np.nanmean(x)
+                stats.at[i, "mean(B)"] = np.nanmean(y)
+                stats.at[i, "std(A)"] = np.nanstd(x, ddof=1)
+                stats.at[i, "std(B)"] = np.nanstd(y, ddof=1)
             stats.at[i, stat_name] = df_ttest[stat_name].iat[0]
-            stats.at[i, 'p-unc'] = df_ttest['p-val'].iat[0]
+            stats.at[i, "p-unc"] = df_ttest["p-val"].iat[0]
             stats.at[i, effsize] = ef
 
         # Multiple comparisons
-        padjust = None if stats['p-unc'].size <= 1 else padjust
+        padjust = None if stats["p-unc"].size <= 1 else padjust
         if padjust is not None:
-            if padjust.lower() != 'none':
-                _, stats['p-corr'] = multicomp(
-                    stats['p-unc'].to_numpy(), alpha=alpha, method=padjust)
-                stats['p-adjust'] = padjust
+            if padjust.lower() != "none":
+                _, stats["p-corr"] = multicomp(
+                    stats["p-unc"].to_numpy(), alpha=alpha, method=padjust
+                )
+                stats["p-adjust"] = padjust
         else:
-            stats['p-corr'] = None
-            stats['p-adjust'] = None
+            stats["p-corr"] = None
+            stats["p-adjust"] = None
     else:
         # Multiple factors
-        if contrast == 'multiple_between':
+        if contrast == "multiple_between":
             # B1: BETWEEN1 + BETWEEN2 + BETWEEN1 * BETWEEN2
             factors = between
             fbt = factors
@@ -389,7 +442,7 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
             paired = False  # the interaction is not paired
             agg = [False, False]
             # TODO: add a pool SD option, as in JASP and JAMOVI?
-        elif contrast == 'multiple_within':
+        elif contrast == "multiple_within":
             # B2: WITHIN1 + WITHIN2 + WITHIN1 * WITHIN2
             factors = within
             fbt = [None, None]
@@ -424,12 +477,23 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
                 tmp = data.groupby([subject, f], as_index=False, observed=True, sort=True).mean()
             else:
                 tmp = data
-            # Recursive call to pairwise_ttests
-            stats = stats.append(pairwise_ttests(
-                dv=dv, between=fbt[i], within=fwt[i], subject=subject, data=tmp,
-                parametric=parametric, marginal=marginal, alpha=alpha, alternative=alternative,
-                padjust=padjust, effsize=effsize, correction=correction, nan_policy=nan_policy,
-                return_desc=return_desc), ignore_index=True, sort=False)
+            pt = pairwise_tests(
+                dv=dv,
+                between=fbt[i],
+                within=fwt[i],
+                subject=subject,
+                data=tmp,
+                parametric=parametric,
+                marginal=marginal,
+                alpha=alpha,
+                alternative=alternative,
+                padjust=padjust,
+                effsize=effsize,
+                correction=correction,
+                nan_policy=nan_policy,
+                return_desc=return_desc,
+            )
+            stats = pd.concat([stats, pt], axis=0, ignore_index=True, sort=False)
 
         # Then compute the interaction between the factors
         if interaction:
@@ -458,19 +522,19 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
 
             # Append empty rows
             idxiter = np.arange(nrows, nrows + ncombs)
-            stats = stats.append(
-                pd.DataFrame(columns=stats.columns, index=idxiter), ignore_index=True)
+            stats = stats.reindex(stats.index.union(idxiter))
+
             # Update other columns
-            stats.loc[idxiter, 'Contrast'] = factors[0] + ' * ' + factors[1]
-            stats.loc[idxiter, 'Time'] = combs[:, 0]
-            stats.loc[idxiter, 'Paired'] = paired
-            stats.loc[idxiter, 'alternative'] = alternative
-            stats.loc[idxiter, 'A'] = combs[:, 1]
-            stats.loc[idxiter, 'B'] = combs[:, 2]
+            stats.loc[idxiter, "Contrast"] = factors[0] + " * " + factors[1]
+            stats.loc[idxiter, "Time"] = combs[:, 0]
+            stats.loc[idxiter, "Paired"] = paired
+            stats.loc[idxiter, "alternative"] = alternative
+            stats.loc[idxiter, "A"] = combs[:, 1]
+            stats.loc[idxiter, "B"] = combs[:, 2]
 
             # For max precision, make sure rounding is disabled
             old_options = options.copy()
-            options['round'] = None
+            options["round"] = None
 
             for i, comb in enumerate(combs):
                 ic = nrows + i  # Take into account previous rows
@@ -479,56 +543,58 @@ def pairwise_ttests(data=None, dv=None, between=None, within=None, subject=None,
                 y = grp_both.get_group((fac1, col2)).to_numpy(dtype=np.float64)
                 ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
                 if parametric:
-                    stat_name = 'T'
+                    stat_name = "T"
                     df_ttest = ttest(
-                        x, y, paired=paired, alternative=alternative, correction=correction)
-                    stats.at[ic, 'BF10'] = df_ttest.at['T-test', 'BF10']
-                    stats.at[ic, 'dof'] = df_ttest.at['T-test', 'dof']
+                        x, y, paired=paired, alternative=alternative, correction=correction
+                    )
+                    stats.at[ic, "BF10"] = df_ttest.at["T-test", "BF10"]
+                    stats.at[ic, "dof"] = df_ttest.at["T-test", "dof"]
                 else:
                     if paired:
-                        stat_name = 'W-val'
+                        stat_name = "W-val"
                         df_ttest = wilcoxon(x, y, alternative=alternative)
                     else:
-                        stat_name = 'U-val'
+                        stat_name = "U-val"
                         df_ttest = mwu(x, y, alternative=alternative)
 
                 options.update(old_options)  # restore options
 
                 # Append to stats
                 if return_desc:
-                    stats.at[ic, 'mean(A)'] = np.nanmean(x)
-                    stats.at[ic, 'mean(B)'] = np.nanmean(y)
-                    stats.at[ic, 'std(A)'] = np.nanstd(x, ddof=1)
-                    stats.at[ic, 'std(B)'] = np.nanstd(y, ddof=1)
+                    stats.at[ic, "mean(A)"] = np.nanmean(x)
+                    stats.at[ic, "mean(B)"] = np.nanmean(y)
+                    stats.at[ic, "std(A)"] = np.nanstd(x, ddof=1)
+                    stats.at[ic, "std(B)"] = np.nanstd(y, ddof=1)
                 stats.at[ic, stat_name] = df_ttest[stat_name].iat[0]
-                stats.at[ic, 'p-unc'] = df_ttest['p-val'].iat[0]
+                stats.at[ic, "p-unc"] = df_ttest["p-val"].iat[0]
                 stats.at[ic, effsize] = ef
 
             # Multi-comparison columns
-            if padjust is not None and padjust.lower() != 'none':
+            if padjust is not None and padjust.lower() != "none":
                 _, pcor = multicomp(
-                    stats.loc[idxiter, 'p-unc'].to_numpy(), alpha=alpha, method=padjust)
-                stats.loc[idxiter, 'p-corr'] = pcor
-                stats.loc[idxiter, 'p-adjust'] = padjust
+                    stats.loc[idxiter, "p-unc"].to_numpy(), alpha=alpha, method=padjust
+                )
+                stats.loc[idxiter, "p-corr"] = pcor
+                stats.loc[idxiter, "p-adjust"] = padjust
 
     # ---------------------------------------------------------------------
     # Append parametric columns
-    stats.loc[:, 'Parametric'] = parametric
+    stats.loc[:, "Parametric"] = parametric
 
     # Reorder and drop empty columns
     stats = stats[np.array(col_order)[np.isin(col_order, stats.columns)]]
-    stats = stats.dropna(how='all', axis=1)
+    stats = stats.dropna(how="all", axis=1)
 
     # Rename Time columns
-    if (contrast in ['multiple_within', 'multiple_between', 'within_between'] and interaction):
-        stats['Time'].fillna('-', inplace=True)
-        stats.rename(columns={'Time': factors[0]}, inplace=True)
+    if contrast in ["multiple_within", "multiple_between", "within_between"] and interaction:
+        stats["Time"].fillna("-", inplace=True)
+        stats.rename(columns={"Time": factors[0]}, inplace=True)
 
     return _postprocess_dataframe(stats)
 
 
 @pf.register_dataframe_method
-def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
+def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     """Pairwise Tukey-HSD post-hoc test.
 
     Parameters
@@ -569,7 +635,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
 
     See also
     --------
-    pairwise_ttests, pairwise_gameshowell
+    pairwise_tests, pairwise_gameshowell
 
     Notes
     -----
@@ -607,12 +673,6 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     :math:`Q(\\sqrt2|t_i|, r, N - r)` where :math:`r` is the total number of
     groups and :math:`N` is the total sample size.
 
-    .. warning:: Versions of Pingouin below 0.3.10 used a wrong algorithm for
-        the studentized range approximation [2]_, which resulted in (slightly)
-        incorrect p-values. Please make sure you're using the
-        LATEST VERSION of Pingouin, and always DOUBLE CHECK your results with
-        another statistical software.
-
     References
     ----------
     .. [1] Tukey, John W. "Comparing individual means in the analysis of
@@ -630,20 +690,18 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     >>> df = pg.read_dataset('penguins')
     >>> df.pairwise_tukey(dv='body_mass_g', between='species').round(3)
                A          B   mean(A)   mean(B)      diff      se       T  p-tukey  hedges
-    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  67.512  -0.480    0.869  -0.070
-    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148 -24.495    0.001  -2.967
-    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857 -19.224    0.001  -2.894
+    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  67.512  -0.480    0.881  -0.070
+    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148 -24.495    0.000  -2.967
+    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857 -19.224    0.000  -2.894
     """
-    from statsmodels.stats.libqsturng import psturng
-
     # First compute the ANOVA
     # For max precision, make sure rounding is disabled
     old_options = options.copy()
-    options['round'] = None
+    options["round"] = None
     aov = anova(dv=dv, data=data, between=between, detailed=True)
     options.update(old_options)  # Restore original options
-    df = aov.at[1, 'DF']
-    ng = aov.at[0, 'DF'] + 1
+    df = aov.at[1, "DF"]
+    ng = aov.at[0, "DF"] + 1
     grp = data.groupby(between, observed=True)[dv]  # default is sort=True
     # Careful: pd.unique does NOT sort whereas numpy does
     # The line below should be equal to labels = np.unique(data[between])
@@ -653,7 +711,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     labels = np.array(list(grp.groups.keys()))
     n = grp.count().to_numpy()
     gmeans = grp.mean().to_numpy()
-    gvar = aov.at[1, 'MS'] / n
+    gvar = aov.at[1, "MS"] / n
 
     # Pairwise combinations
     g1, g2 = np.array(list(combinations(np.arange(ng), 2))).T
@@ -662,9 +720,9 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
     tval = mn / se
 
     # Critical values and p-values
-    # from statsmodels.stats.libqsturng import qsturng
-    # crit = qsturng(1 - alpha, ng, df) / np.sqrt(2)
-    pval = psturng(np.sqrt(2) * np.abs(tval), ng, df)
+    # crit = studentized_range.ppf(1 - alpha, ng, df) / np.sqrt(2)
+    pval = studentized_range.sf(np.sqrt(2) * np.abs(tval), ng, df)
+    pval = np.clip(pval, 0, 1)
 
     # Uncorrected p-values
     # from scipy.stats import t
@@ -672,16 +730,26 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize='hedges'):
 
     # Effect size
     d = tval * np.sqrt(1 / n[g1] + 1 / n[g2])
-    ef = convert_effsize(d, 'cohen', effsize, n[g1], n[g2])
+    ef = convert_effsize(d, "cohen", effsize, n[g1], n[g2])
 
     # Create dataframe
-    stats = pd.DataFrame({
-        'A': labels[g1], 'B': labels[g2], 'mean(A)': gmeans[g1], 'mean(B)': gmeans[g2], 'diff': mn,
-        'se': se, 'T': tval, 'p-tukey': pval, effsize: ef})
+    stats = pd.DataFrame(
+        {
+            "A": labels[g1],
+            "B": labels[g2],
+            "mean(A)": gmeans[g1],
+            "mean(B)": gmeans[g2],
+            "diff": mn,
+            "se": se,
+            "T": tval,
+            "p-tukey": pval,
+            effsize: ef,
+        }
+    )
     return _postprocess_dataframe(stats)
 
 
-def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
+def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     """Pairwise Games-Howell post-hoc test.
 
     Parameters
@@ -723,7 +791,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
 
     See also
     --------
-    pairwise_ttests, pairwise_tukey
+    pairwise_tests, pairwise_tukey
 
     Notes
     -----
@@ -760,12 +828,6 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
     The p-values are then approximated using the Studentized range distribution
     :math:`Q(\\sqrt2|t_i|, r, v_i)`.
 
-    .. warning:: Versions of Pingouin below 0.3.10 used a wrong algorithm for
-        the studentized range approximation [2]_, which resulted in (slightly)
-        incorrect p-values. Please make sure you're using the
-        LATEST VERSION of Pingouin, and always DOUBLE CHECK your results with
-        another statistical software.
-
     References
     ----------
     .. [1] Games, Paul A., and John F. Howell. "Pairwise multiple comparison
@@ -784,15 +846,13 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
     >>> df = pg.read_dataset('penguins')
     >>> pg.pairwise_gameshowell(data=df, dv='body_mass_g',
     ...                         between='species').round(3)
-               A          B   mean(A)   mean(B)      diff      se       T       df   pval  hedges
-    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  59.706  -0.543  152.455  0.834  -0.079
-    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  58.811 -23.386  249.643  0.001  -2.833
-    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  65.103 -20.628  170.404  0.001  -3.105
+               A          B   mean(A)   mean(B)      diff      se       T       df  pval  hedges
+    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  59.706  -0.543  152.455  0.85  -0.079
+    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  58.811 -23.386  249.643  0.00  -2.833
+    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  65.103 -20.628  170.404  0.00  -3.105
     """
-    from statsmodels.stats.libqsturng import psturng
-
     # Check the dataframe
-    _check_dataframe(dv=dv, between=between, effects='between', data=data)
+    _check_dataframe(dv=dv, between=between, effects="between", data=data)
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
@@ -815,12 +875,13 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
     mn = gmeans[g1] - gmeans[g2]
     se = np.sqrt(gvars[g1] / n[g1] + gvars[g2] / n[g2])
     tval = mn / np.sqrt(gvars[g1] / n[g1] + gvars[g2] / n[g2])
-    df = (gvars[g1] / n[g1] + gvars[g2] / n[g2])**2 / \
-         ((((gvars[g1] / n[g1])**2) / (n[g1] - 1)) +
-          (((gvars[g2] / n[g2])**2) / (n[g2] - 1)))
+    df = (gvars[g1] / n[g1] + gvars[g2] / n[g2]) ** 2 / (
+        (((gvars[g1] / n[g1]) ** 2) / (n[g1] - 1)) + (((gvars[g2] / n[g2]) ** 2) / (n[g2] - 1))
+    )
 
     # Compute corrected p-values
-    pval = psturng(np.sqrt(2) * np.abs(tval), ng, df)
+    pval = studentized_range.sf(np.sqrt(2) * np.abs(tval), ng, df)
+    pval = np.clip(pval, 0, 1)
 
     # Uncorrected p-values
     # from scipy.stats import t
@@ -828,18 +889,36 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize='hedges'):
 
     # Effect size
     d = tval * np.sqrt(1 / n[g1] + 1 / n[g2])
-    ef = convert_effsize(d, 'cohen', effsize, n[g1], n[g2])
+    ef = convert_effsize(d, "cohen", effsize, n[g1], n[g2])
 
     # Create dataframe
-    stats = pd.DataFrame({
-        'A': labels[g1], 'B': labels[g2], 'mean(A)': gmeans[g1], 'mean(B)': gmeans[g2],
-        'diff': mn, 'se': se, 'T': tval, 'df': df, 'pval': pval, effsize: ef})
+    stats = pd.DataFrame(
+        {
+            "A": labels[g1],
+            "B": labels[g2],
+            "mean(A)": gmeans[g1],
+            "mean(B)": gmeans[g2],
+            "diff": mn,
+            "se": se,
+            "T": tval,
+            "df": df,
+            "pval": pval,
+            effsize: ef,
+        }
+    )
     return _postprocess_dataframe(stats)
 
 
 @pf.register_dataframe_method
-def pairwise_corr(data, columns=None, covar=None, alternative='two-sided',
-                  method='pearson', padjust='none', nan_policy='pairwise'):
+def pairwise_corr(
+    data,
+    columns=None,
+    covar=None,
+    alternative="two-sided",
+    method="pearson",
+    padjust="none",
+    nan_policy="pairwise",
+):
     """Pairwise (partial) correlations between columns of a pandas dataframe.
 
     Parameters
@@ -956,8 +1035,8 @@ def pairwise_corr(data, columns=None, covar=None, alternative='two-sided',
 
     >>> import pandas as pd
     >>> import pingouin as pg
-    >>> pd.set_option('expand_frame_repr', False)
-    >>> pd.set_option('max_columns', 20)
+    >>> pd.set_option('display.expand_frame_repr', False)
+    >>> pd.set_option('display.max_columns', 20)
     >>> data = pg.read_dataset('pairwise_corr').iloc[:, 1:]
     >>> pg.pairwise_corr(data, method='spearman', alternative='greater', padjust='bonf').round(3)
                    X                  Y    method alternative    n      r         CI95%  p-unc  p-corr p-adjust  power
@@ -1030,9 +1109,12 @@ def pairwise_corr(data, columns=None, covar=None, alternative='two-sided',
     from pingouin.correlation import corr, partial_corr
 
     # Check arguments
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
-    assert nan_policy in ['listwise', 'pairwise']
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    assert nan_policy in ["listwise", "pairwise"]
 
     # Keep only numeric columns
     data = data._get_numeric_data()
@@ -1092,8 +1174,7 @@ def pairwise_corr(data, columns=None, covar=None, alternative='two-sided',
                 # Case B3: one-versus-all, e.g. ['a'] or 'a'
                 # Check that this column exist
                 if columns[0] not in keys:
-                    msg = ('"%s" is not in data or is not numeric.'
-                           % columns[0])
+                    msg = '"%s" is not in data or is not numeric.' % columns[0]
                     raise ValueError(msg)
                 others = [e for e in keys if e != columns[0]]
                 combs = list(product(columns, others))
@@ -1111,9 +1192,11 @@ def pairwise_corr(data, columns=None, covar=None, alternative='two-sided',
 
     combs = np.array(combs)
     if len(combs) == 0:
-        raise ValueError("No column combination found. Please make sure that "
-                         "the specified columns exist in the dataframe, are "
-                         "numeric, and contains at least two unique values.")
+        raise ValueError(
+            "No column combination found. Please make sure that "
+            "the specified columns exist in the dataframe, are "
+            "numeric, and contains at least two unique values."
+        )
 
     # Initialize empty dataframe
     if multi_index:
@@ -1122,53 +1205,68 @@ def pairwise_corr(data, columns=None, covar=None, alternative='two-sided',
     else:
         X = combs[:, 0]
         Y = combs[:, 1]
-    stats = pd.DataFrame({'X': X, 'Y': Y, 'method': method, 'alternative': alternative},
-                         index=range(len(combs)),
-                         columns=['X', 'Y', 'method', 'alternative', 'n', 'outliers',
-                                  'r', 'CI95%', 'p-val', 'BF10', 'power'])
+    stats = pd.DataFrame(
+        {"X": X, "Y": Y, "method": method, "alternative": alternative},
+        index=range(len(combs)),
+        columns=[
+            "X",
+            "Y",
+            "method",
+            "alternative",
+            "n",
+            "outliers",
+            "r",
+            "CI95%",
+            "p-val",
+            "BF10",
+            "power",
+        ],
+    )
 
     # Now we check if covariates are present
     if covar is not None:
-        assert isinstance(covar, (str, list, pd.Index)), (
-            'covar must be list or string.'
-        )
+        assert isinstance(covar, (str, list, pd.Index)), "covar must be list or string."
         if isinstance(covar, str):
             covar = [covar]
         elif isinstance(covar, pd.Index):
             covar = covar.tolist()
         # Check that columns exist and are numeric
-        assert all([c in keys for c in covar]), (
-            'Covariate(s) are either not in data or not numeric.'
-        )
+        assert all(
+            [c in keys for c in covar]
+        ), "Covariate(s) are either not in data or not numeric."
         # And we make sure that X or Y does not contain covar
-        stats = stats[~stats[['X', 'Y']].isin(covar).any(1)]
+        stats = stats[~stats[["X", "Y"]].isin(covar).any(1)]
         stats = stats.reset_index(drop=True)
         if stats.shape[0] == 0:
-            raise ValueError("No column combination found. Please make sure "
-                             "that the specified columns and covar exist in "
-                             "the dataframe, are numeric, and contains at "
-                             "least two unique values.")
+            raise ValueError(
+                "No column combination found. Please make sure "
+                "that the specified columns and covar exist in "
+                "the dataframe, are numeric, and contains at "
+                "least two unique values."
+            )
 
     # Listwise deletion of missing values
-    if nan_policy == 'listwise':
-        all_cols = np.unique(stats[['X', 'Y']].to_numpy()).tolist()
+    if nan_policy == "listwise":
+        all_cols = np.unique(stats[["X", "Y"]].to_numpy()).tolist()
         if covar is not None:
             all_cols.extend(covar)
         data = data[all_cols].dropna()
 
     # For max precision, make sure rounding is disabled
     old_options = options.copy()
-    options['round'] = None
+    options["round"] = None
 
     # Compute pairwise correlations and fill dataframe
     for i in range(stats.shape[0]):
-        col1, col2 = stats.at[i, 'X'], stats.at[i, 'Y']
+        col1, col2 = stats.at[i, "X"], stats.at[i, "Y"]
         if covar is None:
-            cor_st = corr(data[col1].to_numpy(), data[col2].to_numpy(),
-                          alternative=alternative, method=method)
+            cor_st = corr(
+                data[col1].to_numpy(), data[col2].to_numpy(), alternative=alternative, method=method
+            )
         else:
-            cor_st = partial_corr(data=data, x=col1, y=col2, covar=covar,
-                                  alternative=alternative, method=method)
+            cor_st = partial_corr(
+                data=data, x=col1, y=col2, covar=covar, alternative=alternative, method=method
+            )
         cor_st_keys = cor_st.columns.tolist()
 
         for c in cor_st_keys:
@@ -1177,33 +1275,43 @@ def pairwise_corr(data, columns=None, covar=None, alternative='two-sided',
     options.update(old_options)  # restore options
 
     # Force conversion to numeric
-    stats = stats.astype({
-        'r': float, 'n': int, 'p-val': float, 'outliers': float,
-        'power': float})
+    stats = stats.astype({"r": float, "n": int, "p-val": float, "outliers": float, "power": float})
 
     # Multiple comparisons
-    stats = stats.rename(columns={'p-val': 'p-unc'})
-    padjust = None if stats['p-unc'].size <= 1 else padjust
+    stats = stats.rename(columns={"p-val": "p-unc"})
+    padjust = None if stats["p-unc"].size <= 1 else padjust
     if padjust is not None:
-        if padjust.lower() != 'none':
-            reject, stats['p-corr'] = multicomp(
-                stats['p-unc'].to_numpy(), method=padjust)
-            stats['p-adjust'] = padjust
+        if padjust.lower() != "none":
+            reject, stats["p-corr"] = multicomp(stats["p-unc"].to_numpy(), method=padjust)
+            stats["p-adjust"] = padjust
     else:
-        stats['p-corr'] = None
-        stats['p-adjust'] = None
+        stats["p-corr"] = None
+        stats["p-adjust"] = None
 
     # Standardize correlation coefficients (Fisher z-transformation)
     # stats['z'] = np.arctanh(stats['r'].to_numpy())
 
-    col_order = ['X', 'Y', 'method', 'alternative', 'n', 'outliers', 'r', 'CI95%',
-                 'p-unc', 'p-corr', 'p-adjust', 'BF10', 'power']
+    col_order = [
+        "X",
+        "Y",
+        "method",
+        "alternative",
+        "n",
+        "outliers",
+        "r",
+        "CI95%",
+        "p-unc",
+        "p-corr",
+        "p-adjust",
+        "BF10",
+        "power",
+    ]
 
     # Reorder columns and remove empty ones
-    stats = stats.reindex(columns=col_order).dropna(how='all', axis=1)
+    stats = stats.reindex(columns=col_order).dropna(how="all", axis=1)
 
     # Add covariates names if present
     if covar is not None:
-        stats.insert(loc=3, column='covar', value=str(covar))
+        stats.insert(loc=3, column="covar", value=str(covar))
 
     return _postprocess_dataframe(stats)
