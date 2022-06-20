@@ -19,7 +19,6 @@ a. The :py:func:`pingouin.pairwise_ttests` has been renamed to :py:func:`pingoui
 
 a. Allow :py:func:`pingouin.bayesfactor_binom` to take Beta alternative model. `PR 252 <https://github.com/raphaelvallat/pingouin/pull/252>`_.
 b. Allow keyword arguments for logistic regression in :py:func:`pingouin.mediation_analysis`. `PR 245 <https://github.com/raphaelvallat/pingouin/pull/245>`_.
-c. :py:func:`pingouin.anova` now returns the residuals. `PR 260 <https://github.com/raphaelvallat/pingouin/pull/260`_.
 
 v0.5.1 (February 2022)
 ----------------------
