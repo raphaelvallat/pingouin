@@ -173,24 +173,19 @@ class TestParametric(TestCase):
         df_pain = read_dataset("anova")
         anova(dv="Pain threshold", between=["Hair color"], data=df_pain)
         # Compare with JASP
-        aov = anova(dv='Pain threshold', between='Hair color', data=df_pain,
-                    detailed=True).round(3)
-        assert aov.at[0, 'F'] == 6.791
-        assert aov.at[0, 'p-unc'] == .004
-        assert aov.at[0, 'np2'] == .576
-        aov = anova(dv='Pain threshold', between='Hair color', data=df_pain,
-                    effsize="n2", detailed=True).round(3)
-        assert aov.at[0, 'n2'] == .576
+        aov = anova(dv="Pain threshold", between="Hair color", data=df_pain, detailed=True).round(3)
+        assert aov.at[0, "F"] == 6.791
+        assert aov.at[0, "p-unc"] == 0.004
+        assert aov.at[0, "np2"] == 0.576
+        aov = anova(
+            dv="Pain threshold", between="Hair color", data=df_pain, effsize="n2", detailed=True
+        ).round(3)
+        assert aov.at[0, "n2"] == 0.576
         # Compare residuals with R
         # Use different dataset to produce residuals more than 3 decimal places
         # aov(Cholesterol ~ Risk, DF)$residuals
-        resid = read_dataset('anova3').anova(
-            dv='Cholesterol', between=['Risk']
-        ).residuals_
-        array_equal(
-            resid[0:5].round(3),
-            [-0.177, 1.816, -0.444, -1.469, 0.693]
-        )
+        resid = read_dataset("anova3").anova(dv="Cholesterol", between=["Risk"]).residuals_
+        array_equal(resid[0:5].round(3), [-0.177, 1.816, -0.444, -1.469, 0.693])
 
         # Unbalanced and with missing values
         df_pain.loc[[17, 18], "Pain threshold"] = np.nan
@@ -223,19 +218,13 @@ class TestParametric(TestCase):
         array_equal(aov2.loc[[0, 1, 2], "p-unc"], [0.9517, 0.1080, 0.1422])
         array_equal(aov2.loc[[0, 1, 2], "np2"], [0.0002, 0.2191, 0.1948])
         # Same but with standard eta-square
-        aov2 = anova(dv="Yield", between=["Blend", "Crop"],
-                     data=df_aov2, effsize="n2").round(4)
-        array_equal(aov2.loc[[0, 1, 2], 'n2'], [0.0001, 0.1843, 0.1589])
+        aov2 = anova(dv="Yield", between=["Blend", "Crop"], data=df_aov2, effsize="n2").round(4)
+        array_equal(aov2.loc[[0, 1, 2], "n2"], [0.0001, 0.1843, 0.1589])
         # Compare residuals with R
         # Use different dataset to produce residuals more than 3 decimal places
         # aov(Cholesterol ~ Risk * Drug, DF)$residuals
-        resid = read_dataset('anova3').anova(
-            dv='Cholesterol', between=['Risk', 'Drug']
-        ).residuals_
-        array_equal(
-            resid[0:5].round(3),
-            [-0.022, 1.972, -0.288, -1.313, 0.849]
-        )
+        resid = read_dataset("anova3").anova(dv="Cholesterol", between=["Risk", "Drug"]).residuals_
+        array_equal(resid[0:5].round(3), [-0.022, 1.972, -0.288, -1.313, 0.849])
 
         # Two-way ANOVA with unbalanced design
         df_aov2 = read_dataset("anova2_unbalanced")
@@ -274,20 +263,19 @@ class TestParametric(TestCase):
         assert aov3_ss1.equals(aov3_ss2)
         assert aov3_ss2.equals(aov3_ss3)
         # Compare with JASP
-        array_equal(aov3_ss1.loc[:, 'F'], [2.462, 13.449, 0.484, 0.139, 1.522,
-                                           1.446, 1.094, np.nan])
-        array_equal(aov3_ss1.loc[:, 'np2'], [0.049, 0.219, 0.020, 0.003, 0.060,
-                                             0.057, 0.044, np.nan])
-        array_equal(aov3_ss1.loc[:, 'p-unc'], [0.123, 0.001, 0.619, 0.711,
-                                               0.229, 0.245, 0.343, np.nan])
+        array_equal(
+            aov3_ss1.loc[:, "F"], [2.462, 13.449, 0.484, 0.139, 1.522, 1.446, 1.094, np.nan]
+        )
+        array_equal(
+            aov3_ss1.loc[:, "np2"], [0.049, 0.219, 0.020, 0.003, 0.060, 0.057, 0.044, np.nan]
+        )
+        array_equal(
+            aov3_ss1.loc[:, "p-unc"], [0.123, 0.001, 0.619, 0.711, 0.229, 0.245, 0.343, np.nan]
+        )
         # Compare residuals with R
         # ANOVA = aov(Cholesterol~Sex*Risk*Drug, DF)$residuals
-        resid = df_aov3.anova(dv="Cholesterol",
-                              between=["Sex", "Risk", "Drug"]).residuals_
-        array_equal(
-            resid[0:5].round(3),
-            [-0.261, 1.732, -0.527, -1.553, 0.610]
-        )
+        resid = df_aov3.anova(dv="Cholesterol", between=["Sex", "Risk", "Drug"]).residuals_
+        array_equal(resid[0:5].round(3), [-0.261, 1.732, -0.527, -1.553, 0.610])
 
         # Unbalanced
         df_aov3 = read_dataset("anova3_unbalanced")
@@ -377,24 +365,24 @@ class TestParametric(TestCase):
 
         https://github.com/raphaelvallat/pingouin/issues/251
         """
-        rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
-                 correction=False, detailed=False)
-        rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
-                 correction=True, detailed=False)
+        rm_anova(
+            dv="Scores", within="Time", subject="Subject", data=df, correction=False, detailed=False
+        )
+        rm_anova(
+            dv="Scores", within="Time", subject="Subject", data=df, correction=True, detailed=False
+        )
         # Compare with JASP
-        aov = rm_anova(dv='Scores', within='Time', subject='Subject', data=df,
-                       correction='auto', detailed=True).round(3)
-        assert aov.at[0, 'F'] == 3.913
-        assert aov.at[0, 'p-unc'] == .023
-        assert aov.at[0, 'np2'] == .062
+        aov = rm_anova(
+            dv="Scores", within="Time", subject="Subject", data=df, correction="auto", detailed=True
+        ).round(3)
+        assert aov.at[0, "F"] == 3.913
+        assert aov.at[0, "p-unc"] == 0.023
+        assert aov.at[0, "np2"] == 0.062
         # Compare residuals with R package rstatix
         # ANOVA = rstatix::anova_test(DF, dv='Scores', within='Time', wid='Subject')
         # attr(ANOVA, 'args')$model$residuals
-        resid = df.rm_anova(dv='Scores', within='Time', subject='Subject').residuals_
-        array_equal(
-            resid[0:5].round(3),
-            [0.501, -1.161, 1.462, -0.283, -0.691]
-        )
+        resid = df.rm_anova(dv="Scores", within="Time", subject="Subject").residuals_
+        array_equal(resid[0:5].round(3), [0.501, -1.161, 1.462, -0.283, -0.691])
 
         # Same but with categorical columns
         aov = rm_anova(
@@ -450,22 +438,21 @@ class TestParametric(TestCase):
 
         Compare with JAMOVI.
         """
-        data = read_dataset('rm_anova2')
-        aov = rm_anova(data=data, subject='Subject', within=['Time', 'Metric'],
-                       dv='Performance').round(3)
-        array_equal(aov.loc[:, 'MS'], [828.817, 682.617, 112.217])
-        array_equal(aov.loc[:, 'F'], [33.852, 26.959, 12.632])
-        array_equal(aov.loc[:, 'np2'], [0.790, 0.750, 0.584])
-        array_equal(aov.loc[:, 'eps'], [1., 0.969, 0.727])
+        data = read_dataset("rm_anova2")
+        aov = rm_anova(
+            data=data, subject="Subject", within=["Time", "Metric"], dv="Performance"
+        ).round(3)
+        array_equal(aov.loc[:, "MS"], [828.817, 682.617, 112.217])
+        array_equal(aov.loc[:, "F"], [33.852, 26.959, 12.632])
+        array_equal(aov.loc[:, "np2"], [0.790, 0.750, 0.584])
+        array_equal(aov.loc[:, "eps"], [1.0, 0.969, 0.727])
         # Compare residuals with R package rstatix
         # ANOVA = rstatix::anova_test(DF, dv='Performance', within=c('Time', 'Metric'), wid='Subject')
         # attr(ANOVA, 'args')$model$residuals
-        resid = data.rm_anova(dv='Performance', within=['Time', 'Metric'],
-                              subject='Subject').residuals_
-        array_equal(
-            resid[0:5],
-            [1, -3, -1, 7, -6]
-        )
+        resid = data.rm_anova(
+            dv="Performance", within=["Time", "Metric"], subject="Subject"
+        ).residuals_
+        array_equal(resid[0:5], [1, -3, -1, 7, -6])
 
         # With categorical
         data_cat = data.copy()
@@ -562,12 +549,9 @@ class TestParametric(TestCase):
         #                              within='Time', wid='Subject')
         # attr(ANOVA, 'args')$model$residuals
         resid = df.mixed_anova(
-            dv='Scores', within='Time', between='Group', subject='Subject'
+            dv="Scores", within="Time", between="Group", subject="Subject"
         ).residuals_
-        array_equal(
-            resid[0:5].round(3),
-            [0.463, -1.199, 1.425, -0.321, -0.729]
-        )
+        array_equal(resid[0:5].round(3), [0.463, -1.199, 1.425, -0.321, -0.729])
 
         # With missing values
         df_nan2 = df_nan.copy()

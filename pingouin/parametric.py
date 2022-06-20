@@ -547,7 +547,7 @@ def rm_anova(
     grandmean = data[dv].mean()
 
     # Calculate sums of squares
-    ss_with = ((grp_with.mean() - grandmean)**2 * grp_with.count()).sum()
+    ss_with = ((grp_with.mean() - grandmean) ** 2 * grp_with.count()).sum()
     resid = grp_with.apply(lambda x: (x - x.mean()))
     ss_resall = (resid**2).sum()
     # sstotal = sstime + ss_resall =  sstime + (sssubj + sserror)
@@ -661,7 +661,7 @@ def rm_anova(
         ]
 
     aov = aov.reindex(columns=col_order)
-    aov.dropna(how='all', axis=1, inplace=True)
+    aov.dropna(how="all", axis=1, inplace=True)
     aov = _postprocess_dataframe(aov)
 
     aov.residuals_ = 0
@@ -792,17 +792,20 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     resid = data.groupby([a, b], observed=True)[dv].transform(lambda x: x - x.mean())
 
     # Create dataframe
-    aov = pd.DataFrame({
-        'Source': [a, b, a + ' * ' + b],
-        'SS': [ss_a, ss_b, ss_ab],
-        'ddof1': [df_a, df_b, df_ab],
-        'ddof2': [df_as, df_bs, df_abs],
-        'MS': [ms_a, ms_b, ms_ab],
-        'F': [f_a, f_b, f_ab],
-        'p-unc': [p_a, p_b, p_ab],
-        'p-GG-corr': [p_a_corr, p_b_corr, p_ab_corr],
-        effsize: [ef_a, ef_b, ef_ab],
-        'eps': [eps_a, eps_b, eps_ab]})
+    aov = pd.DataFrame(
+        {
+            "Source": [a, b, a + " * " + b],
+            "SS": [ss_a, ss_b, ss_ab],
+            "ddof1": [df_a, df_b, df_ab],
+            "ddof2": [df_as, df_bs, df_abs],
+            "MS": [ms_a, ms_b, ms_ab],
+            "F": [f_a, f_b, f_ab],
+            "p-unc": [p_a, p_b, p_ab],
+            "p-GG-corr": [p_a_corr, p_b_corr, p_ab_corr],
+            effsize: [ef_a, ef_b, ef_ab],
+            "eps": [eps_a, eps_b, eps_ab],
+        }
+    )
     aov = _postprocess_dataframe(aov)
 
     aov.residuals_ = 0
@@ -1038,16 +1041,19 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
         )
 
     else:
-        aov = pd.DataFrame({'Source': [between, 'Within'],
-                            'SS': [ssbetween, sserror],
-                            'DF': [ddof1, ddof2],
-                            'MS': [msbetween, mserror],
-                            'F': [fval, np.nan],
-                            'p-unc': [p_unc, np.nan],
-                            effsize: [np2, np.nan]
-                            })
+        aov = pd.DataFrame(
+            {
+                "Source": [between, "Within"],
+                "SS": [ssbetween, sserror],
+                "DF": [ddof1, ddof2],
+                "MS": [msbetween, mserror],
+                "F": [fval, np.nan],
+                "p-unc": [p_unc, np.nan],
+                effsize: [np2, np.nan],
+            }
+        )
 
-    aov.dropna(how='all', axis=1, inplace=True)
+    aov.dropna(how="all", axis=1, inplace=True)
     aov = _postprocess_dataframe(aov)
     aov.residuals_ = 0  # Trick to avoid Pandas warning
     aov.residuals_ = error  # Residuals is a hidden attribute
@@ -1080,9 +1086,9 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
         aov_fac2 = anova(data=data, dv=dv, between=fac2, detailed=True)
         ng1, ng2 = data[fac1].nunique(), data[fac2].nunique()
         # Sums of squares
-        ss_fac1 = aov_fac1.at[0, 'SS']
-        ss_fac2 = aov_fac2.at[0, 'SS']
-        ss_tot = ((data[dv] - data[dv].mean())**2).sum()
+        ss_fac1 = aov_fac1.at[0, "SS"]
+        ss_fac2 = aov_fac2.at[0, "SS"]
+        ss_tot = ((data[dv] - data[dv].mean()) ** 2).sum()
         resid = grp_both.apply(lambda x: (x - x.mean()))
         ss_resid = (resid**2).sum()
         ss_inter = ss_tot - (ss_resid + ss_fac1 + ss_fac2)
@@ -1126,16 +1132,19 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
         all_effsize = [np2_fac1, np2_fac2, np2_inter, np.nan]
 
     # Create output dataframe
-    aov = pd.DataFrame({'Source': [fac1, fac2, fac1 + ' * ' + fac2, 'Residual'],
-                        'SS': [ss_fac1, ss_fac2, ss_inter, ss_resid],
-                        'DF': [df_fac1, df_fac2, df_inter, df_resid],
-                        'MS': [ms_fac1, ms_fac2, ms_inter, ms_resid],
-                        'F': [fval_fac1, fval_fac2, fval_inter, np.nan],
-                        'p-unc': [pval_fac1, pval_fac2, pval_inter, np.nan],
-                        effsize: all_effsize
-                        })
+    aov = pd.DataFrame(
+        {
+            "Source": [fac1, fac2, fac1 + " * " + fac2, "Residual"],
+            "SS": [ss_fac1, ss_fac2, ss_inter, ss_resid],
+            "DF": [df_fac1, df_fac2, df_inter, df_resid],
+            "MS": [ms_fac1, ms_fac2, ms_inter, ms_resid],
+            "F": [fval_fac1, fval_fac2, fval_inter, np.nan],
+            "p-unc": [pval_fac1, pval_fac2, pval_inter, np.nan],
+            effsize: all_effsize,
+        }
+    )
 
-    aov.dropna(how='all', axis=1, inplace=True)
+    aov.dropna(how="all", axis=1, inplace=True)
     aov = _postprocess_dataframe(aov)
 
     aov.residuals_ = 0
@@ -1361,7 +1370,7 @@ def welch_anova(data=None, dv=None, between=None):
     # Sums of squares (regular and adjusted)
     resid = grp.apply(lambda x: x - x.mean())
     ss_res = (resid**2).sum()
-    ss_bet = ((grp.mean() - data[dv].mean())**2 * grp.count()).sum()
+    ss_bet = ((grp.mean() - data[dv].mean()) ** 2 * grp.count()).sum()
     ss_betadj = np.sum(weights * np.square(grp.mean() - adj_grandmean))
     ms_betadj = ss_betadj / ddof1
 
@@ -1374,13 +1383,17 @@ def welch_anova(data=None, dv=None, between=None):
     np2 = ss_bet / (ss_bet + ss_res)
 
     # Create output dataframe
-    aov = pd.DataFrame({'Source': between,
-                        'ddof1': ddof1,
-                        'ddof2': 1 / lamb,
-                        'F': fval,
-                        'p-unc': pval,
-                        'np2': np2
-                        }, index=[0])
+    aov = pd.DataFrame(
+        {
+            "Source": between,
+            "ddof1": ddof1,
+            "ddof2": 1 / lamb,
+            "F": fval,
+            "p-unc": pval,
+            "np2": np2,
+        },
+        index=[0],
+    )
 
     aov = _postprocess_dataframe(aov)
     aov.residuals_ = 0
@@ -1621,7 +1634,7 @@ def mixed_anova(
         "p-spher",
     ]
     aov = aov.reindex(columns=col_order)
-    aov.dropna(how='all', axis=1, inplace=True)
+    aov.dropna(how="all", axis=1, inplace=True)
     aov = _postprocess_dataframe(aov)
 
     aov.residuals_ = 0
