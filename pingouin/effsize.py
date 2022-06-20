@@ -4,15 +4,29 @@ import warnings
 import numpy as np
 from scipy.stats import pearsonr
 from pingouin.utils import _check_eftype, remove_na
+
 # from pingouin.distribution import homoscedasticity
 
 
-__all__ = ["compute_esci", "compute_bootci", "convert_effsize",
-           "compute_effsize", "compute_effsize_from_t"]
+__all__ = [
+    "compute_esci",
+    "compute_bootci",
+    "convert_effsize",
+    "compute_effsize",
+    "compute_effsize_from_t",
+]
 
 
-def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
-                 confidence=.95, decimals=2, alternative="two-sided"):
+def compute_esci(
+    stat=None,
+    nx=None,
+    ny=None,
+    paired=False,
+    eftype="cohen",
+    confidence=0.95,
+    decimals=2,
+    alternative="two-sided",
+):
     """Parametric confidence intervals around a Cohen d or a correlation coefficient.
 
     Parameters
@@ -128,14 +142,18 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
     0.1538 [-0.737  1.045]
     """
     from scipy.stats import norm, t
-    assert eftype.lower() in ['r', 'pearson', 'spearman', 'cohen', 'd', 'g', 'hedges']
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+
+    assert eftype.lower() in ["r", "pearson", "spearman", "cohen", "d", "g", "hedges"]
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
     assert stat is not None and nx is not None
     assert isinstance(confidence, float)
-    assert 0 < confidence < 1, 'confidence must be between 0 and 1.'
+    assert 0 < confidence < 1, "confidence must be between 0 and 1."
 
-    if eftype.lower() in ['r', 'pearson', 'spearman']:
+    if eftype.lower() in ["r", "pearson", "spearman"]:
         z = np.arctanh(stat)  # R-to-z transform
         se = 1 / np.sqrt(nx - 3)
         # See https://github.com/SurajGupta/r-source/blob/master/src/library/stats/R/cor.test.R
@@ -172,8 +190,18 @@ def compute_esci(stat=None, nx=None, ny=None, paired=False, eftype='cohen',
     return np.round(ci, decimals)
 
 
-def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence=.95,
-                   n_boot=2000, decimals=2, seed=None, return_dist=False):
+def compute_bootci(
+    x,
+    y=None,
+    func=None,
+    method="cper",
+    paired=False,
+    confidence=0.95,
+    n_boot=2000,
+    decimals=2,
+    seed=None,
+    return_dist=False,
+):
     """Bootstrapped confidence intervals of univariate and bivariate functions.
 
     Parameters
@@ -340,10 +368,11 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
     # Check other arguments
     assert isinstance(confidence, float)
     assert 0 < confidence < 1, "confidence must be between 0 and 1."
-    assert method in ['norm', 'normal', 'percentile', 'per', 'cpercentile', 'cper']
+    assert method in ["norm", "normal", "percentile", "per", "cpercentile", "cper"]
     assert isfunction(func) or isinstance(func, str), (
         "func must be a function (e.g. np.mean, custom function) or a string (e.g. 'pearson'). "
-        "See documentation for more details.")
+        "See documentation for more details."
+    )
     vectorizable = False
 
     # Check x
@@ -363,15 +392,15 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
 
     # Check string functions
     if isinstance(func, str):
-        func_str = '%s' % func
-        if func == 'pearson':
+        func_str = "%s" % func
+        if func == "pearson":
 
             assert paired, "Paired should be True if using correlation functions."
 
             def func(x, y):
                 return pearsonr(x, y)[0]  # Faster than np.corrcoef
 
-        elif func == 'spearman':
+        elif func == "spearman":
             from scipy.stats import spearmanr
 
             assert paired, "Paired should be True if using correlation functions."
@@ -379,31 +408,32 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
             def func(x, y):
                 return spearmanr(x, y)[0]
 
-        elif func in ['cohen', 'hedges']:
+        elif func in ["cohen", "hedges"]:
             from pingouin.effsize import compute_effsize
 
             def func(x, y):
                 return compute_effsize(x, y, paired=paired, eftype=func_str)
 
-        elif func == 'mean':
+        elif func == "mean":
             vectorizable = True
 
             def func(x):
                 return np.mean(x, axis=0)
 
-        elif func == 'std':
+        elif func == "std":
             vectorizable = True
 
             def func(x):
                 return np.std(x, ddof=1, axis=0)
 
-        elif func == 'var':
+        elif func == "var":
             vectorizable = True
 
             def func(x):
                 return np.var(x, ddof=1, axis=0)
+
         else:
-            raise ValueError('Function string not recognized.')
+            raise ValueError("Function string not recognized.")
 
     # Bootstrap
     bootstat = np.empty(n_boot)
@@ -438,13 +468,13 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
     # CONFIDENCE INTERVALS
     # See Matlab bootci function
     alpha = (1 - confidence) / 2
-    if method in ['norm', 'normal']:
+    if method in ["norm", "normal"]:
         # Normal approximation
         za = norm.ppf(alpha)  # = 1.96
         se = np.std(bootstat, ddof=1)
         bias = np.mean(bootstat - reference)
         ci = np.array([reference - bias + se * za, reference - bias - se * za])
-    elif method in ['percentile', 'per']:
+    elif method in ["percentile", "per"]:
         # Simple percentile
         interval = 100 * np.array([alpha, 1 - alpha])
         ci = np.percentile(bootstat, interval)
@@ -452,6 +482,7 @@ def compute_bootci(x, y=None, func=None, method='cper', paired=False, confidence
     else:
         # Bias-corrected percentile bootstrap
         from pingouin.regression import _bias_corrected_ci
+
         ci = _bias_corrected_ci(bootstat, reference, alpha=(1 - confidence))
 
     ci = np.round(ci, decimals)
@@ -573,47 +604,50 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
         if not _check_eftype(input):
             err = "Could not interpret input '{}'".format(input)
             raise ValueError(err)
-    if it not in ['r', 'cohen']:
+    if it not in ["r", "cohen"]:
         raise ValueError("Input type must be 'r' or 'cohen'")
 
     # Pass-through option
-    if it == ot or ot == 'none':
+    if it == ot or ot == "none":
         return ef
 
     # Convert r to Cohen d (Rosenthal 1994)
-    d = (2 * ef) / np.sqrt(1 - ef**2) if it == 'r' else ef
+    d = (2 * ef) / np.sqrt(1 - ef**2) if it == "r" else ef
 
     # Then convert to the desired output type
-    if ot == 'cohen':
+    if ot == "cohen":
         return d
-    elif ot == 'hedges':
+    elif ot == "hedges":
         if all(v is not None for v in [nx, ny]):
             return d * (1 - (3 / (4 * (nx + ny) - 9)))
         else:
             # If shapes of x and y are not known, return cohen's d
-            warnings.warn("You need to pass nx and ny arguments to compute "
-                          "Hedges g. Returning Cohen's d instead")
+            warnings.warn(
+                "You need to pass nx and ny arguments to compute "
+                "Hedges g. Returning Cohen's d instead"
+            )
             return d
-    elif ot == 'r':
+    elif ot == "r":
         # McGrath and Meyer 2006
         if all(v is not None for v in [nx, ny]):
-            a = ((nx + ny)**2 - 2 * (nx + ny)) / (nx * ny)
+            a = ((nx + ny) ** 2 - 2 * (nx + ny)) / (nx * ny)
         else:
             a = 4
         return d / np.sqrt(d**2 + a)
-    elif ot == 'eta-square':
+    elif ot == "eta-square":
         # Cohen 1988
-        return (d / 2)**2 / (1 + (d / 2)**2)
-    elif ot == 'odds-ratio':
+        return (d / 2) ** 2 / (1 + (d / 2) ** 2)
+    elif ot == "odds-ratio":
         # Borenstein et al. 2009
         return np.exp(d * np.pi / np.sqrt(3))
     else:  # ['auc']
         # Ruscio 2008
         from scipy.stats import norm
+
         return norm.cdf(d / np.sqrt(2))
 
 
-def compute_effsize(x, y, paired=False, eftype='cohen'):
+def compute_effsize(x, y, paired=False, eftype="cohen"):
     """Calculate effect size between two set of observations.
 
     Parameters
@@ -741,8 +775,7 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
     y = np.asarray(y)
 
     if x.size != y.size and paired:
-        warnings.warn("x and y have unequal sizes. Switching to "
-                      "paired == False.")
+        warnings.warn("x and y have unequal sizes. Switching to " "paired == False.")
         paired = False
 
     # Remove rows with missing values
@@ -753,11 +786,11 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         # Case 1: One-sample Test
         d = (x.mean() - y) / x.std(ddof=1)
         return d
-    if eftype.lower() == 'r':
+    if eftype.lower() == "r":
         # Return correlation coefficient (useful for CI bootstrapping)
         r, _ = pearsonr(x, y)
         return r
-    elif eftype.lower() == 'cles':
+    elif eftype.lower() == "cles":
         # Compute exact CLES (see pingouin.wilcoxon)
         diff = x[:, None] - y
         return np.where(diff == 0, 0.5, diff > 0).mean()
@@ -766,20 +799,18 @@ def compute_effsize(x, y, paired=False, eftype='cohen'):
         if not paired:
             # https://en.wikipedia.org/wiki/Effect_size
             dof = nx + ny - 2
-            poolsd = np.sqrt(((nx - 1) * x.var(ddof=1)
-                              + (ny - 1) * y.var(ddof=1)) / dof)
+            poolsd = np.sqrt(((nx - 1) * x.var(ddof=1) + (ny - 1) * y.var(ddof=1)) / dof)
             d = (x.mean() - y.mean()) / poolsd
         else:
             # Report Cohen d-avg (Cumming 2012; Lakens 2013)
             # Careful, the formula in Lakens 2013 is wrong. Updated in Pingouin
             # v0.3.4 to use the formula provided by Cummings 2012.
             # Before that the denominator was just (SD1 + SD2) / 2
-            d = (x.mean() - y.mean()) / np.sqrt((x.var(ddof=1) +
-                                                 y.var(ddof=1)) / 2)
-        return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)
+            d = (x.mean() - y.mean()) / np.sqrt((x.var(ddof=1) + y.var(ddof=1)) / 2)
+        return convert_effsize(d, "cohen", eftype, nx=nx, ny=ny)
 
 
-def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype='cohen'):
+def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype="cohen"):
     """Compute effect size from a T-value.
 
     Parameters
@@ -844,5 +875,5 @@ def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype='cohen'):
     elif N is not None:
         d = 2 * tval / np.sqrt(N)
     else:
-        raise ValueError('You must specify either nx + ny, or just N')
-    return convert_effsize(d, 'cohen', eftype, nx=nx, ny=ny)
+        raise ValueError("You must specify either nx + ny, or just N")
+    return convert_effsize(d, "cohen", eftype, nx=nx, ny=ny)

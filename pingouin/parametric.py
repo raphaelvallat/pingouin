@@ -4,13 +4,20 @@ import numpy as np
 import pandas as pd
 from scipy.stats import f
 import pandas_flavor as pf
-from pingouin import (_check_dataframe, remove_na, _flatten_list, bayesfactor_ttest, epsilon,
-                      sphericity, _postprocess_dataframe)
+from pingouin import (
+    _check_dataframe,
+    remove_na,
+    _flatten_list,
+    bayesfactor_ttest,
+    epsilon,
+    sphericity,
+    _postprocess_dataframe,
+)
 
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova", "ancova"]
 
 
-def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707, confidence=0.95):
+def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.707, confidence=0.95):
     """T-test.
 
     Parameters
@@ -197,6 +204,7 @@ def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707
     array([1.971859, 0.057056])
     """
     from scipy.stats import t, ttest_rel, ttest_ind, ttest_1samp
+
     try:  # pragma: no cover
         from scipy.stats._stats_py import _unequal_var_ttest_denom, _equal_var_ttest_denom
     except ImportError:  # pragma: no cover
@@ -205,8 +213,11 @@ def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707
     from pingouin import power_ttest, power_ttest2n, compute_effsize
 
     # Check arguments
-    assert alternative in ['two-sided', 'greater', 'less'], (
-        "Alternative must be one of 'two-sided' (default), 'greater' or 'less'.")
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
     assert 0 < confidence < 1, "confidence must be between 0 and 1."
 
     x = np.asarray(x)
@@ -240,7 +251,7 @@ def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707
         dof = nx + ny - 2
         vx, vy = x.var(ddof=1), y.var(ddof=1)
         # Case unpaired two samples T-test
-        if correction is True or (correction == 'auto' and nx != ny):
+        if correction is True or (correction == "auto" and nx != ny):
             # Use the Welch separate variance T-test
             tval, pval = ttest_ind(x, y, equal_var=False, alternative=alternative)
             # Compute sample standard deviation
@@ -251,7 +262,7 @@ def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707
             _, se = _equal_var_ttest_denom(vx, nx, vy, ny)
 
     # Effect size
-    d = compute_effsize(x, y, paired=paired, eftype='cohen')
+    d = compute_effsize(x, y, paired=paired, eftype="cohen")
 
     # Confidence interval for the (difference in) means
     # Compare to the t.test r function
@@ -271,23 +282,26 @@ def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707
         ci[0] = -np.inf
 
     # Rename CI
-    ci_name = 'CI%.0f%%' % (100 * confidence)
+    ci_name = "CI%.0f%%" % (100 * confidence)
 
     # Achieved power
     if ny == 1:
         # One-sample
         power = power_ttest(
-            d=d, n=nx, power=None, alpha=0.05, contrast='one-sample', alternative=alternative)
+            d=d, n=nx, power=None, alpha=0.05, contrast="one-sample", alternative=alternative
+        )
     if ny > 1 and paired is True:
         # Paired two-sample
         power = power_ttest(
-            d=d, n=nx, power=None, alpha=0.05, contrast='paired', alternative=alternative)
+            d=d, n=nx, power=None, alpha=0.05, contrast="paired", alternative=alternative
+        )
     elif ny > 1 and paired is False:
         # Independent two-samples
         if nx == ny:
             # Equal sample sizes
             power = power_ttest(
-                d=d, n=nx, power=None, alpha=0.05, contrast='two-samples', alternative=alternative)
+                d=d, n=nx, power=None, alpha=0.05, contrast="two-samples", alternative=alternative
+            )
         else:
             # Unequal sample sizes
             power = power_ttest2n(nx, ny, d=d, power=None, alpha=0.05, alternative=alternative)
@@ -296,24 +310,27 @@ def ttest(x, y, paired=False, alternative='two-sided', correction='auto', r=.707
     bf = bayesfactor_ttest(tval, nx, ny, paired=paired, alternative=alternative, r=r)
 
     # Create output dictionnary
-    stats = {'dof': dof,
-             'T': tval,
-             'p-val': pval,
-             'alternative': alternative,
-             'cohen-d': abs(d),
-             ci_name: [ci],
-             'power': power,
-             'BF10': bf}
+    stats = {
+        "dof": dof,
+        "T": tval,
+        "p-val": pval,
+        "alternative": alternative,
+        "cohen-d": abs(d),
+        ci_name: [ci],
+        "power": power,
+        "BF10": bf,
+    }
 
     # Convert to dataframe
-    col_order = ['T', 'dof', 'alternative', 'p-val', ci_name, 'cohen-d', 'BF10', 'power']
-    stats = pd.DataFrame(stats, columns=col_order, index=['T-test'])
+    col_order = ["T", "dof", "alternative", "p-val", ci_name, "cohen-d", "BF10", "power"]
+    stats = pd.DataFrame(stats, columns=col_order, index=["T-test"])
     return _postprocess_dataframe(stats)
 
 
 @pf.register_dataframe_method
-def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
-             detailed=False, effsize="ng2"):
+def rm_anova(
+    data=None, dv=None, within=None, subject=None, correction="auto", detailed=False, effsize="ng2"
+):
     """One-way and two-way repeated measures ANOVA.
 
     Parameters
@@ -485,7 +502,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
                Source  ddof1  ddof2          F     p-unc       ng2  eps
     0  Disgustingness      1     92  12.043878  0.000793  0.025784  1.0
     """
-    assert effsize in ['n2', 'np2', 'ng2'], "effsize must be n2, np2 or ng2."
+    assert effsize in ["n2", "np2", "ng2"], "effsize must be n2, np2 or ng2."
     if isinstance(within, list):
         assert len(within) > 0, "Within cannot be empty."
         if len(within) == 1:
@@ -493,8 +510,7 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         elif len(within) == 2:
             return rm_anova2(dv=dv, within=within, data=data, subject=subject, effsize=effsize)
         else:
-            raise ValueError(
-                "Repeated measures ANOVA with three or more factors is not supported.")
+            raise ValueError("Repeated measures ANOVA with three or more factors is not supported.")
 
     # Convert from wide to long-format, if needed
     if all([v is None for v in [dv, within, subject]]):
@@ -502,12 +518,12 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
         data = data._get_numeric_data().dropna()  # Listwise deletion of missing values
         assert data.shape[0] > 2, "Data must have at least 3 non-missing rows."
         assert data.shape[1] > 1, "Data must contain at least two columns."
-        data['Subj'] = np.arange(data.shape[0])
-        data = data.melt(id_vars='Subj', var_name='Within', value_name='DV')
-        subject, within, dv = 'Subj', 'Within', 'DV'
+        data["Subj"] = np.arange(data.shape[0])
+        data = data.melt(id_vars="Subj", var_name="Within", value_name="DV")
+        subject, within, dv = "Subj", "Within", "DV"
 
     # Check dataframe
-    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects='within')
+    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
 
     assert not data[within].isnull().any(), "Cannot have missing values in `within`."
     assert not data[subject].isnull().any(), "Cannot have missing values in `subject`."
@@ -531,13 +547,13 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     grandmean = data[dv].mean()
 
     # Calculate sums of squares
-    ss_with = ((grp_with.mean() - grandmean)**2 * grp_with.count()).sum()
-    ss_resall = grp_with.apply(lambda x: (x - x.mean())**2).sum()
+    ss_with = ((grp_with.mean() - grandmean) ** 2 * grp_with.count()).sum()
+    ss_resall = grp_with.apply(lambda x: (x - x.mean()) ** 2).sum()
     # sstotal = sstime + ss_resall =  sstime + (sssubj + sserror)
     # ss_total = ((data[dv] - grandmean)**2).sum()
     # We can further divide the residuals into a within and between component:
     grp_subj = data.groupby(subject, observed=True)[dv]
-    ss_resbetw = n_rm * np.sum((grp_subj.mean() - grandmean)**2)
+    ss_resbetw = n_rm * np.sum((grp_subj.mean() - grandmean) ** 2)
     ss_reswith = ss_resall - ss_resbetw
 
     # Calculate degrees of freedom
@@ -562,56 +578,89 @@ def rm_anova(data=None, dv=None, within=None, subject=None, correction='auto',
     # Compute sphericity using Mauchly test, on the wide-format dataframe
     # Sphericity assumption only applies if there are more than 2 levels
     if correction == "auto" or (correction is True and n_rm >= 3):
-        spher, W_spher, chi_sq_spher, ddof_spher, p_spher = sphericity(data_piv, alpha=.05)
+        spher, W_spher, chi_sq_spher, ddof_spher, p_spher = sphericity(data_piv, alpha=0.05)
         if correction == "auto":
             correction = True if not spher else False
     else:
         correction = False
 
     # Compute epsilon adjustement factor
-    eps = epsilon(data_piv, correction='gg')
+    eps = epsilon(data_piv, correction="gg")
 
     # If required, apply Greenhouse-Geisser correction for sphericity
     if correction:
-        corr_ddof1, corr_ddof2 = [np.maximum(d * eps, 1.) for d in (ddof1, ddof2)]
+        corr_ddof1, corr_ddof2 = [np.maximum(d * eps, 1.0) for d in (ddof1, ddof2)]
         p_corr = f(corr_ddof1, corr_ddof2).sf(fval)
 
     # Create output dataframe
     if not detailed:
-        aov = pd.DataFrame({
-            'Source': within, 'ddof1': ddof1, 'ddof2': ddof2, 'F': fval, 'p-unc': p_unc,
-            effsize: ef, 'eps': eps}, index=[0])
+        aov = pd.DataFrame(
+            {
+                "Source": within,
+                "ddof1": ddof1,
+                "ddof2": ddof2,
+                "F": fval,
+                "p-unc": p_unc,
+                effsize: ef,
+                "eps": eps,
+            },
+            index=[0],
+        )
         if correction:
-            aov['p-GG-corr'] = p_corr
-            aov['W-spher'] = W_spher
-            aov['p-spher'] = p_spher
-            aov['sphericity'] = spher
+            aov["p-GG-corr"] = p_corr
+            aov["W-spher"] = W_spher
+            aov["p-spher"] = p_spher
+            aov["sphericity"] = spher
 
         col_order = [
-            'Source', 'ddof1', 'ddof2', 'F', 'p-unc', 'p-GG-corr', effsize, 'eps', 'sphericity',
-            'W-spher', 'p-spher']
+            "Source",
+            "ddof1",
+            "ddof2",
+            "F",
+            "p-unc",
+            "p-GG-corr",
+            effsize,
+            "eps",
+            "sphericity",
+            "W-spher",
+            "p-spher",
+        ]
     else:
-        aov = pd.DataFrame({
-            'Source': [within, 'Error'],
-            'SS': [ss_with, ss_reswith],
-            'DF': [ddof1, ddof2],
-            'MS': [ms_with, ms_reswith],
-            'F': [fval, np.nan],
-            'p-unc': [p_unc, np.nan],
-            effsize: [ef, np.nan],
-            'eps': [eps, np.nan]})
+        aov = pd.DataFrame(
+            {
+                "Source": [within, "Error"],
+                "SS": [ss_with, ss_reswith],
+                "DF": [ddof1, ddof2],
+                "MS": [ms_with, ms_reswith],
+                "F": [fval, np.nan],
+                "p-unc": [p_unc, np.nan],
+                effsize: [ef, np.nan],
+                "eps": [eps, np.nan],
+            }
+        )
         if correction:
-            aov['p-GG-corr'] = [p_corr, np.nan]
-            aov['W-spher'] = [W_spher, np.nan]
-            aov['p-spher'] = [p_spher, np.nan]
-            aov['sphericity'] = [spher, np.nan]
+            aov["p-GG-corr"] = [p_corr, np.nan]
+            aov["W-spher"] = [W_spher, np.nan]
+            aov["p-spher"] = [p_spher, np.nan]
+            aov["sphericity"] = [spher, np.nan]
 
         col_order = [
-            'Source', 'SS', 'DF', 'MS', 'F', 'p-unc', 'p-GG-corr', effsize, 'eps', 'sphericity',
-            'W-spher', 'p-spher']
+            "Source",
+            "SS",
+            "DF",
+            "MS",
+            "F",
+            "p-unc",
+            "p-GG-corr",
+            effsize,
+            "eps",
+            "sphericity",
+            "W-spher",
+            "p-spher",
+        ]
 
     aov = aov.reindex(columns=col_order)
-    aov.dropna(how='all', axis=1, inplace=True)
+    aov.dropna(how="all", axis=1, inplace=True)
     return _postprocess_dataframe(aov)
 
 
@@ -624,7 +673,7 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     a, b = within
 
     # Validate the dataframe
-    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects='within')
+    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
 
     assert not data[a].isnull().any(), "Cannot have missing values in %s" % a
     assert not data[b].isnull().any(), "Cannot have missing values in %s" % b
@@ -656,15 +705,15 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     grp_bs = data.groupby([b, subject], observed=True)[dv].mean()
 
     # Sums of squares
-    ss_tot = np.sum((data[dv] - mu)**2)
-    ss_s = (n_a * n_b) * np.sum((grp_s - mu)**2)
-    ss_a = (n_b * n_s) * np.sum((grp_a - mu)**2)
-    ss_b = (n_a * n_s) * np.sum((grp_b - mu)**2)
-    ss_ab_er = n_s * np.sum((grp_ab - mu)**2)
+    ss_tot = np.sum((data[dv] - mu) ** 2)
+    ss_s = (n_a * n_b) * np.sum((grp_s - mu) ** 2)
+    ss_a = (n_b * n_s) * np.sum((grp_a - mu) ** 2)
+    ss_b = (n_a * n_s) * np.sum((grp_b - mu) ** 2)
+    ss_ab_er = n_s * np.sum((grp_ab - mu) ** 2)
     ss_ab = ss_ab_er - ss_a - ss_b
-    ss_as_er = n_b * np.sum((grp_as - mu)**2)
+    ss_as_er = n_b * np.sum((grp_as - mu) ** 2)
     ss_as = ss_as_er - ss_s - ss_a
-    ss_bs_er = n_a * np.sum((grp_bs - mu)**2)
+    ss_bs_er = n_a * np.sum((grp_bs - mu) ** 2)
     ss_bs = ss_bs_er - ss_s - ss_b
     ss_abs = ss_tot - ss_a - ss_b - ss_s - ss_ab - ss_as - ss_bs
 
@@ -719,39 +768,41 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     # Epsilon
     piv_a = data.pivot_table(index=subject, columns=a, values=dv, observed=True)
     piv_b = data.pivot_table(index=subject, columns=b, values=dv, observed=True)
-    eps_a = epsilon(piv_a, correction='gg')
-    eps_b = epsilon(piv_b, correction='gg')
+    eps_a = epsilon(piv_a, correction="gg")
+    eps_b = epsilon(piv_b, correction="gg")
     # Note that the GG epsilon of the interaction slightly differs between
     # R and Pingouin. An alternative is to use the lower bound, which is
     # very conservative (same behavior as described on real-statistics.com).
-    eps_ab = epsilon(data_piv, correction='gg')
+    eps_ab = epsilon(data_piv, correction="gg")
 
     # Greenhouse-Geisser correction
-    df_a_c, df_as_c = [np.maximum(d * eps_a, 1.) for d in (df_a, df_as)]
-    df_b_c, df_bs_c = [np.maximum(d * eps_b, 1.) for d in (df_b, df_bs)]
-    df_ab_c, df_abs_c = [np.maximum(d * eps_ab, 1.) for d in (df_ab, df_abs)]
+    df_a_c, df_as_c = [np.maximum(d * eps_a, 1.0) for d in (df_a, df_as)]
+    df_b_c, df_bs_c = [np.maximum(d * eps_b, 1.0) for d in (df_b, df_bs)]
+    df_ab_c, df_abs_c = [np.maximum(d * eps_ab, 1.0) for d in (df_ab, df_abs)]
     p_a_corr = f(df_a_c, df_as_c).sf(f_a)
     p_b_corr = f(df_b_c, df_bs_c).sf(f_b)
     p_ab_corr = f(df_ab_c, df_abs_c).sf(f_ab)
 
     # Create dataframe
-    aov = pd.DataFrame({
-        'Source': [a, b, a + ' * ' + b],
-        'SS': [ss_a, ss_b, ss_ab],
-        'ddof1': [df_a, df_b, df_ab],
-        'ddof2': [df_as, df_bs, df_abs],
-        'MS': [ms_a, ms_b, ms_ab],
-        'F': [f_a, f_b, f_ab],
-        'p-unc': [p_a, p_b, p_ab],
-        'p-GG-corr': [p_a_corr, p_b_corr, p_ab_corr],
-        effsize: [ef_a, ef_b, ef_ab],
-        'eps': [eps_a, eps_b, eps_ab]})
+    aov = pd.DataFrame(
+        {
+            "Source": [a, b, a + " * " + b],
+            "SS": [ss_a, ss_b, ss_ab],
+            "ddof1": [df_a, df_b, df_ab],
+            "ddof2": [df_as, df_bs, df_abs],
+            "MS": [ms_a, ms_b, ms_ab],
+            "F": [f_a, f_b, f_ab],
+            "p-unc": [p_a, p_b, p_ab],
+            "p-GG-corr": [p_a_corr, p_b_corr, p_ab_corr],
+            effsize: [ef_a, ef_b, ef_ab],
+            "eps": [eps_a, eps_b, eps_ab],
+        }
+    )
     return _postprocess_dataframe(aov)
 
 
 @pf.register_dataframe_method
-def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
-          effsize='np2'):
+def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="np2"):
     """One-way and *N*-way ANOVA.
 
     Parameters
@@ -908,10 +959,10 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
     6  Sex * Risk * Drug   1.844   2.0   0.922   1.094  0.343  0.044
     7           Residual  40.445  48.0   0.843     NaN    NaN    NaN
     """
-    assert effsize in ['np2', 'n2'], "effsize must be 'np2' or 'n2'."
+    assert effsize in ["np2", "n2"], "effsize must be 'np2' or 'n2'."
     if isinstance(between, list):
         if len(between) == 0:
-            raise ValueError('between is empty.')
+            raise ValueError("between is empty.")
         elif len(between) == 1:
             between = between[0]
         elif len(between) == 2:
@@ -923,7 +974,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
             return anovan(dv=dv, between=between, data=data, ss_type=ss_type, effsize=effsize)
 
     # Check data
-    _check_dataframe(dv=dv, between=between, data=data, effects='between')
+    _check_dataframe(dv=dv, between=between, data=data, effects="between")
 
     # Drop missing values
     data = data[[dv, between]].dropna()
@@ -935,10 +986,10 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
     # Calculate sums of squares
     grp = data.groupby(between, observed=True)[dv]
     # Between effect
-    ssbetween = ((grp.mean() - data[dv].mean())**2 * grp.count()).sum()
+    ssbetween = ((grp.mean() - data[dv].mean()) ** 2 * grp.count()).sum()
     # Within effect (= error between)
     #  = (grp.var(ddof=0) * grp.count()).sum()
-    sserror = grp.apply(lambda x: (x - x.mean())**2).sum()
+    sserror = grp.apply(lambda x: (x - x.mean()) ** 2).sum()
     # In 1-way ANOVA, sstotal = ssbetween + sserror
     # sstotal = ssbetween + sserror
 
@@ -959,43 +1010,50 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False,
 
     # Create output dataframe
     if not detailed:
-        aov = pd.DataFrame({'Source': between,
-                            'ddof1': ddof1,
-                            'ddof2': ddof2,
-                            'F': fval,
-                            'p-unc': p_unc,
-                            effsize: np2
-                            }, index=[0])
+        aov = pd.DataFrame(
+            {
+                "Source": between,
+                "ddof1": ddof1,
+                "ddof2": ddof2,
+                "F": fval,
+                "p-unc": p_unc,
+                effsize: np2,
+            },
+            index=[0],
+        )
 
     else:
-        aov = pd.DataFrame({'Source': [between, 'Within'],
-                            'SS': [ssbetween, sserror],
-                            'DF': [ddof1, ddof2],
-                            'MS': [msbetween, mserror],
-                            'F': [fval, np.nan],
-                            'p-unc': [p_unc, np.nan],
-                            effsize: [np2, np.nan]
-                            })
+        aov = pd.DataFrame(
+            {
+                "Source": [between, "Within"],
+                "SS": [ssbetween, sserror],
+                "DF": [ddof1, ddof2],
+                "MS": [msbetween, mserror],
+                "F": [fval, np.nan],
+                "p-unc": [p_unc, np.nan],
+                effsize: [np2, np.nan],
+            }
+        )
 
-    aov.dropna(how='all', axis=1, inplace=True)
+    aov.dropna(how="all", axis=1, inplace=True)
     return _postprocess_dataframe(aov)
 
 
-def anova2(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
+def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     """Two-way balanced ANOVA in pure Python + Pandas.
 
     This is an internal function. The main call to this function should be done
     by the :py:func:`pingouin.anova` function.
     """
     # Validate the dataframe
-    _check_dataframe(dv=dv, between=between, data=data, effects='between')
+    _check_dataframe(dv=dv, between=between, data=data, effects="between")
 
-    assert len(between) == 2, 'Must have exactly two between-factors variables'
+    assert len(between) == 2, "Must have exactly two between-factors variables"
     fac1, fac2 = between
 
     # Drop missing values
     data = data[[dv, fac1, fac2]].dropna()
-    assert data.shape[0] >= 5, 'Data must have at least 5 non-missing values.'
+    assert data.shape[0] >= 5, "Data must have at least 5 non-missing values."
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
@@ -1007,14 +1065,14 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
         aov_fac2 = anova(data=data, dv=dv, between=fac2, detailed=True)
         ng1, ng2 = data[fac1].nunique(), data[fac2].nunique()
         # Sums of squares
-        ss_fac1 = aov_fac1.at[0, 'SS']
-        ss_fac2 = aov_fac2.at[0, 'SS']
-        ss_tot = ((data[dv] - data[dv].mean())**2).sum()
-        ss_resid = np.sum(grp_both.apply(lambda x: (x - x.mean())**2))
+        ss_fac1 = aov_fac1.at[0, "SS"]
+        ss_fac2 = aov_fac2.at[0, "SS"]
+        ss_tot = ((data[dv] - data[dv].mean()) ** 2).sum()
+        ss_resid = np.sum(grp_both.apply(lambda x: (x - x.mean()) ** 2))
         ss_inter = ss_tot - (ss_resid + ss_fac1 + ss_fac2)
         # Degrees of freedom
-        df_fac1 = aov_fac1.at[0, 'DF']
-        df_fac2 = aov_fac2.at[0, 'DF']
+        df_fac1 = aov_fac1.at[0, "DF"]
+        df_fac2 = aov_fac2.at[0, "DF"]
         df_inter = (ng1 - 1) * (ng2 - 1)
         df_resid = data[dv].size - (ng1 * ng2)
     else:
@@ -1038,7 +1096,7 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
     pval_inter = f(df_inter, df_resid).sf(fval_inter)
 
     # Effect size
-    if effsize == 'n2':
+    if effsize == "n2":
         # Standard eta-square
         n2_fac1 = ss_fac1 / ss_tot
         n2_fac2 = ss_fac2 / ss_tot
@@ -1052,20 +1110,23 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
         all_effsize = [np2_fac1, np2_fac2, np2_inter, np.nan]
 
     # Create output dataframe
-    aov = pd.DataFrame({'Source': [fac1, fac2, fac1 + ' * ' + fac2, 'Residual'],
-                        'SS': [ss_fac1, ss_fac2, ss_inter, ss_resid],
-                        'DF': [df_fac1, df_fac2, df_inter, df_resid],
-                        'MS': [ms_fac1, ms_fac2, ms_inter, ms_resid],
-                        'F': [fval_fac1, fval_fac2, fval_inter, np.nan],
-                        'p-unc': [pval_fac1, pval_fac2, pval_inter, np.nan],
-                        effsize: all_effsize
-                        })
+    aov = pd.DataFrame(
+        {
+            "Source": [fac1, fac2, fac1 + " * " + fac2, "Residual"],
+            "SS": [ss_fac1, ss_fac2, ss_inter, ss_resid],
+            "DF": [df_fac1, df_fac2, df_inter, df_resid],
+            "MS": [ms_fac1, ms_fac2, ms_inter, ms_resid],
+            "F": [fval_fac1, fval_fac2, fval_inter, np.nan],
+            "p-unc": [pval_fac1, pval_fac2, pval_inter, np.nan],
+            effsize: all_effsize,
+        }
+    )
 
-    aov.dropna(how='all', axis=1, inplace=True)
+    aov.dropna(how="all", axis=1, inplace=True)
     return _postprocess_dataframe(aov)
 
 
-def anovan(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
+def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     """N-way ANOVA using statsmodels.
 
     This is an internal function. The main call to this function should be done
@@ -1073,21 +1134,22 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
     """
     # Check that stasmodels is installed
     from pingouin.utils import _is_statsmodels_installed
+
     _is_statsmodels_installed(raise_error=True)
     from statsmodels.api import stats
     from statsmodels.formula.api import ols
 
     # Validate the dataframe
-    _check_dataframe(dv=dv, between=between, data=data, effects='between')
+    _check_dataframe(dv=dv, between=between, data=data, effects="between")
     all_cols = _flatten_list([dv, between])
-    bad_chars = [',', '(', ')', ':']
+    bad_chars = [",", "(", ")", ":"]
     if not all([c not in v for c in bad_chars for v in all_cols]):
         err_msg = "comma, bracket, and colon are not allowed in column names."
         raise ValueError(err_msg)
 
     # Drop missing values
     data = data[all_cols].dropna()
-    assert data.shape[0] >= 5, 'Data must have at least 5 non-missing values.'
+    assert data.shape[0] >= 5, "Data must have at least 5 non-missing values."
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
@@ -1109,35 +1171,35 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize='np2'):
     # Convert to Pingouin-like dataframe
     if ss_type == 1:
         # statsmodels output is not exactly the same when ss_type = 1
-        aov = aov[['sum_sq', 'df', 'F', 'PR(>F)']]
+        aov = aov[["sum_sq", "df", "F", "PR(>F)"]]
     if ss_type == 3:
         # Remove intercept row
         aov = aov.iloc[1:, :]
 
     aov = aov.reset_index()
-    aov = aov.rename(columns={'index': 'Source', 'sum_sq': 'SS', 'df': 'DF', 'PR(>F)': 'p-unc'})
-    aov['MS'] = aov['SS'] / aov['DF']
+    aov = aov.rename(columns={"index": "Source", "sum_sq": "SS", "df": "DF", "PR(>F)": "p-unc"})
+    aov["MS"] = aov["SS"] / aov["DF"]
 
     # Effect size
-    if effsize == 'n2':
+    if effsize == "n2":
         # Get standard eta-square for all effects except residuals (last)
-        all_n2 = (aov['SS'] / aov['SS'].sum()).to_numpy()
+        all_n2 = (aov["SS"] / aov["SS"].sum()).to_numpy()
         all_n2[-1] = np.nan
-        aov['n2'] = all_n2
+        aov["n2"] = all_n2
     else:
-        aov['np2'] = (aov['F'] * aov['DF']) / (aov['F'] * aov['DF'] + aov.iloc[-1, 2])
+        aov["np2"] = (aov["F"] * aov["DF"]) / (aov["F"] * aov["DF"] + aov.iloc[-1, 2])
 
     def format_source(x):
         for fac in between:
             x = x.replace("C(Q('%s'), Sum)" % fac, fac)
-        return x.replace(':', ' * ')
+        return x.replace(":", " * ")
 
-    aov['Source'] = aov['Source'].apply(format_source)
+    aov["Source"] = aov["Source"].apply(format_source)
 
     # Re-index and round
-    col_order = ['Source', 'SS', 'DF', 'MS', 'F', 'p-unc', effsize]
+    col_order = ["Source", "SS", "DF", "MS", "F", "p-unc", effsize]
     aov = aov.reindex(columns=col_order)
-    aov.dropna(how='all', axis=1, inplace=True)
+    aov.dropna(how="all", axis=1, inplace=True)
 
     # Add formula to dataframe
     aov = _postprocess_dataframe(aov)
@@ -1261,7 +1323,7 @@ def welch_anova(data=None, dv=None, between=None):
     0  Hair color      3  8.329841  5.890115  0.018813  0.575962
     """
     # Check data
-    _check_dataframe(dv=dv, between=between, data=data, effects='between')
+    _check_dataframe(dv=dv, between=between, data=data, effects="between")
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
@@ -1276,32 +1338,38 @@ def welch_anova(data=None, dv=None, between=None):
     adj_grandmean = (weights * grp.mean()).sum() / weights.sum()
 
     # Sums of squares (regular and adjusted)
-    ss_res = grp.apply(lambda x: (x - x.mean())**2).sum()
-    ss_bet = ((grp.mean() - data[dv].mean())**2 * grp.count()).sum()
+    ss_res = grp.apply(lambda x: (x - x.mean()) ** 2).sum()
+    ss_bet = ((grp.mean() - data[dv].mean()) ** 2 * grp.count()).sum()
     ss_betadj = np.sum(weights * np.square(grp.mean() - adj_grandmean))
     ms_betadj = ss_betadj / ddof1
 
     # Calculate lambda, F-value, p-value and np2
-    lamb = (3 * np.sum((1 / (grp.count() - 1)) *
-                       (1 - (weights / weights.sum()))**2)) / (r**2 - 1)
+    lamb = (3 * np.sum((1 / (grp.count() - 1)) * (1 - (weights / weights.sum())) ** 2)) / (
+        r**2 - 1
+    )
     fval = ms_betadj / (1 + (2 * lamb * (r - 2)) / 3)
     pval = f.sf(fval, ddof1, 1 / lamb)
     np2 = ss_bet / (ss_bet + ss_res)
 
     # Create output dataframe
-    aov = pd.DataFrame({'Source': between,
-                        'ddof1': ddof1,
-                        'ddof2': 1 / lamb,
-                        'F': fval,
-                        'p-unc': pval,
-                        'np2': np2
-                        }, index=[0])
+    aov = pd.DataFrame(
+        {
+            "Source": between,
+            "ddof1": ddof1,
+            "ddof2": 1 / lamb,
+            "F": fval,
+            "p-unc": pval,
+            "np2": np2,
+        },
+        index=[0],
+    )
     return _postprocess_dataframe(aov)
 
 
 @pf.register_dataframe_method
-def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
-                correction='auto', effsize="np2"):
+def mixed_anova(
+    data=None, dv=None, within=None, subject=None, between=None, correction="auto", effsize="np2"
+):
     """Mixed-design (split-plot) ANOVA.
 
     Parameters
@@ -1391,7 +1459,7 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     1         Time  7.628    2  116  3.814  4.027  0.020  0.042  0.999
     2  Interaction  5.167    2  116  2.584  2.728  0.070  0.029    NaN
     """
-    assert effsize in ['n2', 'np2', 'ng2'], "effsize must be n2, np2 or ng2."
+    assert effsize in ["n2", "np2", "ng2"], "effsize must be n2, np2 or ng2."
 
     # Check that only a single within and between factor are provided
     one_is_list = isinstance(within, list) or isinstance(between, list)
@@ -1400,11 +1468,13 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
         raise ValueError(
             "within and between factors must both be strings referring to a column in the data. "
             "Specifying multiple within and between factors is currently not supported. "
-            "For more information, see: https://github.com/raphaelvallat/pingouin/issues/136")
+            "For more information, see: https://github.com/raphaelvallat/pingouin/issues/136"
+        )
 
     # Check data
     _check_dataframe(
-        dv=dv, within=within, between=between, data=data, subject=subject, effects='interaction')
+        dv=dv, within=within, between=between, data=data, subject=subject, effects="interaction"
+    )
 
     # Pivot and melt the table. This has several effects:
     # 1) Force missing values to be explicit (a NaN cell is created)
@@ -1419,40 +1489,43 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     # should have a unique range / set of values for each between-subject
     # group e.g. group1= 1 --> 20 and group2 = 21 --> 40.
     if not (data.groupby([subject, within], observed=True)[between].nunique() == 1).all():
-        raise ValueError("Subject IDs cannot overlap between groups: each "
-                         "group in `%s` must have a unique set of "
-                         "subject IDs, e.g. group1 = [1, 2, 3, ..., 10] "
-                         "and group2 = [11, 12, 13, ..., 20]" % between)
+        raise ValueError(
+            "Subject IDs cannot overlap between groups: each "
+            "group in `%s` must have a unique set of "
+            "subject IDs, e.g. group1 = [1, 2, 3, ..., 10] "
+            "and group2 = [11, 12, 13, ..., 20]" % between
+        )
 
     # SUMS OF SQUARES
     grandmean = data[dv].mean()
-    ss_total = ((data[dv] - grandmean)**2).sum()
+    ss_total = ((data[dv] - grandmean) ** 2).sum()
     # Extract main effects of within and between factors
     aov_with = rm_anova(
-        dv=dv, within=within, subject=subject, data=data, correction=correction, detailed=True)
+        dv=dv, within=within, subject=subject, data=data, correction=correction, detailed=True
+    )
     aov_betw = anova(dv=dv, between=between, data=data, detailed=True)
-    ss_betw = aov_betw.at[0, 'SS']
-    ss_with = aov_with.at[0, 'SS']
+    ss_betw = aov_betw.at[0, "SS"]
+    ss_with = aov_with.at[0, "SS"]
     # Extract residuals and interactions
     grp = data.groupby([between, within], observed=True)[dv]
     # ssresall = residuals within + residuals between
-    ss_resall = grp.apply(lambda x: (x - x.mean())**2).sum()
+    ss_resall = grp.apply(lambda x: (x - x.mean()) ** 2).sum()
     # Interaction
     ss_inter = ss_total - (ss_resall + ss_with + ss_betw)
-    ss_reswith = aov_with.at[1, 'SS'] - ss_inter
+    ss_reswith = aov_with.at[1, "SS"] - ss_inter
     ss_resbetw = ss_total - (ss_with + ss_betw + ss_reswith + ss_inter)
 
     # DEGREES OF FREEDOM
     n_obs = data.groupby(within, observed=True)[dv].count().max()
-    df_with = aov_with.at[0, 'DF']
-    df_betw = aov_betw.at[0, 'DF']
+    df_with = aov_with.at[0, "DF"]
+    df_betw = aov_betw.at[0, "DF"]
     df_resbetw = n_obs - data.groupby(between, observed=True)[dv].count().count()
     df_reswith = df_with * df_resbetw
-    df_inter = aov_with.at[0, 'DF'] * aov_betw.at[0, 'DF']
+    df_inter = aov_with.at[0, "DF"] * aov_betw.at[0, "DF"]
 
     # MEAN SQUARES
-    ms_betw = aov_betw.at[0, 'MS']
-    ms_with = aov_with.at[0, 'MS']
+    ms_betw = aov_betw.at[0, "MS"]
+    ms_with = aov_with.at[0, "MS"]
     ms_resbetw = ss_resbetw / df_resbetw
     ms_reswith = ss_reswith / df_reswith
     ms_inter = ss_inter / df_inter
@@ -1489,21 +1562,42 @@ def mixed_anova(data=None, dv=None, within=None, subject=None, between=None,
     # Stats table
     aov = pd.concat([aov_betw.drop(1), aov_with.drop(1)], axis=0, sort=False, ignore_index=True)
     # Update values
-    aov.rename(columns={'DF': 'DF1'}, inplace=True)
-    aov.at[0, 'F'], aov.at[1, 'F'] = f_betw, f_with
-    aov.at[0, 'p-unc'], aov.at[1, 'p-unc'] = p_betw, p_with
+    aov.rename(columns={"DF": "DF1"}, inplace=True)
+    aov.at[0, "F"], aov.at[1, "F"] = f_betw, f_with
+    aov.at[0, "p-unc"], aov.at[1, "p-unc"] = p_betw, p_with
     aov.at[0, effsize], aov.at[1, effsize] = ef_betw, ef_with
-    aov_inter = pd.DataFrame({
-        'Source': 'Interaction', 'SS': ss_inter, 'DF1': df_inter, 'MS': ms_inter, 'F': f_inter,
-        'p-unc': p_inter, effsize: ef_inter}, index=[2])
+    aov_inter = pd.DataFrame(
+        {
+            "Source": "Interaction",
+            "SS": ss_inter,
+            "DF1": df_inter,
+            "MS": ms_inter,
+            "F": f_inter,
+            "p-unc": p_inter,
+            effsize: ef_inter,
+        },
+        index=[2],
+    )
     aov = pd.concat([aov, aov_inter], axis=0, sort=False, ignore_index=True)
-    aov['DF2'] = [df_resbetw, df_reswith, df_reswith]
-    aov['eps'] = [np.nan, aov_with.at[0, 'eps'], np.nan]
+    aov["DF2"] = [df_resbetw, df_reswith, df_reswith]
+    aov["eps"] = [np.nan, aov_with.at[0, "eps"], np.nan]
     col_order = [
-        'Source', 'SS', 'DF1', 'DF2', 'MS', 'F', 'p-unc', 'p-GG-corr', effsize, 'eps',
-        'sphericity', 'W-spher', 'p-spher']
+        "Source",
+        "SS",
+        "DF1",
+        "DF2",
+        "MS",
+        "F",
+        "p-unc",
+        "p-GG-corr",
+        effsize,
+        "eps",
+        "sphericity",
+        "W-spher",
+        "p-spher",
+    ]
     aov = aov.reindex(columns=col_order)
-    aov.dropna(how='all', axis=1, inplace=True)
+    aov.dropna(how="all", axis=1, inplace=True)
     return _postprocess_dataframe(aov)
 
 
@@ -1583,20 +1677,22 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     """
     # Import
     from pingouin.utils import _is_statsmodels_installed
+
     _is_statsmodels_installed(raise_error=True)
     from statsmodels.api import stats
     from statsmodels.formula.api import ols
 
     # Safety checks
-    assert effsize in ['np2', 'n2'], "effsize must be 'np2' or 'n2'."
+    assert effsize in ["np2", "n2"], "effsize must be 'np2' or 'n2'."
     assert isinstance(data, pd.DataFrame), "data must be a pandas dataframe."
     assert isinstance(between, str), (
         "between must be a string. Pingouin does not support multiple "
         "between factors. For more details, please see "
-        "https://github.com/raphaelvallat/pingouin/issues/173.")
-    assert dv in data.columns, '%s is not in data.' % dv
-    assert between in data.columns, '%s is not in data.' % between
-    assert isinstance(covar, (str, list)), 'covar must be a str or a list.'
+        "https://github.com/raphaelvallat/pingouin/issues/173."
+    )
+    assert dv in data.columns, "%s is not in data." % dv
+    assert between in data.columns, "%s is not in data." % between
+    assert isinstance(covar, (str, list)), "covar must be a str or a list."
     if isinstance(covar, str):
         covar = [covar]
     for c in covar:
@@ -1615,20 +1711,21 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
 
     # Create output dataframe
     aov = stats.anova_lm(model, typ=2).reset_index()
-    aov.rename(columns={'index': 'Source', 'sum_sq': 'SS',
-                        'df': 'DF', 'PR(>F)': 'p-unc'}, inplace=True)
-    aov.at[0, 'Source'] = between
+    aov.rename(
+        columns={"index": "Source", "sum_sq": "SS", "df": "DF", "PR(>F)": "p-unc"}, inplace=True
+    )
+    aov.at[0, "Source"] = between
     for i in range(len(covar)):
-        aov.at[i + 1, 'Source'] = covar[i]
-    aov['DF'] = aov['DF'].astype(int)
+        aov.at[i + 1, "Source"] = covar[i]
+    aov["DF"] = aov["DF"].astype(int)
 
     # Add effect sizes
     if effsize == "n2":
-        all_effsize = (aov['SS'] / aov['SS'].sum()).to_numpy()
+        all_effsize = (aov["SS"] / aov["SS"].sum()).to_numpy()
         all_effsize[-1] = np.nan
     else:
-        ss_resid = aov['SS'].iloc[-1]
-        all_effsize = aov['SS'].apply(lambda x: x / (x + ss_resid)).to_numpy()
+        ss_resid = aov["SS"].iloc[-1]
+        all_effsize = aov["SS"].apply(lambda x: x / (x + ss_resid)).to_numpy()
         all_effsize[-1] = np.nan
     aov[effsize] = all_effsize
 

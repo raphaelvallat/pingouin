@@ -9,12 +9,13 @@ from scipy.stats import power_divergence, binom, chi2 as sp_chi2
 from pingouin import power_chi2, _postprocess_dataframe
 
 
-__all__ = ['chi2_independence', 'chi2_mcnemar', 'dichotomous_crosstab']
+__all__ = ["chi2_independence", "chi2_mcnemar", "dichotomous_crosstab"]
 
 
 ###############################################################################
 # CHI-SQUARED TESTS
 ###############################################################################
+
 
 def chi2_independence(data, x, y, correction=True):
     """
@@ -130,25 +131,23 @@ def chi2_independence(data, x, y, correction=True):
     presence of heart disease on this dataset.
     """
     # Python code inspired by SciPy's chi2_contingency
-    assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
-    assert isinstance(x, (str, int)), 'x must be a string or int.'
-    assert isinstance(y, (str, int)), 'y must be a string or int.'
-    assert all(col in data.columns for col in (x, y)),\
-        'columns are not in dataframe.'
-    assert isinstance(correction, bool), 'correction must be a boolean.'
+    assert isinstance(data, pd.DataFrame), "data must be a pandas DataFrame."
+    assert isinstance(x, (str, int)), "x must be a string or int."
+    assert isinstance(y, (str, int)), "y must be a string or int."
+    assert all(col in data.columns for col in (x, y)), "columns are not in dataframe."
+    assert isinstance(correction, bool), "correction must be a boolean."
 
     observed = pd.crosstab(data[x], data[y])
 
     if observed.size == 0:
-        raise ValueError('No data; observed has size 0.')
+        raise ValueError("No data; observed has size 0.")
 
-    expected = pd.DataFrame(expected_freq(observed), index=observed.index,
-                            columns=observed.columns)
+    expected = pd.DataFrame(expected_freq(observed), index=observed.index, columns=observed.columns)
 
     # All count frequencies should be at least 5
-    for df, name in zip([observed, expected], ['observed', 'expected']):
+    for df, name in zip([observed, expected], ["observed", "expected"]):
         if (df < 5).any(axis=None):
-            warnings.warn('Low count on {} frequencies.'.format(name))
+            warnings.warn("Low count on {} frequencies.".format(name))
 
     dof = float(expected.size - sum(expected.shape) + expected.ndim - 1)
 
@@ -159,25 +158,37 @@ def chi2_independence(data, x, y, correction=True):
     ddof = observed.size - 1 - dof
     n = data.shape[0]
     stats = []
-    names = ["pearson", "cressie-read", "log-likelihood",
-             "freeman-tukey", "mod-log-likelihood", "neyman"]
+    names = [
+        "pearson",
+        "cressie-read",
+        "log-likelihood",
+        "freeman-tukey",
+        "mod-log-likelihood",
+        "neyman",
+    ]
 
     for name, lambda_ in zip(names, [1.0, 2 / 3, 0.0, -1 / 2, -1.0, -2.0]):
         if dof == 0:
             chi2, p, cramer, power = 0.0, 1.0, np.nan, np.nan
         else:
-            chi2, p = power_divergence(observed, expected, ddof=ddof,
-                                       axis=None, lambda_=lambda_)
+            chi2, p = power_divergence(observed, expected, ddof=ddof, axis=None, lambda_=lambda_)
             dof_cramer = min(expected.shape) - 1
             cramer = np.sqrt(chi2 / (n * dof_cramer))
             power = power_chi2(dof=dof, w=cramer, n=n, alpha=0.05)
 
-        stats.append({'test': name, 'lambda': lambda_,
-                      'chi2': chi2, 'dof': dof, 'pval': p,
-                      'cramer': cramer, 'power': power})
+        stats.append(
+            {
+                "test": name,
+                "lambda": lambda_,
+                "chi2": chi2,
+                "dof": dof,
+                "pval": p,
+                "cramer": cramer,
+                "power": power,
+            }
+        )
 
-    stats = pd.DataFrame(stats)[['test', 'lambda', 'chi2', 'dof', 'pval',
-                                 'cramer', 'power']]
+    stats = pd.DataFrame(stats)[["test", "lambda", "chi2", "dof", "pval", "cramer", "power"]]
     return expected, observed, _postprocess_dataframe(stats)
 
 
@@ -296,15 +307,15 @@ def chi2_mcnemar(data, x, y, correction=True):
     mcnemar  20.020833    1  0.000008  0.000003
     """
     # Python code initially inspired by statsmodel's mcnemar
-    assert isinstance(data, pd.DataFrame), 'data must be a pandas DataFrame.'
-    assert all(isinstance(column, (str, int)) for column in (x, y)),\
-        'column names must be string or int.'
-    assert all(column in data.columns for column in (x, y)),\
-        'columns are not in dataframe.'
+    assert isinstance(data, pd.DataFrame), "data must be a pandas DataFrame."
+    assert all(
+        isinstance(column, (str, int)) for column in (x, y)
+    ), "column names must be string or int."
+    assert all(column in data.columns for column in (x, y)), "columns are not in dataframe."
 
     for column in (x, y):
         if data[column].isna().any():
-            raise ValueError('Null values are not allowed.')
+            raise ValueError("Null values are not allowed.")
 
     observed = dichotomous_crosstab(data, x, y)
     # Careful, the order of b and c is inverted compared to wikipedia
@@ -313,21 +324,23 @@ def chi2_mcnemar(data, x, y, correction=True):
     n_discordants = b + c
 
     if (b, c) == (0, 0):
-        raise ValueError('McNemar\'s test does not work if the secondary ' +
-                         'diagonal of the observed data summary does not ' +
-                         'have values different from 0.')
+        raise ValueError(
+            "McNemar's test does not work if the secondary "
+            + "diagonal of the observed data summary does not "
+            + "have values different from 0."
+        )
 
-    chi2 = (abs(b - c) - int(correction))**2 / n_discordants
+    chi2 = (abs(b - c) - int(correction)) ** 2 / n_discordants
     pexact = min(1, 2 * binom.cdf(min(b, c), n_discordants, 0.5))
     stats = {
-        'chi2': chi2,
-        'dof': 1,
-        'p-approx': sp_chi2.sf(chi2, 1),
-        'p-exact': pexact,
+        "chi2": chi2,
+        "dof": 1,
+        "p-approx": sp_chi2.sf(chi2, 1),
+        "p-exact": pexact,
         # 'p-mid': pexact - binom.pmf(b, n_discordants, 0.5)
     }
 
-    stats = pd.DataFrame(stats, index=['mcnemar'])
+    stats = pd.DataFrame(stats, index=["mcnemar"])
 
     return observed, _postprocess_dataframe(stats)
 
@@ -348,13 +361,14 @@ def _dichotomize_series(data, column):
             return int(elem)
         if isinstance(elem, str):
             lower = elem.lower()
-            if lower in ('n', 'no', 'absent', 'false', 'f', 'negative'):
+            if lower in ("n", "no", "absent", "false", "f", "negative"):
                 return 0
-            elif lower in ('y', 'yes', 'present', 'true', 't', 'positive',
-                           'p'):
+            elif lower in ("y", "yes", "present", "true", "t", "positive", "p"):
                 return 1
-        raise ValueError('Invalid value to build a 2x2 contingency '
-                         'table on column {}: {}'.format(column, elem))
+        raise ValueError(
+            "Invalid value to build a 2x2 contingency "
+            "table on column {}: {}".format(column, elem)
+        )
 
     return series.apply(convert_elem)
 
@@ -399,8 +413,7 @@ def dichotomous_crosstab(data, x, y):
     0  1  1
     1  1  0
     """
-    crosstab = pd.crosstab(_dichotomize_series(data, x),
-                           _dichotomize_series(data, y))
+    crosstab = pd.crosstab(_dichotomize_series(data, x), _dichotomize_series(data, y))
     shape = crosstab.shape
     if shape != (2, 2):
         if shape == (2, 1):
@@ -408,7 +421,8 @@ def dichotomous_crosstab(data, x, y):
         elif shape == (1, 2):
             crosstab.loc[int(not bool(crosstab.index[0])), :] = [0, 0]
         else:  # shape = (1, 1) or shape = (>2, >2)
-            raise ValueError('Both series contain only one unique value. '
-                             'Cannot build 2x2 contingency table.')
+            raise ValueError(
+                "Both series contain only one unique value. " "Cannot build 2x2 contingency table."
+            )
     crosstab = crosstab.sort_index(axis=0).sort_index(axis=1)
     return crosstab
