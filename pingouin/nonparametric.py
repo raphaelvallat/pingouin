@@ -536,7 +536,7 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
     Kruskal  Hair color      3  10.58863  0.014172
     """
     # Check data
-    _check_dataframe(dv=dv, between=between, data=data, effects="between")
+    data = _check_dataframe(dv=dv, between=between, data=data, effects="between")
 
     # Remove NaN values
     data = data[[dv, between]].dropna()
@@ -686,7 +686,7 @@ def friedman(data=None, dv=None, within=None, subject=None, method="chisq"):
         subject, within, dv = "Subj", "Within", "DV"
 
     # Check dataframe
-    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
+    data = _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
     assert not data[within].isnull().any(), "Cannot have missing values in `within`."
     assert not data[subject].isnull().any(), "Cannot have missing values in `subject`."
 
@@ -822,7 +822,7 @@ def cochran(data=None, dv=None, within=None, subject=None):
         subject, within, dv = "Subj", "Within", "DV"
 
     # Check data
-    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
+    data = _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
     assert not data[within].isnull().any(), "Cannot have missing values in `within`."
     assert not data[subject].isnull().any(), "Cannot have missing values in `subject`."
 

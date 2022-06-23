@@ -337,10 +337,27 @@ def _check_eftype(eftype):
 
 
 def _check_dataframe(data=None, dv=None, between=None, within=None, subject=None, effects=None):
-    """Check dataframe"""
+    """Checks whether data is a dataframe or can be converted to a dataframe.
+    If successful, a dataframe is returned. If not successful, a ValueError is
+    raised.
+    """
     # Check that data is a dataframe
     if not isinstance(data, pd.DataFrame):
-        raise ValueError("Data must be a pandas dataframe.")
+        # DataMatrix objects can be safely convert to DataFrame objects. By
+        # first checking the name of the class, we avoid having to actually
+        # import DataMatrix unless it is necessary.
+        if data.__class__.__name__ == 'DataMatrix':
+            try:
+                from datamatrix import DataMatrix, convert as cnv
+            except ImportError:
+                raise ValueError("Failed to convert object to pandas dataframe (DataMatrix not available)")
+            else:
+                if isinstance(data, DataMatrix):
+                    data = cnv.to_pandas(data)
+                else:
+                    raise ValueError("Data must be a pandas dataframe or compatible object.")
+        else:
+            raise ValueError("Data must be a pandas dataframe or compatible object.")
     # Check that both dv and data are provided.
     if any(v is None for v in [dv, data]):
         raise ValueError("DV and data must be specified")
@@ -364,7 +381,7 @@ def _check_dataframe(data=None, dv=None, between=None, within=None, subject=None
         for input in [within, between]:
             if not isinstance(input, (str, int, list)):
                 raise ValueError("within and between must be specified when effects=interaction")
-
+    return data
 
 ###############################################################################
 # DEPENDENCIES

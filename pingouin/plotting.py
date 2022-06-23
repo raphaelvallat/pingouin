@@ -555,7 +555,7 @@ def plot_paired(
         )
 
     # Validate args
-    _check_dataframe(data=data, dv=dv, within=within, subject=subject, effects="within")
+    data = _check_dataframe(data=data, dv=dv, within=within, subject=subject, effects="within")
 
     # Pivot and melt the table. This has several effects:
     # 1) Force missing values to be explicit (a NaN cell is created)
