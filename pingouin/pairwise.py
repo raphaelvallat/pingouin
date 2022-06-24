@@ -268,7 +268,7 @@ def pairwise_tests(
     from .nonparametric import wilcoxon, mwu
 
     # Safety checks
-    _check_dataframe(
+    data = _check_dataframe(
         dv=dv, between=between, within=within, subject=subject, effects="all", data=data
     )
     assert alternative in [
@@ -852,7 +852,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  65.103 -20.628  170.404  0.00  -3.105
     """
     # Check the dataframe
-    _check_dataframe(dv=dv, between=between, effects="between", data=data)
+    data = _check_dataframe(dv=dv, between=between, effects="between", data=data)
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)

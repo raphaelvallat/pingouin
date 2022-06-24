@@ -523,7 +523,7 @@ def rm_anova(
         subject, within, dv = "Subj", "Within", "DV"
 
     # Check dataframe
-    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
+    data = _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
 
     assert not data[within].isnull().any(), "Cannot have missing values in `within`."
     assert not data[subject].isnull().any(), "Cannot have missing values in `subject`."
@@ -673,7 +673,7 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     a, b = within
 
     # Validate the dataframe
-    _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
+    data = _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
 
     assert not data[a].isnull().any(), "Cannot have missing values in %s" % a
     assert not data[b].isnull().any(), "Cannot have missing values in %s" % b
@@ -974,7 +974,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
             return anovan(dv=dv, between=between, data=data, ss_type=ss_type, effsize=effsize)
 
     # Check data
-    _check_dataframe(dv=dv, between=between, data=data, effects="between")
+    data = _check_dataframe(dv=dv, between=between, data=data, effects="between")
 
     # Drop missing values
     data = data[[dv, between]].dropna()
@@ -1046,7 +1046,7 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     by the :py:func:`pingouin.anova` function.
     """
     # Validate the dataframe
-    _check_dataframe(dv=dv, between=between, data=data, effects="between")
+    data = _check_dataframe(dv=dv, between=between, data=data, effects="between")
 
     assert len(between) == 2, "Must have exactly two between-factors variables"
     fac1, fac2 = between
@@ -1140,7 +1140,7 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     from statsmodels.formula.api import ols
 
     # Validate the dataframe
-    _check_dataframe(dv=dv, between=between, data=data, effects="between")
+    data = _check_dataframe(dv=dv, between=between, data=data, effects="between")
     all_cols = _flatten_list([dv, between])
     bad_chars = [",", "(", ")", ":"]
     if not all([c not in v for c in bad_chars for v in all_cols]):
@@ -1323,7 +1323,7 @@ def welch_anova(data=None, dv=None, between=None):
     0  Hair color      3  8.329841  5.890115  0.018813  0.575962
     """
     # Check data
-    _check_dataframe(dv=dv, between=between, data=data, effects="between")
+    data = _check_dataframe(dv=dv, between=between, data=data, effects="between")
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
@@ -1472,7 +1472,7 @@ def mixed_anova(
         )
 
     # Check data
-    _check_dataframe(
+    data = _check_dataframe(
         dv=dv, within=within, between=between, data=data, subject=subject, effects="interaction"
     )
 
