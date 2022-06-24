@@ -149,10 +149,8 @@ class TestUtils(TestCase):
         assert np.allclose(y_nan, [[6.0], [3.0], [2.0]])
         # When y is None
         remove_na(x, None, paired=False)
-        # When x or y is an empty list
+        # When y is an empty list
         # See https://github.com/raphaelvallat/pingouin/issues/222
-        with pytest.raises(AssertionError):
-            remove_na(x=[], y=0)
         with pytest.raises(AssertionError):
             remove_na(x, y=[])
 
