@@ -225,7 +225,6 @@ def remove_na(x, y=None, paired=False, axis="rows"):
     """
     # Safety checks
     x = np.asarray(x)
-    assert x.size > 1, "x must have more than one element."
     assert axis in ["rows", "columns"], "axis must be rows or columns."
 
     if y is None:
