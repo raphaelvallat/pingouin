@@ -17,7 +17,7 @@ from pingouin import (
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova", "ancova"]
 
 
-def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.707, confidence=0.95):
+def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.707, confidence=0.95, stars=True):
     """T-test.
 
     Parameters
@@ -49,6 +49,8 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
         The default is 0.707 (= :math:`\\sqrt{2} / 2`).
     confidence : float
         Confidence level for the confidence intervals (0.95 = 95%)
+    stars : boolean
+        Option to add a visual aid for significance level
 
         .. versionadded:: 0.3.9
 
@@ -60,6 +62,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
         * ``'dof'``: degrees of freedom
         * ``'alternative'``: alternative of the test
         * ``'p-val'``: p-value
+        * ``'significance'``: significance stars
         * ``'CI95%'``: confidence intervals of the difference in means
         * ``'cohen-d'``: Cohen d effect size
         * ``'BF10'``: Bayes Factor of the alternative hypothesis
@@ -196,6 +199,12 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> ttest(x, y, correction=False)
                    T  dof alternative     p-val          CI95%   cohen-d   BF10     power
     T-test  1.971859   33   two-sided  0.057056  [-0.03, 1.66]  0.673518  1.418  0.481867
+    
+    6. Significance stars or a null result label can also be added :
+
+    >>> ttest(x, y, correction=False)
+                   T  dof alternative     p-val sig          CI95%   cohen-d   BF10     power
+    T-test  1.971859   33   two-sided  0.057056  NS  [-0.03, 1.66]  0.673518  1.418  0.481867
 
     Compare with SciPy
 
@@ -309,11 +318,26 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     # Bayes factor
     bf = bayesfactor_ttest(tval, nx, ny, paired=paired, alternative=alternative, r=r)
 
+    # Significance stars
+    if stars:
+        if pval < .1 and pval > .05:
+            sigstars = "."
+        if pval < .05 and pval > .01:
+            sigstars = "*"
+        if pval < .01 and pval > .001:
+            sigstars = "**"
+        if pval < .001:
+            sigstars = "***"
+        else:
+            sigstars = "NS"
+    return df   
+        
     # Create output dictionnary
     stats = {
         "dof": dof,
         "T": tval,
         "p-val": pval,
+        "sig": sigstars,
         "alternative": alternative,
         "cohen-d": abs(d),
         ci_name: [ci],
@@ -322,7 +346,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     }
 
     # Convert to dataframe
-    col_order = ["T", "dof", "alternative", "p-val", ci_name, "cohen-d", "BF10", "power"]
+    col_order = ["T", "dof", "alternative", "p-val", "sig", ci_name, "cohen-d", "BF10", "power"]
     stats = pd.DataFrame(stats, columns=col_order, index=["T-test"])
     return _postprocess_dataframe(stats)
 
