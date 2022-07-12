@@ -671,9 +671,9 @@ def ptests(
             N       E      O      A    C
     N       -     ***    ***    ***  ***
     E  -8.397       -                ***
-    O  -8.135  -0.119      -         ***
-    A  -8.398   0.312  0.241      -  ***
-    C  -4.759   3.753  3.791  3.629    -
+    O  -8.332  -0.596      -         ***
+    A  -8.804    0.12   0.72      -  ***
+    C  -4.759   3.753  4.074  3.787    -
 
     Let's compare with SciPy
 
@@ -687,9 +687,9 @@ def ptests(
             N       E      O      A    C
     N       -
     E  -8.397       -                ***
-    O  -8.135  -0.119      -         ***
-    A  -8.398   0.312  0.241      -  ***
-    C  -4.759   3.753  3.791  3.629    -
+    O  -8.332  -0.596      -         ***
+    A  -8.804    0.12   0.72      -  ***
+    C  -4.759   3.753  4.074  3.787    -
 
     Paired T-test, showing the actual p-values instead of stars
 
@@ -711,6 +711,7 @@ def ptests(
     A  -8.399   0.319  0.238      -  0.005
     C  -4.251   3.595  3.785  3.765      -
     """
+    from itertools import combinations
     from numpy import triu_indices_from as tif
     from numpy import format_float_positional as ffp
     from scipy.stats import ttest_ind, ttest_rel
@@ -723,16 +724,25 @@ def ptests(
         func = ttest_ind
 
     # Get T-values and p-values
-    mat = self.corr(method=lambda x, y: func(x, y, **kwargs)[0]).round(decimals)
-    mat_upper = self.corr(method=lambda x, y: func(x, y, **kwargs)[1])
+    # We cannot use pandas.DataFrame.corr here because it will incorrectly remove rows missing
+    # values, even when using an independet T-test!
+    cols = self.columns
+    combs = list(combinations(cols, 2))
+    mat = pd.DataFrame(columns=cols, index=cols, dtype=np.float64)
+    mat_upper = mat.copy()
+
+    for a, b in combs:
+        t, p = func(self[a], self[b], **kwargs, nan_policy="omit")
+        mat.loc[b, a] = np.round(t, decimals)
+        # Do not round p-value here, or we'll lose precision for multicomp
+        mat_upper.loc[a, b] = p
 
     if padjust is not None:
         pvals = mat_upper.to_numpy()[tif(mat, k=1)]
         mat_upper.to_numpy()[tif(mat, k=1)] = multicomp(pvals, alpha=0.05, method=padjust)[1]
 
-    # Convert T-values to str
+    # Convert T-values to str, and fill the diagonal with "-"
     mat = mat.astype(str)
-    # Inplace modification of the diagonal
     np.fill_diagonal(mat.to_numpy(), "-")
 
     def replace_pval(x):
