@@ -715,6 +715,7 @@ def ptests(
     from numpy import triu_indices_from as tif
     from numpy import format_float_positional as ffp
     from scipy.stats import ttest_ind, ttest_rel
+
     assert isinstance(pval_stars, dict), "pval_stars must be a dictionnary."
     assert isinstance(decimals, int), "decimals must be an int."
 

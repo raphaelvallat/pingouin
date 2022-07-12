@@ -490,8 +490,8 @@ class TestPairwise(TestCase):
         from scipy.stats import ttest_ind, ttest_rel
 
         # Load BFI dataset
-        df = read_dataset('pairwise_corr').iloc[:30, 1:]
-        df.columns = ["N", "E", "O", 'A', "C"]
+        df = read_dataset("pairwise_corr").iloc[:30, 1:]
+        df.columns = ["N", "E", "O", "A", "C"]
         # Add some missing values
         df.iloc[[2, 5, 20], 2] = np.nan
         df.iloc[[1, 4, 10], 3] = np.nan
