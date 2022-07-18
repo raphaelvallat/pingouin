@@ -120,6 +120,6 @@ class TestMultivariate(TestCase):
         np.random.seed(123)
         # Test that large datasets do not produce nan
         n, p = 1000, 100
-        Z = np.random.normal(size=(n,p))
+        Z = np.random.normal(size=(n, p))
         hz, pval, normal = multivariate_normality(Z, alpha=0.05)
         assert np.isfinite(pval)
