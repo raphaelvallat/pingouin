@@ -112,7 +112,7 @@ def multivariate_normality(X, alpha=0.05):
 
     # Lognormal mean and variance
     pmu = np.log(np.sqrt(mu**4 / (si2 + mu**2)))
-    psi = np.sqrt(np.log((si2 + mu**2) / mu**2))
+    psi = np.sqrt(np.log1p(si2 / mu**2))
 
     # P-value
     pval = lognorm.sf(hz, psi, scale=np.exp(pmu))
