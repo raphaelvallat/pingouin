@@ -15,6 +15,7 @@ import warnings
 __all__ = [
     "pairwise_ttests",
     "pairwise_tests",
+    "ptests",
     "pairwise_tukey",
     "pairwise_gameshowell",
     "pairwise_corr",
@@ -591,6 +592,177 @@ def pairwise_tests(
         stats.rename(columns={"Time": factors[0]}, inplace=True)
 
     return _postprocess_dataframe(stats)
+
+
+@pf.register_dataframe_method
+def ptests(
+    self,
+    paired=False,
+    decimals=3,
+    padjust=None,
+    stars=True,
+    pval_stars={0.001: "***", 0.01: "**", 0.05: "*"},
+    **kwargs
+):
+    """
+    Pairwise T-test between columns of a dataframe.
+
+    T-values are reported on the lower triangle of the output pairwise matrix and p-values on the
+    upper triangle. This method is a faster, but less exhaustive, matrix-version of the
+    :py:func:`pingouin.pairwise_test` function. Missing values are automatically removed from each
+    pairwise T-test.
+
+    .. versionadded:: 0.6.0
+
+    Parameters
+    ----------
+    self : :py:class:`pandas.DataFrame`
+        Input dataframe.
+    paired : boolean
+        Specify whether the two observations are related (i.e. repeated measures) or independent.
+    decimals : int
+        Number of decimals to display in the output matrix.
+    padjust : string or None
+        P-values adjustment for multiple comparison
+
+        * ``'none'``: no correction
+        * ``'bonf'``: one-step Bonferroni correction
+        * ``'sidak'``: one-step Sidak correction
+        * ``'holm'``: step-down method using Bonferroni adjustments
+        * ``'fdr_bh'``: Benjamini/Hochberg FDR correction
+        * ``'fdr_by'``: Benjamini/Yekutieli FDR correction
+    stars : boolean
+        If True, only significant p-values are displayed as stars using the pre-defined thresholds
+        of ``pval_stars``. If False, all the raw p-values are displayed.
+    pval_stars : dict
+        Significance thresholds. Default is 3 stars for p-values <0.001, 2 stars for
+        p-values <0.01 and 1 star for p-values <0.05.
+    **kwargs : optional
+        Optional argument(s) passed to the lower-level scipy functions, i.e.
+        :py:func:`scipy.stats.ttest_ind` for independent T-test and
+        :py:func:`scipy.stats.ttest_rel` for paired T-test.
+
+    Returns
+    -------
+    mat : :py:class:`pandas.DataFrame`
+        Pairwise T-test matrix, of dtype str, with T-values on the lower triangle and p-values on
+        the upper triangle.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> import pingouin as pg
+    >>> # Load an example dataset of personality dimensions
+    >>> df = pg.read_dataset('pairwise_corr').iloc[:30, 1:]
+    >>> df.columns = ["N", "E", "O", 'A', "C"]
+    >>> # Add some missing values
+    >>> df.iloc[[2, 5, 20], 2] = np.nan
+    >>> df.iloc[[1, 4, 10], 3] = np.nan
+    >>> df.head().round(2)
+          N     E     O     A     C
+    0  2.48  4.21  3.94  3.96  3.46
+    1  2.60  3.19  3.96   NaN  3.23
+    2  2.81  2.90   NaN  2.75  3.50
+    3  2.90  3.56  3.52  3.17  2.79
+    4  3.02  3.33  4.02   NaN  2.85
+
+    Independent pairwise T-tests
+
+    >>> df.ptests()
+            N       E      O      A    C
+    N       -     ***    ***    ***  ***
+    E  -8.397       -                ***
+    O  -8.332  -0.596      -         ***
+    A  -8.804    0.12   0.72      -  ***
+    C  -4.759   3.753  4.074  3.787    -
+
+    Let's compare with SciPy
+
+    >>> from scipy.stats import ttest_ind
+    >>> np.round(ttest_ind(df["N"], df["E"]), 3)
+    array([-8.397,  0.   ])
+
+    Passing custom parameters to the lower-level :py:func:`scipy.stats.ttest_ind` function
+
+    >>> df.ptests(alternative="greater", equal_var=True)
+            N       E      O      A    C
+    N       -
+    E  -8.397       -                ***
+    O  -8.332  -0.596      -         ***
+    A  -8.804    0.12   0.72      -  ***
+    C  -4.759   3.753  4.074  3.787    -
+
+    Paired T-test, showing the actual p-values instead of stars
+
+    >>> df.ptests(paired=True, stars=False, decimals=4)
+            N        E       O       A       C
+    N        -   0.0000  0.0000  0.0000  0.0002
+    E  -7.0773        -  0.8776  0.7522  0.0012
+    O  -8.0568  -0.1555       -  0.8137  0.0008
+    A  -8.3994   0.3191  0.2383       -  0.0009
+    C  -4.2511   3.5953  3.7849  3.7652       -
+
+    Adjusting for multiple comparisons using the Holm-Bonferroni method
+
+    >>> df.ptests(paired=True, stars=False, padjust="holm")
+            N       E      O      A      C
+    N       -   0.000  0.000  0.000  0.001
+    E  -7.077       -     1.     1.  0.005
+    O  -8.057  -0.155      -     1.  0.005
+    A  -8.399   0.319  0.238      -  0.005
+    C  -4.251   3.595  3.785  3.765      -
+    """
+    from itertools import combinations
+    from numpy import triu_indices_from as tif
+    from numpy import format_float_positional as ffp
+    from scipy.stats import ttest_ind, ttest_rel
+
+    assert isinstance(pval_stars, dict), "pval_stars must be a dictionary."
+    assert isinstance(decimals, int), "decimals must be an int."
+
+    if paired:
+        func = ttest_rel
+    else:
+        func = ttest_ind
+
+    # Get T-values and p-values
+    # We cannot use pandas.DataFrame.corr here because it will incorrectly remove rows missing
+    # values, even when using an independent T-test!
+    cols = self.columns
+    combs = list(combinations(cols, 2))
+    mat = pd.DataFrame(columns=cols, index=cols, dtype=np.float64)
+    mat_upper = mat.copy()
+
+    for a, b in combs:
+        t, p = func(self[a], self[b], **kwargs, nan_policy="omit")
+        mat.loc[b, a] = np.round(t, decimals)
+        # Do not round p-value here, or we'll lose precision for multicomp
+        mat_upper.loc[a, b] = p
+
+    if padjust is not None:
+        pvals = mat_upper.to_numpy()[tif(mat, k=1)]
+        mat_upper.to_numpy()[tif(mat, k=1)] = multicomp(pvals, alpha=0.05, method=padjust)[1]
+
+    # Convert T-values to str, and fill the diagonal with "-"
+    mat = mat.astype(str)
+    np.fill_diagonal(mat.to_numpy(), "-")
+
+    def replace_pval(x):
+        for key, value in pval_stars.items():
+            if x < key:
+                return value
+        return ""
+
+    if stars:
+        # Replace p-values by stars
+        mat_upper = mat_upper.applymap(replace_pval)
+    else:
+        mat_upper = mat_upper.applymap(lambda x: ffp(x, precision=decimals))
+
+    # Replace upper triangle by p-values
+    mat.to_numpy()[tif(mat, k=1)] = mat_upper.to_numpy()[tif(mat, k=1)]
+    return mat
 
 
 @pf.register_dataframe_method

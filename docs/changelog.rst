@@ -8,6 +8,21 @@ What's new
 
 *************
 
+v0.6.0.dev
+----------
+
+**New functions**
+
+We have added the :py:func:`pingouin.ptests` function to calculate a T-test (T- and p-values) between all pairs of columns in a given dataframe. This is the T-test equivalent of :py:func:`pingouin.rcorr`. It can only be used as a :py:class:`pandas.DataFrame` method, not as a standalone function. The output is a square dataframe with the T-values on the lower triangle and the p-values on the upper triangle.
+
+.. code-block:: python
+
+   >>> import pingouin as pg
+   >>> df = pg.read_dataset('pairwise_corr').iloc[:30, 1:]
+   >>> df.ptests()
+
+*************
+
 v0.5.2 (June 2022)
 ------------------
 
@@ -34,6 +49,8 @@ h. Add support for `DataMatrix <https://pydatamatrix.eu/>`_ objects. `PR 286 <ht
 **Dependencies**
 
 a. Force scikit-learn<1.1.0 to avoid bug in :py:func:`pingouin.logistic_regression`. `PR 272 <https://github.com/raphaelvallat/pingouin/issues/272>`_.
+
+*************
 
 v0.5.1 (February 2022)
 ----------------------
