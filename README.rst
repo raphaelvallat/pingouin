@@ -329,17 +329,27 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
   Y    Z    pearson   two-sided       30  0.020  [-0.34  0.38]    0.916   0.228    0.051
   ===  ===  ========  =============  ===  =====  =============  =======  ======  =======
 
-10. Convert between effect sizes
-################################
+------------
+
+10.  Pairwise T-test between columns of a dataframe
+###################################################
 
 .. code-block:: python
 
-    # Convert from Cohen's d to Hedges' g
-    pg.convert_effsize(0.4, 'cohen', 'hedges', nx=10, ny=12)
+    data.ptests(paired=True, stars=False)
 
-.. parsed-literal::
+.. table:: Pairwise T-tests, with T-values on the lower triangle and p-values on the upper triangle
+  :widths: auto
 
-    0.384
+  ====  ======  ======  =====
+  ..    X       Y       Z
+  ====  ======  ======  =====
+  X     -       0.226   0.165
+  Y     -1.238  -       0.658
+  Z     -1.424  -0.447  -
+  ====  ======  ======  =====
+
+------------
 
 11. Multiple linear regression
 ##############################
@@ -358,6 +368,8 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
   X           0.143  0.068   2.089   0.046  0.139     0.076       0.003        0.283
   Z          -0.069  0.167  -0.416   0.681  0.139     0.076      -0.412        0.273
   =========  ======  =====  ======  ======  =====  ========  ==========  ===========
+
+------------
 
 12. Mediation analysis
 ######################
@@ -378,6 +390,8 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
   Direct     0.143  0.068   0.046       0.003        0.283  Yes
   Indirect  -0.007  0.025   0.898      -0.069        0.029  No
   ========  ======  =====  ======  ==========  ===========  =====
+
+------------
 
 13. Contingency analysis
 ########################
@@ -435,6 +449,7 @@ The functions that are currently supported as pandas method are:
 * `pingouin.partial_corr <https://pingouin-stats.org/generated/pingouin.partial_corr.html#pingouin.partial_corr>`_
 * `pingouin.pcorr <https://pingouin-stats.org/generated/pingouin.pcorr.html#pingouin.pcorr>`_
 * `pingouin.rcorr <https://pingouin-stats.org/generated/pingouin.rcorr.html#pingouin.rcorr>`_
+* `pingouin.ptests <https://pingouin-stats.org/generated/pingouin.ptests.html#pingouin.ptests>`_
 * `pingouin.mediation_analysis <https://pingouin-stats.org/generated/pingouin.mediation_analysis.html#pingouin.mediation_analysis>`_
 
 Development
