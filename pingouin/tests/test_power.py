@@ -193,7 +193,8 @@ class TestPower(TestCase):
         )
         assert np.isclose(
             power_rm_anova(eta_squared=eta2, m=2, n=100, power=0.95, corr=0.6, alpha=None),
-            0.0001797, rtol=1e-4
+            0.0001797,
+            rtol=1e-4,
         )
 
         # Error
