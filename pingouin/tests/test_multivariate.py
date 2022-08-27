@@ -115,3 +115,11 @@ class TestMultivariate(TestCase):
         data.loc[[1, 3], ["A", "B"]] = np.nan
         stats = box_m(data, dvs=["A", "B"], group="group")
         assert stats.at["box", "df"] == 3
+
+    def test_multivariate_normality_numerical_stability(self):
+        np.random.seed(123)
+        # Test that large datasets do not produce nan
+        n, p = 1000, 100
+        Z = np.random.normal(size=(n, p))
+        hz, pval, normal = multivariate_normality(Z, alpha=0.05)
+        assert np.isfinite(pval)
