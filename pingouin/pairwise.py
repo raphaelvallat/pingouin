@@ -718,7 +718,7 @@ def ptests(
     from numpy import format_float_positional as ffp
     from scipy.stats import ttest_ind, ttest_rel
 
-    assert isinstance(pval_stars, dict), "pval_stars must be a dictionnary."
+    assert isinstance(pval_stars, dict), "pval_stars must be a dictionary."
     assert isinstance(decimals, int), "decimals must be an int."
 
     if paired:
@@ -728,7 +728,7 @@ def ptests(
 
     # Get T-values and p-values
     # We cannot use pandas.DataFrame.corr here because it will incorrectly remove rows missing
-    # values, even when using an independet T-test!
+    # values, even when using an independent T-test!
     cols = self.columns
     combs = list(combinations(cols, 2))
     mat = pd.DataFrame(columns=cols, index=cols, dtype=np.float64)

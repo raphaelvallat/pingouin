@@ -13,7 +13,7 @@ v0.6.0.dev
 
 **New functions**
 
-We have added the :py:func:`pingouin.ptests` function to calculate a T-test (T- and P-values) between all pairs of columns in a given dataframe. This is the T-test equivalent of :py:func:`pingouin.rcorr`. It can only be used as a :py:class:`pandas.DataFrame` method, not as a standalone function. The output is a square dataframe with the T-values on the lower triangle and the p-values on the upper triangle.
+We have added the :py:func:`pingouin.ptests` function to calculate a T-test (T- and p-values) between all pairs of columns in a given dataframe. This is the T-test equivalent of :py:func:`pingouin.rcorr`. It can only be used as a :py:class:`pandas.DataFrame` method, not as a standalone function. The output is a square dataframe with the T-values on the lower triangle and the p-values on the upper triangle.
 
 .. code-block:: python
 
