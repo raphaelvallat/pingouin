@@ -21,6 +21,11 @@ We have added the :py:func:`pingouin.ptests` function to calculate a T-test (T- 
    >>> df = pg.read_dataset('pairwise_corr').iloc[:30, 1:]
    >>> df.ptests()
 
+
+**Dependencies**
+
+a. New requirement for scikit-learn>=1.1.2, which includes bugfix for :py:func:`pingouin.logistic_regression`. `PR 272 <https://github.com/raphaelvallat/pingouin/issues/272>`_.
+
 *************
 
 v0.5.2 (June 2022)
