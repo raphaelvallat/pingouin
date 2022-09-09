@@ -455,7 +455,7 @@ def power_anova(eta_squared=None, k=None, n=None, power=None, alpha=0.05):
     3. Compute required sample size
 
     >>> print('n: %.4f' % power_anova(eta_squared=0.1, k=3, power=0.80))
-    n: 29.9255
+    n: 29.9256
 
     4. Compute achieved effect size
 

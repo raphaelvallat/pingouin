@@ -117,6 +117,7 @@ class TestMultivariate(TestCase):
         assert stats.at["box", "df"] == 3
 
     def test_multivariate_normality_numerical_stability(self):
+        """Test numerical stability of multivariate_normality."""
         np.random.seed(123)
         # Test that large datasets do not produce nan
         n, p = 1000, 100

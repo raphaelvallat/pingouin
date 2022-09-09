@@ -58,7 +58,7 @@ def multivariate_normality(X, alpha=0.05):
     >>> data = pg.read_dataset('multivariate')
     >>> X = data[['Fever', 'Pressure', 'Aches']]
     >>> pg.multivariate_normality(X, alpha=.05)
-    HZResults(hz=0.540086101851555, pval=0.7173686509622385, normal=True)
+    HZResults(hz=0.540086101851555, pval=0.7173686509622386, normal=True)
     """
     from scipy.stats import lognorm
 
