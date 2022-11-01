@@ -436,7 +436,7 @@ def anderson(*args, dist="norm"):
     sig_level = np.zeros(k)
     for j in range(k):
         st, cr, sig = scipy.stats.anderson(args[j], dist=dist)
-        from_dist[j] = True if (st > cr).any() else False
+        from_dist[j] = True if (st < cr).any() else False
         sig_level[j] = sig[np.argmin(np.abs(st - cr))]
 
     if k == 1:
