@@ -898,7 +898,14 @@ def plot_shift(
 
 
 def plot_rm_corr(
-    data=None, x=None, y=None, subject=None, legend=False, kwargs_facetgrid=dict(height=4, aspect=1)
+    data=None,
+    x=None,
+    y=None,
+    subject=None,
+    legend=False,
+    kwargs_facetgrid=dict(height=4, aspect=1),
+    kwargs_line=dict(ls="solid"),
+    kwargs_scatter=dict(marker="o"),
 ):
     """Plot a repeated measures correlation.
 
@@ -914,7 +921,11 @@ def plot_rm_corr(
         If True, add legend to plot. Legend will show all the unique values in
         ``subject``.
     kwargs_facetgrid : dict
-        Optional keyword argument passed to :py:class:`seaborn.FacetGrid`
+        Optional keyword arguments passed to :py:class:`seaborn.FacetGrid`
+    kwargs_line : dict
+        Optional keyword arguments passed to :py:class:`matplotlib.pyplot.plot`
+    kwargs_scatter : dict
+        Optional keyword arguments passed to :py:class:`matplotlib.pyplot.scatter`
 
     Returns
     -------
@@ -1006,8 +1017,8 @@ def plot_rm_corr(
 
     # Start plot
     g = sns.FacetGrid(data, hue=subject, **kwargs_facetgrid)
-    g = g.map(sns.regplot, x, "pred", scatter=False, ci=None, truncate=True)
-    g = g.map(sns.scatterplot, x, y)
+    g = g.map(sns.regplot, x, "pred", scatter=False, ci=None, truncate=True, line_kws=kwargs_line)
+    g = g.map(sns.scatterplot, x, y, **kwargs_scatter)
 
     if legend:
         g.add_legend()

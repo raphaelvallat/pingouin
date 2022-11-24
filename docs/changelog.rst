@@ -21,6 +21,10 @@ We have added the :py:func:`pingouin.ptests` function to calculate a T-test (T- 
    >>> df = pg.read_dataset('pairwise_corr').iloc[:30, 1:]
    >>> df.ptests()
 
+**Improvements**
+
+Added customization options to :py:func:`pingouin.plot_rm_corr`, which now takes optional keyword arguments to pass through to py:func:`seaborn.regplot` and `seaborn.scatterplot`. `PR 312 <https://github.com/raphaelvallat/pingouin/pull/312>`_.
+
 *************
 
 v0.5.2 (June 2022)
