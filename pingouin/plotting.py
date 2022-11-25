@@ -117,6 +117,7 @@ def plot_blandaltman(
         >>> import pingouin as pg
         >>> df = pg.read_dataset("blandaltman")
         >>> ax = pg.plot_blandaltman(df['A'], df['B'])
+        >>> ax.set_aspect("equal")
         >>> plt.tight_layout()
     """
     # Safety check
@@ -1050,15 +1051,18 @@ def plot_circmean(
 
         >>> import pingouin as pg
         >>> ax = pg.plot_circmean([0.05, -0.8, 1.2, 0.8, 0.5, -0.3, 0.3, 0.7])
+        >>> ax.set_aspect("equal")
 
     Changing some aesthetics parameters
 
     .. plot::
 
         >>> import pingouin as pg
+        >>> import matplotlib.pyplot as plt
+        >>> _, ax = plt.subplots(1, 1, figsize=(3, 3))
         >>> ax = pg.plot_circmean([0.05, -0.8, 1.2, 0.8, 0.5, -0.3, 0.3, 0.7],
         ...                       kwargs_markers=dict(color='k', mfc='k'),
-        ...                       kwargs_arrow=dict(ec='k', fc='k'))
+        ...                       kwargs_arrow=dict(ec='k', fc='k'), ax=ax)
 
     .. plot::
 
@@ -1067,6 +1071,7 @@ def plot_circmean(
         >>> sns.set(font_scale=1.5, style='white')
         >>> ax = pg.plot_circmean([0.8, 1.5, 3.14, 5.2, 6.1, 2.8, 2.6, 3.2],
         ...                       kwargs_markers=dict(marker="None"))
+        >>> ax.set_aspect("equal)
     """
     from matplotlib.patches import Circle
     from .circular import circ_r, circ_mean
