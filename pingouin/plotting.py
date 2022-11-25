@@ -369,7 +369,6 @@ def qqplot(x, dist="norm", sparams=(), confidence=0.95, ax=None):
 
     ax.set_xlabel("Theoretical quantiles")
     ax.set_ylabel("Ordered quantiles")
-    ax.set_title("Q-Q Plot")
 
     # Add diagonal line
     end_pts = [ax.get_xlim(), ax.get_ylim()]
