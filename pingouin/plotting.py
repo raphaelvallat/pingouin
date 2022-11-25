@@ -32,8 +32,8 @@ def plot_blandaltman(
     xaxis="mean",
     confidence=0.95,
     annotate=True,
-    scatter_kws=dict(color="tab:blue", alpha=0.8),
     ax=None,
+    **kwargs
 ):
     """
     Generate a Bland-Altman plot to compare two sets of measurements.
@@ -59,11 +59,10 @@ def plot_blandaltman(
     annotate : bool
         If True (default), annotate the values for the mean difference
         and agreement limits.
-    scatter_kws : dict
-        Additional keyword arguments passed to
-        :py:func:`matplotlib.pyplot.scatter`.
     ax : matplotlib axes
         Axis on which to draw the plot.
+    **kwargs : optional
+        Optional argument(s) passed to :py:func:`matplotlib.pyplot.scatter`.
 
     Returns
     -------
@@ -159,6 +158,9 @@ def plot_blandaltman(
     if ax is None:
         ax = plt.gca()
 
+    # Merge default scatter kwargs with any passed in
+    scatter_kws = dict(color="tab:blue", alpha=0.8) | kwargs
+
     # Plot the mean diff, limits of agreement and scatter
     ax.scatter(xval, diff, **scatter_kws)
     ax.axhline(mean_diff, color="k", linestyle="-", lw=2)
@@ -188,8 +190,8 @@ def plot_blandaltman(
         ci["high"] = stats.t.interval(confidence, dof, loc=high, scale=high_low_se)
         ci["low"] = stats.t.interval(confidence, dof, loc=low, scale=high_low_se)
         ax.axhspan(ci["mean"][0], ci["mean"][1], facecolor="tab:grey", alpha=0.2)
-        ax.axhspan(ci["high"][0], ci["high"][1], facecolor="tab:blue", alpha=0.2)
-        ax.axhspan(ci["low"][0], ci["low"][1], facecolor="tab:blue", alpha=0.2)
+        ax.axhspan(ci["high"][0], ci["high"][1], facecolor=scatter_kws["color"], alpha=0.2)
+        ax.axhspan(ci["low"][0], ci["low"][1], facecolor=scatter_kws["color"], alpha=0.2)
 
     # Labels and title
     ax.set_ylabel(f"{xname} - {yname}")
