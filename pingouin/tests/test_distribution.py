@@ -189,6 +189,5 @@ class TestDistribution(TestCase):
 
     def test_anderson(self):
         """Test function test_anderson."""
-        anderson(x)
-        anderson(x, y)
-        anderson(x, dist="expon")
+        assert anderson(np.random.random(size=1000))[0] is False
+        assert anderson(np.random.normal(size=10000))[0] is True
