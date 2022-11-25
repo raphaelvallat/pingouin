@@ -33,8 +33,6 @@ def plot_blandaltman(
     confidence=0.95,
     annotate=True,
     scatter_kws=dict(color="tab:blue", alpha=0.8),
-    figsize=(4.5, 4.5),
-    dpi=100,
     ax=None,
 ):
     """
@@ -64,10 +62,6 @@ def plot_blandaltman(
     scatter_kws : dict
         Additional keyword arguments passed to
         :py:func:`matplotlib.pyplot.scatter`.
-    figsize : tuple
-        Figsize in inches
-    dpi : int
-        Resolution of the figure in dots per inches.
     ax : matplotlib axes
         Axis on which to draw the plot.
 
@@ -162,7 +156,7 @@ def plot_blandaltman(
 
     # Start the plot
     if ax is None:
-        fig, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
+        ax = plt.gca()
 
     # Plot the mean diff, limits of agreement and scatter
     ax.scatter(xval, diff, **scatter_kws)
@@ -226,7 +220,7 @@ def _ppoints(n, a=0.5):
     return (np.arange(n) + 1 - a) / (n + 1 - 2 * a)
 
 
-def qqplot(x, dist="norm", sparams=(), confidence=0.95, figsize=(5, 4), ax=None):
+def qqplot(x, dist="norm", sparams=(), confidence=0.95, ax=None):
     """Quantile-Quantile plot.
 
     Parameters
@@ -242,8 +236,6 @@ def qqplot(x, dist="norm", sparams=(), confidence=0.95, figsize=(5, 4), ax=None)
     confidence : float
         Confidence level (.95 = 95%) for point-wise confidence envelope.
         Can be disabled by passing False.
-    figsize : tuple
-        Figsize in inches
     ax : matplotlib axes
         Axis on which to draw the plot
 
@@ -370,7 +362,7 @@ def qqplot(x, dist="norm", sparams=(), confidence=0.95, figsize=(5, 4), ax=None)
 
     # Start the plot
     if ax is None:
-        fig, ax = plt.subplots(1, 1, figsize=figsize)
+        ax = plt.gca()
 
     ax.plot(theor, observed, "bo")
 
@@ -417,8 +409,6 @@ def plot_paired(
     boxplot=True,
     boxplot_in_front=False,
     orient="v",
-    figsize=(4, 4),
-    dpi=100,
     ax=None,
     colors=["green", "grey", "indianred"],
     pointplot_kwargs={"scale": 0.6, "marker": "."},
@@ -455,10 +445,6 @@ def plot_paired(
         by 90 degrees.
 
         .. versionadded:: 0.3.9
-    figsize : tuple
-        Figsize in inches
-    dpi : int
-        Resolution of the figure in dots per inches.
     ax : matplotlib axes
         Axis on which to draw the plot.
     colors : list of str
@@ -491,8 +477,7 @@ def plot_paired(
         >>> import pingouin as pg
         >>> df = pg.read_dataset('mixed_anova').query("Time != 'January'")
         >>> df = df.query("Group == 'Meditation' and Subject > 40")
-        >>> ax = pg.plot_paired(data=df, dv='Scores', within='Time',
-        ...                     subject='Subject', dpi=150)
+        >>> ax = pg.plot_paired(data=df, dv='Scores', within='Time', subject='Subject')
 
     Paired plot on an existing axis (no boxplot and uniform color):
 
@@ -583,7 +568,7 @@ def plot_paired(
 
     # Start the plot
     if ax is None:
-        fig, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
+        ax = plt.gca()
 
     # Set x and y depending on orientation using the num. replacement within
     _x = "wthn" if orient == "v" else dv
@@ -1028,8 +1013,6 @@ def plot_rm_corr(
 
 def plot_circmean(
     angles,
-    figsize=(4, 4),
-    dpi=None,
     ax=None,
     kwargs_markers=dict(color="tab:blue", marker="o", mfc="none", ms=10),
     kwargs_arrow=dict(width=0.01, head_width=0.1, head_length=0.1, fc="tab:red", ec="tab:red"),
@@ -1043,10 +1026,6 @@ def plot_circmean(
     ----------
     angles : array or list
         Angles (expressed in radians). Only 1D array are supported here.
-    figsize : tuple
-        Figsize in inches. Default is (4, 4).
-    dpi : int
-        Resolution of the figure in dots per inches.
     ax : matplotlib axes
         Axis on which to draw the plot.
     kwargs_markers : dict
@@ -1128,7 +1107,8 @@ def plot_circmean(
     zm = r * np.exp(1j * phi)
 
     # Plot unit circle
-    fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
+    if ax is None:
+        ax = plt.gca()
     circle = Circle((0, 0), 1, edgecolor="k", facecolor="none", linewidth=2)
     ax.add_patch(circle)
     ax.axvline(0, lw=1, ls=":", color="slategrey")
