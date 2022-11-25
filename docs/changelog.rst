@@ -11,6 +11,10 @@ What's new
 v0.6.0.dev
 ----------
 
+**Bugfixes**
+
+- Fixed a bug where the boolean value returned by :py:func:`pingouin.anderson` was inverted. It returned True when the data was NOT coming from the tested distribution, and vice versa. `PR 308 <https://github.com/raphaelvallat/pingouin/pull/308>`_.
+
 **New functions**
 
 We have added the :py:func:`pingouin.ptests` function to calculate a T-test (T- and p-values) between all pairs of columns in a given dataframe. This is the T-test equivalent of :py:func:`pingouin.rcorr`. It can only be used as a :py:class:`pandas.DataFrame` method, not as a standalone function. The output is a square dataframe with the T-values on the lower triangle and the p-values on the upper triangle.
@@ -21,10 +25,13 @@ We have added the :py:func:`pingouin.ptests` function to calculate a T-test (T- 
    >>> df = pg.read_dataset('pairwise_corr').iloc[:30, 1:]
    >>> df.ptests()
 
+**Improvements**
+
+- Added customization options to :py:func:`pingouin.plot_rm_corr`, which now takes optional keyword arguments to pass through to :py:func:`seaborn.regplot` and :py:func:`seaborn.scatterplot`. `PR 312 <https://github.com/raphaelvallat/pingouin/pull/312>`_.
 
 **Dependencies**
 
-a. New requirement for scikit-learn>=1.1.2, which includes bugfix for :py:func:`pingouin.logistic_regression`. `PR 272 <https://github.com/raphaelvallat/pingouin/issues/272>`_.
+- New requirement for scikit-learn>=1.1.2, which includes bugfix for :py:func:`pingouin.logistic_regression`. `PR 272 <https://github.com/raphaelvallat/pingouin/issues/272>`_.
 
 *************
 

@@ -252,6 +252,8 @@ class TestRegression(TestCase):
     def test_logistic_regression(self):
         """Test function logistic_regression."""
         # Simple regression
+        df = read_dataset("mediation")
+        df["Zero"], df["One"] = 0, 1
         lom = logistic_regression(df["X"], df["Ybin"], as_dataframe=False)
         # Compare to R
         # Reproduce in jupyter notebook with rpy2 using
@@ -359,6 +361,8 @@ class TestRegression(TestCase):
 
     def test_mediation_analysis(self):
         """Test function mediation_analysis."""
+        df = read_dataset("mediation")
+        df["Zero"], df["One"] = 0, 1
         ma = mediation_analysis(data=df, x="X", m="M", y="Y", n_boot=500)
 
         # Compare against R package mediation
