@@ -401,35 +401,51 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=0.05, **k
 def anderson(*args, dist="norm"):
     """Anderson-Darling test of distribution.
 
+    The Anderson-Darling test tests the null hypothesis that a sample is drawn from a population
+    that follows a particular distribution. For the Anderson-Darling test, the critical values
+    depend on which distribution is being tested against.
+
+    This function is a wrapper around :py:func:`scipy.stats.anderson`.
+
     Parameters
     ----------
     sample1, sample2,... : array_like
-        Array of sample data. May be different lengths.
+        Array of sample data. They may be of different lengths.
     dist : string
-        Distribution ('norm', 'expon', 'logistic', 'gumbel')
+        The type of distribution to test against. The default is 'norm'.
+        Must be one of 'norm', 'expon', 'logistic', 'gumbel'.
 
     Returns
     -------
     from_dist : boolean
-        True if data comes from this distribution.
+        A boolean indicating if the data comes from the tested distribution (True) or not (False).
     sig_level : float
-        The significance levels for the corresponding critical values in %.
-        (See :py:func:`scipy.stats.anderson` for more details)
+        The significance levels for the corresponding critical values, in %.
+        See :py:func:`scipy.stats.anderson` for more details.
 
     Examples
     --------
     1. Test that an array comes from a normal distribution
 
     >>> from pingouin import anderson
-    >>> x = [2.3, 5.1, 4.3, 2.6, 7.8, 9.2, 1.4]
-    >>> anderson(x, dist='norm')
-    (False, 15.0)
+    >>> import numpy as np
+    >>> np.random.seed(42)
+    >>> x = np.random.normal(size=100)
+    >>> y = np.random.normal(size=10000)
+    >>> z = np.random.random(1000)
+    >>> anderson(x)
+    (True, 15.0)
 
-    2. Test that two arrays comes from an exponential distribution
+    2. Test that multiple arrays comes from the normal distribution
 
-    >>> y = [2.8, 12.4, 28.3, 3.2, 16.3, 14.2]
-    >>> anderson(x, y, dist='expon')
-    (array([False, False]), array([15., 15.]))
+    >>> anderson(x, y, z)
+    (array([ True,  True, False]), array([15., 15.,  1.]))
+
+    3. Test that an array comes from the exponential distribution
+
+    >>> x = np.random.exponential(size=1000)
+    >>> anderson(x, dist="expon")
+    (True, 15.0)
     """
     k = len(args)
     from_dist = np.zeros(k, "bool")

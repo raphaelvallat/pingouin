@@ -27,7 +27,7 @@ We have added the :py:func:`pingouin.ptests` function to calculate a T-test (T- 
 
 **Improvements**
 
-- Added customization options to :py:func:`pingouin.plot_rm_corr`, which now takes optional keyword arguments to pass through to py:func:`seaborn.regplot` and `seaborn.scatterplot`. `PR 312 <https://github.com/raphaelvallat/pingouin/pull/312>`_.
+- Added customization options to :py:func:`pingouin.plot_rm_corr`, which now takes optional keyword arguments to pass through to :py:func:`seaborn.regplot` and :py:func:`seaborn.scatterplot`. `PR 312 <https://github.com/raphaelvallat/pingouin/pull/312>`_.
 
 *************
 
