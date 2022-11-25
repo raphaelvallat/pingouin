@@ -223,7 +223,7 @@ def _ppoints(n, a=0.5):
     return (np.arange(n) + 1 - a) / (n + 1 - 2 * a)
 
 
-def qqplot(x, dist="norm", sparams=(), confidence=0.95, ax=None):
+def qqplot(x, dist="norm", sparams=(), confidence=0.95, ax=None, **kwargs):
     """Quantile-Quantile plot.
 
     Parameters
@@ -241,6 +241,8 @@ def qqplot(x, dist="norm", sparams=(), confidence=0.95, ax=None):
         Can be disabled by passing False.
     ax : matplotlib axes
         Axis on which to draw the plot
+    **kwargs : optional
+        Optional argument(s) passed to :py:func:`matplotlib.pyplot.scatter`.
 
     Returns
     -------
@@ -367,7 +369,8 @@ def qqplot(x, dist="norm", sparams=(), confidence=0.95, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    ax.plot(theor, observed, "bo")
+    scatter_kws = dict(marker="o", color="blue") | kwargs
+    ax.scatter(theor, observed, **scatter_kws)
 
     ax.set_xlabel("Theoretical quantiles")
     ax.set_ylabel("Ordered quantiles")
