@@ -116,7 +116,6 @@ def plot_blandaltman(
         >>> import pingouin as pg
         >>> df = pg.read_dataset("blandaltman")
         >>> ax = pg.plot_blandaltman(df['A'], df['B'])
-        >>> ax.set_aspect("equal")
         >>> plt.tight_layout()
     """
     # Safety check
@@ -193,7 +192,7 @@ def plot_blandaltman(
         ax.axhspan(ci["high"][0], ci["high"][1], facecolor=scatter_kws["color"], alpha=0.2)
         ax.axhspan(ci["low"][0], ci["low"][1], facecolor=scatter_kws["color"], alpha=0.2)
 
-    # Labels and title
+    # Labels
     ax.set_ylabel(f"{xname} - {yname}")
     ax.set_xlabel(xlabel)
     sns.despine(ax=ax)
@@ -223,7 +222,7 @@ def _ppoints(n, a=0.5):
     return (np.arange(n) + 1 - a) / (n + 1 - 2 * a)
 
 
-def qqplot(x, dist="norm", sparams=(), confidence=0.95, ax=None, **kwargs):
+def qqplot(x, dist="norm", sparams=(), confidence=0.95, square=True, ax=None, **kwargs):
     """Quantile-Quantile plot.
 
     Parameters
@@ -239,6 +238,8 @@ def qqplot(x, dist="norm", sparams=(), confidence=0.95, ax=None, **kwargs):
     confidence : float
         Confidence level (.95 = 95%) for point-wise confidence envelope.
         Can be disabled by passing False.
+    square: bool
+        If True (default), ensure equal aspect ratio between X and Y axes.
     ax : matplotlib axes
         Axis on which to draw the plot
     **kwargs : optional
@@ -401,6 +402,10 @@ def qqplot(x, dist="norm", sparams=(), confidence=0.95, ax=None, **kwargs):
         lower = fit_val - crit * se
         ax.plot(theor, upper, "r--", lw=1.25)
         ax.plot(theor, lower, "r--", lw=1.25)
+
+    # Make square
+    if square:
+        ax.set_aspect("equal")
 
     return ax
 
@@ -1018,6 +1023,7 @@ def plot_rm_corr(
 
 def plot_circmean(
     angles,
+    square=True,
     ax=None,
     kwargs_markers=dict(color="tab:blue", marker="o", mfc="none", ms=10),
     kwargs_arrow=dict(width=0.01, head_width=0.1, head_length=0.1, fc="tab:red", ec="tab:red"),
@@ -1031,6 +1037,8 @@ def plot_circmean(
     ----------
     angles : array or list
         Angles (expressed in radians). Only 1D array are supported here.
+    square: bool
+        If True (default), ensure equal aspect ratio between X and Y axes.
     ax : matplotlib axes
         Axis on which to draw the plot.
     kwargs_markers : dict
@@ -1055,7 +1063,6 @@ def plot_circmean(
 
         >>> import pingouin as pg
         >>> ax = pg.plot_circmean([0.05, -0.8, 1.2, 0.8, 0.5, -0.3, 0.3, 0.7])
-        >>> ax.set_aspect("equal")
 
     Changing some aesthetics parameters
 
@@ -1075,7 +1082,6 @@ def plot_circmean(
         >>> sns.set(font_scale=1.5, style='white')
         >>> ax = pg.plot_circmean([0.8, 1.5, 3.14, 5.2, 6.1, 2.8, 2.6, 3.2],
         ...                       kwargs_markers=dict(marker="None"))
-        >>> ax.set_aspect("equal)
     """
     from matplotlib.patches import Circle
     from .circular import circ_r, circ_mean
@@ -1138,4 +1144,8 @@ def plot_circmean(
     ax.text(-1.3, 0, r"$\pi$", verticalalignment="center")
     ax.text(0, 1.2, r"$+\pi/2$", horizontalalignment="center")
     ax.text(0, -1.3, r"$-\pi/2$", horizontalalignment="center")
+
+    # Make square
+    if square:
+        ax.set_aspect("equal")
     return ax
