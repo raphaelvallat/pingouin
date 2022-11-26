@@ -34,7 +34,7 @@ class TestPlotting(TestCase):
         assert isinstance(ax, matplotlib.axes.Axes)
         _, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4))
         plot_blandaltman(x, y, agreement=2, confidence=None, ax=ax1)
-        plot_blandaltman(x, y, agreement=2, confidence=0.68, dpi=200, ax=ax2)
+        plot_blandaltman(x, y, agreement=2, confidence=0.68, ax=ax2)
         plt.close("all")
         # With Pingouin's dataset
         df_ba = read_dataset("blandaltman")
@@ -42,7 +42,7 @@ class TestPlotting(TestCase):
         plot_blandaltman(x, y)
         plot_blandaltman(x, y, annotate=False)
         plot_blandaltman(x, y, xaxis="x", confidence=None)
-        plot_blandaltman(x, y, xaxis="y")
+        plot_blandaltman(x, y, xaxis="y", color="green", s=10)
         plt.close("all")
 
     def test_ppoints(self):
@@ -78,7 +78,7 @@ class TestPlotting(TestCase):
         ax = qqplot(x, dist="norm")
         assert isinstance(ax, matplotlib.axes.Axes)
         _, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4))
-        qqplot(x_exp, dist="expon", ax=ax2)
+        qqplot(x_exp, dist="expon", ax=ax2, color="black", marker="+")
         mean, std = 0, 0.8
         qqplot(x, dist=stats.norm, sparams=(mean, std), confidence=False)
         # For lognormal distribution, the shape parameter must be specified
@@ -164,6 +164,6 @@ class TestPlotting(TestCase):
         angles = np.array([0.02, 0.07, -0.12, 0.14, 1.2, -1.3])
         ax = plot_circmean(angles)
         assert isinstance(ax, matplotlib.axes.Axes)
-        ax = plot_circmean(angles, figsize=(5, 5), dpi=100, kwargs_markers={}, kwargs_arrow={})
+        ax = plot_circmean(angles, kwargs_markers={}, kwargs_arrow={})
         assert isinstance(ax, matplotlib.axes.Axes)
         plt.close("all")
