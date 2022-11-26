@@ -123,6 +123,10 @@ def plot_blandaltman(
     assert not np.isnan(x).any(), "Missing values in x or y are not supported."
     assert not np.isnan(y).any(), "Missing values in x or y are not supported."
 
+    # Update default kwargs with specified inputs
+    _scatter_kwargs = {"color": "tab:blue", "alpha": 0.8}
+    _scatter_kwargs.update(kwargs)
+
     # Calculate mean, STD and SEM of x - y
     n = x.size
     dof = n - 1
@@ -150,13 +154,8 @@ def plot_blandaltman(
     if ax is None:
         ax = plt.gca()
 
-    # Merge default scatter kwargs with any passed in
-    scatter_kws = dict(color="tab:blue", alpha=0.8)
-    if kwargs:
-        scatter_kws.update(kwargs)
-
     # Plot the mean diff, limits of agreement and scatter
-    ax.scatter(xval, diff, **scatter_kws)
+    ax.scatter(xval, diff, **_scatter_kwargs)
     ax.axhline(mean_diff, color="k", linestyle="-", lw=2)
     ax.axhline(high, color="k", linestyle=":", lw=1.5)
     ax.axhline(low, color="k", linestyle=":", lw=1.5)
@@ -184,8 +183,8 @@ def plot_blandaltman(
         ci["high"] = stats.t.interval(confidence, dof, loc=high, scale=high_low_se)
         ci["low"] = stats.t.interval(confidence, dof, loc=low, scale=high_low_se)
         ax.axhspan(ci["mean"][0], ci["mean"][1], facecolor="tab:grey", alpha=0.2)
-        ax.axhspan(ci["high"][0], ci["high"][1], facecolor=scatter_kws["color"], alpha=0.2)
-        ax.axhspan(ci["low"][0], ci["low"][1], facecolor=scatter_kws["color"], alpha=0.2)
+        ax.axhspan(ci["high"][0], ci["high"][1], facecolor=_scatter_kwargs["color"], alpha=0.2)
+        ax.axhspan(ci["low"][0], ci["low"][1], facecolor=_scatter_kwargs["color"], alpha=0.2)
 
     # Labels
     ax.set_ylabel(f"{xname} - {yname}")
@@ -329,6 +328,10 @@ def qqplot(x, dist="norm", sparams=(), confidence=0.95, square=True, ax=None, **
         >>> sns.set_style('darkgrid')
         >>> ax = pg.qqplot(x, dist='norm', sparams=(mean, std))
     """
+    # Update default kwargs with specified inputs
+    _scatter_kwargs = {"marker": "o", "color": "blue"}
+    _scatter_kwargs.update(kwargs)
+
     if isinstance(dist, str):
         dist = getattr(stats, dist)
 
@@ -365,11 +368,7 @@ def qqplot(x, dist="norm", sparams=(), confidence=0.95, square=True, ax=None, **
     if ax is None:
         ax = plt.gca()
 
-    scatter_kws = dict(marker="o", color="blue")
-    if kwargs:
-        scatter_kws.update(kwargs)
-
-    ax.scatter(theor, observed, **scatter_kws)
+    ax.scatter(theor, observed, **_scatter_kwargs)
 
     ax.set_xlabel("Theoretical quantiles")
     ax.set_ylabel("Ordered quantiles")
