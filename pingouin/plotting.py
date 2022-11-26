@@ -26,14 +26,7 @@ __all__ = [
 
 
 def plot_blandaltman(
-    x,
-    y,
-    agreement=1.96,
-    xaxis="mean",
-    confidence=0.95,
-    annotate=True,
-    ax=None,
-    **kwargs
+    x, y, agreement=1.96, xaxis="mean", confidence=0.95, annotate=True, ax=None, **kwargs
 ):
     """
     Generate a Bland-Altman plot to compare two sets of measurements.
