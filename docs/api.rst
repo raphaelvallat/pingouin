@@ -24,6 +24,7 @@ ANOVA and T-test
     welch_anova
     tost
     ttest
+    ptests
 
 Bayesian
 --------
@@ -125,6 +126,7 @@ Multiple comparisons and post-hoc tests
     pairwise_tests
     pairwise_tukey
     pairwise_gameshowell
+    ptests
     multicomp
 
 Multivariate tests
