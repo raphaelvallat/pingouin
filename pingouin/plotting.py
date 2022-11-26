@@ -151,7 +151,9 @@ def plot_blandaltman(
         ax = plt.gca()
 
     # Merge default scatter kwargs with any passed in
-    scatter_kws = dict(color="tab:blue", alpha=0.8) | kwargs
+    scatter_kws = dict(color="tab:blue", alpha=0.8)
+    if kwargs:
+        scatter_kws.update(kwargs)
 
     # Plot the mean diff, limits of agreement and scatter
     ax.scatter(xval, diff, **scatter_kws)
@@ -363,7 +365,10 @@ def qqplot(x, dist="norm", sparams=(), confidence=0.95, square=True, ax=None, **
     if ax is None:
         ax = plt.gca()
 
-    scatter_kws = dict(marker="o", color="blue") | kwargs
+    scatter_kws = dict(marker="o", color="blue")
+    if kwargs:
+        scatter_kws.update(kwargs)
+
     ax.scatter(theor, observed, **scatter_kws)
 
     ax.set_xlabel("Theoretical quantiles")
