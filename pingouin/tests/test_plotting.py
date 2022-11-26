@@ -42,7 +42,7 @@ class TestPlotting(TestCase):
         plot_blandaltman(x, y)
         plot_blandaltman(x, y, annotate=False)
         plot_blandaltman(x, y, xaxis="x", confidence=None)
-        plot_blandaltman(x, y, xaxis="y")
+        plot_blandaltman(x, y, xaxis="y", color="green", s=10)
         plt.close("all")
 
     def test_ppoints(self):
@@ -78,7 +78,7 @@ class TestPlotting(TestCase):
         ax = qqplot(x, dist="norm")
         assert isinstance(ax, matplotlib.axes.Axes)
         _, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4))
-        qqplot(x_exp, dist="expon", ax=ax2)
+        qqplot(x_exp, dist="expon", ax=ax2, color="black", marker="+")
         mean, std = 0, 0.8
         qqplot(x, dist=stats.norm, sparams=(mean, std), confidence=False)
         # For lognormal distribution, the shape parameter must be specified
