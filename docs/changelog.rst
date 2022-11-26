@@ -28,6 +28,7 @@ We have added the :py:func:`pingouin.ptests` function to calculate a T-test (T- 
 **Improvements**
 
 - Added customization options to :py:func:`pingouin.plot_rm_corr`, which now takes optional keyword arguments to pass through to :py:func:`seaborn.regplot` and :py:func:`seaborn.scatterplot`. `PR 312 <https://github.com/raphaelvallat/pingouin/pull/312>`_.
+- Changed some :py:module:`pingouin.plotting` functions to increase compatibility with :py:method:`seaborn.FacetGrid.map`. As explained in `issue 306 <https://github.com/raphaelvallat/pingouin/issues/306>`_, the major change is to generate :py:class:`matplotlib.axes` using default parameters instead of accepting ``fig`` and ``dpi`` keyword arguments. This change applies to :py:func:`pingouin.plot_blandaltman`, :py:func:`pingouin.plot_paired`, :py:func:`pingouin.plot_circmean`, and :py:func:`pingouin.qqplot`. In the future, open a :py:class:`matplotlib.axes` and pass it through using the ``ax`` parameter to use custom figure settings with these functions. Other minor changes include the addition of the ``square`` keyword argument to :py:func`pingouin.plot_circmean` and :py:func`pingouin.qqplot` to ensure equal aspect ratios, and the removal of ``scatter_kws`` as a keyword argument in :py:func:`pingouin.plot_blandaltmann` (now alter the scatter parameters using general ``**kwargs``). `PR 314 <https://github.com/raphaelvallat/pingouin/pull/314>`_.
 
 *************
 
