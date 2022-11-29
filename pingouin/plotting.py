@@ -657,25 +657,27 @@ def plot_paired(
 
 
 def plot_shift(
-    x,
-    y,
-    paired=False,
-    n_boot=1000,
-    percentiles=np.arange(10, 100, 10),
-    confidence=0.95,
-    seed=None,
-    show_median=True,
-    violin=True,
+                x,
+                y,
+                paired=False,
+                n_boot=1000,
+                percentiles=np.arange(10, 100, 10),
+                confidence=0.95,
+                seed=None,
+                show_median=True,
+                violin=True,
+                title="Plot Shift",
+                x_label="X",
+                y_label="Y"
+                
 ):
     """Shift plot.
-
     Parameters
     ----------
     x, y : array_like
         First and second set of observations.
     paired : bool
         Specify whether ``x`` and ``y`` are related (i.e. repeated measures) or independent.
-
         .. versionadded:: 0.3.0
     n_boot : int
         Number of bootstrap iterations. The higher, the better, the slower.
@@ -690,48 +692,46 @@ def plot_shift(
         If True (default), show the median with black lines.
     violin: boolean
         If True (default), plot the density of X and Y distributions. Defaut set to True.
-
+    title: str
+        Define which title should be used for all plot. 
+            Default set "Plot Shift"
+    x_label: str
+        Define which label should be used for X array. 
+            Default set "X"
+    y_label: str
+        Define which label should be used for Y array.  
+            Default set "Y"        
     Returns
     -------
     fig : matplotlib Figure instance
         Matplotlib Figure. To get the individual axes, use fig.axes.
-
     See also
     --------
     harrelldavis
-
     Notes
     -----
     The shift plot is described in [1]_. It computes a shift function [2]_ for two (in)dependent
     groups using the robust Harrell-Davis quantile estimator in conjunction with bias-corrected
     bootstrap confidence intervals.
-
     References
     ----------
     .. [1] Rousselet, G. A., Pernet, C. R. and Wilcox, R. R. (2017). Beyond
            differences in means: robust graphical methods to compare two groups
            in neuroscience. Eur J Neurosci, 46: 1738-1748.
            doi:10.1111/ejn.13610
-
     .. [2] https://garstats.wordpress.com/2016/07/12/shift-function/
-
     Examples
     --------
     Default shift plot
-
     .. plot::
-
         >>> import numpy as np
         >>> import pingouin as pg
         >>> np.random.seed(42)
         >>> x = np.random.normal(5.5, 2, 50)
         >>> y = np.random.normal(6, 1.5, 50)
         >>> fig = pg.plot_shift(x, y)
-
     With different options
-
     .. plot::
-
         >>> import numpy as np
         >>> import pingouin as pg
         >>> np.random.seed(42)
@@ -742,6 +742,7 @@ def plot_shift(
     """
     from pingouin.regression import _bias_corrected_ci
     from pingouin.nonparametric import harrelldavis as hd
+    import matplotlib.patches as mpatches
 
     # Safety check
     x = np.asarray(x)
@@ -755,6 +756,7 @@ def plot_shift(
     assert nx >= 10, "x must have at least 10 samples."
     assert ny >= 10, "y must have at least 10 samples."
     assert 0 < confidence < 1, "confidence must be between 0 and 1."
+
     if paired:
         assert nx == ny, "x and y must have the same size when paired=True."
 
@@ -765,6 +767,7 @@ def plot_shift(
 
     # Compute bootstrap distribution of differences
     rng = np.random.RandomState(seed)
+    
     if paired:
         bootsam = rng.choice(np.arange(nx), size=(nx, n_boot), replace=True)
         bootstat = hd(y[bootsam], percentiles, axis=0) - hd(x[bootsam], percentiles, axis=0)
@@ -812,13 +815,16 @@ def plot_shift(
         ax1.hlines(pos, whiskers[0], whiskers[1], color="k", linestyle="-", lw=2, zorder=9)
 
     ax1 = sns.stripplot(
-        data=data,
-        x="value",
-        y="variable",
-        orient="h",
-        order=["Y", "X"],
-        palette=["#88bedc", "#cfcfcf"],
-    )
+                        data=data,
+                        x="value",
+                        y="variable",
+                        orient="h",
+                        order=["Y", "X"],
+                        palette=["#88bedc", "#cfcfcf"]
+                       )
+
+
+
 
     if violin:
         vl = plt.violinplot([y, x], showextrema=False, vert=False, widths=1)
@@ -838,8 +844,6 @@ def plot_shift(
         vl["bodies"][1].set_edgecolor("k")
         vl["bodies"][1].set_facecolor("#cfcfcf")
         vl["bodies"][1].set_alpha(0.8)
-
-        # Rescale ylim
         ax1.set_ylim(2, -1)
 
     for i in range(len(percentiles)):
@@ -864,7 +868,44 @@ def plot_shift(
     plt.xlabel("Scores (a.u.)", size=15)
     ax1.set_yticklabels(["Y", "X"], size=15)
     ax1.set_ylabel("")
+    #######################
+    # Main title
+    #######################
+    ax1.set_title(title,color="#616161")
+    #######################
+    # Entitled for labels
+    #######################
+    #x_patch = mpatches.Patch(color='#88bedc', label=x_label)
+    #y_patch = mpatches.Patch(color='#cfcfcf', label=y_label)
+    colors = ["#88bedc", "#cfcfcf"]
+    
+    texts = [y_label,x_label]
+    
+    from matplotlib.legend_handler import HandlerPatch
+    class HandlerEllipse(HandlerPatch):
+        def create_artists(self, legend, orig_handle,
+                        xdescent, ydescent, width, height, fontsize, trans):
+            center = 0.5 * width - 0.5 * xdescent, 0.5 * height - 0.5 * ydescent
+            p = mpatches.Ellipse(xy=center,
+                                 width=height + xdescent,
+                                 height=height + ydescent)
+                                 
+            self.update_prop(p, orig_handle, legend)
+            p.set_transform(trans)
+            return [p]
 
+
+    c = [mpatches.Circle((0.1, 0.1), radius = 0.25, facecolor=colors[i], edgecolor="none" ) for i in range(len(texts))]
+
+    plt.legend(c,
+               texts,
+               bbox_to_anchor=(1, 0.2), 
+               loc='best', 
+               ncol=1,
+               prop = {'size' : 8},
+               handler_map={mpatches.Circle: HandlerEllipse()}).get_frame()
+   
+    #plt.legend(handles=[x_patch,y_patch],loc="best")
     #######################
     # Plots quantiles shift
     #######################
@@ -884,9 +925,13 @@ def plot_shift(
     ax2.set_xlabel("X quantiles", size=15)
     ax2.set_ylabel("Y - X quantiles \n differences (a.u.)", size=10)
     sns.despine()
+    
     plt.tight_layout()
 
+   
+
     return fig
+
 
 
 def plot_rm_corr(
