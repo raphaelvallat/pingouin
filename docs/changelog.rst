@@ -29,10 +29,6 @@ We have added the :py:func:`pingouin.ptests` function to calculate a T-test (T- 
 
 - Added customization options to :py:func:`pingouin.plot_rm_corr`, which now takes optional keyword arguments to pass through to :py:func:`seaborn.regplot` and :py:func:`seaborn.scatterplot`. `PR 312 <https://github.com/raphaelvallat/pingouin/pull/312>`_.
 
-**Dependencies**
-
-- New requirement for scikit-learn>=1.1.2, which includes bugfix for :py:func:`pingouin.logistic_regression`. `PR 272 <https://github.com/raphaelvallat/pingouin/issues/272>`_.
-
 *************
 
 v0.5.2 (June 2022)
