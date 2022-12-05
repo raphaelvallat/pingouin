@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.compute_effsize &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-compute-effsize">
+<h1>pingouin.compute_effsize<a class="headerlink" href="#pingouin-compute-effsize" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.compute_effsize">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">compute_effsize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">paired</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eftype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cohen'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.compute_effsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate effect size between two set of observations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">np.array or list</span></dt><dd><p>First set of observations.</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">np.array or list</span></dt><dd><p>Second set of observations.</p>
+</dd>
+<dt><strong>paired</strong><span class="classifier">boolean</span></dt><dd><p>If True, uses Cohen d-avg formula to correct for repeated measurements
+(see Notes).</p>
+</dd>
+<dt><strong>eftype</strong><span class="classifier">string</span></dt><dd><p>Desired output effect size.
+Available methods are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'none'</span></code>: no effect size</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'cohen'</span></code>: Unbiased Cohen d</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'hedges'</span></code>: Hedges g</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'r'</span></code>: correlation coefficient</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'eta-square'</span></code>: Eta-square</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'odds-ratio'</span></code>: Odds ratio</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'AUC'</span></code>: Area Under the Curve</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'CLES'</span></code>: Common Language Effect Size</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>ef</strong><span class="classifier">float</span></dt><dd><p>Effect size</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.convert_effsize.html#pingouin.convert_effsize" title="pingouin.convert_effsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_effsize</span></code></a></dt><dd><p>Conversion between effect sizes.</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.compute_effsize_from_t.html#pingouin.compute_effsize_from_t" title="pingouin.compute_effsize_from_t"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_effsize_from_t</span></code></a></dt><dd><p>Convert a T-statistic to an effect size.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>Missing values are automatically removed from the data. If <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>
+are paired, the entire row is removed.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> are independent, the Cohen <span class="math notranslate nohighlight">\(d\)</span> is:</p>
+<div class="math notranslate nohighlight">
+\[d = \frac{\overline{X} - \overline{Y}}
+{\sqrt{\frac{(n_{1} - 1)\sigma_{1}^{2} + (n_{2} - 1)
+\sigma_{2}^{2}}{n1 + n2 - 2}}}\]</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> are paired, the Cohen <span class="math notranslate nohighlight">\(d_{avg}\)</span> is computed:</p>
+<div class="math notranslate nohighlight">
+\[d_{avg} = \frac{\overline{X} - \overline{Y}}
+{\sqrt{\frac{(\sigma_1^2 + \sigma_2^2)}{2}}}\]</div>
+<p>The Cohen’s d is a biased estimate of the population effect size,
+especially for small samples (n &lt; 20). It is often preferable
+to use the corrected Hedges <span class="math notranslate nohighlight">\(g\)</span> instead:</p>
+<div class="math notranslate nohighlight">
+\[g = d \times (1 - \frac{3}{4(n_1 + n_2) - 9})\]</div>
+<p>The common language effect size is the proportion of pairs where <code class="docutils literal notranslate"><span class="pre">x</span></code> is
+higher than <code class="docutils literal notranslate"><span class="pre">y</span></code> (calculated with a brute-force approach where
+each observation of <code class="docutils literal notranslate"><span class="pre">x</span></code> is paired to each observation of <code class="docutils literal notranslate"><span class="pre">y</span></code>,
+see <a class="reference internal" href="pingouin.wilcoxon.html#pingouin.wilcoxon" title="pingouin.wilcoxon"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.wilcoxon()</span></code></a> for more details):</p>
+<div class="math notranslate nohighlight">
+\[\text{CL} = P(X &gt; Y) + .5 \times P(X = Y)\]</div>
+<p>For other effect sizes, Pingouin will first calculate a Cohen <span class="math notranslate nohighlight">\(d\)</span> and
+then use the <a class="reference internal" href="pingouin.convert_effsize.html#pingouin.convert_effsize" title="pingouin.convert_effsize"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.convert_effsize()</span></code></a> to convert to the desired
+effect size.</p>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>Lakens, D., 2013. Calculating and reporting effect sizes to
+facilitate cumulative science: a practical primer for t-tests and
+ANOVAs. Front. Psychol. 4, 863. <a class="reference external" href="https://doi.org/10.3389/fpsyg.2013.00863">https://doi.org/10.3389/fpsyg.2013.00863</a></p></li>
+<li><p>Cumming, Geoff. Understanding the new statistics: Effect sizes,
+confidence intervals, and meta-analysis. Routledge, 2013.</p></li>
+<li><p><a class="reference external" href="https://osf.io/vbdah/">https://osf.io/vbdah/</a></p></li>
+</ul>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>Cohen d from two independent samples.</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">)</span>
+<span class="go">-1.707825127659933</span>
+</pre></div>
+</div>
+<p>The sign of the Cohen d will be opposite if we reverse the order of
+<code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">compute_effsize</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">)</span>
+<span class="go">1.707825127659933</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Hedges g from two paired samples.</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">)</span>
+<span class="go">-0.8222477210374874</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Common Language Effect Size.</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cles&#39;</span><span class="p">)</span>
+<span class="go">0.2857142857142857</span>
+</pre></div>
+</div>
+<p>In other words, there are ~29% of pairs where <code class="docutils literal notranslate"><span class="pre">x</span></code> is higher than <code class="docutils literal notranslate"><span class="pre">y</span></code>,
+which means that there are ~71% of pairs where <code class="docutils literal notranslate"><span class="pre">x</span></code> is <em>lower</em> than <code class="docutils literal notranslate"><span class="pre">y</span></code>.
+This can be easily verified by changing the order of <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">compute_effsize</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cles&#39;</span><span class="p">)</span>
+<span class="go">0.7142857142857143</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

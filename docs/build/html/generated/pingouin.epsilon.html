@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.epsilon &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-epsilon">
+<h1>pingouin.epsilon<a class="headerlink" href="#pingouin-epsilon" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.epsilon">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">epsilon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">within</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gg'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.epsilon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Epsilon adjustement factor for repeated measures.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>DataFrame containing the repeated measurements.
+Both wide and long-format dataframe are supported for this function.
+To test for an interaction term between two repeated measures factors
+with a wide-format dataframe, <code class="docutils literal notranslate"><span class="pre">data</span></code> must have a two-levels
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.MultiIndex.html#pandas.MultiIndex" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.MultiIndex</span></code></a> columns.</p>
+</dd>
+<dt><strong>dv</strong><span class="classifier">string</span></dt><dd><p>Name of column containing the dependent variable (only required if
+<code class="docutils literal notranslate"><span class="pre">data</span></code> is in long format).</p>
+</dd>
+<dt><strong>within</strong><span class="classifier">string</span></dt><dd><p>Name of column containing the within factor (only required if <code class="docutils literal notranslate"><span class="pre">data</span></code>
+is in long format).
+If <code class="docutils literal notranslate"><span class="pre">within</span></code> is a list with two strings, this function computes
+the epsilon factor for the interaction between the two within-subject
+factor.</p>
+</dd>
+<dt><strong>subject</strong><span class="classifier">string</span></dt><dd><p>Name of column containing the subject identifier (only required if
+<code class="docutils literal notranslate"><span class="pre">data</span></code> is in long format).</p>
+</dd>
+<dt><strong>correction</strong><span class="classifier">string</span></dt><dd><p>Specify the epsilon version:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'gg'</span></code>: Greenhouse-Geisser</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'hf'</span></code>: Huynh-Feldt</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'lb'</span></code>: Lower bound</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>eps</strong><span class="classifier">float</span></dt><dd><p>Epsilon adjustement factor.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.sphericity.html#pingouin.sphericity" title="pingouin.sphericity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sphericity</span></code></a></dt><dd><p>Mauchly and JNS test for sphericity.</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.homoscedasticity.html#pingouin.homoscedasticity" title="pingouin.homoscedasticity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">homoscedasticity</span></code></a></dt><dd><p>Test equality of variance.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>The lower bound epsilon is:</p>
+<div class="math notranslate nohighlight">
+\[lb = \frac{1}{\text{dof}},\]</div>
+<p>where the degrees of freedom <span class="math notranslate nohighlight">\(\text{dof}\)</span> is the number of groups
+<span class="math notranslate nohighlight">\(k\)</span> minus 1 for one-way design and <span class="math notranslate nohighlight">\((k_1 - 1)(k_2 - 1)\)</span>
+for two-way design</p>
+<p>The Greenhouse-Geisser epsilon is given by:</p>
+<div class="math notranslate nohighlight">
+\[\epsilon_{GG} = \frac{k^2(\overline{\text{diag}(S)} -
+\overline{S})^2}{(k-1)(\sum_{i=1}^{k}\sum_{j=1}^{k}s_{ij}^2 -
+2k\sum_{j=1}^{k}\overline{s_i}^2 + k^2\overline{S}^2)}\]</div>
+<p>where <span class="math notranslate nohighlight">\(S\)</span> is the covariance matrix, <span class="math notranslate nohighlight">\(\overline{S}\)</span> the
+grandmean of S and <span class="math notranslate nohighlight">\(\overline{\text{diag}(S)}\)</span> the mean of all the
+elements on the diagonal of S (i.e. mean of the variances).</p>
+<p>The Huynh-Feldt epsilon is given by:</p>
+<div class="math notranslate nohighlight">
+\[\epsilon_{HF} = \frac{n(k-1)\epsilon_{GG}-2}{(k-1)
+(n-1-(k-1)\epsilon_{GG})}\]</div>
+<p>where <span class="math notranslate nohighlight">\(n\)</span> is the number of observations.</p>
+<p>Missing values are automatically removed from data (listwise deletion).</p>
+<p class="rubric">Examples</p>
+<p>Using a wide-format dataframe</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.1</span><span class="p">,</span> <span class="mf">4.3</span><span class="p">,</span> <span class="mf">4.1</span><span class="p">,</span> <span class="mf">7.2</span><span class="p">],</span>
+<span class="gp">... </span>                     <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mf">4.1</span><span class="p">,</span> <span class="mf">5.2</span><span class="p">,</span> <span class="mf">6.4</span><span class="p">],</span>
+<span class="gp">... </span>                     <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">8.2</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">,</span> <span class="mf">6.2</span><span class="p">,</span> <span class="mf">7.2</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gg</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">epsilon</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;gg&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hf</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">epsilon</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;hf&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lb</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">epsilon</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;lb&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2"> </span><span class="si">%.2f</span><span class="s2"> </span><span class="si">%.2f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">gg</span><span class="p">,</span> <span class="n">hf</span><span class="p">))</span>
+<span class="go">0.50 0.56 0.62</span>
+</pre></div>
+</div>
+<p>Now using a long-format dataframe</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;rm_anova2&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="go">   Subject Time   Metric  Performance</span>
+<span class="go">0        1  Pre  Product           13</span>
+<span class="go">1        2  Pre  Product           12</span>
+<span class="go">2        3  Pre  Product           17</span>
+<span class="go">3        4  Pre  Product           12</span>
+<span class="go">4        5  Pre  Product           19</span>
+</pre></div>
+</div>
+<p>Let’s first calculate the epsilon of the <em>Time</em> within-subject factor</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">epsilon</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Performance&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span>
+<span class="gp">... </span>           <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">)</span>
+<span class="go">1.0</span>
+</pre></div>
+</div>
+<p>Since <em>Time</em> has only two levels (Pre and Post), the sphericity assumption
+is necessarily met, and therefore the epsilon adjustement factor is 1.</p>
+<p>The <em>Metric</em> factor, however, has three levels:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">epsilon</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Performance&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">within</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Metric&#39;</span><span class="p">]),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">0.969</span>
+</pre></div>
+</div>
+<p>The epsilon value is very close to 1, meaning that there is no major
+violation of sphericity.</p>
+<p>Now, let’s calculate the epsilon for the interaction between the two
+repeated measures factor:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">epsilon</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Performance&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                 <span class="n">within</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="s1">&#39;Metric&#39;</span><span class="p">]),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">0.727</span>
+</pre></div>
+</div>
+<p>Alternatively, we could use a wide-format dataframe with two column
+levels:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Pivot from long-format to wide-format</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">piv</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="s1">&#39;Metric&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                       <span class="n">values</span><span class="o">=</span><span class="s1">&#39;Performance&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">piv</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="go">Time      Post                   Pre</span>
+<span class="go">Metric  Action Client Product Action Client Product</span>
+<span class="go">Subject</span>
+<span class="go">1           34     30      18     17     12      13</span>
+<span class="go">2           30     18       6     18     19      12</span>
+<span class="go">3           32     31      21     24     19      17</span>
+<span class="go">4           40     39      18     25     25      12</span>
+<span class="go">5           27     28      18     19     27      19</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">epsilon</span><span class="p">(</span><span class="n">piv</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">0.727</span>
+</pre></div>
+</div>
+<p>which gives the same epsilon value as the long-format dataframe.</p>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

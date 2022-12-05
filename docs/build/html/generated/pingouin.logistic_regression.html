@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.logistic_regression &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-logistic-regression">
+<h1>pingouin.logistic_regression<a class="headerlink" href="#pingouin-logistic-regression" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.logistic_regression">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">logistic_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coef_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_dataframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_na</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.logistic_regression" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Multiple) Binary logistic regression.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X</strong><span class="classifier">array_like</span></dt><dd><p>Predictor(s), of shape <em>(n_samples, n_features)</em> or <em>(n_samples)</em>.</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array_like</span></dt><dd><p>Dependent variable, of shape <em>(n_samples)</em>.
+<code class="docutils literal notranslate"><span class="pre">y</span></code> must be binary, i.e. only contains 0 or 1. Multinomial logistic
+regression is not supported.</p>
+</dd>
+<dt><strong>coef_only</strong><span class="classifier">bool</span></dt><dd><p>If True, return only the regression coefficients.</p>
+</dd>
+<dt><strong>alpha</strong><span class="classifier">float</span></dt><dd><p>Alpha value used for the confidence intervals.
+<span class="math notranslate nohighlight">\(\text{CI} = [\alpha / 2 ; 1 - \alpha / 2]\)</span></p>
+</dd>
+<dt><strong>as_dataframe</strong><span class="classifier">bool</span></dt><dd><p>If True, returns a pandas DataFrame. If False, returns a dictionnary.</p>
+</dd>
+<dt><strong>remove_na</strong><span class="classifier">bool</span></dt><dd><p>If True, apply a listwise deletion of missing values (i.e. the entire
+row is removed). Default is False, which will raise an error if missing
+values are present in either the predictor(s) or dependent
+variable.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">optional</span></dt><dd><p>Optional arguments passed to
+<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.linear_model.LogisticRegression</span></code></a> (see Notes).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>stats</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> or dict</span></dt><dd><p>Logistic regression summary:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'names'</span></code>: name of variable(s) in the model (e.g. x1, x2…)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'coef'</span></code>: regression coefficients (log-odds)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'se'</span></code>: standard error</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'z'</span></code>: z-scores</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'pval'</span></code>: two-tailed p-values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'CI[2.5%]'</span></code>: lower confidence interval</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'CI[97.5%]'</span></code>: upper confidence interval</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.linear_regression.html#pingouin.linear_regression" title="pingouin.linear_regression"><code class="xref py py-obj docutils literal notranslate"><span class="pre">linear_regression</span></code></a></dt><dd></dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>This function is a wrapper around the
+<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression" title="(in scikit-learn v1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.linear_model.LogisticRegression</span></code></a> class. However,
+Pingouin internally disables the L2 regularization and changes the
+default solver to ‘newton-cg’ to obtain results that are similar to R and
+statsmodels.</p>
+</div>
+<p>Logistic regression assumes that the log-odds (the logarithm of the
+odds) for the value labeled “1” in the response variable is a linear
+combination of the predictor variables. The log-odds are given by the
+<a class="reference external" href="https://en.wikipedia.org/wiki/Logit">logit</a> function,
+which map a probability <span class="math notranslate nohighlight">\(p\)</span> of the response variable being “1”
+from <span class="math notranslate nohighlight">\([0, 1)\)</span> to <span class="math notranslate nohighlight">\((-\infty, +\infty)\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\text{logit}(p) = \ln \frac{p}{1 - p} = \beta_0 + \beta X\]</div>
+<p>The odds of the response variable being “1” can be obtained by
+exponentiating the log-odds:</p>
+<div class="math notranslate nohighlight">
+\[\frac{p}{1 - p} = e^{\beta_0 + \beta X}\]</div>
+<p>and the probability of the response variable being “1” is given by the
+<a class="reference external" href="https://en.wikipedia.org/wiki/Logistic_function">logistic function</a>:</p>
+<div class="math notranslate nohighlight">
+\[p = \frac{1}{1 + e^{-(\beta_0 + \beta X})}\]</div>
+<p>The first coefficient is always the constant term (intercept) of
+the model. Pingouin will automatically add the intercept
+to your predictor(s) matrix, therefore, <span class="math notranslate nohighlight">\(X\)</span> should not include a
+constant term. Pingouin will remove any constant term (e.g column with only
+one unique value), or duplicate columns from <span class="math notranslate nohighlight">\(X\)</span>.</p>
+<p>The calculation of the p-values and confidence interval is adapted from a
+<a class="reference external" href="https://gist.github.com/rspeare/77061e6e317896be29c6de9a85db301d">code by Rob Speare</a>.
+Results have been compared against statsmodels, R, and JASP.</p>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>Simple binary logistic regression.</p></li>
+</ol>
+<p>In this first example, we’ll use the
+<a class="reference external" href="https://github.com/allisonhorst/palmerpenguins">penguins dataset</a>
+to see how well we can predict the sex of penguins based on their
+bodies mass.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;penguins&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Let&#39;s first convert the target variable from string to boolean:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;male&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;sex&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;male&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># male: 1, female: 0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Since there are missing values in our outcome variable, we need to</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># set `remove_na=True` otherwise regression will fail.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lom</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">logistic_regression</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;body_mass_g&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;male&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                             <span class="n">remove_na</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lom</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">         names  coef    se     z  pval  CI[2.5%]  CI[97.5%]</span>
+<span class="go">0    Intercept -5.16  0.71 -7.24   0.0     -6.56      -3.77</span>
+<span class="go">1  body_mass_g  0.00  0.00  7.24   0.0      0.00       0.00</span>
+</pre></div>
+</div>
+<p>Body mass is a significant predictor of sex (p&lt;0.001). Here, it
+could be useful to rescale our predictor variable from <em>g</em> to <em>kg</em>
+(e.g divide by 1000) in order to get more intuitive coefficients and
+confidence intervals:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;body_mass_kg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;body_mass_g&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">1000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lom</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">logistic_regression</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;body_mass_kg&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;male&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                             <span class="n">remove_na</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lom</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">          names  coef    se     z  pval  CI[2.5%]  CI[97.5%]</span>
+<span class="go">0     Intercept -5.16  0.71 -7.24   0.0     -6.56      -3.77</span>
+<span class="go">1  body_mass_kg  1.23  0.17  7.24   0.0      0.89       1.56</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Multiple binary logistic regression</p></li>
+</ol>
+<p>We’ll now add the species as a categorical predictor in our model. To do
+so, we first need to dummy-code our categorical variable, dropping the
+first level of our categorical variable (species = Adelie) which will be
+used as the reference level:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;species&#39;</span><span class="p">],</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;body_mass_kg&#39;</span><span class="p">,</span> <span class="s1">&#39;species_Chinstrap&#39;</span><span class="p">,</span> <span class="s1">&#39;species_Gentoo&#39;</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;male&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lom</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">logistic_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">remove_na</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lom</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">               names   coef    se     z  pval  CI[2.5%]  CI[97.5%]</span>
+<span class="go">0          Intercept -26.24  2.84 -9.24  0.00    -31.81     -20.67</span>
+<span class="go">1       body_mass_kg   7.10  0.77  9.23  0.00      5.59       8.61</span>
+<span class="go">2  species_Chinstrap  -0.13  0.42 -0.31  0.75     -0.96       0.69</span>
+<span class="go">3     species_Gentoo  -9.72  1.12 -8.65  0.00    -11.92      -7.52</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Using NumPy aray and returning only the coefficients</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">logistic_regression</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">coef_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">... </span>                       <span class="n">remove_na</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">array([-26.23906892,   7.09826571,  -0.13180626,  -9.71718529])</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Passing custom parameters to sklearn</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lom</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">logistic_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;sag&#39;</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+<span class="gp">... </span>                          <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">remove_na</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">lom</span><span class="p">[</span><span class="s1">&#39;coef&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
+<span class="go">[-25.98248153   7.02881472  -0.13119779  -9.62247569]</span>
+</pre></div>
+</div>
+<p><strong>How to interpret the log-odds coefficients?</strong></p>
+<p>We’ll use the <a class="reference external" href="https://en.wikipedia.org/wiki/Logistic_regression#Probability_of_passing_an_exam_versus_hours_of_study">Wikipedia example</a>
+of the probability of passing an exam
+versus the hours of study:</p>
+<p><em>A group of 20 students spends between 0 and 6 hours studying for an
+exam. How does the number of hours spent studying affect the
+probability of the student passing the exam?</em></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># First, let&#39;s create the dataframe</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Hours</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.50</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">,</span> <span class="mf">1.25</span><span class="p">,</span> <span class="mf">1.50</span><span class="p">,</span> <span class="mf">1.75</span><span class="p">,</span> <span class="mf">1.75</span><span class="p">,</span> <span class="mf">2.00</span><span class="p">,</span> <span class="mf">2.25</span><span class="p">,</span> <span class="mf">2.50</span><span class="p">,</span>
+<span class="gp">... </span>         <span class="mf">2.75</span><span class="p">,</span> <span class="mf">3.00</span><span class="p">,</span> <span class="mf">3.25</span><span class="p">,</span> <span class="mf">3.50</span><span class="p">,</span> <span class="mf">4.00</span><span class="p">,</span> <span class="mf">4.25</span><span class="p">,</span> <span class="mf">4.50</span><span class="p">,</span> <span class="mf">4.75</span><span class="p">,</span> <span class="mf">5.00</span><span class="p">,</span> <span class="mf">5.50</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Pass</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;HoursStudy&#39;</span><span class="p">:</span> <span class="n">Hours</span><span class="p">,</span> <span class="s1">&#39;PassExam&#39;</span><span class="p">:</span> <span class="n">Pass</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># And then run the logistic regression</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lr</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">logistic_regression</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;HoursStudy&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;PassExam&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lr</span>
+<span class="go">        names   coef     se      z   pval  CI[2.5%]  CI[97.5%]</span>
+<span class="go">0   Intercept -4.078  1.761 -2.316  0.021    -7.529     -0.626</span>
+<span class="go">1  HoursStudy  1.505  0.629  2.393  0.017     0.272      2.737</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">Intercept</span></code> coefficient (-4.078) is the log-odds of <code class="docutils literal notranslate"><span class="pre">PassExam=1</span></code>
+when <code class="docutils literal notranslate"><span class="pre">HoursStudy=0</span></code>. The odds ratio can be obtained by exponentiating
+the log-odds:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">4.078</span><span class="p">)</span>
+<span class="go">0.016941314421496552</span>
+</pre></div>
+</div>
+<p>i.e. <span class="math notranslate nohighlight">\(0.017:1\)</span>. Conversely the odds of failing the exam are
+<span class="math notranslate nohighlight">\((1/0.017) \approx 59:1\)</span>.</p>
+<p>The probability can then be obtained with the following equation</p>
+<div class="math notranslate nohighlight">
+\[p = \frac{1}{1 + e^{-(-4.078 + 0 * 1.505)}}\]</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="o">-</span><span class="mf">4.078</span><span class="p">)))</span>
+<span class="go">0.016659087580814722</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">HoursStudy</span></code> coefficient (1.505) means that for each additional hour
+of study, the log-odds of passing the exam increase by 1.505, and the odds
+are multipled by <span class="math notranslate nohighlight">\(e^{1.505} \approx 4.50\)</span>.</p>
+<p>For example, a student who studies 2 hours has a probability of passing
+the exam of 25%:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="o">-</span><span class="mf">4.078</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="mf">1.505</span><span class="p">)))</span>
+<span class="go">0.2557836148964987</span>
+</pre></div>
+</div>
+<p>The table below shows the probability of passing the exam for several
+values of <code class="docutils literal notranslate"><span class="pre">HoursStudy</span></code>:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 17%" />
+<col style="width: 27%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Hours of Study</p></th>
+<th class="head"><p>Log-odds</p></th>
+<th class="head"><p>Odds</p></th>
+<th class="head"><p>Probability</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>−4.08</p></td>
+<td><p>0.017 ≈ 1:59</p></td>
+<td><p>0.017</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>−2.57</p></td>
+<td><p>0.076 ≈ 1:13</p></td>
+<td><p>0.07</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>−1.07</p></td>
+<td><p>0.34 ≈ 1:3</p></td>
+<td><p>0.26</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>0.44</p></td>
+<td><p>1.55</p></td>
+<td><p>0.61</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>1.94</p></td>
+<td><p>6.96</p></td>
+<td><p>0.87</p></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p>3.45</p></td>
+<td><p>31.4</p></td>
+<td><p>0.97</p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p>4.96</p></td>
+<td><p>141.4</p></td>
+<td><p>0.99</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

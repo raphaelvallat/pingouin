@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.circ_r &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-circ-r">
+<h1>pingouin.circ_r<a class="headerlink" href="#pingouin-circ-r" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.circ_r">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">circ_r</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.circ_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mean resultant vector length for circular data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>angles</strong><span class="classifier">array_like</span></dt><dd><p>Samples of angles in radians. The range of <code class="docutils literal notranslate"><span class="pre">angles</span></code> must be either
+<span class="math notranslate nohighlight">\([0, 2\pi]\)</span> or <span class="math notranslate nohighlight">\([-\pi, \pi]\)</span>. If <code class="docutils literal notranslate"><span class="pre">angles</span></code> is not
+expressed in radians (e.g. degrees or 24-hours), please use the
+<a class="reference internal" href="pingouin.convert_angles.html#pingouin.convert_angles" title="pingouin.convert_angles"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.convert_angles()</span></code></a> function prior to using the present
+function.</p>
+</dd>
+<dt><strong>w</strong><span class="classifier">array_like</span></dt><dd><p>Number of incidences per bins (i.e. “weights”), in case of binned angle
+data.</p>
+</dd>
+<dt><strong>d</strong><span class="classifier">float</span></dt><dd><p>Spacing (in radians) of bin centers for binned data. If supplied,
+a correction factor is used to correct for bias in the estimation
+of r.</p>
+</dd>
+<dt><strong>axis</strong><span class="classifier">int or None</span></dt><dd><p>Compute along this dimension. Default is the first axis (0).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>r</strong><span class="classifier">float</span></dt><dd><p>Circular mean vector length.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.circ_mean.html#pingouin.circ_mean" title="pingouin.circ_mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pingouin.circ_mean</span></code></a></dt><dd></dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>The length of the mean resultant vector is a crucial quantity for the
+measurement of circular spread or hypothesis testing in directional
+statistics. The closer it is to one, the more concentrated the data
+sample is around the mean direction (Berens 2009).</p>
+<p>The circular vector length of a set of angles <span class="math notranslate nohighlight">\(\alpha\)</span> is defined
+by:</p>
+<div class="math notranslate nohighlight">
+\[\bar{\alpha} =  \frac{1}{N}\left \| \sum_{j=1}^n
+\exp(i \cdot \alpha_j) \right \|\]</div>
+<p>Missing values in <code class="docutils literal notranslate"><span class="pre">angles</span></code> are omitted from the calculations.</p>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://en.wikipedia.org/wiki/Mean_of_circular_quantities">https://en.wikipedia.org/wiki/Mean_of_circular_quantities</a></p></li>
+<li><p>Berens, P. (2009). CircStat: A MATLAB Toolbox for Circular
+Statistics. Journal of Statistical Software, Articles, 31(10),
+1–21. <a class="reference external" href="https://doi.org/10.18637/jss.v031.i10">https://doi.org/10.18637/jss.v031.i10</a></p></li>
+</ul>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>Mean resultant vector length of a 1-D array of angles, in radians</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">angles</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.785</span><span class="p">,</span> <span class="mf">1.570</span><span class="p">,</span> <span class="mf">3.141</span><span class="p">,</span> <span class="mf">0.839</span><span class="p">,</span> <span class="mf">5.934</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">circ_r</span><span class="p">(</span><span class="n">angles</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">0.4972</span>
+</pre></div>
+</div>
+<p>Note that there is a close relationship between the vector length and the
+circular standard deviation, i.e. <span class="math notranslate nohighlight">\(\sigma = \sqrt{-2 \ln R}\)</span>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">r</span><span class="p">)),</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">1.1821</span>
+</pre></div>
+</div>
+<p>which gives similar result as SciPy built-in function:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">circstd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">circstd</span><span class="p">(</span><span class="n">angles</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">1.1821</span>
+</pre></div>
+</div>
+<p>Sanity check: if all angles are the same, the vector length should be one:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">angles</span> <span class="o">=</span> <span class="p">[</span><span class="mf">3.14</span><span class="p">,</span> <span class="mf">3.14</span><span class="p">,</span> <span class="mf">3.14</span><span class="p">,</span> <span class="mf">3.14</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">circ_r</span><span class="p">(</span><span class="n">angles</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">1.0</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Using a 2-D array of angles in degrees</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">360</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deg</span>
+<span class="go">array([[322,  98, 230,  17,  83],</span>
+<span class="go">       [106, 123,  57, 214, 225],</span>
+<span class="go">       [ 96, 113, 126,  47,  73]])</span>
+</pre></div>
+</div>
+<p>We first need to convert from degrees to radians:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">convert_angles</span><span class="p">(</span><span class="n">deg</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">360</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rad</span>
+<span class="go">array([[-0.6632,  1.7104, -2.2689,  0.2967,  1.4486],</span>
+<span class="go">       [ 1.85  ,  2.1468,  0.9948, -2.5482, -2.3562],</span>
+<span class="go">       [ 1.6755,  1.9722,  2.1991,  0.8203,  1.2741]])</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">circ_r</span><span class="p">(</span><span class="n">rad</span><span class="p">)</span>  <span class="c1"># On the first axis (default)</span>
+<span class="go">array([0.46695499, 0.98398294, 0.3723287 , 0.31103746, 0.42527149])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">circ_r</span><span class="p">(</span><span class="n">rad</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># On the last axis (default)</span>
+<span class="go">array([0.28099998, 0.45456096, 0.88261161])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">circ_r</span><span class="p">(</span><span class="n">rad</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>  <span class="c1"># Across the entire array</span>
+<span class="go">0.4486</span>
+</pre></div>
+</div>
+<p>Missing values are omitted from the calculations:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rad</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">circ_r</span><span class="p">(</span><span class="n">rad</span><span class="p">)</span>
+<span class="go">array([0.99619613, 0.98398294, 0.3723287 , 0.31103746, 0.42527149])</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Using binned angles</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nbins</span> <span class="o">=</span> <span class="mi">18</span>  <span class="c1"># Number of bins to divide the unit circle</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">angles_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">nbins</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># w represents the number of incidences per bins, or &quot;weights&quot;.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">angles_bins</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">circ_r</span><span class="p">(</span><span class="n">angles_bins</span><span class="p">,</span> <span class="n">w</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">0.3642</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

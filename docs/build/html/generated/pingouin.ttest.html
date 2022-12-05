@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.ttest &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-ttest">
+<h1>pingouin.ttest<a class="headerlink" href="#pingouin-ttest" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.ttest">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">ttest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">paired</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'two-sided'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.707</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.ttest" title="Permalink to this definition">¶</a></dt>
+<dd><p>T-test.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>x</strong><span class="classifier">array_like</span></dt><dd><p>First set of observations.</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array_like or float</span></dt><dd><p>Second set of observations. If <code class="docutils literal notranslate"><span class="pre">y</span></code> is a single value, a one-sample
+T-test is computed against that value (= “mu” in the t.test R
+function).</p>
+</dd>
+<dt><strong>paired</strong><span class="classifier">boolean</span></dt><dd><p>Specify whether the two observations are related (i.e. repeated
+measures) or independent.</p>
+</dd>
+<dt><strong>alternative</strong><span class="classifier">string</span></dt><dd><p>Defines the alternative hypothesis, or tail of the test. Must be one of
+“two-sided” (default), “greater” or “less”. Both “greater” and “less” return one-sided
+p-values. “greater” tests against the alternative hypothesis that the mean of <code class="docutils literal notranslate"><span class="pre">x</span></code>
+is greater than the mean of <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p>
+</dd>
+<dt><strong>correction</strong><span class="classifier">string or boolean</span></dt><dd><p>For unpaired two sample T-tests, specify whether or not to correct for
+unequal variances using Welch separate variances T-test. If ‘auto’, it
+will automatically uses Welch T-test when the sample sizes are unequal,
+as recommended by Zimmerman 2004.</p>
+</dd>
+<dt><strong>r</strong><span class="classifier">float</span></dt><dd><p>Cauchy scale factor for computing the Bayes Factor.
+Smaller values of r (e.g. 0.5), may be appropriate when small effect
+sizes are expected a priori; larger values of r are appropriate when
+large effect sizes are expected (Rouder et al 2009).
+The default is 0.707 (= <span class="math notranslate nohighlight">\(\sqrt{2} / 2\)</span>).</p>
+</dd>
+<dt><strong>confidence</strong><span class="classifier">float</span></dt><dd><p>Confidence level for the confidence intervals (0.95 = 95%)</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.3.9.</span></p>
+</div>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>stats</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'T'</span></code>: T-value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'dof'</span></code>: degrees of freedom</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alternative'</span></code>: alternative of the test</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-val'</span></code>: p-value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'CI95%'</span></code>: confidence intervals of the difference in means</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'cohen-d'</span></code>: Cohen d effect size</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'BF10'</span></code>: Bayes Factor of the alternative hypothesis</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'power'</span></code>: achieved power of the test ( = 1 - type II error)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.mwu.html#pingouin.mwu" title="pingouin.mwu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mwu</span></code></a>, <a class="reference internal" href="pingouin.wilcoxon.html#pingouin.wilcoxon" title="pingouin.wilcoxon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wilcoxon</span></code></a>, <a class="reference internal" href="pingouin.anova.html#pingouin.anova" title="pingouin.anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anova</span></code></a>, <a class="reference internal" href="pingouin.rm_anova.html#pingouin.rm_anova" title="pingouin.rm_anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rm_anova</span></code></a>, <a class="reference internal" href="pingouin.pairwise_tests.html#pingouin.pairwise_tests" title="pingouin.pairwise_tests"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pairwise_tests</span></code></a>, <a class="reference internal" href="pingouin.compute_effsize.html#pingouin.compute_effsize" title="pingouin.compute_effsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_effsize</span></code></a></dt><dd></dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>Missing values are automatically removed from the data. If <code class="docutils literal notranslate"><span class="pre">x</span></code> and
+<code class="docutils literal notranslate"><span class="pre">y</span></code> are paired, the entire row is removed (= listwise deletion).</p>
+<p>The <strong>T-value for unpaired samples</strong> is defined as:</p>
+<div class="math notranslate nohighlight">
+\[t = \frac{\overline{x} - \overline{y}}
+{\sqrt{\frac{s^{2}_{x}}{n_{x}} + \frac{s^{2}_{y}}{n_{y}}}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\overline{x}\)</span> and <span class="math notranslate nohighlight">\(\overline{y}\)</span> are the sample means,
+<span class="math notranslate nohighlight">\(n_{x}\)</span> and <span class="math notranslate nohighlight">\(n_{y}\)</span> are the sample sizes, and
+<span class="math notranslate nohighlight">\(s^{2}_{x}\)</span> and <span class="math notranslate nohighlight">\(s^{2}_{y}\)</span> are the sample variances.
+The degrees of freedom <span class="math notranslate nohighlight">\(v\)</span> are <span class="math notranslate nohighlight">\(n_x + n_y - 2\)</span> when the sample
+sizes are equal. When the sample sizes are unequal or when
+<code class="code docutils literal notranslate"><span class="pre">correction=True</span></code>, the Welch–Satterthwaite equation is used to
+approximate the adjusted degrees of freedom:</p>
+<div class="math notranslate nohighlight">
+\[v = \frac{(\frac{s^{2}_{x}}{n_{x}} + \frac{s^{2}_{y}}{n_{y}})^{2}}
+{\frac{(\frac{s^{2}_{x}}{n_{x}})^{2}}{(n_{x}-1)} +
+\frac{(\frac{s^{2}_{y}}{n_{y}})^{2}}{(n_{y}-1)}}\]</div>
+<p>The p-value is then calculated using a T distribution with <span class="math notranslate nohighlight">\(v\)</span>
+degrees of freedom.</p>
+<p>The T-value for <strong>paired samples</strong> is defined by:</p>
+<div class="math notranslate nohighlight">
+\[t = \frac{\overline{x}_d}{s_{\overline{x}}}\]</div>
+<p>where</p>
+<div class="math notranslate nohighlight">
+\[s_{\overline{x}} = \frac{s_d}{\sqrt n}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\overline{x}_d\)</span> is the sample mean of the differences
+between the two paired samples, <span class="math notranslate nohighlight">\(n\)</span> is the number of observations
+(sample size), <span class="math notranslate nohighlight">\(s_d\)</span> is the sample standard deviation of the
+differences and <span class="math notranslate nohighlight">\(s_{\overline{x}}\)</span> is the estimated standard error
+of the mean of the differences. The p-value is then calculated using a
+T-distribution with <span class="math notranslate nohighlight">\(n-1\)</span> degrees of freedom.</p>
+<p>The scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor is approximated
+using the <a class="reference internal" href="pingouin.bayesfactor_ttest.html#pingouin.bayesfactor_ttest" title="pingouin.bayesfactor_ttest"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.bayesfactor_ttest()</span></code></a> function.</p>
+<p>Results have been tested against JASP and the <cite>t.test</cite> R function.</p>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm">https://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm</a></p></li>
+<li><p>Delacre, M., Lakens, D., &amp; Leys, C. (2017). Why psychologists should
+by default use Welch’s t-test instead of Student’s t-test.
+International Review of Social Psychology, 30(1).</p></li>
+<li><p>Zimmerman, D. W. (2004). A note on preliminary tests of equality of
+variances. British Journal of Mathematical and Statistical
+Psychology, 57(1), 173-181.</p></li>
+<li><p>Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,
+2009. Bayesian t tests for accepting and rejecting the null
+hypothesis. Psychon. Bull. Rev. 16, 225–237.
+<a class="reference external" href="https://doi.org/10.3758/PBR.16.2.225">https://doi.org/10.3758/PBR.16.2.225</a></p></li>
+</ul>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>One-sample T-test.</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="kn">import</span> <span class="n">ttest</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">2.4</span><span class="p">,</span> <span class="mf">6.8</span><span class="p">,</span> <span class="mf">9.6</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">          T  dof alternative  p-val         CI95%  cohen-d   BF10  power</span>
+<span class="go">T-test  1.4    4   two-sided   0.23  [2.32, 9.08]     0.62  0.766   0.19</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>One sided paired T-test.</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pre</span> <span class="o">=</span> <span class="p">[</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">2.4</span><span class="p">,</span> <span class="mf">6.8</span><span class="p">,</span> <span class="mf">9.6</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">post</span> <span class="o">=</span> <span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">,</span> <span class="mf">6.4</span><span class="p">,</span> <span class="mf">11.</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s1">&#39;less&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">           T  dof alternative  p-val          CI95%  cohen-d   BF10  power</span>
+<span class="go">T-test -2.31    4        less   0.04  [-inf, -0.05]     0.25  3.122   0.12</span>
+</pre></div>
+</div>
+<p>Now testing the opposite alternative hypothesis</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s1">&#39;greater&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">           T  dof alternative  p-val         CI95%  cohen-d  BF10  power</span>
+<span class="go">T-test -2.31    4     greater   0.96  [-1.35, inf]     0.25  0.32   0.02</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Paired T-test with missing values.</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pre</span> <span class="o">=</span> <span class="p">[</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">2.4</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mf">9.6</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">post</span> <span class="o">=</span> <span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">,</span> <span class="mf">6.4</span><span class="p">,</span> <span class="mf">11.</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">            T  dof alternative  p-val          CI95%  cohen-d   BF10  power</span>
+<span class="go">T-test -5.902    3   two-sided   0.01  [-1.5, -0.45]    0.306  7.169  0.073</span>
+</pre></div>
+</div>
+<p>Compare with SciPy</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">ttest_rel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ttest_rel</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="n">nan_policy</span><span class="o">=</span><span class="s2">&quot;omit&quot;</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">array([-5.902,  0.01 ])</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Independent two-sample T-test with equal sample size.</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="go">               T  dof alternative         p-val         CI95%   cohen-d       BF10  power</span>
+<span class="go">T-test  9.106452   38   two-sided  4.306971e-11  [2.64, 4.15]  2.879713  1.366e+08    1.0</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Independent two-sample T-test with unequal sample size. A Welch’s T-test is used.</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mf">6.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="go">               T        dof alternative     p-val          CI95%   cohen-d   BF10     power</span>
+<span class="go">T-test  1.996537  31.567592   two-sided  0.054561  [-0.02, 1.65]  0.673518  1.469  0.481867</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li><p>However, the Welch’s correction can be disabled:</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="go">               T  dof alternative     p-val          CI95%   cohen-d   BF10     power</span>
+<span class="go">T-test  1.971859   33   two-sided  0.057056  [-0.03, 1.66]  0.673518  1.418  0.481867</span>
+</pre></div>
+</div>
+<p>Compare with SciPy</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">ttest_ind</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ttest_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">equal_var</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>  <span class="c1"># T value and p-value</span>
+<span class="go">array([1.971859, 0.057056])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

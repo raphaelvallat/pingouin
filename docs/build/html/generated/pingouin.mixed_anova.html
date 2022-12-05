@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.mixed_anova &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-mixed-anova">
+<h1>pingouin.mixed_anova<a class="headerlink" href="#pingouin-mixed-anova" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.mixed_anova">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">mixed_anova</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">within</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">between</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'np2'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.mixed_anova" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mixed-design (split-plot) ANOVA.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>DataFrame. Note that this function can also directly be used as a
+Pandas method, in which case this argument is no longer needed.</p>
+</dd>
+<dt><strong>dv</strong><span class="classifier">string</span></dt><dd><p>Name of column containing the dependent variable.</p>
+</dd>
+<dt><strong>within</strong><span class="classifier">string</span></dt><dd><p>Name of column containing the within-subject factor
+(repeated measurements).</p>
+</dd>
+<dt><strong>subject</strong><span class="classifier">string</span></dt><dd><p>Name of column containing the between-subject identifier.</p>
+</dd>
+<dt><strong>between</strong><span class="classifier">string</span></dt><dd><p>Name of column containing the between factor.</p>
+</dd>
+<dt><strong>correction</strong><span class="classifier">string or boolean</span></dt><dd><p>If True, return Greenhouse-Geisser corrected p-value.
+If <cite>‘auto’</cite> (default), compute Mauchly’s test of sphericity to
+determine whether the p-values needs to be corrected.</p>
+</dd>
+<dt><strong>effsize</strong><span class="classifier">str</span></dt><dd><p>Effect size. Must be one of ‘np2’ (partial eta-squared), ‘n2’
+(eta-squared) or ‘ng2’(generalized eta-squared).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>aov</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>ANOVA summary:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'Source'</span></code>: Names of the factor considered</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ddof1'</span></code>: Degrees of freedom (numerator)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ddof2'</span></code>: Degrees of freedom (denominator)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'F'</span></code>: F-values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-unc'</span></code>: Uncorrected p-values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'np2'</span></code>: Partial eta-squared effect sizes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'eps'</span></code>: Greenhouse-Geisser epsilon factor (= index of sphericity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-GG-corr'</span></code>: Greenhouse-Geisser corrected p-values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'W-spher'</span></code>: Sphericity test statistic</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-spher'</span></code>: p-value of the sphericity test</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'sphericity'</span></code>: sphericity of the data (boolean)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.anova.html#pingouin.anova" title="pingouin.anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anova</span></code></a>, <a class="reference internal" href="pingouin.rm_anova.html#pingouin.rm_anova" title="pingouin.rm_anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rm_anova</span></code></a>, <a class="reference internal" href="pingouin.pairwise_tests.html#pingouin.pairwise_tests" title="pingouin.pairwise_tests"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pairwise_tests</span></code></a></dt><dd></dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>Data are expected to be in long-format (even the repeated measures).
+If your data is in wide-format, you can use the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.melt.html#pandas.melt" title="(in pandas v1.5.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.melt()</span></code></a>
+function to convert from wide to long format.</p>
+<p>Missing values are automatically removed using a strict listwise approach (= complete-case
+analysis). In other words, any subject with one or more missing value(s) is completely removed
+from the dataframe prior to running the test. This could drastically decrease the power of the
+ANOVA if many missing values are present. In that case, we strongly recommend using linear
+mixed effect modelling, which can handle missing values in repeated measures.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If the between-subject groups are unbalanced (= unequal sample sizes),
+a type II ANOVA will be computed. Note however that SPSS, JAMOVI and JASP by default
+return a type III ANOVA, which may lead to slightly different results.</p>
+</div>
+<p class="rubric">Examples</p>
+<p>For more examples, please refer to the <a class="reference external" href="https://github.com/raphaelvallat/pingouin/blob/master/notebooks/01_ANOVA.ipynb">Jupyter notebooks</a></p>
+<p>Compute a two-way mixed model ANOVA.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="kn">import</span> <span class="n">mixed_anova</span><span class="p">,</span> <span class="n">read_dataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;mixed_anova&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aov</span> <span class="o">=</span> <span class="n">mixed_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aov</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">        Source     SS  DF1  DF2     MS      F  p-unc    np2    eps</span>
+<span class="go">0        Group  5.460    1   58  5.460  5.052  0.028  0.080    NaN</span>
+<span class="go">1         Time  7.628    2  116  3.814  4.027  0.020  0.065  0.999</span>
+<span class="go">2  Interaction  5.167    2  116  2.584  2.728  0.070  0.045    NaN</span>
+</pre></div>
+</div>
+<p>Same but reporting a generalized eta-squared effect size. Notice how we
+can also apply this function directly as a method of the dataframe, in
+which case we do not need to specify <code class="docutils literal notranslate"><span class="pre">data=df</span></code> anymore.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">mixed_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span>
+<span class="gp">... </span>               <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s2">&quot;ng2&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">        Source     SS  DF1  DF2     MS      F  p-unc    ng2    eps</span>
+<span class="go">0        Group  5.460    1   58  5.460  5.052  0.028  0.031    NaN</span>
+<span class="go">1         Time  7.628    2  116  3.814  4.027  0.020  0.042  0.999</span>
+<span class="go">2  Interaction  5.167    2  116  2.584  2.728  0.070  0.029    NaN</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

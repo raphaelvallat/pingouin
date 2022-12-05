@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.chi2_independence &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-chi2-independence">
+<h1>pingouin.chi2_independence<a class="headerlink" href="#pingouin-chi2-independence" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.chi2_independence">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">chi2_independence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.chi2_independence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chi-squared independence tests between two categorical variables.</p>
+<p>The test is computed for different values of <span class="math notranslate nohighlight">\(\lambda\)</span>: 1, 2/3, 0,
+-1/2, -1 and -2 (Cressie and Read, 1984).</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>The dataframe containing the ocurrences for the test.</p>
+</dd>
+<dt><strong>x, y</strong><span class="classifier">string</span></dt><dd><p>The variables names for the Chi-squared test. Must be names of columns
+in <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p>
+</dd>
+<dt><strong>correction</strong><span class="classifier">bool</span></dt><dd><p>Whether to apply Yates’ correction when the degree of freedom of the
+observed contingency table is 1 (Yates 1934).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>expected</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>The expected contingency table of frequencies.</p>
+</dd>
+<dt><strong>observed</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>The (corrected or not) observed contingency table of frequencies.</p>
+</dd>
+<dt><strong>stats</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>The test summary, containing four columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'test'</span></code>: The statistic name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'lambda'</span></code>: The <span class="math notranslate nohighlight">\(\lambda\)</span> value used for the power                        divergence statistic</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'chi2'</span></code>: The test statistic</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'pval'</span></code>: The p-value of the test</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'cramer'</span></code>: The Cramer’s V effect size</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'power'</span></code>: The statistical power of the test</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>From Wikipedia:</p>
+<p><em>The chi-squared test is used to determine whether there is a significant
+difference between the expected frequencies and the observed frequencies
+in one or more categories.</em></p>
+<p>As application examples, this test can be used to <em>i</em>) evaluate the
+quality of a categorical variable in a classification problem or to <em>ii</em>)
+check the similarity between two categorical variables. In the first
+example, a good categorical predictor and the class column should present
+high <span class="math notranslate nohighlight">\(\chi^2\)</span> and low p-value. In the second example, similar
+categorical variables should present low <span class="math notranslate nohighlight">\(\chi^2\)</span> and high p-value.</p>
+<p>This function is a wrapper around the
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.power_divergence.html#scipy.stats.power_divergence" title="(in SciPy v1.9.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.stats.power_divergence()</span></code></a> function.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>As a general guideline for the consistency of this test, the
+observed and the expected contingency tables should not have cells
+with frequencies lower than 5.</p>
+</div>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>Cressie, N., &amp; Read, T. R. (1984). Multinomial goodness‐of‐fit
+tests. Journal of the Royal Statistical Society: Series B
+(Methodological), 46(3), 440-464.</p></li>
+<li><p>Yates, F. (1934). Contingency Tables Involving Small Numbers and the
+<span class="math notranslate nohighlight">\(\chi^2\)</span> Test. Supplement to the Journal of the Royal
+Statistical Society, 1, 217-235.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<p>Let’s see if gender is a good categorical predictor for the presence of
+heart disease.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;chi2_independence&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;sex&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">0     96</span>
+<span class="go">1    207</span>
+<span class="go">Name: sex, dtype: int64</span>
+</pre></div>
+</div>
+<p>If gender is not a good predictor for heart disease, we should expect the
+same 96:207 ratio across the target classes.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">expected</span><span class="p">,</span> <span class="n">observed</span><span class="p">,</span> <span class="n">stats</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">chi2_independence</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;sex&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                                                 <span class="n">y</span><span class="o">=</span><span class="s1">&#39;target&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">expected</span>
+<span class="go">target          0           1</span>
+<span class="go">sex</span>
+<span class="go">0       43.722772   52.277228</span>
+<span class="go">1       94.277228  112.722772</span>
+</pre></div>
+</div>
+<p>Let’s see what the data tells us.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">observed</span>
+<span class="go">target      0     1</span>
+<span class="go">sex</span>
+<span class="go">0        24.5  71.5</span>
+<span class="go">1       113.5  93.5</span>
+</pre></div>
+</div>
+<p>The proportion is lower on the class 0 and higher on the class 1. The
+tests should be sensitive to this difference.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">                 test  lambda    chi2  dof  pval  cramer  power</span>
+<span class="go">0             pearson   1.000  22.717  1.0   0.0   0.274  0.997</span>
+<span class="go">1        cressie-read   0.667  22.931  1.0   0.0   0.275  0.998</span>
+<span class="go">2      log-likelihood   0.000  23.557  1.0   0.0   0.279  0.998</span>
+<span class="go">3       freeman-tukey  -0.500  24.220  1.0   0.0   0.283  0.998</span>
+<span class="go">4  mod-log-likelihood  -1.000  25.071  1.0   0.0   0.288  0.999</span>
+<span class="go">5              neyman  -2.000  27.458  1.0   0.0   0.301  0.999</span>
+</pre></div>
+</div>
+<p>Very low p-values indeed. The gender qualifies as a good predictor for the
+presence of heart disease on this dataset.</p>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

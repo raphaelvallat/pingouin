@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.power_rm_anova &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-power-rm-anova">
+<h1>pingouin.power_rm_anova<a class="headerlink" href="#pingouin-power-rm-anova" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.power_rm_anova">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">power_rm_anova</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta_squared</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.power_rm_anova" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate power, sample size, effect size or significance level of a balanced one-way
+repeated measures ANOVA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>eta_squared</strong><span class="classifier">float</span></dt><dd><p>ANOVA effect size (eta-squared, <span class="math notranslate nohighlight">\(\eta^2\)</span>).</p>
+</dd>
+<dt><strong>m</strong><span class="classifier">int</span></dt><dd><p>Number of repeated measurements.</p>
+</dd>
+<dt><strong>n</strong><span class="classifier">int</span></dt><dd><p>Sample size per measurement. All measurements must have the same sample size.</p>
+</dd>
+<dt><strong>power</strong><span class="classifier">float</span></dt><dd><p>Test power (= 1 - type II error).</p>
+</dd>
+<dt><strong>alpha</strong><span class="classifier">float</span></dt><dd><p>Significance level <span class="math notranslate nohighlight">\(\alpha\)</span> (type I error probability). The default is 0.05.</p>
+</dd>
+<dt><strong>corr</strong><span class="classifier">float</span></dt><dd><p>Average correlation coefficient among repeated measurements. The default is <span class="math notranslate nohighlight">\(r=0.5\)</span>.</p>
+</dd>
+<dt><strong>epsilon</strong><span class="classifier">float</span></dt><dd><p>Epsilon adjustement factor for sphericity. This can be calculated using the
+<a class="reference internal" href="pingouin.epsilon.html#pingouin.epsilon" title="pingouin.epsilon"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.epsilon()</span></code></a> function.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Exactly ONE of the parameters <code class="docutils literal notranslate"><span class="pre">eta_squared</span></code>, <code class="docutils literal notranslate"><span class="pre">m</span></code>, <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">power</span></code> and <code class="docutils literal notranslate"><span class="pre">alpha</span></code> must be
+passed as None, and that parameter is determined from the others.</p>
+<p><code class="docutils literal notranslate"><span class="pre">alpha</span></code> has a default value of 0.05 so None must be explicitly passed if you want to
+compute it.</p>
+<p>Statistical power is the likelihood that a study will detect an effect when there is an effect
+there to be detected. A high statistical power means that there is a low probability of
+concluding that there is no effect when there is one. Statistical power is mainly affected by
+the effect size and the sample size.</p>
+<p>GPower uses the <span class="math notranslate nohighlight">\(f\)</span> effect size instead of the <span class="math notranslate nohighlight">\(\eta^2\)</span>. The formula to convert
+from one to the other are given below:</p>
+<div class="math notranslate nohighlight">
+\[f = \sqrt{\frac{\eta^2}{1 - \eta^2}}\]</div>
+<div class="math notranslate nohighlight">
+\[\eta^2 = \frac{f^2}{1 + f^2}\]</div>
+<p>Using <span class="math notranslate nohighlight">\(\eta^2\)</span>, the sample size <span class="math notranslate nohighlight">\(N\)</span>, the number of repeated measurements
+<span class="math notranslate nohighlight">\(m\)</span>, the epsilon correction factor <span class="math notranslate nohighlight">\(\epsilon\)</span> (see <a class="reference internal" href="pingouin.epsilon.html#pingouin.epsilon" title="pingouin.epsilon"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.epsilon()</span></code></a>),
+and the average correlation between the repeated measures <span class="math notranslate nohighlight">\(c\)</span>, one can then calculate the
+non-centrality parameter as follow:</p>
+<div class="math notranslate nohighlight">
+\[\delta = \frac{f^2 * N * m * \epsilon}{1 - c}\]</div>
+<p>Then the critical value of the non-central F-distribution is computed using the percentile
+point function of the F-distribution with:</p>
+<div class="math notranslate nohighlight">
+\[q = 1 - \alpha\]</div>
+<div class="math notranslate nohighlight">
+\[v_1 = (m - 1) * \epsilon\]</div>
+<div class="math notranslate nohighlight">
+\[v_2 = (N - 1) * v_1\]</div>
+<p>Finally, the power of the ANOVA is calculated using the survival function of the non-central
+F-distribution using the previously computed critical value, non-centrality parameter,
+and degrees of freedom.</p>
+<p><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.brenth.html#scipy.optimize.brenth" title="(in SciPy v1.9.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.brenth()</span></code></a> is used to solve power equations for other variables
+(i.e. sample size, effect size, or significance level). If the solving fails, a nan value is
+returned.</p>
+<p>Results have been tested against GPower and the
+<a class="reference external" href="https://cran.r-project.org/web/packages/pwr/pwr.pdf">pwr</a> R package.</p>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>Compute achieved power</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="kn">import</span> <span class="n">power_rm_anova</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;power: </span><span class="si">%.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">power_rm_anova</span><span class="p">(</span><span class="n">eta_squared</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">20</span><span class="p">))</span>
+<span class="go">power: 0.8913</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Compute required number of groups</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;m: </span><span class="si">%.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">power_rm_anova</span><span class="p">(</span><span class="n">eta_squared</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mf">0.90</span><span class="p">))</span>
+<span class="go">m: 3.1347</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Compute required sample size</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;n: </span><span class="si">%.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">power_rm_anova</span><span class="p">(</span><span class="n">eta_squared</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mf">0.80</span><span class="p">))</span>
+<span class="go">n: 15.9979</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Compute achieved effect size</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;eta-squared: </span><span class="si">%.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">power_rm_anova</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mf">0.80</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">))</span>
+<span class="go">eta-squared: 0.0680</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Compute achieved alpha (significance)</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;alpha: </span><span class="si">%.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">power_rm_anova</span><span class="p">(</span><span class="n">eta_squared</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mf">0.80</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span>
+<span class="go">alpha: 0.0081</span>
+</pre></div>
+</div>
+<p>Let’s take a more concrete example. First, we’ll load a repeated measures
+dataset in wide-format. Each row is an observation (e.g. a subject), and
+each column a successive repeated measurements (e.g t=0, t=1, …).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;rm_anova_wide&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="go">   Before  1 week  2 week  3 week</span>
+<span class="go">0     4.3     5.3     4.8     6.3</span>
+<span class="go">1     3.9     2.3     5.6     4.3</span>
+<span class="go">2     4.5     2.6     4.1     NaN</span>
+<span class="go">3     5.1     4.2     6.0     6.3</span>
+<span class="go">4     3.8     3.6     4.8     6.8</span>
+</pre></div>
+</div>
+<p>Note that this dataset has some missing values. We’ll simply delete any row with one or more
+missing values, and then compute a repeated measures ANOVA:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">rm_anova</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s2">&quot;n2&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">   Source  ddof1  ddof2      F  p-unc     n2    eps</span>
+<span class="go">0  Within      3     24  5.201  0.007  0.346  0.694</span>
+</pre></div>
+</div>
+<p>The repeated measures ANOVA is significant at the 0.05 level. Now, we can
+easily compute the power of the ANOVA with the information in the ANOVA table:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># n is the sample size and m is the number of repeated measures</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">power_rm_anova</span><span class="p">(</span><span class="n">eta_squared</span><span class="o">=</span><span class="mf">0.346</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.694</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">0.99</span>
+</pre></div>
+</div>
+<p>Our ANOVA has a very high statistical power. However, to be even more accurate in our power
+calculation, we should also fill in the average correlation among repeated measurements.
+Since our dataframe is in wide-format (with each column being a successive measurement), this
+can be done by taking the mean of the superdiagonal of the correlation matrix, which is similar
+to manually calculating the correlation between each successive pairwise measurements and then
+taking the mean. Since correlation coefficients are not normally distributed, we use the
+<em>r-to-z</em> transform prior to averaging (<code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.arctanh()</span></code>), and then the <em>z-to-r</em>
+transform (<code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.tanh()</span></code>) to convert back to a correlation coefficient. This gives a
+more precise estimate of the mean.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">corr</span><span class="p">(),</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">avgcorr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctanh</span><span class="p">(</span><span class="n">corr</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">avgcorr</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">-0.1996</span>
+</pre></div>
+</div>
+<p>In this example, we’re using a fake dataset and the average correlation is negative. However,
+it will most likely be positive with real data. Let’s now compute the final power of the
+repeated measures ANOVA:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">power_rm_anova</span><span class="p">(</span><span class="n">eta_squared</span><span class="o">=</span><span class="mf">0.346</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.694</span><span class="p">,</span> <span class="n">corr</span><span class="o">=</span><span class="n">avgcorr</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">0.771</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

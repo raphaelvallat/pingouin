@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.multivariate_ttest &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-multivariate-ttest">
+<h1>pingouin.multivariate_ttest<a class="headerlink" href="#pingouin-multivariate-ttest" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.multivariate_ttest">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">multivariate_ttest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">paired</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.multivariate_ttest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hotelling T-squared test (= multivariate T-test)</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X</strong><span class="classifier">np.array</span></dt><dd><p>First data matrix of shape (n_samples, n_features).</p>
+</dd>
+<dt><strong>Y</strong><span class="classifier">np.array or None</span></dt><dd><p>Second data matrix of shape (n_samples, n_features). If <code class="docutils literal notranslate"><span class="pre">Y</span></code> is a 1D
+array of shape (n_features), a one-sample test is performed where the
+null hypothesis is defined in <code class="docutils literal notranslate"><span class="pre">Y</span></code>. If <code class="docutils literal notranslate"><span class="pre">Y</span></code> is None, a one-sample
+is performed against np.zeros(n_features).</p>
+</dd>
+<dt><strong>paired</strong><span class="classifier">boolean</span></dt><dd><p>Specify whether the two observations are related (i.e. repeated
+measures) or independent. If <code class="docutils literal notranslate"><span class="pre">paired</span></code> is True, <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">Y</span></code> must
+have exactly the same shape.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>stats</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'T2'</span></code>: T-squared value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'F'</span></code>: F-value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'df1'</span></code>: first degree of freedom</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'df2'</span></code>: second degree of freedom</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-val'</span></code>: p-value</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.multivariate_normality.html#pingouin.multivariate_normality" title="pingouin.multivariate_normality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multivariate_normality</span></code></a></dt><dd><p>Multivariate normality test.</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.ttest.html#pingouin.ttest" title="pingouin.ttest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ttest</span></code></a></dt><dd><p>Univariate T-test.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>The Hotelling ‘s T-squared test <a class="reference internal" href="#r1793a0f4e2c3-1" id="id1">[1]</a> is the multivariate counterpart of
+the T-test.</p>
+<p>Rows with missing values are automatically removed using the
+<a class="reference internal" href="pingouin.remove_na.html#pingouin.remove_na" title="pingouin.remove_na"><code class="xref py py-func docutils literal notranslate"><span class="pre">remove_na()</span></code></a> function.</p>
+<p>Tested against the <a class="reference external" href="https://cran.r-project.org/web/packages/Hotelling/Hotelling.pdf">Hotelling</a> R
+package.</p>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r1793a0f4e2c3-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Hotelling, H. The Generalization of Student’s Ratio. Ann. Math.
+Statist. 2 (1931), no. 3, 360–378.</p>
+</dd>
+</dl>
+<p>See also <a class="reference external" href="http://www.real-statistics.com/multivariate-statistics/">http://www.real-statistics.com/multivariate-statistics/</a></p>
+<p class="rubric">Examples</p>
+<p>Two-sample independent Hotelling T-squared test</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;multivariate&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dvs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Fever&#39;</span><span class="p">,</span> <span class="s1">&#39;Pressure&#39;</span><span class="p">,</span> <span class="s1">&#39;Aches&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Condition&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Drug&#39;</span><span class="p">][</span><span class="n">dvs</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Condition&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Placebo&#39;</span><span class="p">][</span><span class="n">dvs</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">multivariate_ttest</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+<span class="go">                 T2         F  df1  df2      pval</span>
+<span class="go">hotelling  4.228679  1.326644    3   32  0.282898</span>
+</pre></div>
+</div>
+<p>Two-sample paired Hotelling T-squared test</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">multivariate_ttest</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">                 T2         F  df1  df2      pval</span>
+<span class="go">hotelling  4.468456  1.314252    3   15  0.306542</span>
+</pre></div>
+</div>
+<p>One-sample Hotelling T-squared test with a specified null hypothesis</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">null_hypothesis_means</span> <span class="o">=</span> <span class="p">[</span><span class="mf">37.5</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">multivariate_ttest</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">null_hypothesis_means</span><span class="p">)</span>
+<span class="go">                   T2          F  df1  df2          pval</span>
+<span class="go">hotelling  253.230991  74.479703    3   15  3.081281e-09</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

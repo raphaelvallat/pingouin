@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.bayesfactor_ttest &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-bayesfactor-ttest">
+<h1>pingouin.bayesfactor_ttest<a class="headerlink" href="#pingouin-bayesfactor-ttest" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.bayesfactor_ttest">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">bayesfactor_ttest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">paired</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'two-sided'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.707</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.bayesfactor_ttest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bayes Factor of a T-test.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>t</strong><span class="classifier">float</span></dt><dd><p>T-value of the T-test</p>
+</dd>
+<dt><strong>nx</strong><span class="classifier">int</span></dt><dd><p>Sample size of first group</p>
+</dd>
+<dt><strong>ny</strong><span class="classifier">int</span></dt><dd><p>Sample size of second group (only needed in case of an independent
+two-sample T-test)</p>
+</dd>
+<dt><strong>paired</strong><span class="classifier">boolean</span></dt><dd><p>Specify whether the two observations are related (i.e. repeated
+measures) or independent.</p>
+</dd>
+<dt><strong>alternative</strong><span class="classifier">string</span></dt><dd><p>Defines the alternative hypothesis, or tail of the test. Must be one of
+“two-sided” (default), “greater” or “less”.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>One-sided Bayes Factor (BF) are simply obtained by
+doubling the two-sided BF, which is not the same behavior
+as R or JASP. Be extra careful when interpretating one-sided BF,
+and if you can, always double-check your results.</p>
+</div>
+</dd>
+<dt><strong>r</strong><span class="classifier">float</span></dt><dd><p>Cauchy scale factor. Smaller values of <code class="docutils literal notranslate"><span class="pre">r</span></code> (e.g. 0.5), may be
+appropriate when small effect sizes are expected a priori; larger
+values of <code class="docutils literal notranslate"><span class="pre">r</span></code> are appropriate when large effect sizes are
+expected (Rouder et al 2009). The default is
+<span class="math notranslate nohighlight">\(\sqrt{2} / 2 \approx 0.707\)</span>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>bf</strong><span class="classifier">float</span></dt><dd><p>Scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor (BF10).
+The Bayes Factor quantifies the evidence in favour of the
+alternative hypothesis.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.ttest.html#pingouin.ttest" title="pingouin.ttest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ttest</span></code></a></dt><dd><p>T-test</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">pairwise_test</span></code></dt><dd><p>Pairwise T-tests</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.bayesfactor_pearson.html#pingouin.bayesfactor_pearson" title="pingouin.bayesfactor_pearson"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bayesfactor_pearson</span></code></a></dt><dd><p>Bayes Factor of a correlation</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.bayesfactor_binom.html#pingouin.bayesfactor_binom" title="pingouin.bayesfactor_binom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bayesfactor_binom</span></code></a></dt><dd><p>Bayes Factor of a binomial test</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>Adapted from a Matlab code found at
+<a class="reference external" href="https://github.com/anne-urai/Tools/tree/master/stats/BayesFactors">https://github.com/anne-urai/Tools/tree/master/stats/BayesFactors</a></p>
+<p>If you would like to compute the Bayes Factor directly from the raw data
+instead of from the T-value, use the <a class="reference internal" href="pingouin.ttest.html#pingouin.ttest" title="pingouin.ttest"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.ttest()</span></code></a> function.</p>
+<p>The JZS Bayes Factor is approximated using the formula described
+in ref <a class="reference internal" href="#r4dd33485f76a-1" id="id1">[1]</a>:</p>
+<div class="math notranslate nohighlight">
+\[\text{BF}_{10} = \frac{\int_{0}^{\infty}(1 + Ngr^2)^{-1/2}
+(1 + \frac{t^2}{v(1 + Ngr^2)})^{-(v+1) / 2}(2\pi)^{-1/2}g^
+{-3/2}e^{-1/2g}}{(1 + \frac{t^2}{v})^{-(v+1) / 2}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(t\)</span> is the T-value, <span class="math notranslate nohighlight">\(v\)</span> the degrees of freedom,
+<span class="math notranslate nohighlight">\(N\)</span> the sample size, <span class="math notranslate nohighlight">\(r\)</span> the Cauchy scale factor
+(= prior on effect size) and <span class="math notranslate nohighlight">\(g\)</span> is is an auxiliary variable
+that is integrated out numerically.</p>
+<p>Results have been validated against JASP and the BayesFactor R package.</p>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r4dd33485f76a-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,
+2009. Bayesian t tests for accepting and rejecting the null hypothesis.
+Psychon. Bull. Rev. 16, 225–237. <a class="reference external" href="https://doi.org/10.3758/PBR.16.2.225">https://doi.org/10.3758/PBR.16.2.225</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>Bayes Factor of an independent two-sample T-test</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="kn">import</span> <span class="n">bayesfactor_ttest</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bf</span> <span class="o">=</span> <span class="n">bayesfactor_ttest</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bayes Factor: </span><span class="si">%.3f</span><span class="s2"> (two-sample independent)&quot;</span> <span class="o">%</span> <span class="n">bf</span><span class="p">)</span>
+<span class="go">Bayes Factor: 26.743 (two-sample independent)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Bayes Factor of a paired two-sample T-test</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bf</span> <span class="o">=</span> <span class="n">bayesfactor_ttest</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bayes Factor: </span><span class="si">%.3f</span><span class="s2"> (two-sample paired)&quot;</span> <span class="o">%</span> <span class="n">bf</span><span class="p">)</span>
+<span class="go">Bayes Factor: 17.185 (two-sample paired)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Now specifying the direction of the test</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tval</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3.5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bf_greater</span> <span class="o">=</span> <span class="n">bayesfactor_ttest</span><span class="p">(</span><span class="n">tval</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s1">&#39;greater&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bf_less</span> <span class="o">=</span> <span class="n">bayesfactor_ttest</span><span class="p">(</span><span class="n">tval</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s1">&#39;less&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BF10-greater: </span><span class="si">%.3f</span><span class="s2"> | BF10-less: </span><span class="si">%.3f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bf_greater</span><span class="p">,</span> <span class="n">bf_less</span><span class="p">))</span>
+<span class="go">BF10-greater: 0.029 | BF10-less: 34.369</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.multicomp &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-multicomp">
+<h1>pingouin.multicomp<a class="headerlink" href="#pingouin-multicomp" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.multicomp">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">multicomp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pvals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'holm'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.multicomp" title="Permalink to this definition">¶</a></dt>
+<dd><p>P-values correction for multiple comparisons.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>pvals</strong><span class="classifier">array_like</span></dt><dd><p>Uncorrected p-values.</p>
+</dd>
+<dt><strong>alpha</strong><span class="classifier">float</span></dt><dd><p>Significance level.</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">string</span></dt><dd><p>Method used for testing and adjustment of p-values. Can be either the
+full name or initial letters. Available methods are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'bonf'</span></code>: one-step Bonferroni correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'sidak'</span></code>: one-step Sidak correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'holm'</span></code>: step-down method using Bonferroni adjustments</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'fdr_bh'</span></code>: Benjamini/Hochberg FDR correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'fdr_by'</span></code>: Benjamini/Yekutieli FDR correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'none'</span></code>: pass-through option (no correction applied)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>reject</strong><span class="classifier">array, boolean</span></dt><dd><p>True for hypothesis that can be rejected for given alpha.</p>
+</dd>
+<dt><strong>pvals_corrected</strong><span class="classifier">array</span></dt><dd><p>P-values corrected for multiple testing.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This function is similar to the <a class="reference external" href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html">p.adjust</a>
+R function.</p>
+<p>The correction methods include the Bonferroni correction (<code class="docutils literal notranslate"><span class="pre">'bonf'</span></code>)
+in which the p-values are multiplied by the number of comparisons.
+Less conservative methods are also included such as Sidak (1967)
+(<code class="docutils literal notranslate"><span class="pre">'sidak'</span></code>), Holm (1979) (<code class="docutils literal notranslate"><span class="pre">'holm'</span></code>), Benjamini &amp; Hochberg (1995)
+(<code class="docutils literal notranslate"><span class="pre">'fdr_bh'</span></code>), and Benjamini &amp; Yekutieli (2001) (<code class="docutils literal notranslate"><span class="pre">'fdr_by'</span></code>),
+respectively.</p>
+<p>The first three methods are designed to give strong control of the
+family-wise error rate. Note that the Holm’s method is usually preferred.
+The <code class="docutils literal notranslate"><span class="pre">'fdr_bh'</span></code> and <code class="docutils literal notranslate"><span class="pre">'fdr_by'</span></code> methods control the false discovery rate,
+i.e. the expected proportion of false discoveries amongst the rejected
+hypotheses. The false discovery rate is a less stringent condition than
+the family-wise error rate, so these methods are more powerful than the
+others.</p>
+<p>The <strong>Bonferroni</strong> <a class="reference internal" href="#r0a0a7abc33ce-1" id="id1">[1]</a> adjusted p-values are defined as:</p>
+<div class="math notranslate nohighlight">
+\[\widetilde {p}_{{(i)}}= n \cdot p_{{(i)}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(n\)</span> is the number of <em>finite</em> p-values (i.e. excluding NaN).</p>
+<p>The <strong>Sidak</strong> <a class="reference internal" href="#r0a0a7abc33ce-2" id="id2">[2]</a> adjusted p-values are defined as:</p>
+<div class="math notranslate nohighlight">
+\[\widetilde {p}_{{(i)}}= 1 - (1 - p_{{(i)}})^{n}\]</div>
+<p>The <strong>Holm</strong> <a class="reference internal" href="#r0a0a7abc33ce-3" id="id3">[3]</a> adjusted p-values are the running maximum of the sorted
+p-values divided by the corresponding increasing alpha level:</p>
+<div class="math notranslate nohighlight">
+\[\widetilde {p}_{{(i)}}=\max _{{j\leq i}}\left\{(n-j+1)p_{{(j)}}
+\right\}_{{1}}\]</div>
+<p>The <strong>Benjamini–Hochberg</strong> procedure (BH step-up procedure, <a class="reference internal" href="#r0a0a7abc33ce-4" id="id4">[4]</a>)
+controls the false discovery rate (FDR) at level <span class="math notranslate nohighlight">\(\alpha\)</span>.
+It works as follows:</p>
+<p>1. For a given <span class="math notranslate nohighlight">\(\alpha\)</span>, find the largest <span class="math notranslate nohighlight">\(k\)</span> such that
+<span class="math notranslate nohighlight">\(P_{(k)}\leq \frac {k}{n}\alpha.\)</span></p>
+<p>2. Reject the null hypothesis for all
+<span class="math notranslate nohighlight">\(H_{(i)}\)</span> for <span class="math notranslate nohighlight">\(i = 1, \ldots, k\)</span>.</p>
+<p>The BH procedure is valid when the <span class="math notranslate nohighlight">\(n\)</span> tests are independent, and
+also in various scenarios of dependence, but is not universally valid.</p>
+<p>The <strong>Benjamini–Yekutieli</strong> procedure (BY, <a class="reference internal" href="#r0a0a7abc33ce-5" id="id5">[5]</a>) controls the FDR under
+arbitrary dependence assumptions. This refinement modifies the threshold
+and finds the largest <span class="math notranslate nohighlight">\(k\)</span> such that:</p>
+<div class="math notranslate nohighlight">
+\[P_{(k)} \leq \frac{k}{n \cdot c(n)} \alpha\]</div>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r0a0a7abc33ce-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Bonferroni, C. E. (1935). Il calcolo delle assicurazioni su gruppi
+di teste. Studi in onore del professore salvatore ortu carboni, 13-60.</p>
+</dd>
+<dt class="label" id="r0a0a7abc33ce-2"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Šidák, Z. K. (1967). “Rectangular Confidence Regions for the Means
+of Multivariate Normal Distributions”. Journal of the American
+Statistical Association. 62 (318): 626–633.</p>
+</dd>
+<dt class="label" id="r0a0a7abc33ce-3"><span class="brackets"><a class="fn-backref" href="#id3">3</a></span></dt>
+<dd><p>Holm, S. (1979). A simple sequentially rejective multiple test
+procedure. Scandinavian Journal of Statistics, 6, 65–70.</p>
+</dd>
+<dt class="label" id="r0a0a7abc33ce-4"><span class="brackets"><a class="fn-backref" href="#id4">4</a></span></dt>
+<dd><p>Benjamini, Y., and Hochberg, Y. (1995). Controlling the false
+discovery rate: a practical and powerful approach to multiple testing.
+Journal of the Royal Statistical Society Series B, 57, 289–300.</p>
+</dd>
+<dt class="label" id="r0a0a7abc33ce-5"><span class="brackets"><a class="fn-backref" href="#id5">5</a></span></dt>
+<dd><p>Benjamini, Y., and Yekutieli, D. (2001). The control of the false
+discovery rate in multiple testing under dependency. Annals of
+Statistics, 29, 1165–1188.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>FDR correction of an array of p-values</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pvals</span> <span class="o">=</span> <span class="p">[</span><span class="mf">.50</span><span class="p">,</span> <span class="mf">.003</span><span class="p">,</span> <span class="mf">.32</span><span class="p">,</span> <span class="mf">.054</span><span class="p">,</span> <span class="mf">.0003</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corr</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">multicomp</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corr</span><span class="p">)</span>
+<span class="go">[False  True False False  True] [0.5    0.0075 0.4    0.09   0.0015]</span>
+</pre></div>
+</div>
+<p>Holm correction with missing values</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pvals</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corr</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">multicomp</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;holm&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">reject</span><span class="p">,</span> <span class="n">pvals_corr</span><span class="p">)</span>
+<span class="go">[False  True False False  True] [0.5    0.009     nan 0.108  0.0012]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

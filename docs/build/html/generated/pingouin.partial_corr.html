@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.partial_corr &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-partial-corr">
+<h1>pingouin.partial_corr<a class="headerlink" href="#pingouin-partial-corr" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.partial_corr">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">partial_corr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_covar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_covar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'two-sided'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pearson'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.partial_corr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Partial and semi-partial correlation.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>Pandas Dataframe. Note that this function can also directly be used
+as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> method, in which case this argument
+is no longer needed.</p>
+</dd>
+<dt><strong>x, y</strong><span class="classifier">string</span></dt><dd><p>x and y. Must be names of columns in <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p>
+</dd>
+<dt><strong>covar</strong><span class="classifier">string or list</span></dt><dd><p>Covariate(s). Must be a names of columns in <code class="docutils literal notranslate"><span class="pre">data</span></code>. Use a list if
+there are two or more covariates.</p>
+</dd>
+<dt><strong>x_covar</strong><span class="classifier">string or list</span></dt><dd><p>Covariate(s) for the <code class="docutils literal notranslate"><span class="pre">x</span></code> variable. This is used to compute
+semi-partial correlation (i.e. the effect of <code class="docutils literal notranslate"><span class="pre">x_covar</span></code> is removed
+from <code class="docutils literal notranslate"><span class="pre">x</span></code> but not from <code class="docutils literal notranslate"><span class="pre">y</span></code>). Only one of <code class="docutils literal notranslate"><span class="pre">covar</span></code>,  <code class="docutils literal notranslate"><span class="pre">x_covar</span></code> and
+<code class="docutils literal notranslate"><span class="pre">y_covar</span></code> can be specified.</p>
+</dd>
+<dt><strong>y_covar</strong><span class="classifier">string or list</span></dt><dd><p>Covariate(s) for the <code class="docutils literal notranslate"><span class="pre">y</span></code> variable. This is used to compute
+semi-partial correlation (i.e. the effect of <code class="docutils literal notranslate"><span class="pre">y_covar</span></code> is removed
+from <code class="docutils literal notranslate"><span class="pre">y</span></code> but not from <code class="docutils literal notranslate"><span class="pre">x</span></code>). Only one of <code class="docutils literal notranslate"><span class="pre">covar</span></code>,  <code class="docutils literal notranslate"><span class="pre">x_covar</span></code> and
+<code class="docutils literal notranslate"><span class="pre">y_covar</span></code> can be specified.</p>
+</dd>
+<dt><strong>alternative</strong><span class="classifier">string</span></dt><dd><p>Defines the alternative hypothesis, or tail of the partial correlation. Must be one of
+“two-sided” (default), “greater” or “less”. Both “greater” and “less” return a one-sided
+p-value. “greater” tests against the alternative hypothesis that the partial correlation is
+positive (greater than zero), “less” tests against the hypothesis that the partial
+correlation is negative.</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">string</span></dt><dd><p>Correlation type:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'pearson'</span></code>: Pearson <span class="math notranslate nohighlight">\(r\)</span> product-moment correlation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'spearman'</span></code>: Spearman <span class="math notranslate nohighlight">\(\rho\)</span> rank-order correlation</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>stats</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'n'</span></code>: Sample size (after removal of missing values)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'r'</span></code>: Partial correlation coefficient</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'CI95'</span></code>: 95% parametric confidence intervals around <span class="math notranslate nohighlight">\(r\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-val'</span></code>: p-value</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.corr.html#pingouin.corr" title="pingouin.corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr</span></code></a>, <a class="reference internal" href="pingouin.pcorr.html#pingouin.pcorr" title="pingouin.pcorr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcorr</span></code></a>, <a class="reference internal" href="pingouin.pairwise_corr.html#pingouin.pairwise_corr" title="pingouin.pairwise_corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pairwise_corr</span></code></a>, <a class="reference internal" href="pingouin.rm_corr.html#pingouin.rm_corr" title="pingouin.rm_corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rm_corr</span></code></a></dt><dd></dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>Partial correlation <a class="reference internal" href="#rb64e1363efeb-1" id="id1">[1]</a> measures the degree of association between <code class="docutils literal notranslate"><span class="pre">x</span></code>
+and <code class="docutils literal notranslate"><span class="pre">y</span></code>, after removing the effect of one or more controlling variables
+(<code class="docutils literal notranslate"><span class="pre">covar</span></code>, or <span class="math notranslate nohighlight">\(Z\)</span>). Practically, this is achieved by calculating the
+correlation coefficient between the residuals of two linear regressions:</p>
+<div class="math notranslate nohighlight">
+\[x \sim Z, y \sim Z\]</div>
+<p>Like the correlation coefficient, the partial correlation
+coefficient takes on a value in the range from –1 to 1, where 1 indicates a
+perfect positive association.</p>
+<p>The semipartial correlation is similar to the partial correlation,
+with the exception that the set of controlling variables is only
+removed for either <code class="docutils literal notranslate"><span class="pre">x</span></code> or <code class="docutils literal notranslate"><span class="pre">y</span></code>, but not both.</p>
+<p>Pingouin uses the method described in <a class="reference internal" href="#rb64e1363efeb-2" id="id2">[2]</a> to calculate the (semi)partial
+correlation coefficients and associated p-values. This method is based on
+the inverse covariance matrix and is significantly faster than the
+traditional regression-based method. Results have been tested against the
+<a class="reference external" href="https://cran.r-project.org/web/packages/ppcor/index.html">ppcor</a>
+R package.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Rows with missing values are automatically removed from
+data.</p>
+</div>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="rb64e1363efeb-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Partial_correlation">https://en.wikipedia.org/wiki/Partial_correlation</a></p>
+</dd>
+<dt class="label" id="rb64e1363efeb-2"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p><a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4681537/">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4681537/</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>Partial correlation with one covariate</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;partial_corr&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">partial_corr</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="s1">&#39;cv1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">          n      r         CI95%  p-val</span>
+<span class="go">pearson  30  0.568  [0.25, 0.77]  0.001</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Spearman partial correlation with several covariates</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Partial correlation of x and y controlling for cv1, cv2 and cv3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">partial_corr</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;cv1&#39;</span><span class="p">,</span> <span class="s1">&#39;cv2&#39;</span><span class="p">,</span> <span class="s1">&#39;cv3&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                <span class="n">method</span><span class="o">=</span><span class="s1">&#39;spearman&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">           n      r         CI95%  p-val</span>
+<span class="go">spearman  30  0.521  [0.18, 0.75]  0.005</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Same but one-sided test</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">partial_corr</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;cv1&#39;</span><span class="p">,</span> <span class="s1">&#39;cv2&#39;</span><span class="p">,</span> <span class="s1">&#39;cv3&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                <span class="n">alternative</span><span class="o">=</span><span class="s2">&quot;greater&quot;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;spearman&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">           n      r        CI95%  p-val</span>
+<span class="go">spearman  30  0.521  [0.24, 1.0]  0.003</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">partial_corr</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;cv1&#39;</span><span class="p">,</span> <span class="s1">&#39;cv2&#39;</span><span class="p">,</span> <span class="s1">&#39;cv3&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                <span class="n">alternative</span><span class="o">=</span><span class="s2">&quot;less&quot;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;spearman&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">           n      r         CI95%  p-val</span>
+<span class="go">spearman  30  0.521  [-1.0, 0.72]  0.997</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>As a pandas method</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">partial_corr</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;cv1&#39;</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;spearman&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">           n      r         CI95%  p-val</span>
+<span class="go">spearman  30  0.578  [0.27, 0.78]  0.001</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Partial correlation matrix (returns only the correlation coefficients)</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">pcorr</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">         x      y    cv1    cv2    cv3</span>
+<span class="go">x    1.000  0.493 -0.095  0.130 -0.385</span>
+<span class="go">y    0.493  1.000 -0.007  0.104 -0.002</span>
+<span class="go">cv1 -0.095 -0.007  1.000 -0.241 -0.470</span>
+<span class="go">cv2  0.130  0.104 -0.241  1.000 -0.118</span>
+<span class="go">cv3 -0.385 -0.002 -0.470 -0.118  1.000</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li><p>Semi-partial correlation on x</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">partial_corr</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">x_covar</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;cv1&#39;</span><span class="p">,</span> <span class="s1">&#39;cv2&#39;</span><span class="p">,</span> <span class="s1">&#39;cv3&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">          n      r        CI95%  p-val</span>
+<span class="go">pearson  30  0.463  [0.1, 0.72]  0.015</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

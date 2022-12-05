@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.power_ttest &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-power-ttest">
+<h1>pingouin.power_ttest<a class="headerlink" href="#pingouin-power-ttest" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.power_ttest">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">power_ttest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contrast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'two-samples'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'two-sided'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.power_ttest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate power, sample size, effect size or significance level of a one-sample T-test,
+a paired T-test or an independent two-samples T-test with equal sample sizes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>d</strong><span class="classifier">float</span></dt><dd><p>Cohen d effect size</p>
+</dd>
+<dt><strong>n</strong><span class="classifier">int</span></dt><dd><p>Sample size
+In case of a two-sample T-test, sample sizes are assumed to be equal.
+Otherwise, see the <a class="reference internal" href="pingouin.power_ttest2n.html#pingouin.power_ttest2n" title="pingouin.power_ttest2n"><code class="xref py py-func docutils literal notranslate"><span class="pre">power_ttest2n()</span></code></a> function.</p>
+</dd>
+<dt><strong>power</strong><span class="classifier">float</span></dt><dd><p>Test power (= 1 - type II error).</p>
+</dd>
+<dt><strong>alpha</strong><span class="classifier">float</span></dt><dd><p>Significance level (type I error probability).
+The default is 0.05.</p>
+</dd>
+<dt><strong>contrast</strong><span class="classifier">str</span></dt><dd><p>Can be <cite>“one-sample”</cite>, <cite>“two-samples”</cite> or <cite>“paired”</cite>.
+Note that <cite>“one-sample”</cite> and <cite>“paired”</cite> have the same behavior.</p>
+</dd>
+<dt><strong>alternative</strong><span class="classifier">string</span></dt><dd><p>Defines the alternative hypothesis, or tail of the test. Must be one of
+“two-sided” (default), “greater” or “less”.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Exactly ONE of the parameters <code class="docutils literal notranslate"><span class="pre">d</span></code>, <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">power</span></code> and <code class="docutils literal notranslate"><span class="pre">alpha</span></code> must be passed as None, and
+that parameter is determined from the others.</p>
+<p>For a paired T-test, the sample size <code class="docutils literal notranslate"><span class="pre">n</span></code> corresponds to the number of pairs. For an
+independent two-sample T-test with equal sample sizes, <code class="docutils literal notranslate"><span class="pre">n</span></code> corresponds to the sample size of
+each group (i.e. number of observations in one group). If the sample sizes are unequal, please
+use the <a class="reference internal" href="pingouin.power_ttest2n.html#pingouin.power_ttest2n" title="pingouin.power_ttest2n"><code class="xref py py-func docutils literal notranslate"><span class="pre">power_ttest2n()</span></code></a> function instead.</p>
+<p><code class="docutils literal notranslate"><span class="pre">alpha</span></code> has a default value of 0.05 so None must be explicitly passed if you want to
+compute it.</p>
+<p>This function is a Python adaptation of the <cite>pwr.t.test</cite> function implemented in the
+<a class="reference external" href="https://cran.r-project.org/web/packages/pwr/pwr.pdf">pwr</a> R package.</p>
+<p>Statistical power is the likelihood that a study will detect an effect when there is an effect
+there to be detected. A high statistical power means that there is a low probability of
+concluding that there is no effect when there is one. Statistical power is mainly affected by
+the effect size and the sample size.</p>
+<p>The first step is to use the Cohen’s d to calculate the non-centrality parameter
+<span class="math notranslate nohighlight">\(\delta\)</span> and degrees of freedom <span class="math notranslate nohighlight">\(v\)</span>. In case of paired groups, this is:</p>
+<div class="math notranslate nohighlight">
+\[\delta = d * \sqrt n\]</div>
+<div class="math notranslate nohighlight">
+\[v = n - 1\]</div>
+<p>and in case of independent groups with equal sample sizes:</p>
+<div class="math notranslate nohighlight">
+\[\delta = d * \sqrt{\frac{n}{2}}\]</div>
+<div class="math notranslate nohighlight">
+\[v = (n - 1) * 2\]</div>
+<p>where <span class="math notranslate nohighlight">\(d\)</span> is the Cohen d and <span class="math notranslate nohighlight">\(n\)</span> the sample size.</p>
+<p>The critical value is then found using the percent point function of the T distribution with
+<span class="math notranslate nohighlight">\(q = 1 - alpha\)</span> and <span class="math notranslate nohighlight">\(v\)</span> degrees of freedom.</p>
+<p>Finally, the power of the test is given by the survival function of the non-central
+distribution using the previously calculated critical value, degrees of freedom and
+non-centrality parameter.</p>
+<p><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.brenth.html#scipy.optimize.brenth" title="(in SciPy v1.9.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.brenth()</span></code></a> is used to solve power equations for other variables (i.e.
+sample size, effect size, or significance level). If the solving fails, a nan value is
+returned.</p>
+<p>Results have been tested against GPower and the
+<a class="reference external" href="https://cran.r-project.org/web/packages/pwr/pwr.pdf">pwr</a> R package.</p>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>Compute power of a one-sample T-test given <code class="docutils literal notranslate"><span class="pre">d</span></code>, <code class="docutils literal notranslate"><span class="pre">n</span></code> and <code class="docutils literal notranslate"><span class="pre">alpha</span></code></p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="kn">import</span> <span class="n">power_ttest</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;power: </span><span class="si">%.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">power_ttest</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">contrast</span><span class="o">=</span><span class="s1">&#39;one-sample&#39;</span><span class="p">))</span>
+<span class="go">power: 0.5645</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Compute required sample size given <code class="docutils literal notranslate"><span class="pre">d</span></code>, <code class="docutils literal notranslate"><span class="pre">power</span></code> and <code class="docutils literal notranslate"><span class="pre">alpha</span></code></p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;n: </span><span class="si">%.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">power_ttest</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mf">0.80</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s1">&#39;greater&#39;</span><span class="p">))</span>
+<span class="go">n: 50.1508</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Compute achieved <code class="docutils literal notranslate"><span class="pre">d</span></code> given <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">power</span></code> and <code class="docutils literal notranslate"><span class="pre">alpha</span></code> level</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;d: </span><span class="si">%.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">power_ttest</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mf">0.80</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">contrast</span><span class="o">=</span><span class="s1">&#39;paired&#39;</span><span class="p">))</span>
+<span class="go">d: 0.6604</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Compute achieved alpha level given <code class="docutils literal notranslate"><span class="pre">d</span></code>, <code class="docutils literal notranslate"><span class="pre">n</span></code> and <code class="docutils literal notranslate"><span class="pre">power</span></code></p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;alpha: </span><span class="si">%.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">power_ttest</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mf">0.80</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span>
+<span class="go">alpha: 0.4430</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>One-sided tests</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="kn">import</span> <span class="n">power_ttest</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;power: </span><span class="si">%.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">power_ttest</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s1">&#39;greater&#39;</span><span class="p">))</span>
+<span class="go">power: 0.4634</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;power: </span><span class="si">%.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">power_ttest</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s1">&#39;less&#39;</span><span class="p">))</span>
+<span class="go">power: 0.0007</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

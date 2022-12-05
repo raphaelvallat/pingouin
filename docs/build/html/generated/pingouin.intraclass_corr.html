@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.intraclass_corr &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-intraclass-corr">
+<h1>pingouin.intraclass_corr<a class="headerlink" href="#pingouin-intraclass-corr" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.intraclass_corr">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">intraclass_corr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'raise'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.intraclass_corr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intraclass correlation.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>Long-format dataframe. Data must be fully balanced.</p>
+</dd>
+<dt><strong>targets</strong><span class="classifier">string</span></dt><dd><p>Name of column in <code class="docutils literal notranslate"><span class="pre">data</span></code> containing the targets.</p>
+</dd>
+<dt><strong>raters</strong><span class="classifier">string</span></dt><dd><p>Name of column in <code class="docutils literal notranslate"><span class="pre">data</span></code> containing the raters.</p>
+</dd>
+<dt><strong>ratings</strong><span class="classifier">string</span></dt><dd><p>Name of column in <code class="docutils literal notranslate"><span class="pre">data</span></code> containing the ratings.</p>
+</dd>
+<dt><strong>nan_policy</strong><span class="classifier">str</span></dt><dd><p>Defines how to handle when input contains missing values (nan).
+<cite>‘raise’</cite> (default) throws an error, <cite>‘omit’</cite> performs the calculations
+after deleting target(s) with one or more missing values (= listwise
+deletion).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.3.0.</span></p>
+</div>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>stats</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>Output dataframe:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'Type'</span></code>: ICC type</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'Description'</span></code>: description of the ICC</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ICC'</span></code>: intraclass correlation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'F'</span></code>: F statistic</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'df1'</span></code>: numerator degree of freedom</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'df2'</span></code>: denominator degree of freedom</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'pval'</span></code>: p-value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'CI95%'</span></code>: 95% confidence intervals around the ICC</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The intraclass correlation (ICC, <a class="reference internal" href="#rc6e049bc6922-1" id="id1">[1]</a>) assesses the reliability of ratings
+by comparing the variability of different ratings of the same subject to
+the total variation across all ratings and all subjects.</p>
+<p>Shrout and Fleiss (1979) <a class="reference internal" href="#rc6e049bc6922-2" id="id2">[2]</a> describe six cases of reliability of ratings
+done by <span class="math notranslate nohighlight">\(k\)</span> raters on <span class="math notranslate nohighlight">\(n\)</span> targets. Pingouin returns all six
+cases with corresponding F and p-values, as well as 95% confidence
+intervals.</p>
+<p>From the documentation of the ICC function in the <a class="reference external" href="https://cran.r-project.org/web/packages/psych/psych.pdf">psych</a> R package:</p>
+<ul class="simple">
+<li><p><strong>ICC1</strong>: Each target is rated by a different rater and the raters are
+selected at random. This is a one-way ANOVA fixed effects model.</p></li>
+<li><p><strong>ICC2</strong>: A random sample of <span class="math notranslate nohighlight">\(k\)</span> raters rate each target. The
+measure is one of absolute agreement in the ratings. ICC1 is sensitive
+to differences in means between raters and is a measure of absolute
+agreement.</p></li>
+<li><p><strong>ICC3</strong>: A fixed set of <span class="math notranslate nohighlight">\(k\)</span> raters rate each target. There is no
+generalization to a larger population of raters. ICC2 and ICC3 remove
+mean differences between raters, but are sensitive to interactions.
+The difference between ICC2 and ICC3 is whether raters are seen as fixed
+or random effects.</p></li>
+</ul>
+<p>Then, for each of these cases, the reliability can either be estimated for
+a single rating or for the average of <span class="math notranslate nohighlight">\(k\)</span> ratings. The 1 rating case
+is equivalent to the average intercorrelation, while the <span class="math notranslate nohighlight">\(k\)</span> rating
+case is equivalent to the Spearman Brown adjusted reliability.
+<strong>ICC1k</strong>, <strong>ICC2k</strong>, <strong>ICC3K</strong> reflect the means of <span class="math notranslate nohighlight">\(k\)</span> raters.</p>
+<p>This function has been tested against the ICC function of the R psych
+package. Note however that contrarily to the R implementation, the
+current implementation does not use linear mixed effect but regular ANOVA,
+which means that it only works with complete-case data (no missing values).</p>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="rc6e049bc6922-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p><a class="reference external" href="http://www.real-statistics.com/reliability/intraclass-correlation/">http://www.real-statistics.com/reliability/intraclass-correlation/</a></p>
+</dd>
+<dt class="label" id="rc6e049bc6922-2"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Shrout, P. E., &amp; Fleiss, J. L. (1979). Intraclass correlations:
+uses in assessing rater reliability. Psychological bulletin, 86(2),
+420.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>ICCs of wine quality assessed by 4 judges.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;icc&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">icc</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">intraclass_corr</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">targets</span><span class="o">=</span><span class="s1">&#39;Wine&#39;</span><span class="p">,</span> <span class="n">raters</span><span class="o">=</span><span class="s1">&#39;Judge&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                         <span class="n">ratings</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">icc</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;Type&quot;</span><span class="p">)</span>
+<span class="go">                   Description    ICC       F  df1  df2  pval         CI95%</span>
+<span class="go">Type</span>
+<span class="go">ICC1    Single raters absolute  0.728  11.680    7   24   0.0  [0.43, 0.93]</span>
+<span class="go">ICC2      Single random raters  0.728  11.787    7   21   0.0  [0.43, 0.93]</span>
+<span class="go">ICC3       Single fixed raters  0.729  11.787    7   21   0.0  [0.43, 0.93]</span>
+<span class="go">ICC1k  Average raters absolute  0.914  11.680    7   24   0.0  [0.75, 0.98]</span>
+<span class="go">ICC2k    Average random raters  0.914  11.787    7   21   0.0  [0.75, 0.98]</span>
+<span class="go">ICC3k     Average fixed raters  0.915  11.787    7   21   0.0  [0.75, 0.98]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

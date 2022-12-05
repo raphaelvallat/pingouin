@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.friedman &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-friedman">
+<h1>pingouin.friedman<a class="headerlink" href="#pingouin-friedman" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.friedman">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">friedman</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">within</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'chisq'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.friedman" title="Permalink to this definition">¶</a></dt>
+<dd><p>Friedman test for repeated measurements.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>DataFrame. Both wide and long-format dataframe are supported for this test.</p>
+</dd>
+<dt><strong>dv</strong><span class="classifier">string</span></dt><dd><p>Name of column containing the dependent variable (only required if <code class="docutils literal notranslate"><span class="pre">data</span></code> is in
+long format).</p>
+</dd>
+<dt><strong>within</strong><span class="classifier">string</span></dt><dd><p>Name of column containing the within-subject factor (only required if <code class="docutils literal notranslate"><span class="pre">data</span></code> is in
+long format). Two or more within-factor are not currently supported.</p>
+</dd>
+<dt><strong>subject</strong><span class="classifier">string</span></dt><dd><p>Name of column containing the subject/rater identifier (only required if <code class="docutils literal notranslate"><span class="pre">data</span></code> is in
+long format).</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">string</span></dt><dd><p>Statistical test to perform. Must be <code class="docutils literal notranslate"><span class="pre">'chisq'</span></code> (chi-square test) or <code class="docutils literal notranslate"><span class="pre">'f'</span></code> (F test).
+See notes below for explanation.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>stats</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'W'</span></code>: Kendall’s coefficient of concordance, corrected for ties</p></li>
+</ul>
+<p>If <code class="docutils literal notranslate"><span class="pre">method='chisq'</span></code></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'Q'</span></code>: The Friedman chi-square statistic, corrected for ties</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'dof'</span></code>: degrees of freedom</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-unc'</span></code>: Uncorrected p-value of the chi squared test</p></li>
+</ul>
+<p>If <code class="docutils literal notranslate"><span class="pre">method='f'</span></code></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'F'</span></code>: The Friedman F statistic, corrected for ties</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'dof1'</span></code>: degrees of freedom of the numerator</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'dof2'</span></code>: degrees of freedom of the denominator</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-unc'</span></code>: Uncorrected p-value of the F test</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The Friedman test is used for non-parametric (rank-based) one-way repeated measures ANOVA.</p>
+<p>It is equivalent to the test of significance of Kendalls’s
+coefficient of concordance (Kendall’s W). Most commonly a Q statistic,
+which has asymptotical chi-squared distribution, is computed and used for
+testing. However, the chi-squared test tend to be overly conservative for small numbers
+of samples and/or repeated measures, in which case a F-test is more adequate <a class="reference internal" href="#r50eabb57bfc8-1" id="id1">[1]</a>.</p>
+<p>Data can be in wide or long format. Missing values are automatically removed using a
+strict listwise approach (= complete-case analysis). In other words, any subject with one or
+more missing value(s) is completely removed from the dataframe prior to running the
+test.</p>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r50eabb57bfc8-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Marozzi, M. (2014). Testing for concordance between several
+criteria. Journal of Statistical Computation and Simulation,
+84(9), 1843–1850. <a class="reference external" href="https://doi.org/10.1080/00949655.2013.766189">https://doi.org/10.1080/00949655.2013.766189</a></p>
+</dd>
+<dt class="label" id="r50eabb57bfc8-2"><span class="brackets">2</span></dt>
+<dd><p><a class="reference external" href="https://www.real-statistics.com/anova-repeated-measures/friedman-test/">https://www.real-statistics.com/anova-repeated-measures/friedman-test/</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Compute the Friedman test for repeated measurements, using a wide-format dataframe</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>   <span class="s1">&#39;white&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">11</span><span class="p">:</span> <span class="mi">7</span><span class="p">},</span>
+<span class="gp">... </span>   <span class="s1">&#39;red&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">7</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">11</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+<span class="gp">... </span>   <span class="s1">&#39;rose&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">11</span><span class="p">:</span> <span class="mi">3</span><span class="p">}})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">friedman</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+<span class="go">          Source         W  ddof1    Q     p-unc</span>
+<span class="go">Friedman  Within  0.083333      2  2.0  0.367879</span>
+</pre></div>
+</div>
+<p>Compare with SciPy</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">friedmanchisquare</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">friedmanchisquare</span><span class="p">(</span><span class="o">*</span><span class="n">df</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<span class="go">FriedmanchisquareResult(statistic=1.9999999999999893, pvalue=0.3678794411714444)</span>
+</pre></div>
+</div>
+<p>Using a long-format dataframe</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df_long</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">ignore_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">friedman</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df_long</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s2">&quot;variable&quot;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+<span class="go">            Source         W  ddof1    Q     p-unc</span>
+<span class="go">Friedman  variable  0.083333      2  2.0  0.367879</span>
+</pre></div>
+</div>
+<p>Using the F-test method</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">friedman</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;f&quot;</span><span class="p">)</span>
+<span class="go">          Source         W     ddof1      ddof2    F     p-unc</span>
+<span class="go">Friedman  Within  0.083333  1.833333  20.166667  1.0  0.378959</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

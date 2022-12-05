@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.compute_bootci &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-compute-bootci">
+<h1>pingouin.compute_bootci<a class="headerlink" href="#pingouin-compute-bootci" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.compute_bootci">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">compute_bootci</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cper'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">paired</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_boot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.compute_bootci" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bootstrapped confidence intervals of univariate and bivariate functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">1D-array or list</span></dt><dd><p>First sample. Required for both bivariate and univariate functions.</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">1D-array, list, or None</span></dt><dd><p>Second sample. Required only for bivariate functions.</p>
+</dd>
+<dt><strong>func</strong><span class="classifier">str or custom function</span></dt><dd><p>Function to compute the bootstrapped statistic.
+Accepted string values are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'pearson'</span></code>: Pearson correlation (bivariate, paired x and y)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'spearman'</span></code>: Spearman correlation (bivariate, paired x and y)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'cohen'</span></code>: Cohen d effect size (bivariate, paired or unpaired x and y)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'hedges'</span></code>: Hedges g effect size (bivariate, paired or unpaired x and y)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'mean'</span></code>: Mean (univariate = only x)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'std'</span></code>: Standard deviation (univariate)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'var'</span></code>: Variance (univariate)</p></li>
+</ul>
+</dd>
+<dt><strong>method</strong><span class="classifier">str</span></dt><dd><p>Method to compute the confidence intervals (see Notes):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'cper'</span></code>: Bias-corrected percentile method (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'norm'</span></code>: Normal approximation with bootstrapped bias and standard error</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'per'</span></code>: Simple percentile</p></li>
+</ul>
+</dd>
+<dt><strong>paired</strong><span class="classifier">boolean</span></dt><dd><p>Indicates whether x and y are paired or not. For example, for correlation functions or
+paired T-test, x and y are assumed to be paired. Pingouin will resample the pairs
+(x_i, y_i) when paired=True, and resample x and y separately when paired=False.
+If paired=True, x and y must have the same number of elements.</p>
+</dd>
+<dt><strong>confidence</strong><span class="classifier">float</span></dt><dd><p>Confidence level (0.95 = 95%)</p>
+</dd>
+<dt><strong>n_boot</strong><span class="classifier">int</span></dt><dd><p>Number of bootstrap iterations. The higher, the better, the slower.</p>
+</dd>
+<dt><strong>decimals</strong><span class="classifier">int</span></dt><dd><p>Number of rounded decimals.</p>
+</dd>
+<dt><strong>seed</strong><span class="classifier">int or None</span></dt><dd><p>Random seed for generating bootstrap samples.</p>
+</dd>
+<dt><strong>return_dist</strong><span class="classifier">boolean</span></dt><dd><p>If True, return the confidence intervals and the bootstrapped distribution (e.g. for
+plotting purposes).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>ci</strong><span class="classifier">array</span></dt><dd><p>Bootstrapped confidence intervals.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Results have been tested against the
+<a class="reference external" href="https://www.mathworks.com/help/stats/bootci.html">bootci</a> Matlab function.</p>
+<p>Since version 1.7, SciPy also includes a built-in bootstrap function
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html#scipy.stats.bootstrap" title="(in SciPy v1.9.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.stats.bootstrap()</span></code></a>. The SciPy implementation has two advantages over Pingouin: it
+is faster when using <code class="docutils literal notranslate"><span class="pre">vectorized=True</span></code>, and it supports the bias-corrected and accelerated
+(BCa) confidence intervals for univariate functions. However, unlike Pingouin, it does not
+return the bootstrap distribution.</p>
+<p>The percentile bootstrap method (<code class="docutils literal notranslate"><span class="pre">per</span></code>) is defined as the
+<span class="math notranslate nohighlight">\(100 \times \frac{\alpha}{2}\)</span> and <span class="math notranslate nohighlight">\(100 \times \frac{1 - \alpha}{2}\)</span>
+percentiles of the distribution of <span class="math notranslate nohighlight">\(\theta\)</span> estimates obtained from resampling, where
+<span class="math notranslate nohighlight">\(\alpha\)</span> is the level of significance (1 - confidence, default = 0.05 for 95% CIs).</p>
+<p>The bias-corrected percentile method (<code class="docutils literal notranslate"><span class="pre">cper</span></code>) corrects for bias of the bootstrap
+distribution. This method is different from the BCa method — the default in Matlab and SciPy —
+which corrects for both bias and skewness of the bootstrap distribution using jackknife
+resampling.</p>
+<p>The normal approximation method (<code class="docutils literal notranslate"><span class="pre">norm</span></code>) calculates the confidence intervals with the
+standard normal distribution using bootstrapped bias and standard error.</p>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>DiCiccio, T. J., &amp; Efron, B. (1996). Bootstrap confidence intervals. Statistical science,
+189-212.</p></li>
+<li><p>Davison, A. C., &amp; Hinkley, D. V. (1997). Bootstrap methods and their application (Vol. 1).
+Cambridge university press.</p></li>
+<li><p>Jung, Lee, Gupta, &amp; Cho (2019). Comparison of bootstrap confidence interval methods for
+GSCA using a Monte Carlo simulation. Frontiers in psychology, 10, 2215.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>Bootstrapped 95% confidence interval of a Pearson correlation</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ci</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">compute_bootci</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">stat</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">ci</span><span class="p">)</span>
+<span class="go">0.0945 [-0.098   0.2738]</span>
+</pre></div>
+</div>
+<p>Let’s compare to SciPy’s built-in bootstrap function</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">bootstrap</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bt_scipy</span> <span class="o">=</span> <span class="n">bootstrap</span><span class="p">(</span>
+<span class="gp">... </span>      <span class="n">data</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">statistic</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>      <span class="n">method</span><span class="o">=</span><span class="s2">&quot;basic&quot;</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_resamples</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">bt_scipy</span><span class="o">.</span><span class="n">confidence_interval</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">array([-0.0952,  0.2883])</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Bootstrapped 95% confidence interval of a Cohen d</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stat</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">compute_effsize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">eftype</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ci</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">compute_bootci</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">stat</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">ci</span><span class="p">)</span>
+<span class="go">0.7009 [0.403 1.009]</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Bootstrapped confidence interval of a standard deviation (univariate)</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ci</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">compute_bootci</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">&#39;std&#39;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">stat</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">ci</span><span class="p">)</span>
+<span class="go">1.5534 [1.38 1.8 ]</span>
+</pre></div>
+</div>
+<p>Compare to SciPy’s built-in bootstrap function, which returns the bias-corrected and
+accelerated CIs (see Notes).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">std</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bt_scipy</span> <span class="o">=</span> <span class="n">bootstrap</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">),</span> <span class="n">statistic</span><span class="o">=</span><span class="n">std</span><span class="p">,</span> <span class="n">n_resamples</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">bt_scipy</span><span class="o">.</span><span class="n">confidence_interval</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">array([1.39, 1.81])</span>
+</pre></div>
+</div>
+<p>Changing the confidence intervals type in Pingouin</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">compute_bootci</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">&#39;std&#39;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;norm&quot;</span><span class="p">)</span>
+<span class="go">array([1.37, 1.76])</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">compute_bootci</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">&#39;std&#39;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;percentile&quot;</span><span class="p">)</span>
+<span class="go">array([1.35, 1.75])</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Bootstrapped confidence interval using a custom univariate function</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">skew</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">skew</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="mi">4</span><span class="p">),</span> <span class="n">pg</span><span class="o">.</span><span class="n">compute_bootci</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">skew</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
+<span class="go">(-0.137, array([-0.55,  0.32]))</span>
+</pre></div>
+</div>
+<p>5. Bootstrapped confidence interval using a custom bivariate function. Here, x and y are not
+paired and can therefore have different sizes.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">mean_diff</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y2</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>  <span class="c1"># y2 has 200 samples, x has 100</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ci</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">compute_bootci</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">mean_diff</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">mean_diff</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y2</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span> <span class="n">ci</span><span class="p">)</span>
+<span class="go">0.88 [0.54 1.21]</span>
+</pre></div>
+</div>
+<p>We can also get the bootstrapped distribution</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ci</span><span class="p">,</span> <span class="n">bt</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">compute_bootci</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">mean_diff</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">return_dist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The bootstrap distribution has </span><span class="si">{</span><span class="n">bt</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2"> samples. The mean and standard &quot;</span>
+<span class="gp">... </span>      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bt</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> ± </span><span class="si">{</span><span class="n">bt</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="go">The bootstrap distribution has 10000 samples. The mean and standard 0.8807 ± 0.1704</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

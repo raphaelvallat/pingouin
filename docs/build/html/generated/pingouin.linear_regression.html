@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.linear_regression &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-linear-regression">
+<h1>pingouin.linear_regression<a class="headerlink" href="#pingouin-linear-regression" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.linear_regression">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">linear_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_intercept</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coef_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_dataframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_na</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relimp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.linear_regression" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Multiple) Linear regression.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>X</strong><span class="classifier">array_like</span></dt><dd><p>Predictor(s), of shape <em>(n_samples, n_features)</em> or <em>(n_samples)</em>.</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array_like</span></dt><dd><p>Dependent variable, of shape <em>(n_samples)</em>.</p>
+</dd>
+<dt><strong>add_intercept</strong><span class="classifier">bool</span></dt><dd><p>If False, assume that the data are already centered. If True, add a
+constant term to the model. In this case, the first value in the
+output dict is the intercept of the model.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is generally recommended to include a constant term
+(intercept) to the model to limit the bias and force the residual
+mean to equal zero. The intercept coefficient and p-values
+are however rarely meaningful.</p>
+</div>
+</dd>
+<dt><strong>weights</strong><span class="classifier">array_like</span></dt><dd><p>An optional vector of sample weights to be used in the fitting
+process, of shape <em>(n_samples)</em>. Missing or negative weights are not
+allowed. If not null, a weighted least squares is calculated.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.3.5.</span></p>
+</div>
+</dd>
+<dt><strong>coef_only</strong><span class="classifier">bool</span></dt><dd><p>If True, return only the regression coefficients.</p>
+</dd>
+<dt><strong>alpha</strong><span class="classifier">float</span></dt><dd><p>Alpha value used for the confidence intervals.
+<span class="math notranslate nohighlight">\(\text{CI} = [\alpha / 2 ; 1 - \alpha / 2]\)</span></p>
+</dd>
+<dt><strong>as_dataframe</strong><span class="classifier">bool</span></dt><dd><p>If True, returns a pandas DataFrame. If False, returns a dictionnary.</p>
+</dd>
+<dt><strong>remove_na</strong><span class="classifier">bool</span></dt><dd><p>If True, apply a listwise deletion of missing values (i.e. the entire
+row is removed). Default is False, which will raise an error if missing
+values are present in either the predictor(s) or dependent
+variable.</p>
+</dd>
+<dt><strong>relimp</strong><span class="classifier">bool</span></dt><dd><p>If True, returns the relative importance (= contribution) of
+predictors. This is irrelevant when the predictors are uncorrelated:
+the total <span class="math notranslate nohighlight">\(R^2\)</span> of the model is simply the sum of each univariate
+regression <span class="math notranslate nohighlight">\(R^2\)</span>-values. However, this does not apply when
+predictors are correlated. Instead, the total <span class="math notranslate nohighlight">\(R^2\)</span> of the model
+is partitioned by averaging over all combinations of predictors,
+as done in the <a class="reference external" href="https://cran.r-project.org/web/packages/relaimpo/relaimpo.pdf">relaimpo</a>
+R package (<code class="docutils literal notranslate"><span class="pre">calc.relimp(type=&quot;lmg&quot;)</span></code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The computation time roughly doubles for each
+additional predictor and therefore this can be extremely slow for
+models with more than 12-15 predictors.</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.3.0.</span></p>
+</div>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>stats</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> or dict</span></dt><dd><p>Linear regression summary:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'names'</span></code>: name of variable(s) in the model (e.g. x1, x2…)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'coef'</span></code>: regression coefficients</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'se'</span></code>: standard errors</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'T'</span></code>: T-values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'pval'</span></code>: p-values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'r2'</span></code>: coefficient of determination (<span class="math notranslate nohighlight">\(R^2\)</span>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'adj_r2'</span></code>: adjusted <span class="math notranslate nohighlight">\(R^2\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'CI[2.5%]'</span></code>: lower confidence intervals</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'CI[97.5%]'</span></code>: upper confidence intervals</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'relimp'</span></code>: relative contribution of each predictor to the final                        <span class="math notranslate nohighlight">\(R^2\)</span> (only if <code class="docutils literal notranslate"><span class="pre">relimp=True</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'relimp_perc'</span></code>: percent relative contribution</p></li>
+</ul>
+<p>In addition, the output dataframe comes with hidden attributes such as
+the residuals, and degrees of freedom of the model and residuals, which
+can be accessed as follow, respectively:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">linear_regression</span><span class="p">()</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span><span class="o">.</span><span class="n">residuals_</span><span class="p">,</span> <span class="n">lm</span><span class="o">.</span><span class="n">df_model_</span><span class="p">,</span> <span class="n">lm</span><span class="o">.</span><span class="n">df_resid_</span> 
+</pre></div>
+</div>
+<p>Note that to follow scikit-learn convention, these hidden atributes end
+with an “_”. When <code class="docutils literal notranslate"><span class="pre">as_dataframe=False</span></code> however, these attributes
+are no longer hidden and can be accessed as any other keys in the
+output dictionary.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">linear_regression</span><span class="p">()</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span><span class="p">[</span><span class="s1">&#39;residuals&#39;</span><span class="p">],</span> <span class="n">lm</span><span class="p">[</span><span class="s1">&#39;df_model&#39;</span><span class="p">],</span> <span class="n">lm</span><span class="p">[</span><span class="s1">&#39;df_resid&#39;</span><span class="p">]</span> 
+</pre></div>
+</div>
+<p>When <code class="docutils literal notranslate"><span class="pre">as_dataframe=False</span></code> the dictionary also contains the
+processed <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> arrays (i.e, with NaNs removed if
+<code class="docutils literal notranslate"><span class="pre">remove_na=True</span></code>) and the model’s predicted values <code class="docutils literal notranslate"><span class="pre">pred</span></code>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">],</span> <span class="n">lm</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="n">lm</span><span class="p">[</span><span class="s1">&#39;pred&#39;</span><span class="p">]</span> 
+</pre></div>
+</div>
+<p>For a weighted least squares fit, the weighted <code class="docutils literal notranslate"><span class="pre">Xw</span></code> and <code class="docutils literal notranslate"><span class="pre">yw</span></code>
+arrays are included in the dictionary.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span><span class="p">[</span><span class="s1">&#39;Xw&#39;</span><span class="p">],</span> <span class="n">lm</span><span class="p">[</span><span class="s1">&#39;yw&#39;</span><span class="p">]</span> 
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.logistic_regression.html#pingouin.logistic_regression" title="pingouin.logistic_regression"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logistic_regression</span></code></a>, <a class="reference internal" href="pingouin.mediation_analysis.html#pingouin.mediation_analysis" title="pingouin.mediation_analysis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mediation_analysis</span></code></a>, <a class="reference internal" href="pingouin.corr.html#pingouin.corr" title="pingouin.corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr</span></code></a></dt><dd></dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>The <span class="math notranslate nohighlight">\(\beta\)</span> coefficients are estimated using an ordinary least
+squares (OLS) regression, as implemented in the
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.lstsq.html#scipy.linalg.lstsq" title="(in SciPy v1.9.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.linalg.lstsq()</span></code></a> function. The OLS method minimizes
+the sum of squared residuals, and leads to a closed-form expression for
+the estimated <span class="math notranslate nohighlight">\(\beta\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\hat{\beta} = (X^TX)^{-1} X^Ty\]</div>
+<p>It is generally recommended to include a constant term (intercept) to the
+model to limit the bias and force the residual mean to equal zero.
+Note that intercept coefficient and p-values are however rarely meaningful.</p>
+<p>The standard error of the estimates is a measure of the accuracy of the
+prediction defined as:</p>
+<div class="math notranslate nohighlight">
+\[\sigma = \sqrt{\text{MSE} \cdot (X^TX)^{-1}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\text{MSE}\)</span> is the mean squared error,</p>
+<div class="math notranslate nohighlight">
+\[\text{MSE} = \frac{SS_{\text{resid}}}{n - p - 1}
+ = \frac{\sum{(\text{true} - \text{pred})^2}}{n - p - 1}\]</div>
+<p><span class="math notranslate nohighlight">\(p\)</span> is the total number of predictor variables in the model
+(excluding the intercept) and <span class="math notranslate nohighlight">\(n\)</span> is the sample size.</p>
+<p>Using the <span class="math notranslate nohighlight">\(\beta\)</span> coefficients and the standard errors,
+the T-values can be obtained:</p>
+<div class="math notranslate nohighlight">
+\[T = \frac{\beta}{\sigma}\]</div>
+<p>and the p-values approximated using a T-distribution with
+<span class="math notranslate nohighlight">\(n - p - 1\)</span> degrees of freedom.</p>
+<p>The coefficient of determination (<span class="math notranslate nohighlight">\(R^2\)</span>) is defined as:</p>
+<div class="math notranslate nohighlight">
+\[R^2 = 1 - (\frac{SS_{\text{resid}}}{SS_{\text{total}}})\]</div>
+<p>The adjusted <span class="math notranslate nohighlight">\(R^2\)</span> is defined as:</p>
+<div class="math notranslate nohighlight">
+\[\overline{R}^2 = 1 - (1 - R^2) \frac{n - 1}{n - p - 1}\]</div>
+<p>The relative importance (<code class="docutils literal notranslate"><span class="pre">relimp</span></code>) column is a partitioning of the
+total <span class="math notranslate nohighlight">\(R^2\)</span> of the model into individual <span class="math notranslate nohighlight">\(R^2\)</span> contribution.
+This is calculated by taking the average over average contributions in
+models of different sizes. For more details, please refer to
+<a class="reference external" href="http://dx.doi.org/10.18637/jss.v017.i01">Groemping et al. 2006</a>
+and the R package <a class="reference external" href="https://cran.r-project.org/web/packages/relaimpo/relaimpo.pdf">relaimpo</a>.</p>
+<p>Note that Pingouin will automatically remove any duplicate columns
+from <span class="math notranslate nohighlight">\(X\)</span>, as well as any column with only one unique value
+(constant), excluding the intercept.</p>
+<p>Results have been compared against sklearn, R, statsmodels and JASP.</p>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>Simple linear regression using columns of a pandas dataframe</p></li>
+</ol>
+<p>In this first example, we’ll use the tips dataset to see how well we
+can predict the waiter’s tip (in dollars) based on the total bill (also
+in dollars).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;tips&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Let&#39;s predict the tip ($) based on the total bill (also in $)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">linear_regression</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;total_bill&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;tip&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">        names  coef    se      T  pval    r2  adj_r2  CI[2.5%]  CI[97.5%]</span>
+<span class="go">0   Intercept  0.92  0.16   5.76   0.0  0.46    0.45      0.61       1.23</span>
+<span class="go">1  total_bill  0.11  0.01  14.26   0.0  0.46    0.45      0.09       0.12</span>
+</pre></div>
+</div>
+<p>It comes as no surprise that total bill is indeed a significant predictor
+of the waiter’s tip (T=14.26, p&lt;0.05). The <span class="math notranslate nohighlight">\(R^2\)</span> of the model is 0.46
+and the adjusted <span class="math notranslate nohighlight">\(R^2\)</span> is 0.45, which means that our model roughly
+explains ~45% of the total variance in the tip amount.</p>
+<ol class="arabic simple" start="2">
+<li><p>Multiple linear regression</p></li>
+</ol>
+<p>We can also have more than one predictor and run a multiple linear
+regression. Below, we add the party size as a second predictor of tip.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># We&#39;ll add a second predictor: the party size</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">linear_regression</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;total_bill&#39;</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">]],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;tip&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">        names  coef    se      T  pval    r2  adj_r2  CI[2.5%]  CI[97.5%]</span>
+<span class="go">0   Intercept  0.67  0.19   3.46  0.00  0.47    0.46      0.29       1.05</span>
+<span class="go">1  total_bill  0.09  0.01  10.17  0.00  0.47    0.46      0.07       0.11</span>
+<span class="go">2        size  0.19  0.09   2.26  0.02  0.47    0.46      0.02       0.36</span>
+</pre></div>
+</div>
+<p>The party size is also a significant predictor of tip (T=2.26, p=0.02).
+Note that adding this new predictor however only improved the <span class="math notranslate nohighlight">\(R^2\)</span>
+of our model by ~1%.</p>
+<p>This function also works with numpy arrays:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;total_bill&#39;</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;tip&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">linear_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">       names  coef    se      T  pval    r2  adj_r2  CI[2.5%]  CI[97.5%]</span>
+<span class="go">0  Intercept  0.67  0.19   3.46  0.00  0.47    0.46      0.29       1.05</span>
+<span class="go">1         x1  0.09  0.01  10.17  0.00  0.47    0.46      0.07       0.11</span>
+<span class="go">2         x2  0.19  0.09   2.26  0.02  0.47    0.46      0.02       0.36</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Get the residuals</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># For clarity, only display the first 9 values</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">lm</span><span class="o">.</span><span class="n">residuals_</span><span class="p">,</span> <span class="mi">2</span><span class="p">)[:</span><span class="mi">9</span><span class="p">]</span>
+<span class="go">array([-1.62, -0.55,  0.31,  0.06, -0.11,  0.93,  0.13, -0.81, -0.49])</span>
+</pre></div>
+</div>
+<p>Using pandas, we can show a summary of the distribution of the residuals:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">lm</span><span class="o">.</span><span class="n">residuals_</span><span class="p">)</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">count    244.00</span>
+<span class="go">mean      -0.00</span>
+<span class="go">std        1.01</span>
+<span class="go">min       -2.93</span>
+<span class="go">25%       -0.55</span>
+<span class="go">50%       -0.09</span>
+<span class="go">75%        0.51</span>
+<span class="go">max        4.04</span>
+<span class="go">dtype: float64</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>No intercept and return only the regression coefficients</p></li>
+</ol>
+<p>Sometimes it may be useful to remove the constant term from the regression,
+or to only return the regression coefficients without calculating the
+standard errors or p-values. This latter can potentially save you a lot of
+time if you need to calculate hundreds of regression and only care about
+the coefficients!</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">linear_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">add_intercept</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">coef_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">array([0.1007119 , 0.36209717])</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li><p>Return a dictionnary instead of a dataframe</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lm_dict</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">linear_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">as_dataframe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lm_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="go">dict_keys([&#39;names&#39;, &#39;coef&#39;, &#39;se&#39;, &#39;T&#39;, &#39;pval&#39;, &#39;r2&#39;, &#39;adj_r2&#39;, &#39;CI[2.5%]&#39;,</span>
+<span class="go">           &#39;CI[97.5%]&#39;, &#39;df_model&#39;, &#39;df_resid&#39;, &#39;residuals&#39;, &#39;X&#39;, &#39;y&#39;,</span>
+<span class="go">           &#39;pred&#39;])</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="7">
+<li><p>Remove missing values</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">linear_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">remove_na</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">coef_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">array([0.65749955, 0.09262059, 0.19927529])</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="8">
+<li><p>Get the relative importance of predictors</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">linear_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">remove_na</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">relimp</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span><span class="p">[[</span><span class="s1">&#39;names&#39;</span><span class="p">,</span> <span class="s1">&#39;relimp&#39;</span><span class="p">,</span> <span class="s1">&#39;relimp_perc&#39;</span><span class="p">]]</span>
+<span class="go">       names    relimp  relimp_perc</span>
+<span class="go">0  Intercept       NaN          NaN</span>
+<span class="go">1         x1  0.342503    73.045583</span>
+<span class="go">2         x2  0.126386    26.954417</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">relimp</span></code> column is a partitioning of the total <span class="math notranslate nohighlight">\(R^2\)</span> of the
+model into individual contribution. Therefore, it sums to the <span class="math notranslate nohighlight">\(R^2\)</span>
+of the full model. The <code class="docutils literal notranslate"><span class="pre">relimp_perc</span></code> is normalized to sum to 100%. See
+<a class="reference external" href="https://www.jstatsoft.org/article/view/v017i01">Groemping 2006</a>
+for more details.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span><span class="p">[[</span><span class="s1">&#39;relimp&#39;</span><span class="p">,</span> <span class="s1">&#39;relimp_perc&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="go">relimp           0.468889</span>
+<span class="go">relimp_perc    100.000000</span>
+<span class="go">dtype: float64</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="9">
+<li><p>Weighted linear regression</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">16</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">w</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># Array of weights. Must be &gt;= 0.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">linear_regression</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lm</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">       names  coef    se     T  pval    r2  adj_r2  CI[2.5%]  CI[97.5%]</span>
+<span class="go">0  Intercept  9.00  2.03  4.42  0.01  0.51    0.39      3.35      14.64</span>
+<span class="go">1         x1  1.04  0.50  2.06  0.11  0.51    0.39     -0.36       2.44</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

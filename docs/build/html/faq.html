@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>FAQ &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html"><span><img src="_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="api.html">Functions</a></li>
+                <li><a href="guidelines.html">Guidelines</a></li>
+                <li><a href="#">FAQ</a></li>
+                <li><a href="changelog.html">What's new</a></li>
+                <li><a href="contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="faq">
+<span id="id1"></span><h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h1>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="panel-group">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h5 class="panel-title">
+        <a data-toggle="collapse" href="#collapse_python">How can I install Pingouin on my computer?</a>
+      </h5>
+    </div>
+    <div id="collapse_python" class="panel-collapse collapse">
+      <div class="panel-body"><p>To install Pingouin, open a command prompt (or Terminal or Anaconda Prompt) and type:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install pingouin --upgrade
+</pre></div>
+</div>
+<p>You should now be able to use Pingouin. To try it, you need to open an interactive Python console (either <a class="reference external" href="https://ipython.org/">IPython</a> or <a class="reference external" href="https://jupyter.readthedocs.io/en/latest/index.html">Jupyter</a>). For example, type the following command in a command prompt:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ipython
+</pre></div>
+</div>
+<p>Now, let’s do a simple paired T-test using Pingouin:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="c1"># Create two variables</span>
+<span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="c1"># Run a T-test</span>
+<span class="n">pg</span><span class="o">.</span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+      </div>
+    </div>
+  </div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_import">How to import and use Pingouin?</a>
+    </h5>
+  </div>
+  <div id="collapse_import" class="panel-collapse collapse">
+    <div class="panel-body"><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1) Import the full package</span>
+<span class="c1"># --&gt; Best if you are planning to use several Pingouin functions.</span>
+<span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="n">pg</span><span class="o">.</span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+<span class="c1"># 2) Import specific functions</span>
+<span class="c1"># --&gt; Best if you are planning to use only this specific function.</span>
+<span class="kn">from</span> <span class="nn">pingouin</span> <span class="kn">import</span> <span class="n">ttest</span>
+<span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+      </div>
+    </div>
+  </div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_sm">What are the differences between statsmodels and Pingouin?</a>
+    </h5>
+  </div>
+  <div id="collapse_sm" class="panel-collapse collapse">
+    <div class="panel-body"><p><a class="reference external" href="https://www.statsmodels.org/stable/index.html">Statsmodels</a> is a great statistical Python package that provides several advanced functions (regression, GLM, time-series analysis) as well as an R-like syntax for fitting models. However, statsmodels can be quite hard to grasp and use for Python beginners and/or users who just want to perform simple statistical tests. The goal of Pingouin is not to replace statsmodels but rather to provide some easy-to-use functions to perform the most widely-used statistical tests. In addition, Pingouin also provides some novel functions (to cite but a few: effect sizes, pairwise T-tests and correlations, ICC, repeated measures correlation, circular statistics…).</p>
+      </div>
+    </div>
+  </div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_scp">What are the differences between scipy.stats and Pingouin?</a>
+    </h5>
+  </div>
+  <div id="collapse_scp" class="panel-collapse collapse">
+    <div class="panel-body"><p>The <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/stats.html">scipy.stats</a> module provides several low-level statistical functions. However, most of these functions do not return a very detailed output (e.g. only the T- and p-values for a T-test). Most Pingouin functions are using the low-level SciPy funtions to provide a richer, more exhaustive, output. See for yourself!:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">ttest_ind</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>   <span class="c1"># Pingouin: returns a DataFrame with T-value, p-value, degrees of freedom, tail, Cohen d, power and Bayes Factor</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ttest_ind</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>  <span class="c1"># SciPy: returns only the T- and p-values</span>
+</pre></div>
+</div>
+  </div>
+</div></section>
+<section id="data">
+<h2>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h2>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_read">How can I load a .csv or .xlsx file in Python?</a>
+    </h5>
+  </div>
+  <div id="collapse_read" class="panel-collapse collapse">
+    <div class="panel-body"><p>You need to use the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html#pandas.read_csv" title="(in pandas v1.5.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_csv()</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_excel.html#pandas.read_excel" title="(in pandas v1.5.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.read_excel()</span></code></a> functions:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;myfile.csv&#39;</span><span class="p">)</span>     <span class="c1"># Load a .csv file</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="s1">&#39;myfile.xlsx&#39;</span><span class="p">)</span>  <span class="c1"># Load an Excel file</span>
+</pre></div>
+</div>
+      </div>
+    </div>
+  </div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_missing">How does Pingouin deal with missing values?</a>
+    </h5>
+  </div>
+  <div id="collapse_missing" class="panel-collapse collapse">
+    <div class="panel-body"><p>Pingouin hates missing values as much as you do!</p>
+<p>Most functions of Pingouin will automatically remove the missing values. In the case of paired measurements (e.g. paired T-test, correlation, or repeated measures ANOVA), a listwise deletion of missing values is performed, meaning that the entire row is removed. This is generally the best strategy if you have a large sample size and only a few missing values. However, this can be quite drastic if there are a lot of missing values in your data. In that case, it might be useful to look at <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/missing_data.html">imputation methods (see Pandas documentation)</a>, or use a linear mixed effect model instead, which natively supports missing values. However, the latter is not implemented in Pingouin.</p>
+      </div>
+    </div>
+  </div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_wide">What's the difference between wide format and long format data and how can I convert my data from one to the other?</a>
+    </h5>
+  </div>
+  <div id="collapse_wide" class="panel-collapse collapse">
+    <div class="panel-body"><p>In wide format, each row represent a subject, and each column a measurement (e.g. “Pre”, “Post”). This is the most convenient way for humans to look at repeated measurements. It typically results in spreadsheet with a larger number of columns than rows. An example of wide-format dataframe is shown below:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 15%" />
+<col style="width: 18%" />
+<col style="width: 24%" />
+<col style="width: 15%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Subject</p></th>
+<th class="head"><p>Pre</p></th>
+<th class="head"><p>Post</p></th>
+<th class="head"><p>Gender</p></th>
+<th class="head"><p>Age</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>2.5</p></td>
+<td><p>3.1</p></td>
+<td><p>M</p></td>
+<td><p>24</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>4.2</p></td>
+<td><p>4.8</p></td>
+<td><p>F</p></td>
+<td><p>32</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>2.5</p></td>
+<td><p>2.9</p></td>
+<td><p>F</p></td>
+<td><p>38</p></td>
+</tr>
+</tbody>
+</table>
+<p>In long-format, each row is one time point per subject and each column is a variable (e.g. one column with the “Subject” identifier, another with the “Scores” and another with the “Time” grouping factors). In long-format, there are usually many more rows than columns. While this is harder to read for humans, this is much easier to read for computers. For this reason, all the repeated measures functions in Pingouin work only with long-format dataframe. In the example below, the wide-format dataframe from above was converted into a long-format dataframe:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 23%" />
+<col style="width: 12%" />
+<col style="width: 15%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Subject</p></th>
+<th class="head"><p>Gender</p></th>
+<th class="head"><p>Age</p></th>
+<th class="head"><p>Time</p></th>
+<th class="head"><p>Scores</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>M</p></td>
+<td><p>24</p></td>
+<td><p>Pre</p></td>
+<td><p>2.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>M</p></td>
+<td><p>24</p></td>
+<td><p>Post</p></td>
+<td><p>3.1</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>F</p></td>
+<td><p>32</p></td>
+<td><p>Pre</p></td>
+<td><p>4.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>F</p></td>
+<td><p>32</p></td>
+<td><p>Post</p></td>
+<td><p>4.8</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>F</p></td>
+<td><p>38</p></td>
+<td><p>Pre</p></td>
+<td><p>2.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>F</p></td>
+<td><p>38</p></td>
+<td><p>Post</p></td>
+<td><p>2.9</p></td>
+</tr>
+</tbody>
+</table>
+<p>The <a class="reference external" href="https://pandas.pydata.org/">Pandas</a> package provides some convenient functions to convert from one format to the other:</p>
+<ul class="simple">
+<li><p>From wide-format to long-format (easier to read for computer), use the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.melt.html#pandas.melt" title="(in pandas v1.5.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.melt()</span></code></a> function.</p></li>
+<li><p>From long-format to wide-format, use the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.pivot_table.html#pandas.pivot_table" title="(in pandas v1.5.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.pivot_table()</span></code></a> function.</p></li>
+</ul>
+      </div>
+    </div>
+  </div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_desc">Can I compute descriptive statistics with Pingouin?</a>
+    </h5>
+  </div>
+  <div id="collapse_desc" class="panel-collapse collapse">
+    <div class="panel-body"><p>No, the central idea behind Pingouin is that all data manipulations and descriptive statistics should be first performed in Pandas (or NumPy). For example, to compute the mean, standard deviation, and quartiles of all the numeric columns of a pandas DataFrame, one can easily use the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.describe.html#pandas.DataFrame.describe" title="(in pandas v1.5.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pandas.DataFrame.describe()</span></code></a> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+  </div>
+</div></section>
+<section id="others">
+<h2>Others<a class="headerlink" href="#others" title="Permalink to this headline">¶</a></h2>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_license">Why is Pingouin licensed under the GNU-GPL v3?</a>
+    </h5>
+  </div>
+  <div id="collapse_license" class="panel-collapse collapse">
+    <div class="panel-body"><p>Pingouin is licensed under the GNU General Public License v3.0 (GPL-3), which is less permissive than the BSD or MIT licenses. The reason for this is that Pingouin borrows extensively from R packages, which are all licensed under the GPL-3.
+To read more about what you can do and cannot do with a GPL-3 license, please visit <a class="reference external" href="https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3)#summary">tldrlegal.com</a> or <a class="reference external" href="https://choosealicense.com/licenses/">choosealicense.com</a>.</p>
+      </div>
+    </div>
+  </div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_release">How can I be notified of new releases?</a>
+    </h5>
+  </div>
+  <div id="collapse_release" class="panel-collapse collapse">
+    <div class="panel-body"><p>Pingouin uses <a class="reference external" href="https://github.com/alexmojaki/outdated">outdated</a>, a Python package that automatically checks if a newer version of Pingouin is available upon loading. Alternatively, you can click “Watch” on the <a class="reference external" href="https://github.com/raphaelvallat/pingouin">GitHub</a> of Pingouin.</p>
+<figure class="align-center">
+<img alt="_images/github_watch_release.png" src="_images/github_watch_release.png" />
+</figure>
+<p>Whenever a new release is out there, you can simply upgrade your version by typing the following line in a terminal window:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install --upgrade pingouin
+</pre></div>
+</div>
+      </div>
+    </div>
+  </div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_donate">I am not a programmer, how can I contribute to Pingouin?</a>
+    </h5>
+  </div>
+  <div id="collapse_donate" class="panel-collapse collapse">
+    <div class="panel-body"><p>There are many ways to contribute to Pingouin, even if you are not a programmer, for example, reporting bugs or results that are inconsistent with other statistical softwares, improving the documentation and examples, or, even <a class="reference external" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=K2FZVJGCKYPAG&amp;currency_code=USD&amp;source=url">buying the developpers a coffee</a>!</p>
+      </div>
+    </div>
+  </div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h5 class="panel-title">
+      <a data-toggle="collapse" href="#collapse_cite">How can I cite Pingouin?</a>
+    </h5>
+  </div>
+  <div id="collapse_cite" class="panel-collapse collapse">
+    <div class="panel-body"><p>To cite Pingouin, please use the publication in JOSS:</p>
+<ul class="simple">
+<li><p>Vallat, R. (2018). Pingouin: statistics in Python. <em>Journal of Open Source Software</em>, 3(31), 1026, <a class="reference external" href="https://doi.org/10.21105/joss.01026">https://doi.org/10.21105/joss.01026</a></p></li>
+</ul>
+<p>BibTeX:</p>
+<div class="highlight-latex notranslate"><div class="highlight"><pre><span></span>@ARTICLE<span class="nb">{</span>Vallat2018,
+  title    = &quot;Pingouin: statistics in Python&quot;,
+  author   = &quot;Vallat, Raphael&quot;,
+  journal  = &quot;The Journal of Open Source Software&quot;,
+  volume   =  3,
+  number   =  31,
+  pages    = &quot;1026&quot;,
+  month    =  nov,
+  year     =  2018
+<span class="nb">}</span>
+</pre></div>
+</div>
+    </div>
+  </div>
+</div></section>
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

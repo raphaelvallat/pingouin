@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.corr &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-corr">
+<h1>pingouin.corr<a class="headerlink" href="#pingouin-corr" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.corr">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">corr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'two-sided'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pearson'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.corr" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Robust) correlation between two variables.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x, y</strong><span class="classifier">array_like</span></dt><dd><p>First and second set of observations. <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> must be
+independent.</p>
+</dd>
+<dt><strong>alternative</strong><span class="classifier">string</span></dt><dd><p>Defines the alternative hypothesis, or tail of the correlation. Must be one of
+“two-sided” (default), “greater” or “less”. Both “greater” and “less” return a one-sided
+p-value. “greater” tests against the alternative hypothesis that the correlation is
+positive (greater than zero), “less” tests against the hypothesis that the correlation is
+negative.</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">string</span></dt><dd><p>Correlation type:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'pearson'</span></code>: Pearson <span class="math notranslate nohighlight">\(r\)</span> product-moment correlation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'spearman'</span></code>: Spearman <span class="math notranslate nohighlight">\(\rho\)</span> rank-order correlation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'kendall'</span></code>: Kendall’s <span class="math notranslate nohighlight">\(\tau_B\)</span> correlation (for ordinal data)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'bicor'</span></code>: Biweight midcorrelation (robust)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'percbend'</span></code>: Percentage bend correlation (robust)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'shepherd'</span></code>: Shepherd’s pi correlation (robust)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'skipped'</span></code>: Skipped correlation (robust)</p></li>
+</ul>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">optional</span></dt><dd><p>Optional argument(s) passed to the lower-level correlation functions.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>stats</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'n'</span></code>: Sample size (after removal of missing values)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'outliers'</span></code>: number of outliers, only if a robust method was used</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'r'</span></code>: Correlation coefficient</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'CI95'</span></code>: 95% parametric confidence intervals around <span class="math notranslate nohighlight">\(r\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-val'</span></code>: p-value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'BF10'</span></code>: Bayes Factor of the alternative hypothesis (only for Pearson correlation)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'power'</span></code>: achieved power of the test with an alpha of 0.05.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.pairwise_corr.html#pingouin.pairwise_corr" title="pingouin.pairwise_corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pairwise_corr</span></code></a></dt><dd><p>Pairwise correlation between columns of a pandas DataFrame</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.partial_corr.html#pingouin.partial_corr" title="pingouin.partial_corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">partial_corr</span></code></a></dt><dd><p>Partial correlation</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.rm_corr.html#pingouin.rm_corr" title="pingouin.rm_corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rm_corr</span></code></a></dt><dd><p>Repeated measures correlation</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>The <a class="reference external" href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">Pearson correlation coefficient</a>
+measures the linear relationship between two datasets. Strictly speaking,
+Pearson’s correlation requires that each dataset be normally distributed.
+Correlations of -1 or +1 imply a perfect negative and positive linear
+relationship, respectively, with 0 indicating the absence of association.</p>
+<div class="math notranslate nohighlight">
+\[r_{xy} = \frac{\sum_i(x_i - \bar{x})(y_i - \bar{y})}
+{\sqrt{\sum_i(x_i - \bar{x})^2} \sqrt{\sum_i(y_i - \bar{y})^2}}
+= \frac{\text{cov}(x, y)}{\sigma_x \sigma_y}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\text{cov}\)</span> is the sample covariance and <span class="math notranslate nohighlight">\(\sigma\)</span>
+is the sample standard deviation.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">method='pearson'</span></code>, The Bayes Factor is calculated using the
+<a class="reference internal" href="pingouin.bayesfactor_pearson.html#pingouin.bayesfactor_pearson" title="pingouin.bayesfactor_pearson"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.bayesfactor_pearson()</span></code></a> function.</p>
+<p>The <a class="reference external" href="https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient">Spearman correlation coefficient</a>
+is a non-parametric measure of the monotonicity of the relationship between
+two datasets. Unlike the Pearson correlation, the Spearman correlation does
+not assume that both datasets are normally distributed. Correlations of -1
+or +1 imply an exact negative and positive monotonic relationship,
+respectively. Mathematically, the Spearman correlation coefficient is
+defined as the Pearson correlation coefficient between the
+<a class="reference external" href="https://en.wikipedia.org/wiki/Ranking">rank variables</a>.</p>
+<p>The <a class="reference external" href="https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient">Kendall correlation coefficient</a>
+is a measure of the correspondence between two rankings. Values also range
+from -1 (perfect disagreement) to 1 (perfect agreement), with 0 indicating
+the absence of association. Consistent with
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.kendalltau.html#scipy.stats.kendalltau" title="(in SciPy v1.9.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.stats.kendalltau()</span></code></a>, Pingouin returns the Tau-b coefficient,
+which adjusts for ties:</p>
+<div class="math notranslate nohighlight">
+\[\tau_B = \frac{(P - Q)}{\sqrt{(P + Q + T) (P + Q + U)}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(P\)</span> is the number of concordant pairs, <span class="math notranslate nohighlight">\(Q\)</span> the number of
+discordand pairs, <span class="math notranslate nohighlight">\(T\)</span> the number of ties in x, and <span class="math notranslate nohighlight">\(U\)</span>
+the number of ties in y.</p>
+<p>The <a class="reference external" href="https://en.wikipedia.org/wiki/Biweight_midcorrelation">biweight midcorrelation</a> and
+percentage bend correlation <a class="reference internal" href="#rfd5a1c711630-1" id="id1">[1]</a> are both robust methods that
+protects against <em>univariate</em> outliers by down-weighting observations that
+deviate too much from the median.</p>
+<p>The Shepherd pi <a class="reference internal" href="#rfd5a1c711630-2" id="id2">[2]</a> correlation and skipped <a class="reference internal" href="#rfd5a1c711630-3" id="id3">[3]</a>, <a class="reference internal" href="#rfd5a1c711630-4" id="id4">[4]</a> correlation are
+both robust methods that returns the Spearman correlation coefficient after
+removing <em>bivariate</em> outliers. Briefly, the Shepherd pi uses a
+bootstrapping of the Mahalanobis distance to identify outliers, while the
+skipped correlation is based on the minimum covariance determinant
+(which requires scikit-learn). Note that these two methods are
+significantly slower than the previous ones.</p>
+<p>The confidence intervals for the correlation coefficient are estimated
+using the Fisher transformation.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Rows with missing values (NaN) are automatically removed.</p>
+</div>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="rfd5a1c711630-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Wilcox, R.R., 1994. The percentage bend correlation coefficient.
+Psychometrika 59, 601–616. <a class="reference external" href="https://doi.org/10.1007/BF02294395">https://doi.org/10.1007/BF02294395</a></p>
+</dd>
+<dt class="label" id="rfd5a1c711630-2"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Schwarzkopf, D.S., De Haas, B., Rees, G., 2012. Better ways to
+improve standards in brain-behavior correlation analysis. Front.
+Hum. Neurosci. 6, 200. <a class="reference external" href="https://doi.org/10.3389/fnhum.2012.00200">https://doi.org/10.3389/fnhum.2012.00200</a></p>
+</dd>
+<dt class="label" id="rfd5a1c711630-3"><span class="brackets"><a class="fn-backref" href="#id3">3</a></span></dt>
+<dd><p>Rousselet, G.A., Pernet, C.R., 2012. Improving standards in
+brain-behavior correlation analyses. Front. Hum. Neurosci. 6, 119.
+<a class="reference external" href="https://doi.org/10.3389/fnhum.2012.00119">https://doi.org/10.3389/fnhum.2012.00119</a></p>
+</dd>
+<dt class="label" id="rfd5a1c711630-4"><span class="brackets"><a class="fn-backref" href="#id4">4</a></span></dt>
+<dd><p>Pernet, C.R., Wilcox, R., Rousselet, G.A., 2012. Robust correlation
+analyses: false positive and power validation using a new open
+source matlab toolbox. Front. Psychol. 3, 606.
+<a class="reference external" href="https://doi.org/10.3389/fpsyg.2012.00606">https://doi.org/10.3389/fpsyg.2012.00606</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>Pearson correlation</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Generate random correlated samples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mean</span><span class="p">,</span> <span class="n">cov</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">.5</span><span class="p">),</span> <span class="p">(</span><span class="mf">.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Compute Pearson correlation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">          n      r         CI95%  p-val  BF10  power</span>
+<span class="go">pearson  30  0.491  [0.16, 0.72]  0.006  8.55  0.809</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Pearson correlation with two outliers</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span> <span class="o">-</span><span class="mi">8</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">          n      r          CI95%  p-val   BF10  power</span>
+<span class="go">pearson  30  0.147  [-0.23, 0.48]  0.439  0.302  0.121</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Spearman correlation (robust to outliers)</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;spearman&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">           n      r         CI95%  p-val  power</span>
+<span class="go">spearman  30  0.401  [0.05, 0.67]  0.028   0.61</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Biweight midcorrelation (robust)</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;bicor&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">        n      r         CI95%  p-val  power</span>
+<span class="go">bicor  30  0.393  [0.04, 0.66]  0.031  0.592</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Percentage bend correlation (robust)</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;percbend&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">           n      r         CI95%  p-val  power</span>
+<span class="go">percbend  30  0.389  [0.03, 0.66]  0.034  0.581</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li><p>Shepherd’s pi correlation (robust)</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;shepherd&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">           n  outliers      r        CI95%  p-val  power</span>
+<span class="go">shepherd  30         2  0.437  [0.08, 0.7]   0.02  0.662</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="7">
+<li><p>Skipped spearman correlation (robust)</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;skipped&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">          n  outliers      r        CI95%  p-val  power</span>
+<span class="go">skipped  30         2  0.437  [0.08, 0.7]   0.02  0.662</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="8">
+<li><p>One-tailed Pearson correlation</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s2">&quot;greater&quot;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">        n      r           CI95%  p-val   BF10  power</span>
+<span class="go">pearson  30  0.147  [-0.17, 1.0]   0.22  0.467  0.194</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s2">&quot;less&quot;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">        n        r         CI95%  p-val   BF10  power</span>
+<span class="go">pearson  30  0.147  [-1.0, 0.43]   0.78  0.137  0.008</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="9">
+<li><p>Perfect correlation</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">          n    r         CI95%  p-val BF10  power</span>
+<span class="go">pearson  30 -1.0  [-1.0, -1.0]    0.0  inf      1</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="10">
+<li><p>Using columns of a pandas dataframe</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">          n      r          CI95%  p-val   BF10  power</span>
+<span class="go">pearson  30  0.147  [-0.23, 0.48]  0.439  0.302  0.121</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Installation &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#"><span><img src="_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="api.html">Functions</a></li>
+                <li><a href="guidelines.html">Guidelines</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="changelog.html">What's new</a></li>
+                <li><a href="contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <div class="line-block">
+<div class="line"><br /></div>
+</div>
+<a class="reference external image-reference" href="https://badge.fury.io/py/pingouin"><img alt="https://badge.fury.io/py/pingouin.svg" src="https://badge.fury.io/py/pingouin.svg" /></a>
+<a class="reference external image-reference" href="https://anaconda.org/conda-forge/pingouin"><img alt="https://img.shields.io/conda/vn/conda-forge/pingouin.svg" src="https://img.shields.io/conda/vn/conda-forge/pingouin.svg" /></a>
+<a class="reference external image-reference" href="https://github.com/raphaelvallat/pingouin/blob/master/LICENSE"><img alt="https://img.shields.io/github/license/raphaelvallat/pingouin.svg" src="https://img.shields.io/github/license/raphaelvallat/pingouin.svg" /></a>
+<a class="reference external image-reference" href="https://github.com/raphaelvallat/pingouin/actions"><img alt="https://github.com/raphaelvallat/pingouin/actions/workflows/python_tests.yml/badge.svg" src="https://github.com/raphaelvallat/pingouin/actions/workflows/python_tests.yml/badge.svg" /></a>
+<a class="reference external image-reference" href="https://codecov.io/gh/raphaelvallat/pingouin"><img alt="https://codecov.io/gh/raphaelvallat/pingouin/branch/master/graph/badge.svg" src="https://codecov.io/gh/raphaelvallat/pingouin/branch/master/graph/badge.svg" /></a>
+<a class="reference external image-reference" href="https://pepy.tech/badge/pingouin/month"><img alt="https://pepy.tech/badge/pingouin/month" src="https://pepy.tech/badge/pingouin/month" /></a>
+<a class="reference external image-reference" href="http://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244"><img alt="http://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244/status.svg" src="http://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244/status.svg" /></a>
+<hr class="docutils" />
+<figure class="align-center">
+<img alt="_images/logo_pingouin.png" src="_images/logo_pingouin.png" />
+</figure>
+<p><strong>Pingouin</strong> is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy. Some of its main features are listed below. For a full list of available functions, please refer to the <a class="reference external" href="https://pingouin-stats.org/api.html">API documentation</a>.</p>
+<ol class="arabic simple">
+<li><p>ANOVAs: N-ways, repeated measures, mixed, ancova</p></li>
+<li><p>Pairwise post-hocs tests (parametric and non-parametric) and pairwise correlations</p></li>
+<li><p>Robust, partial, distance and repeated measures correlations</p></li>
+<li><p>Linear/logistic regression and mediation analysis</p></li>
+<li><p>Bayes Factors</p></li>
+<li><p>Multivariate tests</p></li>
+<li><p>Reliability and consistency</p></li>
+<li><p>Effect sizes and power analysis</p></li>
+<li><p>Parametric/bootstrapped confidence intervals around an effect size or a correlation coefficient</p></li>
+<li><p>Circular statistics</p></li>
+<li><p>Chi-squared tests</p></li>
+<li><p>Plotting: Bland-Altman plot, Q-Q plot, paired plot, robust correlation…</p></li>
+</ol>
+<p>Pingouin is designed for users who want <strong>simple yet exhaustive stats functions</strong>.</p>
+<p>For example, the <code class="code docutils literal notranslate"><span class="pre">ttest_ind</span></code> function of SciPy returns only the T-value and the p-value. By contrast,
+the <code class="code docutils literal notranslate"><span class="pre">ttest</span></code> function of Pingouin returns the T-value, the p-value, the degrees of freedom, the effect size (Cohen’s d), the 95% confidence intervals of the difference in means, the statistical power and the Bayes Factor (BF10) of the test.</p>
+<hr class="docutils" />
+<section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>Pingouin is a Python 3 package and is currently tested for Python 3.7-3.9. It does not support Python 2.</p>
+<p>The main dependencies of Pingouin are :</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://numpy.org/">NumPy</a></p></li>
+<li><p><a class="reference external" href="https://www.scipy.org/">SciPy</a></p></li>
+<li><p><a class="reference external" href="https://pandas.pydata.org/">Pandas</a></p></li>
+<li><p><a class="reference external" href="https://github.com/Zsailer/pandas_flavor">Pandas-flavor</a></p></li>
+<li><p><a class="reference external" href="https://www.statsmodels.org/">Statsmodels</a></p></li>
+<li><p><a class="reference external" href="https://matplotlib.org/">Matplotlib</a></p></li>
+<li><p><a class="reference external" href="https://seaborn.pydata.org/">Seaborn</a></p></li>
+<li><p><a class="reference external" href="https://github.com/alexmojaki/outdated">Outdated</a></p></li>
+</ul>
+<p>In addition, some functions require :</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://scikit-learn.org/">Scikit-learn</a></p></li>
+<li><p><a class="reference external" href="http://mpmath.org/">Mpmath</a></p></li>
+</ul>
+<p>Pingouin can be easily installed using pip</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install pingouin
+</pre></div>
+</div>
+<p>or conda</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>conda install -c conda-forge pingouin
+</pre></div>
+</div>
+<p>Pingouin is under heavy development and it is likely that bugs/mistakes will be discovered in future releases. Please always make sure that you are using the latest version of Pingouin (new releases are <a class="reference external" href="https://pingouin-stats.org/changelog.html">frequent</a>).
+Whenever a new release is out there, you can upgrade your version by typing the following line in a terminal window:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install --upgrade pingouin
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="quick-start">
+<h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
+<ul>
+<li><p>If you have <em>questions</em>, please ask them in <a class="reference external" href="https://github.com/raphaelvallat/pingouin/discussions">GitHub Discussions</a>.</p></li>
+<li><p>If you want to <em>report a bug</em>, please open an issue on the <a class="reference external" href="https://github.com/raphaelvallat/pingouin">GitHub repository</a>.</p></li>
+<li><p>If you want to see <em>Pingouin in action</em>, please click on the link below and navigate to the <em>notebooks/</em> folder to open a collection of interactive Jupyter notebooks.</p>
+<a class="reference external image-reference" href="https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop"><img alt="https://mybinder.org/badge.svg" src="https://mybinder.org/badge.svg" /></a>
+</li>
+</ul>
+<section id="minutes-to-pingouin">
+<h2>10 minutes to Pingouin<a class="headerlink" href="#minutes-to-pingouin" title="Permalink to this headline">¶</a></h2>
+<section id="t-test">
+<h3>1. T-test<a class="headerlink" href="#t-test" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">.6</span><span class="p">),</span> <span class="p">(</span><span class="mf">.6</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> <span class="mi">30</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+<span class="c1"># T-test</span>
+<span class="n">pg</span><span class="o">.</span><span class="n">ttest</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="colwidths-auto docutils align-default" id="id2">
+<caption><span class="caption-text">Output</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>T</p></th>
+<th class="head"><p>dof</p></th>
+<th class="head"><p>alternative</p></th>
+<th class="head"><p>p-val</p></th>
+<th class="head"><p>CI95%</p></th>
+<th class="head"><p>cohen-d</p></th>
+<th class="head"><p>BF10</p></th>
+<th class="head"><p>power</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>-3.401</p></td>
+<td><p>58</p></td>
+<td><p>two-sided</p></td>
+<td><p>0.001</p></td>
+<td><p>[-1.68 -0.43]</p></td>
+<td><p>0.878</p></td>
+<td><p>26.155</p></td>
+<td><p>0.917</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="pearson-s-correlation">
+<h3>2. Pearson’s correlation<a class="headerlink" href="#pearson-s-correlation" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pg</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="colwidths-auto docutils align-default" id="id3">
+<caption><span class="caption-text">Output</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>n</p></th>
+<th class="head"><p>r</p></th>
+<th class="head"><p>CI95%</p></th>
+<th class="head"><p>p-val</p></th>
+<th class="head"><p>BF10</p></th>
+<th class="head"><p>power</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>30</p></td>
+<td><p>0.595</p></td>
+<td><p>[0.3  0.79]</p></td>
+<td><p>0.001</p></td>
+<td><p>69.723</p></td>
+<td><p>0.950</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="robust-correlation">
+<h3>3. Robust correlation<a class="headerlink" href="#robust-correlation" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Introduce an outlier</span>
+<span class="n">x</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">18</span>
+<span class="c1"># Use the robust biweight midcorrelation</span>
+<span class="n">pg</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;bicor&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="colwidths-auto docutils align-default" id="id4">
+<caption><span class="caption-text">Output</span><a class="headerlink" href="#id4" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>n</p></th>
+<th class="head"><p>r</p></th>
+<th class="head"><p>CI95%</p></th>
+<th class="head"><p>p-val</p></th>
+<th class="head"><p>power</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>30</p></td>
+<td><p>0.576</p></td>
+<td><p>[0.27 0.78]</p></td>
+<td><p>0.001</p></td>
+<td><p>0.933</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="test-the-normality-of-the-data">
+<h3>4. Test the normality of the data<a class="headerlink" href="#test-the-normality-of-the-data" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="generated/pingouin.normality.html#pingouin.normality" title="pingouin.normality"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.normality()</span></code></a> function works with lists, arrays, or pandas DataFrame in wide or long-format.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">normality</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>                                    <span class="c1"># Univariate normality</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">multivariate_normality</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))))</span> <span class="c1"># Multivariate normality</span>
+</pre></div>
+</div>
+<table class="colwidths-auto docutils align-default" id="id5">
+<caption><span class="caption-text">Output</span><a class="headerlink" href="#id5" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>W</p></th>
+<th class="head"><p>pval</p></th>
+<th class="head"><p>normal</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0.615</p></td>
+<td><p>0.000</p></td>
+<td><p>False</p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="mf">0.00018</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="q-q-plot">
+<h3>5. Q-Q plot<a class="headerlink" href="#q-q-plot" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">qqplot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="s1">&#39;norm&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="_images/index-1.png" class="plot-directive" src="_images/index-1.png" />
+</figure>
+</section>
+<hr class="docutils" />
+<section id="one-way-anova-using-a-pandas-dataframe">
+<h3>6. One-way ANOVA using a pandas DataFrame<a class="headerlink" href="#one-way-anova-using-a-pandas-dataframe" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read an example dataset</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;mixed_anova&#39;</span><span class="p">)</span>
+
+<span class="c1"># Run the ANOVA</span>
+<span class="n">aov</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">anova</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">aov</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="colwidths-auto docutils align-default" id="id6">
+<caption><span class="caption-text">Output</span><a class="headerlink" href="#id6" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Source</p></th>
+<th class="head"><p>SS</p></th>
+<th class="head"><p>DF</p></th>
+<th class="head"><p>MS</p></th>
+<th class="head"><p>F</p></th>
+<th class="head"><p>p-unc</p></th>
+<th class="head"><p>np2</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Group</p></td>
+<td><p>5.460</p></td>
+<td><p>1</p></td>
+<td><p>5.460</p></td>
+<td><p>5.244</p></td>
+<td><p>0.023</p></td>
+<td><p>0.029</p></td>
+</tr>
+<tr class="row-odd"><td><p>Within</p></td>
+<td><p>185.343</p></td>
+<td><p>178</p></td>
+<td><p>1.041</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="repeated-measures-anova">
+<h3>7. Repeated measures ANOVA<a class="headerlink" href="#repeated-measures-anova" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pg</span><span class="o">.</span><span class="n">rm_anova</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="colwidths-auto docutils align-default" id="id7">
+<caption><span class="caption-text">Output</span><a class="headerlink" href="#id7" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Source</p></th>
+<th class="head"><p>SS</p></th>
+<th class="head"><p>DF</p></th>
+<th class="head"><p>MS</p></th>
+<th class="head"><p>F</p></th>
+<th class="head"><p>p-unc</p></th>
+<th class="head"><p>ng2</p></th>
+<th class="head"><p>eps</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Time</p></td>
+<td><p>7.628</p></td>
+<td><p>2</p></td>
+<td><p>3.814</p></td>
+<td><p>3.913</p></td>
+<td><p>0.023</p></td>
+<td><p>0.04</p></td>
+<td><p>0.999</p></td>
+</tr>
+<tr class="row-odd"><td><p>Error</p></td>
+<td><p>115.027</p></td>
+<td><p>118</p></td>
+<td><p>0.975</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="post-hoc-tests-corrected-for-multiple-comparisons">
+<h3>8. Post-hoc tests corrected for multiple-comparisons<a class="headerlink" href="#post-hoc-tests-corrected-for-multiple-comparisons" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># FDR-corrected post hocs with Hedges&#39;g effect size</span>
+<span class="n">posthoc</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">pairwise_tests</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span>
+                             <span class="n">parametric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;hedges&#39;</span><span class="p">)</span>
+
+<span class="c1"># Pretty printing of table</span>
+<span class="n">pg</span><span class="o">.</span><span class="n">print_table</span><span class="p">(</span><span class="n">posthoc</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s1">&#39;.3f&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="colwidths-auto docutils align-default" id="id8">
+<caption><span class="caption-text">Output</span><a class="headerlink" href="#id8" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Contrast</p></th>
+<th class="head"><p>A</p></th>
+<th class="head"><p>B</p></th>
+<th class="head"><p>Paired</p></th>
+<th class="head"><p>Parametric</p></th>
+<th class="head"><p>T</p></th>
+<th class="head"><p>dof</p></th>
+<th class="head"><p>alternative</p></th>
+<th class="head"><p>p-unc</p></th>
+<th class="head"><p>p-corr</p></th>
+<th class="head"><p>p-adjust</p></th>
+<th class="head"><p>BF10</p></th>
+<th class="head"><p>hedges</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Time</p></td>
+<td><p>August</p></td>
+<td><p>January</p></td>
+<td><p>True</p></td>
+<td><p>True</p></td>
+<td><p>-1.740</p></td>
+<td><p>59.000</p></td>
+<td><p>two-sided</p></td>
+<td><p>0.087</p></td>
+<td><p>0.131</p></td>
+<td><p>fdr_bh</p></td>
+<td><p>0.582</p></td>
+<td><p>-0.328</p></td>
+</tr>
+<tr class="row-odd"><td><p>Time</p></td>
+<td><p>August</p></td>
+<td><p>June</p></td>
+<td><p>True</p></td>
+<td><p>True</p></td>
+<td><p>-2.743</p></td>
+<td><p>59.000</p></td>
+<td><p>two-sided</p></td>
+<td><p>0.008</p></td>
+<td><p>0.024</p></td>
+<td><p>fdr_bh</p></td>
+<td><p>4.232</p></td>
+<td><p>-0.483</p></td>
+</tr>
+<tr class="row-even"><td><p>Time</p></td>
+<td><p>January</p></td>
+<td><p>June</p></td>
+<td><p>True</p></td>
+<td><p>True</p></td>
+<td><p>-1.024</p></td>
+<td><p>59.000</p></td>
+<td><p>two-sided</p></td>
+<td><p>0.310</p></td>
+<td><p>0.310</p></td>
+<td><p>fdr_bh</p></td>
+<td><p>0.232</p></td>
+<td><p>-0.170</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="two-way-mixed-anova">
+<h3>9. Two-way mixed ANOVA<a class="headerlink" href="#two-way-mixed-anova" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compute the two-way mixed ANOVA and export to a .csv file</span>
+<span class="n">aov</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">mixed_anova</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span>
+                     <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s2">&quot;np2&quot;</span><span class="p">)</span>
+<span class="n">pg</span><span class="o">.</span><span class="n">print_table</span><span class="p">(</span><span class="n">aov</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="colwidths-auto docutils align-default" id="id9">
+<caption><span class="caption-text">Output</span><a class="headerlink" href="#id9" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Source</p></th>
+<th class="head"><p>SS</p></th>
+<th class="head"><p>DF1</p></th>
+<th class="head"><p>DF2</p></th>
+<th class="head"><p>MS</p></th>
+<th class="head"><p>F</p></th>
+<th class="head"><p>p-unc</p></th>
+<th class="head"><p>np2</p></th>
+<th class="head"><p>eps</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Group</p></td>
+<td><p>5.460</p></td>
+<td><p>1</p></td>
+<td><p>58</p></td>
+<td><p>5.460</p></td>
+<td><p>5.052</p></td>
+<td><p>0.028</p></td>
+<td><p>0.080</p></td>
+<td><p>nan</p></td>
+</tr>
+<tr class="row-odd"><td><p>Time</p></td>
+<td><p>7.628</p></td>
+<td><p>2</p></td>
+<td><p>116</p></td>
+<td><p>3.814</p></td>
+<td><p>4.027</p></td>
+<td><p>0.020</p></td>
+<td><p>0.065</p></td>
+<td><p>0.999</p></td>
+</tr>
+<tr class="row-even"><td><p>Interaction</p></td>
+<td><p>5.167</p></td>
+<td><p>2</p></td>
+<td><p>116</p></td>
+<td><p>2.584</p></td>
+<td><p>2.728</p></td>
+<td><p>0.070</p></td>
+<td><p>0.045</p></td>
+<td><p>nan</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="pairwise-correlations-between-columns-of-a-dataframe">
+<h3>10. Pairwise correlations between columns of a dataframe<a class="headerlink" href="#pairwise-correlations-between-columns-of-a-dataframe" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="n">z</span><span class="p">})</span>
+<span class="n">pg</span><span class="o">.</span><span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="colwidths-auto docutils align-default" id="id10">
+<caption><span class="caption-text">Output</span><a class="headerlink" href="#id10" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>X</p></th>
+<th class="head"><p>Y</p></th>
+<th class="head"><p>method</p></th>
+<th class="head"><p>alternative</p></th>
+<th class="head"><p>n</p></th>
+<th class="head"><p>r</p></th>
+<th class="head"><p>CI95%</p></th>
+<th class="head"><p>p-unc</p></th>
+<th class="head"><p>BF10</p></th>
+<th class="head"><p>power</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>X</p></td>
+<td><p>Y</p></td>
+<td><p>pearson</p></td>
+<td><p>two-sided</p></td>
+<td><p>30</p></td>
+<td><p>0.366</p></td>
+<td><p>[0.01 0.64]</p></td>
+<td><p>0.047</p></td>
+<td><p>1.500</p></td>
+<td><p>0.525</p></td>
+</tr>
+<tr class="row-odd"><td><p>X</p></td>
+<td><p>Z</p></td>
+<td><p>pearson</p></td>
+<td><p>two-sided</p></td>
+<td><p>30</p></td>
+<td><p>0.251</p></td>
+<td><p>[-0.12  0.56]</p></td>
+<td><p>0.181</p></td>
+<td><p>0.534</p></td>
+<td><p>0.272</p></td>
+</tr>
+<tr class="row-even"><td><p>Y</p></td>
+<td><p>Z</p></td>
+<td><p>pearson</p></td>
+<td><p>two-sided</p></td>
+<td><p>30</p></td>
+<td><p>0.020</p></td>
+<td><p>[-0.34  0.38]</p></td>
+<td><p>0.916</p></td>
+<td><p>0.228</p></td>
+<td><p>0.051</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="pairwise-t-test-between-columns-of-a-dataframe">
+<h3>11.  Pairwise T-test between columns of a dataframe<a class="headerlink" href="#pairwise-t-test-between-columns-of-a-dataframe" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">ptests</span><span class="p">(</span><span class="n">paired</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stars</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="colwidths-auto docutils align-default" id="id11">
+<caption><span class="caption-text">Pairwise T-tests, with T-values on the lower triangle and p-values on the upper triangle</span><a class="headerlink" href="#id11" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>X</p></th>
+<th class="head"><p>Y</p></th>
+<th class="head"><p>Z</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>X</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>0.226</p></td>
+<td><p>0.165</p></td>
+</tr>
+<tr class="row-odd"><td><p>Y</p></td>
+<td><p>-1.238</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>0.658</p></td>
+</tr>
+<tr class="row-even"><td><p>Z</p></td>
+<td><p>-1.424</p></td>
+<td><p>-0.447</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="multiple-linear-regression">
+<h3>12. Multiple linear regression<a class="headerlink" href="#multiple-linear-regression" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pg</span><span class="o">.</span><span class="n">linear_regression</span><span class="p">(</span><span class="n">data</span><span class="p">[[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">]],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<table class="colwidths-auto docutils align-default" id="id12">
+<caption><span class="caption-text">Linear regression summary</span><a class="headerlink" href="#id12" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>names</p></th>
+<th class="head"><p>coef</p></th>
+<th class="head"><p>se</p></th>
+<th class="head"><p>T</p></th>
+<th class="head"><p>pval</p></th>
+<th class="head"><p>r2</p></th>
+<th class="head"><p>adj_r2</p></th>
+<th class="head"><p>CI[2.5%]</p></th>
+<th class="head"><p>CI[97.5%]</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Intercept</p></td>
+<td><p>4.650</p></td>
+<td><p>0.841</p></td>
+<td><p>5.530</p></td>
+<td><p>0.000</p></td>
+<td><p>0.139</p></td>
+<td><p>0.076</p></td>
+<td><p>2.925</p></td>
+<td><p>6.376</p></td>
+</tr>
+<tr class="row-odd"><td><p>X</p></td>
+<td><p>0.143</p></td>
+<td><p>0.068</p></td>
+<td><p>2.089</p></td>
+<td><p>0.046</p></td>
+<td><p>0.139</p></td>
+<td><p>0.076</p></td>
+<td><p>0.003</p></td>
+<td><p>0.283</p></td>
+</tr>
+<tr class="row-even"><td><p>Z</p></td>
+<td><p>-0.069</p></td>
+<td><p>0.167</p></td>
+<td><p>-0.416</p></td>
+<td><p>0.681</p></td>
+<td><p>0.139</p></td>
+<td><p>0.076</p></td>
+<td><p>-0.412</p></td>
+<td><p>0.273</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="mediation-analysis">
+<h3>13. Mediation analysis<a class="headerlink" href="#mediation-analysis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pg</span><span class="o">.</span><span class="n">mediation_analysis</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="colwidths-auto docutils align-default" id="id13">
+<caption><span class="caption-text">Mediation summary</span><a class="headerlink" href="#id13" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>path</p></th>
+<th class="head"><p>coef</p></th>
+<th class="head"><p>se</p></th>
+<th class="head"><p>pval</p></th>
+<th class="head"><p>CI[2.5%]</p></th>
+<th class="head"><p>CI[97.5%]</p></th>
+<th class="head"><p>sig</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Z ~ X</p></td>
+<td><p>0.103</p></td>
+<td><p>0.075</p></td>
+<td><p>0.181</p></td>
+<td><p>-0.051</p></td>
+<td><p>0.256</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>Y ~ Z</p></td>
+<td><p>0.018</p></td>
+<td><p>0.171</p></td>
+<td><p>0.916</p></td>
+<td><p>-0.332</p></td>
+<td><p>0.369</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>Total</p></td>
+<td><p>0.136</p></td>
+<td><p>0.065</p></td>
+<td><p>0.047</p></td>
+<td><p>0.002</p></td>
+<td><p>0.269</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>Direct</p></td>
+<td><p>0.143</p></td>
+<td><p>0.068</p></td>
+<td><p>0.046</p></td>
+<td><p>0.003</p></td>
+<td><p>0.283</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>Indirect</p></td>
+<td><p>-0.007</p></td>
+<td><p>0.025</p></td>
+<td><p>0.898</p></td>
+<td><p>-0.069</p></td>
+<td><p>0.029</p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="contingency-analysis">
+<h3>14. Contingency analysis<a class="headerlink" href="#contingency-analysis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;chi2_independence&#39;</span><span class="p">)</span>
+<span class="n">expected</span><span class="p">,</span> <span class="n">observed</span><span class="p">,</span> <span class="n">stats</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">chi2_independence</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;sex&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;target&#39;</span><span class="p">)</span>
+<span class="n">stats</span>
+</pre></div>
+</div>
+<table class="colwidths-auto docutils align-default" id="id14">
+<caption><span class="caption-text">Chi-squared tests summary</span><a class="headerlink" href="#id14" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>test</p></th>
+<th class="head"><p>lambda</p></th>
+<th class="head"><p>chi2</p></th>
+<th class="head"><p>dof</p></th>
+<th class="head"><p>p</p></th>
+<th class="head"><p>cramer</p></th>
+<th class="head"><p>power</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>pearson</p></td>
+<td><p>1.000</p></td>
+<td><p>22.717</p></td>
+<td><p>1.000</p></td>
+<td><p>0.000</p></td>
+<td><p>0.274</p></td>
+<td><p>0.997</p></td>
+</tr>
+<tr class="row-odd"><td><p>cressie-read</p></td>
+<td><p>0.667</p></td>
+<td><p>22.931</p></td>
+<td><p>1.000</p></td>
+<td><p>0.000</p></td>
+<td><p>0.275</p></td>
+<td><p>0.998</p></td>
+</tr>
+<tr class="row-even"><td><p>log-likelihood</p></td>
+<td><p>0.000</p></td>
+<td><p>23.557</p></td>
+<td><p>1.000</p></td>
+<td><p>0.000</p></td>
+<td><p>0.279</p></td>
+<td><p>0.998</p></td>
+</tr>
+<tr class="row-odd"><td><p>freeman-tukey</p></td>
+<td><p>-0.500</p></td>
+<td><p>24.220</p></td>
+<td><p>1.000</p></td>
+<td><p>0.000</p></td>
+<td><p>0.283</p></td>
+<td><p>0.998</p></td>
+</tr>
+<tr class="row-even"><td><p>mod-log-likelihood</p></td>
+<td><p>-1.000</p></td>
+<td><p>25.071</p></td>
+<td><p>1.000</p></td>
+<td><p>0.000</p></td>
+<td><p>0.288</p></td>
+<td><p>0.999</p></td>
+</tr>
+<tr class="row-odd"><td><p>neyman</p></td>
+<td><p>-2.000</p></td>
+<td><p>27.458</p></td>
+<td><p>1.000</p></td>
+<td><p>0.000</p></td>
+<td><p>0.301</p></td>
+<td><p>0.999</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="bland-altman-plot">
+<h3>15. Bland-Altman plot<a class="headerlink" href="#bland-altman-plot" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="n">mean</span><span class="p">,</span> <span class="n">cov</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">plot_blandaltman</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="_images/index-2.png" class="plot-directive" src="_images/index-2.png" />
+</figure>
+</section>
+<hr class="docutils" />
+<section id="plot-achieved-power-of-a-paired-t-test">
+<h3>16. Plot achieved power of a paired T-test<a class="headerlink" href="#plot-achieved-power-of-a-paired-t-test" title="Permalink to this headline">¶</a></h3>
+<p>Plot the curve of achieved power given the effect size (Cohen d) and the sample size of a paired T-test.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s1">&#39;ticks&#39;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="s1">&#39;notebook&#39;</span><span class="p">,</span> <span class="n">font_scale</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># Fixed effect size</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># Incrementing sample size</span>
+<span class="c1"># Compute the achieved power</span>
+<span class="n">pwr</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">power_ttest</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">contrast</span><span class="o">=</span><span class="s1">&#39;paired&#39;</span><span class="p">)</span>
+<span class="c1"># Start the plot</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">pwr</span><span class="p">,</span> <span class="s1">&#39;ko-.&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Sample size&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Power (1 - type II error)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Achieved power of a paired T-test&#39;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="_images/index-3.png" class="plot-directive" src="_images/index-3.png" />
+</figure>
+</section>
+<hr class="docutils" />
+<section id="paired-plot">
+<h3>17.  Paired plot<a class="headerlink" href="#paired-plot" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;mixed_anova&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;Group == &#39;Meditation&#39; and Time != &#39;January&#39;&quot;</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">plot_paired</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Effect of meditation on school performance&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="_images/index-4.png" class="plot-directive" src="_images/index-4.png" />
+</figure>
+</section>
+</section>
+<section id="integration-with-pandas">
+<h2>Integration with Pandas<a class="headerlink" href="#integration-with-pandas" title="Permalink to this headline">¶</a></h2>
+<p>Several functions of Pingouin can be used directly as <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> methods. Try for yourself with the code below:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+
+<span class="c1"># Example 1 | ANOVA</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;mixed_anova&#39;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Example 2 | Pairwise correlations</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;mediation&#39;</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">pairwise_corr</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">],</span> <span class="n">covar</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Mbin&#39;</span><span class="p">])</span>
+
+<span class="c1"># Example 3 | Partial correlation matrix</span>
+<span class="n">data</span><span class="o">.</span><span class="n">pcorr</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The functions that are currently supported as pandas method are:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="generated/pingouin.anova.html#pingouin.anova" title="pingouin.anova"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.anova()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/pingouin.ancova.html#pingouin.ancova" title="pingouin.ancova"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.ancova()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/pingouin.rm_anova.html#pingouin.rm_anova" title="pingouin.rm_anova"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.rm_anova()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/pingouin.mixed_anova.html#pingouin.mixed_anova" title="pingouin.mixed_anova"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.mixed_anova()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/pingouin.welch_anova.html#pingouin.welch_anova" title="pingouin.welch_anova"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.welch_anova()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/pingouin.pairwise_tests.html#pingouin.pairwise_tests" title="pingouin.pairwise_tests"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.pairwise_tests()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/pingouin.pairwise_tukey.html#pingouin.pairwise_tukey" title="pingouin.pairwise_tukey"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.pairwise_tukey()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/pingouin.pairwise_corr.html#pingouin.pairwise_corr" title="pingouin.pairwise_corr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.pairwise_corr()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/pingouin.partial_corr.html#pingouin.partial_corr" title="pingouin.partial_corr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.partial_corr()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/pingouin.pcorr.html#pingouin.pcorr" title="pingouin.pcorr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.pcorr()</span></code></a></p></li>
+<li><p><a class="reference internal" href="generated/pingouin.rcorr.html#pingouin.rcorr" title="pingouin.rcorr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.rcorr()</span></code></a></p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.ptests()</span></code></p></li>
+<li><p><a class="reference internal" href="generated/pingouin.mediation_analysis.html#pingouin.mediation_analysis" title="pingouin.mediation_analysis"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.mediation_analysis()</span></code></a></p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="development">
+<h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>
+<p>Pingouin was created and is maintained by <a class="reference external" href="https://raphaelvallat.github.io">Raphael Vallat</a>, a postdoctoral researcher at UC Berkeley, mostly during his spare time. Contributions are more than welcome so feel free to contact me, open an issue or submit a pull request!</p>
+<p>To see the code or report a bug, please visit the <a class="reference external" href="https://github.com/raphaelvallat/pingouin">GitHub repository</a>.</p>
+<p>This program is provided with NO WARRANTY OF ANY KIND. Pingouin is still under heavy development and there are likely hidden bugs. Always double check the results with another statistical software.</p>
+<p><strong>Contributors</strong></p>
+<ul class="simple">
+<li><p>Nicolas Legrand</p></li>
+<li><p><a class="reference external" href="http://hoechenberger.net/">Richard Höchenberger</a></p></li>
+<li><p><a class="reference external" href="https://github.com/arthurpaulino">Arthur Paulino</a></p></li>
+<li><p><a class="reference external" href="https://eelkespaak.nl/">Eelke Spaak</a></p></li>
+<li><p><a class="reference external" href="https://www.linkedin.com/in/johannes-elfner/">Johannes Elfner</a></p></li>
+<li><p><a class="reference external" href="https://stefanappelhoff.com">Stefan Appelhoff</a></p></li>
+</ul>
+</section>
+<section id="how-to-cite-pingouin">
+<h1>How to cite Pingouin?<a class="headerlink" href="#how-to-cite-pingouin" title="Permalink to this headline">¶</a></h1>
+<p>If you want to cite Pingouin, please use the publication in JOSS:</p>
+<ul class="simple">
+<li><p>Vallat, R. (2018). Pingouin: statistics in Python. <em>Journal of Open Source Software</em>, 3(31), 1026, <a class="reference external" href="https://doi.org/10.21105/joss.01026">https://doi.org/10.21105/joss.01026</a></p></li>
+</ul>
+</section>
+<section id="acknowledgement">
+<h1>Acknowledgement<a class="headerlink" href="#acknowledgement" title="Permalink to this headline">¶</a></h1>
+<p>Several functions of Pingouin were inspired from R or Matlab toolboxes, including:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://cran.r-project.org/web/packages/effsize/effsize.pdf">effsize package (R)</a></p></li>
+<li><p><a class="reference external" href="https://cran.r-project.org/web/packages/ez/ez.pdf">ezANOVA package (R)</a></p></li>
+<li><p><a class="reference external" href="https://cran.r-project.org/web/packages/pwr/pwr.pdf">pwr package (R)</a></p></li>
+<li><p><a class="reference external" href="https://www.mathworks.com/matlabcentral/fileexchange/10676-circular-statistics-toolbox-directional-statistics">circular statistics (Matlab)</a></p></li>
+<li><p><a class="reference external" href="https://sourceforge.net/projects/robustcorrtool/">robust correlations (Matlab)</a></p></li>
+<li><p><a class="reference external" href="https://cran.r-project.org/web/packages/rmcorr/index.html">repeated-measure correlation (R)</a></p></li>
+<li><p><a class="reference external" href="https://www.real-statistics.com/">real-statistics.com</a></p></li>
+</ul>
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

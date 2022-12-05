@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.convert_effsize &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-convert-effsize">
+<h1>pingouin.convert_effsize<a class="headerlink" href="#pingouin-convert-effsize" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.convert_effsize">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">convert_effsize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.convert_effsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conversion between effect sizes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ef</strong><span class="classifier">float</span></dt><dd><p>Original effect size.</p>
+</dd>
+<dt><strong>input_type</strong><span class="classifier">string</span></dt><dd><p>Effect size type of ef. Must be <code class="docutils literal notranslate"><span class="pre">'r'</span></code> or <code class="docutils literal notranslate"><span class="pre">'cohen'</span></code>.</p>
+</dd>
+<dt><strong>output_type</strong><span class="classifier">string</span></dt><dd><p>Desired effect size type. Available methods are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'cohen'</span></code>: Unbiased Cohen d</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'hedges'</span></code>: Hedges g</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'eta-square'</span></code>: Eta-square</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'odds-ratio'</span></code>: Odds ratio</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'AUC'</span></code>: Area Under the Curve</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'none'</span></code>: pass-through (return <code class="docutils literal notranslate"><span class="pre">ef</span></code>)</p></li>
+</ul>
+</dd>
+<dt><strong>nx, ny</strong><span class="classifier">int, optional</span></dt><dd><p>Length of vector x and y. Required to convert to Hedges g.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>ef</strong><span class="classifier">float</span></dt><dd><p>Desired converted effect size</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.compute_effsize.html#pingouin.compute_effsize" title="pingouin.compute_effsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_effsize</span></code></a></dt><dd><p>Calculate effect size between two set of observations.</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.compute_effsize_from_t.html#pingouin.compute_effsize_from_t" title="pingouin.compute_effsize_from_t"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_effsize_from_t</span></code></a></dt><dd><p>Convert a T-statistic to an effect size.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>The formula to convert <strong>r</strong> to <strong>d</strong> is given in <a class="reference internal" href="#rbe4b7ffd8d54-1" id="id1">[1]</a>:</p>
+<div class="math notranslate nohighlight">
+\[d = \frac{2r}{\sqrt{1 - r^2}}\]</div>
+<p>The formula to convert <strong>d</strong> to <strong>r</strong> is given in <a class="reference internal" href="#rbe4b7ffd8d54-2" id="id2">[2]</a>:</p>
+<div class="math notranslate nohighlight">
+\[r = \frac{d}{\sqrt{d^2 + \frac{(n_x + n_y)^2 - 2(n_x + n_y)}
+{n_xn_y}}}\]</div>
+<p>The formula to convert <strong>d</strong> to <span class="math notranslate nohighlight">\(\eta^2\)</span> is given in <a class="reference internal" href="#rbe4b7ffd8d54-3" id="id3">[3]</a>:</p>
+<div class="math notranslate nohighlight">
+\[\eta^2 = \frac{(0.5 d)^2}{1 + (0.5 d)^2}\]</div>
+<p>The formula to convert <strong>d</strong> to an odds-ratio is given in <a class="reference internal" href="#rbe4b7ffd8d54-4" id="id4">[4]</a>:</p>
+<div class="math notranslate nohighlight">
+\[\text{OR} = \exp (\frac{d \pi}{\sqrt{3}})\]</div>
+<p>The formula to convert <strong>d</strong> to area under the curve is given in <a class="reference internal" href="#rbe4b7ffd8d54-5" id="id5">[5]</a>:</p>
+<div class="math notranslate nohighlight">
+\[\text{AUC} = \mathcal{N}_{cdf}(\frac{d}{\sqrt{2}})\]</div>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="rbe4b7ffd8d54-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Rosenthal, Robert. “Parametric measures of effect size.”
+The handbook of research synthesis 621 (1994): 231-244.</p>
+</dd>
+<dt class="label" id="rbe4b7ffd8d54-2"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>McGrath, Robert E., and Gregory J. Meyer. “When effect sizes
+disagree: the case of r and d.” Psychological methods 11.4 (2006): 386.</p>
+</dd>
+<dt class="label" id="rbe4b7ffd8d54-3"><span class="brackets"><a class="fn-backref" href="#id3">3</a></span></dt>
+<dd><p>Cohen, Jacob. “Statistical power analysis for the behavioral
+sciences. 2nd.” (1988).</p>
+</dd>
+<dt class="label" id="rbe4b7ffd8d54-4"><span class="brackets"><a class="fn-backref" href="#id4">4</a></span></dt>
+<dd><p>Borenstein, Michael, et al. “Effect sizes for continuous data.”
+The handbook of research synthesis and meta-analysis 2 (2009): 221-235.</p>
+</dd>
+<dt class="label" id="rbe4b7ffd8d54-5"><span class="brackets"><a class="fn-backref" href="#id5">5</a></span></dt>
+<dd><p>Ruscio, John. “A probability-based measure of effect size:
+Robustness to base rates and other factors.” Psychological methods 1
+3.1 (2008): 19.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>Convert from Cohen d to eta-square</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="mf">.45</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eta</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">convert_effsize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="s1">&#39;eta-square&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span>
+<span class="go">0.048185603807257595</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Convert from Cohen d to Hegdes g (requires the sample sizes of each
+group)</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">convert_effsize</span><span class="p">(</span><span class="mf">.45</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="s1">&#39;hedges&#39;</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="go">0.4309859154929578</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Convert Pearson r to Cohen d</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="mf">0.40</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">convert_effsize</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="go">0.8728715609439696</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Reverse operation: convert Cohen d to Pearson r</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">convert_effsize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;cohen&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="go">0.4000000000000001</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.plot_blandaltman &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-plot-blandaltman">
+<h1>pingouin.plot_blandaltman<a class="headerlink" href="#pingouin-plot-blandaltman" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.plot_blandaltman">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">plot_blandaltman</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agreement</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.96</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xaxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scatter_kws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'alpha':</span> <span class="pre">0.8,</span> <span class="pre">'color':</span> <span class="pre">'tab:blue'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(4.5,</span> <span class="pre">4.5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.plot_blandaltman" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a Bland-Altman plot to compare two sets of measurements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x, y</strong><span class="classifier">pd.Series, np.array, or list</span></dt><dd><p>First and second measurements.</p>
+</dd>
+<dt><strong>agreement</strong><span class="classifier">float</span></dt><dd><p>Multiple of the standard deviation to plot agreement limits.
+The defaults is 1.96, which corresponds to 95% confidence interval if
+the differences are normally distributed.</p>
+</dd>
+<dt><strong>xaxis</strong><span class="classifier">str</span></dt><dd><p>Define which measurements should be used as the reference (x-axis).
+Default is to use the average of x and y (“mean”). Accepted values are
+“mean”, “x” or “y”.</p>
+</dd>
+<dt><strong>confidence</strong><span class="classifier">float</span></dt><dd><p>If not None, plot the specified percentage confidence interval of
+the mean and limits of agreement. The CIs of the mean difference and
+agreement limits describe a possible error in the
+estimate due to a sampling error. The greater the sample size,
+the narrower the CIs will be.</p>
+</dd>
+<dt><strong>annotate</strong><span class="classifier">bool</span></dt><dd><p>If True (default), annotate the values for the mean difference
+and agreement limits.</p>
+</dd>
+<dt><strong>scatter_kws</strong><span class="classifier">dict</span></dt><dd><p>Additional keyword arguments passed to
+<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html#matplotlib.pyplot.scatter" title="(in Matplotlib v3.6.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">matplotlib.pyplot.scatter()</span></code></a>.</p>
+</dd>
+<dt><strong>figsize</strong><span class="classifier">tuple</span></dt><dd><p>Figsize in inches</p>
+</dd>
+<dt><strong>dpi</strong><span class="classifier">int</span></dt><dd><p>Resolution of the figure in dots per inches.</p>
+</dd>
+<dt><strong>ax</strong><span class="classifier">matplotlib axes</span></dt><dd><p>Axis on which to draw the plot.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>ax</strong><span class="classifier">Matplotlib Axes instance</span></dt><dd><p>Returns the Axes object with the plot for further tweaking.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Bland-Altman plots <a class="reference internal" href="#r5bbb6e366078-1" id="id1">[1]</a> are extensively used to evaluate the agreement
+among two different instruments or two measurements techniques.
+They allow identification of any systematic difference between the
+measurements (i.e., fixed bias) or possible outliers.</p>
+<p>The mean difference (= x - y) is the estimated bias, and the SD of the
+differences measures the random fluctuations around this mean.
+If the mean value of the difference differs significantly from 0 on the
+basis of a 1-sample t-test, this indicates the presence of fixed bias.
+If there is a consistent bias, it can be adjusted for by subtracting the
+mean difference from the new method.</p>
+<p>It is common to compute 95% limits of agreement for each comparison
+(average difference ± 1.96 standard deviation of the difference), which
+tells us how far apart measurements by 2 methods were more likely to be
+for most individuals. If the differences within mean ± 1.96 SD are not
+clinically important, the two methods may be used interchangeably.
+The 95% limits of agreement can be unreliable estimates of the population
+parameters especially for small sample sizes so, when comparing methods
+or assessing repeatability, it is important to calculate confidence
+intervals for the 95% limits of agreement.</p>
+<p>The code is an adaptation of the
+<a class="reference external" href="https://github.com/jaketmp/pyCompare">PyCompare</a> package. The present
+implementation is a simplified version; please refer to the original
+package for more advanced functionalities.</p>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r5bbb6e366078-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Bland, J. M., &amp; Altman, D. (1986). Statistical methods for assessing
+agreement between two methods of clinical measurement. The lancet,
+327(8476), 307-310.</p>
+</dd>
+<dt class="label" id="r5bbb6e366078-2"><span class="brackets"><a class="fn-backref" href="#id4">2</a></span></dt>
+<dd><p>Giavarina, D. (2015). Understanding bland altman analysis.
+Biochemia medica, 25(2), 141-151.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Bland-Altman plot (example data from <a class="reference internal" href="#r5bbb6e366078-2" id="id4">[2]</a>)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s2">&quot;blandaltman&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">plot_blandaltman</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../_images/pingouin-plot_blandaltman-1.png" class="plot-directive" src="../_images/pingouin-plot_blandaltman-1.png" />
+</figure>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

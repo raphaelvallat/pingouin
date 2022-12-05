@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.convert_angles &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-convert-angles">
+<h1>pingouin.convert_angles<a class="headerlink" href="#pingouin-convert-angles" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.convert_angles">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">convert_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">360</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.convert_angles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Element-wise conversion of arbitrary-unit circular quantities
+to radians.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.3.4.</span></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>angles</strong><span class="classifier">array_like</span></dt><dd><p>Circular data.</p>
+</dd>
+<dt><strong>low</strong><span class="classifier">float or int, optional</span></dt><dd><p>Low boundary for <code class="docutils literal notranslate"><span class="pre">angles</span></code> range.  Default is 0.</p>
+</dd>
+<dt><strong>high</strong><span class="classifier">float or int, optional</span></dt><dd><p>High boundary for <code class="docutils literal notranslate"><span class="pre">angles</span></code> range.  Default is 360
+(for degrees to radians conversion).</p>
+</dd>
+<dt><strong>positive</strong><span class="classifier">boolean</span></dt><dd><p>If True, radians are mapped on the <span class="math notranslate nohighlight">\([0, 2\pi]\)</span>. Otherwise,
+the resulting angles are mapped from <span class="math notranslate nohighlight">\([-\pi, \pi)\)</span> (default).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>radians</strong><span class="classifier">array_like</span></dt><dd><p>Circular data in radians.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The formula to convert a set of angles <span class="math notranslate nohighlight">\(\alpha\)</span> from an arbitrary
+range <span class="math notranslate nohighlight">\([\text{high},\text{low}]\)</span> to radians
+<span class="math notranslate nohighlight">\([0, 2\pi]\)</span> is:</p>
+<div class="math notranslate nohighlight">
+\[\alpha_r = \frac{2\pi\alpha}{\text{high} - \text{low}}\]</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">positive=False</span></code> (default), the resulting angles in
+radians <span class="math notranslate nohighlight">\(\alpha_r\)</span> are then wrapped to the <span class="math notranslate nohighlight">\([-\pi, \pi)\)</span>
+range:</p>
+<div class="math notranslate nohighlight">
+\[(\text{angle} + \pi) \mod 2 \pi - \pi\]</div>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>Convert degrees to radians</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="kn">import</span> <span class="n">convert_angles</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mi">270</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">convert_angles</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">360</span><span class="p">)</span>
+<span class="go">array([ 0.        ,  0.        , -3.14159265,  1.57079633,  0.78539816,</span>
+<span class="go">       -1.57079633])</span>
+</pre></div>
+</div>
+<p>with <code class="docutils literal notranslate"><span class="pre">positive=True</span></code>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">convert_angles</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">360</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">array([0.        , 6.28318531, 3.14159265, 1.57079633, 0.78539816,</span>
+<span class="go">       4.71238898])</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Convert hours (24h-format) to radians</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sleep_onset</span> <span class="o">=</span> <span class="p">[</span><span class="mf">22.5</span><span class="p">,</span> <span class="mf">23.25</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">convert_angles</span><span class="p">(</span><span class="n">sleep_onset</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+<span class="go">array([-0.39269908, -0.19634954,  0.        ,  0.13089969,  0.26179939])</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Convert radians from <span class="math notranslate nohighlight">\([0, 2\pi]\)</span> to <span class="math notranslate nohighlight">\([-\pi, \pi)\)</span>:</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rad</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">3.14</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">convert_angles</span><span class="p">(</span><span class="n">rad</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+<span class="go">array([ 0.1       ,  3.14      , -1.28318531,  2.        , -0.28318531])</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Convert degrees from a 2-D array</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">360</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">convert_angles</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span>
+<span class="go">array([[-0.66322512,  1.71042267, -2.26892803,  0.29670597],</span>
+<span class="go">       [ 1.44862328,  1.85004901,  2.14675498,  0.99483767],</span>
+<span class="go">       [-2.54818071, -2.35619449,  1.67551608,  1.97222205]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

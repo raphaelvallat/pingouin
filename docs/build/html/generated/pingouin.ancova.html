@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.ancova &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-ancova">
+<h1>pingouin.ancova<a class="headerlink" href="#pingouin-ancova" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.ancova">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">ancova</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">between</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'np2'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.ancova" title="Permalink to this definition">¶</a></dt>
+<dd><p>ANCOVA with one or more covariate(s).</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>DataFrame. Note that this function can also directly be used as a
+Pandas method, in which case this argument is no longer needed.</p>
+</dd>
+<dt><strong>dv</strong><span class="classifier">string</span></dt><dd><p>Name of column in data with the dependent variable.</p>
+</dd>
+<dt><strong>between</strong><span class="classifier">string</span></dt><dd><p>Name of column in data with the between factor.</p>
+</dd>
+<dt><strong>covar</strong><span class="classifier">string or list</span></dt><dd><p>Name(s) of column(s) in data with the covariate.</p>
+</dd>
+<dt><strong>effsize</strong><span class="classifier">str</span></dt><dd><p>Effect size. Must be ‘np2’ (partial eta-squared) or ‘n2’
+(eta-squared).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>aov</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>ANCOVA summary:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'Source'</span></code>: Names of the factor considered</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'SS'</span></code>: Sums of squares</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'DF'</span></code>: Degrees of freedom</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'F'</span></code>: F-values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-unc'</span></code>: Uncorrected p-values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'np2'</span></code>: Partial eta-squared</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.anova.html#pingouin.anova" title="pingouin.anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anova</span></code></a></dt><dd><p>One-way and N-way ANOVA</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>Analysis of covariance (ANCOVA) is a general linear model which blends
+ANOVA and regression. ANCOVA evaluates whether the means of a dependent
+variable (dv) are equal across levels of a categorical independent
+variable (between) often called a treatment, while statistically
+controlling for the effects of other continuous variables that are not
+of primary interest, known as covariates or nuisance variables (covar).</p>
+<p>Pingouin uses <a class="reference external" href="https://www.statsmodels.org/stable/generated/statsmodels.regression.linear_model.OLS.html#statsmodels.regression.linear_model.OLS" title="(in statsmodels v0.13.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">statsmodels.regression.linear_model.OLS</span></code></a> to
+compute the ANCOVA.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Rows with missing values are automatically removed
+(listwise deletion).</p>
+</div>
+<p class="rubric">Examples</p>
+<p>1. Evaluate the reading scores of students with different teaching method
+and family income as a covariate.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="kn">import</span> <span class="n">ancova</span><span class="p">,</span> <span class="n">read_dataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;ancova&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ancova</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="s1">&#39;Income&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Method&#39;</span><span class="p">)</span>
+<span class="go">     Source           SS  DF          F     p-unc       np2</span>
+<span class="go">0    Method   571.029883   3   3.336482  0.031940  0.244077</span>
+<span class="go">1    Income  1678.352687   1  29.419438  0.000006  0.486920</span>
+<span class="go">2  Residual  1768.522313  31        NaN       NaN       NaN</span>
+</pre></div>
+</div>
+<p>2. Evaluate the reading scores of students with different teaching method
+and family income + BMI as a covariate.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ancova</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Income&#39;</span><span class="p">,</span> <span class="s1">&#39;BMI&#39;</span><span class="p">],</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Method&#39;</span><span class="p">,</span>
+<span class="gp">... </span>       <span class="n">effsize</span><span class="o">=</span><span class="s2">&quot;n2&quot;</span><span class="p">)</span>
+<span class="go">     Source           SS  DF          F     p-unc        n2</span>
+<span class="go">0    Method   552.284043   3   3.232550  0.036113  0.141802</span>
+<span class="go">1    Income  1573.952434   1  27.637304  0.000011  0.404121</span>
+<span class="go">2       BMI    60.013656   1   1.053790  0.312842  0.015409</span>
+<span class="go">3  Residual  1708.508657  30        NaN       NaN       NaN</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

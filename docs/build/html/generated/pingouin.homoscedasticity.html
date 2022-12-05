@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.homoscedasticity &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-homoscedasticity">
+<h1>pingouin.homoscedasticity<a class="headerlink" href="#pingouin-homoscedasticity" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.homoscedasticity">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">homoscedasticity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'levene'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.homoscedasticity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test equality of variance.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>, list or dict</span></dt><dd><p>Iterable. Can be either a list / dictionnary of iterables
+or a wide- or long-format pandas dataframe.</p>
+</dd>
+<dt><strong>dv</strong><span class="classifier">str</span></dt><dd><p>Dependent variable (only when <code class="docutils literal notranslate"><span class="pre">data</span></code> is a long-format dataframe).</p>
+</dd>
+<dt><strong>group</strong><span class="classifier">str</span></dt><dd><p>Grouping variable (only when <code class="docutils literal notranslate"><span class="pre">data</span></code> is a long-format dataframe).</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">str</span></dt><dd><p>Statistical test. <cite>‘levene’</cite> (default) performs the Levene test
+using <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.levene.html#scipy.stats.levene" title="(in SciPy v1.9.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.stats.levene()</span></code></a>, and <cite>‘bartlett’</cite> performs the
+Bartlett test using <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bartlett.html#scipy.stats.bartlett" title="(in SciPy v1.9.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.stats.bartlett()</span></code></a>.
+The former is more robust to departure from normality.</p>
+</dd>
+<dt><strong>alpha</strong><span class="classifier">float</span></dt><dd><p>Significance level.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">optional</span></dt><dd><p>Optional argument(s) passed to the lower-level <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.levene.html#scipy.stats.levene" title="(in SciPy v1.9.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.stats.levene()</span></code></a> function.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>stats</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'W/T'</span></code>: Test statistic (‘W’ for Levene, ‘T’ for Bartlett)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'pval'</span></code>: p-value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'equal_var'</span></code>: True if <code class="docutils literal notranslate"><span class="pre">data</span></code> has equal variance</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.normality.html#pingouin.normality" title="pingouin.normality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normality</span></code></a></dt><dd><p>Univariate normality test.</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.sphericity.html#pingouin.sphericity" title="pingouin.sphericity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sphericity</span></code></a></dt><dd><p>Mauchly’s test for sphericity.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>The <strong>Bartlett</strong> <span class="math notranslate nohighlight">\(T\)</span> statistic <a class="reference internal" href="#r9319403e2d06-1" id="id1">[1]</a> is defined as:</p>
+<div class="math notranslate nohighlight">
+\[T = \frac{(N-k) \ln{s^{2}_{p}} - \sum_{i=1}^{k}(N_{i} - 1)
+\ln{s^{2}_{i}}}{1 + (1/(3(k-1)))((\sum_{i=1}^{k}{1/(N_{i} - 1))}
+- 1/(N-k))}\]</div>
+<p>where <span class="math notranslate nohighlight">\(s_i^2\)</span> is the variance of the <span class="math notranslate nohighlight">\(i^{th}\)</span> group,
+<span class="math notranslate nohighlight">\(N\)</span> is the total sample size, <span class="math notranslate nohighlight">\(N_i\)</span> is the sample size of the
+<span class="math notranslate nohighlight">\(i^{th}\)</span> group, <span class="math notranslate nohighlight">\(k\)</span> is the number of groups,
+and <span class="math notranslate nohighlight">\(s_p^2\)</span> is the pooled variance.</p>
+<p>The pooled variance is a weighted average of the group variances and is
+defined as:</p>
+<div class="math notranslate nohighlight">
+\[s^{2}_{p} = \sum_{i=1}^{k}(N_{i} - 1)s^{2}_{i}/(N-k)\]</div>
+<p>The p-value is then computed using a chi-square distribution:</p>
+<div class="math notranslate nohighlight">
+\[T \sim \chi^2(k-1)\]</div>
+<p>The <strong>Levene</strong> <span class="math notranslate nohighlight">\(W\)</span> statistic <a class="reference internal" href="#r9319403e2d06-2" id="id2">[2]</a> is defined as:</p>
+<div class="math notranslate nohighlight">
+\[W = \frac{(N-k)} {(k-1)}
+\frac{\sum_{i=1}^{k}N_{i}(\overline{Z}_{i.}-\overline{Z})^{2} }
+{\sum_{i=1}^{k}\sum_{j=1}^{N_i}(Z_{ij}-\overline{Z}_{i.})^{2} }\]</div>
+<p>where <span class="math notranslate nohighlight">\(Z_{ij} = |Y_{ij} - \text{median}({Y}_{i.})|\)</span>,
+<span class="math notranslate nohighlight">\(\overline{Z}_{i.}\)</span> are the group means of <span class="math notranslate nohighlight">\(Z_{ij}\)</span> and
+<span class="math notranslate nohighlight">\(\overline{Z}\)</span> is the grand mean of <span class="math notranslate nohighlight">\(Z_{ij}\)</span>.</p>
+<p>The p-value is then computed using a F-distribution:</p>
+<div class="math notranslate nohighlight">
+\[W \sim F(k-1, N-k)\]</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Missing values are not supported for this function.
+Make sure to remove them before using the
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.dropna.html#pandas.DataFrame.dropna" title="(in pandas v1.5.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pandas.DataFrame.dropna()</span></code></a> or <a class="reference internal" href="pingouin.remove_na.html#pingouin.remove_na" title="pingouin.remove_na"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.remove_na()</span></code></a>
+functions.</p>
+</div>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r9319403e2d06-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Bartlett, M. S. (1937). Properties of sufficiency and statistical
+tests. Proc. R. Soc. Lond. A, 160(901), 268-282.</p>
+</dd>
+<dt class="label" id="r9319403e2d06-2"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Brown, M. B., &amp; Forsythe, A. B. (1974). Robust tests for the
+equality of variances. Journal of the American Statistical
+Association, 69(346), 364-367.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>Levene test on a wide-format dataframe</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;mediation&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">homoscedasticity</span><span class="p">(</span><span class="n">data</span><span class="p">[[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;M&#39;</span><span class="p">]])</span>
+<span class="go">               W      pval  equal_var</span>
+<span class="go">levene  1.173518  0.310707       True</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Same data but using a long-format dataframe</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data_long</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;M&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">melt</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">homoscedasticity</span><span class="p">(</span><span class="n">data_long</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;variable&quot;</span><span class="p">)</span>
+<span class="go">               W      pval  equal_var</span>
+<span class="go">levene  1.173518  0.310707       True</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Same but using a mean center</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">homoscedasticity</span><span class="p">(</span><span class="n">data_long</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;variable&quot;</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span>
+<span class="go">               W      pval  equal_var</span>
+<span class="go">levene  1.572239  0.209303       True</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Bartlett test using a list of iterables</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">14</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mi">12</span><span class="p">])]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">homoscedasticity</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;bartlett&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">.05</span><span class="p">)</span>
+<span class="go">                 T      pval  equal_var</span>
+<span class="go">bartlett  2.873569  0.090045       True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

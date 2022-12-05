@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.bayesfactor_pearson &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-bayesfactor-pearson">
+<h1>pingouin.bayesfactor_pearson<a class="headerlink" href="#pingouin-bayesfactor-pearson" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.bayesfactor_pearson">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">bayesfactor_pearson</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'two-sided'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ly'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.bayesfactor_pearson" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bayes Factor of a Pearson correlation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>r</strong><span class="classifier">float</span></dt><dd><p>Pearson correlation coefficient.</p>
+</dd>
+<dt><strong>n</strong><span class="classifier">int</span></dt><dd><p>Sample size.</p>
+</dd>
+<dt><strong>alternative</strong><span class="classifier">string</span></dt><dd><p>Defines the alternative hypothesis, or tail of the correlation. Must be one of
+“two-sided” (default), “greater” or “less”. Both “greater” and “less” return a one-sided
+p-value. “greater” tests against the alternative hypothesis that the correlation is
+positive (greater than zero), “less” tests against the hypothesis that the correlation is
+negative.</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">str</span></dt><dd><p>Method to compute the Bayes Factor. Can be “ly” (default) or
+“wetzels”. The former has an exact analytical solution, while the
+latter requires integral solving (and is therefore slower). “wetzels”
+was the default in Pingouin &lt;= 0.2.5. See Notes for details.</p>
+</dd>
+<dt><strong>kappa</strong><span class="classifier">float</span></dt><dd><p>Kappa factor. This is sometimes called the <em>rscale</em> parameter, and
+is only used when <code class="docutils literal notranslate"><span class="pre">method</span></code> is “ly”.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>bf</strong><span class="classifier">float</span></dt><dd><p>Bayes Factor (BF10).
+The Bayes Factor quantifies the evidence in favour of the alternative
+hypothesis.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.corr.html#pingouin.corr" title="pingouin.corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr</span></code></a></dt><dd><p>(Robust) correlation between two variables</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.pairwise_corr.html#pingouin.pairwise_corr" title="pingouin.pairwise_corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pairwise_corr</span></code></a></dt><dd><p>Pairwise correlation between columns of a pandas DataFrame</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.bayesfactor_ttest.html#pingouin.bayesfactor_ttest" title="pingouin.bayesfactor_ttest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bayesfactor_ttest</span></code></a></dt><dd><p>Bayes Factor of a T-test</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.bayesfactor_binom.html#pingouin.bayesfactor_binom" title="pingouin.bayesfactor_binom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bayesfactor_binom</span></code></a></dt><dd><p>Bayes Factor of a binomial test</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>To compute the Bayes Factor directly from the raw data, use the
+<a class="reference internal" href="pingouin.corr.html#pingouin.corr" title="pingouin.corr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.corr()</span></code></a> function.</p>
+<p>The two-sided <strong>Wetzels Bayes Factor</strong> (also called <em>JZS Bayes Factor</em>)
+is calculated using the equation 13 and associated R code of <a class="reference internal" href="#r92c7003c6841-1" id="id1">[1]</a>:</p>
+<div class="math notranslate nohighlight">
+\[\text{BF}_{10}(n, r) = \frac{\sqrt{n/2}}{\gamma(1/2)}*
+\int_{0}^{\infty}e((n-2)/2)*
+log(1+g)+(-(n-1)/2)log(1+(1-r^2)*g)+(-3/2)log(g)-n/2g\]</div>
+<p>where <span class="math notranslate nohighlight">\(n\)</span> is the sample size, <span class="math notranslate nohighlight">\(r\)</span> is the Pearson correlation
+coefficient and <span class="math notranslate nohighlight">\(g\)</span> is is an auxiliary variable that is integrated
+out numerically. Since the Wetzels Bayes Factor requires solving an
+integral, it is slower than the analytical solution described below.</p>
+<p>The two-sided <strong>Ly Bayes Factor</strong> (also called <em>Jeffreys
+exact Bayes Factor</em>) is calculated using equation 25 of <a class="reference internal" href="#r92c7003c6841-2" id="id2">[2]</a>:</p>
+<div class="math notranslate nohighlight">
+\[\text{BF}_{10;k}(n, r) = \frac{2^{\frac{k-2}{k}}\sqrt{\pi}}
+{\beta(\frac{1}{k}, \frac{1}{k})} \cdot
+\frac{\Gamma(\frac{2+k(n-1)}{2k})}{\Gamma(\frac{2+nk}{2k})}
+\cdot 2F_1(\frac{n-1}{2}, \frac{n-1}{2}, \frac{2+nk}{2k}, r^2)\]</div>
+<p>The one-sided version is described in eq. 27 and 28 of Ly et al, 2016.
+Please take note that the one-sided test requires the
+<a class="reference external" href="http://mpmath.org/">mpmath</a> package.</p>
+<p>Results have been validated against JASP and the BayesFactor R package.</p>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r92c7003c6841-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Ly, A., Verhagen, J. &amp; Wagenmakers, E.-J. Harold Jeffreys’s default
+Bayes factor hypothesis tests: Explanation, extension, and
+application in psychology. J. Math. Psychol. 72, 19–32 (2016).</p>
+</dd>
+<dt class="label" id="r92c7003c6841-2"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Wetzels, R. &amp; Wagenmakers, E.-J. A default Bayesian hypothesis test
+for correlations and partial correlations. Psychon. Bull. Rev. 19,
+1057–1064 (2012).</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Bayes Factor of a Pearson correlation</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="kn">import</span> <span class="n">bayesfactor_pearson</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">20</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bf</span> <span class="o">=</span> <span class="n">bayesfactor_pearson</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bayes Factor: </span><span class="si">%.3f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">bf</span><span class="p">)</span>
+<span class="go">Bayes Factor: 10.634</span>
+</pre></div>
+</div>
+<p>Compare to Wetzels method:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bf</span> <span class="o">=</span> <span class="n">bayesfactor_pearson</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;wetzels&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bayes Factor: </span><span class="si">%.3f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">bf</span><span class="p">)</span>
+<span class="go">Bayes Factor: 8.221</span>
+</pre></div>
+</div>
+<p>One-sided test</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bf10pos</span> <span class="o">=</span> <span class="n">bayesfactor_pearson</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s1">&#39;greater&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bf10neg</span> <span class="o">=</span> <span class="n">bayesfactor_pearson</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s1">&#39;less&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BF-pos: </span><span class="si">%.3f</span><span class="s2">, BF-neg: </span><span class="si">%.3f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bf10pos</span><span class="p">,</span> <span class="n">bf10neg</span><span class="p">))</span>
+<span class="go">BF-pos: 21.185, BF-neg: 0.082</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

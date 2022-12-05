@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.rcorr &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-rcorr">
+<h1>pingouin.rcorr<a class="headerlink" href="#pingouin-rcorr" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.rcorr">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">rcorr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pearson'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pval'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padjust</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pval_stars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{0.001:</span> <span class="pre">'***',</span> <span class="pre">0.01:</span> <span class="pre">'**',</span> <span class="pre">0.05:</span> <span class="pre">'*'}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.rcorr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Correlation matrix of a dataframe with p-values and/or sample size on the
+upper triangle (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> method).</p>
+<p>This method is a faster, but less exhaustive, matrix-version of the
+<a class="reference internal" href="pingouin.pairwise_corr.html#pingouin.pairwise_corr" title="pingouin.pairwise_corr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.pairwise_corr()</span></code></a> function. It is based on the
+<code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.DataFrame.corr()</span></code> method. Missing values are automatically
+removed from each pairwise correlation.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>self</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>Input dataframe.</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">str</span></dt><dd><p>Correlation method. Can be either ‘pearson’ or ‘spearman’.</p>
+</dd>
+<dt><strong>upper</strong><span class="classifier">str</span></dt><dd><p>If ‘pval’, the upper triangle of the output correlation matrix shows
+the p-values. If ‘n’, the upper triangle is the sample size used in
+each pairwise correlation.</p>
+</dd>
+<dt><strong>decimals</strong><span class="classifier">int</span></dt><dd><p>Number of decimals to display in the output correlation matrix.</p>
+</dd>
+<dt><strong>padjust</strong><span class="classifier">string or None</span></dt><dd><p>Method used for testing and adjustment of pvalues.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'none'</span></code>: no correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'bonf'</span></code>: one-step Bonferroni correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'sidak'</span></code>: one-step Sidak correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'holm'</span></code>: step-down method using Bonferroni adjustments</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'fdr_bh'</span></code>: Benjamini/Hochberg FDR correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'fdr_by'</span></code>: Benjamini/Yekutieli FDR correction</p></li>
+</ul>
+</dd>
+<dt><strong>stars</strong><span class="classifier">boolean</span></dt><dd><p>If True, only significant p-values are displayed as stars using the
+pre-defined thresholds of <code class="docutils literal notranslate"><span class="pre">pval_stars</span></code>. If False, all the raw
+p-values are displayed.</p>
+</dd>
+<dt><strong>pval_stars</strong><span class="classifier">dict</span></dt><dd><p>Significance thresholds. Default is 3 stars for p-values &lt; 0.001,
+2 stars for p-values &lt; 0.01 and 1 star for p-values &lt; 0.05.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>rcorr</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>Correlation matrix, of type str.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Load an example dataset of personality dimensions</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;pairwise_corr&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Add some missing values</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">   Neuroticism  Extraversion  Openness  Agreeableness  Conscientiousness</span>
+<span class="go">0         2.48          4.21      3.94           3.96               3.46</span>
+<span class="go">1         2.60          3.19      3.96            NaN               3.23</span>
+<span class="go">2         2.81          2.90       NaN           2.75               3.50</span>
+<span class="go">3         2.90          3.56      3.52           3.17               2.79</span>
+<span class="go">4         3.02          3.33      4.02            NaN               2.85</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Correlation matrix on the four first columns</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">rcorr</span><span class="p">()</span>
+<span class="go">              Neuroticism Extraversion Openness Agreeableness</span>
+<span class="go">Neuroticism             -          ***                     **</span>
+<span class="go">Extraversion        -0.35            -      ***</span>
+<span class="go">Openness            -0.01        0.265        -           ***</span>
+<span class="go">Agreeableness      -0.134        0.054    0.161             -</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Spearman correlation and Holm adjustement for multiple comparisons</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">rcorr</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;spearman&#39;</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;holm&#39;</span><span class="p">)</span>
+<span class="go">              Neuroticism Extraversion Openness Agreeableness</span>
+<span class="go">Neuroticism             -          ***                     **</span>
+<span class="go">Extraversion       -0.325            -      ***</span>
+<span class="go">Openness           -0.027         0.24        -           ***</span>
+<span class="go">Agreeableness       -0.15         0.06    0.173             -</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Compare with the pg.pairwise_corr function</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pairwise</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">pairwise_corr</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;spearman&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                                         <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;holm&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pairwise</span><span class="p">[[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;p-corr&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># Do not show all columns</span>
+<span class="go">              X              Y      r  p-corr</span>
+<span class="go">0   Neuroticism   Extraversion -0.325   0.000</span>
+<span class="go">1   Neuroticism       Openness -0.027   0.543</span>
+<span class="go">2   Neuroticism  Agreeableness -0.150   0.002</span>
+<span class="go">3  Extraversion       Openness  0.240   0.000</span>
+<span class="go">4  Extraversion  Agreeableness  0.060   0.358</span>
+<span class="go">5      Openness  Agreeableness  0.173   0.000</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Display the raw p-values with four decimals</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span><span class="o">.</span><span class="n">rcorr</span><span class="p">(</span><span class="n">stars</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">              Neuroticism Extraversion Agreeableness</span>
+<span class="go">Neuroticism             -       0.0000        0.0028</span>
+<span class="go">Extraversion      -0.3501            -        0.2305</span>
+<span class="go">Agreeableness      -0.134       0.0539             -</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># With the sample size on the upper triangle instead of the p-values</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span><span class="o">.</span><span class="n">rcorr</span><span class="p">(</span><span class="n">upper</span><span class="o">=</span><span class="s1">&#39;n&#39;</span><span class="p">)</span>
+<span class="go">             Neuroticism Extraversion Openness</span>
+<span class="go">Neuroticism            -          500      497</span>
+<span class="go">Extraversion       -0.35            -      497</span>
+<span class="go">Openness           -0.01        0.265        -</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

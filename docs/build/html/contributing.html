@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Contribute to Pingouin &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html"><span><img src="_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="api.html">Functions</a></li>
+                <li><a href="guidelines.html">Guidelines</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="changelog.html">What's new</a></li>
+                <li><a href="#">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="contribute-to-pingouin">
+<span id="contribute"></span><h1>Contribute to Pingouin<a class="headerlink" href="#contribute-to-pingouin" title="Permalink to this headline">¶</a></h1>
+<p>There are many ways to contribute to Pingouin: reporting bugs or results that are inconsistent with other statistical softwares, adding new functions, improving the documentation, etc…</p>
+<p>If you like Pingouin, you can also consider <a class="reference external" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=K2FZVJGCKYPAG&amp;currency_code=USD&amp;source=url">buying the developpers a coffee</a>!</p>
+<section id="code-guidelines">
+<h2>Code guidelines<a class="headerlink" href="#code-guidelines" title="Permalink to this headline">¶</a></h2>
+<p><em>Before starting new code</em>, we highly recommend opening an issue on <a class="reference external" href="https://github.com/raphaelvallat/pingouin">GitHub</a> to discuss potential changes.</p>
+<ul>
+<li><p>Please use standard <a class="reference external" href="https://pypi.python.org/pypi/pep8">pep8</a> and <a class="reference external" href="http://flake8.pycqa.org/">flake8</a> Python style guidelines. Pingouin uses <a class="reference external" href="https://github.com/psf/black">black</a> for code formatting. Before submitting a PR, please make sure to run the following command in the root folder of Pingouin:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ black .
+</pre></div>
+</div>
+</li>
+<li><p>Use <a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html">NumPy style</a> for docstrings. Follow existing examples for simplest guidance.</p></li>
+<li><p>New functionality must be <strong>validated</strong> against at least one other statistical software including R, SPSS, Matlab or JASP.</p></li>
+<li><p>When adding new functions, make sure that they are <strong>generalizable to various situations</strong>, including missing data, unbalanced groups, etc.</p></li>
+<li><p>Changes must be accompanied by <strong>updated documentation</strong> and examples.</p></li>
+<li><p>After making changes, <strong>ensure all tests pass</strong>. This can be done by running:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ pytest --doctest-modules
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="checking-and-building-documentation">
+<h2>Checking and building documentation<a class="headerlink" href="#checking-and-building-documentation" title="Permalink to this headline">¶</a></h2>
+<p>Pingouin’s documentation (including docstring in code) uses ReStructuredText format,
+see <a class="reference external" href="http://www.sphinx-doc.org/en/master/">Sphinx documentation</a> to learn more about editing them. The code
+follows the <a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html">NumPy docstring standard</a>.</p>
+<p>All changes to the codebase must be properly documented. To ensure that documentation is rendered correctly, the best bet is to follow the existing examples for function docstrings.</p>
+<section id="build-locally">
+<h3>Build locally<a class="headerlink" href="#build-locally" title="Permalink to this headline">¶</a></h3>
+<p>If you want to test the documentation locally, you will need to install the following packages:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ pip install --upgrade sphinx sphinx_bootstrap_theme numpydoc sphinx-copybutton
+</pre></div>
+</div>
+<p>and then within the <code class="docutils literal notranslate"><span class="pre">pingouin/docs</span></code> directory do:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ make html
+</pre></div>
+</div>
+<p>or call make from the root <code class="docutils literal notranslate"><span class="pre">pingouin</span></code> directory directly,
+using the <code class="docutils literal notranslate"><span class="pre">-C</span></code> flag to tell the <code class="docutils literal notranslate"><span class="pre">make</span></code> command to first switch to the <code class="docutils literal notranslate"><span class="pre">docs</span></code> directory,
+and then come back after executing the <code class="docutils literal notranslate"><span class="pre">html</span></code> recipe.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ make -C docs html
+</pre></div>
+</div>
+</section>
+<section id="inspect-on-github">
+<h3>Inspect on GitHub<a class="headerlink" href="#inspect-on-github" title="Permalink to this headline">¶</a></h3>
+<p>Thanks to the <a class="reference external" href="https://docs.github.com/en/free-pro-team&#64;latest/actions">GitHub Actions</a> continuous integration service,
+the documentation is also built on GitHub servers after every commit you make as part of a Pull Request.
+To inspect these build artifacts, follow these steps:</p>
+<ul class="simple">
+<li><p>Click on the “Show all checks” dropdown menu at the end of the Pull Request user interface</p></li>
+</ul>
+<figure class="align-center" id="id1">
+<img alt="GitHub checks dropdown menu" src="_images/github_checks.png" />
+<figcaption>
+<p><span class="caption-text">Screenshot of the GitHub checks dropdown menu</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+<ul class="simple">
+<li><p>Click on the check that starts with <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">tests</span> <span class="pre">/</span> <span class="pre">build</span> <span class="pre">(ubuntu-latest,</span> <span class="pre">3.8)</span></code></p></li>
+<li><p>Now in the top right corner of the opening window, you will see a small dropdown menu called “Artifacts”</p></li>
+</ul>
+<figure class="align-center" id="id2">
+<img alt="GitHub build artifacts dropdown menu" src="_images/github_build_artifacts.png" />
+<figcaption>
+<p><span class="caption-text">Screenshot of the GitHub build artifacts dropdown menu</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+<ul class="simple">
+<li><p>Click on that drowndown menu and download the <code class="docutils literal notranslate"><span class="pre">docs-artifact</span></code> zip file</p></li>
+</ul>
+<p>You can then unpack that zip file on your computer, enter the directory, and open the <code class="docutils literal notranslate"><span class="pre">index.html</span></code> file that you will find there.
+That should open the Pingouin documentation based on the changes from your Pull Request.</p>
+</section>
+</section>
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.anova &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-anova">
+<h1>pingouin.anova<a class="headerlink" href="#pingouin-anova" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.anova">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">anova</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">between</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ss_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detailed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'np2'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.anova" title="Permalink to this definition">¶</a></dt>
+<dd><p>One-way and <em>N</em>-way ANOVA.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>DataFrame. Note that this function can also directly be used as a
+Pandas method, in which case this argument is no longer needed.</p>
+</dd>
+<dt><strong>dv</strong><span class="classifier">string</span></dt><dd><p>Name of column in <code class="docutils literal notranslate"><span class="pre">data</span></code> containing the dependent variable.</p>
+</dd>
+<dt><strong>between</strong><span class="classifier">string or list with <em>N</em> elements</span></dt><dd><p>Name of column(s) in <code class="docutils literal notranslate"><span class="pre">data</span></code> containing the between-subject factor(s).
+If <code class="docutils literal notranslate"><span class="pre">between</span></code> is a single string, a one-way ANOVA is computed.
+If <code class="docutils literal notranslate"><span class="pre">between</span></code> is a list with two or more elements, a <em>N</em>-way ANOVA is
+performed.
+Note that Pingouin will internally call statsmodels to calculate
+ANOVA with 3 or more factors, or unbalanced two-way ANOVA.</p>
+</dd>
+<dt><strong>ss_type</strong><span class="classifier">int</span></dt><dd><p>Specify how the sums of squares is calculated for <em>unbalanced</em> design
+with 2 or more factors. Can be 1, 2 (default), or 3. This has no impact
+on one-way design or N-way ANOVA with balanced data.</p>
+</dd>
+<dt><strong>detailed</strong><span class="classifier">boolean</span></dt><dd><p>If True, return a detailed ANOVA table
+(default True for N-way ANOVA).</p>
+</dd>
+<dt><strong>effsize</strong><span class="classifier">str</span></dt><dd><p>Effect size. Must be ‘np2’ (partial eta-squared) or ‘n2’
+(eta-squared). Note that for one-way ANOVA partial eta-squared is the
+same as eta-squared.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>aov</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>ANOVA summary:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'Source'</span></code>: Factor names</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'SS'</span></code>: Sums of squares</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'DF'</span></code>: Degrees of freedom</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'MS'</span></code>: Mean squares</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'F'</span></code>: F-values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-unc'</span></code>: uncorrected p-values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'np2'</span></code>: Partial eta-square effect sizes</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.rm_anova.html#pingouin.rm_anova" title="pingouin.rm_anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rm_anova</span></code></a></dt><dd><p>One-way and two-way repeated measures ANOVA</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.mixed_anova.html#pingouin.mixed_anova" title="pingouin.mixed_anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mixed_anova</span></code></a></dt><dd><p>Two way mixed ANOVA</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.welch_anova.html#pingouin.welch_anova" title="pingouin.welch_anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">welch_anova</span></code></a></dt><dd><p>One-way Welch ANOVA</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.kruskal.html#pingouin.kruskal" title="pingouin.kruskal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kruskal</span></code></a></dt><dd><p>Non-parametric one-way ANOVA</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>The classic ANOVA is very powerful when the groups are normally distributed
+and have equal variances. However, when the groups have unequal variances,
+it is best to use the Welch ANOVA (<a class="reference internal" href="pingouin.welch_anova.html#pingouin.welch_anova" title="pingouin.welch_anova"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.welch_anova()</span></code></a>) that
+better controls for type I error (Liu 2015). The homogeneity of variances
+can be measured with the <a class="reference internal" href="pingouin.homoscedasticity.html#pingouin.homoscedasticity" title="pingouin.homoscedasticity"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.homoscedasticity()</span></code></a> function.</p>
+<p>The main idea of ANOVA is to partition the variance (sums of squares)
+into several components. For example, in one-way ANOVA:</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}SS_{\text{total}} = SS_{\text{effect}} + SS_{\text{error}}\\SS_{\text{total}} = \sum_i \sum_j (Y_{ij} - \overline{Y})^2\\SS_{\text{effect}} = \sum_i n_i (\overline{Y_i} - \overline{Y})^2\\SS_{\text{error}} = \sum_i \sum_j (Y_{ij} - \overline{Y}_i)^2\end{aligned}\end{align} \]</div>
+<p>where <span class="math notranslate nohighlight">\(i=1,...,r; j=1,...,n_i\)</span>, <span class="math notranslate nohighlight">\(r\)</span> is the number of groups,
+and <span class="math notranslate nohighlight">\(n_i\)</span> the number of observations for the <span class="math notranslate nohighlight">\(i\)</span> th group.</p>
+<p>The F-statistics is then defined as:</p>
+<div class="math notranslate nohighlight">
+\[F^* = \frac{MS_{\text{effect}}}{MS_{\text{error}}} =
+\frac{SS_{\text{effect}} / (r - 1)}{SS_{\text{error}} / (n_t - r)}\]</div>
+<p>and the p-value can be calculated using a F-distribution with
+<span class="math notranslate nohighlight">\(r-1, n_t-1\)</span> degrees of freedom.</p>
+<p>When the groups are balanced and have equal variances, the optimal post-hoc
+test is the Tukey-HSD test (<a class="reference internal" href="pingouin.pairwise_tukey.html#pingouin.pairwise_tukey" title="pingouin.pairwise_tukey"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.pairwise_tukey()</span></code></a>).
+If the groups have unequal variances, the Games-Howell test is more
+adequate (<a class="reference internal" href="pingouin.pairwise_gameshowell.html#pingouin.pairwise_gameshowell" title="pingouin.pairwise_gameshowell"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.pairwise_gameshowell()</span></code></a>).</p>
+<p>The default effect size reported in Pingouin is the partial eta-square,
+which, for one-way ANOVA is the same as eta-square and generalized
+eta-square.</p>
+<div class="math notranslate nohighlight">
+\[\eta_p^2 = \frac{SS_{\text{effect}}}{SS_{\text{effect}} +
+SS_{\text{error}}}\]</div>
+<p>Missing values are automatically removed. Results have been tested against
+R, Matlab and JASP.</p>
+<p class="rubric">Examples</p>
+<p>One-way ANOVA</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;anova&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aov</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Pain threshold&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Hair color&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+<span class="gp">... </span>               <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aov</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">       Source        SS  DF       MS      F  p-unc    np2</span>
+<span class="go">0  Hair color  1360.726   3  453.575  6.791  0.004  0.576</span>
+<span class="go">1      Within  1001.800  15   66.787    NaN    NaN    NaN</span>
+</pre></div>
+</div>
+<p>Same but using a standard eta-squared instead of a partial eta-squared
+effect size. Also note how here we’re using the anova function directly as
+a method (= built-in function) of our pandas dataframe. In that case,
+we don’t have to specify <code class="docutils literal notranslate"><span class="pre">data</span></code> anymore.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Pain threshold&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Hair color&#39;</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="gp">... </span>         <span class="n">effsize</span><span class="o">=</span><span class="s1">&#39;n2&#39;</span><span class="p">)</span>
+<span class="go">       Source  ddof1  ddof2         F     p-unc        n2</span>
+<span class="go">0  Hair color      3     15  6.791407  0.004114  0.575962</span>
+</pre></div>
+</div>
+<p>Two-way ANOVA with balanced design</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;anova2&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s2">&quot;Yield&quot;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Blend&quot;</span><span class="p">,</span> <span class="s2">&quot;Crop&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">         Source        SS  DF        MS      F  p-unc    np2</span>
+<span class="go">0         Blend     2.042   1     2.042  0.004  0.952  0.000</span>
+<span class="go">1          Crop  2736.583   2  1368.292  2.525  0.108  0.219</span>
+<span class="go">2  Blend * Crop  2360.083   2  1180.042  2.178  0.142  0.195</span>
+<span class="go">3      Residual  9753.250  18   541.847    NaN    NaN    NaN</span>
+</pre></div>
+</div>
+<p>Two-way ANOVA with unbalanced design (requires statsmodels)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;anova2_unbalanced&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s2">&quot;Scores&quot;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Diet&quot;</span><span class="p">,</span> <span class="s2">&quot;Exercise&quot;</span><span class="p">],</span>
+<span class="gp">... </span>           <span class="n">effsize</span><span class="o">=</span><span class="s2">&quot;n2&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">            Source       SS   DF       MS      F  p-unc     n2</span>
+<span class="go">0             Diet  390.625  1.0  390.625  7.423  0.034  0.433</span>
+<span class="go">1         Exercise  180.625  1.0  180.625  3.432  0.113  0.200</span>
+<span class="go">2  Diet * Exercise   15.625  1.0   15.625  0.297  0.605  0.017</span>
+<span class="go">3         Residual  315.750  6.0   52.625    NaN    NaN    NaN</span>
+</pre></div>
+</div>
+<p>Three-way ANOVA, type 3 sums of squares (requires statsmodels)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;anova3&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Cholesterol&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Sex&#39;</span><span class="p">,</span> <span class="s1">&#39;Risk&#39;</span><span class="p">,</span> <span class="s1">&#39;Drug&#39;</span><span class="p">],</span>
+<span class="gp">... </span>           <span class="n">ss_type</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">              Source      SS    DF      MS       F  p-unc    np2</span>
+<span class="go">0                Sex   2.075   1.0   2.075   2.462  0.123  0.049</span>
+<span class="go">1               Risk  11.332   1.0  11.332  13.449  0.001  0.219</span>
+<span class="go">2               Drug   0.816   2.0   0.408   0.484  0.619  0.020</span>
+<span class="go">3         Sex * Risk   0.117   1.0   0.117   0.139  0.711  0.003</span>
+<span class="go">4         Sex * Drug   2.564   2.0   1.282   1.522  0.229  0.060</span>
+<span class="go">5        Risk * Drug   2.438   2.0   1.219   1.446  0.245  0.057</span>
+<span class="go">6  Sex * Risk * Drug   1.844   2.0   0.922   1.094  0.343  0.044</span>
+<span class="go">7           Residual  40.445  48.0   0.843     NaN    NaN    NaN</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

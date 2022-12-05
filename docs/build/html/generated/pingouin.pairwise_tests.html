@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.pairwise_tests &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-pairwise-tests">
+<h1>pingouin.pairwise_tests<a class="headerlink" href="#pingouin-pairwise-tests" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.pairwise_tests">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">pairwise_tests</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">between</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">within</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parametric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marginal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'two-sided'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padjust</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hedges'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'listwise'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_desc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interaction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">within_first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.pairwise_tests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pairwise tests.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>DataFrame. Note that this function can also directly be used as a
+Pandas method, in which case this argument is no longer needed.</p>
+</dd>
+<dt><strong>dv</strong><span class="classifier">string</span></dt><dd><p>Name of column containing the dependent variable.</p>
+</dd>
+<dt><strong>between</strong><span class="classifier">string or list with 2 elements</span></dt><dd><p>Name of column(s) containing the between-subject factor(s).</p>
+</dd>
+<dt><strong>within</strong><span class="classifier">string or list with 2 elements</span></dt><dd><p>Name of column(s) containing the within-subject factor(s), i.e. the
+repeated measurements.</p>
+</dd>
+<dt><strong>subject</strong><span class="classifier">string</span></dt><dd><p>Name of column containing the subject identifier. This is mandatory
+when <code class="docutils literal notranslate"><span class="pre">within</span></code> is specified.</p>
+</dd>
+<dt><strong>parametric</strong><span class="classifier">boolean</span></dt><dd><p>If True (default), use the parametric <a class="reference internal" href="pingouin.ttest.html#pingouin.ttest" title="pingouin.ttest"><code class="xref py py-func docutils literal notranslate"><span class="pre">ttest()</span></code></a> function.
+If False, use <a class="reference internal" href="pingouin.wilcoxon.html#pingouin.wilcoxon" title="pingouin.wilcoxon"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.wilcoxon()</span></code></a> or <a class="reference internal" href="pingouin.mwu.html#pingouin.mwu" title="pingouin.mwu"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.mwu()</span></code></a>
+for paired or unpaired samples, respectively.</p>
+</dd>
+<dt><strong>marginal</strong><span class="classifier">boolean</span></dt><dd><p>If True (default), the between-subject pairwise T-test(s) will be calculated
+after averaging across all levels of the within-subject factor in mixed
+design. This is recommended to avoid violating the assumption of
+independence and conflating the degrees of freedom by the
+number of repeated measurements.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.3.2.</span></p>
+</div>
+</dd>
+<dt><strong>alpha</strong><span class="classifier">float</span></dt><dd><p>Significance level</p>
+</dd>
+<dt><strong>alternative</strong><span class="classifier">string</span></dt><dd><p>Defines the alternative hypothesis, or tail of the test. Must be one of
+“two-sided” (default), “greater” or “less”. Both “greater” and “less” return one-sided
+p-values. “greater” tests against the alternative hypothesis that the mean of <code class="docutils literal notranslate"><span class="pre">x</span></code>
+is greater than the mean of <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p>
+</dd>
+<dt><strong>padjust</strong><span class="classifier">string</span></dt><dd><p>Method used for testing and adjustment of pvalues.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'none'</span></code>: no correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'bonf'</span></code>: one-step Bonferroni correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'sidak'</span></code>: one-step Sidak correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'holm'</span></code>: step-down method using Bonferroni adjustments</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'fdr_bh'</span></code>: Benjamini/Hochberg FDR correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'fdr_by'</span></code>: Benjamini/Yekutieli FDR correction</p></li>
+</ul>
+</dd>
+<dt><strong>effsize</strong><span class="classifier">string or None</span></dt><dd><p>Effect size type. Available methods are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'none'</span></code>: no effect size</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'cohen'</span></code>: Unbiased Cohen d</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'hedges'</span></code>: Hedges g</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'r'</span></code>: Pearson correlation coefficient</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'eta-square'</span></code>: Eta-square</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'odds-ratio'</span></code>: Odds ratio</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'AUC'</span></code>: Area Under the Curve</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'CLES'</span></code>: Common Language Effect Size</p></li>
+</ul>
+</dd>
+<dt><strong>correction</strong><span class="classifier">string or boolean</span></dt><dd><p>For independent two sample T-tests, specify whether or not to correct for
+unequal variances using Welch separate variances T-test. If <cite>‘auto’</cite>,
+it will automatically uses Welch T-test when the sample sizes are
+unequal, as recommended by Zimmerman 2004.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.3.2.</span></p>
+</div>
+</dd>
+<dt><strong>nan_policy</strong><span class="classifier">string</span></dt><dd><p>Can be <cite>‘listwise’</cite> for listwise deletion of missing values in repeated
+measures design (= complete-case analysis) or <cite>‘pairwise’</cite> for the
+more liberal pairwise deletion (= available-case analysis). The former (default) is more
+appropriate for post-hoc analysis following an ANOVA, however it can drastically reduce
+the power of the test: any subject with one or more missing value(s) will be
+completely removed from the analysis.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.2.9.</span></p>
+</div>
+</dd>
+<dt><strong>return_desc</strong><span class="classifier">boolean</span></dt><dd><p>If True, append group means and std to the output dataframe</p>
+</dd>
+<dt><strong>interaction</strong><span class="classifier">boolean</span></dt><dd><p>If there are multiple factors and <code class="docutils literal notranslate"><span class="pre">interaction</span></code> is True (default),
+Pingouin will also calculate T-tests for the interaction term (see Notes).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.2.9.</span></p>
+</div>
+</dd>
+<dt><strong>within_first</strong><span class="classifier">boolean</span></dt><dd><p>Determines the order of the interaction in mixed design. Pingouin will
+return within * between when this parameter is set to True (default),
+and between * within otherwise.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.3.6.</span></p>
+</div>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>stats</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'Contrast'</span></code>: Contrast (= independent variable or interaction)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'A'</span></code>: Name of first measurement</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'B'</span></code>: Name of second measurement</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'Paired'</span></code>: indicates whether the two measurements are paired or
+independent</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'Parametric'</span></code>: indicates if (non)-parametric tests were used</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'T'</span></code>: T statistic (only if parametric=True)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'U-val'</span></code>: Mann-Whitney U stat (if parametric=False and unpaired
+data)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'W-val'</span></code>: Wilcoxon W stat (if parametric=False and paired data)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'dof'</span></code>: degrees of freedom (only if parametric=True)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alternative'</span></code>: tail of the test</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-unc'</span></code>: Uncorrected p-values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-corr'</span></code>: Corrected p-values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-adjust'</span></code>: p-values correction method</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'BF10'</span></code>: Bayes Factor</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'hedges'</span></code>: effect size (or any effect size defined in
+<code class="docutils literal notranslate"><span class="pre">effsize</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.ttest.html#pingouin.ttest" title="pingouin.ttest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ttest</span></code></a>, <a class="reference internal" href="pingouin.mwu.html#pingouin.mwu" title="pingouin.mwu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mwu</span></code></a>, <a class="reference internal" href="pingouin.wilcoxon.html#pingouin.wilcoxon" title="pingouin.wilcoxon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wilcoxon</span></code></a>, <a class="reference internal" href="pingouin.compute_effsize.html#pingouin.compute_effsize" title="pingouin.compute_effsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_effsize</span></code></a>, <a class="reference internal" href="pingouin.multicomp.html#pingouin.multicomp" title="pingouin.multicomp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multicomp</span></code></a></dt><dd></dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>Data are expected to be in long-format. If your data is in wide-format,
+you can use the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.melt.html#pandas.melt" title="(in pandas v1.5.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.melt()</span></code></a> function to convert from wide to
+long format.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">between</span></code> or <code class="docutils literal notranslate"><span class="pre">within</span></code> is a list (e.g. [‘col1’, ‘col2’]),
+the function returns 1) the pairwise T-tests between each values of the
+first column, 2) the pairwise T-tests between each values of the second
+column and 3) the interaction between col1 and col2. The interaction is
+dependent of the order of the list, so [‘col1’, ‘col2’] will not yield the
+same results as [‘col2’, ‘col1’]. Furthermore, the interaction will only be
+calculated if <code class="docutils literal notranslate"><span class="pre">interaction=True</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">between</span></code> is a list with two elements, the output
+model is between1 + between2 + between1 * between2.</p>
+<p>Similarly, if <code class="docutils literal notranslate"><span class="pre">within</span></code> is a list with two elements, the output model is
+within1 + within2 + within1 * within2.</p>
+<p>If both <code class="docutils literal notranslate"><span class="pre">between</span></code> and <code class="docutils literal notranslate"><span class="pre">within</span></code> are specified, the output model is
+within + between + within * between (= mixed design), unless
+<code class="docutils literal notranslate"><span class="pre">within_first=False</span></code> in which case the model becomes between + within +
+between * within.</p>
+<p>Missing values in repeated measurements are automatically removed using a
+listwise (default) or pairwise deletion strategy. The former is more conservative, as any
+subject with one or more missing value(s) will be completely removed from the dataframe prior
+to calculating the T-tests. The <code class="docutils literal notranslate"><span class="pre">nan_policy</span></code> parameter can therefore have a huge impact
+on the results.</p>
+<p class="rubric">Examples</p>
+<p>For more examples, please refer to the <a class="reference external" href="https://github.com/raphaelvallat/pingouin/blob/master/notebooks/01_ANOVA.ipynb">Jupyter notebooks</a></p>
+<ol class="arabic simple">
+<li><p>One between-subject factor</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;display.expand_frame_repr&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;display.max_columns&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;mixed_anova.csv&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">pairwise_tests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">  Contrast        A           B  Paired  Parametric     T    dof alternative  p-unc   BF10  hedges</span>
+<span class="go">0    Group  Control  Meditation   False        True -2.29  178.0   two-sided  0.023  1.813   -0.34</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>One within-subject factor</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">post_hocs</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">pairwise_tests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">post_hocs</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">  Contrast        A        B  Paired  Parametric      T   dof alternative  p-unc   BF10  hedges</span>
+<span class="go">0     Time   August  January    True        True -1.740  59.0   two-sided  0.087  0.582  -0.328</span>
+<span class="go">1     Time   August     June    True        True -2.743  59.0   two-sided  0.008  4.232  -0.483</span>
+<span class="go">2     Time  January     June    True        True -1.024  59.0   two-sided  0.310  0.232  -0.170</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Non-parametric pairwise paired test (wilcoxon)</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">pairwise_tests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                   <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">parametric</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">  Contrast        A        B  Paired  Parametric  W-val alternative  p-unc  hedges</span>
+<span class="go">0     Time   August  January    True       False  716.0   two-sided  0.144  -0.328</span>
+<span class="go">1     Time   August     June    True       False  564.0   two-sided  0.010  -0.483</span>
+<span class="go">2     Time  January     June    True       False  887.0   two-sided  0.840  -0.170</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Mixed design (within and between) with bonferroni-corrected p-values</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">posthocs</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">pairwise_tests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                              <span class="n">between</span><span class="o">=</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;bonf&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">posthocs</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">       Contrast     Time        A           B Paired  Parametric      T   dof alternative  p-unc  p-corr p-adjust   BF10  hedges</span>
+<span class="go">0          Time        -   August     January   True        True -1.740  59.0   two-sided  0.087   0.261     bonf  0.582  -0.328</span>
+<span class="go">1          Time        -   August        June   True        True -2.743  59.0   two-sided  0.008   0.024     bonf  4.232  -0.483</span>
+<span class="go">2          Time        -  January        June   True        True -1.024  59.0   two-sided  0.310   0.931     bonf  0.232  -0.170</span>
+<span class="go">3         Group        -  Control  Meditation  False        True -2.248  58.0   two-sided  0.028     NaN      NaN  2.096  -0.573</span>
+<span class="go">4  Time * Group   August  Control  Meditation  False        True  0.316  58.0   two-sided  0.753   1.000     bonf  0.274   0.081</span>
+<span class="go">5  Time * Group  January  Control  Meditation  False        True -1.434  58.0   two-sided  0.157   0.471     bonf  0.619  -0.365</span>
+<span class="go">6  Time * Group     June  Control  Meditation  False        True -2.744  58.0   two-sided  0.008   0.024     bonf  5.593  -0.699</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Two between-subject factors. The order of the <code class="docutils literal notranslate"><span class="pre">between</span></code> factors matters!</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">pairwise_tests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="s1">&#39;Time&#39;</span><span class="p">],</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">       Contrast       Group        A           B Paired  Parametric      T    dof alternative  p-unc     BF10  hedges</span>
+<span class="go">0         Group           -  Control  Meditation  False        True -2.290  178.0   two-sided  0.023    1.813  -0.340</span>
+<span class="go">1          Time           -   August     January  False        True -1.806  118.0   two-sided  0.074    0.839  -0.328</span>
+<span class="go">2          Time           -   August        June  False        True -2.660  118.0   two-sided  0.009    4.499  -0.483</span>
+<span class="go">3          Time           -  January        June  False        True -0.934  118.0   two-sided  0.352    0.288  -0.170</span>
+<span class="go">4  Group * Time     Control   August     January  False        True -0.383   58.0   two-sided  0.703    0.279  -0.098</span>
+<span class="go">5  Group * Time     Control   August        June  False        True -0.292   58.0   two-sided  0.771    0.272  -0.074</span>
+<span class="go">6  Group * Time     Control  January        June  False        True  0.045   58.0   two-sided  0.964    0.263   0.011</span>
+<span class="go">7  Group * Time  Meditation   August     January  False        True -2.188   58.0   two-sided  0.033    1.884  -0.558</span>
+<span class="go">8  Group * Time  Meditation   August        June  False        True -4.040   58.0   two-sided  0.000  148.302  -1.030</span>
+<span class="go">9  Group * Time  Meditation  January        June  False        True -1.442   58.0   two-sided  0.155    0.625  -0.367</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li><p>Same but without the interaction, and using a directional test</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">pairwise_tests</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Group&#39;</span><span class="p">,</span> <span class="s1">&#39;Time&#39;</span><span class="p">],</span> <span class="n">alternative</span><span class="o">=</span><span class="s2">&quot;less&quot;</span><span class="p">,</span>
+<span class="gp">... </span>                   <span class="n">interaction</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">  Contrast        A           B  Paired  Parametric      T    dof alternative  p-unc   BF10  hedges</span>
+<span class="go">0    Group  Control  Meditation   False        True -2.290  178.0        less  0.012  3.626  -0.340</span>
+<span class="go">1     Time   August     January   False        True -1.806  118.0        less  0.037  1.679  -0.328</span>
+<span class="go">2     Time   August        June   False        True -2.660  118.0        less  0.004  8.998  -0.483</span>
+<span class="go">3     Time  January        June   False        True -0.934  118.0        less  0.176  0.577  -0.170</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

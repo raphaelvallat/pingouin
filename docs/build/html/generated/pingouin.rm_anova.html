@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.rm_anova &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-rm-anova">
+<h1>pingouin.rm_anova<a class="headerlink" href="#pingouin-rm-anova" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.rm_anova">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">rm_anova</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">within</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detailed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ng2'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.rm_anova" title="Permalink to this definition">¶</a></dt>
+<dd><p>One-way and two-way repeated measures ANOVA.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>DataFrame. Note that this function can also directly be used as a
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> method, in which case this argument is no
+longer needed.
+Both wide and long-format dataframe are supported for one-way repeated
+measures ANOVA. However, <code class="docutils literal notranslate"><span class="pre">data</span></code> must be in long format for two-way
+repeated measures.</p>
+</dd>
+<dt><strong>dv</strong><span class="classifier">string</span></dt><dd><p>Name of column containing the dependent variable (only required if
+<code class="docutils literal notranslate"><span class="pre">data</span></code> is in long format).</p>
+</dd>
+<dt><strong>within</strong><span class="classifier">string or list of string</span></dt><dd><p>Name of column containing the within factor (only required if <code class="docutils literal notranslate"><span class="pre">data</span></code>
+is in long format).
+If <code class="docutils literal notranslate"><span class="pre">within</span></code> is a single string, then compute a one-way repeated
+measures ANOVA, if <code class="docutils literal notranslate"><span class="pre">within</span></code> is a list with two strings,
+compute a two-way repeated measures ANOVA.</p>
+</dd>
+<dt><strong>subject</strong><span class="classifier">string</span></dt><dd><p>Name of column containing the subject identifier (only required if
+<code class="docutils literal notranslate"><span class="pre">data</span></code> is in long format).</p>
+</dd>
+<dt><strong>correction</strong><span class="classifier">string or boolean</span></dt><dd><p>If True, also return the Greenhouse-Geisser corrected p-value.</p>
+<p>The default for one-way design is to compute Mauchly’s test of
+sphericity to determine whether the p-values needs to be corrected
+(see <a class="reference internal" href="pingouin.sphericity.html#pingouin.sphericity" title="pingouin.sphericity"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.sphericity()</span></code></a>).</p>
+<p>The default for two-way design is to return both the uncorrected and
+Greenhouse-Geisser corrected p-values. Note that sphericity test for
+two-way design are not currently implemented in Pingouin.</p>
+</dd>
+<dt><strong>detailed</strong><span class="classifier">boolean</span></dt><dd><p>If True, return a full ANOVA table.</p>
+</dd>
+<dt><strong>effsize</strong><span class="classifier">string</span></dt><dd><p>Effect size. Must be one of ‘np2’ (partial eta-squared), ‘n2’
+(eta-squared) or ‘ng2’(generalized eta-squared, default). Note that for
+one-way repeated measure ANOVA, eta-squared is the same as the generalized eta-squared.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>aov</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>ANOVA summary:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'Source'</span></code>: Name of the within-group factor</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ddof1'</span></code>: Degrees of freedom (numerator)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ddof2'</span></code>: Degrees of freedom (denominator)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'F'</span></code>: F-value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-unc'</span></code>: Uncorrected p-value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ng2'</span></code>: Generalized eta-square effect size</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'eps'</span></code>: Greenhouse-Geisser epsilon factor (= index of sphericity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-GG-corr'</span></code>: Greenhouse-Geisser corrected p-value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'W-spher'</span></code>: Sphericity test statistic</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-spher'</span></code>: p-value of the sphericity test</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'sphericity'</span></code>: sphericity of the data (boolean)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.anova.html#pingouin.anova" title="pingouin.anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anova</span></code></a></dt><dd><p>One-way and N-way ANOVA</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.mixed_anova.html#pingouin.mixed_anova" title="pingouin.mixed_anova"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mixed_anova</span></code></a></dt><dd><p>Two way mixed ANOVA</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.friedman.html#pingouin.friedman" title="pingouin.friedman"><code class="xref py py-obj docutils literal notranslate"><span class="pre">friedman</span></code></a></dt><dd><p>Non-parametric one-way repeated measures ANOVA</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>Data can be in wide or long format for one-way repeated measures ANOVA but
+<em>must</em> be in long format for two-way repeated measures ANOVA.</p>
+<p>In one-way repeated-measures ANOVA, the total variance (sums of squares)
+is divided into three components</p>
+<div class="math notranslate nohighlight">
+\[SS_{\text{total}} = SS_{\text{effect}} +
+(SS_{\text{subjects}} + SS_{\text{error}})\]</div>
+<p>with</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}SS_{\text{total}} = \sum_i^r \sum_j^n (Y_{ij} - \overline{Y})^2\\SS_{\text{effect}} = \sum_i^r n_i(\overline{Y_i} - \overline{Y})^2\\SS_{\text{subjects}} = r\sum (\overline{Y}_s - \overline{Y})^2\\SS_{\text{error}} = SS_{\text{total}} - SS_{\text{effect}} -
+SS_{\text{subjects}}\end{aligned}\end{align} \]</div>
+<p>where <span class="math notranslate nohighlight">\(i=1,...,r; j=1,...,n_i\)</span>, <span class="math notranslate nohighlight">\(r\)</span> is the number of
+conditions, <span class="math notranslate nohighlight">\(n_i\)</span> the number of observations for each condition,
+<span class="math notranslate nohighlight">\(\overline{Y}\)</span> the grand mean of the data, <span class="math notranslate nohighlight">\(\overline{Y_i}\)</span>
+the mean of the <span class="math notranslate nohighlight">\(i^{th}\)</span> condition and <span class="math notranslate nohighlight">\(\overline{Y}_{subj}\)</span>
+the mean of the <span class="math notranslate nohighlight">\(s^{th}\)</span> subject.</p>
+<p>The F-statistics is then defined as:</p>
+<div class="math notranslate nohighlight">
+\[F^* = \frac{MS_{\text{effect}}}{MS_{\text{error}}} =
+\frac{\frac{SS_{\text{effect}}}
+{r-1}}{\frac{SS_{\text{error}}}{(n - 1)(r - 1)}}\]</div>
+<p>and the p-value can be calculated using a F-distribution with
+<span class="math notranslate nohighlight">\(v_{\text{effect}} = r - 1\)</span> and
+<span class="math notranslate nohighlight">\(v_{\text{error}} = (n - 1)(r - 1)\)</span> degrees of freedom.</p>
+<p>The default effect size reported in Pingouin is the generalized eta-squared,
+which is equivalent to eta-squared for one-way repeated measures ANOVA.</p>
+<div class="math notranslate nohighlight">
+\[\eta_g^2 = \frac{SS_{\text{effect}}}{SS_{\text{total}}}\]</div>
+<p>The partial eta-squared is defined as:</p>
+<div class="math notranslate nohighlight">
+\[\eta_p^2 = \frac{SS_{\text{effect}}}{SS_{\text{effect}} + SS_{\text{error}}}\]</div>
+<p>Missing values are automatically removed using a strict listwise approach (= complete-case
+analysis). In other words, any subject with one or more missing value(s) is completely removed
+from the dataframe prior to running the test. This could drastically decrease the power of the
+ANOVA if many missing values are present. In that case, we strongly recommend using linear
+mixed effect modelling, which can handle missing values in repeated measures.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The epsilon adjustement factor of the interaction in
+two-way repeated measures ANOVA where both factors have more than
+two levels slightly differs than from R and JASP.
+Please always make sure to double-check your results with another
+software.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Sphericity tests for the interaction term of a two-way
+repeated measures ANOVA are not currently supported in Pingouin.
+Instead, please refer to the Greenhouse-Geisser epsilon value
+(a value close to 1 indicates that sphericity is met.) For more
+details, see <a class="reference internal" href="pingouin.sphericity.html#pingouin.sphericity" title="pingouin.sphericity"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.sphericity()</span></code></a>.</p>
+</div>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>One-way repeated measures ANOVA using a wide-format dataset</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;rm_anova_wide&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">rm_anova</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="go">   Source  ddof1  ddof2         F     p-unc       ng2       eps</span>
+<span class="go">0  Within      3     24  5.200652  0.006557  0.346392  0.694329</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>One-way repeated-measures ANOVA using a long-format dataset.</p></li>
+</ol>
+<p>We’re also specifying two additional options here: <code class="docutils literal notranslate"><span class="pre">detailed=True</span></code> means
+that we’ll get a more detailed ANOVA table, and <code class="docutils literal notranslate"><span class="pre">effsize='np2'</span></code>
+means that we want to get the partial eta-squared effect size instead
+of the default (generalized) eta-squared.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;rm_anova&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aov</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DesireToKill&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Disgustingness&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">effsize</span><span class="o">=</span><span class="s2">&quot;np2&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aov</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">           Source       SS  DF      MS       F  p-unc    np2  eps</span>
+<span class="go">0  Disgustingness   27.485   1  27.485  12.044  0.001  0.116  1.0</span>
+<span class="go">1           Error  209.952  92   2.282     NaN    NaN    NaN  NaN</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Two-way repeated-measures ANOVA</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aov</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DesireToKill&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Disgustingness&#39;</span><span class="p">,</span> <span class="s1">&#39;Frighteningness&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>As a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> method</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">rm_anova</span><span class="p">(</span><span class="n">dv</span><span class="o">=</span><span class="s1">&#39;DesireToKill&#39;</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="s1">&#39;Disgustingness&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span>  <span class="n">detailed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="go">           Source  ddof1  ddof2          F     p-unc       ng2  eps</span>
+<span class="go">0  Disgustingness      1     92  12.043878  0.000793  0.025784  1.0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

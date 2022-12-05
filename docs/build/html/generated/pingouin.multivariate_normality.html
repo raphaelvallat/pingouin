@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.multivariate_normality &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-multivariate-normality">
+<h1>pingouin.multivariate_normality<a class="headerlink" href="#pingouin-multivariate-normality" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.multivariate_normality">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">multivariate_normality</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.multivariate_normality" title="Permalink to this definition">¶</a></dt>
+<dd><p>Henze-Zirkler multivariate normality test.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X</strong><span class="classifier">np.array</span></dt><dd><p>Data matrix of shape (n_samples, n_features).</p>
+</dd>
+<dt><strong>alpha</strong><span class="classifier">float</span></dt><dd><p>Significance level.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>hz</strong><span class="classifier">float</span></dt><dd><p>The Henze-Zirkler test statistic.</p>
+</dd>
+<dt><strong>pval</strong><span class="classifier">float</span></dt><dd><p>P-value.</p>
+</dd>
+<dt><strong>normal</strong><span class="classifier">boolean</span></dt><dd><p>True if X comes from a multivariate normal distribution.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.normality.html#pingouin.normality" title="pingouin.normality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normality</span></code></a></dt><dd><p>Test the univariate normality of one or more variables.</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.homoscedasticity.html#pingouin.homoscedasticity" title="pingouin.homoscedasticity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">homoscedasticity</span></code></a></dt><dd><p>Test equality of variance.</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.sphericity.html#pingouin.sphericity" title="pingouin.sphericity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sphericity</span></code></a></dt><dd><p>Mauchly’s test for sphericity.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>The Henze-Zirkler test <a class="reference internal" href="#r5fbf0c93fb2c-1" id="id1">[1]</a> has a good overall power against alternatives
+to normality and works for any dimension and sample size.</p>
+<p>Adapted to Python from a Matlab code <a class="reference internal" href="#r5fbf0c93fb2c-2" id="id2">[2]</a> by Antonio Trujillo-Ortiz and
+tested against the
+<a class="reference external" href="https://cran.r-project.org/web/packages/MVN/MVN.pdf">MVN</a> R package.</p>
+<p>Rows with missing values are automatically removed.</p>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r5fbf0c93fb2c-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Henze, N., &amp; Zirkler, B. (1990). A class of invariant consistent
+tests for multivariate normality. Communications in Statistics-Theory
+and Methods, 19(10), 3595-3617.</p>
+</dd>
+<dt class="label" id="r5fbf0c93fb2c-2"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Trujillo-Ortiz, A., R. Hernandez-Walls, K. Barba-Rojo and L.
+Cupul-Magana. (2007). HZmvntest: Henze-Zirkler’s Multivariate
+Normality Test. A MATLAB file.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;multivariate&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s1">&#39;Fever&#39;</span><span class="p">,</span> <span class="s1">&#39;Pressure&#39;</span><span class="p">,</span> <span class="s1">&#39;Aches&#39;</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">multivariate_normality</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">.05</span><span class="p">)</span>
+<span class="go">HZResults(hz=0.540086101851555, pval=0.7173686509622385, normal=True)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

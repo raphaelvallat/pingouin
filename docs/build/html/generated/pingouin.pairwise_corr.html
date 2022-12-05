@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.pairwise_corr &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-pairwise-corr">
+<h1>pingouin.pairwise_corr<a class="headerlink" href="#pingouin-pairwise-corr" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.pairwise_corr">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">pairwise_corr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'two-sided'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pearson'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padjust</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pairwise'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.pairwise_corr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pairwise (partial) correlations between columns of a pandas dataframe.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>DataFrame. Note that this function can also directly be used as a
+Pandas method, in which case this argument is no longer needed.</p>
+</dd>
+<dt><strong>columns</strong><span class="classifier">list or str</span></dt><dd><p>Column names in data:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[&quot;a&quot;,</span> <span class="pre">&quot;b&quot;,</span> <span class="pre">&quot;c&quot;]</span></code>: combination between columns a, b, and c.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[&quot;a&quot;]</span></code>: product between a and all the other numeric columns.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[[&quot;a&quot;],</span> <span class="pre">[&quot;b&quot;,</span> <span class="pre">&quot;c&quot;]]</span></code>: product between [“a”] and [“b”, “c”].</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[[&quot;a&quot;,</span> <span class="pre">&quot;d&quot;],</span> <span class="pre">[&quot;b&quot;,</span> <span class="pre">&quot;c&quot;]]</span></code>: product between [“a”, “d”] and
+[“b”, “c”].</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[[&quot;a&quot;,</span> <span class="pre">&quot;d&quot;],</span> <span class="pre">None]</span></code>: product between [“a”, “d”] and all other
+numeric columns in dataframe.</p></li>
+</ul>
+<p>If column is None, the function will return the pairwise correlation
+between the combination of all the numeric columns in data.
+See the examples section for more details on this.</p>
+</dd>
+<dt><strong>covar</strong><span class="classifier">None, string or list</span></dt><dd><p>Covariate(s) for partial correlation. Must be one or more columns
+in data. Use a list if there are more than one covariate. If
+<code class="docutils literal notranslate"><span class="pre">covar</span></code> is not None, a partial correlation will be computed using
+<a class="reference internal" href="pingouin.partial_corr.html#pingouin.partial_corr" title="pingouin.partial_corr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.partial_corr()</span></code></a> function.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Only <code class="docutils literal notranslate"><span class="pre">method='pearson'</span></code> and <code class="docutils literal notranslate"><span class="pre">method='spearman'</span></code>
+are currently supported in partial correlation.</p>
+</div>
+</dd>
+<dt><strong>alternative</strong><span class="classifier">string</span></dt><dd><p>Defines the alternative hypothesis, or tail of the correlation. Must be one of
+“two-sided” (default), “greater” or “less”. Both “greater” and “less” return a one-sided
+p-value. “greater” tests against the alternative hypothesis that the correlation is
+positive (greater than zero), “less” tests against the hypothesis that the correlation is
+negative.</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">string</span></dt><dd><p>Correlation type:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'pearson'</span></code>: Pearson <span class="math notranslate nohighlight">\(r\)</span> product-moment correlation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'spearman'</span></code>: Spearman <span class="math notranslate nohighlight">\(\rho\)</span> rank-order correlation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'kendall'</span></code>: Kendall’s <span class="math notranslate nohighlight">\(\tau_B\)</span> correlation
+(for ordinal data)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'bicor'</span></code>: Biweight midcorrelation (robust)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'percbend'</span></code>: Percentage bend correlation (robust)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'shepherd'</span></code>: Shepherd’s pi correlation (robust)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'skipped'</span></code>: Skipped correlation (robust)</p></li>
+</ul>
+</dd>
+<dt><strong>padjust</strong><span class="classifier">string</span></dt><dd><p>Method used for testing and adjustment of pvalues.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'none'</span></code>: no correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'bonf'</span></code>: one-step Bonferroni correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'sidak'</span></code>: one-step Sidak correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'holm'</span></code>: step-down method using Bonferroni adjustments</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'fdr_bh'</span></code>: Benjamini/Hochberg FDR correction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'fdr_by'</span></code>: Benjamini/Yekutieli FDR correction</p></li>
+</ul>
+</dd>
+<dt><strong>nan_policy</strong><span class="classifier">string</span></dt><dd><p>Can be <code class="docutils literal notranslate"><span class="pre">'listwise'</span></code> for listwise deletion of missing values
+(= complete-case analysis) or <code class="docutils literal notranslate"><span class="pre">'pairwise'</span></code> (default) for the more
+liberal pairwise deletion (= available-case analysis).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.2.9.</span></p>
+</div>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>stats</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'X'</span></code>: Name(s) of first columns.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'Y'</span></code>: Name(s) of second columns.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'method'</span></code>: Correlation type.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'covar'</span></code>: List of specified covariate(s), only when covariates are passed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alternative'</span></code>: Tail of the test.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'n'</span></code>: Sample size (after removal of missing values).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'r'</span></code>: Correlation coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'CI95'</span></code>: 95% parametric confidence intervals.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-unc'</span></code>: Uncorrected p-values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-corr'</span></code>: Corrected p-values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'p-adjust'</span></code>: P-values correction method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'BF10'</span></code>: Bayes Factor of the alternative hypothesis (only for Pearson correlation)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'power'</span></code>: achieved power of the test (= 1 - type II error).</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Please refer to the <a class="reference internal" href="pingouin.corr.html#pingouin.corr" title="pingouin.corr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.corr()</span></code></a> function for a description
+of the different methods. Missing values are automatically removed from the
+data using a pairwise deletion.</p>
+<p>This function is more flexible and gives a much more detailed
+output than the <code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.DataFrame.corr()</span></code> method (i.e. p-values,
+confidence interval, Bayes Factor…). This comes however at
+an increased computational cost. While this should not be discernible for
+a dataframe with less than 10,000 rows and/or less than 20 columns, this
+function can be slow for very large datasets.</p>
+<p>A faster alternative to get the r-values and p-values in a matrix format is
+to use the <a class="reference internal" href="pingouin.rcorr.html#pingouin.rcorr" title="pingouin.rcorr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.rcorr()</span></code></a> function, which works directly as a
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> method (see example below).</p>
+<p>This function also works with two-dimensional multi-index columns. In this
+case, columns must be list(s) of tuple(s). Please refer to this <a class="reference external" href="https://github.com/raphaelvallat/pingouin/blob/master/notebooks/04_Correlations.ipynb">example
+Jupyter notebook</a>
+for more details.</p>
+<p>If and only if <code class="docutils literal notranslate"><span class="pre">covar</span></code> is specified, this function will compute the
+pairwise partial correlation between the variables. If you are only
+interested in computing the partial correlation matrix (i.e. the raw
+pairwise partial correlation coefficient matrix, without the p-values,
+sample sizes, etc), a better alternative is to use the
+<a class="reference internal" href="pingouin.pcorr.html#pingouin.pcorr" title="pingouin.pcorr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.pcorr()</span></code></a> function (see example 7).</p>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>One-sided spearman correlation corrected for multiple comparisons</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;display.expand_frame_repr&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;display.max_columns&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;pairwise_corr&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;spearman&#39;</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s1">&#39;greater&#39;</span><span class="p">,</span> <span class="n">padjust</span><span class="o">=</span><span class="s1">&#39;bonf&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">               X                  Y    method alternative    n      r         CI95%  p-unc  p-corr p-adjust  power</span>
+<span class="go">0    Neuroticism       Extraversion  spearman     greater  500 -0.325  [-0.39, 1.0]  1.000   1.000     bonf  0.000</span>
+<span class="go">1    Neuroticism           Openness  spearman     greater  500 -0.028   [-0.1, 1.0]  0.735   1.000     bonf  0.012</span>
+<span class="go">2    Neuroticism      Agreeableness  spearman     greater  500 -0.151  [-0.22, 1.0]  1.000   1.000     bonf  0.000</span>
+<span class="go">3    Neuroticism  Conscientiousness  spearman     greater  500 -0.356  [-0.42, 1.0]  1.000   1.000     bonf  0.000</span>
+<span class="go">4   Extraversion           Openness  spearman     greater  500  0.243   [0.17, 1.0]  0.000   0.000     bonf  1.000</span>
+<span class="go">5   Extraversion      Agreeableness  spearman     greater  500  0.062  [-0.01, 1.0]  0.083   0.832     bonf  0.398</span>
+<span class="go">6   Extraversion  Conscientiousness  spearman     greater  500  0.056  [-0.02, 1.0]  0.106   1.000     bonf  0.345</span>
+<span class="go">7       Openness      Agreeableness  spearman     greater  500  0.170    [0.1, 1.0]  0.000   0.001     bonf  0.985</span>
+<span class="go">8       Openness  Conscientiousness  spearman     greater  500 -0.007  [-0.08, 1.0]  0.560   1.000     bonf  0.036</span>
+<span class="go">9  Agreeableness  Conscientiousness  spearman     greater  500  0.161   [0.09, 1.0]  0.000   0.002     bonf  0.976</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Robust two-sided biweight midcorrelation with uncorrected p-values</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pcor</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Openness&#39;</span><span class="p">,</span> <span class="s1">&#39;Extraversion&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                                       <span class="s1">&#39;Neuroticism&#39;</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bicor&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pcor</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">              X             Y method alternative    n      r           CI95%  p-unc  power</span>
+<span class="go">0      Openness  Extraversion  bicor   two-sided  500  0.247    [0.16, 0.33]  0.000  1.000</span>
+<span class="go">1      Openness   Neuroticism  bicor   two-sided  500 -0.028   [-0.12, 0.06]  0.535  0.095</span>
+<span class="go">2  Extraversion   Neuroticism  bicor   two-sided  500 -0.343  [-0.42, -0.26]  0.000  1.000</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>One-versus-all pairwise correlations</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Neuroticism&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">             X                  Y   method alternative    n      r           CI95%  p-unc       BF10  power</span>
+<span class="go">0  Neuroticism       Extraversion  pearson   two-sided  500 -0.350  [-0.42, -0.27]  0.000  6.765e+12  1.000</span>
+<span class="go">1  Neuroticism           Openness  pearson   two-sided  500 -0.010    [-0.1, 0.08]  0.817      0.058  0.056</span>
+<span class="go">2  Neuroticism      Agreeableness  pearson   two-sided  500 -0.134  [-0.22, -0.05]  0.003      5.122  0.854</span>
+<span class="go">3  Neuroticism  Conscientiousness  pearson   two-sided  500 -0.368  [-0.44, -0.29]  0.000  2.644e+14  1.000</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Pairwise correlations between two lists of columns (cartesian product)</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">columns</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;Neuroticism&#39;</span><span class="p">,</span> <span class="s1">&#39;Extraversion&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;Openness&#39;</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">              X         Y   method alternative    n      r         CI95%  p-unc       BF10  power</span>
+<span class="go">0   Neuroticism  Openness  pearson   two-sided  500 -0.010  [-0.1, 0.08]  0.817      0.058  0.056</span>
+<span class="go">1  Extraversion  Openness  pearson   two-sided  500  0.267  [0.18, 0.35]  0.000  5.277e+06  1.000</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>As a Pandas method</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pcor</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pairwise_corr</span><span class="p">(</span><span class="n">covar</span><span class="o">=</span><span class="s1">&#39;Neuroticism&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;spearman&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li><p>Pairwise partial correlation</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">pairwise_corr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Neuroticism&#39;</span><span class="p">,</span> <span class="s1">&#39;Openness&#39;</span><span class="p">])</span>
+<span class="go">               X                  Y   method                        covar alternative    n         r          CI95%     p-unc</span>
+<span class="go">0   Extraversion      Agreeableness  pearson  [&#39;Neuroticism&#39;, &#39;Openness&#39;]   two-sided  500 -0.038737  [-0.13, 0.05]  0.388361</span>
+<span class="go">1   Extraversion  Conscientiousness  pearson  [&#39;Neuroticism&#39;, &#39;Openness&#39;]   two-sided  500 -0.071427  [-0.16, 0.02]  0.111389</span>
+<span class="go">2  Agreeableness  Conscientiousness  pearson  [&#39;Neuroticism&#39;, &#39;Openness&#39;]   two-sided  500  0.123108   [0.04, 0.21]  0.005944</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="7">
+<li><p>Pairwise partial correlation matrix using <a class="reference internal" href="pingouin.pcorr.html#pingouin.pcorr" title="pingouin.pcorr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.pcorr()</span></code></a></p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="p">[[</span><span class="s1">&#39;Neuroticism&#39;</span><span class="p">,</span> <span class="s1">&#39;Openness&#39;</span><span class="p">,</span> <span class="s1">&#39;Extraversion&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">pcorr</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">              Neuroticism  Openness  Extraversion</span>
+<span class="go">Neuroticism         1.000     0.092        -0.360</span>
+<span class="go">Openness            0.092     1.000         0.281</span>
+<span class="go">Extraversion       -0.360     0.281         1.000</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="8">
+<li><p>Correlation matrix with p-values using <a class="reference internal" href="pingouin.rcorr.html#pingouin.rcorr" title="pingouin.rcorr"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.rcorr()</span></code></a></p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="p">[[</span><span class="s1">&#39;Neuroticism&#39;</span><span class="p">,</span> <span class="s1">&#39;Openness&#39;</span><span class="p">,</span> <span class="s1">&#39;Extraversion&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">rcorr</span><span class="p">()</span>
+<span class="go">             Neuroticism Openness Extraversion</span>
+<span class="go">Neuroticism            -                   ***</span>
+<span class="go">Openness           -0.01        -          ***</span>
+<span class="go">Extraversion       -0.35    0.267            -</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

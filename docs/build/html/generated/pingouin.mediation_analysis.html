@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.mediation_analysis &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-mediation-analysis">
+<h1>pingouin.mediation_analysis<a class="headerlink" href="#pingouin-mediation-analysis" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.mediation_analysis">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">mediation_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_boot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logreg_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.mediation_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mediation analysis using a bias-correct non-parametric bootstrap method.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>Dataframe.</p>
+</dd>
+<dt><strong>x</strong><span class="classifier">str</span></dt><dd><p>Column name in data containing the predictor variable.
+The predictor variable must be continuous.</p>
+</dd>
+<dt><strong>m</strong><span class="classifier">str or list of str</span></dt><dd><p>Column name(s) in data containing the mediator variable(s).
+The mediator(s) can be continuous or binary (e.g. 0 or 1).
+This function supports multiple parallel mediators.</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">str</span></dt><dd><p>Column name in data containing the outcome variable.
+The outcome variable must be continuous.</p>
+</dd>
+<dt><strong>covar</strong><span class="classifier">None, str, or list</span></dt><dd><p>Covariate(s). If not None, the specified covariate(s) will be included
+in all regressions.</p>
+</dd>
+<dt><strong>alpha</strong><span class="classifier">float</span></dt><dd><p>Significance threshold. Used to determine the confidence interval,
+<span class="math notranslate nohighlight">\(\text{CI} = [\alpha / 2 ; 1 - \alpha / 2]\)</span>.</p>
+</dd>
+<dt><strong>n_boot</strong><span class="classifier">int</span></dt><dd><p>Number of bootstrap iterations for confidence intervals and p-values
+estimation. The greater, the slower.</p>
+</dd>
+<dt><strong>seed</strong><span class="classifier">int or None</span></dt><dd><p>Random state seed.</p>
+</dd>
+<dt><strong>logreg_kwargs</strong><span class="classifier">dict or None</span></dt><dd><p>Dictionary with optional arguments passed to <a class="reference internal" href="pingouin.logistic_regression.html#pingouin.logistic_regression" title="pingouin.logistic_regression"><code class="xref py py-func docutils literal notranslate"><span class="pre">pingouin.logistic_regression()</span></code></a></p>
+</dd>
+<dt><strong>return_dist</strong><span class="classifier">bool</span></dt><dd><p>If True, the function also returns the indirect bootstrapped beta
+samples (size = n_boot). Can be plotted for instance using
+<a class="reference external" href="https://seaborn.pydata.org/generated/seaborn.distplot.html#seaborn.distplot" title="(in seaborn v0.12.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">seaborn.distplot()</span></code></a> or <a class="reference external" href="https://seaborn.pydata.org/generated/seaborn.kdeplot.html#seaborn.kdeplot" title="(in seaborn v0.12.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">seaborn.kdeplot()</span></code></a>
+functions.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>stats</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><p>Mediation summary:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'path'</span></code>: regression model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'coef'</span></code>: regression estimates</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'se'</span></code>: standard error</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'CI[2.5%]'</span></code>: lower confidence interval</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'CI[97.5%]'</span></code>: upper confidence interval</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'pval'</span></code>: two-sided p-values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'sig'</span></code>: statistical significance</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.linear_regression.html#pingouin.linear_regression" title="pingouin.linear_regression"><code class="xref py py-obj docutils literal notranslate"><span class="pre">linear_regression</span></code></a>, <a class="reference internal" href="pingouin.logistic_regression.html#pingouin.logistic_regression" title="pingouin.logistic_regression"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logistic_regression</span></code></a></dt><dd></dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>Mediation analysis <a class="reference internal" href="#ree2a7b711245-1" id="id1">[1]</a> is a <em>“statistical procedure to test
+whether the effect of an independent variable X on a dependent variable
+Y (i.e., X → Y) is at least partly explained by a chain of effects of the
+independent variable on an intervening mediator variable M and of the
+intervening variable on the dependent variable (i.e., X → M → Y)”</em> <a class="reference internal" href="#ree2a7b711245-2" id="id2">[2]</a>.</p>
+<p>The <strong>indirect effect</strong> (also referred to as average causal mediation
+effect or ACME) of X on Y through mediator M quantifies the estimated
+difference in Y resulting from a one-unit change in X through a sequence of
+causal steps in which X affects M, which in turn affects Y.
+It is considered significant if the specified confidence interval does not
+include 0. The path ‘X –&gt; Y’ is the sum of both the indirect and direct
+effect. It is sometimes referred to as total effect.</p>
+<p>A linear regression is used if the mediator variable is continuous and a
+logistic regression if the mediator variable is dichotomous (binary).
+Multiple parallel mediators are also supported.</p>
+<p>This function will only work well if the outcome variable is continuous.
+It does not support binary or ordinal outcome variable. For more
+advanced mediation models, please refer to the
+<a class="reference external" href="http://lavaan.ugent.be/tutorial/mediation.html">lavaan</a> or  <a class="reference external" href="https://cran.r-project.org/web/packages/mediation/mediation.pdf">mediation</a> R
+packages, or the <a class="reference external" href="https://www.processmacro.org/index.html">PROCESS macro</a> for SPSS.</p>
+<p>The two-sided p-value of the indirect effect is computed using the
+bootstrap distribution, as in the mediation R package. However, the p-value
+should be interpreted with caution since it is not constructed
+conditioned on a true null hypothesis <a class="reference internal" href="#ree2a7b711245-3" id="id3">[3]</a> and varies depending on the
+number of bootstrap samples and the random seed.</p>
+<p>Note that rows with missing values are automatically removed.</p>
+<p>Results have been tested against the R mediation package and this tutorial
+<a class="reference external" href="https://data.library.virginia.edu/introduction-to-mediation-analysis/">https://data.library.virginia.edu/introduction-to-mediation-analysis/</a></p>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="ree2a7b711245-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Baron, R. M. &amp; Kenny, D. A. The moderator–mediator variable
+distinction in social psychological research: Conceptual, strategic,
+and statistical considerations. J. Pers. Soc. Psychol. 51, 1173–1182
+(1986).</p>
+</dd>
+<dt class="label" id="ree2a7b711245-2"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Fiedler, K., Schott, M. &amp; Meiser, T. What mediation analysis can
+(not) do. J. Exp. Soc. Psychol. 47, 1231–1236 (2011).</p>
+</dd>
+<dt class="label" id="ree2a7b711245-3"><span class="brackets"><a class="fn-backref" href="#id3">3</a></span></dt>
+<dd><p>Hayes, A. F. &amp; Rockwood, N. J. Regression-based statistical
+mediation and moderation analysis in clinical research:
+Observations, recommendations, and implementation. Behav. Res.
+Ther. 98, 39–57 (2017).</p>
+</dd>
+</dl>
+<p>Code originally adapted from <a class="reference external" href="https://github.com/rmill040/pymediation">https://github.com/rmill040/pymediation</a>.</p>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>Simple mediation analysis</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pingouin</span> <span class="kn">import</span> <span class="n">mediation_analysis</span><span class="p">,</span> <span class="n">read_dataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;mediation&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mediation_analysis</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+<span class="gp">... </span>                   <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="go">       path      coef        se          pval  CI[2.5%]  CI[97.5%]  sig</span>
+<span class="go">0     M ~ X  0.561015  0.094480  4.391362e-08  0.373522   0.748509  Yes</span>
+<span class="go">1     Y ~ M  0.654173  0.085831  1.612674e-11  0.483844   0.824501  Yes</span>
+<span class="go">2     Total  0.396126  0.111160  5.671128e-04  0.175533   0.616719  Yes</span>
+<span class="go">3    Direct  0.039604  0.109648  7.187429e-01 -0.178018   0.257226   No</span>
+<span class="go">4  Indirect  0.356522  0.083313  0.000000e+00  0.219818   0.537654  Yes</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Return the indirect bootstrapped beta coefficients</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span><span class="p">,</span> <span class="n">dist</span> <span class="o">=</span> <span class="n">mediation_analysis</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                                 <span class="n">return_dist</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">(500,)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Mediation analysis with a binary mediator variable</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mediation_analysis</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="s1">&#39;Mbin&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">       path   coef     se   pval  CI[2.5%]  CI[97.5%]  sig</span>
+<span class="go">0  Mbin ~ X -0.021  0.116  0.857    -0.248      0.206   No</span>
+<span class="go">1  Y ~ Mbin -0.135  0.412  0.743    -0.952      0.682   No</span>
+<span class="go">2     Total  0.396  0.111  0.001     0.176      0.617  Yes</span>
+<span class="go">3    Direct  0.396  0.112  0.001     0.174      0.617  Yes</span>
+<span class="go">4  Indirect  0.002  0.050  0.960    -0.072      0.146   No</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Mediation analysis with covariates</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mediation_analysis</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                   <span class="n">covar</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Mbin&#39;</span><span class="p">,</span> <span class="s1">&#39;Ybin&#39;</span><span class="p">],</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">       path   coef     se   pval  CI[2.5%]  CI[97.5%]  sig</span>
+<span class="go">0     M ~ X  0.559  0.097  0.000     0.367      0.752  Yes</span>
+<span class="go">1     Y ~ M  0.666  0.086  0.000     0.495      0.837  Yes</span>
+<span class="go">2     Total  0.420  0.113  0.000     0.196      0.645  Yes</span>
+<span class="go">3    Direct  0.064  0.110  0.561    -0.155      0.284   No</span>
+<span class="go">4  Indirect  0.356  0.086  0.000     0.209      0.553  Yes</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Mediation analysis with multiple parallel mediators</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mediation_analysis</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;Mbin&#39;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                   <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">            path   coef     se   pval  CI[2.5%]  CI[97.5%]  sig</span>
+<span class="go">0          M ~ X  0.561  0.094  0.000     0.374      0.749  Yes</span>
+<span class="go">1       Mbin ~ X -0.005  0.029  0.859    -0.063      0.052   No</span>
+<span class="go">2          Y ~ M  0.654  0.086  0.000     0.482      0.825  Yes</span>
+<span class="go">3       Y ~ Mbin -0.064  0.328  0.846    -0.715      0.587   No</span>
+<span class="go">4          Total  0.396  0.111  0.001     0.176      0.617  Yes</span>
+<span class="go">5         Direct  0.040  0.110  0.721    -0.179      0.258   No</span>
+<span class="go">6     Indirect M  0.356  0.085  0.000     0.215      0.538  Yes</span>
+<span class="go">7  Indirect Mbin  0.000  0.010  0.952    -0.017      0.025   No</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

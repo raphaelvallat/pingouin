@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pingouin.normality &#8212; pingouin 0.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/pingouin_blue.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pingouin.png"></span>
+          pingouin</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.5.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../api.html">Functions</a></li>
+                <li><a href="../guidelines.html">Guidelines</a></li>
+                <li><a href="../faq.html">FAQ</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
+                <li><a href="../contributing.html">Contribute</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="pingouin-normality">
+<h1>pingouin.normality<a class="headerlink" href="#pingouin-normality" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pingouin.normality">
+<span class="sig-prename descclassname"><span class="pre">pingouin.</span></span><span class="sig-name descname"><span class="pre">normality</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shapiro'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pingouin.normality" title="Permalink to this definition">¶</a></dt>
+<dd><p>Univariate normality test.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>, series, list or 1D np.array</span></dt><dd><p>Iterable. Can be either a single list, 1D numpy array,
+or a wide- or long-format pandas dataframe.</p>
+</dd>
+<dt><strong>dv</strong><span class="classifier">str</span></dt><dd><p>Dependent variable (only when <code class="docutils literal notranslate"><span class="pre">data</span></code> is a long-format dataframe).</p>
+</dd>
+<dt><strong>group</strong><span class="classifier">str</span></dt><dd><p>Grouping variable (only when <code class="docutils literal notranslate"><span class="pre">data</span></code> is a long-format dataframe).</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">str</span></dt><dd><p>Normality test. <cite>‘shapiro’</cite> (default) performs the Shapiro-Wilk test
+using <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.shapiro.html#scipy.stats.shapiro" title="(in SciPy v1.9.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.stats.shapiro()</span></code></a>, <cite>‘normaltest’</cite> performs the
+omnibus test of normality using <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.normaltest.html#scipy.stats.normaltest" title="(in SciPy v1.9.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.stats.normaltest()</span></code></a>, <cite>‘jarque_bera’</cite> performs
+the Jarque-Bera test using <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.jarque_bera.html#scipy.stats.jarque_bera" title="(in SciPy v1.9.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.stats.jarque_bera()</span></code></a>.
+The Omnibus and Jarque-Bera tests are more suitable than the Shapiro test for
+large samples.</p>
+</dd>
+<dt><strong>alpha</strong><span class="classifier">float</span></dt><dd><p>Significance level.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>stats</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></span></dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'W'</span></code>: Test statistic.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'pval'</span></code>: p-value.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'normal'</span></code>: True if <code class="docutils literal notranslate"><span class="pre">data</span></code> is normally distributed.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="pingouin.homoscedasticity.html#pingouin.homoscedasticity" title="pingouin.homoscedasticity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">homoscedasticity</span></code></a></dt><dd><p>Test equality of variance.</p>
+</dd>
+<dt><a class="reference internal" href="pingouin.sphericity.html#pingouin.sphericity" title="pingouin.sphericity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sphericity</span></code></a></dt><dd><p>Mauchly’s test for sphericity.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>The Shapiro-Wilk test calculates a <span class="math notranslate nohighlight">\(W\)</span> statistic that tests whether a
+random sample <span class="math notranslate nohighlight">\(x_1, x_2, ..., x_n\)</span> comes from a normal distribution.</p>
+<p>The <span class="math notranslate nohighlight">\(W\)</span> statistic is calculated as follows:</p>
+<div class="math notranslate nohighlight">
+\[W = \frac{(\sum_{i=1}^n a_i x_{i})^2}
+{\sum_{i=1}^n (x_i - \overline{x})^2}\]</div>
+<p>where the <span class="math notranslate nohighlight">\(x_i\)</span> are the ordered sample values (in ascending
+order) and the <span class="math notranslate nohighlight">\(a_i\)</span> are constants generated from the means,
+variances and covariances of the order statistics of a sample of size
+<span class="math notranslate nohighlight">\(n\)</span> from a standard normal distribution. Specifically:</p>
+<div class="math notranslate nohighlight">
+\[(a_1, ..., a_n) = \frac{m^TV^{-1}}{(m^TV^{-1}V^{-1}m)^{1/2}}\]</div>
+<p>with <span class="math notranslate nohighlight">\(m = (m_1, ..., m_n)^T\)</span> and <span class="math notranslate nohighlight">\((m_1, ..., m_n)\)</span> are the
+expected values of the order statistics of independent and identically
+distributed random variables sampled from the standard normal distribution,
+and <span class="math notranslate nohighlight">\(V\)</span> is the covariance matrix of those order statistics.</p>
+<p>The null-hypothesis of this test is that the population is normally
+distributed. Thus, if the p-value is less than the
+chosen alpha level (typically set at 0.05), then the null hypothesis is
+rejected and there is evidence that the data tested are not normally
+distributed.</p>
+<p>The result of the Shapiro-Wilk test should be interpreted with caution in
+the case of large sample sizes. Indeed, quoting from
+<a class="reference external" href="https://en.wikipedia.org/wiki/Shapiro%E2%80%93Wilk_test">Wikipedia</a>:</p>
+<blockquote>
+<div><p><em>“Like most statistical significance tests, if the sample size is
+sufficiently large this test may detect even trivial departures from
+the null hypothesis (i.e., although there may be some statistically
+significant effect, it may be too small to be of any practical
+significance); thus, additional investigation of the effect size is
+typically advisable, e.g., a Q–Q plot in this case.”</em></p>
+</div></blockquote>
+<p>Note that missing values are automatically removed (casewise deletion).</p>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>Shapiro, S. S., &amp; Wilk, M. B. (1965). An analysis of variance test
+for normality (complete samples). Biometrika, 52(3/4), 591-611.</p></li>
+<li><p><a class="reference external" href="https://www.itl.nist.gov/div898/handbook/prc/section2/prc213.htm">https://www.itl.nist.gov/div898/handbook/prc/section2/prc213.htm</a></p></li>
+</ul>
+<p class="rubric">Examples</p>
+<ol class="arabic simple">
+<li><p>Shapiro-Wilk test on a 1D array.</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pingouin</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">normality</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="go">         W      pval  normal</span>
+<span class="go">0  0.98414  0.274886    True</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Omnibus test on a wide-format dataframe with missing values</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;mediation&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">normality</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;normaltest&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">            W   pval  normal</span>
+<span class="go">X       1.792  0.408    True</span>
+<span class="go">M       0.492  0.782    True</span>
+<span class="go">Y       0.349  0.840    True</span>
+<span class="go">Mbin  839.716  0.000   False</span>
+<span class="go">Ybin  814.468  0.000   False</span>
+<span class="go">W1     24.816  0.000   False</span>
+<span class="go">W2     43.400  0.000   False</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Pandas Series</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">normality</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;normaltest&#39;</span><span class="p">)</span>
+<span class="go">          W      pval  normal</span>
+<span class="go">X  1.791839  0.408232    True</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Long-format dataframe</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="s1">&#39;rm_anova2&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">normality</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Performance&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">)</span>
+<span class="go">             W      pval  normal</span>
+<span class="go">Pre   0.967718  0.478773    True</span>
+<span class="go">Post  0.940728  0.095157    True</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Same but using the Jarque-Bera test</p></li>
+</ol>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pg</span><span class="o">.</span><span class="n">normality</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="s1">&#39;Performance&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;jarque_bera&quot;</span><span class="p">)</span>
+<span class="go">            W      pval   normal</span>
+<span class="go">Pre   0.304021  0.858979    True</span>
+<span class="go">Post  1.265656  0.531088    True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2022, Raphael Vallat.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
