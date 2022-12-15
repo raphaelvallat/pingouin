@@ -545,7 +545,7 @@ def rm_anova(
     # Groupby
     # I think that observed=True is actually not needed here since we have already used
     # `observed=True` in pivot_table.
-    grp_with = data.groupby(within, observed=True)[dv]
+    grp_with = data.groupby(within, observed=True, group_keys=False)[dv]
     rm = list(data[within].unique())
     n_rm = len(rm)
     n_obs = int(grp_with.count().max())
@@ -989,12 +989,12 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
     N = data[dv].size
 
     # Calculate sums of squares
-    grp = data.groupby(between, observed=True)[dv]
+    grp = data.groupby(between, observed=True, group_keys=False)[dv]
     # Between effect
     ssbetween = ((grp.mean() - data[dv].mean()) ** 2 * grp.count()).sum()
     # Within effect (= error between)
     #  = (grp.var(ddof=0) * grp.count()).sum()
-    sserror = grp.apply(lambda x: (x - x.mean()) ** 2).sum()
+    sserror = grp.transform(lambda x: (x - x.mean()) ** 2).sum()
     # In 1-way ANOVA, sstotal = ssbetween + sserror
     # sstotal = ssbetween + sserror
 
@@ -1062,7 +1062,7 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
-    grp_both = data.groupby(between, observed=True)[dv]
+    grp_both = data.groupby(between, observed=True, group_keys=False)[dv]
 
     if grp_both.count().nunique() == 1:
         # BALANCED DESIGN
@@ -1338,7 +1338,7 @@ def welch_anova(data=None, dv=None, between=None):
     ddof1 = r - 1
 
     # Compute weights and ajusted means
-    grp = data.groupby(between, observed=True)[dv]
+    grp = data.groupby(between, observed=True, group_keys=False)[dv]
     weights = grp.count() / grp.var()
     adj_grandmean = (weights * grp.mean()).sum() / weights.sum()
 
@@ -1512,7 +1512,7 @@ def mixed_anova(
     ss_betw = aov_betw.at[0, "SS"]
     ss_with = aov_with.at[0, "SS"]
     # Extract residuals and interactions
-    grp = data.groupby([between, within], observed=True)[dv]
+    grp = data.groupby([between, within], observed=True, group_keys=False)[dv]
     # ssresall = residuals within + residuals between
     ss_resall = grp.apply(lambda x: (x - x.mean()) ** 2).sum()
     # Interaction

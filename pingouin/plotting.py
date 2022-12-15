@@ -732,7 +732,6 @@ def plot_shift(
 
     .. plot::
 
-        >>> import numpy as np
         >>> import pingouin as pg
         >>> import matplotlib.pyplot as plt
         >>> data = pg.read_dataset("pairwise_corr")
