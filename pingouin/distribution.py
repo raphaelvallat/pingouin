@@ -494,7 +494,11 @@ def _check_multilevel_rm(data, func="epsilon"):
             # We end up with a one-way design. It is similar to applying
             # a paired T-test to gain scores instead of using repeated measures
             # on two time points. Here we have computed the gain scores.
-            data = data.groupby(level=1, axis=1, observed=True).diff(axis=1).dropna(axis=1)
+            data = (
+                data.groupby(level=1, axis=1, observed=True, group_keys=False)
+                .diff(axis=1)
+                .dropna(axis=1)
+            )
             data = data.droplevel(level=0, axis=1)
         else:
             # Both factors have more than 2 levels -- differ from R / JASP

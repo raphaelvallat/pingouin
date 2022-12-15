@@ -591,7 +591,7 @@ class TestParametric(TestCase):
 
         # With overlapping subject IDs in the between-subject groups
         df_overlap = df.copy()
-        df_overlap["Subject"] = df_overlap.groupby(["Group"])["Subject"].apply(
+        df_overlap["Subject"] = df_overlap.groupby(["Group"], group_keys=False)["Subject"].apply(
             lambda x: x - x.min()
         )
         with pytest.raises(ValueError):
