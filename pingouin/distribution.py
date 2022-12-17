@@ -195,13 +195,15 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
     >>> data = pg.read_dataset('rm_anova2')
     >>> pg.normality(data, dv='Performance', group='Time')
                  W      pval  normal
+    Time
     Pre   0.967718  0.478773    True
     Post  0.940728  0.095157    True
 
     5. Same but using the Jarque-Bera test
 
     >>> pg.normality(data, dv='Performance', group='Time', method="jarque_bera")
-                W      pval   normal
+                 W      pval  normal
+    Time
     Pre   0.304021  0.858979    True
     Post  1.265656  0.531088    True
     """
@@ -235,10 +237,17 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
             assert dv in data.columns
             grp = data.groupby(group, observed=True, sort=False)
             cols = grp.groups.keys()
-            for _, tmp in grp:
-                st_grp = normality(tmp[dv].to_numpy(), method=method, alpha=alpha)
+            for idx, tmp in grp:
+                if tmp[dv].count() <= 3:
+                    warnings.warn(f"Group {idx} has less than 4 valid samples. Returning NaN.")
+                    st_grp = pd.DataFrame(
+                        {"W": np.nan, "pval": np.nan, "normal": "False"}, index=[idx]
+                    )
+                else:
+                    st_grp = normality(tmp[dv].to_numpy(), method=method, alpha=alpha)
                 stats = pd.concat([stats, st_grp], axis=0, ignore_index=True)
             stats.index = cols
+            stats.index.name = group
     return _postprocess_dataframe(stats)
 
 
