@@ -74,6 +74,18 @@ class TestDistribution(TestCase):
         # assert stats_piv.equals(normality(df_nan, group='Time', dv='Scores'))
         normality(df_nan, group="Group", dv="Scores", method="normaltest")
         normality(df_nan, group="Group", dv="Scores", method="jarque_bera")
+        # Long-format but some groups are too small
+        # https://github.com/raphaelvallat/pingouin/issues/319
+        df_small = pd.DataFrame(
+            {
+                "group": [0, 0, 0, 0, 1, 1, 2, 2, 2, 2, 2, 3],
+                "variable": [5, 6, 8, 9, 5, 5, 2, 3, 4, 5, np.nan, 8],
+            }
+        )
+        stats = normality(df_small, dv="variable", group="group")
+        assert np.isnan(stats.loc[[1, 3], "pval"]).all()
+        assert not np.isnan(stats.loc[[0, 2], "pval"]).all()
+        assert (stats.loc[[1, 3], "normal"] == "False").all()
 
     def test_homoscedasticity(self):
         """Test function test_homoscedasticity."""
