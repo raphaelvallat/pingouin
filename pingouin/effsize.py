@@ -32,13 +32,13 @@ def compute_esci(
     Parameters
     ----------
     stat : float
-        Original effect size. Must be either a correlation coefficient or a
-        Cohen-type effect size (Cohen d or Hedges g).
+        Original effect size. Must be either a correlation coefficient or a Cohen-type effect size
+        (Cohen d or Hedges g).
     nx, ny : int
         Length of vector x and y.
     paired : bool
-        Indicates if the effect size was estimated from a paired sample.
-        This is only relevant for cohen or hedges effect size.
+        Indicates if the effect size was estimated from a paired sample. This is only relevant for
+        cohen or hedges effect size.
     eftype : string
         Effect size type. Must be "r" (correlation) or "cohen" (Cohen d or Hedges g).
     confidence : float
@@ -57,9 +57,8 @@ def compute_esci(
 
     Notes
     -----
-    To compute the parametric confidence interval around a
-    **Pearson r correlation** coefficient, one must first apply a
-    Fisher's r-to-z transformation:
+    To compute the parametric confidence interval around a **Pearson r correlation** coefficient,
+    one must first apply a Fisher's r-to-z transformation:
 
     .. math:: z = 0.5 \\cdot \\ln \\frac{1 + r}{1 - r} = \\text{arctanh}(r)
 
@@ -69,14 +68,12 @@ def compute_esci(
 
     where :math:`n` is the sample size.
 
-    The lower and upper confidence intervals - *in z-space* - are then
-    given by:
+    The lower and upper confidence intervals - *in z-space* - are then given by:
 
     .. math:: \\text{ci}_z = z \\pm \\text{crit} \\cdot \\text{SE}
 
-    where :math:`\\text{crit}` is the critical value of the normal distribution
-    corresponding to the desired confidence level (e.g. 1.96 in case of a 95%
-    confidence interval).
+    where :math:`\\text{crit}` is the critical value of the normal distribution corresponding to
+    the desired confidence level (e.g. 1.96 in case of a 95% confidence interval).
 
     These confidence intervals can then be easily converted back to *r-space*:
 
@@ -85,10 +82,9 @@ def compute_esci(
         \\text{ci}_r = \\frac{\\exp(2 \\cdot \\text{ci}_z) - 1}
         {\\exp(2 \\cdot \\text{ci}_z) + 1} = \\text{tanh}(\\text{ci}_z)
 
-    A formula for calculating the confidence interval for a
-    **Cohen d effect size** is given by Hedges and Olkin (1985, p86).
-    If the effect size estimate from the sample is :math:`d`, then it follows a
-    T distribution with standard error:
+    A formula for calculating the confidence interval for a **Cohen d effect size** is given by
+    Hedges and Olkin (1985, p86). If the effect size estimate from the sample is :math:`d`, then
+    it follows a T distribution with standard error:
 
     .. math::
 
@@ -107,15 +103,14 @@ def compute_esci(
 
     .. math:: \\text{ci}_d = d \\pm \\text{crit} \\cdot \\text{SE}
 
-    where :math:`\\text{crit}` is the critical value of the T distribution
-    corresponding to the desired confidence level.
+    where :math:`\\text{crit}` is the critical value of the T distribution corresponding to the
+    desired confidence level.
 
     References
     ----------
     * https://en.wikipedia.org/wiki/Fisher_transformation
 
-    * Hedges, L., and Ingram Olkin. "Statistical models for meta-analysis."
-      (1985).
+    * Hedges, L., and Ingram Olkin. "Statistical models for meta-analysis." (1985).
 
     * http://www.leeds.ac.uk/educol/documents/00002182.htm
 
@@ -211,8 +206,7 @@ def compute_bootci(
     y : 1D-array, list, or None
         Second sample. Required only for bivariate functions.
     func : str or custom function
-        Function to compute the bootstrapped statistic.
-        Accepted string values are:
+        Function to compute the bootstrapped statistic. Accepted string values are:
 
         * ``'pearson'``: Pearson correlation (bivariate, paired x and y)
         * ``'spearman'``: Spearman correlation (bivariate, paired x and y)
@@ -501,12 +495,13 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     ef : float
         Original effect size.
     input_type : string
-        Effect size type of ef. Must be ``'r'`` or ``'cohen'``.
+        Effect size type of ef. Must be ``'cohen'`` or ``'pointbiserialr'``.
     output_type : string
         Desired effect size type. Available methods are:
 
         * ``'cohen'``: Unbiased Cohen d
         * ``'hedges'``: Hedges g
+        * ``'pointbiserialr'``: Point-biserial correlation
         * ``'eta-square'``: Eta-square
         * ``'odds-ratio'``: Odds ratio
         * ``'AUC'``: Area Under the Curve
@@ -527,15 +522,17 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
 
     Notes
     -----
-    The formula to convert **r** to **d** is given in [1]_:
+    The formula to convert from a`point-biserial correlation
+    <https://en.wikipedia.org/wiki/Point-biserial_correlation_coefficient>`_ **r** to **d** is
+    given in [1]_:
 
-    .. math:: d = \\frac{2r}{\\sqrt{1 - r^2}}
+    .. math:: d = \\frac{2r_{pb}}{\\sqrt{1 - r_{pb}^2}}
 
-    The formula to convert **d** to **r** is given in [2]_:
+    The formula to convert **d** to a point-biserial correlation **r** is given in [2]_:
 
     .. math::
 
-        r = \\frac{d}{\\sqrt{d^2 + \\frac{(n_x + n_y)^2 - 2(n_x + n_y)}
+        r_{pb} = \\frac{d}{\\sqrt{d^2 + \\frac{(n_x + n_y)^2 - 2(n_x + n_y)}
         {n_xn_y}}}
 
     The formula to convert **d** to :math:`\\eta^2` is given in [3]_:
@@ -584,35 +581,35 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     >>> pg.convert_effsize(.45, 'cohen', 'hedges', nx=10, ny=10)
     0.4309859154929578
 
-    3. Convert Pearson r to Cohen d
+    3. Convert a point-biserial correlation to Cohen d
 
-    >>> r = 0.40
-    >>> d = pg.convert_effsize(r, 'r', 'cohen')
+    >>> rpb = 0.40
+    >>> d = pg.convert_effsize(rpb, 'pointbiserialr', 'cohen')
     >>> print(d)
     0.8728715609439696
 
-    4. Reverse operation: convert Cohen d to Pearson r
+    4. Reverse operation: convert Cohen d to a point-biserial correlation
 
-    >>> pg.convert_effsize(d, 'cohen', 'r')
+    >>> pg.convert_effsize(d, 'cohen', 'pointbiserialr')
     0.4000000000000001
     """
     it = input_type.lower()
     ot = output_type.lower()
 
     # Check input and output type
-    for input in [it, ot]:
-        if not _check_eftype(input):
-            err = "Could not interpret input '{}'".format(input)
+    for inp in [it, ot]:
+        if not _check_eftype(inp):
+            err = "Could not interpret input '{}'".format(inp)
             raise ValueError(err)
-    if it not in ["r", "cohen"]:
-        raise ValueError("Input type must be 'r' or 'cohen'")
+    if it not in ["pointbiserialr", "cohen"]:
+        raise ValueError("Input type must be 'cohen' or 'pointbiserialr'")
 
     # Pass-through option
     if it == ot or ot == "none":
         return ef
 
-    # Convert r to Cohen d (Rosenthal 1994)
-    d = (2 * ef) / np.sqrt(1 - ef**2) if it == "r" else ef
+    # Convert point-biserial r to Cohen d (Rosenthal 1994)
+    d = (2 * ef) / np.sqrt(1 - ef**2) if it == "pointbiserialr" else ef
 
     # Then convert to the desired output type
     if ot == "cohen":
@@ -627,7 +624,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
                 "Hedges g. Returning Cohen's d instead"
             )
             return d
-    elif ot == "r":
+    elif ot == "pointbiserialr":
         # McGrath and Meyer 2006
         if all(v is not None for v in [nx, ny]):
             a = ((nx + ny) ** 2 - 2 * (nx + ny)) / (nx * ny)
@@ -640,6 +637,12 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     elif ot == "odds-ratio":
         # Borenstein et al. 2009
         return np.exp(d * np.pi / np.sqrt(3))
+    elif ot == "r":
+        # https://github.com/raphaelvallat/pingouin/issues/302
+        raise ValueError(
+            "Using effect size 'r' in `pingouin.convert_effsize` has been deprecated. "
+            "Please use 'pointbiserialr' instead."
+        )
     else:  # ['auc']
         # Ruscio 2008
         from scipy.stats import norm
@@ -666,7 +669,8 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
         * ``'none'``: no effect size
         * ``'cohen'``: Unbiased Cohen d
         * ``'hedges'``: Hedges g
-        * ``'r'``: correlation coefficient
+        * ``'r'``: Pearson correlation coefficient
+        * ``'pointbiserialr'``: Point-biserial correlation
         * ``'eta-square'``: Eta-square
         * ``'odds-ratio'``: Odds ratio
         * ``'AUC'``: Area Under the Curve
@@ -684,8 +688,8 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
 
     Notes
     -----
-    Missing values are automatically removed from the data. If ``x`` and ``y``
-    are paired, the entire row is removed.
+    Missing values are automatically removed from the data. If ``x`` and ``y`` are paired, the
+    entire row is removed.
 
     If ``x`` and ``y`` are independent, the Cohen :math:`d` is:
 
@@ -702,22 +706,19 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
         d_{avg} = \\frac{\\overline{X} - \\overline{Y}}
         {\\sqrt{\\frac{(\\sigma_1^2 + \\sigma_2^2)}{2}}}
 
-    The Cohen’s d is a biased estimate of the population effect size,
-    especially for small samples (n < 20). It is often preferable
-    to use the corrected Hedges :math:`g` instead:
+    The Cohen's d is a biased estimate of the population effect size, especially for small samples
+    (n < 20). It is often preferable to use the corrected Hedges :math:`g` instead:
 
     .. math:: g = d \\times (1 - \\frac{3}{4(n_1 + n_2) - 9})
 
-    The common language effect size is the proportion of pairs where ``x`` is
-    higher than ``y`` (calculated with a brute-force approach where
-    each observation of ``x`` is paired to each observation of ``y``,
-    see :py:func:`pingouin.wilcoxon` for more details):
+    The common language effect size is the proportion of pairs where ``x`` is higher than ``y``
+    (calculated with a brute-force approach where each observation of ``x`` is paired to each
+    observation of ``y``, see :py:func:`pingouin.wilcoxon` for more details):
 
     .. math:: \\text{CL} = P(X > Y) + .5 \\times P(X = Y)
 
-    For other effect sizes, Pingouin will first calculate a Cohen :math:`d` and
-    then use the :py:func:`pingouin.convert_effsize` to convert to the desired
-    effect size.
+    For other effect sizes, Pingouin will first calculate a Cohen :math:`d` and then use the
+    :py:func:`pingouin.convert_effsize` to convert to the desired effect size.
 
     References
     ----------
@@ -822,7 +823,7 @@ def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype="cohen"):
     N : int, optional
         Total sample size (will not be used if nx and ny are specified)
     eftype : string, optional
-        desired output effect size
+        Desired output effect size.
 
     Returns
     -------

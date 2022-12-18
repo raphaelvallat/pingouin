@@ -216,29 +216,33 @@ class TestEffsize(TestCase):
 
     def test_convert_effsize(self):
         """Test function convert_effsize.
+
         Compare to https://www.psychometrica.de/effect_size.html
         """
         # Cohen d
         d = 0.40
         assert cef(d, "cohen", "none") == d
-        assert round(cef(d, "cohen", "r"), 4) == 0.1961
-        cef(d, "cohen", "r", nx=10, ny=12)  # When nx and ny are specified
-        assert np.allclose(cef(1.002549, "cohen", "r"), 0.4481248)  # R
+        assert round(cef(d, "cohen", "pointbiserialr"), 4) == 0.1961
+        cef(d, "cohen", "pointbiserialr", nx=10, ny=12)  # When nx and ny are specified
+        assert np.allclose(cef(1.002549, "cohen", "pointbiserialr"), 0.4481248)  # R
         assert round(cef(d, "cohen", "eta-square"), 4) == 0.0385
         assert round(cef(d, "cohen", "odds-ratio"), 4) == 2.0658
         cef(d, "cohen", "hedges", nx=10, ny=10)
-        cef(d, "cohen", "r")
+        cef(d, "cohen", "pointbiserialr")
         cef(d, "cohen", "hedges")
 
-        # Correlation coefficient
-        r = 0.65
-        assert cef(r, "r", "none") == r
-        assert round(cef(r, "r", "cohen"), 4) == 1.7107
-        assert np.allclose(cef(0.4481248, "r", "cohen"), 1.002549)
-        assert round(cef(r, "r", "eta-square"), 4) == 0.4225
-        assert round(cef(r, "r", "odds-ratio"), 4) == 22.2606
+        # Point-biserial correlation
+        rpb = 0.65
+        assert cef(rpb, "pointbiserialr", "none") == rpb
+        assert round(cef(rpb, "pointbiserialr", "cohen"), 4) == 1.7107
+        assert np.allclose(cef(0.4481248, "pointbiserialr", "cohen"), 1.002549)
+        assert round(cef(rpb, "pointbiserialr", "eta-square"), 4) == 0.4225
+        assert round(cef(rpb, "pointbiserialr", "odds-ratio"), 4) == 22.2606
 
         # Error
+        with pytest.raises(ValueError):
+            # https://github.com/raphaelvallat/pingouin/issues/302
+            cef(d, "cohen", "r")
         with pytest.raises(ValueError):
             cef(d, "coucou", "hibou")
         with pytest.raises(ValueError):
@@ -252,6 +256,7 @@ class TestEffsize(TestCase):
         compute_effsize(x=x, y=y, eftype="odds-ratio", paired=False)
         compute_effsize(x=x, y=y, eftype="eta-square", paired=False)
         compute_effsize(x=x, y=y, eftype="cles", paired=False)
+        compute_effsize(x=x, y=y, eftype="pointbiserialr", paired=False)
         compute_effsize(x=x, y=y, eftype="none", paired=False)
         # Unequal variances
         z = np.random.normal(2.5, 3, 30)
