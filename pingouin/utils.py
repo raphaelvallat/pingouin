@@ -325,6 +325,7 @@ def _check_eftype(eftype):
         "hedges",
         "cohen",
         "r",
+        "pointbiserialr",
         "eta-square",
         "odds-ratio",
         "auc",

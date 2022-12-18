@@ -14,6 +14,7 @@ v0.6.0.dev
 **Bugfixes**
 
 - Fixed a bug where the boolean value returned by :py:func:`pingouin.anderson` was inverted. It returned True when the data was NOT coming from the tested distribution, and vice versa. `PR 308 <https://github.com/raphaelvallat/pingouin/pull/308>`_.
+- Fixed misleading documentation and ``input_type`` in the :py:func:`convert_effsize` function. When converting from a Cohen's d effect size to a correlation coefficient, the resulting correlation is **not** a Pearson correlation but instead a `point-biserial correlation <https://en.wikipedia.org/wiki/Point-biserial_correlation_coefficient>`_. To avoid any confusion, ``input_type='r'`` has been deprecated and replaced with ``input_type='pointbiserialr'``. For more details, see `issue 302 <https://github.com/raphaelvallat/pingouin/issues/302>`_.
 
 **New functions**
 
