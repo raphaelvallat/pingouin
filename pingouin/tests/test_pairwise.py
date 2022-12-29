@@ -560,6 +560,9 @@ class TestPairwise(TestCase):
         # P-values Pingouin: [0.8694, 0.0010, 0.0010]
         sig = stats["p-tukey"].apply(lambda x: "Yes" if x < 0.05 else "No").to_numpy()
         assert np.array_equal(sig, ["No", "Yes", "Yes"])
+        # Effect size should be the same as pairwise_tests
+        stats_tests = df.pairwise_tests(dv="body_mass_g", between="species").round(4)
+        assert np.array_equal(stats["hedges"], stats_tests["hedges"])
 
         # Same but with balanced group
         df_balanced = df.groupby("species").head(20).copy()
@@ -613,6 +616,9 @@ class TestPairwise(TestCase):
         # P-values Pingouin: [0.8339, 0.0010, 0.0010]
         sig = stats["pval"].apply(lambda x: "Yes" if x < 0.05 else "No").to_numpy()
         assert np.array_equal(sig, ["No", "Yes", "Yes"])
+        # Effect size should be the same as pairwise_tests
+        stats_tests = df.pairwise_tests(dv="body_mass_g", between="species").round(4)
+        assert np.array_equal(stats["hedges"], stats_tests["hedges"])
 
         # Same but with balanced group
         df_balanced = df.groupby("species").head(20).copy()
