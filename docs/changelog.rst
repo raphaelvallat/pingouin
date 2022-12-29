@@ -8,15 +8,15 @@ What's new
 
 *************
 
-v0.6.0.dev
-----------
+v0.5.3 (December 2022)
+----------------------
 
 **Bugfixes**
 
 - Fixed a bug where the boolean value returned by :py:func:`pingouin.anderson` was inverted. It returned True when the data was NOT coming from the tested distribution, and vice versa. `PR 308 <https://github.com/raphaelvallat/pingouin/pull/308>`_.
-- Fixed misleading documentation and ``input_type`` in the :py:func:`convert_effsize` function. When converting from a Cohen's d effect size to a correlation coefficient, the resulting correlation is **not** a Pearson correlation but instead a `point-biserial correlation <https://en.wikipedia.org/wiki/Point-biserial_correlation_coefficient>`_. To avoid any confusion, ``input_type='r'`` has been deprecated and replaced with ``input_type='pointbiserialr'``. For more details, see `issue 302 <https://github.com/raphaelvallat/pingouin/issues/302>`_.
+- Fixed misleading documentation and ``input_type`` in the :py:func:`pingouin.convert_effsize` function. When converting from a Cohen's d effect size to a correlation coefficient, the resulting correlation is **not** a Pearson correlation but instead a `point-biserial correlation <https://en.wikipedia.org/wiki/Point-biserial_correlation_coefficient>`_. To avoid any confusion, ``input_type='r'`` has been deprecated and replaced with ``input_type='pointbiserialr'``. For more details, see `issue 302 <https://github.com/raphaelvallat/pingouin/issues/302>`_.
 
-**New functions**
+**New function**
 
 We have added the :py:func:`pingouin.ptests` function to calculate a T-test (T- and p-values) between all pairs of columns in a given dataframe. This is the T-test equivalent of :py:func:`pingouin.rcorr`. It can only be used as a :py:class:`pandas.DataFrame` method, not as a standalone function. The output is a square dataframe with the T-values on the lower triangle and the p-values on the upper triangle.
 
@@ -24,14 +24,21 @@ We have added the :py:func:`pingouin.ptests` function to calculate a T-test (T- 
 
    >>> import pingouin as pg
    >>> df = pg.read_dataset('pairwise_corr').iloc[:30, 1:]
+   >>> df.columns = ["N", "E", "O", "A", "C"]
    >>> df.ptests()
+           N       E      O      A    C
+   N       -     ***    ***    ***  ***
+   E  -8.397       -                ***
+   O  -8.585  -0.483      -         ***
+   A  -9.026   0.278  0.786      -  ***
+   C  -4.759   3.753  4.128  3.802    -
 
 **Improvements**
 
-- Added customization options to :py:func:`pingouin.plot_rm_corr`, which now takes optional keyword arguments to pass through to :py:func:`seaborn.regplot` and :py:func:`seaborn.scatterplot`. `PR 312 <https://github.com/raphaelvallat/pingouin/pull/312>`_.
-- Changed some plotting functions to increase compatibility with :py:class:`seaborn.FacetGrid`. As explained in `issue 306 <https://github.com/raphaelvallat/pingouin/issues/306>`_, the major change is to generate :py:class:`matplotlib.axes` using default parameters instead of accepting ``fig`` and ``dpi`` keyword arguments. This change applies to :py:func:`pingouin.plot_blandaltman`, :py:func:`pingouin.plot_paired`, :py:func:`pingouin.plot_circmean`, and :py:func:`pingouin.qqplot`. In the future, open a :py:class:`matplotlib.axes` and pass it through using the ``ax`` parameter to use custom figure settings with these functions. Other minor changes include the addition of the ``square`` keyword argument to :py:func`pingouin.plot_circmean` and :py:func`pingouin.qqplot` to ensure equal aspect ratios, and the removal of ``scatter_kws`` as a keyword argument in :py:func:`pingouin.plot_blandaltmann` (now alter the scatter parameters using general ``**kwargs``). `PR 314 <https://github.com/raphaelvallat/pingouin/pull/314>`_.
-- :py:func:`pingouin.normality` does not raise an AssertionError anymore if one of the groups in ``group`` has ≤ 3 samples. `PR 324 <https://github.com/raphaelvallat/pingouin/pull/324>`_.
 - Effect sizes are now calculated using an exact method instead of an approximation based on T-values in :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell`. `PR 328 <https://github.com/raphaelvallat/pingouin/pull/328>`_.
+- :py:func:`pingouin.normality` does not raise an AssertionError anymore if one of the groups in ``group`` has ≤ 3 samples. `PR 324 <https://github.com/raphaelvallat/pingouin/pull/324>`_.
+- Added customization options to :py:func:`pingouin.plot_rm_corr`, which now takes optional keyword arguments to pass through to :py:func:`seaborn.regplot` and :py:func:`seaborn.scatterplot`. `PR 312 <https://github.com/raphaelvallat/pingouin/pull/312>`_.
+- Changed some plotting functions to increase compatibility with :py:class:`seaborn.FacetGrid`. As explained in `issue 306 <https://github.com/raphaelvallat/pingouin/issues/306>`_, the major change is to generate matplotlib.axes using default parameters instead of accepting ``fig`` and ``dpi`` keyword arguments. This change applies to :py:func:`pingouin.plot_blandaltman`, :py:func:`pingouin.plot_paired`, :py:func:`pingouin.plot_circmean`, and :py:func:`pingouin.qqplot`. In the future, open a matplotlib.axes and pass it through using the ``ax`` parameter to use custom figure settings with these functions. Other minor changes include the addition of the ``square`` keyword argument to :py:func:`pingouin.plot_circmean` and :py:func:`pingouin.qqplot` to ensure equal aspect ratios, and the removal of ``scatter_kws`` as a keyword argument in :py:func:`pingouin.plot_blandaltmann` (now alter the scatter parameters using general ``**kwargs``). `PR 314 <https://github.com/raphaelvallat/pingouin/pull/314>`_.
 
 *************
 

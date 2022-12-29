@@ -612,7 +612,7 @@ def ptests(
     :py:func:`pingouin.pairwise_test` function. Missing values are automatically removed from each
     pairwise T-test.
 
-    .. versionadded:: 0.6.0
+    .. versionadded:: 0.5.3
 
     Parameters
     ----------

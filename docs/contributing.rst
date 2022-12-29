@@ -16,7 +16,7 @@ Code guidelines
 
   .. code-block:: bash
 
-     $ black .
+     $ black . --line-length=100
 
 * Use `NumPy style <https://numpydoc.readthedocs.io/en/latest/format.html>`_ for docstrings. Follow existing examples for simplest guidance.
 
