@@ -7,7 +7,7 @@ from itertools import combinations, product
 from pingouin.config import options
 from pingouin.parametric import anova
 from pingouin.multicomp import multicomp
-from pingouin.effsize import compute_effsize, convert_effsize
+from pingouin.effsize import compute_effsize
 from pingouin.utils import _check_dataframe, _flatten_list, _postprocess_dataframe
 from scipy.stats import studentized_range
 import warnings
