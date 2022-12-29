@@ -7,7 +7,7 @@ from itertools import combinations, product
 from pingouin.config import options
 from pingouin.parametric import anova
 from pingouin.multicomp import multicomp
-from pingouin.effsize import compute_effsize, convert_effsize
+from pingouin.effsize import compute_effsize
 from pingouin.utils import _check_dataframe, _flatten_list, _postprocess_dataframe
 from scipy.stats import studentized_range
 import warnings
@@ -772,8 +772,8 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     Parameters
     ----------
     data : :py:class:`pandas.DataFrame`
-        DataFrame. Note that this function can also directly be used as a
-        Pandas method, in which case this argument is no longer needed.
+        DataFrame. Note that this function can also directly be used as a Pandas method, in which
+        case this argument is no longer needed.
     dv : string
         Name of column containing the dependent variable.
     between: string
@@ -813,11 +813,10 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     -----
     Tukey HSD post-hoc [1]_ is best for balanced one-way ANOVA.
 
-    It has been proven to be conservative for one-way ANOVA with unequal
-    sample sizes. However, it is not robust if the groups have unequal
-    variances, in which case the Games-Howell test is more adequate.
-    Tukey HSD is not valid for repeated measures ANOVA.
-    Only one-way ANOVA design are supported.
+    It has been proven to be conservative for one-way ANOVA with unequal sample sizes. However, it
+    is not robust if the groups have unequal variances, in which case the Games-Howell test is
+    more adequate. Tukey HSD is not valid for repeated measures ANOVA. Only one-way ANOVA design
+    are supported.
 
     The T-values are defined as:
 
@@ -826,24 +825,23 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
         t = \\frac{\\overline{x}_i - \\overline{x}_j}
         {\\sqrt{2 \\cdot \\text{MS}_w / n}}
 
-    where :math:`\\overline{x}_i` and :math:`\\overline{x}_j` are the means of
-    the first and second group, respectively, :math:`\\text{MS}_w` the mean
-    squares of the error (computed using ANOVA) and :math:`n` the sample size.
+    where :math:`\\overline{x}_i` and :math:`\\overline{x}_j` are the means of the first and
+    second group, respectively, :math:`\\text{MS}_w` the mean squares of the error (computed using
+    ANOVA) and :math:`n` the sample size.
 
-    If the sample sizes are unequal, the Tukey-Kramer procedure is
-    automatically used:
+    If the sample sizes are unequal, the Tukey-Kramer procedure is automatically used:
 
     .. math::
 
         t = \\frac{\\overline{x}_i - \\overline{x}_j}{\\sqrt{\\frac{MS_w}{n_i}
         + \\frac{\\text{MS}_w}{n_j}}}
 
-    where :math:`n_i` and :math:`n_j` are the sample sizes of the first and
-    second group, respectively.
+    where :math:`n_i` and :math:`n_j` are the sample sizes of the first and second group,
+    respectively.
 
     The p-values are then approximated using the Studentized range distribution
-    :math:`Q(\\sqrt2|t_i|, r, N - r)` where :math:`r` is the total number of
-    groups and :math:`N` is the total sample size.
+    :math:`Q(\\sqrt2|t_i|, r, N - r)` where :math:`r` is the total number of groups and
+    :math:`N` is the total sample size.
 
     References
     ----------
@@ -862,9 +860,9 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     >>> df = pg.read_dataset('penguins')
     >>> df.pairwise_tukey(dv='body_mass_g', between='species').round(3)
                A          B   mean(A)   mean(B)      diff      se       T  p-tukey  hedges
-    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  67.512  -0.480    0.881  -0.070
-    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148 -24.495    0.000  -2.967
-    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857 -19.224    0.000  -2.894
+    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  67.512  -0.480    0.881  -0.074
+    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148 -24.495    0.000  -2.860
+    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857 -19.224    0.000  -2.875
     """
     # First compute the ANOVA
     # For max precision, make sure rounding is disabled
@@ -901,8 +899,20 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     # punc = t.sf(np.abs(tval), n[g1].size + n[g2].size - 2) * 2
 
     # Effect size
-    d = tval * np.sqrt(1 / n[g1] + 1 / n[g2])
-    ef = convert_effsize(d, "cohen", effsize, n[g1], n[g2])
+    # Method 1: Approximation
+    # d = tval * np.sqrt(1 / n[g1] + 1 / n[g2])
+    # ef = convert_effsize(d, "cohen", effsize, n[g1], n[g2])
+    # Method 2: Exact
+    ef = []
+    for idx_a, idx_b in zip(g1, g2):
+        ef.append(
+            compute_effsize(
+                grp.get_group(labels[idx_a]),
+                grp.get_group(labels[idx_b]),
+                paired=False,
+                eftype=effsize,
+            )
+        )
 
     # Create dataframe
     stats = pd.DataFrame(
@@ -967,15 +977,13 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
 
     Notes
     -----
-    Games-Howell [1]_ is very similar to the Tukey HSD post-hoc test but is
-    much more robust to heterogeneity of variances. While the
-    Tukey-HSD post-hoc is optimal after a classic one-way ANOVA, the
-    Games-Howell is optimal after a Welch ANOVA. Please note that Games-Howell
-    is not valid for repeated measures ANOVA.
-    Only one-way ANOVA design are supported.
+    Games-Howell [1]_ is very similar to the Tukey HSD post-hoc test but is much more robust to
+    heterogeneity of variances. While the Tukey-HSD post-hoc is optimal after a classic one-way
+    ANOVA, the Games-Howell is optimal after a Welch ANOVA. Please note that Games-Howell
+    is not valid for repeated measures ANOVA. Only one-way ANOVA design are supported.
 
-    Compared to the Tukey-HSD test, the Games-Howell test uses different pooled
-    variances for each pair of variables instead of the same pooled variance.
+    Compared to the Tukey-HSD test, the Games-Howell test uses different pooled variances for
+    each pair of variables instead of the same pooled variance.
 
     The T-values are defined as:
 
@@ -992,10 +1000,9 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
         {\\frac{(\\frac{s_i^2}{n_i})^2}{n_i-1} +
         \\frac{(\\frac{s_j^2}{n_j})^2}{n_j-1}}
 
-    where :math:`\\overline{x}_i`, :math:`s_i^2`, and :math:`n_i`
-    are the mean, variance and sample size of the first group and
-    :math:`\\overline{x}_j`, :math:`s_j^2`, and :math:`n_j` the mean, variance
-    and sample size of the second group.
+    where :math:`\\overline{x}_i`, :math:`s_i^2`, and :math:`n_i` are the mean, variance and sample
+    size of the first group and :math:`\\overline{x}_j`, :math:`s_j^2`, and :math:`n_j` the mean,
+    variance and sample size of the second group.
 
     The p-values are then approximated using the Studentized range distribution
     :math:`Q(\\sqrt2|t_i|, r, v_i)`.
@@ -1003,7 +1010,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     References
     ----------
     .. [1] Games, Paul A., and John F. Howell. "Pairwise multiple comparison
-           procedures with unequal n’s and/or variances: a Monte Carlo study."
+           procedures with unequal n's and/or variances: a Monte Carlo study."
            Journal of Educational Statistics 1.2 (1976): 113-125.
 
     .. [2] Gleason, John R. "An accurate, non-iterative approximation for
@@ -1019,9 +1026,9 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     >>> pg.pairwise_gameshowell(data=df, dv='body_mass_g',
     ...                         between='species').round(3)
                A          B   mean(A)   mean(B)      diff      se       T       df  pval  hedges
-    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  59.706  -0.543  152.455  0.85  -0.079
-    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  58.811 -23.386  249.643  0.00  -2.833
-    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  65.103 -20.628  170.404  0.00  -3.105
+    0     Adelie  Chinstrap  3700.662  3733.088   -32.426  59.706  -0.543  152.455  0.85  -0.074
+    1     Adelie     Gentoo  3700.662  5076.016 -1375.354  58.811 -23.386  249.643  0.00  -2.860
+    2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  65.103 -20.628  170.404  0.00  -2.875
     """
     # Check the dataframe
     data = _check_dataframe(dv=dv, between=between, effects="between", data=data)
@@ -1060,8 +1067,20 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     # punc = t.sf(np.abs(tval), n[g1].size + n[g2].size - 2) * 2
 
     # Effect size
-    d = tval * np.sqrt(1 / n[g1] + 1 / n[g2])
-    ef = convert_effsize(d, "cohen", effsize, n[g1], n[g2])
+    # Method 1: Approximation
+    # d = tval * np.sqrt(1 / n[g1] + 1 / n[g2])
+    # ef = convert_effsize(d, "cohen", effsize, n[g1], n[g2])
+    # Method 2: Exact
+    ef = []
+    for idx_a, idx_b in zip(g1, g2):
+        ef.append(
+            compute_effsize(
+                grp.get_group(labels[idx_a]),
+                grp.get_group(labels[idx_b]),
+                paired=False,
+                eftype=effsize,
+            )
+        )
 
     # Create dataframe
     stats = pd.DataFrame(
