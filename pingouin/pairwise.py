@@ -315,10 +315,14 @@ def pairwise_tests(
         assert all([between in data.keys(), within in data.keys()])
 
     # Create col_order
+
+    # Create col_order
     if parametric == True:
         am, ae, bm, be = "mean(A)", "std(A)", "mean(B)", "std(B)"
+    
     if parametric == False:
         am, ae, bm, be = "median(A)", "IQR(A)", "median(B)", "IQR(B)"
+
     col_order = [
         "Contrast",
         "Time",
@@ -419,11 +423,13 @@ def pairwise_tests(
 
             if return_desc:
                 if parametric == True:
+                    display(print("paramüst"))
                     stats.at[i, "mean(A)"] = np.nanmean(x)
                     stats.at[i, "mean(B)"] = np.nanmean(y)
                     stats.at[i, "std(A)"] = np.nanstd(x, ddof=1)
                     stats.at[i, "std(B)"] = np.nanstd(y, ddof=1)
-                else:
+                if parametric == False:
+                    display(print("noparamüst"))
                     stats.at[i, "median(A)"] = np.nanmedian(x)
                     stats.at[i, "median(B)"] = np.nanmedian(y)
                     stats.at[i, "IQR(A)"] = np.abs(np.diff(np.percentile(x, [75, 25]))).item()
@@ -571,17 +577,19 @@ def pairwise_tests(
                 options.update(old_options)  # restore options
 
                 # Append to stats
-            if return_desc:
-                if parametric == True:
-                    stats.at[ic, "mean(A)"] = np.nanmean(x)
-                    stats.at[ic, "mean(B)"] = np.nanmean(y)
-                    stats.at[ic, "std(A)"] = np.nanstd(x, ddof=1)
-                    stats.at[ic, "std(B)"] = np.nanstd(y, ddof=1)
-                else:
-                    stats.at[ic, "median(A)"] = np.nanmedian(x)
-                    stats.at[ic, "median(B)"] = np.nanmedian(y)
-                    stats.at[ic, "IQR(A)"] = np.abs(np.diff(np.percentile(x, [75, 25]))).item()
-                    stats.at[ic, "IQR(B)"] = np.abs(np.diff(np.percentile(y, [75, 25]))).item()
+                if return_desc:
+                    if parametric == True:
+                        display(print("param"))
+                        stats.at[ic, "mean(A)"] = np.nanmean(x)
+                        stats.at[ic, "mean(B)"] = np.nanmean(y)
+                        stats.at[ic, "std(A)"] = np.nanstd(x, ddof=1)
+                        stats.at[ic, "std(B)"] = np.nanstd(y, ddof=1)
+                    else:
+                        display(print("noparam"))
+                        stats.at[ic, "median(A)"] = np.nanmedian(x)
+                        stats.at[ic, "median(B)"] = np.nanmedian(y)
+                        stats.at[ic, "IQR(A)"] = np.abs(np.diff(np.percentile(x, [75, 25]))).item()
+                        stats.at[ic, "IQR(B)"] = np.abs(np.diff(np.percentile(y, [75, 25]))).item()
                 stats.at[ic, stat_name] = df_ttest[stat_name].iat[0]
                 stats.at[ic, "p-unc"] = df_ttest["p-val"].iat[0]
                 stats.at[ic, effsize] = ef
