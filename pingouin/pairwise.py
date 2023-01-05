@@ -573,15 +573,15 @@ def pairwise_tests(
                 # Append to stats
             if return_desc:
                 if parametric == True:
-                    stats.at[i, "mean(A)"] = np.nanmean(x)
-                    stats.at[i, "mean(B)"] = np.nanmean(y)
-                    stats.at[i, "std(A)"] = np.nanstd(x, ddof=1)
-                    stats.at[i, "std(B)"] = np.nanstd(y, ddof=1)
+                    stats.at[ic, "mean(A)"] = np.nanmean(x)
+                    stats.at[ic, "mean(B)"] = np.nanmean(y)
+                    stats.at[ic, "std(A)"] = np.nanstd(x, ddof=1)
+                    stats.at[ic, "std(B)"] = np.nanstd(y, ddof=1)
                 else:
-                    stats.at[i, "median(A)"] = np.nanmedian(x)
-                    stats.at[i, "median(B)"] = np.nanmedian(y)
-                    stats.at[i, "IQR(A)"] = np.abs(np.diff(np.percentile(x, [75, 25]))).item()
-                    stats.at[i, "IQR(B)"] = np.abs(np.diff(np.percentile(y, [75, 25]))).item()
+                    stats.at[ic, "median(A)"] = np.nanmedian(x)
+                    stats.at[ic, "median(B)"] = np.nanmedian(y)
+                    stats.at[ic, "IQR(A)"] = np.abs(np.diff(np.percentile(x, [75, 25]))).item()
+                    stats.at[ic, "IQR(B)"] = np.abs(np.diff(np.percentile(y, [75, 25]))).item()
                 stats.at[ic, stat_name] = df_ttest[stat_name].iat[0]
                 stats.at[ic, "p-unc"] = df_ttest["p-val"].iat[0]
                 stats.at[ic, effsize] = ef
