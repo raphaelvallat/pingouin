@@ -420,14 +420,12 @@ def pairwise_tests(
             ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
 
             if return_desc:
-                if parametric == True:
-                    display(print("paramüst"))
+                if parametric:
                     stats.at[i, "mean(A)"] = np.nanmean(x)
                     stats.at[i, "mean(B)"] = np.nanmean(y)
                     stats.at[i, "std(A)"] = np.nanstd(x, ddof=1)
                     stats.at[i, "std(B)"] = np.nanstd(y, ddof=1)
-                if parametric == False:
-                    display(print("noparamüst"))
+                else:
                     stats.at[i, "median(A)"] = np.nanmedian(x)
                     stats.at[i, "median(B)"] = np.nanmedian(y)
                     stats.at[i, "IQR(A)"] = np.abs(np.diff(np.percentile(x, [75, 25]))).item()
@@ -576,14 +574,12 @@ def pairwise_tests(
 
                 # Append to stats
                 if return_desc:
-                    if parametric == True:
-                        display(print("param"))
+                    if parametric:
                         stats.at[ic, "mean(A)"] = np.nanmean(x)
                         stats.at[ic, "mean(B)"] = np.nanmean(y)
                         stats.at[ic, "std(A)"] = np.nanstd(x, ddof=1)
                         stats.at[ic, "std(B)"] = np.nanstd(y, ddof=1)
                     else:
-                        display(print("noparam"))
                         stats.at[ic, "median(A)"] = np.nanmedian(x)
                         stats.at[ic, "median(B)"] = np.nanmedian(y)
                         stats.at[ic, "IQR(A)"] = np.abs(np.diff(np.percentile(x, [75, 25]))).item()
