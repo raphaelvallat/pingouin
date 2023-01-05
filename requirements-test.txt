@@ -1,6 +1,0 @@
-pytest>=4.6
-codecov
-pytest-cov
-openpyxl
-mpmath
-numpy<=1.23
