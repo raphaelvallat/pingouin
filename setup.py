@@ -17,7 +17,7 @@ MAINTAINER = "Raphael Vallat"
 MAINTAINER_EMAIL = "raphaelvallat9@gmail.com"
 URL = "https://pingouin-stats.org/index.html"
 DOWNLOAD_URL = "https://github.com/raphaelvallat/pingouin/"
-VERSION = "0.5.2"
+VERSION = "0.5.3"
 LICENSE = "GPL-3.0"
 PACKAGE_DATA = {"pingouin.data.icons": ["*.svg"]}
 
@@ -44,6 +44,7 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "Topic :: Scientific/Engineering :: Mathematics",
     "Operating System :: POSIX",
     "Operating System :: Unix",
