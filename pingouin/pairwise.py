@@ -121,7 +121,8 @@ def pairwise_tests(
 
         .. versionadded:: 0.2.9
     return_desc : boolean
-        If True, append group means and std to the output dataframe
+        If True, append group means and std for parametrics=True (default) to the output dataframe, if
+        paramterics=False append group median and IQR
     interaction : boolean
         If there are multiple factors and ``interaction`` is True (default),
         Pingouin will also calculate T-tests for the interaction term (see Notes).
