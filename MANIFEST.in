@@ -1,0 +1,36 @@
+# Add README, LICENSE and requirements :
+include README.rst
+include LICENSE
+include requirements.txt
+
+# Add datasets .csv files
+include pingouin/datasets/ancova.csv
+include pingouin/datasets/anova.csv
+include pingouin/datasets/anova2.csv
+include pingouin/datasets/anova2_unbalanced.csv
+include pingouin/datasets/anova3.csv
+include pingouin/datasets/anova3_unbalanced.csv
+include pingouin/datasets/blandaltman.csv
+include pingouin/datasets/chi2_independence.csv
+include pingouin/datasets/chi2_mcnemar.csv
+include pingouin/datasets/circular.csv
+include pingouin/datasets/cochran.csv
+include pingouin/datasets/cronbach_alpha.csv
+include pingouin/datasets/cronbach_wide_missing.csv
+include pingouin/datasets/datasets.csv
+include pingouin/datasets/icc.csv
+include pingouin/datasets/mediation.csv
+include pingouin/datasets/mixed_anova.csv
+include pingouin/datasets/mixed_anova_unbalanced.csv
+include pingouin/datasets/multivariate.csv
+include pingouin/datasets/pairwise_corr.csv
+include pingouin/datasets/pairwise_tests.csv
+include pingouin/datasets/pairwise_tests_missing.csv
+include pingouin/datasets/partial_corr.csv
+include pingouin/datasets/penguins.csv
+include pingouin/datasets/rm_anova.csv
+include pingouin/datasets/rm_anova2.csv
+include pingouin/datasets/rm_anova_wide.csv
+include pingouin/datasets/rm_corr.csv
+include pingouin/datasets/rm_missing.csv
+include pingouin/datasets/tips.csv

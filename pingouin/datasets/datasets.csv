@@ -1,0 +1,30 @@
+dataset,description,useful,ref
+ancova,Teaching method with family income as covariate,ANCOVA,www.real-statistics.com
+anova,Pain threshold per hair color,anova - pairwise_tukey,McClave and Dietrich 1991
+anova2,Fertilizer impact on the yield of crops,anova,www.real-statistics.com
+anova2_unbalanced,Diet and exercise impact,anova,http://onlinestatbook.com/2/analysis_of_variance/unequal.html
+anova3,Cholesterol in different groups,anova,Pingouin
+anova3_unbalanced,Cholesterol in different groups,anova,Pingouin
+blandaltman,Hypothetical data of an agreement between two methods (Method A and B). ,plot_blandaltman,https://www.biochemia-medica.com/en/journal/25/2/10.11613/BM.2015.015
+chi2_independence,Patients' attributes and heart conditions,chi2_independence,https://archive.ics.uci.edu/ml/datasets/Heart+Disease
+chi2_mcnemar,Responses to 2 athlete's foot treatments, chi2_mcnemar, http://www.stat.purdue.edu/~tqin/system101/method/method_mcnemar_sas.htm (adapted)
+circular,Orientation tuning properties of three neurons,circular statistics,Berens 2009
+cochran,Energy level across three days,Cochran,www.real-statistics.com
+cronbach_alpha,Questionnaire ratings,cronbach_alpha,www.real-statistics.com
+cronbach_wide_missing,Questionnaire rating (binary) in wide format and with missing values,cronbach_alpha,www.real-statistics.com
+icc,Wine quality rating by 4 judges,intraclass_corr,www.real-statistics.com
+mediation,Mediation analysis,linear_regression - mediation,https://data.library.virginia.edu/introduction-to-mediation-analysis/
+mixed_anova,Memory scores in two groups at three time points,mixed_anova,Pingouin
+mixed_anova_unbalanced,Memory scores in three groups at four time points,mixed_anova,Pingouin
+multivariate,Multivariate health outcomes in drug and placebo conditions,multivariate statistics,www.real-statistics.com
+pairwise_corr,Big 5 personality traits,corr - pairwise_corr,Dolan et al 2009
+pairwise_tests,Scores at 3 time points per gender,pairwise_tests,Pingouin
+pairwise_tests_missing,Scores at 3 time points with missing values,pairwise_tests,Pingouin
+partial_corr,Scores at 4 time points,partial_corr,Pingouin
+penguins,Flipper length and boody mass for different species of penguins (Adelie - Chinstrap - Gentoo),everything!,https://github.com/allisonhorst/palmerpenguins
+rm_anova,Hostility towards insect,rm_anova - mixed_anova,Ryan et al 2013
+rm_anova_wide,Scores at 4 time points,rm_anova,Pingouin
+rm_anova2,Performance of employees at two time points and three areas,rm_anova2,www.real-statistics.com
+rm_corr,Repeated measurements of pH and PaCO2,rm_corr,Bland et Altmann 1995
+rm_missing,Missing values in long-format repeated measures dataframe,rm_anova - rm_anova2,Pingouin
+tips,One waiter recorded information about each tip he received over a period of a few months working in one restaurant,regression, https://vincentarelbundock.github.io/Rdatasets/doc/reshape2/tips.html
