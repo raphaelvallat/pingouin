@@ -121,7 +121,7 @@ def pairwise_tests(
 
         .. versionadded:: 0.2.9
     return_desc : boolean
-        If True, and if parametric argument True append group means and std  or if parametric argument False append group median and IQR to the output dataframe
+        If True, append group means and std to the output dataframe
     interaction : boolean
         If there are multiple factors and ``interaction`` is True (default),
         Pingouin will also calculate T-tests for the interaction term (see Notes).
@@ -313,8 +313,6 @@ def pairwise_tests(
     if isinstance(between, (str, int)) and isinstance(within, (str, int)):
         contrast = "within_between"
         assert all([between in data.keys(), within in data.keys()])
-
-    # Create col_order
 
     # Create col_order
     if parametric == True:
