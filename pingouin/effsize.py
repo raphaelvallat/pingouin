@@ -388,7 +388,6 @@ def compute_bootci(
     if isinstance(func, str):
         func_str = "%s" % func
         if func == "pearson":
-
             assert paired, "Paired should be True if using correlation functions."
 
             def func(x, y):
