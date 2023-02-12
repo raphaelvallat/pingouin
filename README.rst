@@ -29,7 +29,7 @@
 .. figure::  https://github.com/raphaelvallat/pingouin/blob/master/docs/pictures/logo_pingouin.png
    :align:   center
 
-**Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy. Some of its main features are listed below. For a full list of available functions, please refer to the `API documentation <https://pingouin-stats.org/api.html>`_.
+**Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy. Some of its main features are listed below. For a full list of available functions, please refer to the `API documentation <https://pingouin-stats.org/build/html/api.html#>`_.
 
 1. ANOVAs: N-ways, repeated measures, mixed, ancova
 

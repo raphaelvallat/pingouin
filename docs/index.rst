@@ -27,7 +27,7 @@
 .. figure::  /pictures/logo_pingouin.png
   :align:   center
 
-**Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy. Some of its main features are listed below. For a full list of available functions, please refer to the `API documentation <https://pingouin-stats.org/api.html>`_.
+**Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy. Some of its main features are listed below. For a full list of available functions, please refer to the `API documentation <https://pingouin-stats.org/build/html/api.html#>`_.
 
 1. ANOVAs: N-ways, repeated measures, mixed, ancova
 
@@ -93,7 +93,7 @@ or conda
 
   conda install -c conda-forge pingouin
 
-Pingouin is under heavy development and it is likely that bugs/mistakes will be discovered in future releases. Please always make sure that you are using the latest version of Pingouin (new releases are `frequent <https://pingouin-stats.org/changelog.html>`_).
+Pingouin is under heavy development and it is likely that bugs/mistakes will be discovered in future releases. Please always make sure that you are using the latest version of Pingouin (new releases are `frequent <https://pingouin-stats.org/build/html/changelog.html>`_).
 Whenever a new release is out there, you can upgrade your version by typing the following line in a terminal window:
 
 .. code-block:: shell
