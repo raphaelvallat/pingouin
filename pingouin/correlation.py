@@ -637,6 +637,10 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
     n_outliers = sum(outliers) if "outliers" in locals() else 0
     n_clean = n - n_outliers
 
+    # Rounding errors caused an r value marginally beyond 1
+    if abs(r) > 1 and np.isclose(abs(r), 1):
+        r = np.clip(r, -1, 1)
+
     # Compute the parametric 95% confidence interval and power
     if abs(r) == 1:
         ci = [r, r]
