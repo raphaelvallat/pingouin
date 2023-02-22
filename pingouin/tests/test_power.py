@@ -7,7 +7,7 @@ from pingouin.power import (
     power_anova,
     power_rm_anova,
     power_corr,
-    # power_chi2,
+    power_chi2,
 )
 
 
@@ -231,14 +231,13 @@ class TestPower(TestCase):
             power_corr(r=0.5, n=4)
             power_corr(power=0.80, n=4)
 
-    # def test_power_chi2(self):
-    #     """Test function power_chi2.
-    #     Values are compared to the pwr R package.
-    #     """
-    #     w = 0.30
-    #     # Power
-    #     assert np.isclose(power_chi2(dof=1, w=0.3, n=20), 0.2686618)
-    #     assert np.isclose(power_chi2(dof=2, w=0.3, n=100), 0.7706831)
+    def test_power_chi2(self):
+        """Test function power_chi2.
+        Values are compared to the pwr R package.
+        """
+        # Power
+        assert np.isclose(power_chi2(dof=1, w=0.3, n=20), 0.2686618)
+        assert np.isclose(power_chi2(dof=2, w=0.3, n=100), 0.7706831)
     #     # Sample size
     #     assert np.isclose(power_chi2(dof=1, w=0.3, power=0.80), 87.20954)
     #     assert np.isclose(power_chi2(dof=3, w=0.3, power=0.80), 121.1396)
@@ -251,4 +250,4 @@ class TestPower(TestCase):
     #     )
     #     # Error
     #     with pytest.raises(ValueError):
-    #         power_chi2(1, w=w)
+    #         power_chi2(1, w=0.3)
