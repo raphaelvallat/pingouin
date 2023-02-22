@@ -244,14 +244,14 @@ class TestPower(TestCase):
         assert np.isclose(power_chi2(dof=3, w=0.3, power=0.80), 121.1396)
 
         # Effect size
-        # assert np.isclose(power_chi2(dof=4, n=50, power=0.80), 0.4885751)
-        # assert np.isclose(power_chi2(dof=1, n=50, power=0.80), 0.3962023)
+        assert np.isclose(power_chi2(dof=4, n=50, power=0.80), 0.4885751)
+        assert np.isclose(power_chi2(dof=1, n=50, power=0.80), 0.3962023)
 
         # Alpha
         assert np.isclose(
             power_chi2(dof=1, w=0.3, n=100, power=0.80, alpha=None), 0.03089736, atol=1e-03
         )
 
-    #     # Error
-    #     with pytest.raises(ValueError):
-    #         power_chi2(1, w=0.3)
+        # Error
+        with pytest.raises(ValueError):
+            power_chi2(1, w=0.3)

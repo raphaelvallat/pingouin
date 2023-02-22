@@ -1058,7 +1058,7 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
             return func(w, n, power, alpha) - power
 
         try:
-            return brenth(_eval_w, 1e-10, 1e07, args=(n, power, alpha))
+            return brenth(_eval_w, 1e-10, 100, args=(n, power, alpha))
         except ValueError:  # pragma: no cover
             return np.nan
 
