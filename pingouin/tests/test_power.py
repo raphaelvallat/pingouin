@@ -238,9 +238,11 @@ class TestPower(TestCase):
         # Power
         assert np.isclose(power_chi2(dof=1, w=0.3, n=20), 0.2686618)
         assert np.isclose(power_chi2(dof=2, w=0.3, n=100), 0.7706831)
-    #     # Sample size
-    #     assert np.isclose(power_chi2(dof=1, w=0.3, power=0.80), 87.20954)
-    #     assert np.isclose(power_chi2(dof=3, w=0.3, power=0.80), 121.1396)
+
+        # Sample size
+        assert np.isclose(power_chi2(dof=1, w=0.3, power=0.80), 87.20954)
+        assert np.isclose(power_chi2(dof=3, w=0.3, power=0.80), 121.1396)
+
     #     # Effect size
     #     assert np.isclose(power_chi2(dof=4, n=50, power=0.80), 0.4885751)
     #     assert np.isclose(power_chi2(dof=1, n=50, power=0.80), 0.3962023)
