@@ -1165,7 +1165,7 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     # Q allows to quote variable that do not meet Python variable name rule
     # e.g. if variable is "weight.in.kg" or "2A"
     assert dv not in ["C", "Q"], "`dv` must not be 'C' or 'Q'."
-    assert fac not in ["C", "Q"], "`fac` must not be 'C' or 'Q'."
+    assert all(fac not in ["C", "Q"] for fac in between), "`between` must not contain 'C' or 'Q'."
     formula = "Q('%s') ~ " % dv
     for fac in between:
         formula += "C(Q('%s'), Sum) * " % fac
@@ -1711,6 +1711,9 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
 
     # Fit ANCOVA model
     # formula = dv ~ 1 + between + covar1 + covar2 + ...
+    assert dv not in ["C", "Q"], "`dv` must not be 'C' or 'Q'."
+    assert between not in ["C", "Q"], "`between` must not be 'C' or 'Q'."
+    assert all(c not in ["C", "Q"] for c in covar), "`covar` must not contain 'C' or 'Q'."
     formula = "Q('%s') ~ C(Q('%s'))" % (dv, between)
     for c in covar:
         formula += " + Q('%s')" % (c)
