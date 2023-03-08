@@ -1164,6 +1164,8 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     # C marks the data as categorical
     # Q allows to quote variable that do not meet Python variable name rule
     # e.g. if variable is "weight.in.kg" or "2A"
+    assert dv not in ["C", "Q"], "`dv` must not be 'C' or 'Q'."
+    assert fac not in ["C", "Q"], "`fac` must not be 'C' or 'Q'."
     formula = "Q('%s') ~ " % dv
     for fac in between:
         formula += "C(Q('%s'), Sum) * " % fac
