@@ -1001,6 +1001,9 @@ def plot_rm_corr(
     # C marks the data as categorical
     # Q allows to quote variable that do not meet Python variable name rule
     # e.g. if variable is "weight.in.kg" or "2A"
+    assert x not in ["C", "Q"], "`x` must not be 'C' or 'Q'."
+    assert y not in ["C", "Q"], "`y` must not be 'C' or 'Q'."
+    assert subject not in ["C", "Q"], "`subject` must not be 'C' or 'Q'."
     formula = "Q('%s') ~ C(Q('%s')) + Q('%s')" % (y, subject, x)
     model = ols(formula, data=data).fit()
 
