@@ -47,6 +47,7 @@ def pairwise_tests(
     return_desc=False,
     interaction=True,
     within_first=True,
+    **kwargs
 ):
     """Pairwise tests.
 
@@ -133,6 +134,9 @@ def pairwise_tests(
         and between * within otherwise.
 
         .. versionadded:: 0.3.6
+    **kwargs : optional
+    Optional argument(s) passed to the lower-level pingouin functions, such as pg.wilcoxon
+    or pg.mwu
 
     Returns
     -------
@@ -396,17 +400,17 @@ def pairwise_tests(
             if parametric:
                 stat_name = "T"
                 df_ttest = ttest(
-                    x, y, paired=paired, alternative=alternative, correction=correction
+                    x, y, paired=paired, alternative=alternative, correction=correction, **kwargs
                 )
                 stats.at[i, "BF10"] = df_ttest.at["T-test", "BF10"]
                 stats.at[i, "dof"] = df_ttest.at["T-test", "dof"]
             else:
                 if paired:
                     stat_name = "W-val"
-                    df_ttest = wilcoxon(x, y, alternative=alternative)
+                    df_ttest = wilcoxon(x, y, alternative=alternative, **kwargs)
                 else:
                     stat_name = "U-val"
-                    df_ttest = mwu(x, y, alternative=alternative)
+                    df_ttest = mwu(x, y, alternative=alternative, **kwargs)
 
             options.update(old_options)  # restore options
 
