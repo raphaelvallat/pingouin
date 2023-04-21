@@ -497,6 +497,7 @@ def pairwise_tests(
                 correction=correction,
                 nan_policy=nan_policy,
                 return_desc=return_desc,
+                **kwargs
             )
             stats = pd.concat([stats, pt], axis=0, ignore_index=True, sort=False)
 
@@ -550,17 +551,18 @@ def pairwise_tests(
                 if parametric:
                     stat_name = "T"
                     df_ttest = ttest(
-                        x, y, paired=paired, alternative=alternative, correction=correction
+                        x, y, paired=paired, alternative=alternative, correction=correction,
+                        **kwargs
                     )
                     stats.at[ic, "BF10"] = df_ttest.at["T-test", "BF10"]
                     stats.at[ic, "dof"] = df_ttest.at["T-test", "dof"]
                 else:
                     if paired:
                         stat_name = "W-val"
-                        df_ttest = wilcoxon(x, y, alternative=alternative)
+                        df_ttest = wilcoxon(x, y, alternative=alternative, **kwargs)
                     else:
                         stat_name = "U-val"
-                        df_ttest = mwu(x, y, alternative=alternative)
+                        df_ttest = mwu(x, y, alternative=alternative, **kwargs)
 
                 options.update(old_options)  # restore options
 
