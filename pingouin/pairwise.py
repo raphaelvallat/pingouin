@@ -475,7 +475,7 @@ def pairwise_tests(
             # designs. Indeed, a similar groupby is applied by default on
             # each within-subject factor of a two-way repeated measures design.
             if all([agg[i], marginal]):
-                tmp = data.groupby([subject, f], as_index=False, observed=True, sort=True).mean()
+                tmp = data.groupby([subject, f], as_index=False, observed=True, sort=True).mean(numeric_only=True)
             else:
                 tmp = data
             pt = pairwise_tests(
