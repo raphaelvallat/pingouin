@@ -145,9 +145,9 @@ def _postprocess_dataframe(df):
 
 def _get_round_setting_for(row, col):
     keys_to_check = (
-        "round.cell.[{}]x[{}]".format(row, col),
-        "round.column.{}".format(col),
-        "round.row.{}".format(row),
+        f"round.cell.[{row}]x[{col}]",
+        f"round.column.{col}",
+        f"round.row.{row}",
     )
     for key in keys_to_check:
         try:
@@ -397,11 +397,11 @@ def _is_statsmodels_installed(raise_error=False):
         import statsmodels  # noqa
 
         is_installed = True
-    except IOError:  # pragma: no cover
+    except OSError:  # pragma: no cover
         is_installed = False
     # Raise error (if needed) :
     if raise_error and not is_installed:  # pragma: no cover
-        raise IOError("statsmodels needs to be installed. Please use `pip " "install statsmodels`.")
+        raise OSError("statsmodels needs to be installed. Please use `pip " "install statsmodels`.")
     return is_installed
 
 
@@ -411,11 +411,11 @@ def _is_sklearn_installed(raise_error=False):
         import sklearn  # noqa
 
         is_installed = True
-    except IOError:  # pragma: no cover
+    except OSError:  # pragma: no cover
         is_installed = False
     # Raise error (if needed) :
     if raise_error and not is_installed:  # pragma: no cover
-        raise IOError("sklearn needs to be installed. Please use `pip " "install scikit-learn`.")
+        raise OSError("sklearn needs to be installed. Please use `pip " "install scikit-learn`.")
     return is_installed
 
 
@@ -425,9 +425,9 @@ def _is_mpmath_installed(raise_error=False):
         import mpmath  # noqa
 
         is_installed = True
-    except IOError:  # pragma: no cover
+    except OSError:  # pragma: no cover
         is_installed = False
     # Raise error (if needed) :
     if raise_error and not is_installed:  # pragma: no cover
-        raise IOError("mpmath needs to be installed. Please use `pip " "install mpmath`.")
+        raise OSError("mpmath needs to be installed. Please use `pip " "install mpmath`.")
     return is_installed
