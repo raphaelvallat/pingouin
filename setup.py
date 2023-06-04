@@ -24,7 +24,7 @@ PACKAGE_DATA = {"pingouin.data.icons": ["*.svg"]}
 INSTALL_REQUIRES = [
     "numpy>=1.19",
     "scipy>=1.7",
-    "pandas>=1.0",
+    "pandas>=1.1",
     "matplotlib>=3.0.2",
     "seaborn>=0.11",
     "statsmodels>=0.13",
@@ -41,10 +41,10 @@ PACKAGES = [
 
 CLASSIFIERS = [
     "Intended Audience :: Science/Research",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering :: Mathematics",
     "Operating System :: POSIX",
     "Operating System :: Unix",
