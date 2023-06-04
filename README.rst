@@ -92,7 +92,7 @@ In addition, some functions require :
 * `Scikit-learn <https://scikit-learn.org/>`_
 * `Mpmath <http://mpmath.org/>`_
 
-Pingouin is a Python 3 package and is currently tested for Python 3.7-3.10. It does not support Python 2.
+Pingouin is a Python 3 package and is currently tested for Python 3.8-3.10. It does not support Python 2.
 
 User installation
 -----------------
