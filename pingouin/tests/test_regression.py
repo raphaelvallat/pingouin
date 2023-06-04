@@ -349,7 +349,7 @@ class TestRegression(TestCase):
         # R: >>> glm("male ~ body_mass_kg + species", family=binomial, ...)
         #    >>> confint.default(model)  # Wald CI
         # See https://stats.stackexchange.com/a/275421/253579
-        data_dum = pd.get_dummies(data, columns=["species"], drop_first=True)
+        data_dum = pd.get_dummies(data, columns=["species"], drop_first=True, dtype=float)
         X = data_dum[["body_mass_kg", "species_Chinstrap", "species_Gentoo"]]
         y = data_dum["male"]
         lom = logistic_regression(X, y, as_dataframe=False)

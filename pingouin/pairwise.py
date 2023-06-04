@@ -475,7 +475,9 @@ def pairwise_tests(
             # designs. Indeed, a similar groupby is applied by default on
             # each within-subject factor of a two-way repeated measures design.
             if all([agg[i], marginal]):
-                tmp = data.groupby([subject, f], as_index=False, observed=True, sort=True).mean()
+                tmp = data.groupby([subject, f], as_index=False, observed=True, sort=True).mean(
+                    numeric_only=True
+                )
             else:
                 tmp = data
             pt = pairwise_tests(
@@ -880,7 +882,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     # See https://github.com/raphaelvallat/pingouin/issues/111
     labels = np.array(list(grp.groups.keys()))
     n = grp.count().to_numpy()
-    gmeans = grp.mean().to_numpy()
+    gmeans = grp.mean(numeric_only=True).to_numpy()
     gvar = aov.at[1, "MS"] / n
 
     # Pairwise combinations
@@ -1046,8 +1048,8 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     # See https://github.com/raphaelvallat/pingouin/issues/111
     labels = np.array(list(grp.groups.keys()))
     n = grp.count().to_numpy()
-    gmeans = grp.mean().to_numpy()
-    gvars = grp.var().to_numpy()
+    gmeans = grp.mean(numeric_only=True).to_numpy()
+    gvars = grp.var().to_numpy()  # numeric_only=True added in pandas 1.5, set to False in 2.0
 
     # Pairwise combinations
     g1, g2 = np.array(list(combinations(np.arange(ng), 2))).T
@@ -1425,7 +1427,7 @@ def pairwise_corr(
             [c in keys for c in covar]
         ), "Covariate(s) are either not in data or not numeric."
         # And we make sure that X or Y does not contain covar
-        stats = stats[~stats[["X", "Y"]].isin(covar).any(1)]
+        stats = stats[~stats[["X", "Y"]].isin(covar).any(axis=1)]
         stats = stats.reset_index(drop=True)
         if stats.shape[0] == 0:
             raise ValueError(
