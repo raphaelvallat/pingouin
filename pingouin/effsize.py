@@ -598,7 +598,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     # Check input and output type
     for inp in [it, ot]:
         if not _check_eftype(inp):
-            err = "Could not interpret input '{}'".format(inp)
+            err = f"Could not interpret input '{inp}'"
             raise ValueError(err)
     if it not in ["pointbiserialr", "cohen"]:
         raise ValueError("Input type must be 'cohen' or 'pointbiserialr'")
@@ -768,7 +768,7 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
     """
     # Check arguments
     if not _check_eftype(eftype):
-        err = "Could not interpret input '{}'".format(eftype)
+        err = f"Could not interpret input '{eftype}'"
         raise ValueError(err)
 
     x = np.asarray(x)
@@ -862,7 +862,7 @@ def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype="cohen"):
     0.7487767802667672
     """
     if not _check_eftype(eftype):
-        err = "Could not interpret input '{}'".format(eftype)
+        err = f"Could not interpret input '{eftype}'"
         raise ValueError(err)
 
     if not isinstance(tval, float):
