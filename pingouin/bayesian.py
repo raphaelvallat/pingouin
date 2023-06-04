@@ -300,7 +300,7 @@ def bayesfactor_pearson(r, n, alternative="two-sided", method="ly", kappa=1.0):
             )
 
         integr = quad(fun, 0, np.inf, args=(r, n))[0]
-        bf10 = np.sqrt((n / 2)) / gamma(1 / 2) * integr
+        bf10 = np.sqrt(n / 2) / gamma(1 / 2) * integr
 
     else:
         # Ly et al, 2016. Analytical solution.
