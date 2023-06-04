@@ -727,7 +727,7 @@ def logistic_regression(
     first level of our categorical variable (species = Adelie) which will be
     used as the reference level:
 
-    >>> df = pd.get_dummies(df, columns=['species'], drop_first=True)
+    >>> df = pd.get_dummies(df, columns=['species'], dtype=float, drop_first=True)
     >>> X = df[['body_mass_kg', 'species_Chinstrap', 'species_Gentoo']]
     >>> y = df['male']
     >>> lom = pg.logistic_regression(X, y, remove_na=True)
