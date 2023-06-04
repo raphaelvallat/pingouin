@@ -882,7 +882,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     # See https://github.com/raphaelvallat/pingouin/issues/111
     labels = np.array(list(grp.groups.keys()))
     n = grp.count().to_numpy()
-    gmeans = grp.mean().to_numpy()
+    gmeans = grp.mean(numeric_only=True).to_numpy()
     gvar = aov.at[1, "MS"] / n
 
     # Pairwise combinations
@@ -1048,8 +1048,8 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     # See https://github.com/raphaelvallat/pingouin/issues/111
     labels = np.array(list(grp.groups.keys()))
     n = grp.count().to_numpy()
-    gmeans = grp.mean().to_numpy()
-    gvars = grp.var().to_numpy()
+    gmeans = grp.mean(numeric_only=True).to_numpy()
+    gvars = grp.var().to_numpy()  # numeric_only=True added in pandas 1.5, set to False in 2.0
 
     # Pairwise combinations
     g1, g2 = np.array(list(combinations(np.arange(ng), 2))).T

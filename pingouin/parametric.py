@@ -552,13 +552,13 @@ def rm_anova(
     grandmean = data[dv].mean()
 
     # Calculate sums of squares
-    ss_with = ((grp_with.mean() - grandmean) ** 2 * grp_with.count()).sum()
+    ss_with = ((grp_with.mean(numeric_only=True) - grandmean) ** 2 * grp_with.count()).sum()
     ss_resall = grp_with.apply(lambda x: (x - x.mean()) ** 2).sum()
     # sstotal = sstime + ss_resall =  sstime + (sssubj + sserror)
     # ss_total = ((data[dv] - grandmean)**2).sum()
     # We can further divide the residuals into a within and between component:
     grp_subj = data.groupby(subject, observed=True)[dv]
-    ss_resbetw = n_rm * np.sum((grp_subj.mean() - grandmean) ** 2)
+    ss_resbetw = n_rm * np.sum((grp_subj.mean(numeric_only=True) - grandmean) ** 2)
     ss_reswith = ss_resall - ss_resbetw
 
     # Calculate degrees of freedom
@@ -702,12 +702,12 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     # Groupby means
     # I think that observed=True is actually not needed here since we have already used
     # `observed=True` in pivot_table.
-    grp_s = data.groupby(subject, observed=True)[dv].mean()
-    grp_a = data.groupby([a], observed=True)[dv].mean()
-    grp_b = data.groupby([b], observed=True)[dv].mean()
-    grp_ab = data.groupby([a, b], observed=True)[dv].mean()
-    grp_as = data.groupby([a, subject], observed=True)[dv].mean()
-    grp_bs = data.groupby([b, subject], observed=True)[dv].mean()
+    grp_s = data.groupby(subject, observed=True)[dv].mean(numeric_only=True)
+    grp_a = data.groupby([a], observed=True)[dv].mean(numeric_only=True)
+    grp_b = data.groupby([b], observed=True)[dv].mean(numeric_only=True)
+    grp_ab = data.groupby([a, b], observed=True)[dv].mean(numeric_only=True)
+    grp_as = data.groupby([a, subject], observed=True)[dv].mean(numeric_only=True)
+    grp_bs = data.groupby([b, subject], observed=True)[dv].mean(numeric_only=True)
 
     # Sums of squares
     ss_tot = np.sum((data[dv] - mu) ** 2)
@@ -991,7 +991,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
     # Calculate sums of squares
     grp = data.groupby(between, observed=True, group_keys=False)[dv]
     # Between effect
-    ssbetween = ((grp.mean() - data[dv].mean()) ** 2 * grp.count()).sum()
+    ssbetween = ((grp.mean(numeric_only=True) - data[dv].mean()) ** 2 * grp.count()).sum()
     # Within effect (= error between)
     #  = (grp.var(ddof=0) * grp.count()).sum()
     sserror = grp.transform(lambda x: (x - x.mean()) ** 2).sum()
@@ -1346,8 +1346,8 @@ def welch_anova(data=None, dv=None, between=None):
 
     # Sums of squares (regular and adjusted)
     ss_res = grp.apply(lambda x: (x - x.mean()) ** 2).sum()
-    ss_bet = ((grp.mean() - data[dv].mean()) ** 2 * grp.count()).sum()
-    ss_betadj = np.sum(weights * np.square(grp.mean() - adj_grandmean))
+    ss_bet = ((grp.mean(numeric_only=True) - data[dv].mean()) ** 2 * grp.count()).sum()
+    ss_betadj = np.sum(weights * np.square(grp.mean(numeric_only=True) - adj_grandmean))
     ms_betadj = ss_betadj / ddof1
 
     # Calculate lambda, F-value, p-value and np2
