@@ -594,7 +594,7 @@ def rm_anova(
 
     # If required, apply Greenhouse-Geisser correction for sphericity
     if correction:
-        corr_ddof1, corr_ddof2 = [np.maximum(d * eps, 1.0) for d in (ddof1, ddof2)]
+        corr_ddof1, corr_ddof2 = (np.maximum(d * eps, 1.0) for d in (ddof1, ddof2))
         p_corr = f(corr_ddof1, corr_ddof2).sf(fval)
 
     # Create output dataframe
@@ -781,9 +781,9 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     eps_ab = epsilon(data_piv, correction="gg")
 
     # Greenhouse-Geisser correction
-    df_a_c, df_as_c = [np.maximum(d * eps_a, 1.0) for d in (df_a, df_as)]
-    df_b_c, df_bs_c = [np.maximum(d * eps_b, 1.0) for d in (df_b, df_bs)]
-    df_ab_c, df_abs_c = [np.maximum(d * eps_ab, 1.0) for d in (df_ab, df_abs)]
+    df_a_c, df_as_c = (np.maximum(d * eps_a, 1.0) for d in (df_a, df_as))
+    df_b_c, df_bs_c = (np.maximum(d * eps_b, 1.0) for d in (df_b, df_bs))
+    df_ab_c, df_abs_c = (np.maximum(d * eps_ab, 1.0) for d in (df_ab, df_abs))
     p_a_corr = f(df_a_c, df_as_c).sf(f_a)
     p_b_corr = f(df_b_c, df_bs_c).sf(f_b)
     p_ab_corr = f(df_ab_c, df_abs_c).sf(f_ab)
@@ -1714,7 +1714,7 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     assert dv not in ["C", "Q"], "`dv` must not be 'C' or 'Q'."
     assert between not in ["C", "Q"], "`between` must not be 'C' or 'Q'."
     assert all(c not in ["C", "Q"] for c in covar), "`covar` must not contain 'C' or 'Q'."
-    formula = "Q('%s') ~ C(Q('%s'))" % (dv, between)
+    formula = f"Q('{dv}') ~ C(Q('{between}'))"
     for c in covar:
         formula += " + Q('%s')" % (c)
     model = ols(formula, data=data).fit()
