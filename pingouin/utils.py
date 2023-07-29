@@ -297,8 +297,6 @@ def _flatten_list(x, include_tuple=False):
     # If x is not iterable, return x
     if not isinstance(x, collections.abc.Iterable):
         return x
-    # Remove None
-    x = list(filter(None.__ne__, x))
     # Initialize empty output variable
     result = []
     # Loop over items in x
@@ -315,6 +313,8 @@ def _flatten_list(x, include_tuple=False):
                     result.append(el)
         else:
             result.append(el)
+    # Remove None from output
+    result = [r for r in result if r is not None]
     return result
 
 
