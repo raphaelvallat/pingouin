@@ -5,11 +5,11 @@ import pandas as pd
 
 from scipy.stats.contingency import expected_freq
 from scipy.stats import power_divergence, binom, chi2 as sp_chi2
-
+from scipy.stats import barnard_exact, boschloo_exact, fisher_exact
 from pingouin import power_chi2, _postprocess_dataframe
 
 
-__all__ = ["chi2_independence", "chi2_mcnemar", "dichotomous_crosstab"]
+__all__ = ["chi2_independence", "chi2_mcnemar", "chi2_exact","dichotomous_crosstab"]
 
 
 ###############################################################################
@@ -343,6 +343,188 @@ def chi2_mcnemar(data, x, y, correction=True):
     stats = pd.DataFrame(stats, index=["mcnemar"])
 
     return observed, _postprocess_dataframe(stats)
+
+
+def chi2_exact(data, x, y, method='fisher', **kwargs):
+    """
+    Perform a exact test on a 2x2 contingency table.
+
+    Parameters
+    ----------
+    data : :py:class:`pandas.DataFrame`
+        The dataframe containing the ocurrences for the test.
+    x, y : string
+        The variables names for the exact test. Must be names of columns
+        in ``data``.
+    method : string
+        Methods of exact test. Options include``fisher``,``barnard``,``boschloo``.
+
+    Returns
+    -------
+    expected : :py:class:`pandas.DataFrame`
+        The expected contingency table of frequencies.
+    observed : :py:class:`pandas.DataFrame`
+        The (corrected or not) observed contingency table of frequencies.
+    stats : :py:class:`pandas.DataFrame`
+        The test summary, containing four columns:
+
+        * ``'alternative'``: Defines the alternative hypothesis
+        * ``'odds ratio'``: The prior odds ratio
+        * ``'pval'``: The p-value of the test
+
+    Notes
+    -----
+    *The null hypothesis is that the true odds ratio of the populations underlying
+    the observations is one, and the observations were sampled from these populations
+    under a condition: the marginals of the resulting table must equal those of the 
+    observed table. The statistic returned is the unconditional maximum likelihood 
+    estimate of the odds ratio, and the p-value is the probability under the null 
+    hypothesis of obtaining a table at least as extreme as the one that was actually 
+    observed. There are other possible choices of statistic and two-sided p-value 
+    definition associated with Fisher’s exact test;*
+    
+    *Barnard’s test is an exact test used in the analysis of contingency tables. 
+    It examines the association of two categorical variables, and is a more powerful
+    alternative than Fisher’s exact test for 2x2 contingency tables.*
+    
+    *Boschloo’s test is an exact test used in the analysis of contingency tables.
+    It examines the association of two categorical variables, and is a uniformly 
+    more powerful alternative to Fisher’s exact test for 2x2 contingency tables.*
+
+    References
+    ----------
+    * Fisher, Sir Ronald A, “The Design of Experiments: Mathematics of
+      a Lady Tasting Tea.” ISBN 978-0-486-41151-4, 1935.
+
+    * “Fisher’s exact test”, https://en.wikipedia.org/wiki/Fisher’s_exact_test
+
+    * Emma V. Low et al. “Identifying the lowest effective dose of acetazolamide
+      for the prophylaxis of acute mountain sickness: systematic review and meta-analysis
+      .” BMJ, 345, DOI:10.1136/bmj.e6779, 2012.
+      
+    * Barnard, G. A. “Significance Tests for 2x2 Tables”. Biometrika. 34.1/2 (1947):
+      123-138. DOI:dpgkg3
+
+    * Mehta, Cyrus R., and Pralay Senchaudhuri. “Conditional versus unconditional
+      exact tests for comparing two binomials.” Cytel Software Corporation 675 (2003): 1-5.
+      
+    * “Wald Test”. Wikipedia. https://en.wikipedia.org/wiki/Wald_test
+      
+    * R.D. Boschloo. “Raised conditional level of significance for the 2 x 2-table
+      when testing the equality of two probabilities”, Statistica Neerlandica, 24(1), 1970
+
+    * “Boschloo’s test”, Wikipedia, https://en.wikipedia.org/wiki/Boschloo%27s_test
+    
+    * Lise M. Saari et al. “Employee attitudes and job satisfaction”, Human Resource
+      Management, 43(4), 395-407, 2004, DOI:10.1002/hrm.20032.
+
+    Examples
+    --------
+    Let's see if gender is a good categorical predictor for the presence of
+    heart disease.
+
+    >>> import pingouin as pg
+    >>> data = pg.read_dataset('chi2_independence')
+    >>> data['sex'].value_counts(ascending=True)
+    0     96
+    1    207
+    Name: sex, dtype: int64
+
+    If gender is not a good predictor for heart disease, we should expect the
+    same 96:207 ratio across the target classes.
+
+    >>> expected, observed, stats = pg.chi2_exact(data, x='sex', y='target', method='fisher')
+    >>> expected
+    target          0           1
+    sex
+    0       43.722772   52.277228
+    1       94.277228  112.722772
+
+    Let's see what the data tells us.
+
+    >>> observed
+    target      0     1
+    sex
+    0        24.5  71.5
+    1       113.5  93.5
+
+    The proportion is lower on the class 0 and higher on the class 1. The
+    tests should be sensitive to this difference.
+
+    >>> stats.round(3)
+              alternative  odds ratio    pval
+    0           two-sided       0.272     0.0
+    1                less       0.272     0.0
+    2             greater       0.272     1.0
+
+    The p-value is very small when the alternative is two-sided and less. 
+    suggests that there is a significant relationship between gender and 
+    heart disease, and that women are less likely to suffer from heart disease
+    than men.
+    """
+    # Python code inspired by SciPy's fisher_exact,barnard_exact,boschloo_exact
+    assert isinstance(data, pd.DataFrame), "data must be a pandas DataFrame."
+    assert isinstance(x, (str, int)), "x must be a string or int."
+    assert isinstance(y, (str, int)), "y must be a string or int."
+    assert all(col in data.columns for col in (x, y)), "columns are not in dataframe."
+    assert isinstance(method, str), "method must be a string and must be one of 'fisher', 'barnard', 'boschloo'."
+
+    observed = pd.crosstab(data[x], data[y])
+
+    if observed.size == 0:
+        raise ValueError("No data; observed has size 0.")
+
+    expected = pd.DataFrame(expected_freq(observed), index=observed.index, columns=observed.columns)
+    
+    stats = []
+    alternatives = [
+        "two-sided",
+        "less",
+        "greater",
+    ]
+    
+    if method == 'fisher':
+        for alternative in alternatives:
+            odds, pval = fisher_exact(table = observed, alternative = alternative)
+            stats.append(
+            {
+                "alternative": alternative,
+                "odds ratio": odds,
+                "pval": pval,
+            }
+        )
+            
+        stats = pd.DataFrame(stats)[["alternative", "odds ratio", "pval"]]
+
+    elif method == 'barnard':
+        for alternative in alternatives:
+            res = barnard_exact(table = observed, alternative = alternative, **kwargs)
+            odds, pval = (res.statistic, res.pvalue)
+            stats.append(
+            {
+                "alternative": alternative,
+                "odds ratio": odds,
+                "pval": pval,
+            }
+        )
+            
+        stats = pd.DataFrame(stats)[["alternative", "odds ratio", "pval"]]
+    
+    elif method == 'boschloo':
+        for alternative in alternatives:
+            res = boschloo_exact(table = observed, alternative = alternative, **kwargs)
+            odds, pval = (res.statistic, res.pvalue)
+            stats.append(
+            {
+                "alternative": alternative,
+                "odds ratio": odds,
+                "pval": pval,
+            }
+        )
+            
+        stats = pd.DataFrame(stats)[["alternative", "odds ratio", "pval"]]
+        
+    return expected, observed, _postprocess_dataframe(stats)
 
 
 ###############################################################################
