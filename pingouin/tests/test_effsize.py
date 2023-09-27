@@ -125,7 +125,6 @@ class TestEffsize(TestCase):
         assert ci_p[0] == 2.98 and ci_p[1] == 3.21
         assert ci_c[0] == 2.98 and round(ci_c[1], 1) == 3.2
 
-
         # 3. Univariate custom function: skewness
         from scipy.stats import skew
 
