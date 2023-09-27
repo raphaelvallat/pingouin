@@ -356,14 +356,14 @@ def compute_bootci(
     ...       f"{bt.mean():.4f} ± {bt.std():.4f}")
     The bootstrap distribution has 10000 samples. The mean and standard 0.8807 ± 0.1704
     """
-    from inspect import isfunction
+    from inspect import isfunction, isroutine
     from scipy.stats import norm
 
     # Check other arguments
     assert isinstance(confidence, float)
     assert 0 < confidence < 1, "confidence must be between 0 and 1."
     assert method in ["norm", "normal", "percentile", "per", "cpercentile", "cper"]
-    assert isfunction(func) or isinstance(func, str), (
+    assert isfunction(func) or isinstance(func, str) or isroutine(func), (
         "func must be a function (e.g. np.mean, custom function) or a string (e.g. 'pearson'). "
         "See documentation for more details."
     )
