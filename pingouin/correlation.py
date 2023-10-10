@@ -412,7 +412,7 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
         * ``'n'``: Sample size (after removal of missing values)
         * ``'outliers'``: number of outliers, only if a robust method was used
         * ``'r'``: Correlation coefficient
-        * ``'CI95'``: 95% parametric confidence intervals around :math:`r`
+        * ``'CI95%'``: 95% parametric confidence intervals around :math:`r`
         * ``'p-val'``: p-value
         * ``'BF10'``: Bayes Factor of the alternative hypothesis (only for Pearson correlation)
         * ``'power'``: achieved power of the test with an alpha of 0.05.
