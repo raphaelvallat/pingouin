@@ -1234,9 +1234,8 @@ def welch_anova(data=None, dv=None, between=None):
         ANOVA summary:
 
         * ``'Source'``: Factor names
-        * ``'SS'``: Sums of squares
-        * ``'DF'``: Degrees of freedom
-        * ``'MS'``: Mean squares
+        * ``'ddof1'``: Numerator degrees of freedom
+        * ``'ddof2'``: Denominator degrees of freedom
         * ``'F'``: F-values
         * ``'p-unc'``: uncorrected p-values
         * ``'np2'``: Partial eta-squared
@@ -1354,8 +1353,9 @@ def welch_anova(data=None, dv=None, between=None):
     lamb = (3 * np.sum((1 / (grp.count() - 1)) * (1 - (weights / weights.sum())) ** 2)) / (
         r**2 - 1
     )
+    ddof2 = 1 / lamb
     fval = ms_betadj / (1 + (2 * lamb * (r - 2)) / 3)
-    pval = f.sf(fval, ddof1, 1 / lamb)
+    pval = f.sf(fval, ddof1, ddof2)
     np2 = ss_bet / (ss_bet + ss_res)
 
     # Create output dataframe
@@ -1363,7 +1363,7 @@ def welch_anova(data=None, dv=None, between=None):
         {
             "Source": between,
             "ddof1": ddof1,
-            "ddof2": 1 / lamb,
+            "ddof2": ddof2,
             "F": fval,
             "p-unc": pval,
             "np2": np2,
