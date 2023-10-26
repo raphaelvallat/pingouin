@@ -981,7 +981,7 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
     dof : float
         Degree of freedom (depends on the chosen test).
     w : float
-        Effect size.
+        Cohen's w effect size [1]_.
     n : int
         Total number of observations.
     power : float
@@ -1023,6 +1023,10 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
 
     Results have been tested against GPower and the
     `pwr <https://cran.r-project.org/web/packages/pwr/pwr.pdf>`_ R package.
+
+    References
+    ----------
+    .. [1] Cohen, J. (1988). Statistical power analysis for the behavioral sciences (2nd ed.).
 
     Examples
     --------
