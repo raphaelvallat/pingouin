@@ -836,12 +836,13 @@ def partial_corr(
         raise ValueError("Cannot specify both covar and {x,y}_covar.")
     if x_covar is not None and y_covar is not None:
         raise ValueError("Cannot specify both x_covar and y_covar.")
-    assert x != covar, "x and covar must be independent"
-    assert y != covar, "y and covar must be independent"
     assert x != y, "x and y must be independent"
     if isinstance(covar, list):
         assert x not in covar, "x and covar must be independent"
         assert y not in covar, "y and covar must be independent"
+    else:
+        assert x != covar, "x and covar must be independent"
+        assert y != covar, "y and covar must be independent"
     # Check that columns exist
     col = _flatten_list([x, y, covar, x_covar, y_covar])
     assert all([c in data for c in col]), "columns are not in dataframe."
