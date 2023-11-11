@@ -1001,7 +1001,7 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
         S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
         eig = np.linalg.eigvalsh(S_pop)[1:]
         eig = eig[eig > 0.001]  # Additional check to remove very low eig
-        W = np.product(eig) / (eig.sum() / d) ** d
+        W = np.prod(eig) / (eig.sum() / d) ** d
         logW = np.log(W)
 
         # Compute chi-square and p-value (adapted from the ezANOVA R package)
