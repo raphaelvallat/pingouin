@@ -241,7 +241,7 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
                 if tmp[dv].count() <= 3:
                     warnings.warn(f"Group {idx} has less than 4 valid samples. Returning NaN.")
                     st_grp = pd.DataFrame(
-                        {"W": np.nan, "pval": np.nan, "normal": "False"}, index=[idx]
+                        {"W": np.nan, "pval": np.nan, "normal": False}, index=[idx]
                     )
                 else:
                     st_grp = normality(tmp[dv].to_numpy(), method=method, alpha=alpha)
