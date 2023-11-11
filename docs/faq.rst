@@ -286,12 +286,12 @@ To read more about what you can do and cannot do with a GPL-3 license, please vi
       <div id="collapse_release" class="panel-collapse collapse">
         <div class="panel-body">
 
-Pingouin uses `outdated <https://github.com/alexmojaki/outdated>`_, a Python package that automatically checks if a newer version of Pingouin is available upon loading. Alternatively, you can click "Watch" on the `GitHub <https://github.com/raphaelvallat/pingouin>`_ of Pingouin.
+You can click "Watch" on the `GitHub <https://github.com/raphaelvallat/pingouin>`_ of Pingouin:
 
 .. figure::  /pictures/github_watch_release.png
   :align:   center
 
-Whenever a new release is out there, you can simply upgrade your version by typing the following line in a terminal window:
+Whenever a new release is available, you can simply upgrade your version by typing the following line in a terminal window:
 
 .. code-block:: shell
 
