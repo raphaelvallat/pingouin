@@ -457,7 +457,7 @@ def anderson(*args, dist="norm"):
     (True, 15.0)
     """
     k = len(args)
-    from_dist = np.zeros(k, "bool")
+    from_dist = np.zeros(k, dtype="bool")
     sig_level = np.zeros(k)
     for j in range(k):
         st, cr, sig = scipy.stats.anderson(args[j], dist=dist)
@@ -465,8 +465,8 @@ def anderson(*args, dist="norm"):
         sig_level[j] = sig[np.argmin(np.abs(st - cr))]
 
     if k == 1:
-        from_dist = bool(from_dist)
-        sig_level = float(sig_level)
+        from_dist = from_dist[0]
+        sig_level = sig_level[0]
     return from_dist, sig_level
 
 
@@ -1001,7 +1001,7 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
         S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
         eig = np.linalg.eigvalsh(S_pop)[1:]
         eig = eig[eig > 0.001]  # Additional check to remove very low eig
-        W = np.product(eig) / (eig.sum() / d) ** d
+        W = np.prod(eig) / (eig.sum() / d) ** d
         logW = np.log(W)
 
         # Compute chi-square and p-value (adapted from the ezANOVA R package)

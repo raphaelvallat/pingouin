@@ -109,7 +109,7 @@ class TestCorrelation(TestCase):
         # Compare BF10 with JASP
         df = read_dataset("pairwise_corr")
         stats = corr(df["Neuroticism"], df["Extraversion"])
-        assert np.isclose(1 / float(stats["BF10"].to_numpy()), 1.478e-13)
+        assert np.isclose(1 / float(stats.at["pearson", "BF10"]), 1.478e-13)
         # Perfect correlation, CI and power should be 1, BF should be Inf
         # https://github.com/raphaelvallat/pingouin/issues/195
         stats = corr(x, x)
