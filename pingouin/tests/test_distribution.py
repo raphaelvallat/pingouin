@@ -85,7 +85,7 @@ class TestDistribution(TestCase):
         stats = normality(df_small, dv="variable", group="group")
         assert np.isnan(stats.loc[[1, 3], "pval"]).all()
         assert not np.isnan(stats.loc[[0, 2], "pval"]).all()
-        assert (stats.loc[[1, 3], "normal"] == "False").all()
+        assert (~stats.loc[[1, 3], "normal"]).all()
 
     def test_homoscedasticity(self):
         """Test function test_homoscedasticity."""
