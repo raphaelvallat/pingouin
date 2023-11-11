@@ -3,4 +3,4 @@ codecov
 pytest-cov
 openpyxl
 mpmath
-numpy<=1.23
+numpy
