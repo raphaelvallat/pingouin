@@ -680,17 +680,16 @@ def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
     levels:
 
     >>> # Pivot from long-format to wide-format
-    >>> piv = data.pivot_table(index='Subject', columns=['Time', 'Metric'],
-    ...                        values='Performance')
+    >>> piv = data.pivot(index='Subject', columns=['Time', 'Metric'], values='Performance')
     >>> piv.head()
-    Time      Post                   Pre
-    Metric  Action Client Product Action Client Product
+    Time        Pre                  Post
+    Metric  Product Client Action Product Client Action
     Subject
-    1           34     30      18     17     12      13
-    2           30     18       6     18     19      12
-    3           32     31      21     24     19      17
-    4           40     39      18     25     25      12
-    5           27     28      18     19     27      19
+    1            13     12     17      18     30     34
+    2            12     19     18       6     18     30
+    3            17     19     24      21     31     32
+    4            12     25     25      18     39     40
+    5            19     27     19      18     28     27
 
     >>> round(pg.epsilon(piv), 3)
     0.727
@@ -934,17 +933,16 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
     levels:
 
     >>> # Pivot from long-format to wide-format
-    >>> piv = data.pivot_table(index='Subject', columns=['Time', 'Metric'],
-    ...                        values='Performance')
+    >>> piv = data.pivot(index='Subject', columns=['Time', 'Metric'], values='Performance')
     >>> piv.head()
-    Time      Post                   Pre
-    Metric  Action Client Product Action Client Product
+    Time        Pre                  Post
+    Metric  Product Client Action Product Client Action
     Subject
-    1           34     30      18     17     12      13
-    2           30     18       6     18     19      12
-    3           32     31      21     24     19      17
-    4           40     39      18     25     25      12
-    5           27     28      18     19     27      19
+    1            13     12     17      18     30     34
+    2            12     19     18       6     18     30
+    3            17     19     24      21     31     32
+    4            12     25     25      18     39     40
+    5            19     27     19      18     28     27
 
     >>> spher, _, chisq, dof, pval = pg.sphericity(piv)
     >>> print(spher, round(chisq, 3), dof, round(pval, 3))

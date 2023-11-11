@@ -92,9 +92,10 @@ def chi2_independence(data, x, y, correction=True):
     >>> import pingouin as pg
     >>> data = pg.read_dataset('chi2_independence')
     >>> data['sex'].value_counts(ascending=True)
+    sex
     0     96
     1    207
-    Name: sex, dtype: int64
+    Name: count, dtype: int64
 
     If gender is not a good predictor for heart disease, we should expect the
     same 96:207 ratio across the target classes.
