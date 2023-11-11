@@ -22,15 +22,14 @@ LICENSE = "GPL-3.0"
 PACKAGE_DATA = {"pingouin.data.icons": ["*.svg"]}
 
 INSTALL_REQUIRES = [
-    "numpy>=1.19",
-    "scipy>=1.7",
-    "pandas>=1.1",
-    "matplotlib>=3.0.2",
-    "seaborn>=0.11",
-    "statsmodels>=0.13",
+    "numpy",
+    "scipy",
+    "pandas>=1.5",
+    "matplotlib",
+    "seaborn",
+    "statsmodels",
     "scikit-learn",
-    "pandas_flavor>=0.2.0",
-    "outdated",
+    "pandas_flavor",
     "tabulate",
 ]
 

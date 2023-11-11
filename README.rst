@@ -85,14 +85,13 @@ The main dependencies of Pingouin are :
 * `Statsmodels <https://www.statsmodels.org/>`_
 * `Matplotlib <https://matplotlib.org/>`_
 * `Seaborn <https://seaborn.pydata.org/>`_
-* `Outdated <https://github.com/alexmojaki/outdated>`_
 
 In addition, some functions require :
 
 * `Scikit-learn <https://scikit-learn.org/>`_
 * `Mpmath <http://mpmath.org/>`_
 
-Pingouin is a Python 3 package and is currently tested for Python 3.8-3.11. It does not support Python 2.
+Pingouin is a Python 3 package and is currently tested for Python 3.8-3.11.
 
 User installation
 -----------------
