@@ -457,7 +457,7 @@ def anderson(*args, dist="norm"):
     (True, 15.0)
     """
     k = len(args)
-    from_dist = np.zeros(k, "bool")
+    from_dist = np.zeros(k, dtype="bool")
     sig_level = np.zeros(k)
     for j in range(k):
         st, cr, sig = scipy.stats.anderson(args[j], dist=dist)
@@ -465,8 +465,8 @@ def anderson(*args, dist="norm"):
         sig_level[j] = sig[np.argmin(np.abs(st - cr))]
 
     if k == 1:
-        from_dist = bool(from_dist)
-        sig_level = float(sig_level)
+        from_dist = from_dist[0]
+        sig_level = sig_level[0]
     return from_dist, sig_level
 
 
