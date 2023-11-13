@@ -711,7 +711,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
     data = _check_multilevel_rm(data, func="epsilon")
 
     # Covariance matrix
-    S = data.cov()
+    S = data.cov(numeric_only=True)
     n, k = data.shape
 
     # Epsilon is always 1 with only two repeated measures.
@@ -988,7 +988,7 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
         # Z = data.diff(axis=1).dropna(axis=1)
         # M = np.linalg.lstsq(data, Z, rcond=None)[0]
         # C, _ = np.linalg.qr(M)
-        # S = data.cov()
+        # S = data.cov(numeric_only=True)
         # A = C.T.dot(S).dot(C)
         # logW = np.log(np.linalg.det(A)) - d * np.log(np.trace(A / d))
         # W = np.exp(logW)
@@ -997,7 +997,7 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
         # 1 - Estimate the population covariance (= double-centered)
         # 2 - Calculate n-1 eigenvalues
         # 3 - Compute Mauchly's statistic
-        S = data.cov().to_numpy()  # NumPy, otherwise S.mean() != grandmean
+        S = data.cov(numeric_only=True).to_numpy()  # NumPy, otherwise S.mean() != grandmean
         S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
         eig = np.linalg.eigvalsh(S_pop)[1:]
         eig = eig[eig > 0.001]  # Additional check to remove very low eig

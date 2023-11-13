@@ -360,7 +360,7 @@ def box_m(data, dvs, group, alpha=0.001):
     # - n_dvs is the number of variables
     # - n_samp is the number of samples in each covariance matrix
     # - nobs is the total number of observations
-    covs = grp.cov()
+    covs = grp.cov(numeric_only=True)
     n_covs, n_dvs = covs.index.levshape
     n_samp = grp.count().iloc[:, 0].to_numpy()  # NaN are excluded by .count
     nobs = n_samp.sum()

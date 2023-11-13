@@ -858,9 +858,9 @@ def partial_corr(
     # Calculate the partial corrrelation matrix - similar to pingouin.pcorr()
     if method == "spearman":
         # Convert the data to rank, similar to R cov()
-        V = data.rank(na_option="keep").cov()
+        V = data.rank(na_option="keep").cov(numeric_only=True)
     else:
-        V = data.cov()
+        V = data.cov(numeric_only=True)
     Vi = np.linalg.pinv(V, hermitian=True)  # Inverse covariance matrix
     Vi_diag = Vi.diagonal()
     D = np.diag(np.sqrt(1 / Vi_diag))
@@ -954,7 +954,7 @@ def pcorr(self):
     Y  0.036649  1.000000  0.540140
     M  0.412804  0.540140  1.000000
     """
-    V = self.cov()  # Covariance matrix
+    V = self.cov(numeric_only=True)  # Covariance matrix
     Vi = np.linalg.pinv(V, hermitian=True)  # Inverse covariance matrix
     D = np.diag(np.sqrt(1 / np.diag(Vi)))
     pcor = -1 * (D @ Vi @ D)  # Partial correlation matrix
@@ -1084,15 +1084,15 @@ def rcorr(
     assert isinstance(decimals, int), "decimals must be an int."
     assert method in ["pearson", "spearman"], "Method is not recognized."
     assert upper in ["pval", "n"], "upper must be either `pval` or `n`."
-    mat = self.corr(method=method).round(decimals)
+    mat = self.corr(method=method, numeric_only=True).round(decimals)
     if upper == "n":
-        mat_upper = self.corr(method=lambda x, y: len(x)).astype(int)
+        mat_upper = self.corr(method=lambda x, y: len(x), numeric_only=True).astype(int)
     else:
         if method == "pearson":
-            mat_upper = self.corr(method=lambda x, y: pearsonr(x, y)[1])
+            mat_upper = self.corr(method=lambda x, y: pearsonr(x, y)[1], numeric_only=True)
         else:
             # Method = 'spearman'
-            mat_upper = self.corr(method=lambda x, y: spearmanr(x, y)[1])
+            mat_upper = self.corr(method=lambda x, y: spearmanr(x, y)[1], numeric_only=True)
 
         if padjust is not None:
             pvals = mat_upper.to_numpy()[tif(mat, k=1)]

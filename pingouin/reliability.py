@@ -140,7 +140,7 @@ def cronbach_alpha(
         data = data.dropna(axis=0, how="any")
 
     # Compute covariance matrix and Cronbach's alpha
-    C = data.cov()
+    C = data.cov(numeric_only=True)
     cronbach = (k / (k - 1)) * (1 - np.trace(C) / C.sum().sum())
     # which is equivalent to
     # v = np.diag(C).mean()
