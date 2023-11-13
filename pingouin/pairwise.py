@@ -604,7 +604,7 @@ def ptests(
     padjust=None,
     stars=True,
     pval_stars={0.001: "***", 0.01: "**", 0.05: "*"},
-    **kwargs
+    **kwargs,
 ):
     """
     Pairwise T-test between columns of a dataframe.
