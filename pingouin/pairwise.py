@@ -758,9 +758,9 @@ def ptests(
 
     if stars:
         # Replace p-values by stars
-        mat_upper = mat_upper.map(replace_pval)
+        mat_upper = mat_upper.applymap(replace_pval)
     else:
-        mat_upper = mat_upper.map(lambda x: ffp(x, precision=decimals))
+        mat_upper = mat_upper.applymap(lambda x: ffp(x, precision=decimals))
 
     # Replace upper triangle by p-values
     mat.to_numpy()[tif(mat, k=1)] = mat_upper.to_numpy()[tif(mat, k=1)]
