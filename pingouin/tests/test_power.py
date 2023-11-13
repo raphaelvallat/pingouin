@@ -99,13 +99,6 @@ class TestPower(TestCase):
         # Error
         with pytest.raises(ValueError):
             power_ttest(d=0.5)
-        # Too high values of nc
-        with pytest.warns(UserWarning, match="Non-centrality parameter"):
-            assert np.isnan(power_ttest(d=2**16, n=20))
-            assert np.isnan(power_ttest(d=-(2**16), n=20))
-            assert np.isnan(power_ttest(d=5000.0, n=1500))
-            assert np.isnan(power_ttest(d=5000.0, n=1500, alternative="less"))
-            assert np.isnan(power_ttest(d=5000.0, n=1500, alternative="greater"))
 
     def test_power_ttest2n(self):
         """Test function power_ttest2n.
@@ -138,12 +131,6 @@ class TestPower(TestCase):
         # Error
         with pytest.raises(ValueError):
             power_ttest2n(nx=20, ny=20)
-        # Too high values of nc
-        with pytest.warns(UserWarning, match="Non-centrality parameter"):
-            assert np.isnan(power_ttest2n(nx=1500, ny=450, d=5000.0))
-            assert np.isnan(power_ttest2n(nx=1500, ny=450, d=5000.0, alternative="less"))
-            assert np.isnan(power_ttest2n(nx=1500, ny=450, d=5000.0, alternative="greater"))
-            assert np.isnan(power_ttest2n(nx=5, ny=7, d=float(-(2**16))))
 
     def test_power_anova(self):
         """Test function power_anova.
@@ -160,10 +147,6 @@ class TestPower(TestCase):
         # Error
         with pytest.raises(ValueError):
             power_anova(eta_squared=eta, k=2)
-        # Too high values of nc
-        with pytest.warns(UserWarning, match="Non-centrality parameter"):
-            assert np.isnan(power_anova(eta_squared=0.9999, k=40, n=100000))
-            assert np.isnan(power_anova(eta_squared=0.9999, k=10, n=50000))
 
     def test_power_rm_anova(self):
         """Test function power_rm_anova.
@@ -217,9 +200,6 @@ class TestPower(TestCase):
         # Error
         with pytest.raises(ValueError):
             power_rm_anova(eta_squared=eta, m=2)
-        # Too high values of nc
-        with pytest.warns(UserWarning, match="Non-centrality parameter"):
-            assert np.isnan(power_rm_anova(eta_squared=0.999, m=50, n=100000))
 
     def test_power_corr(self):
         """Test function power_corr.
@@ -275,6 +255,3 @@ class TestPower(TestCase):
         # Error
         with pytest.raises(ValueError):
             power_chi2(1, w=0.3)
-        # Too high values of nc
-        with pytest.warns(UserWarning, match="Non-centrality parameter"):
-            assert np.isnan(power_chi2(dof=10, w=0.999, n=10000000000))

@@ -13,7 +13,7 @@ v0.5.4 (November 2023)
 
 This is a minor release with several bugfixes and no new features. The new version is tested for Python 3.8 to 3.11 (but should also work with Python 3.12). See GitHub for the full changelog.
 
-This release requires pandas≥1.5.
+This release requires pandas≥1.5. We recommend scipy≥1.11.0.
 
 *************
 
