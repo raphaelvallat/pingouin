@@ -15,22 +15,6 @@ __all__ = [
 ]
 
 
-def _check_nc(dist, nc):
-    """Check if non-centrality parameter is too large for the given distribution.
-    This is a workaround for scipy/scipy#17916 which can hopefully be removed at some point.
-    """
-    if dist is stats.ncx2 and nc >= float(2**32 - 1):
-        warnings.warn("Non-centrality parameter is too large for the ncx2 distribution.")
-        return False
-    if dist is stats.ncf and nc >= float(2**32):
-        warnings.warn("Non-centrality parameter is too large for the ncf distribution.")
-        return False
-    if dist is stats.nct and (nc <= float(-(2**16)) or nc >= float(2**16)):
-        warnings.warn("Non-centrality parameter is too large for the nct distribution.")
-        return False
-    return True
-
-
 def power_ttest(
     d=None, n=None, power=None, alpha=0.05, contrast="two-samples", alternative="two-sided"
 ):
@@ -165,8 +149,6 @@ def power_ttest(
             dof = (n - 1) * tsample
             nc = d * np.sqrt(n / tsample)
             tcrit = stats.t.ppf(alpha / tside, dof)
-            if not _check_nc(stats.nct, nc):
-                return np.nan
             return stats.nct.cdf(tcrit, dof, nc)
 
     elif alternative == "two-sided":
@@ -175,8 +157,6 @@ def power_ttest(
             dof = (n - 1) * tsample
             nc = d * np.sqrt(n / tsample)
             tcrit = stats.t.ppf(1 - alpha / tside, dof)
-            if not _check_nc(stats.nct, nc):
-                return np.nan
             return stats.nct.sf(tcrit, dof, nc) + stats.nct.cdf(-tcrit, dof, nc)
 
     else:  # Alternative = 'greater'
@@ -185,8 +165,6 @@ def power_ttest(
             dof = (n - 1) * tsample
             nc = d * np.sqrt(n / tsample)
             tcrit = stats.t.ppf(1 - alpha / tside, dof)
-            if not _check_nc(stats.nct, nc):
-                return np.nan
             return stats.nct.sf(tcrit, dof, nc)
 
     # Evaluate missing variable
@@ -338,8 +316,6 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative="two-sided
             dof = nx + ny - 2
             nc = d * (1 / np.sqrt(1 / nx + 1 / ny))
             tcrit = stats.t.ppf(alpha / tside, dof)
-            if not _check_nc(stats.nct, nc):
-                return np.nan
             return stats.nct.cdf(tcrit, dof, nc)
 
     elif alternative == "two-sided":
@@ -348,8 +324,6 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative="two-sided
             dof = nx + ny - 2
             nc = d * (1 / np.sqrt(1 / nx + 1 / ny))
             tcrit = stats.t.ppf(1 - alpha / tside, dof)
-            if not _check_nc(stats.nct, nc):
-                return np.nan
             return stats.nct.sf(tcrit, dof, nc) + stats.nct.cdf(-tcrit, dof, nc)
 
     else:  # Alternative = 'greater'
@@ -358,8 +332,6 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative="two-sided
             dof = nx + ny - 2
             nc = d * (1 / np.sqrt(1 / nx + 1 / ny))
             tcrit = stats.t.ppf(1 - alpha / tside, dof)
-            if not _check_nc(stats.nct, nc):
-                return np.nan
             return stats.nct.sf(tcrit, dof, nc)
 
     # Evaluate missing variable
@@ -515,8 +487,6 @@ def power_anova(eta_squared=None, k=None, n=None, power=None, alpha=0.05):
         dof1 = k - 1
         dof2 = (n * k) - k
         fcrit = stats.f.ppf(1 - alpha, dof1, dof2)
-        if not _check_nc(stats.ncf, nc):
-            return np.nan
         return stats.ncf.sf(fcrit, dof1, dof2, nc)
 
     # Evaluate missing variable
@@ -745,8 +715,6 @@ def power_rm_anova(eta_squared=None, m=None, n=None, power=None, alpha=0.05, cor
         dof2 = (n - 1) * dof1
         nc = (f_sq * n * m * epsilon) / (1 - corr)
         fcrit = stats.f.ppf(1 - alpha, dof1, dof2)
-        if not _check_nc(stats.ncf, nc):
-            return np.nan
         return stats.ncf.sf(fcrit, dof1, dof2, nc)
 
     # Evaluate missing variable
@@ -1069,8 +1037,6 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
     def func(w, n, power, alpha):
         k = stats.chi2.ppf(1 - alpha, dof)
         nc = n * w**2
-        if not _check_nc(stats.ncx2, nc):
-            return np.nan
         return stats.ncx2.sf(k, dof, nc)
 
     # Evaluate missing variable

@@ -58,7 +58,7 @@ class TestNonParametric(TestCase):
     def test_madmedianrule(self):
         """Test function madmedianrule."""
         a = [1.2, 3, 4.5, 2.4, 5, 12.7, 0.4]
-        assert np.alltrue(madmedianrule(a) == [False, False, False, False, False, True, False])
+        assert np.all(madmedianrule(a) == [False, False, False, False, False, True, False])
 
     def test_mwu(self):
         """Test function mwu"""
