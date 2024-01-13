@@ -8,10 +8,10 @@ What's new
 
 *************
 
-v0.5.4 (November 2023)
-----------------------
+v0.5.4 (January 2024)
+---------------------
 
-This is a minor release with several bugfixes and no new features. The new version is tested for Python 3.8-3.11 (but should also work with Python 3.12). See [GitHub](https://github.com/raphaelvallat/pingouin/releases) for the full changelog.
+This is a minor release with several bugfixes and no new features. The new version is tested for Python 3.8-3.11 (but should also work with Python 3.12). See `GitHub <https://github.com/raphaelvallat/pingouin/releases>`_ for the full changelog.
 
 This release requires pandas≥1.5. We recommend scipy≥1.11.0.
 
