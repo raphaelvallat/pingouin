@@ -593,7 +593,7 @@ def _relimp(S):
     stats_relimp = {
         "names": predictors,
         "relimp": all_preds,
-        "relimp_perc": all_preds / sum(all_preds) * 100,
+        "relimp_perc": np.array(all_preds) / sum(all_preds) * 100,
     }
 
     return stats_relimp
