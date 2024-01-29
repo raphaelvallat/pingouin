@@ -4,6 +4,7 @@ Authors
 - Raphael Vallat <raphaelvallat9@gmail.com>
 - Nicolas Legrand <legrand@cyceron.fr>
 """
+
 import numpy as np
 import pandas as pd
 import seaborn as sns

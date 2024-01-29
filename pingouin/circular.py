@@ -545,10 +545,7 @@ def circ_corrcc(x, y, correction_uniform=False):
         r = (r_minus - r_plus) / denom
 
     # Compute T- and p-values
-    tval = (
-        np.sqrt((n * (x_sin**2).mean() * (y_sin**2).mean()) / np.mean(x_sin**2 * y_sin**2))
-        * r
-    )
+    tval = np.sqrt((n * (x_sin**2).mean() * (y_sin**2).mean()) / np.mean(x_sin**2 * y_sin**2)) * r
 
     # Approximately distributed as a standard normal
     pval = 2 * norm.sf(abs(tval))

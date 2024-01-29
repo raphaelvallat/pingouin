@@ -1354,9 +1354,7 @@ def welch_anova(data=None, dv=None, between=None):
     ms_betadj = ss_betadj / ddof1
 
     # Calculate lambda, F-value, p-value and np2
-    lamb = (3 * np.sum((1 / (grp.count() - 1)) * (1 - (weights / weights.sum())) ** 2)) / (
-        r**2 - 1
-    )
+    lamb = (3 * np.sum((1 / (grp.count() - 1)) * (1 - (weights / weights.sum())) ** 2)) / (r**2 - 1)
     ddof2 = 1 / lamb
     fval = ms_betadj / (1 + (2 * lamb * (r - 2)) / 3)
     pval = f.sf(fval, ddof1, ddof2)

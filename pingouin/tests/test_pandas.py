@@ -4,6 +4,7 @@ Authors
 - Nicolas Legrand <nicolaslegrand21@gmail.com>
 - Raphael Vallat <raphaelvallat9@gmail.com>
 """
+
 import numpy as np
 import pingouin as pg
 from unittest import TestCase
