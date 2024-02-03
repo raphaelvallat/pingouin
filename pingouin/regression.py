@@ -893,7 +893,7 @@ def logistic_regression(
         # Updated in Pingouin > 0.3.6 to be consistent with R
         kwargs["solver"] = "newton-cg"
     if "penalty" not in kwargs:
-        kwargs["penalty"] = "none"
+        kwargs["penalty"] = None
     lom = LogisticRegression(**kwargs)
     lom.fit(X, y)
 
