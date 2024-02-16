@@ -1,4 +1,116 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pingouin"
+description = "Pingouin: statistical package for Python"
+authors = [
+    {name = "Raphael Vallat", email = "raphaelvallat9@gmail.com"},
+]
+dependencies = [
+    "matplotlib",
+    "numpy",
+    "pandas>=1.5",
+    "pandas_flavor",
+    "scikit-learn>=1.2",
+    "scipy",
+    "seaborn",
+    "statsmodels",
+    "tabulate",
+]
+requires-python = ">=3.8"
+readme = "README.rst"
+license = {text = "GPL-3.0"}
+maintainers = [
+    {name = "Raphael Vallat", email = "raphaelvallat9@gmail.com"},
+]
+dynamic = ["version"]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=6",
+    "pytest-cov",
+    "codecov",
+    "openpyxl",
+    "mpmath",
+]
+
+[project.urls]
+Homepage = "https://pingouin-stats.org/index.html"
+Downloads = "https://github.com/raphaelvallat/pingouin/"
+
+[tool.setuptools]
+py-modules = ["pingouin"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+pingouin = [
+    "datasets/*.csv",
+]
+
+[tool.setuptools.packages.find]
+namespaces = false
+where = ["src"]
+
+[tool.setuptools.dynamic]
+version = {attr = "pingouin.__version__"}
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--showlocals --durations=10 --maxfail=2 --cov"
+doctest_optionflags= ["NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL"]
+filterwarnings = [
+    "ignore::UserWarning",
+    "ignore::RuntimeWarning",
+    "ignore::FutureWarning",
+]
+markers = ["slow"]
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+omit = [
+    "*/setup.py",
+    "*/examples/*",
+    "*/tests/*",
+    "*/datasets/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+# sort = "Cover"
+
 [tool.black]
 line-length = 100
 target-version = ['py311']
 include = '\.pyi?$'
+
+[tool.flake8]
+# W605 : bug when math equation in numpydoc
+# W503, W504 : line-break with math operator
+# E203: E203 whitespace before ':', not compatible with Black
+# DXXX: Docstring related
+max-line-length = 100
+ignore = ["N806", "N803", "W503", "W504", "W605", "D100", "D200", "D205", "D301", "D400", "D401", "E203"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "docs",
+    "build",
+    "__init__.py",
+    "examples",
+    "setup.py",
+]
+statistics = true

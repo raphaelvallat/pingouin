@@ -1,9 +1,0 @@
-numpy
-scipy
-pandas>=1.5
-matplotlib
-seaborn
-statsmodels
-scikit-learn
-pandas_flavor
-tabulate
