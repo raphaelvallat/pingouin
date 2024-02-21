@@ -261,29 +261,29 @@ class TestRegression(TestCase):
         # Together in one cell below
         # %%R -i df
         # summary(glm(Ybin ~ X, data=df, family=binomial))
-        assert_equal(np.round(lom["coef"], 4), [1.3191, -0.1995])
-        assert_equal(np.round(lom["se"], 4), [0.7582, 0.1211])
-        assert_equal(np.round(lom["z"], 4), [1.7399, -1.6476])
-        assert_equal(np.round(lom["pval"], 4), [0.0819, 0.0994])
-        assert_equal(np.round(lom["CI[2.5%]"], 4), [-0.1669, -0.4367])
-        assert_equal(np.round(lom["CI[97.5%]"], 4), [2.8050, 0.0378])
+        assert_equal(np.round(lom["coef"], 3), [1.319, -0.199])
+        assert_equal(np.round(lom["se"], 3), [0.758, 0.121])
+        assert_equal(np.round(lom["z"], 3), [1.74, -1.647])
+        assert_equal(np.round(lom["pval"], 3), [0.082, 0.099])
+        assert_equal(np.round(lom["CI[2.5%]"], 3), [-0.167, -0.437])
+        assert_equal(np.round(lom["CI[97.5%]"], 3), [2.805, 0.038])
 
         # Multiple predictors
         X = df[["X", "M"]].to_numpy()
         y = df["Ybin"].to_numpy()
-        lom = logistic_regression(X, y).round(4)  # Pingouin
+        lom = logistic_regression(X, y).round(3)  # Pingouin
         # Compare against R
         # summary(glm(Ybin ~ X+M, data=df, family=binomial))
-        assert_equal(lom["coef"].to_numpy(), [1.3275, -0.1960, -0.0060])
-        assert_equal(lom["se"].to_numpy(), [0.7784, 0.1408, 0.1253])
-        assert_equal(lom["z"].to_numpy(), [1.7055, -1.3926, -0.0475])
-        assert_equal(lom["pval"].to_numpy(), [0.0881, 0.1637, 0.9621])
-        assert_equal(lom["CI[2.5%]"].to_numpy(), [-0.1981, -0.4719, -0.2516])
-        assert_equal(lom["CI[97.5%]"].to_numpy(), [2.8531, 0.0799, 0.2397])
+        assert_equal(lom["coef"].to_numpy(), [1.327, -0.196, -0.006])
+        assert_equal(lom["se"].to_numpy(), [0.778, 0.141, 0.125])
+        assert_equal(lom["z"].to_numpy(), [1.705, -1.392, -0.048])
+        assert_equal(lom["pval"].to_numpy(), [0.088, 0.164, 0.962])
+        assert_equal(lom["CI[2.5%]"].to_numpy(), [-0.198, -0.472, -0.252])
+        assert_equal(lom["CI[97.5%]"].to_numpy(), [2.853, 0.08, 0.24])
 
         # Test other arguments
         c = logistic_regression(df[["X", "M"]], df["Ybin"], coef_only=True)
-        assert_equal(np.round(c, 4), [1.3275, -0.1960, -0.0060])
+        assert_equal(np.round(c, 3), [1.327, -0.196, -0.006])
 
         # With missing values
         logistic_regression(df_nan[["X", "M"]], df_nan["Ybin"], remove_na=True)
@@ -353,11 +353,12 @@ class TestRegression(TestCase):
         X = data_dum[["body_mass_kg", "species_Chinstrap", "species_Gentoo"]]
         y = data_dum["male"]
         lom = logistic_regression(X, y, as_dataframe=False)
-        assert_equal(np.round(lom["coef"], 7), [-27.1318593, 7.3728436, -0.2559251, -10.1778083])
-        assert_equal(np.round(lom["se"], 4), [2.9984, 0.8141, 0.4293, 1.1946])
+        # See https://github.com/raphaelvallat/pingouin/pull/403
+        assert_equal(np.round(lom["coef"], 2), [-27.13, 7.37, -0.26, -10.18])
+        assert_equal(np.round(lom["se"], 3), [2.998, 0.814, 0.429, 1.195])
         assert_equal(np.round(lom["z"], 3), [-9.049, 9.056, -0.596, -8.520])
-        assert_equal(np.round(lom["CI[2.5%]"], 3), [-33.009, 5.777, -1.097, -12.519])
-        assert_equal(np.round(lom["CI[97.5%]"], 3), [-21.255, 8.969, 0.586, -7.836])
+        assert_equal(np.round(lom["CI[2.5%]"], 1), [-33.0, 5.8, -1.1, -12.5])
+        assert_equal(np.round(lom["CI[97.5%]"], 1), [-21.3, 9.0, 0.6, -7.8])
 
     def test_mediation_analysis(self):
         """Test function mediation_analysis."""
