@@ -45,6 +45,8 @@ test = [
     "codecov",
     "openpyxl",
     "mpmath",
+    # Ensure coverage is new enough for `source_pkgs`.
+    "coverage[toml]>=5.3",
 ]
 
 [project.urls]
@@ -80,13 +82,16 @@ markers = ["slow"]
 
 [tool.coverage.run]
 branch = true
-source = ["src"]
 omit = [
     "*/setup.py",
     "*/examples/*",
     "*/tests/*",
     "*/datasets/*",
 ]
+source_pkgs = ["pingouin"]
+
+[tool.coverage.paths]
+source = ["src"]
 
 [tool.coverage.report]
 show_missing = true
