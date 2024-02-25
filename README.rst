@@ -114,6 +114,19 @@ New releases are frequent so always make sure that you have the latest version:
 
   pip install --upgrade pingouin
 
+Development
+-----------
+
+To build and install from source, clone this repository or download the source archive and decompress the files
+
+.. code-block:: shell
+
+  cd pingouin
+  python -m build            # optional, build a wheel and sdist
+  pip install .              # install the package
+  pip install --editable .   # or editable install
+  pytest                     # test the package
+
 Quick start
 ============
 
