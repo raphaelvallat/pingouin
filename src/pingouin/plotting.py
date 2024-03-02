@@ -190,7 +190,6 @@ def plot_blandaltman(
     # Labels
     ax.set_ylabel(f"{xname} - {yname}")
     ax.set_xlabel(xlabel)
-    sns.despine(ax=ax)
     return ax
 
 
@@ -652,8 +651,6 @@ def plot_paired(
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
 
-    # Despine and trim
-    sns.despine(trim=True, ax=ax)
     return ax
 
 
@@ -888,7 +885,6 @@ def plot_shift(
 
     ax2.set_xlabel("X quantiles", size=15)
     ax2.set_ylabel("Y - X quantiles \n differences (a.u.)", size=10)
-    sns.despine()
     plt.tight_layout()
 
     return fig
