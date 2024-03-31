@@ -549,7 +549,7 @@ def rm_anova(
     rm = list(data[within].unique())
     n_rm = len(rm)
     n_obs = int(grp_with.count().max())
-    grandmean = data[dv].mean(numeric_only=True)
+    grandmean = data[dv].mean()
 
     # Calculate sums of squares
     ss_with = ((grp_with.mean(numeric_only=True) - grandmean) ** 2 * grp_with.count()).sum()
@@ -697,7 +697,7 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     n_a = data[a].nunique()
     n_b = data[b].nunique()
     n_s = data[subject].nunique()
-    mu = data[dv].mean(numeric_only=True)
+    mu = data[dv].mean()
 
     # Groupby means
     # I think that observed=True is actually not needed here since we have already used
@@ -992,7 +992,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
     grp = data.groupby(between, observed=True, group_keys=False)[dv]
     # Between effect
     ssbetween = (
-        (grp.mean(numeric_only=True) - data[dv].mean(numeric_only=True)) ** 2 * grp.count()
+        (grp.mean(numeric_only=True) - data[dv].mean()) ** 2 * grp.count()
     ).sum()
     # Within effect (= error between)
     #  = (grp.var(ddof=0) * grp.count()).sum()
@@ -1074,7 +1074,7 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
         # Sums of squares
         ss_fac1 = aov_fac1.at[0, "SS"]
         ss_fac2 = aov_fac2.at[0, "SS"]
-        ss_tot = ((data[dv] - data[dv].mean(numeric_only=True)) ** 2).sum()
+        ss_tot = ((data[dv] - data[dv].mean()) ** 2).sum()
         ss_resid = np.sum(grp_both.apply(lambda x: (x - x.mean()) ** 2))
         ss_inter = ss_tot - (ss_resid + ss_fac1 + ss_fac2)
         # Degrees of freedom
@@ -1348,7 +1348,7 @@ def welch_anova(data=None, dv=None, between=None):
     # Sums of squares (regular and adjusted)
     ss_res = grp.apply(lambda x: (x - x.mean()) ** 2).sum()
     ss_bet = (
-        (grp.mean(numeric_only=True) - data[dv].mean(numeric_only=True)) ** 2 * grp.count()
+        (grp.mean(numeric_only=True) - data[dv].mean()) ** 2 * grp.count()
     ).sum()
     ss_betadj = np.sum(weights * np.square(grp.mean(numeric_only=True) - adj_grandmean))
     ms_betadj = ss_betadj / ddof1
@@ -1506,7 +1506,7 @@ def mixed_anova(
         )
 
     # SUMS OF SQUARES
-    grandmean = data[dv].mean(numeric_only=True)
+    grandmean = data[dv].mean()
     ss_total = ((data[dv] - grandmean) ** 2).sum()
     # Extract main effects of within and between factors
     aov_with = rm_anova(
