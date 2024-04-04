@@ -150,7 +150,8 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative="two-sided", r=0
 
     # JZS Bayes factor calculation: eq. 1 in Rouder et al. (2009)
     integr = quad(fun, 0, np.inf, args=(t, n, r, df))[0]
-    bf10 = 1 / ((1 + t**2 / df) ** (-(df + 1) / 2) / integr)
+    with np.errstate(divide='ignore'):
+        bf10 = 1 / ((1 + t**2 / df) ** (-(df + 1) / 2) / integr)
 
     # Tail
     tail_binary = "two-sided" if alternative == "two-sided" else "one-sided"
