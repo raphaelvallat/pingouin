@@ -172,7 +172,7 @@ def mwu(x, y, alternative="two-sided", **kwargs):
     -------
     stats : :py:class:`pandas.DataFrame`
 
-        * ``'U-val'``: U-value
+        * ``'U-val'``: U-value corresponding with sample x
         * ``'alternative'``: tail of the test
         * ``'p-val'``: p-value
         * ``'RBC'``   : rank-biserial correlation
@@ -193,7 +193,8 @@ def mwu(x, y, alternative="two-sided", **kwargs):
 
     The rank biserial correlation [2]_ is the difference between
     the proportion of favorable evidence minus the proportion of unfavorable
-    evidence.
+    evidence. Values range from -1 to 1, with negative values indicating that `y > x`, and
+    positive values indicating `x > y`.
 
     The common language effect size is the proportion of pairs where ``x`` is
     higher than ``y``. It was first introduced by McGraw and Wong (1992) [3]_.
@@ -238,8 +239,8 @@ def mwu(x, y, alternative="two-sided", **kwargs):
     >>> x = np.random.uniform(low=0, high=1, size=20)
     >>> y = np.random.uniform(low=0.2, high=1.2, size=20)
     >>> pg.mwu(x, y, alternative='two-sided')
-         U-val alternative    p-val    RBC    CLES
-    MWU   97.0   two-sided  0.00556  0.515  0.2425
+         U-val alternative    p-val     RBC    CLES
+    MWU   97.0   two-sided  0.00556  -0.515  0.2425
 
     Compare with SciPy
 
@@ -250,18 +251,24 @@ def mwu(x, y, alternative="two-sided", **kwargs):
     One-sided test
 
     >>> pg.mwu(x, y, alternative='greater')
-         U-val alternative     p-val    RBC    CLES
-    MWU   97.0     greater  0.997442  0.515  0.2425
+         U-val alternative     p-val     RBC    CLES
+    MWU   97.0     greater  0.997442  -0.515  0.2425
 
     >>> pg.mwu(x, y, alternative='less')
-         U-val alternative    p-val    RBC    CLES
-    MWU   97.0        less  0.00278  0.515  0.7575
+         U-val alternative    p-val     RBC    CLES
+    MWU   97.0        less  0.00278  -0.515  0.7575
 
     Passing keyword arguments to :py:func:`scipy.stats.mannwhitneyu`:
 
     >>> pg.mwu(x, y, alternative='two-sided', method='exact')
-         U-val alternative     p-val    RBC    CLES
-    MWU   97.0   two-sided  0.004681  0.515  0.2425
+         U-val alternative     p-val     RBC    CLES
+    MWU   97.0   two-sided  0.004681  -0.515  0.2425
+
+    Reversing the order of `x` and `y`.
+
+    >>> pg.mwu(y, x)
+         U-val alternative    p-val    RBC    CLES
+    MWU  303.0   two-sided  0.00556  0.515  0.7575
     """
     x = np.asarray(x)
     y = np.asarray(y)
@@ -279,7 +286,7 @@ def mwu(x, y, alternative="two-sided", **kwargs):
         raise ValueError(
             "Since Pingouin 0.4.0, the 'tail' argument has been renamed to 'alternative'."
         )
-    uval, pval = scipy.stats.mannwhitneyu(x, y, alternative=alternative, **kwargs)
+    uval_x, pval = scipy.stats.mannwhitneyu(x, y, alternative=alternative, **kwargs)
 
     # Effect size 1: Common Language Effect Size
     # CLES is tail-specific and calculated according to the formula given in
@@ -292,11 +299,12 @@ def mwu(x, y, alternative="two-sided", **kwargs):
     cles = 1 - cles if alternative == "less" else cles
 
     # Effect size 2: rank biserial correlation (Wendt 1972)
-    rbc = 1 - (2 * uval) / diff.size  # diff.size = x.size * y.size
+    uval_y = x.shape[0] * y.shape[0] - uval_x
+    rbc = 1 - (2 * uval_y) / diff.size  # diff.size = x.size * y.size
 
     # Fill output DataFrame
     stats = pd.DataFrame(
-        {"U-val": uval, "alternative": alternative, "p-val": pval, "RBC": rbc, "CLES": cles},
+        {"U-val": uval_x, "alternative": alternative, "p-val": pval, "RBC": rbc, "CLES": cles},
         index=["MWU"],
     )
     return _postprocess_dataframe(stats)
