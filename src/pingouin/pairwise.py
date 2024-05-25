@@ -590,8 +590,8 @@ def pairwise_tests(
 
     # Rename Time columns
     if contrast in ["multiple_within", "multiple_between", "within_between"] and interaction:
-        stats["Time"].fillna("-", inplace=True)
-        stats.rename(columns={"Time": factors[0]}, inplace=True)
+        stats["Time"] = stats["Time"].fillna("-")
+        stats = stats.rename(columns={"Time": factors[0]})
 
     return _postprocess_dataframe(stats)
 
