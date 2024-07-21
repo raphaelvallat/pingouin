@@ -22,12 +22,14 @@ import os
 import sys
 import time
 import pingouin
-import sphinx_bootstrap_theme
+import pydata_sphinx_theme
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+
 sys.path.insert(0, os.path.abspath("sphinxext"))
+
 extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.doctest",
@@ -39,7 +41,6 @@ extensions = [
     "matplotlib.sphinxext.plot_directive",
     "numpydoc",
     "sphinx_copybutton",
-    "sphinx_panels",
 ]
 
 # configure sphinx-copybutton
@@ -48,7 +49,7 @@ copybutton_prompt_text = r">>> |\.\.\. |\$ "
 copybutton_prompt_is_regexp = True
 
 # sphinx_panels
-panels_add_bootstrap_css = False
+#panels_add_bootstrap_css = False
 
 # Generate the API documentation when building
 autosummary_generate = True
@@ -89,7 +90,7 @@ release = pingouin.__version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -100,50 +101,59 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 pygments_style = "sphinx"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = False
+#todo_include_todos = False
 
 # -- Options for HTML output ----------------------------------------------
 
 # Bootstrap theme
-html_theme = "bootstrap"
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+html_theme = "pydata_sphinx_theme"
+
 html_theme_options = {
-    "source_link_position": "footer",
-    # 'navbar_title': ' ',  # we replace this with an image
-    "bootswatch_theme": "readable",
-    "navbar_sidebarrel": False,
-    # 'nosidebar': True,
-    # 'navbar_site_name': "",
-    "navbar_pagenav": False,
-    "bootstrap_version": "3",
-    "navbar_class": "navbar",
-    "navbar_links": [
-        ("Functions", "api"),
-        ("Guidelines", "guidelines"),
-        ("FAQ", "faq"),
-        ("What's new", "changelog"),
-        ("Contribute", "contributing"),
+    "navbar_start": ["navbar-logo"],
+    "navbar_center": ["navbar-nav"],
+    "navbar_end": ["navbar-icon-links", "theme-switcher"],
+    "navbar_align": "left",
+    "back_to_top_button": True,
+    "show_prev_next": False,
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/raphaelvallat/pingouin",
+            "icon": "fa-brands fa-github",
+        },
+        
     ],
+    "use_edit_page_button": True,
 }
 
 html_logo = "pictures/pingouin.png"
 html_favicon = "pictures/pingouin_blue.svg"
 
-# IMPORTANT: There is a misalignement of the Navbar when using Sphinx > 3.0!
 
 # -- Options for HTML output ------------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = "pingouindoc"
 html_static_path = ["_static"]
-html_show_sourcelink = False
+html_css_files = [
+    'css/style.css',
+]
+html_show_sourcelink = True
 html_copy_source = False
-templates_path = ["templates"]  # To remove the searchbar
+html_sidebars = {
+    "**": [],
+    "api": ["sidebar-nav-bs"]
+}
 
+html_context = {
+    "default_mode": "light",
+    "github_user": "raphaelvallat",
+    "github_repo": "pingouin",
+    "github_version": "main",
+    "doc_path": "docs",
+}
 
-def setup(app):
-    """Add custom CSS"""
-    app.add_css_file("style.css")
+#templates_path = ["templates"]  # To remove the searchbar
 
 
 # -- Intersphinx ------------------------------------------------
