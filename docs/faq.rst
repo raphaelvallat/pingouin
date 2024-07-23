@@ -4,20 +4,12 @@ FAQ
 ###
 
 Installation
-------------
+************
 
 .. ----------------------------- INTRO -----------------------------
-.. raw:: html
 
-    <div class="panel-group">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h5 class="panel-title">
-            <a data-toggle="collapse" href="#collapse_python">How can I install Pingouin on my computer?</a>
-          </h5>
-        </div>
-        <div id="collapse_python" class="panel-collapse collapse">
-          <div class="panel-body">
+How can I install Pingouin on my computer?
+==========================================
 
 To install Pingouin, open a command prompt (or Terminal or Anaconda Prompt) and type:
 
@@ -44,20 +36,9 @@ Now, let's do a simple paired T-test using Pingouin:
 
 
 .. ----------------------------- IMPORT -----------------------------
-.. raw:: html
 
-          </div>
-        </div>
-      </div>
-
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h5 class="panel-title">
-          <a data-toggle="collapse" href="#collapse_import">How to import and use Pingouin?</a>
-        </h5>
-      </div>
-      <div id="collapse_import" class="panel-collapse collapse">
-        <div class="panel-body">
+How to import and use Pingouin?
+===============================
 
 .. code-block:: python
 
@@ -72,38 +53,16 @@ Now, let's do a simple paired T-test using Pingouin:
     ttest(x, y)
 
 .. ----------------------------- STATSMODELS -----------------------------
-.. raw:: html
 
-          </div>
-        </div>
-      </div>
-
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h5 class="panel-title">
-          <a data-toggle="collapse" href="#collapse_sm">What are the differences between statsmodels and Pingouin?</a>
-        </h5>
-      </div>
-      <div id="collapse_sm" class="panel-collapse collapse">
-        <div class="panel-body">
+What are the differences between statsmodels and Pingouin?
+==========================================================
 
 `Statsmodels <https://www.statsmodels.org/stable/index.html>`_ is a great statistical Python package that provides several advanced functions (regression, GLM, time-series analysis) as well as an R-like syntax for fitting models. However, statsmodels can be quite hard to grasp and use for Python beginners and/or users who just want to perform simple statistical tests. The goal of Pingouin is not to replace statsmodels but rather to provide some easy-to-use functions to perform the most widely-used statistical tests. In addition, Pingouin also provides some novel functions (to cite but a few: effect sizes, pairwise T-tests and correlations, ICC, repeated measures correlation, circular statistics...).
 
 .. ----------------------------- SCIPY -----------------------------
-.. raw:: html
 
-          </div>
-        </div>
-      </div>
-
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h5 class="panel-title">
-          <a data-toggle="collapse" href="#collapse_scp">What are the differences between scipy.stats and Pingouin?</a>
-        </h5>
-      </div>
-      <div id="collapse_scp" class="panel-collapse collapse">
-        <div class="panel-body">
+What are the differences between scipy.stats and Pingouin?
+==========================================================
 
 The `scipy.stats <https://docs.scipy.org/doc/scipy/reference/stats.html>`_ module provides several low-level statistical functions. However, most of these functions do not return a very detailed output (e.g. only the T- and p-values for a T-test). Most Pingouin functions are using the low-level SciPy funtions to provide a richer, more exhaustive, output. See for yourself!:
 
@@ -118,11 +77,6 @@ The `scipy.stats <https://docs.scipy.org/doc/scipy/reference/stats.html>`_ modul
     print(pg.ttest(x, y))   # Pingouin: returns a DataFrame with T-value, p-value, degrees of freedom, tail, Cohen d, power and Bayes Factor
     print(ttest_ind(x, y))  # SciPy: returns only the T- and p-values
 
-.. raw:: html
-
-          </div>
-        </div>
-
 .. ############################################################################
 .. ############################################################################
 ..                                  DATA
@@ -130,19 +84,12 @@ The `scipy.stats <https://docs.scipy.org/doc/scipy/reference/stats.html>`_ modul
 .. ############################################################################
 
 Data
-----
+****
 
 .. ----------------------------- READING -----------------------------
-.. raw:: html
 
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h5 class="panel-title">
-          <a data-toggle="collapse" href="#collapse_read">How can I load a .csv or .xlsx file in Python?</a>
-        </h5>
-      </div>
-      <div id="collapse_read" class="panel-collapse collapse">
-        <div class="panel-body">
+How can I load a .csv or .xlsx file in Python?
+==============================================
 
 You need to use the :py:func:`pandas.read_csv` or :py:func:`pandas.read_excel` functions:
 
@@ -153,40 +100,18 @@ You need to use the :py:func:`pandas.read_csv` or :py:func:`pandas.read_excel` f
     pd.read_excel('myfile.xlsx')  # Load an Excel file
 
 .. ----------------------------- MISSING VALUES -----------------------------
-.. raw:: html
 
-          </div>
-        </div>
-      </div>
-
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h5 class="panel-title">
-          <a data-toggle="collapse" href="#collapse_missing">How does Pingouin deal with missing values?</a>
-        </h5>
-      </div>
-      <div id="collapse_missing" class="panel-collapse collapse">
-        <div class="panel-body">
+How does Pingouin deal with missing values?
+===========================================
 
 Pingouin hates missing values as much as you do!
 
 Most functions of Pingouin will automatically remove the missing values. In the case of paired measurements (e.g. paired T-test, correlation, or repeated measures ANOVA), a listwise deletion of missing values is performed, meaning that the entire row is removed. This is generally the best strategy if you have a large sample size and only a few missing values. However, this can be quite drastic if there are a lot of missing values in your data. In that case, it might be useful to look at `imputation methods (see Pandas documentation) <https://pandas.pydata.org/pandas-docs/stable/user_guide/missing_data.html>`_, or use a linear mixed effect model instead, which natively supports missing values. However, the latter is not implemented in Pingouin.
 
 .. ----------------------------- LONG <--> WIDE FORMAT -----------------------------
-.. raw:: html
 
-          </div>
-        </div>
-      </div>
-
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h5 class="panel-title">
-          <a data-toggle="collapse" href="#collapse_wide">What's the difference between wide format and long format data and how can I convert my data from one to the other?</a>
-        </h5>
-      </div>
-      <div id="collapse_wide" class="panel-collapse collapse">
-        <div class="panel-body">
+What's the difference between wide format and long format data and how can I convert my data from one to the other?
+===================================================================================================================
 
 In wide format, each row represent a subject, and each column a measurement (e.g. "Pre", "Post"). This is the most convenient way for humans to look at repeated measurements. It typically results in spreadsheet with a larger number of columns than rows. An example of wide-format dataframe is shown below:
 
@@ -220,20 +145,9 @@ The `Pandas <https://pandas.pydata.org/>`_ package provides some convenient func
 * From long-format to wide-format, use the :py:func:`pandas.pivot_table` function.
 
 .. ----------------------------- DESCRIPTIVE -----------------------------
-.. raw:: html
 
-          </div>
-        </div>
-      </div>
-
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h5 class="panel-title">
-          <a data-toggle="collapse" href="#collapse_desc">Can I compute descriptive statistics with Pingouin?</a>
-        </h5>
-      </div>
-      <div id="collapse_desc" class="panel-collapse collapse">
-        <div class="panel-body">
+Can I compute descriptive statistics with Pingouin?
+===================================================
 
 No, the central idea behind Pingouin is that all data manipulations and descriptive statistics should be first performed in Pandas (or NumPy). For example, to compute the mean, standard deviation, and quartiles of all the numeric columns of a pandas DataFrame, one can easily use the :py:meth:`pandas.DataFrame.describe` method:
 
@@ -241,10 +155,6 @@ No, the central idea behind Pingouin is that all data manipulations and descript
 
     data.describe()
 
-.. raw:: html
-
-          </div>
-        </div>
 
 .. ############################################################################
 .. ############################################################################
@@ -253,38 +163,20 @@ No, the central idea behind Pingouin is that all data manipulations and descript
 .. ############################################################################
 
 Others
-------
+******
 
 .. ----------------------------- LICENSE -----------------------------
-.. raw:: html
 
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h5 class="panel-title">
-          <a data-toggle="collapse" href="#collapse_license">Why is Pingouin licensed under the GNU-GPL v3?</a>
-        </h5>
-      </div>
-      <div id="collapse_license" class="panel-collapse collapse">
-        <div class="panel-body">
+Why is Pingouin licensed under the GNU-GPL v3?
+==============================================
 
 Pingouin is licensed under the GNU General Public License v3.0 (GPL-3), which is less permissive than the BSD or MIT licenses. The reason for this is that Pingouin borrows extensively from R packages, which are all licensed under the GPL-3.
 To read more about what you can do and cannot do with a GPL-3 license, please visit `tldrlegal.com <https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3)#summary>`_ or `choosealicense.com <https://choosealicense.com/licenses/>`_.
 
 .. ----------------------------- NEW RELEASES -----------------------------
-.. raw:: html
 
-          </div>
-        </div>
-      </div>
-
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h5 class="panel-title">
-          <a data-toggle="collapse" href="#collapse_release">How can I be notified of new releases?</a>
-        </h5>
-      </div>
-      <div id="collapse_release" class="panel-collapse collapse">
-        <div class="panel-body">
+How can I be notified of new releases?
+======================================
 
 You can click "Watch" on the `GitHub <https://github.com/raphaelvallat/pingouin>`_ of Pingouin:
 
@@ -298,61 +190,14 @@ Whenever a new release is available, you can simply upgrade your version by typi
     pip install --upgrade pingouin
 
 .. ----------------------------- DONATION -----------------------------
-.. raw:: html
 
-          </div>
-        </div>
-      </div>
-
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h5 class="panel-title">
-          <a data-toggle="collapse" href="#collapse_donate">I am not a programmer, how can I contribute to Pingouin?</a>
-        </h5>
-      </div>
-      <div id="collapse_donate" class="panel-collapse collapse">
-        <div class="panel-body">
+I am not a programmer, how can I contribute to Pingouin?
+========================================================
 
 There are many ways to contribute to Pingouin, even if you are not a programmer, for example, reporting bugs or results that are inconsistent with other statistical softwares, improving the documentation and examples, or, even `buying the developers a coffee <https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=K2FZVJGCKYPAG&currency_code=USD&source=url>`_!
 
 .. ----------------------------- CITING PINGOUIN -----------------------------
-.. raw:: html
 
-          </div>
-        </div>
-      </div>
-
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h5 class="panel-title">
-          <a data-toggle="collapse" href="#collapse_cite">How can I cite Pingouin?</a>
-        </h5>
-      </div>
-      <div id="collapse_cite" class="panel-collapse collapse">
-        <div class="panel-body">
-
-To cite Pingouin, please use the publication in JOSS:
-
-* Vallat, R. (2018). Pingouin: statistics in Python. *Journal of Open Source Software*, 3(31), 1026, `https://doi.org/10.21105/joss.01026 <https://doi.org/10.21105/joss.01026>`_
-
-BibTeX:
-
-.. code-block:: latex
-
-  @ARTICLE{Vallat2018,
-    title    = "Pingouin: statistics in Python",
-    author   = "Vallat, Raphael",
-    journal  = "The Journal of Open Source Software",
-    volume   =  3,
-    number   =  31,
-    pages    = "1026",
-    month    =  nov,
-    year     =  2018
-  }
-
-.. ----------------------------- END -----------------------------
-.. raw:: html
-
-          </div>
-        </div>
-      </div>
+How can I cite Pingouin?
+========================
+Please go to :ref:`citing`.
