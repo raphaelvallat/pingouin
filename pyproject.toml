@@ -48,6 +48,14 @@ test = [
     # Ensure coverage is new enough for `source_pkgs`.
     "coverage[toml]>=5.3",
 ]
+docs = [
+    "sphinx>7.0.0",
+    "pydata_sphinx_theme",
+    "numpydoc",
+    "sphinx-copybutton",
+    "sphinx-design",
+    "sphinx-notfound-page",
+]
 
 [project.urls]
 Homepage = "https://pingouin-stats.org/index.html"
