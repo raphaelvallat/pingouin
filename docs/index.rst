@@ -27,19 +27,6 @@
 .. figure::  /pictures/logo_pingouin.png
   :align:   center
 
-
-Temporary TOC for the navbar
---------------------------
-.. toctree::
-  :maxdepth: 1
-
-  api
-  guidelines
-  faq
-  contributing
-  changelog
-
-
 **Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy. Some of its main features are listed below. For a full list of available functions, please refer to the `API documentation <https://pingouin-stats.org/build/html/api.html#>`_.
 
 1. ANOVAs: N-ways, repeated measures, mixed, ancova
@@ -542,13 +529,6 @@ This program is provided with NO WARRANTY OF ANY KIND. Pingouin is still under h
 - `Johannes Elfner <https://www.linkedin.com/in/johannes-elfner/>`_
 - `Stefan Appelhoff <https://stefanappelhoff.com>`_
 
-How to cite Pingouin?
-=====================
-
-If you want to cite Pingouin, please use the publication in JOSS:
-
-* Vallat, R. (2018). Pingouin: statistics in Python. *Journal of Open Source Software*, 3(31), 1026, `https://doi.org/10.21105/joss.01026 <https://doi.org/10.21105/joss.01026>`_
-
 Acknowledgement
 ===============
 
@@ -561,3 +541,15 @@ Several functions of Pingouin were inspired from R or Matlab toolboxes, includin
 - `robust correlations (Matlab) <https://sourceforge.net/projects/robustcorrtool/>`_
 - `repeated-measure correlation (R) <https://cran.r-project.org/web/packages/rmcorr/index.html>`_
 - `real-statistics.com <https://www.real-statistics.com/>`_
+
+
+.. toctree::
+  :maxdepth: 1
+  :hidden:
+
+  Functions <api>
+  Guidelines <guidelines>
+  FAQ <faq> 
+  Changelog <changelog>
+  Contribute <contributing>
+  Cite <citing>
