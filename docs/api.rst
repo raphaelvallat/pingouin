@@ -5,8 +5,6 @@
 Functions
 #########
 
-.. contents:: Table of Contents
-   :depth: 2
 
 ANOVA and T-test
 ----------------

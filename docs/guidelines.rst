@@ -7,11 +7,8 @@ In this page, you will find a collection of flowcharts designed to help you choo
 which functions of Pingouin are adequate for your analysis. Click on
 the desired flowchart to view a full scale image with hyperlinks to the relevant documentation.
 
-.. contents:: Table of Contents
-   :depth: 2
-
 ANOVA
------
+*****
 
 .. figure::  /pictures/flowchart/flowchart_one_way_ANOVA.svg
   :align: center
@@ -40,7 +37,7 @@ Example code
 |
 
 Correlation
------------
+***********
 
 .. figure::  /pictures/flowchart/flowchart_correlations.svg
   :align: center
@@ -70,7 +67,7 @@ Example code
 |
 
 Non-parametric
---------------
+**************
 
 .. figure::  /pictures/flowchart/flowchart_nonparametric.svg
   :align: center

@@ -1,10 +1,10 @@
 .. _citing:
 
 Citation and logo
-=================
+#################
 
 Citing
-------------
+******
 
 If you want to cite Pingouin, please use the publication in JOSS:
 
@@ -19,8 +19,6 @@ Here is a ready-made BibTeX entry:
     @article{Vallat2018,
         title = {Pingouin: statistics in Python},
         volume = {3},
-        ISSN = {2475-9066},
-        url = {http://dx.doi.org/10.21105/joss.01026},
         DOI = {10.21105/joss.01026},
         number = {31},
         journal = {Journal of Open Source Software},
@@ -33,16 +31,16 @@ Here is a ready-made BibTeX entry:
 
 
 Logo
-----------
+****
 
 Wide logo
-^^^^^^^^^
+=========
 .. figure::  /pictures/logo_pingouin.png
   :align: left
   :alt: pingouin logo
 
 Quadratic logo 
-^^^^^^^^^^^^^^
+==============
 .. figure::  /pictures/pingouin.png
   :align: left
   :alt: pingouin logo quadratic

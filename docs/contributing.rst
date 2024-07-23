@@ -1,7 +1,7 @@
 .. _Contribute:
 
 Contribute to Pingouin
-**********************
+######################
 
 There are many ways to contribute to Pingouin: reporting bugs or results that are inconsistent with other statistical softwares, adding new functions, improving the documentation, etc...
 
