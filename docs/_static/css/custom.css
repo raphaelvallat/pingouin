@@ -18,18 +18,17 @@ html[data-theme="dark"] {
 }
 
 #pst-back-to-top:hover {
-  background-color: #A95200;
+  background-color: #a95200;
 }
 
 table caption {
   text-align: left;
 }
 
-
 /* -------------------- NAV BAR-------------------- */
 
 html[data-theme="dark"] .navbar-brand p {
-  color: white
+  color: white;
 }
 
 html[data-theme="dark"] .navbar-brand img {
