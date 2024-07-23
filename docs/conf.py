@@ -108,10 +108,11 @@ html_theme_options = {
     ],
     "use_edit_page_button": True,
     "pygments_light_style": "vs",
-    "pygments_dark_style": "github",
+    "pygments_dark_style": "monokai",
 }
 
 html_sidebars = {
+    "citing": [],
     "contributing": [],
     "changelog": [],
     "faq": [],
@@ -120,7 +121,6 @@ html_sidebars = {
 }
 
 html_context = {
-    "default_mode": "light",
     "github_user": "raphaelvallat",
     "github_repo": "pingouin",
     "github_version": "main",
