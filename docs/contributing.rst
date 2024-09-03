@@ -1,7 +1,7 @@
 .. _Contribute:
 
 Contribute to Pingouin
-**********************
+######################
 
 There are many ways to contribute to Pingouin: reporting bugs or results that are inconsistent with other statistical softwares, adding new functions, improving the documentation, etc...
 
@@ -45,11 +45,11 @@ All changes to the codebase must be properly documented. To ensure that document
 Build locally
 ^^^^^^^^^^^^^
 
-If you want to test the documentation locally, you will need to install the following packages:
+If you want to test the documentation locally, you will need to install additional dependencies. They can be installed with the docs extra:
 
 .. code-block:: bash
 
-  $ pip install --upgrade sphinx sphinx_bootstrap_theme numpydoc sphinx-copybutton
+  $ pip install --upgrade pingouin[docs]
 
 and then within the ``pingouin/docs`` directory do:
 

@@ -3,11 +3,6 @@
 What's new
 ##########
 
-.. contents:: Table of Contents
-    :depth: 2
-
-*************
-
 v0.5.4 (January 2024)
 ---------------------
 
