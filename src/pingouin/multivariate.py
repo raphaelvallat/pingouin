@@ -78,7 +78,8 @@ def multivariate_normality(X, alpha=0.05):
     # Squared-Mahalanobis distances
     Dj = np.diag(np.linalg.multi_dot([difT, S_inv, difT.T]))
     Y = np.linalg.multi_dot([X, S_inv, X.T])
-    Djk = -2 * Y.T + np.repeat(np.diag(Y.T), n).reshape(n, -1) + np.tile(np.diag(Y.T), (n, 1))
+    Y_diag = np.diag(Y)
+    Djk = -2 * Y.T + Y_diag + Y_diag[..., None]
 
     # Smoothing parameter
     b = 1 / (np.sqrt(2)) * ((2 * p + 1) / 4) ** (1 / (p + 4)) * (n ** (1 / (p + 4)))
