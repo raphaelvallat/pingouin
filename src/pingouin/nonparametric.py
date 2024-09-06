@@ -996,7 +996,9 @@ def quades(data, dv, within, group):
     """
     # Validate input types
     if not all(isinstance(param, str) for param in [dv, within, group]):
-        raise TypeError("Parameters 'dv', 'within', and 'group' must be strings representing column names.")
+        raise TypeError(
+            "Parameters 'dv', 'within', and 'group' must be strings representing column names."
+        )
 
     # Ensure columns exist in the data
     if not all(col in data.columns for col in [dv, within, group]):
@@ -1008,26 +1010,28 @@ def quades(data, dv, within, group):
         raise ValueError("At least two groups are required to perform Quade's test.")
 
     # Step 1: Calculate the change scores (Posttest - Pretest)
-    data['change_score'] = data[dv] - data[within]
+    data["change_score"] = data[dv] - data[within]
 
     # Handle zero variance case (all change scores are zero)
-    if np.all(data['change_score'] == 0):
+    if np.all(data["change_score"] == 0):
         F_stat, p_value = "N/A", "N/A"
     else:
         # Step 2: Rank the scores
-        data['rank_change'] = scipy.stats.rankdata(data['change_score'])
-        data['rank_pretest'] = scipy.stats.rankdata(data[within])
+        data["rank_change"] = scipy.stats.rankdata(data["change_score"])
+        data["rank_pretest"] = scipy.stats.rankdata(data[within])
 
         # Step 3: Handle identical ranks case
-        if np.all(data['rank_pretest'] == data['rank_pretest'][0]):
-            data['residuals'] = data['rank_change'] - np.mean(data['rank_change'])
+        if np.all(data["rank_pretest"] == data["rank_pretest"][0]):
+            data["residuals"] = data["rank_change"] - np.mean(data["rank_change"])
         else:
             # Perform linear regression
-            slope, intercept, _, _, _ = scipy.stats.linregress(data['rank_pretest'], data['rank_change'])
-            data['residuals'] = data['rank_change'] - (slope * data['rank_pretest'] + intercept)
+            slope, intercept, _, _, _ = scipy.stats.linregress(
+                data["rank_pretest"], data["rank_change"]
+            )
+            data["residuals"] = data["rank_change"] - (slope * data["rank_pretest"] + intercept)
 
         # Step 4: Ensure there are at least two groups with residuals
-        residuals_by_group = [data.loc[data[group] == g, 'residuals'].values for g in unique_groups]
+        residuals_by_group = [data.loc[data[group] == g, "residuals"].values for g in unique_groups]
         if len(residuals_by_group) < 2:
             raise ValueError("At least two groups are required to perform Quade's test.")
 
@@ -1036,16 +1040,22 @@ def quades(data, dv, within, group):
         F_stat, p_value = f"{F_statistic:.3f}", f"{p_value:.4f}"
 
     # Step 5: Calculate and format Means (M) and Standard Deviations (SD) for Pretest and Posttest
-    summary_stats = data.groupby(group).agg(
-        PretestM_SD=(within, lambda x: f"{x.mean():.2f} ({x.std():.2f})"),
-        PosttestM_SD=(dv, lambda x: f"{x.mean():.2f} ({x.std():.2f})")
-    ).reset_index()
+    summary_stats = (
+        data.groupby(group)
+        .agg(
+            PretestM_SD=(within, lambda x: f"{x.mean():.2f} ({x.std():.2f})"),
+            PosttestM_SD=(dv, lambda x: f"{x.mean():.2f} ({x.std():.2f})"),
+        )
+        .reset_index()
+    )
 
     # Step 6: Add F-statistic and p-value
-    summary_stats['F'] = [F_stat if g == unique_groups[0] else '' for g in summary_stats[group]]
-    summary_stats['p-value'] = [p_value if g == unique_groups[0] else '' for g in summary_stats[group]]
+    summary_stats["F"] = [F_stat if g == unique_groups[0] else "" for g in summary_stats[group]]
+    summary_stats["p-value"] = [
+        p_value if g == unique_groups[0] else "" for g in summary_stats[group]
+    ]
 
     # Rename the group column
-    final_table = summary_stats.rename(columns={group: 'Group'})
+    final_table = summary_stats.rename(columns={group: "Group"})
 
     return final_table
