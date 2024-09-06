@@ -12,6 +12,7 @@ from pingouin.nonparametric import (
     friedman,
     cochran,
     harrelldavis,
+    quades,
 )
 
 np.random.seed(1234)
@@ -243,3 +244,71 @@ class TestNonParametric(TestCase):
         np.testing.assert_array_almost_equal(
             harrelldavis(p, [0.25, 0.75], -1), np.apply_over_axes(func, p, 1)
         )
+
+    def test_quades(self):
+        """Test function quades"""
+        # Basic test case
+        data = {
+            'group': ['A', 'A', 'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B'],
+            'pretest': [50, 60, 45, 70, 65, 55, 75, 60, 80, 70],
+            'posttest': [52, 63, 47, 72, 67, 70, 95, 85, 100, 95]
+        }
+        df = pd.DataFrame(data)
+
+        result = quades(data=df, dv='posttest', within='pretest', group='group')
+
+        # Verify results
+        assert result.loc[result['Group'] == 'A', 'F'].values[0] == '12.635'
+        assert result.loc[result['Group'] == 'A', 'p-value'].values[0] == '0.0075'
+
+        # Check if the output is a DataFrame and has the correct column names
+        assert isinstance(result, pd.DataFrame)
+        assert 'Group' in result.columns
+        assert 'F' in result.columns
+        assert 'p-value' in result.columns
+
+        # Additional test cases
+
+        # Edge case: Empty DataFrame
+        empty_df = pd.DataFrame(columns=['group', 'pretest', 'posttest'])
+        try:
+            quades(data=empty_df, dv='posttest', within='pretest', group='group')
+        except ValueError:
+            pass  # Expect an error for an empty DataFrame
+
+        # Edge case: Only one group
+        one_group_df = pd.DataFrame({
+            'group': ['A', 'A', 'A', 'A', 'A'],
+            'pretest': [50, 60, 45, 70, 65],
+            'posttest': [52, 63, 47, 72, 67]
+        })
+        try:
+            quades(data=one_group_df, dv='posttest', within='pretest', group='group')
+        except ValueError:
+            pass  # Expect an error when there is only one group
+
+        # Data type validity test: Incorrect data type
+        try:
+            quades(data=df, dv=123, within='pretest', group='group')
+        except TypeError:
+            pass  # Expect an error when 'dv' is not a string
+
+        # Test for non-existent column
+        try:
+            quades(data=df, dv='nonexistent', within='pretest', group='group')
+        except KeyError:
+            pass  # Expect an error when the specified column does not exist
+
+        # Special case test: All 'within' values are the same
+        df_same_within = df.copy()
+        df_same_within['pretest'] = 60
+        result = quades(data=df_same_within, dv='posttest', within='pretest', group='group')
+        assert isinstance(result, pd.DataFrame)  # The result should still be a DataFrame
+        assert 'F' in result.columns and 'p-value' in result.columns
+
+        # Special case test: All change scores are zero
+        df_zero_change = df.copy()
+        df_zero_change['posttest'] = df_zero_change['pretest']
+        result = quades(data=df_zero_change, dv='posttest', within='pretest', group='group')
+        assert isinstance(result, pd.DataFrame)  # The result should still be a DataFrame
+        assert 'F' in result.columns and 'p-value' in result.columns
