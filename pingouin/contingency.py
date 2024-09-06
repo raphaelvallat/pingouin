@@ -483,46 +483,26 @@ def chi2_exact(data, x, y, method='fisher', **kwargs):
         "greater",
     ]
     
-    if method == 'fisher':
-        for alternative in alternatives:
-            odds, pval = fisher_exact(table = observed, alternative = alternative)
-            stats.append(
-            {
-                "alternative": alternative,
-                "odds ratio": odds,
-                "pval": pval,
-            }
-        )
-            
-        stats = pd.DataFrame(stats)[["alternative", "odds ratio", "pval"]]
+    if method == "fisher":
+        func = fisher_exact
+    elif method == "barnard":
+        func = barnard_exact
+    elif method == "boschloo":
+        func = boschloo_exact
+    else:
+        raise ValueError(f"Unsupported method {method}")
 
-    elif method == 'barnard':
-        for alternative in alternatives:
-            res = barnard_exact(table = observed, alternative = alternative, **kwargs)
-            odds, pval = (res.statistic, res.pvalue)
-            stats.append(
+    for alternative in alternatives:
+        res = func(table=observed, alternative=alternative, **kwargs)
+        stats.append(
             {
                 "alternative": alternative,
-                "odds ratio": odds,
-                "pval": pval,
+                "odds ratio": res.statistic,
+                "pval": res.pvalue,
             }
         )
-            
-        stats = pd.DataFrame(stats)[["alternative", "odds ratio", "pval"]]
-    
-    elif method == 'boschloo':
-        for alternative in alternatives:
-            res = boschloo_exact(table = observed, alternative = alternative, **kwargs)
-            odds, pval = (res.statistic, res.pvalue)
-            stats.append(
-            {
-                "alternative": alternative,
-                "odds ratio": odds,
-                "pval": pval,
-            }
-        )
-            
-        stats = pd.DataFrame(stats)[["alternative", "odds ratio", "pval"]]
+
+    stats = pd.DataFrame(stats)[["alternative", "odds ratio", "pval"]]
         
     return expected, observed, _postprocess_dataframe(stats)
 
