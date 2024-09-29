@@ -27,7 +27,7 @@
 .. figure::  /pictures/logo_pingouin.png
   :align:   center
 
-** SOME CHANGE  **
+**SOME CHANGE**
 
 **Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy. Some of its main features are listed below. For a full list of available functions, please refer to the `API documentation <https://pingouin-stats.org/build/html/api.html#>`_.
 
