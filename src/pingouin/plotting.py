@@ -540,9 +540,17 @@ def plot_paired(
     if boxplot_in_front:
         _boxplot_kwargs.update(
             {
-                "boxprops": {"zorder": 2},
-                "whiskerprops": {"zorder": 2},
-                "zorder": 2,
+                "boxprops": {"zorder": 3},  # Boxplot on top
+                "whiskerprops": {"zorder": 3},
+                "zorder": 3,
+            }
+        )
+    else:
+        _boxplot_kwargs.update(
+            {
+                "boxprops": {"zorder": 1},  # Boxplot behind
+                "whiskerprops": {"zorder": 1},
+                "zorder": 1,
             }
         )
 
