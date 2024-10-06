@@ -27,28 +27,28 @@ class TestCorrelation(TestCase):
         stats = corr(x, y, method="pearson")
         assert np.isclose(stats.loc["pearson", "r"], 0.1761221)
         assert np.isclose(stats.loc["pearson", "p-val"], 0.3518659)
-        assert stats.loc["pearson", "CI95%"][0] == round(-0.1966232, 2)
-        assert stats.loc["pearson", "CI95%"][1] == round(0.5043872, 2)
+        assert stats.loc["pearson", "CI95"][0] == round(-0.1966232, 2)
+        assert stats.loc["pearson", "CI95"][1] == round(0.5043872, 2)
         # - One-sided: greater
         stats = corr(x, y, method="pearson", alternative="greater")
         assert np.isclose(stats.loc["pearson", "r"], 0.1761221)
         assert np.isclose(stats.loc["pearson", "p-val"], 0.175933)
-        assert stats.loc["pearson", "CI95%"][0] == round(-0.1376942, 2)
-        assert stats.loc["pearson", "CI95%"][1] == 1
+        assert stats.loc["pearson", "CI95"][0] == round(-0.1376942, 2)
+        assert stats.loc["pearson", "CI95"][1] == 1
         # - One-sided: less
         stats = corr(x, y, method="pearson", alternative="less")
         assert np.isclose(stats.loc["pearson", "r"], 0.1761221)
         assert np.isclose(stats.loc["pearson", "p-val"], 0.824067)
-        assert stats.loc["pearson", "CI95%"][0] == -1
-        assert stats.loc["pearson", "CI95%"][1] == round(0.4578044, 2)
+        assert stats.loc["pearson", "CI95"][0] == -1
+        assert stats.loc["pearson", "CI95"][1] == round(0.4578044, 2)
 
         # Spearman correlation
         stats = corr(x, y, method="spearman")
         assert np.isclose(stats.loc["spearman", "r"], 0.4740823)
         assert np.isclose(stats.loc["spearman", "p-val"], 0.008129768)
         # CI are calculated using a different formula for Spearman in R
-        # assert stats.loc['spearman', 'CI95%'][0] == round(0.1262988, 2)
-        # assert stats.loc['spearman', 'CI95%'][1] == round(0.7180799, 2)
+        # assert stats.loc['spearman', 'CI95'][0] == round(0.1262988, 2)
+        # assert stats.loc['spearman', 'CI95'][1] == round(0.7180799, 2)
 
         # Kendall correlation
         # R uses a different estimation method than scipy for the p-value
@@ -88,8 +88,8 @@ class TestCorrelation(TestCase):
         stats = corr(x, y, method="bicor")
         assert np.isclose(stats.loc["bicor", "r"], 0.4951418)
         assert np.isclose(stats.loc["bicor", "p-val"], 0.005403701)
-        assert stats.loc["bicor", "CI95%"][0] == round(0.1641553, 2)
-        assert stats.loc["bicor", "CI95%"][1] == round(0.7259185, 2)
+        assert stats.loc["bicor", "CI95"][0] == round(0.1641553, 2)
+        assert stats.loc["bicor", "CI95"][1] == round(0.7259185, 2)
         stats = corr(x, y, method="bicor", c=5)
         assert np.isclose(stats.loc["bicor", "r"], 0.4940706950017)
         # Not normally distributed
@@ -198,7 +198,7 @@ class TestCorrelation(TestCase):
         stats = rm_corr(data=df, x="pH", y="PacO2", subject="Subject").round(3)
         assert stats.at["rm_corr", "r"] == -0.507
         assert stats.at["rm_corr", "dof"] == 38
-        assert np.allclose(np.round(stats.at["rm_corr", "CI95%"], 2), [-0.71, -0.23])
+        assert np.allclose(np.round(stats.at["rm_corr", "CI95"], 2), [-0.71, -0.23])
         assert stats.at["rm_corr", "pval"] == 0.001
         # Test with less than 3 subjects (same behavior as R package)
         with pytest.raises(ValueError):

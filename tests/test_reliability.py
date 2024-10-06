@@ -61,8 +61,8 @@ class TestReliability(TestCase):
         np.testing.assert_almost_equal(
             (icc["pval"]), [0.16472, 0.00013, 0.00013, 0.16472, 0.00013, 0.00013], decimal=4
         )
-        lower = icc["CI95%"].explode().to_numpy()[::2].astype(float)
-        upper = icc["CI95%"].explode().to_numpy()[1::2].astype(float)
+        lower = icc["CI95"].explode().to_numpy()[::2].astype(float)
+        upper = icc["CI95"].explode().to_numpy()[1::2].astype(float)
         np.testing.assert_almost_equal(lower, [-0.13, 0.02, 0.34, -0.88, 0.07, 0.68])
         np.testing.assert_almost_equal(upper, [0.72, 0.76, 0.95, 0.91, 0.93, 0.99])
 
@@ -78,8 +78,8 @@ class TestReliability(TestCase):
         np.testing.assert_almost_equal(
             (icc["pval"]), [2.2e-06, 5.0e-06, 5.0e-06, 2.2e-06, 5.0e-06, 5.0e-06]
         )
-        lower = icc["CI95%"].explode().to_numpy()[::2].astype(float)
-        upper = icc["CI95%"].explode().to_numpy()[1::2].astype(float)
+        lower = icc["CI95"].explode().to_numpy()[::2].astype(float)
+        upper = icc["CI95"].explode().to_numpy()[1::2].astype(float)
         np.testing.assert_almost_equal(lower, [0.43, 0.43, 0.43, 0.75, 0.75, 0.75])
         np.testing.assert_almost_equal(upper, [0.93, 0.93, 0.93, 0.98, 0.98, 0.98])
         # Test with missing values

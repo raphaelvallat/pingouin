@@ -61,7 +61,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
         * ``'dof'``: degrees of freedom
         * ``'alternative'``: alternative of the test
         * ``'p-val'``: p-value
-        * ``'CI95%'``: confidence intervals of the difference in means
+        * ``'CI95'``: confidence intervals of the difference in means
         * ``'cohen-d'``: Cohen d effect size
         * ``'BF10'``: Bayes Factor of the alternative hypothesis
         * ``'power'``: achieved power of the test ( = 1 - type II error)
@@ -143,7 +143,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> from pingouin import ttest
     >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> ttest(x, 4).round(2)
-              T  dof alternative  p-val         CI95%  cohen-d   BF10  power
+              T  dof alternative  p-val          CI95  cohen-d   BF10  power
     T-test  1.4    4   two-sided   0.23  [2.32, 9.08]     0.62  0.766   0.19
 
     2. One sided paired T-test.
@@ -151,13 +151,13 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
     >>> ttest(pre, post, paired=True, alternative='less').round(2)
-               T  dof alternative  p-val          CI95%  cohen-d   BF10  power
+               T  dof alternative  p-val           CI95  cohen-d   BF10  power
     T-test -2.31    4        less   0.04  [-inf, -0.05]     0.25  3.122   0.12
 
     Now testing the opposite alternative hypothesis
 
     >>> ttest(pre, post, paired=True, alternative='greater').round(2)
-               T  dof alternative  p-val         CI95%  cohen-d  BF10  power
+               T  dof alternative  p-val          CI95  cohen-d  BF10  power
     T-test -2.31    4     greater   0.96  [-1.35, inf]     0.25  0.32   0.02
 
     3. Paired T-test with missing values.
@@ -166,7 +166,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> pre = [5.5, 2.4, np.nan, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
     >>> ttest(pre, post, paired=True).round(3)
-                T  dof alternative  p-val          CI95%  cohen-d   BF10  power
+                T  dof alternative  p-val           CI95  cohen-d   BF10  power
     T-test -5.902    3   two-sided   0.01  [-1.5, -0.45]    0.306  7.169  0.073
 
     Compare with SciPy
@@ -181,7 +181,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> x = np.random.normal(loc=7, size=20)
     >>> y = np.random.normal(loc=4, size=20)
     >>> ttest(x, y)
-                   T  dof alternative         p-val         CI95%   cohen-d       BF10  power
+                   T  dof alternative         p-val          CI95   cohen-d       BF10  power
     T-test  9.106452   38   two-sided  4.306971e-11  [2.64, 4.15]  2.879713  1.366e+08    1.0
 
     5. Independent two-sample T-test with unequal sample size. A Welch's T-test is used.
@@ -189,13 +189,13 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> np.random.seed(123)
     >>> y = np.random.normal(loc=6.5, size=15)
     >>> ttest(x, y)
-                   T        dof alternative     p-val          CI95%   cohen-d   BF10     power
+                   T        dof alternative     p-val           CI95   cohen-d   BF10     power
     T-test  1.996537  31.567592   two-sided  0.054561  [-0.02, 1.65]  0.673518  1.469  0.481867
 
     6. However, the Welch's correction can be disabled:
 
     >>> ttest(x, y, correction=False)
-                   T  dof alternative     p-val          CI95%   cohen-d   BF10     power
+                   T  dof alternative     p-val           CI95   cohen-d   BF10     power
     T-test  1.971859   33   two-sided  0.057056  [-0.03, 1.66]  0.673518  1.418  0.481867
 
     Compare with SciPy
@@ -287,7 +287,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
         ci[0] = -np.inf
 
     # Rename CI
-    ci_name = "CI%.0f%%" % (100 * confidence)
+    ci_name = "CI%.0f" % (100 * confidence)
 
     # Achieved power
     if ny == 1:
