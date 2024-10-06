@@ -157,7 +157,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
    :widths: auto
 
    ======  =====  =============  =======  =============  =========  ======  =======
-        T    dof  alternative      p-val  CI95%            cohen-d    BF10    power
+        T    dof  alternative      p-val  CI95             cohen-d    BF10    power
    ======  =====  =============  =======  =============  =========  ======  =======
    -3.401     58  two-sided        0.001  [-1.68 -0.43]      0.878  26.155    0.917
    ======  =====  =============  =======  =============  =========  ======  =======
@@ -175,7 +175,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
    :widths: auto
 
    ===  =====  ===========  =======  ======  =======
-     n      r  CI95%          p-val    BF10    power
+     n      r  CI95           p-val    BF10    power
    ===  =====  ===========  =======  ======  =======
     30  0.595  [0.3  0.79]    0.001  69.723    0.950
    ===  =====  ===========  =======  ======  =======
@@ -196,7 +196,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
    :widths: auto
 
    ===  =====  ===========  =======  =======
-     n      r  CI95%          p-val    power
+     n      r  CI95           p-val    power
    ===  =====  ===========  =======  =======
     30  0.576  [0.27 0.78]    0.001    0.933
    ===  =====  ===========  =======  =======
@@ -334,7 +334,7 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
   :widths: auto
 
   ===  ===  ========  =============  ===  =====  =============  =======  ======  =======
-  X    Y    method    alternative      n      r  CI95%            p-unc    BF10    power
+  X    Y    method    alternative      n      r  CI95             p-unc    BF10    power
   ===  ===  ========  =============  ===  =====  =============  =======  ======  =======
   X    Y    pearson   two-sided       30  0.366  [0.01 0.64]      0.047   1.500    0.525
   X    Z    pearson   two-sided       30  0.251  [-0.12  0.56]    0.181   0.534    0.272

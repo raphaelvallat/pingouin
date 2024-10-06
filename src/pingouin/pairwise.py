@@ -1232,7 +1232,7 @@ def pairwise_corr(
     >>> pd.set_option('display.max_columns', 20)
     >>> data = pg.read_dataset('pairwise_corr').iloc[:, 1:]
     >>> pg.pairwise_corr(data, method='spearman', alternative='greater', padjust='bonf').round(3)
-                   X                  Y    method alternative    n      r         CI95%  p-unc  p-corr p-adjust  power
+                   X                  Y    method alternative    n      r          CI95  p-unc  p-corr p-adjust  power
     0    Neuroticism       Extraversion  spearman     greater  500 -0.325  [-0.39, 1.0]  1.000   1.000     bonf  0.000
     1    Neuroticism           Openness  spearman     greater  500 -0.028   [-0.1, 1.0]  0.735   1.000     bonf  0.012
     2    Neuroticism      Agreeableness  spearman     greater  500 -0.151  [-0.22, 1.0]  1.000   1.000     bonf  0.000
@@ -1249,7 +1249,7 @@ def pairwise_corr(
     >>> pcor = pg.pairwise_corr(data, columns=['Openness', 'Extraversion',
     ...                                        'Neuroticism'], method='bicor')
     >>> pcor.round(3)
-                  X             Y method alternative    n      r           CI95%  p-unc  power
+                  X             Y method alternative    n      r            CI95  p-unc  power
     0      Openness  Extraversion  bicor   two-sided  500  0.247    [0.16, 0.33]  0.000  1.000
     1      Openness   Neuroticism  bicor   two-sided  500 -0.028   [-0.12, 0.06]  0.535  0.095
     2  Extraversion   Neuroticism  bicor   two-sided  500 -0.343  [-0.42, -0.26]  0.000  1.000
@@ -1257,7 +1257,7 @@ def pairwise_corr(
     3. One-versus-all pairwise correlations
 
     >>> pg.pairwise_corr(data, columns=['Neuroticism']).round(3)
-                 X                  Y   method alternative    n      r           CI95%  p-unc       BF10  power
+                 X                  Y   method alternative    n      r            CI95  p-unc       BF10  power
     0  Neuroticism       Extraversion  pearson   two-sided  500 -0.350  [-0.42, -0.27]  0.000  6.765e+12  1.000
     1  Neuroticism           Openness  pearson   two-sided  500 -0.010    [-0.1, 0.08]  0.817      0.058  0.056
     2  Neuroticism      Agreeableness  pearson   two-sided  500 -0.134  [-0.22, -0.05]  0.003      5.122  0.854
@@ -1267,7 +1267,7 @@ def pairwise_corr(
 
     >>> columns = [['Neuroticism', 'Extraversion'], ['Openness']]
     >>> pg.pairwise_corr(data, columns).round(3)
-                  X         Y   method alternative    n      r         CI95%  p-unc       BF10  power
+                  X         Y   method alternative    n      r          CI95  p-unc       BF10  power
     0   Neuroticism  Openness  pearson   two-sided  500 -0.010  [-0.1, 0.08]  0.817      0.058  0.056
     1  Extraversion  Openness  pearson   two-sided  500  0.267  [0.18, 0.35]  0.000  5.277e+06  1.000
 
@@ -1278,7 +1278,7 @@ def pairwise_corr(
     6. Pairwise partial correlation
 
     >>> pg.pairwise_corr(data, covar=['Neuroticism', 'Openness'])
-                   X                  Y   method                        covar alternative    n         r          CI95%     p-unc
+                   X                  Y   method                        covar alternative    n         r           CI95     p-unc
     0   Extraversion      Agreeableness  pearson  ['Neuroticism', 'Openness']   two-sided  500 -0.038737  [-0.13, 0.05]  0.388361
     1   Extraversion  Conscientiousness  pearson  ['Neuroticism', 'Openness']   two-sided  500 -0.071427  [-0.16, 0.02]  0.111389
     2  Agreeableness  Conscientiousness  pearson  ['Neuroticism', 'Openness']   two-sided  500  0.123108   [0.04, 0.21]  0.005944
@@ -1408,7 +1408,7 @@ def pairwise_corr(
             "n",
             "outliers",
             "r",
-            "CI95%",
+            "CI95",
             "p-val",
             "BF10",
             "power",
@@ -1491,7 +1491,7 @@ def pairwise_corr(
         "n",
         "outliers",
         "r",
-        "CI95%",
+        "CI95",
         "p-unc",
         "p-corr",
         "p-adjust",

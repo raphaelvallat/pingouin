@@ -189,7 +189,7 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_poli
         * ``'df1'``: numerator degree of freedom
         * ``'df2'``: denominator degree of freedom
         * ``'pval'``: p-value
-        * ``'CI95%'``: 95% confidence intervals around the ICC
+        * ``'CI95'``: 95% confidence intervals around the ICC
 
     Notes
     -----
@@ -247,7 +247,7 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_poli
     >>> icc = pg.intraclass_corr(data=data, targets='Wine', raters='Judge',
     ...                          ratings='Scores').round(3)
     >>> icc.set_index("Type")
-                       Description    ICC       F  df1  df2  pval         CI95%
+                       Description    ICC       F  df1  df2  pval          CI95
     Type
     ICC1    Single raters absolute  0.728  11.680    7   24   0.0  [0.43, 0.93]
     ICC2      Single random raters  0.728  11.787    7   21   0.0  [0.43, 0.93]
@@ -367,7 +367,7 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_poli
     l2 = n * (msb - f2u * mse) / (f2u * (k * msj + (k * n - k - n) * mse) + n * msb)
     u2 = n * (f2l * msb - mse) / (k * msj + (k * n - k - n) * mse + n * f2l * msb)
 
-    stats["CI95%"] = [
+    stats["CI95"] = [
         np.array([l1, u1]),
         np.array([l2, u2]),
         np.array([l3, u3]),
