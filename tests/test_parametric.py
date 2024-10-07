@@ -49,121 +49,121 @@ class TestParametric(TestCase):
         # R: t.test(a, mu=0)
         # Two-sided
         tt = ttest(a, y=0, alternative="two-sided")
-        assert round(tt.loc["T-test", "T"], 5) == 5.17549
-        assert tt.loc["T-test", "dof"] == 5
-        assert round(tt.loc["T-test", "p_val"], 5) == 0.00354
-        array_equal(np.round(tt.loc["T-test", "CI95"], 2), [2.52, 7.48])
+        assert round(tt.loc["T_test", "T"], 5) == 5.17549
+        assert tt.loc["T_test", "dof"] == 5
+        assert round(tt.loc["T_test", "p_val"], 5) == 0.00354
+        array_equal(np.round(tt.loc["T_test", "CI95"], 2), [2.52, 7.48])
         # Using a different confidence level
         tt = ttest(a, y=0, alternative="two-sided", confidence=0.90)
-        array_equal(np.round(tt.loc["T-test", "CI90"], 3), [3.053, 6.947])
+        array_equal(np.round(tt.loc["T_test", "CI90"], 3), [3.053, 6.947])
 
         # One-sided (greater)
         tt = ttest(a, y=0, alternative="greater")
-        assert round(tt.loc["T-test", "T"], 5) == 5.17549
-        assert tt.loc["T-test", "dof"] == 5
-        assert round(tt.loc["T-test", "p_val"], 5) == 0.00177
-        array_equal(np.round(tt.loc["T-test", "CI95"], 2), [3.05, np.inf])
+        assert round(tt.loc["T_test", "T"], 5) == 5.17549
+        assert tt.loc["T_test", "dof"] == 5
+        assert round(tt.loc["T_test", "p_val"], 5) == 0.00177
+        array_equal(np.round(tt.loc["T_test", "CI95"], 2), [3.05, np.inf])
         # One-sided (less)
         tt = ttest(a, y=0, alternative="less")
-        assert round(tt.loc["T-test", "T"], 5) == 5.17549
-        assert tt.loc["T-test", "dof"] == 5
-        assert round(tt.loc["T-test", "p_val"], 5) == 0.99823
-        array_equal(np.round(tt.loc["T-test", "CI95"], 2), [-np.inf, 6.95])
+        assert round(tt.loc["T_test", "T"], 5) == 5.17549
+        assert tt.loc["T_test", "dof"] == 5
+        assert round(tt.loc["T_test", "p_val"], 5) == 0.99823
+        array_equal(np.round(tt.loc["T_test", "CI95"], 2), [-np.inf, 6.95])
 
         # 2) One sample with y=4
         # R: t.test(a, mu=4)
         # Two-sided
         tt = ttest(a, y=4, alternative="two-sided")
-        assert round(tt.loc["T-test", "T"], 5) == 1.0351
-        assert tt.loc["T-test", "dof"] == 5
-        assert round(tt.loc["T-test", "p_val"], 5) == 0.34807
-        array_equal(np.round(tt.loc["T-test", "CI95"], 2), [2.52, 7.48])
+        assert round(tt.loc["T_test", "T"], 5) == 1.0351
+        assert tt.loc["T_test", "dof"] == 5
+        assert round(tt.loc["T_test", "p_val"], 5) == 0.34807
+        array_equal(np.round(tt.loc["T_test", "CI95"], 2), [2.52, 7.48])
         # One-sided (greater)
         tt = ttest(a, y=4, alternative="greater")
-        assert round(tt.loc["T-test", "T"], 5) == 1.0351
-        assert tt.loc["T-test", "dof"] == 5
-        assert round(tt.loc["T-test", "p_val"], 5) == 0.17403
-        array_equal(np.round(tt.loc["T-test", "CI95"], 2), [3.05, np.inf])
+        assert round(tt.loc["T_test", "T"], 5) == 1.0351
+        assert tt.loc["T_test", "dof"] == 5
+        assert round(tt.loc["T_test", "p_val"], 5) == 0.17403
+        array_equal(np.round(tt.loc["T_test", "CI95"], 2), [3.05, np.inf])
         # One-sided (less)
         tt = ttest(a, y=4, alternative="less")
-        assert round(tt.loc["T-test", "T"], 5) == 1.0351
-        assert tt.loc["T-test", "dof"] == 5
-        assert round(tt.loc["T-test", "p_val"], 5) == 0.82597
-        array_equal(np.round(tt.loc["T-test", "CI95"], 2), [-np.inf, 6.95])
+        assert round(tt.loc["T_test", "T"], 5) == 1.0351
+        assert tt.loc["T_test", "dof"] == 5
+        assert round(tt.loc["T_test", "p_val"], 5) == 0.82597
+        array_equal(np.round(tt.loc["T_test", "CI95"], 2), [-np.inf, 6.95])
 
         # 3) Paired two-sample
         # R: t.test(a, b, paired=TRUE)
         # Two-sided
         tt = ttest(a, b, paired=True, alternative="two-sided")
-        assert round(tt.loc["T-test", "T"], 5) == -2.44451
-        assert tt.loc["T-test", "dof"] == 5
-        assert round(tt.loc["T-test", "p_val"], 5) == 0.05833
-        array_equal(np.round(tt.loc["T-test", "CI95"], 2), [-7.18, 0.18])
+        assert round(tt.loc["T_test", "T"], 5) == -2.44451
+        assert tt.loc["T_test", "dof"] == 5
+        assert round(tt.loc["T_test", "p_val"], 5) == 0.05833
+        array_equal(np.round(tt.loc["T_test", "CI95"], 2), [-7.18, 0.18])
         # One-sided (greater)
         tt = ttest(a, b, paired=True, alternative="greater")
-        assert round(tt.loc["T-test", "T"], 5) == -2.44451
-        assert tt.loc["T-test", "dof"] == 5
-        assert round(tt.loc["T-test", "p_val"], 5) == 0.97084
-        array_equal(np.round(tt.loc["T-test", "CI95"], 2), [-6.39, np.inf])
+        assert round(tt.loc["T_test", "T"], 5) == -2.44451
+        assert tt.loc["T_test", "dof"] == 5
+        assert round(tt.loc["T_test", "p_val"], 5) == 0.97084
+        array_equal(np.round(tt.loc["T_test", "CI95"], 2), [-6.39, np.inf])
         # With a different confidence level
         tt = ttest(a, b, paired=True, alternative="greater", confidence=0.99)
-        array_equal(np.round(tt.loc["T-test", "CI99"], 3), [-8.318, np.inf])
+        array_equal(np.round(tt.loc["T_test", "CI99"], 3), [-8.318, np.inf])
 
         # One-sided (less)
         tt = ttest(a, b, paired=True, alternative="less")
-        assert round(tt.loc["T-test", "T"], 5) == -2.44451
-        assert tt.loc["T-test", "dof"] == 5
-        assert round(tt.loc["T-test", "p_val"], 5) == 0.02916
-        array_equal(np.round(tt.loc["T-test", "CI95"], 2), [-np.inf, -0.61])
+        assert round(tt.loc["T_test", "T"], 5) == -2.44451
+        assert tt.loc["T_test", "dof"] == 5
+        assert round(tt.loc["T_test", "p_val"], 5) == 0.02916
+        array_equal(np.round(tt.loc["T_test", "CI95"], 2), [-np.inf, -0.61])
 
         # When the two arrays are identical
         tt = ttest(a, a, paired=True)
-        assert str(tt.loc["T-test", "T"]) == str(np.nan)
-        assert str(tt.loc["T-test", "p_val"]) == str(np.nan)
-        assert tt.loc["T-test", "cohen-d"] == 0.0
-        assert tt.loc["T-test", "BF10"] == str(np.nan)
+        assert str(tt.loc["T_test", "T"]) == str(np.nan)
+        assert str(tt.loc["T_test", "p_val"]) == str(np.nan)
+        assert tt.loc["T_test", "cohen-d"] == 0.0
+        assert tt.loc["T_test", "BF10"] == str(np.nan)
 
         # 4) Independent two-samples, equal variance (no correction)
         # R: t.test(a, b, paired=FALSE, var.equal=TRUE)
         # Two-sided
         tt = ttest(a, b, correction=False, alternative="two-sided")
-        assert round(tt.loc["T-test", "T"], 5) == -2.84199
-        assert tt.loc["T-test", "dof"] == 10
-        assert round(tt.loc["T-test", "p_val"], 5) == 0.01749
-        array_equal(np.round(tt.loc["T-test", "CI95"], 2), [-6.24, -0.76])
+        assert round(tt.loc["T_test", "T"], 5) == -2.84199
+        assert tt.loc["T_test", "dof"] == 10
+        assert round(tt.loc["T_test", "p_val"], 5) == 0.01749
+        array_equal(np.round(tt.loc["T_test", "CI95"], 2), [-6.24, -0.76])
         # One-sided (greater)
         tt = ttest(a, b, correction=False, alternative="greater")
-        assert round(tt.loc["T-test", "T"], 5) == -2.84199
-        assert tt.loc["T-test", "dof"] == 10
-        assert round(tt.loc["T-test", "p_val"], 5) == 0.99126
-        array_equal(np.round(tt.loc["T-test", "CI95"], 2), [-5.73, np.inf])
+        assert round(tt.loc["T_test", "T"], 5) == -2.84199
+        assert tt.loc["T_test", "dof"] == 10
+        assert round(tt.loc["T_test", "p_val"], 5) == 0.99126
+        array_equal(np.round(tt.loc["T_test", "CI95"], 2), [-5.73, np.inf])
         # One-sided (less)
         tt = ttest(a, b, correction=False, alternative="less")
-        assert round(tt.loc["T-test", "T"], 5) == -2.84199
-        assert tt.loc["T-test", "dof"] == 10
-        assert round(tt.loc["T-test", "p_val"], 5) == 0.00874
-        array_equal(np.round(tt.loc["T-test", "CI95"], 2), [-np.inf, -1.27])
+        assert round(tt.loc["T_test", "T"], 5) == -2.84199
+        assert tt.loc["T_test", "dof"] == 10
+        assert round(tt.loc["T_test", "p_val"], 5) == 0.00874
+        array_equal(np.round(tt.loc["T_test", "CI95"], 2), [-np.inf, -1.27])
 
         # 5) Independent two-samples, Welch correction
         # R: t.test(a, b, paired=FALSE, var.equal=FALSE)
         # Two-sided
         tt = ttest(a, b, correction=True, alternative="two-sided")
-        assert round(tt.loc["T-test", "T"], 5) == -2.84199
-        assert round(tt.loc["T-test", "dof"], 5) == 9.49438
-        assert round(tt.loc["T-test", "p_val"], 5) == 0.01837
-        array_equal(np.round(tt.loc["T-test", "CI95"], 2), [-6.26, -0.74])
+        assert round(tt.loc["T_test", "T"], 5) == -2.84199
+        assert round(tt.loc["T_test", "dof"], 5) == 9.49438
+        assert round(tt.loc["T_test", "p_val"], 5) == 0.01837
+        array_equal(np.round(tt.loc["T_test", "CI95"], 2), [-6.26, -0.74])
         # One-sided (greater)
         tt = ttest(a, b, correction=True, alternative="greater")
-        assert round(tt.loc["T-test", "T"], 5) == -2.84199
-        assert round(tt.loc["T-test", "dof"], 5) == 9.49438
-        assert round(tt.loc["T-test", "p_val"], 5) == 0.99082
-        array_equal(np.round(tt.loc["T-test", "CI95"], 2), [-5.74, np.inf])
+        assert round(tt.loc["T_test", "T"], 5) == -2.84199
+        assert round(tt.loc["T_test", "dof"], 5) == 9.49438
+        assert round(tt.loc["T_test", "p_val"], 5) == 0.99082
+        array_equal(np.round(tt.loc["T_test", "CI95"], 2), [-5.74, np.inf])
         # One-sided (less)
         tt = ttest(a, b, correction=True, alternative="less")
-        assert round(tt.loc["T-test", "T"], 5) == -2.84199
-        assert round(tt.loc["T-test", "dof"], 5) == 9.49438
-        assert round(tt.loc["T-test", "p_val"], 5) == 0.00918
-        array_equal(np.round(tt.loc["T-test", "CI95"], 2), [-np.inf, -1.26])
+        assert round(tt.loc["T_test", "T"], 5) == -2.84199
+        assert round(tt.loc["T_test", "dof"], 5) == 9.49438
+        assert round(tt.loc["T_test", "p_val"], 5) == 0.00918
+        array_equal(np.round(tt.loc["T_test", "CI95"], 2), [-np.inf, -1.26])
 
     def test_anova(self):
         """Test function anova.

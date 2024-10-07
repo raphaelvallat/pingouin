@@ -398,8 +398,8 @@ def pairwise_tests(
                 df_ttest = ttest(
                     x, y, paired=paired, alternative=alternative, correction=correction
                 )
-                stats.at[i, "BF10"] = df_ttest.at["T-test", "BF10"]
-                stats.at[i, "dof"] = df_ttest.at["T-test", "dof"]
+                stats.at[i, "BF10"] = df_ttest.at["T_test", "BF10"]
+                stats.at[i, "dof"] = df_ttest.at["T_test", "dof"]
             else:
                 if paired:
                     stat_name = "W_val"
@@ -550,8 +550,8 @@ def pairwise_tests(
                     df_ttest = ttest(
                         x, y, paired=paired, alternative=alternative, correction=correction
                     )
-                    stats.at[ic, "BF10"] = df_ttest.at["T-test", "BF10"]
-                    stats.at[ic, "dof"] = df_ttest.at["T-test", "dof"]
+                    stats.at[ic, "BF10"] = df_ttest.at["T_test", "BF10"]
+                    stats.at[ic, "dof"] = df_ttest.at["T_test", "dof"]
                 else:
                     if paired:
                         stat_name = "W_val"
