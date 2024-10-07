@@ -56,8 +56,8 @@ class TestPairwise(TestCase):
                 return_desc=True,
                 padjust="holm",
             )
-            np.testing.assert_array_equal(pt.loc[:, "p-corr"].round(3), [0.174, 0.024, 0.310])
-            np.testing.assert_array_equal(pt.loc[:, "p-unc"].round(3), [0.087, 0.008, 0.310])
+            np.testing.assert_array_equal(pt.loc[:, "p_corr"].round(3), [0.174, 0.024, 0.310])
+            np.testing.assert_array_equal(pt.loc[:, "p_unc"].round(3), [0.087, 0.008, 0.310])
 
         # -------------------------------------------------------------------
         # Simple within: EASY!
@@ -68,8 +68,8 @@ class TestPairwise(TestCase):
         pt = pairwise_tests(
             dv="Scores", within="Time", subject="Subject", data=df, return_desc=True, padjust="holm"
         )
-        np.testing.assert_array_equal(pt.loc[:, "p-corr"].round(3), [0.174, 0.024, 0.310])
-        np.testing.assert_array_equal(pt.loc[:, "p-unc"].round(3), [0.087, 0.008, 0.310])
+        np.testing.assert_array_equal(pt.loc[:, "p_corr"].round(3), [0.174, 0.024, 0.310])
+        np.testing.assert_array_equal(pt.loc[:, "p_unc"].round(3), [0.087, 0.008, 0.310])
         pairwise_tests(
             dv="Scores",
             within="Time",
@@ -95,7 +95,7 @@ class TestPairwise(TestCase):
         # -------------------------------------------------------------------
         # In R: >>> pairwise.t.test(df$Scores, df$Group, pool.sd = FALSE)
         pt = pairwise_tests(dv="Scores", between="Group", data=df).round(3)
-        assert pt.loc[0, "p-unc"] == 0.023
+        assert pt.loc[0, "p_unc"] == 0.023
         pairwise_tests(
             dv="Scores",
             between="Group",
@@ -126,13 +126,13 @@ class TestPairwise(TestCase):
         )
         # ...Within main effect: OK with JASP
         assert np.array_equal(pt["Paired"], [True, True, True, False])
-        assert np.array_equal(pt.loc[:2, "p-corr"].round(3), [0.174, 0.024, 0.310])
+        assert np.array_equal(pt.loc[:2, "p_corr"].round(3), [0.174, 0.024, 0.310])
         assert np.array_equal(pt.loc[:2, "BF10"].astype(float), [0.582, 4.232, 0.232])
         # ..Between main effect: T and p-values OK with JASP
         #   but BF10 is only similar when marginal=False (see note in the
         #   2-way RM test below).
         assert pt.loc[3, "T"].round(3) == -2.248
-        assert pt.loc[3, "p-unc"].round(3) == 0.028
+        assert pt.loc[3, "p_unc"].round(3) == 0.028
         # ..Interaction: slightly different because JASP pool the error term
         #    across the between-subject groups. JASP does not compute the BF10
         #    for the interaction.
@@ -190,10 +190,10 @@ class TestPairwise(TestCase):
         # T, dof and p-values should be equal
         assert np.array_equal(pt_merged["T"], pt["T"].iloc[4:])
         assert np.array_equal(pt_merged["dof"], pt["dof"].iloc[4:])
-        assert np.array_equal(pt_merged["p-unc"], pt["p-unc"].iloc[4:])
+        assert np.array_equal(pt_merged["p_unc"], pt["p_unc"].iloc[4:])
         # However adjusted p-values are not equal because they are calculated
         # separately on each dataframe.
-        assert not np.array_equal(pt_merged["p-corr"], pt["p-corr"].iloc[4:])
+        assert not np.array_equal(pt_merged["p_corr"], pt["p_corr"].iloc[4:])
 
         # Other options
         pairwise_tests(
@@ -222,19 +222,19 @@ class TestPairwise(TestCase):
         assert np.array_equal(
             pt1.loc[:5, "T"].round(3), [-0.777, -1.344, -2.039, -0.814, -1.492, -0.627]
         )
-        assert np.array_equal(pt1.loc[:5, "p-corr"].round(3), [1.0, 1.0, 0.313, 1.0, 0.889, 1.0])
+        assert np.array_equal(pt1.loc[:5, "p_corr"].round(3), [1.0, 1.0, 0.313, 1.0, 0.889, 1.0])
         assert np.array_equal(
             pt1.loc[:5, "BF10"].astype(float), [0.273, 0.463, 1.221, 0.280, 0.554, 0.248]
         )
         # ...Between main effect: slightly different from JASP (why?)
         #      True with or without the Welch correction...
-        assert (pt1.loc[6:8, "p-corr"] > 0.20).all()
+        assert (pt1.loc[6:8, "p_corr"] > 0.20).all()
         # ...Interaction: slightly different because JASP pool the error term
         #    across the between-subject groups.
         # Below the interaction JASP bonferroni-correct p-values, which are
         # more conservative because JASP perform all possible pairwise tests
         # jasp_pbonf = [1., 1., 1., 1., 1., 1., 1., 0.886, 1., 1., 1., 1.]
-        assert (pt1.loc[9:, "p-corr"] > 0.05).all()
+        assert (pt1.loc[9:, "p_corr"] > 0.05).all()
         # Check that the Welch corection is applied by default
         assert not pt1["dof"].apply(lambda x: x.is_integer()).all()
 
@@ -287,7 +287,7 @@ class TestPairwise(TestCase):
         # JAMOVI, because they both pool the error term.
         # The dof are not available in JASP, but in JAMOVI they are 18
         # everywhere, which I'm not sure to understand why...
-        assert np.array_equal(pt.loc[:3, "p-unc"] < 0.05, [False, False, False, True])
+        assert np.array_equal(pt.loc[:3, "p_unc"] < 0.05, [False, False, False, True])
 
         # However, the Bayes Factor of the simple main effects are the same...!
         np.array_equal(pt.loc[:3, "BF10"].astype(float), [0.374, 0.533, 0.711, 2.287])
@@ -381,7 +381,7 @@ class TestPairwise(TestCase):
             parametric=False,
             nan_policy="listwise",
         )
-        np.testing.assert_array_equal(st["W-val"].to_numpy(), [9, 3, 12])
+        np.testing.assert_array_equal(st["W_val"].to_numpy(), [9, 3, 12])
         st2 = pairwise_tests(
             dv="Value",
             within="Condition",
@@ -391,7 +391,7 @@ class TestPairwise(TestCase):
             parametric=False,
         )
         # Tested against a simple for loop on combinations
-        np.testing.assert_array_equal(st2["W-val"].to_numpy(), [9, 3, 21])
+        np.testing.assert_array_equal(st2["W_val"].to_numpy(), [9, 3, 21])
 
         # Two within factors from other datasets and with NaN values
         df2 = read_dataset("rm_anova")
@@ -413,13 +413,13 @@ class TestPairwise(TestCase):
         pt = pairwise_tests(
             dv="Scores", within="Drug", subject="Subject", data=df, alternative="greater"
         )
-        np.testing.assert_array_equal(pt.loc[:, "p-unc"].round(3), [0.907, 0.941, 0.405])
+        np.testing.assert_array_equal(pt.loc[:, "p_unc"].round(3), [0.907, 0.941, 0.405])
         assert all(pt.loc[:, "BF10"].astype(float) < 1)
         # 1.1.2 Tail is less
         pt = pairwise_tests(
             dv="Scores", within="Drug", subject="Subject", data=df, alternative="less"
         )
-        np.testing.assert_array_equal(pt.loc[:, "p-unc"].round(3), [0.093, 0.059, 0.595])
+        np.testing.assert_array_equal(pt.loc[:, "p_unc"].round(3), [0.093, 0.059, 0.595])
         assert sum(pt.loc[:, "BF10"].astype(float) > 1) == 2
 
         # 1.2 Non-parametric
@@ -432,7 +432,7 @@ class TestPairwise(TestCase):
             data=df,
             alternative="greater",
         )
-        np.testing.assert_array_equal(pt.loc[:, "p-unc"].round(3), [0.910, 0.951, 0.483])
+        np.testing.assert_array_equal(pt.loc[:, "p_unc"].round(3), [0.910, 0.951, 0.483])
         # 1.2.2 Tail is less
         pt = pairwise_tests(
             dv="Scores",
@@ -442,7 +442,7 @@ class TestPairwise(TestCase):
             data=df,
             alternative="less",
         )
-        np.testing.assert_array_equal(pt.loc[:, "p-unc"].round(3), [0.108, 0.060, 0.551])
+        np.testing.assert_array_equal(pt.loc[:, "p_unc"].round(3), [0.108, 0.060, 0.551])
 
         # Compare the RBC value for wilcoxon
         from pingouin.nonparametric import wilcoxon
@@ -458,11 +458,11 @@ class TestPairwise(TestCase):
         # 2.1 Parametric
         # 2.1.1 Tail is greater
         pt = pairwise_tests(dv="Scores", between="Gender", data=df, alternative="greater")
-        assert pt.loc[0, "p-unc"].round(3) == 0.932
+        assert pt.loc[0, "p_unc"].round(3) == 0.932
         assert float(pt.loc[0, "BF10"]) < 1
         # 2.1.2 Tail is less
         pt = pairwise_tests(dv="Scores", between="Gender", data=df, alternative="less")
-        assert pt.loc[0, "p-unc"].round(3) == 0.068
+        assert pt.loc[0, "p_unc"].round(3) == 0.068
         assert float(pt.loc[0, "BF10"]) > 1
 
         # 2.2 Non-parametric
@@ -470,12 +470,12 @@ class TestPairwise(TestCase):
         pt = pairwise_tests(
             dv="Scores", between="Gender", parametric=False, data=df, alternative="greater"
         )
-        assert pt.loc[0, "p-unc"].round(3) == 0.901
+        assert pt.loc[0, "p_unc"].round(3) == 0.901
         # 2.2.2 Tail is less
         pt = pairwise_tests(
             dv="Scores", between="Gender", parametric=False, data=df, alternative="less"
         )
-        assert pt.loc[0, "p-unc"].round(3) == 0.105
+        assert pt.loc[0, "p_unc"].round(3) == 0.105
 
         # Compare the RBC value for MWU
         from pingouin.nonparametric import mwu
@@ -543,7 +543,7 @@ class TestPairwise(TestCase):
         # Pingouin: [0.0742, 0.4369, 0.4160, 0.0037, 0.7697, 0.0367]
         assert np.allclose(
             [0.074, 0.435, 0.415, 0.004, 0.789, 0.037],
-            stats.loc[:, "p-tukey"].to_numpy().round(3),
+            stats.loc[:, "p_tukey"].to_numpy().round(3),
             atol=0.05,
         )
         # Compare with JASP in the Palmer Penguins dataset
@@ -558,7 +558,7 @@ class TestPairwise(TestCase):
         assert np.array_equal(stats["T"], [-0.4803, -24.4952, -19.2240])
         # P-values JASP: [0.8807, 0.0000, 0.0000]
         # P-values Pingouin: [0.8694, 0.0010, 0.0010]
-        sig = stats["p-tukey"].apply(lambda x: "Yes" if x < 0.05 else "No").to_numpy()
+        sig = stats["p_tukey"].apply(lambda x: "Yes" if x < 0.05 else "No").to_numpy()
         assert np.array_equal(sig, ["No", "Yes", "Yes"])
         # Effect size should be the same as pairwise_tests
         stats_tests = df.pairwise_tests(dv="body_mass_g", between="species").round(4)
@@ -577,7 +577,7 @@ class TestPairwise(TestCase):
         assert np.array_equal(stats["T"], [-0.9969, -10.1961, -9.1992])
         # P-values JASP: [0.5818, 0.0000, 0.0000]
         # P-values Pingouin: [0.5766, 0.0010, 0.0010]
-        sig = stats["p-tukey"].apply(lambda x: "Yes" if x < 0.05 else "No").to_numpy()
+        sig = stats["p_tukey"].apply(lambda x: "Yes" if x < 0.05 else "No").to_numpy()
         assert np.array_equal(sig, ["No", "Yes", "Yes"])
 
     def test_pairwise_gameshowell(self):

@@ -157,7 +157,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
    :widths: auto
 
    ======  =====  =============  =======  =============  =========  ======  =======
-        T    dof  alternative      p-val  CI95             cohen-d    BF10    power
+        T    dof  alternative      p_val  CI95             cohen-d    BF10    power
    ======  =====  =============  =======  =============  =========  ======  =======
    -3.401     58  two-sided        0.001  [-1.68 -0.43]      0.878  26.155    0.917
    ======  =====  =============  =======  =============  =========  ======  =======
@@ -175,7 +175,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
    :widths: auto
 
    ===  =====  ===========  =======  ======  =======
-     n      r  CI95           p-val    BF10    power
+     n      r  CI95           p_val    BF10    power
    ===  =====  ===========  =======  ======  =======
     30  0.595  [0.3  0.79]    0.001  69.723    0.950
    ===  =====  ===========  =======  ======  =======
@@ -196,7 +196,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
    :widths: auto
 
    ===  =====  ===========  =======  =======
-     n      r  CI95           p-val    power
+     n      r  CI95           p_val    power
    ===  =====  ===========  =======  =======
     30  0.576  [0.27 0.78]    0.001    0.933
    ===  =====  ===========  =======  =======
@@ -244,7 +244,7 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
   :widths: auto
 
   ========  =======  ====  =====  =======  =======  =======
-  Source         SS    DF     MS        F    p-unc      np2
+  Source         SS    DF     MS        F    p_unc      np2
   ========  =======  ====  =====  =======  =======  =======
   Group       5.460     1  5.460    5.244    0.023    0.029
   Within    185.343   178  1.041      nan      nan      nan
@@ -263,7 +263,7 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
   :widths: auto
 
   ========  =======  ====  =====  =======  =======  =======  =======
-  Source         SS    DF     MS        F    p-unc      ng2      eps
+  Source         SS    DF     MS        F    p_unc      ng2      eps
   ========  =======  ====  =====  =======  =======  =======  =======
   Time        7.628     2  3.814    3.913    0.023     0.04    0.999
   Error     115.027   118  0.975      nan      nan      nan      nan
@@ -287,7 +287,7 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
   :widths: auto
 
   ==========  =======  =======  ========  ============  ======  ======  =============  =======  ========  ==========  ======  ========
-  Contrast    A        B        Paired    Parametric         T     dof  alternative      p-unc    p-corr  p-adjust      BF10    hedges
+  Contrast    A        B        Paired    Parametric         T     dof  alternative      p_unc    p_corr  p_adjust      BF10    hedges
   ==========  =======  =======  ========  ============  ======  ======  =============  =======  ========  ==========  ======  ========
   Time        August   January  True      True          -1.740  59.000  two-sided        0.087     0.131  fdr_bh       0.582    -0.328
   Time        August   June     True      True          -2.743  59.000  two-sided        0.008     0.024  fdr_bh       4.232    -0.483
@@ -310,7 +310,7 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
   :widths: auto
 
   ===========  =====  =====  =====  =====  =====  =======  =====  =======
-  Source          SS    DF1    DF2     MS      F    p-unc    np2      eps
+  Source          SS    DF1    DF2     MS      F    p_unc    np2      eps
   ===========  =====  =====  =====  =====  =====  =======  =====  =======
   Group        5.460      1     58  5.460  5.052    0.028  0.080      nan
   Time         7.628      2    116  3.814  4.027    0.020  0.065    0.999
@@ -334,7 +334,7 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
   :widths: auto
 
   ===  ===  ========  =============  ===  =====  =============  =======  ======  =======
-  X    Y    method    alternative      n      r  CI95             p-unc    BF10    power
+  X    Y    method    alternative      n      r  CI95             p_unc    BF10    power
   ===  ===  ========  =============  ===  =====  =============  =======  ======  =======
   X    Y    pearson   two-sided       30  0.366  [0.01 0.64]      0.047   1.500    0.525
   X    Z    pearson   two-sided       30  0.251  [-0.12  0.56]    0.181   0.534    0.272

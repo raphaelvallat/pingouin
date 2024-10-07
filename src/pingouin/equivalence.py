@@ -78,7 +78,7 @@ def tost(x, y, bound=1, paired=False, correction=False):
     # T-tests
     df_a = ttest(x + bound, y, paired=paired, correction=correction, alternative="greater")
     df_b = ttest(x - bound, y, paired=paired, correction=correction, alternative="less")
-    pval = max(df_a.at["T-test", "p-val"], df_b.at["T-test", "p-val"])
+    pval = max(df_a.at["T-test", "p_val"], df_b.at["T-test", "p_val"])
 
     # Create output dataframe
     stats = pd.DataFrame(
