@@ -365,7 +365,7 @@ The :py:func:`pingouin.normality` function works with lists, arrays, or pandas D
   :widths: auto
 
   =========  ======  =====  ======  ======  =====  ========  ==========  ===========
-  names        coef     se       T    pval     r2    adj_r2    CI[2.5%]    CI[97.5%]
+  names        coef     se       T    pval     r2    adj_r2       CI2.5       CI97.5
   =========  ======  =====  ======  ======  =====  ========  ==========  ===========
   Intercept   4.650  0.841   5.530   0.000  0.139     0.076       2.925        6.376
   X           0.143  0.068   2.089   0.046  0.139     0.076       0.003        0.283
@@ -385,7 +385,7 @@ The :py:func:`pingouin.normality` function works with lists, arrays, or pandas D
   :widths: auto
 
   ========  ======  =====  ======  ==========  ===========  =====
-  path        coef     se    pval    CI[2.5%]    CI[97.5%]  sig
+  path        coef     se    pval       CI2.5       CI97.5  sig
   ========  ======  =====  ======  ==========  ===========  =====
   Z ~ X      0.103  0.075   0.181      -0.051        0.256  No
   Y ~ Z      0.018  0.171   0.916      -0.332        0.369  No
