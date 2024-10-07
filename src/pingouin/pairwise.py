@@ -320,10 +320,10 @@ def pairwise_tests(
         "Time",
         "A",
         "B",
-        "mean(A)",
-        "std(A)",
-        "mean(B)",
-        "std(B)",
+        "mean_A",
+        "std_A",
+        "mean_B",
+        "std_B",
         "Paired",
         "Parametric",
         "T",
@@ -414,10 +414,10 @@ def pairwise_tests(
             ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
 
             if return_desc:
-                stats.at[i, "mean(A)"] = np.nanmean(x)
-                stats.at[i, "mean(B)"] = np.nanmean(y)
-                stats.at[i, "std(A)"] = np.nanstd(x, ddof=1)
-                stats.at[i, "std(B)"] = np.nanstd(y, ddof=1)
+                stats.at[i, "mean_A"] = np.nanmean(x)
+                stats.at[i, "mean_B"] = np.nanmean(y)
+                stats.at[i, "std_A"] = np.nanstd(x, ddof=1)
+                stats.at[i, "std_B"] = np.nanstd(y, ddof=1)
             stats.at[i, stat_name] = df_ttest[stat_name].iat[0]
             stats.at[i, "p_unc"] = df_ttest["p_val"].iat[0]
             stats.at[i, effsize] = ef
@@ -564,10 +564,10 @@ def pairwise_tests(
 
                 # Append to stats
                 if return_desc:
-                    stats.at[ic, "mean(A)"] = np.nanmean(x)
-                    stats.at[ic, "mean(B)"] = np.nanmean(y)
-                    stats.at[ic, "std(A)"] = np.nanstd(x, ddof=1)
-                    stats.at[ic, "std(B)"] = np.nanstd(y, ddof=1)
+                    stats.at[ic, "mean_A"] = np.nanmean(x)
+                    stats.at[ic, "mean_B"] = np.nanmean(y)
+                    stats.at[ic, "std_A"] = np.nanstd(x, ddof=1)
+                    stats.at[ic, "std_B"] = np.nanstd(y, ddof=1)
                 stats.at[ic, stat_name] = df_ttest[stat_name].iat[0]
                 stats.at[ic, "p_unc"] = df_ttest["p_val"].iat[0]
                 stats.at[ic, effsize] = ef
@@ -798,8 +798,8 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
 
         * ``'A'``: Name of first measurement
         * ``'B'``: Name of second measurement
-        * ``'mean(A)'``: Mean of first measurement
-        * ``'mean(B)'``: Mean of second measurement
+        * ``'mean_A'``: Mean of first measurement
+        * ``'mean_B'``: Mean of second measurement
         * ``'diff'``: Mean difference (= mean(A) - mean(B))
         * ``'se'``: Standard error
         * ``'T'``: T-values
@@ -921,8 +921,8 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
         {
             "A": labels[g1],
             "B": labels[g2],
-            "mean(A)": gmeans[g1],
-            "mean(B)": gmeans[g2],
+            "mean_A": gmeans[g1],
+            "mean_B": gmeans[g2],
             "diff": mn,
             "se": se,
             "T": tval,
@@ -963,8 +963,8 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
 
         * ``'A'``: Name of first measurement
         * ``'B'``: Name of second measurement
-        * ``'mean(A)'``: Mean of first measurement
-        * ``'mean(B)'``: Mean of second measurement
+        * ``'mean_A'``: Mean of first measurement
+        * ``'mean_B'``: Mean of second measurement
         * ``'diff'``: Mean difference (= mean(A) - mean(B))
         * ``'se'``: Standard error
         * ``'T'``: T-values
@@ -1089,8 +1089,8 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
         {
             "A": labels[g1],
             "B": labels[g2],
-            "mean(A)": gmeans[g1],
-            "mean(B)": gmeans[g2],
+            "mean_A": gmeans[g1],
+            "mean_B": gmeans[g2],
             "diff": mn,
             "se": se,
             "T": tval,
