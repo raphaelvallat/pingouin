@@ -60,7 +60,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
         * ``'T'``: T-value
         * ``'dof'``: degrees of freedom
         * ``'alternative'``: alternative of the test
-        * ``'p-val'``: p-value
+        * ``'p_val'``: p-value
         * ``'CI95'``: confidence intervals of the difference in means
         * ``'cohen-d'``: Cohen d effect size
         * ``'BF10'``: Bayes Factor of the alternative hypothesis
@@ -143,7 +143,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> from pingouin import ttest
     >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> ttest(x, 4).round(2)
-              T  dof alternative  p-val          CI95  cohen-d   BF10  power
+              T  dof alternative  p_val          CI95  cohen-d   BF10  power
     T-test  1.4    4   two-sided   0.23  [2.32, 9.08]     0.62  0.766   0.19
 
     2. One sided paired T-test.
@@ -151,13 +151,13 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
     >>> ttest(pre, post, paired=True, alternative='less').round(2)
-               T  dof alternative  p-val           CI95  cohen-d   BF10  power
+               T  dof alternative  p_val           CI95  cohen-d   BF10  power
     T-test -2.31    4        less   0.04  [-inf, -0.05]     0.25  3.122   0.12
 
     Now testing the opposite alternative hypothesis
 
     >>> ttest(pre, post, paired=True, alternative='greater').round(2)
-               T  dof alternative  p-val          CI95  cohen-d  BF10  power
+               T  dof alternative  p_val          CI95  cohen-d  BF10  power
     T-test -2.31    4     greater   0.96  [-1.35, inf]     0.25  0.32   0.02
 
     3. Paired T-test with missing values.
@@ -166,7 +166,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> pre = [5.5, 2.4, np.nan, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
     >>> ttest(pre, post, paired=True).round(3)
-                T  dof alternative  p-val           CI95  cohen-d   BF10  power
+                T  dof alternative  p_val           CI95  cohen-d   BF10  power
     T-test -5.902    3   two-sided   0.01  [-1.5, -0.45]    0.306  7.169  0.073
 
     Compare with SciPy
@@ -181,7 +181,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> x = np.random.normal(loc=7, size=20)
     >>> y = np.random.normal(loc=4, size=20)
     >>> ttest(x, y)
-                   T  dof alternative         p-val          CI95   cohen-d       BF10  power
+                   T  dof alternative         p_val          CI95   cohen-d       BF10  power
     T-test  9.106452   38   two-sided  4.306971e-11  [2.64, 4.15]  2.879713  1.366e+08    1.0
 
     5. Independent two-sample T-test with unequal sample size. A Welch's T-test is used.
@@ -189,13 +189,13 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> np.random.seed(123)
     >>> y = np.random.normal(loc=6.5, size=15)
     >>> ttest(x, y)
-                   T        dof alternative     p-val           CI95   cohen-d   BF10     power
+                   T        dof alternative     p_val           CI95   cohen-d   BF10     power
     T-test  1.996537  31.567592   two-sided  0.054561  [-0.02, 1.65]  0.673518  1.469  0.481867
 
     6. However, the Welch's correction can be disabled:
 
     >>> ttest(x, y, correction=False)
-                   T  dof alternative     p-val           CI95   cohen-d   BF10     power
+                   T  dof alternative     p_val           CI95   cohen-d   BF10     power
     T-test  1.971859   33   two-sided  0.057056  [-0.03, 1.66]  0.673518  1.418  0.481867
 
     Compare with SciPy
@@ -318,7 +318,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     stats = {
         "dof": dof,
         "T": tval,
-        "p-val": pval,
+        "p_val": pval,
         "alternative": alternative,
         "cohen-d": abs(d),
         ci_name: [ci],
@@ -327,7 +327,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     }
 
     # Convert to dataframe
-    col_order = ["T", "dof", "alternative", "p-val", ci_name, "cohen-d", "BF10", "power"]
+    col_order = ["T", "dof", "alternative", "p_val", ci_name, "cohen-d", "BF10", "power"]
     stats = pd.DataFrame(stats, columns=col_order, index=["T-test"])
     return _postprocess_dataframe(stats)
 
@@ -385,12 +385,12 @@ def rm_anova(
         * ``'ddof1'``: Degrees of freedom (numerator)
         * ``'ddof2'``: Degrees of freedom (denominator)
         * ``'F'``: F-value
-        * ``'p-unc'``: Uncorrected p-value
+        * ``'p_unc'``: Uncorrected p-value
         * ``'ng2'``: Generalized eta-square effect size
         * ``'eps'``: Greenhouse-Geisser epsilon factor (= index of sphericity)
-        * ``'p-GG-corr'``: Greenhouse-Geisser corrected p-value
-        * ``'W-spher'``: Sphericity test statistic
-        * ``'p-spher'``: p-value of the sphericity test
+        * ``'p_GG_corr'``: Greenhouse-Geisser corrected p-value
+        * ``'W_spher'``: Sphericity test statistic
+        * ``'p_spher'``: p-value of the sphericity test
         * ``'sphericity'``: sphericity of the data (boolean)
 
     See Also
@@ -478,7 +478,7 @@ def rm_anova(
     >>> import pingouin as pg
     >>> data = pg.read_dataset('rm_anova_wide')
     >>> pg.rm_anova(data)
-       Source  ddof1  ddof2         F     p-unc       ng2       eps
+       Source  ddof1  ddof2         F     p_unc       ng2       eps
     0  Within      3     24  5.200652  0.006557  0.346392  0.694329
 
     2. One-way repeated-measures ANOVA using a long-format dataset.
@@ -492,7 +492,7 @@ def rm_anova(
     >>> aov = pg.rm_anova(dv='DesireToKill', within='Disgustingness',
     ...                   subject='Subject', data=df, detailed=True, effsize="np2")
     >>> aov.round(3)
-               Source       SS  DF      MS       F  p-unc    np2  eps
+               Source       SS  DF      MS       F  p_unc    np2  eps
     0  Disgustingness   27.485   1  27.485  12.044  0.001  0.116  1.0
     1           Error  209.952  92   2.282     NaN    NaN    NaN  NaN
 
@@ -504,7 +504,7 @@ def rm_anova(
     4. As a :py:class:`pandas.DataFrame` method
 
     >>> df.rm_anova(dv='DesireToKill', within='Disgustingness', subject='Subject',  detailed=False)
-               Source  ddof1  ddof2          F     p-unc       ng2  eps
+               Source  ddof1  ddof2          F     p_unc       ng2  eps
     0  Disgustingness      1     92  12.043878  0.000793  0.025784  1.0
     """
     assert effsize in ["n2", "np2", "ng2"], "effsize must be n2, np2 or ng2."
@@ -605,16 +605,16 @@ def rm_anova(
                 "ddof1": ddof1,
                 "ddof2": ddof2,
                 "F": fval,
-                "p-unc": p_unc,
+                "p_unc": p_unc,
                 effsize: ef,
                 "eps": eps,
             },
             index=[0],
         )
         if correction:
-            aov["p-GG-corr"] = p_corr
-            aov["W-spher"] = W_spher
-            aov["p-spher"] = p_spher
+            aov["p_GG_corr"] = p_corr
+            aov["W_spher"] = W_spher
+            aov["p_spher"] = p_spher
             aov["sphericity"] = spher
 
         col_order = [
@@ -622,13 +622,13 @@ def rm_anova(
             "ddof1",
             "ddof2",
             "F",
-            "p-unc",
-            "p-GG-corr",
+            "p_unc",
+            "p_GG_corr",
             effsize,
             "eps",
             "sphericity",
-            "W-spher",
-            "p-spher",
+            "W_spher",
+            "p_spher",
         ]
     else:
         aov = pd.DataFrame(
@@ -638,15 +638,15 @@ def rm_anova(
                 "DF": [ddof1, ddof2],
                 "MS": [ms_with, ms_reswith],
                 "F": [fval, np.nan],
-                "p-unc": [p_unc, np.nan],
+                "p_unc": [p_unc, np.nan],
                 effsize: [ef, np.nan],
                 "eps": [eps, np.nan],
             }
         )
         if correction:
-            aov["p-GG-corr"] = [p_corr, np.nan]
-            aov["W-spher"] = [W_spher, np.nan]
-            aov["p-spher"] = [p_spher, np.nan]
+            aov["p_GG_corr"] = [p_corr, np.nan]
+            aov["W_spher"] = [W_spher, np.nan]
+            aov["p_spher"] = [p_spher, np.nan]
             aov["sphericity"] = [spher, np.nan]
 
         col_order = [
@@ -655,13 +655,13 @@ def rm_anova(
             "DF",
             "MS",
             "F",
-            "p-unc",
-            "p-GG-corr",
+            "p_unc",
+            "p_GG_corr",
             effsize,
             "eps",
             "sphericity",
-            "W-spher",
-            "p-spher",
+            "W_spher",
+            "p_spher",
         ]
 
     aov = aov.reindex(columns=col_order)
@@ -797,8 +797,8 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
             "ddof2": [df_as, df_bs, df_abs],
             "MS": [ms_a, ms_b, ms_ab],
             "F": [f_a, f_b, f_ab],
-            "p-unc": [p_a, p_b, p_ab],
-            "p-GG-corr": [p_a_corr, p_b_corr, p_ab_corr],
+            "p_unc": [p_a, p_b, p_ab],
+            "p_GG_corr": [p_a_corr, p_b_corr, p_ab_corr],
             effsize: [ef_a, ef_b, ef_ab],
             "eps": [eps_a, eps_b, eps_ab],
         }
@@ -846,7 +846,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
         * ``'DF'``: Degrees of freedom
         * ``'MS'``: Mean squares
         * ``'F'``: F-values
-        * ``'p-unc'``: uncorrected p-values
+        * ``'p_unc'``: uncorrected p-values
         * ``'np2'``: Partial eta-square effect sizes
 
     See Also
@@ -914,7 +914,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
     >>> aov = pg.anova(dv='Pain threshold', between='Hair color', data=df,
     ...                detailed=True)
     >>> aov.round(3)
-           Source        SS  DF       MS      F  p-unc    np2
+           Source        SS  DF       MS      F  p_unc    np2
     0  Hair color  1360.726   3  453.575  6.791  0.004  0.576
     1      Within  1001.800  15   66.787    NaN    NaN    NaN
 
@@ -925,14 +925,14 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
 
     >>> df.anova(dv='Pain threshold', between='Hair color', detailed=False,
     ...          effsize='n2')
-           Source  ddof1  ddof2         F     p-unc        n2
+           Source  ddof1  ddof2         F     p_unc        n2
     0  Hair color      3     15  6.791407  0.004114  0.575962
 
     Two-way ANOVA with balanced design
 
     >>> data = pg.read_dataset('anova2')
     >>> data.anova(dv="Yield", between=["Blend", "Crop"]).round(3)
-             Source        SS  DF        MS      F  p-unc    np2
+             Source        SS  DF        MS      F  p_unc    np2
     0         Blend     2.042   1     2.042  0.004  0.952  0.000
     1          Crop  2736.583   2  1368.292  2.525  0.108  0.219
     2  Blend * Crop  2360.083   2  1180.042  2.178  0.142  0.195
@@ -943,7 +943,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
     >>> data = pg.read_dataset('anova2_unbalanced')
     >>> data.anova(dv="Scores", between=["Diet", "Exercise"],
     ...            effsize="n2").round(3)
-                Source       SS   DF       MS      F  p-unc     n2
+                Source       SS   DF       MS      F  p_unc     n2
     0             Diet  390.625  1.0  390.625  7.423  0.034  0.433
     1         Exercise  180.625  1.0  180.625  3.432  0.113  0.200
     2  Diet * Exercise   15.625  1.0   15.625  0.297  0.605  0.017
@@ -954,7 +954,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
     >>> data = pg.read_dataset('anova3')
     >>> data.anova(dv='Cholesterol', between=['Sex', 'Risk', 'Drug'],
     ...            ss_type=3).round(3)
-                  Source      SS    DF      MS       F  p-unc    np2
+                  Source      SS    DF      MS       F  p_unc    np2
     0                Sex   2.075   1.0   2.075   2.462  0.123  0.049
     1               Risk  11.332   1.0  11.332  13.449  0.001  0.219
     2               Drug   0.816   2.0   0.408   0.484  0.619  0.020
@@ -1023,7 +1023,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
                 "ddof1": ddof1,
                 "ddof2": ddof2,
                 "F": fval,
-                "p-unc": p_unc,
+                "p_unc": p_unc,
                 effsize: np2,
             },
             index=[0],
@@ -1037,7 +1037,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
                 "DF": [ddof1, ddof2],
                 "MS": [msbetween, mserror],
                 "F": [fval, np.nan],
-                "p-unc": [p_unc, np.nan],
+                "p_unc": [p_unc, np.nan],
                 effsize: [np2, np.nan],
             }
         )
@@ -1124,7 +1124,7 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
             "DF": [df_fac1, df_fac2, df_inter, df_resid],
             "MS": [ms_fac1, ms_fac2, ms_inter, ms_resid],
             "F": [fval_fac1, fval_fac2, fval_inter, np.nan],
-            "p-unc": [pval_fac1, pval_fac2, pval_inter, np.nan],
+            "p_unc": [pval_fac1, pval_fac2, pval_inter, np.nan],
             effsize: all_effsize,
         }
     )
@@ -1186,7 +1186,7 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
         aov = aov.iloc[1:, :]
 
     aov = aov.reset_index()
-    aov = aov.rename(columns={"index": "Source", "sum_sq": "SS", "df": "DF", "PR(>F)": "p-unc"})
+    aov = aov.rename(columns={"index": "Source", "sum_sq": "SS", "df": "DF", "PR(>F)": "p_unc"})
     aov["MS"] = aov["SS"] / aov["DF"]
 
     # Effect size
@@ -1206,7 +1206,7 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     aov["Source"] = aov["Source"].apply(format_source)
 
     # Re-index and round
-    col_order = ["Source", "SS", "DF", "MS", "F", "p-unc", effsize]
+    col_order = ["Source", "SS", "DF", "MS", "F", "p_unc", effsize]
     aov = aov.reindex(columns=col_order)
     aov.dropna(how="all", axis=1, inplace=True)
 
@@ -1239,7 +1239,7 @@ def welch_anova(data=None, dv=None, between=None):
         * ``'ddof1'``: Numerator degrees of freedom
         * ``'ddof2'``: Denominator degrees of freedom
         * ``'F'``: F-values
-        * ``'p-unc'``: uncorrected p-values
+        * ``'p_unc'``: uncorrected p-values
         * ``'np2'``: Partial eta-squared
 
     See Also
@@ -1327,7 +1327,7 @@ def welch_anova(data=None, dv=None, between=None):
     >>> df = read_dataset('anova')
     >>> aov = welch_anova(dv='Pain threshold', between='Hair color', data=df)
     >>> aov
-           Source  ddof1     ddof2         F     p-unc       np2
+           Source  ddof1     ddof2         F     p_unc       np2
     0  Hair color      3  8.329841  5.890115  0.018813  0.575962
     """
     # Check data
@@ -1367,7 +1367,7 @@ def welch_anova(data=None, dv=None, between=None):
             "ddof1": ddof1,
             "ddof2": ddof2,
             "F": fval,
-            "p-unc": pval,
+            "p_unc": pval,
             "np2": np2,
         },
         index=[0],
@@ -1412,12 +1412,12 @@ def mixed_anova(
         * ``'ddof1'``: Degrees of freedom (numerator)
         * ``'ddof2'``: Degrees of freedom (denominator)
         * ``'F'``: F-values
-        * ``'p-unc'``: Uncorrected p-values
+        * ``'p_unc'``: Uncorrected p-values
         * ``'np2'``: Partial eta-squared effect sizes
         * ``'eps'``: Greenhouse-Geisser epsilon factor (= index of sphericity)
-        * ``'p-GG-corr'``: Greenhouse-Geisser corrected p-values
-        * ``'W-spher'``: Sphericity test statistic
-        * ``'p-spher'``: p-value of the sphericity test
+        * ``'p_GG_corr'``: Greenhouse-Geisser corrected p-values
+        * ``'W_spher'``: Sphericity test statistic
+        * ``'p_spher'``: p-value of the sphericity test
         * ``'sphericity'``: sphericity of the data (boolean)
 
     See Also
@@ -1452,7 +1452,7 @@ def mixed_anova(
     >>> aov = mixed_anova(dv='Scores', between='Group',
     ...                   within='Time', subject='Subject', data=df)
     >>> aov.round(3)
-            Source     SS  DF1  DF2     MS      F  p-unc    np2    eps
+            Source     SS  DF1  DF2     MS      F  p_unc    np2    eps
     0        Group  5.460    1   58  5.460  5.052  0.028  0.080    NaN
     1         Time  7.628    2  116  3.814  4.027  0.020  0.065  0.999
     2  Interaction  5.167    2  116  2.584  2.728  0.070  0.045    NaN
@@ -1463,7 +1463,7 @@ def mixed_anova(
 
     >>> df.mixed_anova(dv='Scores', between='Group', within='Time',
     ...                subject='Subject', effsize="ng2").round(3)
-            Source     SS  DF1  DF2     MS      F  p-unc    ng2    eps
+            Source     SS  DF1  DF2     MS      F  p_unc    ng2    eps
     0        Group  5.460    1   58  5.460  5.052  0.028  0.031    NaN
     1         Time  7.628    2  116  3.814  4.027  0.020  0.042  0.999
     2  Interaction  5.167    2  116  2.584  2.728  0.070  0.029    NaN
@@ -1573,7 +1573,7 @@ def mixed_anova(
     # Update values
     aov.rename(columns={"DF": "DF1"}, inplace=True)
     aov.at[0, "F"], aov.at[1, "F"] = f_betw, f_with
-    aov.at[0, "p-unc"], aov.at[1, "p-unc"] = p_betw, p_with
+    aov.at[0, "p_unc"], aov.at[1, "p_unc"] = p_betw, p_with
     aov.at[0, effsize], aov.at[1, effsize] = ef_betw, ef_with
     aov_inter = pd.DataFrame(
         {
@@ -1582,7 +1582,7 @@ def mixed_anova(
             "DF1": df_inter,
             "MS": ms_inter,
             "F": f_inter,
-            "p-unc": p_inter,
+            "p_unc": p_inter,
             effsize: ef_inter,
         },
         index=[2],
@@ -1597,13 +1597,13 @@ def mixed_anova(
         "DF2",
         "MS",
         "F",
-        "p-unc",
-        "p-GG-corr",
+        "p_unc",
+        "p_GG_corr",
         effsize,
         "eps",
         "sphericity",
-        "W-spher",
-        "p-spher",
+        "W_spher",
+        "p_spher",
     ]
     aov = aov.reindex(columns=col_order)
     aov.dropna(how="all", axis=1, inplace=True)
@@ -1638,7 +1638,7 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
         * ``'SS'``: Sums of squares
         * ``'DF'``: Degrees of freedom
         * ``'F'``: F-values
-        * ``'p-unc'``: Uncorrected p-values
+        * ``'p_unc'``: Uncorrected p-values
         * ``'np2'``: Partial eta-squared
 
     Notes
@@ -1668,7 +1668,7 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     >>> from pingouin import ancova, read_dataset
     >>> df = read_dataset('ancova')
     >>> ancova(data=df, dv='Scores', covar='Income', between='Method')
-         Source           SS  DF          F     p-unc       np2
+         Source           SS  DF          F     p_unc       np2
     0    Method   571.029883   3   3.336482  0.031940  0.244077
     1    Income  1678.352687   1  29.419438  0.000006  0.486920
     2  Residual  1768.522313  31        NaN       NaN       NaN
@@ -1678,7 +1678,7 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
 
     >>> ancova(data=df, dv='Scores', covar=['Income', 'BMI'], between='Method',
     ...        effsize="n2")
-         Source           SS  DF          F     p-unc        n2
+         Source           SS  DF          F     p_unc        n2
     0    Method   552.284043   3   3.232550  0.036113  0.141802
     1    Income  1573.952434   1  27.637304  0.000011  0.404121
     2       BMI    60.013656   1   1.053790  0.312842  0.015409
@@ -1724,7 +1724,7 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     # Create output dataframe
     aov = stats.anova_lm(model, typ=2).reset_index()
     aov.rename(
-        columns={"index": "Source", "sum_sq": "SS", "df": "DF", "PR(>F)": "p-unc"}, inplace=True
+        columns={"index": "Source", "sum_sq": "SS", "df": "DF", "PR(>F)": "p_unc"}, inplace=True
     )
     aov.at[0, "Source"] = between
     for i in range(len(covar)):
