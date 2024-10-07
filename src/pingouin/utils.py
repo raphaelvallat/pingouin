@@ -327,8 +327,8 @@ def _check_eftype(eftype):
         "cohen",
         "r",
         "pointbiserialr",
-        "eta-square",
-        "odds-ratio",
+        "eta_square",
+        "odds_ratio",
         "auc",
         "cles",
     ]:
