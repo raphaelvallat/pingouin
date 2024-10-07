@@ -120,7 +120,7 @@ class TestParametric(TestCase):
         tt = ttest(a, a, paired=True)
         assert str(tt.loc["T_test", "T"]) == str(np.nan)
         assert str(tt.loc["T_test", "p_val"]) == str(np.nan)
-        assert tt.loc["T_test", "cohen-d"] == 0.0
+        assert tt.loc["T_test", "cohen_d"] == 0.0
         assert tt.loc["T_test", "BF10"] == str(np.nan)
 
         # 4) Independent two-samples, equal variance (no correction)

@@ -157,7 +157,7 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
    :widths: auto
 
    ======  =====  =============  =======  =============  =========  ======  =======
-        T    dof  alternative      p_val  CI95             cohen-d    BF10    power
+        T    dof  alternative      p_val  CI95             cohen_d    BF10    power
    ======  =====  =============  =======  =============  =========  ======  =======
    -3.401     58  two-sided        0.001  [-1.68 -0.43]      0.878  26.155    0.917
    ======  =====  =============  =======  =============  =========  ======  =======

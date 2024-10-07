@@ -234,8 +234,8 @@ class TestEffsize(TestCase):
         assert round(cef(d, "cohen", "pointbiserialr"), 4) == 0.1961
         cef(d, "cohen", "pointbiserialr", nx=10, ny=12)  # When nx and ny are specified
         assert np.allclose(cef(1.002549, "cohen", "pointbiserialr"), 0.4481248)  # R
-        assert round(cef(d, "cohen", "eta-square"), 4) == 0.0385
-        assert round(cef(d, "cohen", "odds-ratio"), 4) == 2.0658
+        assert round(cef(d, "cohen", "eta_square"), 4) == 0.0385
+        assert round(cef(d, "cohen", "odds_ratio"), 4) == 2.0658
         cef(d, "cohen", "hedges", nx=10, ny=10)
         cef(d, "cohen", "pointbiserialr")
         cef(d, "cohen", "hedges")
@@ -245,8 +245,8 @@ class TestEffsize(TestCase):
         assert cef(rpb, "pointbiserialr", "none") == rpb
         assert round(cef(rpb, "pointbiserialr", "cohen"), 4) == 1.7107
         assert np.allclose(cef(0.4481248, "pointbiserialr", "cohen"), 1.002549)
-        assert round(cef(rpb, "pointbiserialr", "eta-square"), 4) == 0.4225
-        assert round(cef(rpb, "pointbiserialr", "odds-ratio"), 4) == 22.2606
+        assert round(cef(rpb, "pointbiserialr", "eta_square"), 4) == 0.4225
+        assert round(cef(rpb, "pointbiserialr", "odds_ratio"), 4) == 22.2606
         # Using actual values
         np.random.seed(42)
         x1, y1 = np.random.multivariate_normal(mean=[1, 2], cov=[[1, 0.5], [0.5, 1]], size=100).T
@@ -270,15 +270,15 @@ class TestEffsize(TestCase):
         with pytest.raises(ValueError):
             cef(d, "coucou", "hibou")
         with pytest.raises(ValueError):
-            cef(d, "AUC", "eta-square")
+            cef(d, "AUC", "eta_square")
 
     def test_compute_effsize(self):
         """Test function compute_effsize"""
         compute_effsize(x=x, y=y, eftype="cohen", paired=False)
         compute_effsize(x=x, y=y, eftype="AUC", paired=True)
         compute_effsize(x=x, y=y, eftype="r", paired=False)
-        compute_effsize(x=x, y=y, eftype="odds-ratio", paired=False)
-        compute_effsize(x=x, y=y, eftype="eta-square", paired=False)
+        compute_effsize(x=x, y=y, eftype="odds_ratio", paired=False)
+        compute_effsize(x=x, y=y, eftype="eta_square", paired=False)
         compute_effsize(x=x, y=y, eftype="cles", paired=False)
         compute_effsize(x=x, y=y, eftype="pointbiserialr", paired=False)
         compute_effsize(x=x, y=y, eftype="none", paired=False)
