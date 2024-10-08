@@ -47,7 +47,7 @@ jobs:
       if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == 3.9 }}
       uses: actions/upload-artifact@v4
       with:
-        name: docs-artifact-${{ matrix.platform }}-${{ matrix.python-version }}
+        name: docs-artifact
         path: docs/build/html
 
     - name: Upload coverage report
