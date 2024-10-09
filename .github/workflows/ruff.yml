@@ -7,8 +7,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: "Linting"
         uses: astral-sh/ruff-action@v1
-        with:
-          args: "check --output-format github"
       - name: "Formatting"
         uses: astral-sh/ruff-action@v1
         with:
