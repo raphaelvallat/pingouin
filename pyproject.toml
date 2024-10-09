@@ -112,3 +112,12 @@ exclude = [
     "__init__.py",  # Skip init files bc they use star imports (breaking rules F403, F405)
     "notebooks",  # Skip jupyter notebook examples
 ]
+
+[tool.ruff.lint]
+select = [
+    "E4",  # Subset of pycodestyle rules
+    "E7",  # Subset of pycodestyle rules
+    "E9",  # Subset of pycodestyle rules
+    "F",  # All Pyflakes rules
+    "NPY201",
+]
