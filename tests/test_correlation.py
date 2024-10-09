@@ -26,29 +26,29 @@ class TestCorrelation(TestCase):
         # Pearson correlation
         stats = corr(x, y, method="pearson")
         assert np.isclose(stats.loc["pearson", "r"], 0.1761221)
-        assert np.isclose(stats.loc["pearson", "p-val"], 0.3518659)
-        assert stats.loc["pearson", "CI95%"][0] == round(-0.1966232, 2)
-        assert stats.loc["pearson", "CI95%"][1] == round(0.5043872, 2)
+        assert np.isclose(stats.loc["pearson", "p_val"], 0.3518659)
+        assert stats.loc["pearson", "CI95"][0] == round(-0.1966232, 2)
+        assert stats.loc["pearson", "CI95"][1] == round(0.5043872, 2)
         # - One-sided: greater
         stats = corr(x, y, method="pearson", alternative="greater")
         assert np.isclose(stats.loc["pearson", "r"], 0.1761221)
-        assert np.isclose(stats.loc["pearson", "p-val"], 0.175933)
-        assert stats.loc["pearson", "CI95%"][0] == round(-0.1376942, 2)
-        assert stats.loc["pearson", "CI95%"][1] == 1
+        assert np.isclose(stats.loc["pearson", "p_val"], 0.175933)
+        assert stats.loc["pearson", "CI95"][0] == round(-0.1376942, 2)
+        assert stats.loc["pearson", "CI95"][1] == 1
         # - One-sided: less
         stats = corr(x, y, method="pearson", alternative="less")
         assert np.isclose(stats.loc["pearson", "r"], 0.1761221)
-        assert np.isclose(stats.loc["pearson", "p-val"], 0.824067)
-        assert stats.loc["pearson", "CI95%"][0] == -1
-        assert stats.loc["pearson", "CI95%"][1] == round(0.4578044, 2)
+        assert np.isclose(stats.loc["pearson", "p_val"], 0.824067)
+        assert stats.loc["pearson", "CI95"][0] == -1
+        assert stats.loc["pearson", "CI95"][1] == round(0.4578044, 2)
 
         # Spearman correlation
         stats = corr(x, y, method="spearman")
         assert np.isclose(stats.loc["spearman", "r"], 0.4740823)
-        assert np.isclose(stats.loc["spearman", "p-val"], 0.008129768)
+        assert np.isclose(stats.loc["spearman", "p_val"], 0.008129768)
         # CI are calculated using a different formula for Spearman in R
-        # assert stats.loc['spearman', 'CI95%'][0] == round(0.1262988, 2)
-        # assert stats.loc['spearman', 'CI95%'][1] == round(0.7180799, 2)
+        # assert stats.loc['spearman', 'CI95'][0] == round(0.1262988, 2)
+        # assert stats.loc['spearman', 'CI95'][1] == round(0.7180799, 2)
 
         # Kendall correlation
         # R uses a different estimation method than scipy for the p-value
@@ -70,7 +70,7 @@ class TestCorrelation(TestCase):
         # Shepherd
         stats = corr(x, y, method="shepherd")
         assert np.isclose(stats.loc["shepherd", "r"], 0.5123153)
-        assert np.isclose(stats.loc["shepherd", "p-val"], 0.005316)
+        assert np.isclose(stats.loc["shepherd", "p_val"], 0.005316)
         assert stats.loc["shepherd", "outliers"] == 2
         _, _, outliers = skipped(x, y, corr_type="pearson")
         assert outliers.size == x.size
@@ -79,7 +79,7 @@ class TestCorrelation(TestCase):
         stats = corr(x, y, method="percbend")
         assert round(stats.loc["percbend", "r"], 4) == 0.4843
         assert np.isclose(stats.loc["percbend", "r"], 0.4842686)
-        assert np.isclose(stats.loc["percbend", "p-val"], 0.006693313)
+        assert np.isclose(stats.loc["percbend", "p_val"], 0.006693313)
         stats = corr(x2, y2, method="percbend")
         assert round(stats.loc["percbend", "r"], 4) == 0.4843
         stats = corr(x, y, method="percbend", beta=0.5)
@@ -87,9 +87,9 @@ class TestCorrelation(TestCase):
         # Compare biweight correlation to astropy
         stats = corr(x, y, method="bicor")
         assert np.isclose(stats.loc["bicor", "r"], 0.4951418)
-        assert np.isclose(stats.loc["bicor", "p-val"], 0.005403701)
-        assert stats.loc["bicor", "CI95%"][0] == round(0.1641553, 2)
-        assert stats.loc["bicor", "CI95%"][1] == round(0.7259185, 2)
+        assert np.isclose(stats.loc["bicor", "p_val"], 0.005403701)
+        assert stats.loc["bicor", "CI95"][0] == round(0.1641553, 2)
+        assert stats.loc["bicor", "CI95"][1] == round(0.7259185, 2)
         stats = corr(x, y, method="bicor", c=5)
         assert np.isclose(stats.loc["bicor", "r"], 0.4940706950017)
         # Not normally distributed
@@ -136,20 +136,20 @@ class TestCorrelation(TestCase):
         # With one covariate
         pc = partial_corr(data=df, x="x", y="y", covar="cv1")
         assert round(pc.at["pearson", "r"], 7) == 0.5681692
-        assert round(pc.at["pearson", "p-val"], 9) == 0.001303059
+        assert round(pc.at["pearson", "p_val"], 9) == 0.001303059
         # With two covariates
         pc = partial_corr(data=df, x="x", y="y", covar=["cv1", "cv2"])
         assert round(pc.at["pearson", "r"], 7) == 0.5344372
-        assert round(pc.at["pearson", "p-val"], 9) == 0.003392904
+        assert round(pc.at["pearson", "p_val"], 9) == 0.003392904
         # With three covariates
         # in R: pcor.test(x=df$x, y=df$y, z=df[, c("cv1", "cv2", "cv3")])
         pc = partial_corr(data=df, x="x", y="y", covar=["cv1", "cv2", "cv3"])
         assert round(pc.at["pearson", "r"], 7) == 0.4926007
-        assert round(pc.at["pearson", "p-val"], 9) == 0.009044164
+        assert round(pc.at["pearson", "p_val"], 9) == 0.009044164
         # Method == "spearman"
         pc = partial_corr(data=df, x="x", y="y", covar=["cv1", "cv2", "cv3"], method="spearman")
         assert round(pc.at["spearman", "r"], 7) == 0.5209208
-        assert round(pc.at["spearman", "p-val"], 9) == 0.005336187
+        assert round(pc.at["spearman", "p_val"], 9) == 0.005336187
 
         #######################################################################
         # SEMI-PARTIAL CORRELATION
@@ -157,25 +157,25 @@ class TestCorrelation(TestCase):
         # With one covariate
         pc = partial_corr(data=df, x="x", y="y", y_covar="cv1")
         assert round(pc.at["pearson", "r"], 7) == 0.5670793
-        assert round(pc.at["pearson", "p-val"], 9) == 0.001337718
+        assert round(pc.at["pearson", "p_val"], 9) == 0.001337718
         # With two covariates
         pc = partial_corr(data=df, x="x", y="y", y_covar=["cv1", "cv2"])
         assert round(pc.at["pearson", "r"], 7) == 0.5097489
-        assert round(pc.at["pearson", "p-val"], 9) == 0.005589687
+        assert round(pc.at["pearson", "p_val"], 9) == 0.005589687
         # With three covariates
         # in R: spcor.test(x=df$x, y=df$y, z=df[, c("cv1", "cv2", "cv3")])
         pc = partial_corr(data=df, x="x", y="y", y_covar=["cv1", "cv2", "cv3"])
         assert round(pc.at["pearson", "r"], 7) == 0.4212351
-        assert round(pc.at["pearson", "p-val"], 8) == 0.02865483
+        assert round(pc.at["pearson", "p_val"], 8) == 0.02865483
         # With three covariates (x_covar)
         pc = partial_corr(data=df, x="x", y="y", x_covar=["cv1", "cv2", "cv3"])
         assert round(pc.at["pearson", "r"], 7) == 0.4631883
-        assert round(pc.at["pearson", "p-val"], 8) == 0.01496857
+        assert round(pc.at["pearson", "p_val"], 8) == 0.01496857
 
         # Method == "spearman"
         pc = partial_corr(data=df, x="x", y="y", y_covar=["cv1", "cv2", "cv3"], method="spearman")
         assert round(pc.at["spearman", "r"], 7) == 0.4597143
-        assert round(pc.at["spearman", "p-val"], 8) == 0.01584262
+        assert round(pc.at["spearman", "p_val"], 8) == 0.01584262
 
         #######################################################################
         # ERROR
@@ -198,7 +198,7 @@ class TestCorrelation(TestCase):
         stats = rm_corr(data=df, x="pH", y="PacO2", subject="Subject").round(3)
         assert stats.at["rm_corr", "r"] == -0.507
         assert stats.at["rm_corr", "dof"] == 38
-        assert np.allclose(np.round(stats.at["rm_corr", "CI95%"], 2), [-0.71, -0.23])
+        assert np.allclose(np.round(stats.at["rm_corr", "CI95"], 2), [-0.71, -0.23])
         assert stats.at["rm_corr", "pval"] == 0.001
         # Test with less than 3 subjects (same behavior as R package)
         with pytest.raises(ValueError):

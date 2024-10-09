@@ -144,7 +144,7 @@ def multivariate_ttest(X, Y=None, paired=False):
         * ``'F'``: F-value
         * ``'df1'``: first degree of freedom
         * ``'df2'``: second degree of freedom
-        * ``'p-val'``: p-value
+        * ``'p_val'``: p-value
 
     See Also
     --------

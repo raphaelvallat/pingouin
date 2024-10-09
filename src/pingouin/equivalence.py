@@ -78,10 +78,10 @@ def tost(x, y, bound=1, paired=False, correction=False):
     # T-tests
     df_a = ttest(x + bound, y, paired=paired, correction=correction, alternative="greater")
     df_b = ttest(x - bound, y, paired=paired, correction=correction, alternative="less")
-    pval = max(df_a.at["T-test", "p-val"], df_b.at["T-test", "p-val"])
+    pval = max(df_a.at["T_test", "p_val"], df_b.at["T_test", "p_val"])
 
     # Create output dataframe
     stats = pd.DataFrame(
-        {"bound": bound, "dof": df_a.at["T-test", "dof"], "pval": pval}, index=["TOST"]
+        {"bound": bound, "dof": df_a.at["T_test", "dof"], "pval": pval}, index=["TOST"]
     )
     return _postprocess_dataframe(stats)

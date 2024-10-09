@@ -53,8 +53,8 @@ class TestRegression(TestCase):
         assert_almost_equal(lm["pval"][1], sc.pvalue)
         assert_almost_equal(np.sqrt(lm["r2"][0]), sc.rvalue)
         assert lm.residuals_.size == df["Y"].size
-        assert_equal(lm["CI[2.5%]"].round(5).to_numpy(), [1.48155, 0.17553])
-        assert_equal(lm["CI[97.5%]"].round(5).to_numpy(), [4.23286, 0.61672])
+        assert_equal(lm["CI2.5"].round(5).to_numpy(), [1.48155, 0.17553])
+        assert_equal(lm["CI97.5"].round(5).to_numpy(), [4.23286, 0.61672])
         assert round(lm["r2"].iloc[0], 4) == 0.1147
         assert round(lm["adj_r2"].iloc[0], 4) == 0.1057
         assert lm.df_model_ == 1
@@ -74,8 +74,8 @@ class TestRegression(TestCase):
         assert_equal([0.605, 0.110, 0.101], np.round(lm["se"], 3))
         assert_equal([3.145, 0.361, 6.321], np.round(lm["T"], 3))
         assert_equal([0.002, 0.719, 0.000], np.round(lm["pval"], 3))
-        assert_equal([0.703, -0.178, 0.436], np.round(lm["CI[2.5%]"], 3))
-        assert_equal([3.106, 0.257, 0.835], np.round(lm["CI[97.5%]"], 3))
+        assert_equal([0.703, -0.178, 0.436], np.round(lm["CI2.5"], 3))
+        assert_equal([3.106, 0.257, 0.835], np.round(lm["CI97.5"], 3))
 
         # No intercept
         lm = linear_regression(X, y, add_intercept=False, as_dataframe=False)
@@ -146,8 +146,8 @@ class TestRegression(TestCase):
         np.testing.assert_allclose(res_pingouin["T"], res_sm.tvalues)
         np.testing.assert_allclose(res_pingouin["se"], res_sm.bse)
         np.testing.assert_allclose(res_pingouin["pval"], res_sm.pvalues)
-        np.testing.assert_allclose(res_pingouin["CI[2.5%]"], res_sm.conf_int()[:, 0])
-        np.testing.assert_allclose(res_pingouin["CI[97.5%]"], res_sm.conf_int()[:, 1])
+        np.testing.assert_allclose(res_pingouin["CI2.5"], res_sm.conf_int()[:, 0])
+        np.testing.assert_allclose(res_pingouin["CI97.5"], res_sm.conf_int()[:, 1])
 
         # Relative importance
         # Compare to R package relaimpo
@@ -190,8 +190,8 @@ class TestRegression(TestCase):
         assert_equal(lm["se"].round(5).to_numpy(), [0.60498, 0.10984, 0.10096])
         assert_equal(lm["T"].round(3).to_numpy(), [3.133, 0.356, 6.331])  # R round to 3
         assert_equal(lm["pval"].round(5).to_numpy(), [0.00229, 0.72296, 0.00000])
-        assert_equal(lm["CI[2.5%]"].round(5).to_numpy(), [0.69459, -0.17896, 0.43874])
-        assert_equal(lm["CI[97.5%]"].round(5).to_numpy(), [3.09602, 0.25706, 0.83949])
+        assert_equal(lm["CI2.5"].round(5).to_numpy(), [0.69459, -0.17896, 0.43874])
+        assert_equal(lm["CI97.5"].round(5).to_numpy(), [3.09602, 0.25706, 0.83949])
         assert round(lm["r2"].iloc[0], 4) == 0.3742
         assert round(lm["adj_r2"].iloc[0], 4) == 0.3613
         assert lm.df_model_ == 2
@@ -203,8 +203,8 @@ class TestRegression(TestCase):
         assert_equal(lm["se"].round(5).to_numpy(), [0.08525, 0.10213])
         assert_equal(lm["T"].round(3).to_numpy(), [3.158, 7.024])
         assert_equal(lm["pval"].round(5).to_numpy(), [0.00211, 0.00000])
-        assert_equal(lm["CI[2.5%]"].round(5).to_numpy(), [0.10007, 0.51466])
-        assert_equal(lm["CI[97.5%]"].round(4).to_numpy(), [0.4384, 0.9200])
+        assert_equal(lm["CI2.5"].round(5).to_numpy(), [0.10007, 0.51466])
+        assert_equal(lm["CI97.5"].round(4).to_numpy(), [0.4384, 0.9200])
         assert round(lm["r2"].iloc[0], 4) == 0.9090
         assert round(lm["adj_r2"].iloc[0], 4) == 0.9072
         assert lm.df_model_ == 2
@@ -218,8 +218,8 @@ class TestRegression(TestCase):
         assert_equal(lm["coef"].round(4).to_numpy(), [3.5597, 0.2820])
         assert_equal(lm["se"].round(4).to_numpy(), [0.7355, 0.1222])
         assert_equal(lm["pval"].round(4).to_numpy(), [0.0000, 0.0232])
-        assert_equal(lm["CI[2.5%]"].round(5).to_numpy(), [2.09935, 0.03943])
-        assert_equal(lm["CI[97.5%]"].round(5).to_numpy(), [5.02015, 0.52453])
+        assert_equal(lm["CI2.5"].round(5).to_numpy(), [2.09935, 0.03943])
+        assert_equal(lm["CI97.5"].round(5).to_numpy(), [5.02015, 0.52453])
         assert round(lm["r2"].iloc[0], 5) == 0.05364
         assert round(lm["adj_r2"].iloc[0], 5) == 0.04358
         assert lm.df_model_ == 1
@@ -230,8 +230,8 @@ class TestRegression(TestCase):
         assert_equal(lm["coef"].round(5).to_numpy(), [0.85060])
         assert_equal(lm["se"].round(5).to_numpy(), [0.03719])
         assert_equal(lm["pval"].round(5).to_numpy(), [0.0000])
-        assert_equal(lm["CI[2.5%]"].round(5).to_numpy(), [0.77678])
-        assert_equal(lm["CI[97.5%]"].round(5).to_numpy(), [0.92443])
+        assert_equal(lm["CI2.5"].round(5).to_numpy(), [0.77678])
+        assert_equal(lm["CI97.5"].round(5).to_numpy(), [0.92443])
         assert round(lm["r2"].iloc[0], 4) == 0.8463
         assert round(lm["adj_r2"].iloc[0], 4) == 0.8447
         assert lm.df_model_ == 1
@@ -265,8 +265,8 @@ class TestRegression(TestCase):
         assert_equal(np.round(lom["se"], 3), [0.758, 0.121])
         assert_equal(np.round(lom["z"], 3), [1.74, -1.647])
         assert_equal(np.round(lom["pval"], 3), [0.082, 0.099])
-        assert_equal(np.round(lom["CI[2.5%]"], 3), [-0.167, -0.437])
-        assert_equal(np.round(lom["CI[97.5%]"], 3), [2.805, 0.038])
+        assert_equal(np.round(lom["CI2.5"], 3), [-0.167, -0.437])
+        assert_equal(np.round(lom["CI97.5"], 3), [2.805, 0.038])
 
         # Multiple predictors
         X = df[["X", "M"]].to_numpy()
@@ -278,8 +278,8 @@ class TestRegression(TestCase):
         assert_equal(lom["se"].to_numpy(), [0.778, 0.141, 0.125])
         assert_equal(lom["z"].to_numpy(), [1.705, -1.392, -0.048])
         assert_equal(lom["pval"].to_numpy(), [0.088, 0.164, 0.962])
-        assert_equal(lom["CI[2.5%]"].to_numpy(), [-0.198, -0.472, -0.252])
-        assert_equal(lom["CI[97.5%]"].to_numpy(), [2.853, 0.08, 0.24])
+        assert_equal(lom["CI2.5"].to_numpy(), [-0.198, -0.472, -0.252])
+        assert_equal(lom["CI97.5"].to_numpy(), [2.853, 0.08, 0.24])
 
         # Test other arguments
         c = logistic_regression(df[["X", "M"]], df["Ybin"], coef_only=True)
@@ -322,8 +322,8 @@ class TestRegression(TestCase):
         assert_equal(np.round(lom["se"], 5), [0.72439, 0.00017])
         assert_equal(np.round(lom["z"], 3), [-7.127, 7.177])
         assert np.allclose(lom["pval"], [1.03e-12, 7.10e-13])
-        assert_equal(np.round(lom["CI[2.5%]"], 3), [-6.582, 0.001])
-        assert_equal(np.round(lom["CI[97.5%]"], 3), [-3.743, 0.002])
+        assert_equal(np.round(lom["CI2.5"], 3), [-6.582, 0.001])
+        assert_equal(np.round(lom["CI97.5"], 3), [-3.743, 0.002])
 
         # With a different scaling: z / p-values should be similar
         lom = logistic_regression(data["body_mass_kg"], data["male"], as_dataframe=False)
@@ -331,8 +331,8 @@ class TestRegression(TestCase):
         assert_equal(np.round(lom["se"], 4), [0.7244, 0.1727])
         assert_equal(np.round(lom["z"], 3), [-7.127, 7.177])
         assert np.allclose(lom["pval"], [1.03e-12, 7.10e-13])
-        assert_equal(np.round(lom["CI[2.5%]"], 3), [-6.582, 0.901])
-        assert_equal(np.round(lom["CI[97.5%]"], 3), [-3.743, 1.578])
+        assert_equal(np.round(lom["CI2.5"], 3), [-6.582, 0.901])
+        assert_equal(np.round(lom["CI97.5"], 3), [-3.743, 1.578])
 
         # With no intercept
         lom = logistic_regression(
@@ -342,8 +342,8 @@ class TestRegression(TestCase):
         assert np.round(lom["se"], 5) == 0.02570
         assert np.round(lom["z"], 3) == 1.615
         assert np.round(lom["pval"], 3) == 0.106
-        assert np.round(lom["CI[2.5%]"], 3) == -0.009
-        assert np.round(lom["CI[97.5%]"], 3) == 0.092
+        assert np.round(lom["CI2.5"], 3) == -0.009
+        assert np.round(lom["CI97.5"], 3) == 0.092
 
         # With categorical predictors
         # R: >>> glm("male ~ body_mass_kg + species", family=binomial, ...)
@@ -357,8 +357,8 @@ class TestRegression(TestCase):
         assert_equal(np.round(lom["coef"], 2), [-27.13, 7.37, -0.26, -10.18])
         assert_equal(np.round(lom["se"], 3), [2.998, 0.814, 0.429, 1.195])
         assert_equal(np.round(lom["z"], 3), [-9.049, 9.056, -0.596, -8.520])
-        assert_equal(np.round(lom["CI[2.5%]"], 1), [-33.0, 5.8, -1.1, -12.5])
-        assert_equal(np.round(lom["CI[97.5%]"], 1), [-21.3, 9.0, 0.6, -7.8])
+        assert_equal(np.round(lom["CI2.5"], 1), [-33.0, 5.8, -1.1, -12.5])
+        assert_equal(np.round(lom["CI97.5"], 1), [-21.3, 9.0, 0.6, -7.8])
 
     def test_mediation_analysis(self):
         """Test function mediation_analysis."""
@@ -383,8 +383,8 @@ class TestRegression(TestCase):
 
         # Direct effect
         assert_almost_equal(ma["coef"][3], 0.3956, decimal=2)
-        assert_almost_equal(ma["CI[2.5%]"][3], 0.1714, decimal=2)
-        assert_almost_equal(ma["CI[97.5%]"][3], 0.617, decimal=1)
+        assert_almost_equal(ma["CI2.5"][3], 0.1714, decimal=2)
+        assert_almost_equal(ma["CI97.5"][3], 0.617, decimal=1)
         assert ma["sig"][3] == "Yes"
 
         # Check if `logreg_kwargs` is being passed on to `LogisticRegression`

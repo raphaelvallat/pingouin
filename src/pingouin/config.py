@@ -16,6 +16,6 @@ def set_default_options():
 
     # Rounding behavior
     options["round"] = None
-    options["round.column.CI95%"] = 2
+    options["round.column.CI95"] = 2
     # default is to return Bayes factors inside DataFrames as formatted str
     options["round.column.BF10"] = _format_bf
