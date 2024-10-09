@@ -105,25 +105,10 @@ source = ["src"]
 show_missing = true
 # sort = "Cover"
 
-[tool.black]
+[tool.ruff]
 line-length = 100
-target-version = ['py311']
-include = '\.pyi?$'
-
-[tool.flake8]
-# W605 : bug when math equation in numpydoc
-# W503, W504 : line-break with math operator
-# E203: E203 whitespace before ':', not compatible with Black
-# DXXX: Docstring related
-max-line-length = 100
-ignore = ["N806", "N803", "W503", "W504", "W605", "D100", "D200", "D205", "D301", "D400", "D401", "E203"]
+target-version = "py311"
 exclude = [
-    ".git",
-    "__pycache__",
-    "docs",
-    "build",
-    "__init__.py",
-    "examples",
-    "setup.py",
+    "__init__.py",  # Skip init files bc they use star imports (breaking rules F403, F405)
+    "notebooks",  # Skip jupyter notebook examples
 ]
-statistics = true
