@@ -80,7 +80,7 @@ To inspect these build artifacts, follow these steps:
 
   Screenshot of the GitHub checks dropdown menu
 
-* Click on the check that starts with ``Python tests / build (ubuntu-latest, 3.8)``
+* Click on the check that starts with ``Python tests / build (ubuntu-latest, 3.9)``
 * Now in the top right corner of the opening window, you will see a small dropdown menu called "Artifacts"
 
 .. figure::  /pictures/github_build_artifacts.png
