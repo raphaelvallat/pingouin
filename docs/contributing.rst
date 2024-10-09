@@ -12,11 +12,11 @@ Code guidelines
 
 *Before starting new code*, we highly recommend opening an issue on `GitHub <https://github.com/raphaelvallat/pingouin>`_ to discuss potential changes.
 
-* Please use standard `pep8 <https://pypi.python.org/pypi/pep8>`_ and `flake8 <http://flake8.pycqa.org/>`_ Python style guidelines. Pingouin uses `black <https://github.com/psf/black>`_ for code formatting. Before submitting a PR, please make sure to run the following command in the root folder of Pingouin:
+* Please use standard `pep8 <https://pypi.python.org/pypi/pep8>`_ and `flake8 <http://flake8.pycqa.org/>`_ Python style guidelines. Pingouin uses `ruff <https://github.com/astral-sh/ruff>`_ for code formatting. Before submitting a PR, please make sure to run the following command in the root folder of Pingouin:
 
   .. code-block:: bash
 
-     $ black . --line-length=100
+     $ ruff format --line-length=100
 
 * Use `NumPy style <https://numpydoc.readthedocs.io/en/latest/format.html>`_ for docstrings. Follow existing examples for simplest guidance.
 
