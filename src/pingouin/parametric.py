@@ -1262,7 +1262,7 @@ def welch_anova(data=None, dv=None, between=None):
     it is best to use the Welch ANOVA that better controls for
     type I error (Liu 2015). The homogeneity of variances can be measured with
     the `homoscedasticity` function. The two other assumptions of
-    normality and independance remain.
+    normality and independence remain.
 
     The main idea of Welch ANOVA is to use a weight :math:`w_i` to reduce
     the effect of unequal variances. This weight is calculated using the sample
