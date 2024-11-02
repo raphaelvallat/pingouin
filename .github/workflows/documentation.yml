@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pages:
+  deploy-to-gh-pages:
     runs-on: ubuntu-24.04
     environment:
       name: documentation-github-pages
