@@ -1,0 +1,54 @@
+name: Deploy Documentation to Github Pages
+
+on: workflow_dispatch
+  # Alternative: trigger deployment on push
+  # push:
+  # branches: [main] 
+
+# Cancel any in-progress job or run
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pages:
+    runs-on: ubuntu-24.04
+    environment:
+      name: documentation-github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Setup python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    - name: Enable github problem matcher
+      uses: sphinx-doc/github-problem-matcher@master
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -U pip setuptools wheel 
+        pip install .[docs]
+    - name: Sphinx build
+      run: >
+        sphinx-build
+        -b html ./docs ./docs/_builds
+        -v
+        --jobs=auto
+        --show-traceback
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        # Path to build dir, see 'sphinx run'
+        path: './docs/_builds'
+    - id: deployment
+      name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v4
+
+
+
