@@ -129,6 +129,21 @@ html_context = {
     "doc_path": "docs",
 }
 
+# -- 404 page  ------------------------------------------------
+
+# Remove default url prefix on 404 pages
+# https://sphinx-notfound-page.readthedocs.io/en/latest/configuration.html#confval-notfound_urls_prefix
+#notfound_urls_prefix = "/test/",
+notfound_no_urls_prefix = True
+
+notfound_context = {
+    "title": "Page Not Found (404)",
+    "body": """
+        <h1>Page Not Found</h1>
+        <p>Sorry, we couldn't find that page.</p>
+        <p>Try using the search box or go to the homepage.</p>
+        """,
+}
 
 # -- Intersphinx ------------------------------------------------
 
