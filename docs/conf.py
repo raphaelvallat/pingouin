@@ -133,8 +133,7 @@ html_context = {
 
 # Remove default url prefix on 404 pages
 # https://sphinx-notfound-page.readthedocs.io/en/latest/configuration.html#confval-notfound_urls_prefix
-#notfound_urls_prefix = "/test/",
-notfound_no_urls_prefix = True
+notfound_urls_prefix = None
 
 notfound_context = {
     "title": "Page Not Found (404)",
