@@ -48,6 +48,7 @@ test = [
     "pytest-cov",
     # Ensure coverage is new enough for `source_pkgs`.
     "coverage[toml]>=5.3",
+    "mpmath",
 ]
 docs = [
     "sphinx>7.0.0",
