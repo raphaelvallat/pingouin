@@ -5,9 +5,28 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pingouin"
 description = "Pingouin: statistical package for Python"
+readme = "README.rst"
+license = {text = "GPL-3.0"}
 authors = [
     {name = "Raphael Vallat", email = "raphaelvallat9@gmail.com"},
 ]
+maintainers = [
+    {name = "Raphael Vallat", email = "raphaelvallat9@gmail.com"},
+]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+dynamic = ["version"]
+requires-python = ">=3.8"
 dependencies = [
     "matplotlib",
     "numpy",
@@ -19,32 +38,14 @@ dependencies = [
     "statsmodels",
     "tabulate",
 ]
-requires-python = ">=3.8"
-readme = "README.rst"
-license = {text = "GPL-3.0"}
-maintainers = [
-    {name = "Raphael Vallat", email = "raphaelvallat9@gmail.com"},
-]
-dynamic = ["version"]
-classifiers = [
-    "Intended Audience :: Science/Research",
-    "Operating System :: MacOS",
-    "Operating System :: POSIX",
-    "Operating System :: Unix",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Topic :: Scientific/Engineering :: Mathematics",
-]
 
 [project.optional-dependencies]
+extras = [
+    "mpmath",
+]
 test = [
     "pytest>=6",
     "pytest-cov",
-    "codecov",
-    "openpyxl",
-    "mpmath",
     # Ensure coverage is new enough for `source_pkgs`.
     "coverage[toml]>=5.3",
 ]
