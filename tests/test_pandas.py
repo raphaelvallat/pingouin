@@ -105,7 +105,7 @@ class TestParametric(TestCase):
         assert corrs.at["Neuroticism", "Agreeableness"] == "*"
         assert corrs.at["Agreeableness", "Neuroticism"] == str(corrs2.at[2, "r"])
         corrs = df_corr.rcorr(padjust="holm", stars=False, decimals=4)
-        assert corrs.at["Neuroticism", "Agreeableness"] == str(corrs2.at[2, "p-corr"].round(4))
+        assert corrs.at["Neuroticism", "Agreeableness"] == str(corrs2.at[2, "p_corr"].round(4))
         corrs = df_corr.rcorr(upper="n", decimals=5)
         corrs2 = df_corr.pairwise_corr().round(5)
         assert corrs.at["Extraversion", "Openness"] == corrs2.at[4, "n"]
