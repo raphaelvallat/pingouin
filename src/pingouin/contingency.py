@@ -367,8 +367,7 @@ def _dichotomize_series(data, column):
             elif lower in ("y", "yes", "present", "true", "t", "positive", "p"):
                 return 1
         raise ValueError(
-            "Invalid value to build a 2x2 contingency "
-            "table on column {}: {}".format(column, elem)
+            "Invalid value to build a 2x2 contingency table on column {}: {}".format(column, elem)
         )
 
     return series.apply(convert_elem)
