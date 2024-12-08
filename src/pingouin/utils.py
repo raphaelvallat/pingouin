@@ -90,7 +90,7 @@ def _postprocess_dataframe(df):
     `pingouin.options`. The default rounding (number of decimals) is
     determined by `pingouin.options['round']`. You can specify rounding for a
     given column name by the option `'round.column.<colname>'`, e.g.
-    `'round.column.CI95%'`. Analogously, `'round.row.<rowname>'` also works
+    `'round.column.CI95'`. Analogously, `'round.row.<rowname>'` also works
     (where `rowname`) refers to the pandas index), as well as
     `'round.cell.[<rolname>]x[<colname]'`. A cell-based option is used,
     if available; if not, a column-based option is used, if
@@ -327,8 +327,8 @@ def _check_eftype(eftype):
         "cohen",
         "r",
         "pointbiserialr",
-        "eta-square",
-        "odds-ratio",
+        "eta_square",
+        "odds_ratio",
         "auc",
         "cles",
     ]:

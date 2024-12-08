@@ -234,8 +234,8 @@ def chi2_mcnemar(data, x, y, correction=True):
 
         * ``'chi2'``: The test statistic
         * ``'dof'``: The degree of freedom
-        * ``'p-approx'``: The approximated p-value
-        * ``'p-exact'``: The exact p-value
+        * ``'p_approx'``: The approximated p-value
+        * ``'p_exact'``: The exact p-value
 
     Notes
     -----
@@ -304,7 +304,7 @@ def chi2_mcnemar(data, x, y, correction=True):
     The McNemar test should be sensitive to this.
 
     >>> stats
-                chi2  dof  p-approx   p-exact
+                chi2  dof  p_approx   p_exact
     mcnemar  20.020833    1  0.000008  0.000003
     """
     # Python code initially inspired by statsmodel's mcnemar
@@ -336,9 +336,9 @@ def chi2_mcnemar(data, x, y, correction=True):
     stats = {
         "chi2": chi2,
         "dof": 1,
-        "p-approx": sp_chi2.sf(chi2, 1),
-        "p-exact": pexact,
-        # 'p-mid': pexact - binom.pmf(b, n_discordants, 0.5)
+        "p_approx": sp_chi2.sf(chi2, 1),
+        "p_exact": pexact,
+        # 'p_mid': pexact - binom.pmf(b, n_discordants, 0.5)
     }
 
     stats = pd.DataFrame(stats, index=["mcnemar"])
