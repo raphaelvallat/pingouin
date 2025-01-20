@@ -490,7 +490,9 @@ def wilcoxon(x, y=None, alternative="two-sided", **kwargs):
     rsum = r.sum()
     r_plus = np.sum((d > 0) * r)
     r_minus = np.sum((d < 0) * r)
-    rbc = r_minus / rsum - r_plus / rsum if alternative == "less" else r_plus / rsum - r_minus / rsum
+    rbc = (
+        r_minus / rsum - r_plus / rsum if alternative == "less" else r_plus / rsum - r_minus / rsum
+    )
 
     # Fill output DataFrame
     stats = pd.DataFrame(
