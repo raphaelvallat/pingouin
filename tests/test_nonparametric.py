@@ -104,7 +104,7 @@ class TestNonParametric(TestCase):
         # Note that the RBC value are compared to JASP in test_pairwise.py
         # The RBC values in JASP does not change according to the tail.
         assert round(wc_pg.at["Wilcoxon", "RBC"], 3) == -0.379
-        assert round(wc_pg_less.at["Wilcoxon", "RBC"], 3) == -0.379
+        assert round(wc_pg_less.at["Wilcoxon", "RBC"], 3) == 0.379
         assert round(wc_pg_greater.at["Wilcoxon", "RBC"], 3) == -0.379
         # CLES is compared to:
         # https://janhove.github.io/reporting/2016/11/16/common-language-effect-sizes

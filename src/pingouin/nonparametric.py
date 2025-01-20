@@ -410,37 +410,37 @@ def wilcoxon(x, y=None, alternative="two-sided", **kwargs):
     >>> y = np.array([38, 37, 33, 29, 14, 12, 20, 22, 17, 25, 26, 16])
     >>> pg.wilcoxon(x, y, alternative='two-sided')
               W_val alternative     p_val       RBC      CLES
-    Wilcoxon   20.5   two-sided  0.285765 -0.378788  0.395833
+    Wilcoxon   20.5   two-sided  0.288086 -0.378788  0.395833
 
     Same but using pre-computed differences. However, the CLES effect size
     cannot be computed as it requires the raw data.
 
     >>> pg.wilcoxon(x - y)
               W_val alternative     p_val       RBC  CLES
-    Wilcoxon   20.5   two-sided  0.285765 -0.378788   NaN
+    Wilcoxon   20.5   two-sided  0.288086 -0.378788   NaN
 
     Compare with SciPy
 
     >>> import scipy
     >>> scipy.stats.wilcoxon(x, y)
-    WilcoxonResult(statistic=20.5, pvalue=0.2661660677806492)
+    WilcoxonResult(statistic=20.5, pvalue=0.2880859375)
 
     The p-value is not exactly similar to Pingouin. This is because Pingouin automatically applies
     a continuity correction. Disabling it gives the same p-value as scipy:
 
     >>> pg.wilcoxon(x, y, alternative='two-sided', correction=False)
               W_val alternative     p_val       RBC      CLES
-    Wilcoxon   20.5   two-sided  0.266166 -0.378788  0.395833
+    Wilcoxon   20.5   two-sided  0.288086 -0.378788  0.395833
 
     One-sided test
 
     >>> pg.wilcoxon(x, y, alternative='greater')
               W_val alternative     p_val       RBC      CLES
-    Wilcoxon   20.5     greater  0.876244 -0.378788  0.395833
+    Wilcoxon   20.5     greater  0.865723 -0.378788  0.395833
 
     >>> pg.wilcoxon(x, y, alternative='less')
               W_val alternative     p_val       RBC      CLES
-    Wilcoxon   20.5        less  0.142883 -0.378788  0.604167
+    Wilcoxon   20.5        less  0.144043  0.378788  0.604167
     """
     x = np.asarray(x)
     if y is not None:
@@ -490,7 +490,7 @@ def wilcoxon(x, y=None, alternative="two-sided", **kwargs):
     rsum = r.sum()
     r_plus = np.sum((d > 0) * r)
     r_minus = np.sum((d < 0) * r)
-    rbc = r_plus / rsum - r_minus / rsum
+    rbc = r_minus / rsum - r_plus / rsum if alternative == "less" else r_plus / rsum - r_minus / rsum
 
     # Fill output DataFrame
     stats = pd.DataFrame(
