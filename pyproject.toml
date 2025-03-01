@@ -5,9 +5,28 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pingouin"
 description = "Pingouin: statistical package for Python"
+readme = "README.rst"
+license = {text = "GPL-3.0"}
 authors = [
     {name = "Raphael Vallat", email = "raphaelvallat9@gmail.com"},
 ]
+maintainers = [
+    {name = "Raphael Vallat", email = "raphaelvallat9@gmail.com"},
+]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+dynamic = ["version"]
+requires-python = ">=3.8"
 dependencies = [
     "matplotlib",
     "numpy",
@@ -19,34 +38,25 @@ dependencies = [
     "statsmodels",
     "tabulate",
 ]
-requires-python = ">=3.8"
-readme = "README.rst"
-license = {text = "GPL-3.0"}
-maintainers = [
-    {name = "Raphael Vallat", email = "raphaelvallat9@gmail.com"},
-]
-dynamic = ["version"]
-classifiers = [
-    "Intended Audience :: Science/Research",
-    "Operating System :: MacOS",
-    "Operating System :: POSIX",
-    "Operating System :: Unix",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Topic :: Scientific/Engineering :: Mathematics",
-]
 
 [project.optional-dependencies]
+extras = [
+    "mpmath",
+]
 test = [
     "pytest>=6",
     "pytest-cov",
-    "codecov",
-    "openpyxl",
-    "mpmath",
     # Ensure coverage is new enough for `source_pkgs`.
     "coverage[toml]>=5.3",
+    "mpmath",
+]
+docs = [
+    "sphinx>7.0.0",
+    "pydata_sphinx_theme",
+    "numpydoc",
+    "sphinx-copybutton",
+    "sphinx-design",
+    "sphinx-notfound-page",
 ]
 
 [project.urls]
@@ -97,25 +107,19 @@ source = ["src"]
 show_missing = true
 # sort = "Cover"
 
-[tool.black]
+[tool.ruff]
 line-length = 100
-target-version = ['py311']
-include = '\.pyi?$'
-
-[tool.flake8]
-# W605 : bug when math equation in numpydoc
-# W503, W504 : line-break with math operator
-# E203: E203 whitespace before ':', not compatible with Black
-# DXXX: Docstring related
-max-line-length = 100
-ignore = ["N806", "N803", "W503", "W504", "W605", "D100", "D200", "D205", "D301", "D400", "D401", "E203"]
+target-version = "py311"
 exclude = [
-    ".git",
-    "__pycache__",
-    "docs",
-    "build",
-    "__init__.py",
-    "examples",
-    "setup.py",
+    "__init__.py",  # Skip init files bc they use star imports (breaking rules F403, F405)
+    "notebooks",  # Skip jupyter notebook examples
 ]
-statistics = true
+
+[tool.ruff.lint]
+select = [
+    "E4",  # Subset of pycodestyle rules
+    "E7",  # Subset of pycodestyle rules
+    "E9",  # Subset of pycodestyle rules
+    "F",  # All Pyflakes rules
+    "NPY201",
+]

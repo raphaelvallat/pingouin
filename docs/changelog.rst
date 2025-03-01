@@ -3,15 +3,18 @@
 What's new
 ##########
 
-.. contents:: Table of Contents
-    :depth: 2
+v0.5.5 (September 2024)
+-----------------------
 
-*************
+This is a minor release with several bugfixes, and major updates to the internal structure and sphinx documentation.
+
+See the full `changelog for 0.5.5 <https://github.com/raphaelvallat/pingouin/releases/tag/v0.5.5>`_.
+
 
 v0.5.4 (January 2024)
 ---------------------
 
-This is a minor release with several bugfixes and no new features. The new version is tested for Python 3.8-3.11 (but should also work with Python 3.12). See `GitHub <https://github.com/raphaelvallat/pingouin/releases>`_ for the full changelog.
+This is a minor release with several bugfixes and no new features. The new version is tested for Python 3.8-3.11 (but should also work with Python 3.12). See the full `changelog for 0.5.4 <https://github.com/raphaelvallat/pingouin/releases/tag/v0.5.4>`_.
 
 This release requires pandas≥1.5. We recommend scipy≥1.11.0.
 

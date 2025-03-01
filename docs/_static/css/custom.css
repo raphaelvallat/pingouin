@@ -1,0 +1,36 @@
+/* -------------------- THEME OVERRIDES -------------------- */
+
+html[data-theme="light"],
+html[data-theme="dark"] {
+  --pst-color-primary: #4583ec;
+  --pst-color-secondary: #d46700;
+  --pst-color-table-row-zebra-low-bg: var(--bs-table-bg);
+  --pst-color-table-row-hover-bg: transparent;
+  --pst-color-inline-code: var(--pst-color-text-base);
+}
+
+html[data-theme="light"] {
+  --pst-color-inline-code-links: #00358f;
+}
+
+html[data-theme="dark"] {
+  --pst-color-inline-code-links: #00caeb;
+}
+
+#pst-back-to-top:hover {
+  background-color: #a95200;
+}
+
+table caption {
+  text-align: left;
+}
+
+/* -------------------- NAV BAR-------------------- */
+
+html[data-theme="dark"] .navbar-brand p {
+  color: white;
+}
+
+html[data-theme="dark"] .navbar-brand img {
+  filter: invert(1);
+}
