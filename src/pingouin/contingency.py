@@ -309,9 +309,9 @@ def chi2_mcnemar(data, x, y, correction=True):
     """
     # Python code initially inspired by statsmodel's mcnemar
     assert isinstance(data, pd.DataFrame), "data must be a pandas DataFrame."
-    assert all(
-        isinstance(column, (str, int)) for column in (x, y)
-    ), "column names must be string or int."
+    assert all(isinstance(column, (str, int)) for column in (x, y)), (
+        "column names must be string or int."
+    )
     assert all(column in data.columns for column in (x, y)), "columns are not in dataframe."
 
     for column in (x, y):
@@ -422,7 +422,7 @@ def dichotomous_crosstab(data, x, y):
             crosstab.loc[int(not bool(crosstab.index[0])), :] = [0, 0]
         else:  # shape = (1, 1) or shape = (>2, >2)
             raise ValueError(
-                "Both series contain only one unique value. " "Cannot build 2x2 contingency table."
+                "Both series contain only one unique value. Cannot build 2x2 contingency table."
             )
     crosstab = crosstab.sort_index(axis=0).sort_index(axis=1)
     return crosstab

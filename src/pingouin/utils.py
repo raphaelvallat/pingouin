@@ -402,7 +402,7 @@ def _is_statsmodels_installed(raise_error=False):
         is_installed = False
     # Raise error (if needed) :
     if raise_error and not is_installed:  # pragma: no cover
-        raise OSError("statsmodels needs to be installed. Please use `pip " "install statsmodels`.")
+        raise OSError("statsmodels needs to be installed. Please use `pip install statsmodels`.")
     return is_installed
 
 
@@ -416,7 +416,7 @@ def _is_sklearn_installed(raise_error=False):
         is_installed = False
     # Raise error (if needed) :
     if raise_error and not is_installed:  # pragma: no cover
-        raise OSError("sklearn needs to be installed. Please use `pip " "install scikit-learn`.")
+        raise OSError("sklearn needs to be installed. Please use `pip install scikit-learn`.")
     return is_installed
 
 
@@ -430,5 +430,5 @@ def _is_mpmath_installed(raise_error=False):
         is_installed = False
     # Raise error (if needed) :
     if raise_error and not is_installed:  # pragma: no cover
-        raise OSError("mpmath needs to be installed. Please use `pip " "install mpmath`.")
+        raise OSError("mpmath needs to be installed. Please use `pip install mpmath`.")
     return is_installed
