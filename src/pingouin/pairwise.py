@@ -61,10 +61,11 @@ def pairwise_tests(
         Name of column(s) containing the between-subject factor(s).
     within : string or list with 2 elements
         Name of column(s) containing the within-subject factor(s), i.e. the
-        repeated measurements.
+        repeated measurements. Only a single within-subject factor is supported for mixed analysis
+        (if ``between`` is also specified).
     subject : string
-        Name of column containing the subject identifier. This is mandatory
-        when ``within`` is specified.
+        Name of column containing the subject identifier. This is mandatory when ``within`` is
+        specified.
     parametric : boolean
         If True (default), use the parametric :py:func:`ttest` function.
         If False, use :py:func:`pingouin.wilcoxon` or :py:func:`pingouin.mwu`
@@ -184,7 +185,8 @@ def pairwise_tests(
     If both ``between`` and ``within`` are specified, the output model is
     within + between + within * between (= mixed design), unless
     ``within_first=False`` in which case the model becomes between + within +
-    between * within.
+    between * within. Mixed analysis with two or more within-subject factors are not currently
+    supported.
 
     Missing values in repeated measurements are automatically removed using a
     listwise (default) or pairwise deletion strategy. The former is more conservative, as any
