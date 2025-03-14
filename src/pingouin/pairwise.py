@@ -1423,9 +1423,9 @@ def pairwise_corr(
         elif isinstance(covar, pd.Index):
             covar = covar.tolist()
         # Check that columns exist and are numeric
-        assert all(
-            [c in keys for c in covar]
-        ), "Covariate(s) are either not in data or not numeric."
+        assert all([c in keys for c in covar]), (
+            "Covariate(s) are either not in data or not numeric."
+        )
         # And we make sure that X or Y does not contain covar
         stats = stats[~stats[["X", "Y"]].isin(covar).any(axis=1)]
         stats = stats.reset_index(drop=True)

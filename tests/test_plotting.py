@@ -93,7 +93,7 @@ class TestPlotting(TestCase):
         """Test plot_paired()"""
         df = read_dataset("mixed_anova")
         df = df.query(
-            "Group == 'Meditation' and Subject > 40 and " "(Time == 'August' or Time == 'June')"
+            "Group == 'Meditation' and Subject > 40 and (Time == 'August' or Time == 'June')"
         ).copy()
         df.loc[[101, 161], "Scores"] = 6
         ax = plot_paired(data=df, dv="Scores", within="Time", subject="Subject")

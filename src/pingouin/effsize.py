@@ -775,7 +775,7 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
     y = np.asarray(y)
 
     if x.size != y.size and paired:
-        warnings.warn("x and y have unequal sizes. Switching to " "paired == False.")
+        warnings.warn("x and y have unequal sizes. Switching to paired == False.")
         paired = False
 
     # Remove rows with missing values

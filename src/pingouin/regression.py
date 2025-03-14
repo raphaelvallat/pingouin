@@ -336,10 +336,10 @@ def linear_regression(
     y_gd = np.isfinite(y).all()
     X_gd = np.isfinite(X).all()
     assert y_gd, (
-        "Target (y) contains NaN or Inf. Please remove them " "manually or use remove_na=True."
+        "Target (y) contains NaN or Inf. Please remove them manually or use remove_na=True."
     )
     assert X_gd, (
-        "Predictors (X) contain NaN or Inf. Please remove them " "manually or use remove_na=True."
+        "Predictors (X) contain NaN or Inf. Please remove them manually or use remove_na=True."
     )
 
     # Check that X and y have same length
@@ -390,7 +390,7 @@ def linear_regression(
     # 5. Handle weights
     if weights is not None:
         if relimp:
-            raise ValueError("relimp = True is not supported when using " "weights.")
+            raise ValueError("relimp = True is not supported when using weights.")
         w = np.asarray(weights)
         assert w.ndim == 1, "weights must be a 1D array."
         assert w.size == n, "weights must be of shape n_samples."
@@ -853,10 +853,10 @@ def logistic_regression(
     y_gd = np.isfinite(y).all()
     X_gd = np.isfinite(X).all()
     assert y_gd, (
-        "Target (y) contains NaN or Inf. Please remove them " "manually or use remove_na=True."
+        "Target (y) contains NaN or Inf. Please remove them manually or use remove_na=True."
     )
     assert X_gd, (
-        "Predictors (X) contain NaN or Inf. Please remove them " "manually or use remove_na=True."
+        "Predictors (X) contain NaN or Inf. Please remove them manually or use remove_na=True."
     )
 
     # Check that X and y have same length
