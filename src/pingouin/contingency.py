@@ -524,7 +524,8 @@ def ransacking(data, row_var, col_var, alpha=0.05, adjusted=False):
                 'Adjusted Critical Z': adjusted_critical_z,
                 'Result': result,
                 'Adjusted Result': adjusted_result,
-                '2x2 Table': table_2x2
+                '2x2 Table': table_2x2,
+                'DOF': dof,
             })
 
         return pd.DataFrame(results)

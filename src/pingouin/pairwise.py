@@ -284,9 +284,9 @@ def pairwise_tests(
     if isinstance(between, (str, int)) and isinstance(within, (str, int)):
         contrast = "within_between"
         assert all([between in data.keys(), within in data.keys()])
-    if parametric == True:
+    if parametric:
         desca, stata, descb, statb = "mean(A)", "std(A)", "mean(B)", "std(B)"
-    if parametric == False:
+    else:
         desca, stata, descb, statb = "median(A)", "IQR(A)", "median(B)", "IQR(B)"
     # Create col_order
     col_order = [
@@ -328,7 +328,7 @@ def pairwise_tests(
 
     if contrast in ["simple_within", "simple_between"]:
         # OPTION A: SIMPLE MAIN EFFECTS, WITHIN OR BETWEEN
-        paired = True if contrast == "simple_within" else False
+        paired = contrast == "simple_within"
         col = within if contrast == "simple_within" else between
 
         # Extract levels of the grouping variable, sorted in alphabetical order
