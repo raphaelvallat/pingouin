@@ -435,8 +435,8 @@ def dichotomous_crosstab(data, x, y):
 
 def ransacking(data, row_var, col_var, alpha=0.05, adjusted=False):
     r"""
-    Perform ransacking post-hoc analysis of a larger \(r \times c\) contingency table 
-    by focusing on each \(2 \times 2\) subtable of interest and testing whether that 
+    Perform ransacking post-hoc analysis of a larger \(r \times c\) contingency table
+    by focusing on each \(2 \times 2\) subtable of interest and testing whether that
     subtable exhibits an "interaction" (i.e., departure from independence).
 
     This implementation follows the method described by Sharpe (2015) and others:
@@ -444,7 +444,7 @@ def ransacking(data, row_var, col_var, alpha=0.05, adjusted=False):
     1. **Log Odds Ratio** \((G)\):
        \[
          G = \ln \Bigl(\frac{\text{odds}_{\text{row1}}}{\text{odds}_{\text{row2}}}\Bigr),
-         \quad \text{where } \text{odds}_{\text{row1}} 
+         \quad \text{where } \text{odds}_{\text{row1}}
          = \frac{\text{cell}(1,1)}{\text{cell}(1,2)}.
        \]
 
@@ -461,12 +461,12 @@ def ransacking(data, row_var, col_var, alpha=0.05, adjusted=False):
 
     4. **Critical \(Z\)-value** from the global degrees of freedom \(\text{dof} = (r-1)\,(c-1)\).
        - We compute \(\chi^2_{(1-\alpha,\ \text{dof})}\) from the chi-square distribution,
-         then use 
+         then use
          \[
            Z_{\alpha} = \sqrt{\chi^2_{(1-\alpha,\ \text{dof})}}.
          \]
        - This matches the post-hoc logic in Sharpe (2015). For example, in a \(2 \times 3\)
-         table, \(\text{dof}=2\), so the critical \(Z\) is 
+         table, \(\text{dof}=2\), so the critical \(Z\) is
          \(\sqrt{\chi^2_{(1-\alpha=0.95,\ 2)}} \approx 2.45\).
 
     Parameters
@@ -480,7 +480,7 @@ def ransacking(data, row_var, col_var, alpha=0.05, adjusted=False):
     alpha : float, optional
         Significance level for the test. Default is 0.05.
     adjusted : bool, optional
-        Whether to apply a Bonferroni-like correction (divide alpha by the number 
+        Whether to apply a Bonferroni-like correction (divide alpha by the number
         of cells) to maintain a familywise error rate. Default is False.
 
     Returns
@@ -505,11 +505,11 @@ def ransacking(data, row_var, col_var, alpha=0.05, adjusted=False):
     -----
     - Sharpe (2015) illustrates an example where a \(2 \times 3\) table yields \(\text{dof}=2\).
       Post-hoc selection of a \(2 \times 2\) subtable uses
-      \(\sqrt{\chi^2_{\text{critical},\ 2}}\) as the cutoff for the \(Z\)-test, 
+      \(\sqrt{\chi^2_{\text{critical},\ 2}}\) as the cutoff for the \(Z\)-test,
       rather than \(\chi^2_{(1-\alpha,\ 1)}\).
-    - If you prefer each \(2 \times 2\) subtable be tested against \(\text{dof}=1\), 
-      adapt the code to use `dof_cell = 1` instead. However, Sharpe's example 
-      shows why using the full table's \((r - 1)(c - 1)\) may be more appropriate 
+    - If you prefer each \(2 \times 2\) subtable be tested against \(\text{dof}=1\),
+      adapt the code to use `dof_cell = 1` instead. However, Sharpe's example
+      shows why using the full table's \((r - 1)(c - 1)\) may be more appropriate
       for post-hoc analyses.
     - If multiple sub-tests are performed, consider alpha adjustment (e.g., Bonferroni)
       to curb type I error inflation.
@@ -550,7 +550,7 @@ def ransacking(data, row_var, col_var, alpha=0.05, adjusted=False):
     assert isinstance(alpha, (int, float)), "alpha must be a number"
     assert 0 < alpha < 1, "alpha must be between 0 and 1"
     assert isinstance(adjusted, bool), "adjusted must be a boolean"
-    
+
     try:
         freq_table = pd.crosstab(data[row_var], data[col_var])
         total = freq_table.values.sum()
@@ -577,10 +577,9 @@ def ransacking(data, row_var, col_var, alpha=0.05, adjusted=False):
             remaining_total = total - cell_value - row_total - col_total
 
             # Build the 2x2 sub-table
-            table_2x2 = np.array([
-                [cell_value,         row_total],
-                [col_total, remaining_total]
-            ], dtype=float)
+            table_2x2 = np.array(
+                [[cell_value, row_total], [col_total, remaining_total]], dtype=float
+            )
 
             # Small epsilon to avoid division-by-zero
             epsilon = 1e-10
@@ -601,28 +600,34 @@ def ransacking(data, row_var, col_var, alpha=0.05, adjusted=False):
             unadjusted_result = "reject" if abs(z_value) > critical_z else "fail to reject"
             adjusted_result = "reject" if abs(z_value) > adjusted_critical_z else "fail to reject"
 
-            results.append({
-                'Row': row_label,
-                'Column': col_label,
-                'Odds Ratio': odds_ratio,
-                'Log Odds Ratio': log_odds_ratio,
-                'Standard Error': standard_error,
-                'Z Value': z_value,
-                'Critical Z (global dof)': critical_z,
-                'Adjusted Critical Z (global dof)': adjusted_critical_z,
-                'Unadjusted Result': unadjusted_result,
-                'Adjusted Result': adjusted_result,
-                '2x2 Table': table_2x2.tolist(),
-                'DOF': dof  # global dof
-            })
+            results.append(
+                {
+                    "Row": row_label,
+                    "Column": col_label,
+                    "Odds Ratio": odds_ratio,
+                    "Log Odds Ratio": log_odds_ratio,
+                    "Standard Error": standard_error,
+                    "Z Value": z_value,
+                    "Critical Z (global dof)": critical_z,
+                    "Adjusted Critical Z (global dof)": adjusted_critical_z,
+                    "Unadjusted Result": unadjusted_result,
+                    "Adjusted Result": adjusted_result,
+                    "2x2 Table": table_2x2.tolist(),
+                    "DOF": dof,  # global dof
+                }
+            )
 
         # Convert results to a DataFrame
         df_results = pd.DataFrame(results)
 
         # Round numeric columns (except integer DOF) to 3 decimals
         numeric_cols = [
-            'Odds Ratio', 'Log Odds Ratio', 'Standard Error', 'Z Value',
-            'Critical Z (global dof)', 'Adjusted Critical Z (global dof)'
+            "Odds Ratio",
+            "Log Odds Ratio",
+            "Standard Error",
+            "Z Value",
+            "Critical Z (global dof)",
+            "Adjusted Critical Z (global dof)",
         ]
         for col in numeric_cols:
             df_results[col] = df_results[col].round(3)
@@ -631,7 +636,7 @@ def ransacking(data, row_var, col_var, alpha=0.05, adjusted=False):
         def round_2x2(tbl):
             return [[round(x, 3) for x in row] for row in tbl]
 
-        df_results['2x2 Table'] = df_results['2x2 Table'].apply(round_2x2)
+        df_results["2x2 Table"] = df_results["2x2 Table"].apply(round_2x2)
 
         return df_results
 

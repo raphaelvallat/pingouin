@@ -178,32 +178,43 @@ class TestContingency(TestCase):
         """Test function ransacking."""
         # We use the 'chi2_independence' dataset that is already read into df_ind.
         # row_var = 'cp' and col_var = 'restecg' as in your example usage.
-        results = pg.ransacking(data=df_ind, row_var='cp', col_var='restecg',
-                                alpha=0.05, adjusted=True)
+        results = pg.ransacking(
+            data=df_ind, row_var="cp", col_var="restecg", alpha=0.05, adjusted=True
+        )
 
         # 1) Check the output type
         self.assertIsInstance(results, pd.DataFrame, "Result should be a DataFrame.")
 
         # 2) Check the column names
         expected_columns = {
-            "Row", "Column", "Odds Ratio", "Log Odds Ratio", "Standard Error",
-            "Z Value", "Critical Z (global dof)", "Adjusted Critical Z (global dof)",
-            "Unadjusted Result", "Adjusted Result", "2x2 Table", "DOF"
+            "Row",
+            "Column",
+            "Odds Ratio",
+            "Log Odds Ratio",
+            "Standard Error",
+            "Z Value",
+            "Critical Z (global dof)",
+            "Adjusted Critical Z (global dof)",
+            "Unadjusted Result",
+            "Adjusted Result",
+            "2x2 Table",
+            "DOF",
         }
-        self.assertEqual(set(results.columns), expected_columns,
-                         "DataFrame does not have the expected columns.")
+        self.assertEqual(
+            set(results.columns), expected_columns, "DataFrame does not have the expected columns."
+        )
 
         # 3) Check the number of rows: should match r*c from a crosstab
-        ctab = pd.crosstab(df_ind['cp'], df_ind['restecg'])
+        ctab = pd.crosstab(df_ind["cp"], df_ind["restecg"])
         expected_rows = ctab.shape[0] * ctab.shape[1]
-        self.assertEqual(len(results), expected_rows,
-                         "Number of rows in 'ransacking' output does not match r*c.")
+        self.assertEqual(
+            len(results), expected_rows, "Number of rows in 'ransacking' output does not match r*c."
+        )
 
         # 4) Check DOF is present and is integer
         self.assertIn("DOF", results.columns, "'DOF' column is missing.")
         self.assertTrue(
-            np.issubdtype(results["DOF"].dtype, np.integer),
-            "'DOF' should be an integer type."
+            np.issubdtype(results["DOF"].dtype, np.integer), "'DOF' should be an integer type."
         )
 
         # 5) Check each '2x2 Table' is a list of lists of shape (2,2)
@@ -217,11 +228,17 @@ class TestContingency(TestCase):
         # 6) Check "Unadjusted Result" and "Adjusted Result" are in allowed set
         allowed_results = {"reject", "fail to reject"}
         for res in results["Unadjusted Result"]:
-            self.assertIn(res, allowed_results,
-                          "'Unadjusted Result' should be either 'reject' or 'fail to reject'.")
+            self.assertIn(
+                res,
+                allowed_results,
+                "'Unadjusted Result' should be either 'reject' or 'fail to reject'.",
+            )
         for res in results["Adjusted Result"]:
-            self.assertIn(res, allowed_results,
-                          "'Adjusted Result' should be either 'reject' or 'fail to reject'.")
+            self.assertIn(
+                res,
+                allowed_results,
+                "'Adjusted Result' should be either 'reject' or 'fail to reject'.",
+            )
 
         # 7) Check that it raises KeyError when row/column var do not exist
         with self.assertRaises(KeyError):
