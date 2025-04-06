@@ -372,8 +372,8 @@ def pairwise_tests(
                 df_ttest = ttest(
                     x, y, paired=paired, alternative=alternative, correction=correction
                 )
-                stats.at[i, "BF10"] = df_ttest.at["T-test", "BF10"]
-                stats.at[i, "dof"] = df_ttest.at["T-test", "dof"]
+                stats.at[i, "BF10"] = df_ttest.get("BF10", None)  # Use .get to avoid KeyError
+                stats.at[i, "dof"] = df_ttest.get("dof", None)    # Use .get to avoid KeyError
             else:
                 if paired:
                     stat_name = "W-val"
@@ -398,8 +398,8 @@ def pairwise_tests(
                     stats.at[i, "median(B)"] = np.nanmedian(y)
                     stats.at[i, "IQR(A)"] = iqr(x)
                     stats.at[i, "IQR(B)"] = iqr(y)
-            stats.at[i, stat_name] = df_ttest[stat_name].iat[0]
-            stats.at[i, "p-unc"] = df_ttest["p-val"].iat[0]
+            stats.at[i, stat_name] = df_ttest.get(stat_name, None)  # Use .get to avoid KeyError
+            stats.at[i, "p-unc"] = df_ttest.get("p-val", None)      # Use .get to avoid KeyError
             stats.at[i, effsize] = ef
 
         # Multiple comparisons
@@ -528,8 +528,8 @@ def pairwise_tests(
                     df_ttest = ttest(
                         x, y, paired=paired, alternative=alternative, correction=correction
                     )
-                    stats.at[ic, "BF10"] = df_ttest.at["T-test", "BF10"]
-                    stats.at[ic, "dof"] = df_ttest.at["T-test", "dof"]
+                    stats.at[ic, "BF10"] = df_ttest.get("BF10", None)  # Use .get to avoid KeyError
+                    stats.at[ic, "dof"] = df_ttest.get("dof", None)    # Use .get to avoid KeyError
                 else:
                     if paired:
                         stat_name = "W-val"
@@ -552,8 +552,8 @@ def pairwise_tests(
                         stats.at[ic, "median(B)"] = np.nanmedian(y)
                         stats.at[ic, "IQR(A)"] = iqr(x)
                         stats.at[ic, "IQR(B)"] = iqr(y)
-                stats.at[ic, stat_name] = df_ttest[stat_name].iat[0]
-                stats.at[ic, "p-unc"] = df_ttest["p-val"].iat[0]
+                stats.at[ic, stat_name] = df_ttest.get(stat_name, None)  # Use .get to avoid KeyError
+                stats.at[ic, "p-unc"] = df_ttest.get("p-val", None)      # Use .get to avoid KeyError
                 stats.at[ic, effsize] = ef
 
             # Multi-comparison columns
