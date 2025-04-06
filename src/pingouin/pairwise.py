@@ -374,8 +374,8 @@ def pairwise_tests(
                 )
                 # Fix: Access BF10 without assuming 'T-test' index
                 # The index for BF10 may vary based on the test type
-                if 'BF10' in df_ttest.columns:
-                    stats.at[i, "BF10"] = df_ttest.iloc[0]['BF10']
+                if "BF10" in df_ttest.columns:
+                    stats.at[i, "BF10"] = df_ttest.iloc[0]["BF10"]
                 stats.at[i, "dof"] = df_ttest.iloc[0]["dof"]
             else:
                 if paired:
@@ -533,8 +533,8 @@ def pairwise_tests(
                     )
                     # Fix: Access BF10 without assuming 'T-test' index
                     # The index for BF10 may vary based on the test type
-                    if 'BF10' in df_ttest.columns:
-                        stats.at[ic, "BF10"] = df_ttest.iloc[0]['BF10']
+                    if "BF10" in df_ttest.columns:
+                        stats.at[ic, "BF10"] = df_ttest.iloc[0]["BF10"]
                     stats.at[ic, "dof"] = df_ttest.iloc[0]["dof"]
                 else:
                     if paired:
