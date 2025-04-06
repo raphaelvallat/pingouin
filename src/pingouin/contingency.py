@@ -6,7 +6,7 @@ import pandas as pd
 from scipy.stats.contingency import expected_freq
 from scipy.stats import power_divergence, binom, chi2 as sp_chi2
 
-from pingouin import power_chi2, _postprocess_dataframe, read_dataset
+from pingouin import power_chi2, _postprocess_dataframe
 
 
 __all__ = ["chi2_independence", "chi2_mcnemar", "dichotomous_crosstab", "ransacking"]
@@ -547,10 +547,6 @@ def ransacking(data, row_var, col_var, alpha=0.05, adjusted=False):
     """
     # Add assertions for input validation
     assert isinstance(data, pd.DataFrame), "data must be a pandas DataFrame"
-    assert isinstance(row_var, str), "row_var must be a string"
-    assert isinstance(col_var, str), "col_var must be a string"
-    assert row_var in data.columns, f"row_var '{row_var}' not found in data columns"
-    assert col_var in data.columns, f"col_var '{col_var}' not found in data columns" 
     assert isinstance(alpha, (int, float)), "alpha must be a number"
     assert 0 < alpha < 1, "alpha must be between 0 and 1"
     assert isinstance(adjusted, bool), "adjusted must be a boolean"
