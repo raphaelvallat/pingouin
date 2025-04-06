@@ -416,6 +416,10 @@ def pairwise_tests(
         else:
             stats["p-corr"] = None
             stats["p-adjust"] = None
+
+        # Ensure 'p_unc' and 'p_corr' columns exist in the output DataFrame
+        if "p-unc" not in stats.columns or "p-corr" not in stats.columns:
+            raise KeyError("The 'p_unc' or 'p_corr' column is missing from the output DataFrame. Please check the computation logic.")
     else:
         # Multiple factors
         if contrast == "multiple_between":
@@ -1089,6 +1093,11 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
             effsize: ef,
         }
     )
+
+    # Ensure 'pval' column exists in the output DataFrame
+    if "pval" not in stats.columns:
+        raise KeyError("The 'pval' column is missing from the output DataFrame. Please check the computation logic.")
+
     return _postprocess_dataframe(stats)
 
 
