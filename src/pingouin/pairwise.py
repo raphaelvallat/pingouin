@@ -284,9 +284,9 @@ def pairwise_tests(
     if isinstance(between, (str, int)) and isinstance(within, (str, int)):
         contrast = "within_between"
         assert all([between in data.keys(), within in data.keys()])
-    if parametric == True:
+    if parametric:
         desca, stata, descb, statb = "mean(A)", "std(A)", "mean(B)", "std(B)"
-    if parametric == False:
+    if not parametric:
         desca, stata, descb, statb = "median(A)", "IQR(A)", "median(B)", "IQR(B)"
     # Create col_order
     col_order = [
