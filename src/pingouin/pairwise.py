@@ -1412,7 +1412,7 @@ def pairwise_corr(
             [c in keys for c in covar]
         ), "Covariate(s) are either not in data or not numeric."
         # And we make sure that X or Y does not contain covar
-        stats = stats[~stats[["X", "Y"]].isin(covar).any(1)]
+        stats = stats[~stats[["X", "Y"]].isin(covar).any(axis=1)]
         stats = stats.reset_index(drop=True)
         if stats.shape[0] == 0:
             raise ValueError(
