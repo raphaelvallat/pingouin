@@ -38,11 +38,14 @@ class TestPairwise(TestCase):
         Therefore, one cannot directly validate the T and p-values.
         """
         df = read_dataset("mixed_anova.csv")  # Simple and mixed design
+        df['Scores'] = pd.to_numeric(df['Scores'], errors='coerce')  # Ensure numeric
         df_sort = df.sort_values("Time")  # Same but random order of subject
-        # df_sort = df.sample(frac=1)
         df_unb = read_dataset("mixed_anova_unbalanced")
+        df_unb['Scores'] = pd.to_numeric(df_unb['Scores'], errors='coerce')  # Ensure numeric
         df_rm2 = read_dataset("rm_anova2")  # 2-way rm design
+        df_rm2['Scores'] = pd.to_numeric(df_rm2['Scores'], errors='coerce')  # Ensure numeric
         df_aov2 = read_dataset("anova2")  # 2-way factorial design
+        df_aov2['Scores'] = pd.to_numeric(df_aov2['Scores'], errors='coerce')  # Ensure numeric
 
         # -------------------------------------------------------------------
         # Warning for deprecated pairwise_ttests()
@@ -95,6 +98,20 @@ class TestPairwise(TestCase):
         # -------------------------------------------------------------------
         # In R: >>> pairwise.t.test(df$Scores, df$Group, pool.sd = FALSE)
         pt = pairwise_tests(dv="Scores", between="Group", data=df).round(3)
+        assert pt.loc[0, "p_unc"] == 0.023
+        pairwise_tests(
+            dv="Scores",
+            between="Group",
+            data=df,
+            padjust="bonf",
+            alternative="greater",
+            effsize="cohen",
+            parametric=False,
+        )
+
+        # Same after random ordering of subject (issue 151)
+        pt_sort = pairwise_tests(dv="Scores", between="Group", data=df_sort).round(3)
+        
         assert pt.loc[0, "p_unc"] == 0.023
         pairwise_tests(
             dv="Scores",
