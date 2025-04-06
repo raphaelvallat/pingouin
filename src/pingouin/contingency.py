@@ -6,7 +6,7 @@ import pandas as pd
 from scipy.stats.contingency import expected_freq
 from scipy.stats import power_divergence, binom, chi2 as sp_chi2
 
-from pingouin import power_chi2, _postprocess_dataframe
+from pingouin import power_chi2, _postprocess_dataframe, read_dataset
 
 
 __all__ = ["chi2_independence", "chi2_mcnemar", "dichotomous_crosstab", "ransacking"]
@@ -434,8 +434,40 @@ def dichotomous_crosstab(data, x, y):
 
 
 def ransacking(data, row_var, col_var, alpha=0.05, adjusted=False):
-    """
-    Perform the ransacking post-hoc analysis for Chi-Square tests.
+    r"""
+    Perform ransacking post-hoc analysis of a larger \(r \times c\) contingency table 
+    by focusing on each \(2 \times 2\) subtable of interest and testing whether that 
+    subtable exhibits an "interaction" (i.e., departure from independence).
+
+    This implementation follows the method described by Sharpe (2015) and others:
+
+    1. **Log Odds Ratio** \((G)\):
+       \[
+         G = \ln \Bigl(\frac{\text{odds}_{\text{row1}}}{\text{odds}_{\text{row2}}}\Bigr),
+         \quad \text{where } \text{odds}_{\text{row1}} 
+         = \frac{\text{cell}(1,1)}{\text{cell}(1,2)}.
+       \]
+
+    2. **Standard Error** \((\text{SE}_G)\) is approximated by:
+       \[
+         \sqrt{\frac{1}{n_{11}} + \frac{1}{n_{12}} + \frac{1}{n_{21}} + \frac{1}{n_{22}}}
+       \]
+       where \(n_{ij}\) is the observed count in row \(i\), column \(j\) of the \(2 \times 2\) subtable.
+
+    3. **\(Z\)-value**:
+       \[
+         Z = \frac{G}{\text{SE}_G}.
+       \]
+
+    4. **Critical \(Z\)-value** from the global degrees of freedom \(\text{dof} = (r-1)\,(c-1)\).
+       - We compute \(\chi^2_{(1-\alpha,\ \text{dof})}\) from the chi-square distribution,
+         then use 
+         \[
+           Z_{\alpha} = \sqrt{\chi^2_{(1-\alpha,\ \text{dof})}}.
+         \]
+       - This matches the post-hoc logic in Sharpe (2015). For example, in a \(2 \times 3\)
+         table, \(\text{dof}=2\), so the critical \(Z\) is 
+         \(\sqrt{\chi^2_{(1-\alpha=0.95,\ 2)}} \approx 2.45\).
 
     Parameters
     ----------
@@ -448,69 +480,129 @@ def ransacking(data, row_var, col_var, alpha=0.05, adjusted=False):
     alpha : float, optional
         Significance level for the test. Default is 0.05.
     adjusted : bool, optional
-        Whether to adjust the significance level for multiple tests. Default is False.
+        Whether to apply a Bonferroni-like correction (divide alpha by the number 
+        of cells) to maintain a familywise error rate. Default is False.
 
     Returns
     -------
     :py:class:`pandas.DataFrame`
-        A dataframe with the ransacking test results for each cell.
+        A dataframe with the ransacking test results for each cell, including:
 
-    Examples
-    --------
-    >>> import pandas as pd
-    >>> import pingouin as pg
-    >>> data = pd.DataFrame({
-    ...     'A': ['Yes', 'No', 'Yes', 'No', 'Yes'],
-    ...     'B': ['High', 'Low', 'High', 'Low', 'Medium']
-    ... })
-    >>> results = pg.ransacking(data=data, row_var='A', col_var='B', alpha=0.05, adjusted=True)
-    >>> results
-      Row  Column    Odds Ratio  Log Odds Ratio  Standard Error   Z Value  Critical Z  Adjusted Critical Z          Result Adjusted Result         2x2 Table
-    0   No    High  0.000000e+00      -23.025851    100000.00001 -0.000230    1.959964             2.638257  fail to reject  fail to reject  [[0, 2], [2, 1]]
-    1   No     Low  2.000000e+20       46.744849    141421.35624  0.000331    1.959964             2.638257  fail to reject  fail to reject  [[2, 0], [0, 3]]
-    2   No  Medium  0.000000e+00      -23.025851    100000.00001 -0.000230    1.959964             2.638257  fail to reject  fail to reject  [[0, 2], [1, 2]]
-    3  Yes    High  2.000000e+10       23.718998    100000.00001  0.000237    1.959964             2.638257  fail to reject  fail to reject  [[2, 1], [0, 2]]
-    4  Yes     Low  0.000000e+00      -23.025851    141421.35624 -0.000163    1.959964             2.638257  fail to reject  fail to reject  [[0, 3], [2, 0]]
-    5  Yes  Medium  5.000000e+09       22.332704    100000.00001  0.000223    1.959964             2.638257  fail to reject  fail to reject  [[1, 2], [0, 2]]
+        - **Row** (label)
+        - **Column** (label)
+        - **Odds Ratio** (ratio of two odds)
+        - **Log Odds Ratio** (\(G\))
+        - **Standard Error** of \(G\)
+        - **Z Value** (test statistic)
+        - **Critical Z (global dof)** (unadjusted)
+        - **Adjusted Critical Z (global dof)** (Bonferroni-like if ``adjusted=True``)
+        - **Unadjusted Result** (reject/fail to reject)
+        - **Adjusted Result** (reject/fail to reject)
+        - **2x2 Table** (the subtable as a list of lists)
+        - **DOF** (global, \((r - 1)(c - 1)\))
 
-    This example demonstrates how to use the ransacking method to analyze relationships between categorical variables in a contingency table.
+    Notes
+    -----
+    - Sharpe (2015) illustrates an example where a \(2 \times 3\) table yields \(\text{dof}=2\).
+      Post-hoc selection of a \(2 \times 2\) subtable uses
+      \(\sqrt{\chi^2_{\text{critical},\ 2}}\) as the cutoff for the \(Z\)-test, 
+      rather than \(\chi^2_{(1-\alpha,\ 1)}\).
+    - If you prefer each \(2 \times 2\) subtable be tested against \(\text{dof}=1\), 
+      adapt the code to use `dof_cell = 1` instead. However, Sharpe's example 
+      shows why using the full table's \((r - 1)(c - 1)\) may be more appropriate 
+      for post-hoc analyses.
+    - If multiple sub-tests are performed, consider alpha adjustment (e.g., Bonferroni)
+      to curb type I error inflation.
+
+    .. rubric:: Example usage
+
+    .. code-block:: python
+
+       >>> from pingouin import read_dataset
+       >>> df = read_dataset('chi2_independence')
+       >>> results = ransacking(data=df, row_var='cp', col_var='restecg', alpha=0.05, adjusted=True)
+       >>> results  # doctest: +SKIP
+
+    .. code-block:: none
+
+       Row,Column,Odds Ratio,Log Odds Ratio,Standard Error,Z Value,Critical Z (global dof),Adjusted Critical Z (global dof),Unadjusted Result,Adjusted Result,2x2 Table,DOF
+       0,0,1.583,0.459,0.232,1.981,3.548,4.359,fail to reject,fail to reject,"[[78.0, 65.0], [69.0, 91.0]]",6
+       0,1,0.595,-0.519,0.232,-2.234,3.548,4.359,fail to reject,fail to reject,"[[62.0, 81.0], [90.0, 70.0]]",6
+       0,2,3.407,1.226,1.161,1.056,3.548,4.359,fail to reject,fail to reject,"[[3.0, 140.0], [1.0, 159.0]]",6
+       1,0,0.599,-0.513,0.317,-1.617,3.548,4.359,fail to reject,fail to reject,"[[19.0, 31.0], [128.0, 125.0]]",6
+       1,1,1.78,0.577,0.317,1.817,3.548,4.359,fail to reject,fail to reject,"[[31.0, 19.0], [121.0, 132.0]]",6
+       1,2,0.0,-23.026,100000.0,-0.0,3.548,4.359,fail to reject,fail to reject,"[[0.0, 50.0], [4.0, 249.0]]",6
+       2,0,0.668,-0.404,0.257,-1.573,3.548,4.359,fail to reject,fail to reject,"[[36.0, 51.0], [111.0, 105.0]]",6
+       2,1,1.51,0.412,0.256,1.61,3.548,4.359,fail to reject,fail to reject,"[[50.0, 37.0], [102.0, 114.0]]",6
+       2,2,0.826,-0.192,1.162,-0.165,3.548,4.359,fail to reject,fail to reject,"[[1.0, 86.0], [3.0, 213.0]]",6
+       3,0,1.719,0.542,0.444,1.221,3.548,4.359,fail to reject,fail to reject,"[[14.0, 9.0], [133.0, 147.0]]",6
+       3,1,0.616,-0.485,0.444,-1.093,3.548,4.359,fail to reject,fail to reject,"[[9.0, 14.0], [143.0, 137.0]]",6
+       3,2,0.0,-23.026,100000.0,-0.0,3.548,4.359,fail to reject,fail to reject,"[[0.0, 23.0], [4.0, 276.0]]",6
+
+    References
+    ----------
+    Sharpe, D. (2015). Your chi-square test is statistically significant: Now what?
+    *Practical assessment, research & evaluation*, *20*(8), n8.
+
     """
+    # Add assertions for input validation
+    assert isinstance(data, pd.DataFrame), "data must be a pandas DataFrame"
+    assert isinstance(row_var, str), "row_var must be a string"
+    assert isinstance(col_var, str), "col_var must be a string"
+    assert row_var in data.columns, f"row_var '{row_var}' not found in data columns"
+    assert col_var in data.columns, f"col_var '{col_var}' not found in data columns" 
+    assert isinstance(alpha, (int, float)), "alpha must be a number"
+    assert 0 < alpha < 1, "alpha must be between 0 and 1"
+    assert isinstance(adjusted, bool), "adjusted must be a boolean"
+    
     try:
         freq_table = pd.crosstab(data[row_var], data[col_var])
         total = freq_table.values.sum()
+
+        # Number of sub-tests and alpha adjustment
         num_tests = freq_table.shape[0] * freq_table.shape[1]
         adjusted_alpha = alpha / num_tests if adjusted else alpha
-        dof = (freq_table.shape[0] - 1) * (freq_table.shape[1] - 1)
+
+        # Global DOF for the full table (r-1)*(c-1)
+        r = freq_table.shape[0]
+        c = freq_table.shape[1]
+        dof = (r - 1) * (c - 1)
+
+        # Compute critical z-values using the global dof
+        critical_z = np.sqrt(sp_chi2.ppf(1 - alpha, dof))
+        adjusted_critical_z = np.sqrt(sp_chi2.ppf(1 - adjusted_alpha, dof))
 
         results = []
 
-        for row_label, col_label in freq_table.stack().index:
-            cell_value = freq_table.loc[row_label, col_label]
+        # Iterate over each cell in the contingency table
+        for (row_label, col_label), cell_value in freq_table.stack().items():
             row_total = freq_table.loc[row_label].sum() - cell_value
             col_total = freq_table[col_label].sum() - cell_value
             remaining_total = total - cell_value - row_total - col_total
 
-            table_2x2 = np.array([[cell_value, row_total], [col_total, remaining_total]])
+            # Build the 2x2 sub-table
+            table_2x2 = np.array([
+                [cell_value,         row_total],
+                [col_total, remaining_total]
+            ], dtype=float)
 
-            # Avoid division by zero by adding a small epsilon to denominators
+            # Small epsilon to avoid division-by-zero
             epsilon = 1e-10
             odds_1 = table_2x2[0, 0] / (table_2x2[0, 1] + epsilon)
             odds_2 = table_2x2[1, 0] / (table_2x2[1, 1] + epsilon)
 
-            # Calculate odds ratio and log odds ratio
+            # Odds ratio and log odds ratio
             odds_ratio = odds_1 / (odds_2 + epsilon)
             log_odds_ratio = np.log(odds_ratio + epsilon)
 
-            # Calculate standard error, avoiding division by zero
-            standard_error = np.sqrt(sum(1 / (table_2x2.flatten() + epsilon)))
+            # Standard error for the log odds ratio (SE_G)
+            standard_error = np.sqrt(np.sum(1.0 / (table_2x2 + epsilon)))
 
-            # Calculate z-value
+            # Z-value for the log odds ratio
             z_value = log_odds_ratio / (standard_error + epsilon)
 
-            critical_z = np.sqrt(sp_chi2.ppf(1 - alpha, 1))
-            adjusted_critical_z = np.sqrt(sp_chi2.ppf(1 - adjusted_alpha, 1))
-
-            result = "reject" if abs(z_value) > critical_z else "fail to reject"
+            # Evaluate significance against global critical z
+            unadjusted_result = "reject" if abs(z_value) > critical_z else "fail to reject"
             adjusted_result = "reject" if abs(z_value) > adjusted_critical_z else "fail to reject"
 
             results.append({
@@ -520,15 +612,32 @@ def ransacking(data, row_var, col_var, alpha=0.05, adjusted=False):
                 'Log Odds Ratio': log_odds_ratio,
                 'Standard Error': standard_error,
                 'Z Value': z_value,
-                'Critical Z': critical_z,
-                'Adjusted Critical Z': adjusted_critical_z,
-                'Result': result,
+                'Critical Z (global dof)': critical_z,
+                'Adjusted Critical Z (global dof)': adjusted_critical_z,
+                'Unadjusted Result': unadjusted_result,
                 'Adjusted Result': adjusted_result,
-                '2x2 Table': table_2x2,
-                'DOF': dof,
+                '2x2 Table': table_2x2.tolist(),
+                'DOF': dof  # global dof
             })
 
-        return pd.DataFrame(results)
+        # Convert results to a DataFrame
+        df_results = pd.DataFrame(results)
+
+        # Round numeric columns (except integer DOF) to 3 decimals
+        numeric_cols = [
+            'Odds Ratio', 'Log Odds Ratio', 'Standard Error', 'Z Value',
+            'Critical Z (global dof)', 'Adjusted Critical Z (global dof)'
+        ]
+        for col in numeric_cols:
+            df_results[col] = df_results[col].round(3)
+
+        # Round each entry in the 2x2 Table to 3 decimals
+        def round_2x2(tbl):
+            return [[round(x, 3) for x in row] for row in tbl]
+
+        df_results['2x2 Table'] = df_results['2x2 Table'].apply(round_2x2)
+
+        return df_results
 
     except KeyError as e:
         raise KeyError(f"Column not found in the dataframe: {e}")

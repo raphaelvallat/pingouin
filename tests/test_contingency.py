@@ -176,42 +176,61 @@ class TestContingency(TestCase):
 
     def test_ransacking(self):
         """Test function ransacking."""
-        # Create sample data
-        data = pd.DataFrame({
-            'A': ['Yes', 'No', 'Yes', 'No', 'Yes'],
-            'B': ['High', 'Low', 'High', 'Low', 'Medium']
-        })
+        # We use the 'chi2_independence' dataset that is already read into df_ind.
+        # row_var = 'cp' and col_var = 'restecg' as in your example usage.
+        results = pg.ransacking(data=df_ind, row_var='cp', col_var='restecg',
+                                alpha=0.05, adjusted=True)
 
-        # Run the ransacking function
-        results = pg.ransacking(data=data, row_var='A', col_var='B', alpha=0.05, adjusted=True)
-
-        # Check that the output is a DataFrame
+        # 1) Check the output type
         self.assertIsInstance(results, pd.DataFrame, "Result should be a DataFrame.")
 
-        # Define the expected columns
+        # 2) Check the column names
         expected_columns = {
-            'Row', 'Column', 'Odds Ratio', 'Log Odds Ratio', 'Standard Error',
-            'Z Value', 'Critical Z', 'Adjusted Critical Z', 'Result', 'Adjusted Result', '2x2 Table'
+            "Row", "Column", "Odds Ratio", "Log Odds Ratio", "Standard Error",
+            "Z Value", "Critical Z (global dof)", "Adjusted Critical Z (global dof)",
+            "Unadjusted Result", "Adjusted Result", "2x2 Table", "DOF"
         }
-        self.assertEqual(set(results.columns), expected_columns, "DataFrame does not have the expected columns.")
+        self.assertEqual(set(results.columns), expected_columns,
+                         "DataFrame does not have the expected columns.")
 
-        # Verify that the number of rows matches the product of unique rows and columns from pd.crosstab
-        crosstab = pd.crosstab(data['A'], data['B'])
-        expected_rows = crosstab.shape[0] * crosstab.shape[1]
-        self.assertEqual(len(results), expected_rows, "The number of rows in the result is incorrect.")
+        # 3) Check the number of rows: should match r*c from a crosstab
+        ctab = pd.crosstab(df_ind['cp'], df_ind['restecg'])
+        expected_rows = ctab.shape[0] * ctab.shape[1]
+        self.assertEqual(len(results), expected_rows,
+                         "Number of rows in 'ransacking' output does not match r*c.")
 
-        # Check that each '2x2 Table' is a numpy array of shape (2,2)
-        for table in results['2x2 Table']:
-            self.assertIsInstance(table, np.ndarray, "'2x2 Table' should be a numpy array.")
-            self.assertEqual(table.shape, (2, 2), "'2x2 Table' must be of shape (2,2).")
+        # 4) Check DOF is present and is integer
+        self.assertIn("DOF", results.columns, "'DOF' column is missing.")
+        self.assertTrue(
+            np.issubdtype(results["DOF"].dtype, np.integer),
+            "'DOF' should be an integer type."
+        )
 
-        # Ensure 'Result' and 'Adjusted Result' contain allowed values
-        allowed_results = {'reject', 'fail to reject'}
-        for res in results['Result']:
-            self.assertIn(res, allowed_results, "'Result' should be either 'reject' or 'fail to reject'.")
-        for res in results['Adjusted Result']:
-            self.assertIn(res, allowed_results, "'Adjusted Result' should be either 'reject' or 'fail to reject'.")
+        # 5) Check each '2x2 Table' is a list of lists of shape (2,2)
+        for tbl in results["2x2 Table"]:
+            self.assertIsInstance(tbl, list, "'2x2 Table' must be a Python list (of lists).")
+            self.assertEqual(len(tbl), 2, "Each '2x2 Table' must have 2 rows.")
+            for row in tbl:
+                self.assertIsInstance(row, list, "Each row in '2x2 Table' must be a list.")
+                self.assertEqual(len(row), 2, "Each row in '2x2 Table' must have 2 columns.")
 
-        # Test error handling: using a non-existent column should raise a KeyError
+        # 6) Check "Unadjusted Result" and "Adjusted Result" are in allowed set
+        allowed_results = {"reject", "fail to reject"}
+        for res in results["Unadjusted Result"]:
+            self.assertIn(res, allowed_results,
+                          "'Unadjusted Result' should be either 'reject' or 'fail to reject'.")
+        for res in results["Adjusted Result"]:
+            self.assertIn(res, allowed_results,
+                          "'Adjusted Result' should be either 'reject' or 'fail to reject'.")
+
+        # 7) Check that it raises KeyError when row/column var do not exist
         with self.assertRaises(KeyError):
-            pg.ransacking(data=data, row_var='NonExistent', col_var='B')
+            pg.ransacking(data=df_ind, row_var="DoesNotExist", col_var="restecg")
+        with self.assertRaises(KeyError):
+            pg.ransacking(data=df_ind, row_var="cp", col_var="DoesNotExist")
+
+        # 8) Optionally: Check that a small toy dataset with all same values doesn't crash
+        # (like a degenerate case).
+        deg_data = pd.DataFrame({"A": ["X", "X"], "B": ["Y", "Y"]})
+        deg_results = pg.ransacking(data=deg_data, row_var="A", col_var="B")
+        self.assertEqual(len(deg_results), 1, "Degenerate table should only produce 1 result.")
