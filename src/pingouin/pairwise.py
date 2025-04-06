@@ -284,9 +284,9 @@ def pairwise_tests(
     if isinstance(between, (str, int)) and isinstance(within, (str, int)):
         contrast = "within_between"
         assert all([between in data.keys(), within in data.keys()])
-    if parametric:
+    if parametric == True:
         desca, stata, descb, statb = "mean(A)", "std(A)", "mean(B)", "std(B)"
-    else:
+    if parametric == False:
         desca, stata, descb, statb = "median(A)", "IQR(A)", "median(B)", "IQR(B)"
     # Create col_order
     col_order = [
@@ -328,7 +328,7 @@ def pairwise_tests(
 
     if contrast in ["simple_within", "simple_between"]:
         # OPTION A: SIMPLE MAIN EFFECTS, WITHIN OR BETWEEN
-        paired = contrast == "simple_within"
+        paired = True if contrast == "simple_within" else False
         col = within if contrast == "simple_within" else between
 
         # Extract levels of the grouping variable, sorted in alphabetical order
@@ -372,11 +372,8 @@ def pairwise_tests(
                 df_ttest = ttest(
                     x, y, paired=paired, alternative=alternative, correction=correction
                 )
-                # Fix: Access BF10 without assuming 'T-test' index
-                # The index for BF10 may vary based on the test type
-                if "BF10" in df_ttest.columns:
-                    stats.at[i, "BF10"] = df_ttest.iloc[0]["BF10"]
-                stats.at[i, "dof"] = df_ttest.iloc[0]["dof"]
+                stats.at[i, "BF10"] = df_ttest.at["T-test", "BF10"]
+                stats.at[i, "dof"] = df_ttest.at["T-test", "dof"]
             else:
                 if paired:
                     stat_name = "W-val"
@@ -416,10 +413,6 @@ def pairwise_tests(
         else:
             stats["p-corr"] = None
             stats["p-adjust"] = None
-
-        # Ensure 'p_unc' and 'p_corr' columns exist in the output DataFrame
-        if "p-unc" not in stats.columns or "p-corr" not in stats.columns:
-            raise KeyError("The 'p_unc' or 'p_corr' column is missing from the output DataFrame. Please check the computation logic.")
     else:
         # Multiple factors
         if contrast == "multiple_between":
@@ -535,11 +528,8 @@ def pairwise_tests(
                     df_ttest = ttest(
                         x, y, paired=paired, alternative=alternative, correction=correction
                     )
-                    # Fix: Access BF10 without assuming 'T-test' index
-                    # The index for BF10 may vary based on the test type
-                    if "BF10" in df_ttest.columns:
-                        stats.at[ic, "BF10"] = df_ttest.iloc[0]["BF10"]
-                    stats.at[ic, "dof"] = df_ttest.iloc[0]["dof"]
+                    stats.at[ic, "BF10"] = df_ttest.at["T-test", "BF10"]
+                    stats.at[ic, "dof"] = df_ttest.at["T-test", "dof"]
                 else:
                     if paired:
                         stat_name = "W-val"
@@ -588,7 +578,6 @@ def pairwise_tests(
         stats.rename(columns={"Time": factors[0]}, inplace=True)
 
     return _postprocess_dataframe(stats)
-
 
 @pf.register_dataframe_method
 def ptests(
@@ -752,9 +741,9 @@ def ptests(
 
     if stars:
         # Replace p-values by stars
-        mat_upper = mat_upper.applymap(replace_pval)
+        mat_upper = mat_upper.map(replace_pval)
     else:
-        mat_upper = mat_upper.applymap(lambda x: ffp(x, precision=decimals))
+        mat_upper = mat_upper.map(lambda x: ffp(x, precision=decimals))
 
     # Replace upper triangle by p-values
     mat.to_numpy()[tif(mat, k=1)] = mat_upper.to_numpy()[tif(mat, k=1)]
@@ -781,8 +770,8 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
         * ``'cohen'``: Unbiased Cohen d
         * ``'hedges'``: Hedges g
         * ``'r'``: Pearson correlation coefficient
-        * ``'eta-square'``: Eta-square
-        * ``'odds-ratio'``: Odds ratio
+        * ``'eta_square'``: Eta-square
+        * ``'odds_ratio'``: Odds ratio
         * ``'AUC'``: Area Under the Curve
         * ``'CLES'``: Common Language Effect Size
 
@@ -792,12 +781,12 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
 
         * ``'A'``: Name of first measurement
         * ``'B'``: Name of second measurement
-        * ``'mean(A)'``: Mean of first measurement
-        * ``'mean(B)'``: Mean of second measurement
+        * ``'mean_A'``: Mean of first measurement
+        * ``'mean_B'``: Mean of second measurement
         * ``'diff'``: Mean difference (= mean(A) - mean(B))
         * ``'se'``: Standard error
         * ``'T'``: T-values
-        * ``'p-tukey'``: Tukey-HSD corrected p-values
+        * ``'p_tukey'``: Tukey-HSD corrected p-values
         * ``'hedges'``: Hedges effect size (or any effect size defined in
           ``effsize``)
 
@@ -855,7 +844,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     >>> import pingouin as pg
     >>> df = pg.read_dataset('penguins')
     >>> df.pairwise_tukey(dv='body_mass_g', between='species').round(3)
-               A          B   mean(A)   mean(B)      diff      se       T  p-tukey  hedges
+               A          B   mean(A)   mean(B)      diff      se       T  p_tukey  hedges
     0     Adelie  Chinstrap  3700.662  3733.088   -32.426  67.512  -0.480    0.881  -0.074
     1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148 -24.495    0.000  -2.860
     2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857 -19.224    0.000  -2.875
@@ -876,7 +865,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     # See https://github.com/raphaelvallat/pingouin/issues/111
     labels = np.array(list(grp.groups.keys()))
     n = grp.count().to_numpy()
-    gmeans = grp.mean().to_numpy()
+    gmeans = grp.mean(numeric_only=True).to_numpy()
     gvar = aov.at[1, "MS"] / n
 
     # Pairwise combinations
@@ -915,12 +904,12 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
         {
             "A": labels[g1],
             "B": labels[g2],
-            "mean(A)": gmeans[g1],
-            "mean(B)": gmeans[g2],
+            "mean_A": gmeans[g1],
+            "mean_B": gmeans[g2],
             "diff": mn,
             "se": se,
             "T": tval,
-            "p-tukey": pval,
+            "p_tukey": pval,
             effsize: ef,
         }
     )
@@ -945,8 +934,8 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
         * ``'cohen'``: Unbiased Cohen d
         * ``'hedges'``: Hedges g
         * ``'r'``: Pearson correlation coefficient
-        * ``'eta-square'``: Eta-square
-        * ``'odds-ratio'``: Odds ratio
+        * ``'eta_square'``: Eta-square
+        * ``'odds_ratio'``: Odds ratio
         * ``'AUC'``: Area Under the Curve
         * ``'CLES'``: Common Language Effect Size
 
@@ -957,8 +946,8 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
 
         * ``'A'``: Name of first measurement
         * ``'B'``: Name of second measurement
-        * ``'mean(A)'``: Mean of first measurement
-        * ``'mean(B)'``: Mean of second measurement
+        * ``'mean_A'``: Mean of first measurement
+        * ``'mean_B'``: Mean of second measurement
         * ``'diff'``: Mean difference (= mean(A) - mean(B))
         * ``'se'``: Standard error
         * ``'T'``: T-values
@@ -1042,8 +1031,8 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     # See https://github.com/raphaelvallat/pingouin/issues/111
     labels = np.array(list(grp.groups.keys()))
     n = grp.count().to_numpy()
-    gmeans = grp.mean().to_numpy()
-    gvars = grp.var().to_numpy()
+    gmeans = grp.mean(numeric_only=True).to_numpy()
+    gvars = grp.var(numeric_only=True).to_numpy()  # numeric_only=True added in pandas 1.5
 
     # Pairwise combinations
     g1, g2 = np.array(list(combinations(np.arange(ng), 2))).T
@@ -1083,8 +1072,8 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
         {
             "A": labels[g1],
             "B": labels[g2],
-            "mean(A)": gmeans[g1],
-            "mean(B)": gmeans[g2],
+            "mean_A": gmeans[g1],
+            "mean_B": gmeans[g2],
             "diff": mn,
             "se": se,
             "T": tval,
@@ -1093,11 +1082,6 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
             effsize: ef,
         }
     )
-
-    # Ensure 'pval' column exists in the output DataFrame
-    if "pval" not in stats.columns:
-        raise KeyError("The 'pval' column is missing from the output DataFrame. Please check the computation logic.")
-
     return _postprocess_dataframe(stats)
 
 
@@ -1185,9 +1169,9 @@ def pairwise_corr(
         * ``'n'``: Sample size (after removal of missing values).
         * ``'r'``: Correlation coefficients.
         * ``'CI95'``: 95% parametric confidence intervals.
-        * ``'p-unc'``: Uncorrected p-values.
-        * ``'p-corr'``: Corrected p-values.
-        * ``'p-adjust'``: P-values correction method.
+        * ``'p_unc'``: Uncorrected p-values.
+        * ``'p_corr'``: Corrected p-values.
+        * ``'p_adjust'``: P-values correction method.
         * ``'BF10'``: Bayes Factor of the alternative hypothesis (only for Pearson correlation)
         * ``'power'``: achieved power of the test (= 1 - type II error).
 
@@ -1231,7 +1215,7 @@ def pairwise_corr(
     >>> pd.set_option('display.max_columns', 20)
     >>> data = pg.read_dataset('pairwise_corr').iloc[:, 1:]
     >>> pg.pairwise_corr(data, method='spearman', alternative='greater', padjust='bonf').round(3)
-                   X                  Y    method alternative    n      r         CI95%  p-unc  p-corr p-adjust  power
+                   X                  Y    method alternative    n      r          CI95  p_unc  p_corr p_adjust  power
     0    Neuroticism       Extraversion  spearman     greater  500 -0.325  [-0.39, 1.0]  1.000   1.000     bonf  0.000
     1    Neuroticism           Openness  spearman     greater  500 -0.028   [-0.1, 1.0]  0.735   1.000     bonf  0.012
     2    Neuroticism      Agreeableness  spearman     greater  500 -0.151  [-0.22, 1.0]  1.000   1.000     bonf  0.000
@@ -1248,7 +1232,7 @@ def pairwise_corr(
     >>> pcor = pg.pairwise_corr(data, columns=['Openness', 'Extraversion',
     ...                                        'Neuroticism'], method='bicor')
     >>> pcor.round(3)
-                  X             Y method alternative    n      r           CI95%  p-unc  power
+                  X             Y method alternative    n      r            CI95  p_unc  power
     0      Openness  Extraversion  bicor   two-sided  500  0.247    [0.16, 0.33]  0.000  1.000
     1      Openness   Neuroticism  bicor   two-sided  500 -0.028   [-0.12, 0.06]  0.535  0.095
     2  Extraversion   Neuroticism  bicor   two-sided  500 -0.343  [-0.42, -0.26]  0.000  1.000
@@ -1256,7 +1240,7 @@ def pairwise_corr(
     3. One-versus-all pairwise correlations
 
     >>> pg.pairwise_corr(data, columns=['Neuroticism']).round(3)
-                 X                  Y   method alternative    n      r           CI95%  p-unc       BF10  power
+                 X                  Y   method alternative    n      r            CI95  p_unc       BF10  power
     0  Neuroticism       Extraversion  pearson   two-sided  500 -0.350  [-0.42, -0.27]  0.000  6.765e+12  1.000
     1  Neuroticism           Openness  pearson   two-sided  500 -0.010    [-0.1, 0.08]  0.817      0.058  0.056
     2  Neuroticism      Agreeableness  pearson   two-sided  500 -0.134  [-0.22, -0.05]  0.003      5.122  0.854
@@ -1266,7 +1250,7 @@ def pairwise_corr(
 
     >>> columns = [['Neuroticism', 'Extraversion'], ['Openness']]
     >>> pg.pairwise_corr(data, columns).round(3)
-                  X         Y   method alternative    n      r         CI95%  p-unc       BF10  power
+                  X         Y   method alternative    n      r          CI95  p_unc       BF10  power
     0   Neuroticism  Openness  pearson   two-sided  500 -0.010  [-0.1, 0.08]  0.817      0.058  0.056
     1  Extraversion  Openness  pearson   two-sided  500  0.267  [0.18, 0.35]  0.000  5.277e+06  1.000
 
@@ -1277,7 +1261,7 @@ def pairwise_corr(
     6. Pairwise partial correlation
 
     >>> pg.pairwise_corr(data, covar=['Neuroticism', 'Openness'])
-                   X                  Y   method                        covar alternative    n         r          CI95%     p-unc
+                   X                  Y   method                        covar alternative    n         r           CI95     p_unc
     0   Extraversion      Agreeableness  pearson  ['Neuroticism', 'Openness']   two-sided  500 -0.038737  [-0.13, 0.05]  0.388361
     1   Extraversion  Conscientiousness  pearson  ['Neuroticism', 'Openness']   two-sided  500 -0.071427  [-0.16, 0.02]  0.111389
     2  Agreeableness  Conscientiousness  pearson  ['Neuroticism', 'Openness']   two-sided  500  0.123108   [0.04, 0.21]  0.005944
@@ -1325,8 +1309,7 @@ def pairwise_corr(
         """
         if isinstance(o, tree_types):
             for value in o:
-                for subvalue in traverse(value, tree_types):
-                    yield subvalue
+                yield from traverse(value, tree_types)
         else:
             yield o
 
@@ -1409,7 +1392,7 @@ def pairwise_corr(
             "outliers",
             "r",
             "CI95",
-            "p-val",
+            "p_val",
             "BF10",
             "power",
         ],
@@ -1467,18 +1450,18 @@ def pairwise_corr(
     options.update(old_options)  # restore options
 
     # Force conversion to numeric
-    stats = stats.astype({"r": float, "n": int, "p-val": float, "outliers": float, "power": float})
+    stats = stats.astype({"r": float, "n": int, "p_val": float, "outliers": float, "power": float})
 
     # Multiple comparisons
-    stats = stats.rename(columns={"p-val": "p-unc"})
-    padjust = None if stats["p-unc"].size <= 1 else padjust
+    stats = stats.rename(columns={"p_val": "p_unc"})
+    padjust = None if stats["p_unc"].size <= 1 else padjust
     if padjust is not None:
         if padjust.lower() != "none":
-            reject, stats["p-corr"] = multicomp(stats["p-unc"].to_numpy(), method=padjust)
-            stats["p-adjust"] = padjust
+            reject, stats["p_corr"] = multicomp(stats["p_unc"].to_numpy(), method=padjust)
+            stats["p_adjust"] = padjust
     else:
-        stats["p-corr"] = None
-        stats["p-adjust"] = None
+        stats["p_corr"] = None
+        stats["p_adjust"] = None
 
     # Standardize correlation coefficients (Fisher z-transformation)
     # stats['z'] = np.arctanh(stats['r'].to_numpy())
@@ -1492,9 +1475,9 @@ def pairwise_corr(
         "outliers",
         "r",
         "CI95",
-        "p-unc",
-        "p-corr",
-        "p-adjust",
+        "p_unc",
+        "p_corr",
+        "p_adjust",
         "BF10",
         "power",
     ]
