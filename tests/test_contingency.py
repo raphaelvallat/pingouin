@@ -173,3 +173,45 @@ class TestContingency(TestCase):
         pg.dichotomous_crosstab(data_ct, "E", "A")
         with pytest.raises(ValueError):
             pg.dichotomous_crosstab(data_ct, "E", "E")
+
+    def test_ransacking(self):
+        """Test function ransacking."""
+        # Create sample data
+        data = pd.DataFrame({
+            'A': ['Yes', 'No', 'Yes', 'No', 'Yes'],
+            'B': ['High', 'Low', 'High', 'Low', 'Medium']
+        })
+
+        # Run the ransacking function
+        results = pg.ransacking(data=data, row_var='A', col_var='B', alpha=0.05, adjusted=True)
+
+        # Check that the output is a DataFrame
+        self.assertIsInstance(results, pd.DataFrame, "Result should be a DataFrame.")
+
+        # Define the expected columns
+        expected_columns = {
+            'Row', 'Column', 'Odds Ratio', 'Log Odds Ratio', 'Standard Error',
+            'Z Value', 'Critical Z', 'Adjusted Critical Z', 'Result', 'Adjusted Result', '2x2 Table'
+        }
+        self.assertEqual(set(results.columns), expected_columns, "DataFrame does not have the expected columns.")
+
+        # Verify that the number of rows matches the product of unique rows and columns from pd.crosstab
+        crosstab = pd.crosstab(data['A'], data['B'])
+        expected_rows = crosstab.shape[0] * crosstab.shape[1]
+        self.assertEqual(len(results), expected_rows, "The number of rows in the result is incorrect.")
+
+        # Check that each '2x2 Table' is a numpy array of shape (2,2)
+        for table in results['2x2 Table']:
+            self.assertIsInstance(table, np.ndarray, "'2x2 Table' should be a numpy array.")
+            self.assertEqual(table.shape, (2, 2), "'2x2 Table' must be of shape (2,2).")
+
+        # Ensure 'Result' and 'Adjusted Result' contain allowed values
+        allowed_results = {'reject', 'fail to reject'}
+        for res in results['Result']:
+            self.assertIn(res, allowed_results, "'Result' should be either 'reject' or 'fail to reject'.")
+        for res in results['Adjusted Result']:
+            self.assertIn(res, allowed_results, "'Adjusted Result' should be either 'reject' or 'fail to reject'.")
+
+        # Test error handling: using a non-existent column should raise a KeyError
+        with self.assertRaises(KeyError):
+            pg.ransacking(data=data, row_var='NonExistent', col_var='B')

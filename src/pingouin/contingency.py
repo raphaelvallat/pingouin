@@ -9,7 +9,7 @@ from scipy.stats import power_divergence, binom, chi2 as sp_chi2
 from pingouin import power_chi2, _postprocess_dataframe
 
 
-__all__ = ["chi2_independence", "chi2_mcnemar", "dichotomous_crosstab"]
+__all__ = ["chi2_independence", "chi2_mcnemar", "dichotomous_crosstab", "ransacking"]
 
 
 ###############################################################################
@@ -426,3 +426,112 @@ def dichotomous_crosstab(data, x, y):
             )
     crosstab = crosstab.sort_index(axis=0).sort_index(axis=1)
     return crosstab
+
+
+###############################################################################
+# RANSACKING POST-HOC ANALYSIS
+###############################################################################
+
+
+def ransacking(data, row_var, col_var, alpha=0.05, adjusted=False):
+    """
+    Perform the ransacking post-hoc analysis for Chi-Square tests.
+
+    Parameters
+    ----------
+    data : :py:class:`pandas.DataFrame`
+        The dataframe containing the data.
+    row_var : str
+        The name of the row variable.
+    col_var : str
+        The name of the column variable.
+    alpha : float, optional
+        Significance level for the test. Default is 0.05.
+    adjusted : bool, optional
+        Whether to adjust the significance level for multiple tests. Default is False.
+
+    Returns
+    -------
+    :py:class:`pandas.DataFrame`
+        A dataframe with the ransacking test results for each cell.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> import pingouin as pg
+    >>> data = pd.DataFrame({
+    ...     'A': ['Yes', 'No', 'Yes', 'No', 'Yes'],
+    ...     'B': ['High', 'Low', 'High', 'Low', 'Medium']
+    ... })
+    >>> results = pg.ransacking(data=data, row_var='A', col_var='B', alpha=0.05, adjusted=True)
+    >>> results
+      Row  Column    Odds Ratio  Log Odds Ratio  Standard Error   Z Value  Critical Z  Adjusted Critical Z          Result Adjusted Result         2x2 Table
+    0   No    High  0.000000e+00      -23.025851    100000.00001 -0.000230    1.959964             2.638257  fail to reject  fail to reject  [[0, 2], [2, 1]]
+    1   No     Low  2.000000e+20       46.744849    141421.35624  0.000331    1.959964             2.638257  fail to reject  fail to reject  [[2, 0], [0, 3]]
+    2   No  Medium  0.000000e+00      -23.025851    100000.00001 -0.000230    1.959964             2.638257  fail to reject  fail to reject  [[0, 2], [1, 2]]
+    3  Yes    High  2.000000e+10       23.718998    100000.00001  0.000237    1.959964             2.638257  fail to reject  fail to reject  [[2, 1], [0, 2]]
+    4  Yes     Low  0.000000e+00      -23.025851    141421.35624 -0.000163    1.959964             2.638257  fail to reject  fail to reject  [[0, 3], [2, 0]]
+    5  Yes  Medium  5.000000e+09       22.332704    100000.00001  0.000223    1.959964             2.638257  fail to reject  fail to reject  [[1, 2], [0, 2]]
+
+    This example demonstrates how to use the ransacking method to analyze relationships between categorical variables in a contingency table.
+    """
+    try:
+        freq_table = pd.crosstab(data[row_var], data[col_var])
+        total = freq_table.values.sum()
+        num_tests = freq_table.shape[0] * freq_table.shape[1]
+        adjusted_alpha = alpha / num_tests if adjusted else alpha
+        dof = (freq_table.shape[0] - 1) * (freq_table.shape[1] - 1)
+
+        results = []
+
+        for row_label, col_label in freq_table.stack().index:
+            cell_value = freq_table.loc[row_label, col_label]
+            row_total = freq_table.loc[row_label].sum() - cell_value
+            col_total = freq_table[col_label].sum() - cell_value
+            remaining_total = total - cell_value - row_total - col_total
+
+            table_2x2 = np.array([[cell_value, row_total], [col_total, remaining_total]])
+
+            # Avoid division by zero by adding a small epsilon to denominators
+            epsilon = 1e-10
+            odds_1 = table_2x2[0, 0] / (table_2x2[0, 1] + epsilon)
+            odds_2 = table_2x2[1, 0] / (table_2x2[1, 1] + epsilon)
+
+            # Calculate odds ratio and log odds ratio
+            odds_ratio = odds_1 / (odds_2 + epsilon)
+            log_odds_ratio = np.log(odds_ratio + epsilon)
+
+            # Calculate standard error, avoiding division by zero
+            standard_error = np.sqrt(sum(1 / (table_2x2.flatten() + epsilon)))
+
+            # Calculate z-value
+            z_value = log_odds_ratio / (standard_error + epsilon)
+
+            critical_z = np.sqrt(sp_chi2.ppf(1 - alpha, 1))
+            adjusted_critical_z = np.sqrt(sp_chi2.ppf(1 - adjusted_alpha, 1))
+
+            result = "reject" if abs(z_value) > critical_z else "fail to reject"
+            adjusted_result = "reject" if abs(z_value) > adjusted_critical_z else "fail to reject"
+
+            results.append({
+                'Row': row_label,
+                'Column': col_label,
+                'Odds Ratio': odds_ratio,
+                'Log Odds Ratio': log_odds_ratio,
+                'Standard Error': standard_error,
+                'Z Value': z_value,
+                'Critical Z': critical_z,
+                'Adjusted Critical Z': adjusted_critical_z,
+                'Result': result,
+                'Adjusted Result': adjusted_result,
+                '2x2 Table': table_2x2
+            })
+
+        return pd.DataFrame(results)
+
+    except KeyError as e:
+        raise KeyError(f"Column not found in the dataframe: {e}")
+    except ZeroDivisionError as e:
+        raise ZeroDivisionError(f"Division by zero encountered: {e}")
+    except Exception as e:
+        raise Exception(f"An unexpected error occurred: {e}")
