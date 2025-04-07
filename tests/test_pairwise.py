@@ -485,6 +485,7 @@ class TestPairwise(TestCase):
         x = df[df["Gender"] == "M"]["Scores"].to_numpy()
         y = df[df["Gender"] == "F"]["Scores"].to_numpy()
         assert round(abs(mwu(x, y).at["MWU", "RBC"]), 3) == 0.252
+
 # -------------------------------------------------------------------
         # Additional test: Check descriptive columns with parametric flag
         # -------------------------------------------------------------------

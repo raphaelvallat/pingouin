@@ -140,9 +140,9 @@ def pairwise_tests(
         * ``'W-val'``: Wilcoxon W stat (if parametric=False and paired data)
         * ``'dof'``: degrees of freedom (only if parametric=True)
         * ``'alternative'``: tail of the test
-        * ``'p-unc'``: Uncorrected p-values
-        * ``'p-corr'``: Corrected p-values
-        * ``'p-adjust'``: p-values correction method
+        * ``'p_unc'``: Uncorrected p-values
+        * ``'p_corr'``: Corrected p-values
+        * ``'p_adjust'``: p-values correction method
         * ``'BF10'``: Bayes Factor
         * ``'hedges'``: effect size (or any effect size defined in
           ``effsize``)
@@ -185,19 +185,19 @@ def pairwise_tests(
     >>> pd.set_option('display.max_columns', 20)
     >>> df = pg.read_dataset('mixed_anova.csv')
     >>> pg.pairwise_tests(dv='Scores', between='Group', data=df).round(3)
-      Contrast        A           B  Paired  Parametric     T    dof alternative  p-unc   BF10  hedges
+      Contrast        A           B  Paired  Parametric     T    dof alternative  p_unc   BF10  hedges
     0    Group  Control  Meditation   False        True -2.29  178.0   two-sided  0.023  1.813   -0.34
     2. One within-subject factor
     >>> post_hocs = pg.pairwise_tests(dv='Scores', within='Time', subject='Subject', data=df)
     >>> post_hocs.round(3)
-      Contrast        A        B  Paired  Parametric      T   dof alternative  p-unc   BF10  hedges
+      Contrast        A        B  Paired  Parametric      T   dof alternative  p_unc   BF10  hedges
     0     Time   August  January    True        True -1.740  59.0   two-sided  0.087  0.582  -0.328
     1     Time   August     June    True        True -2.743  59.0   two-sided  0.008  4.232  -0.483
     2     Time  January     June    True        True -1.024  59.0   two-sided  0.310  0.232  -0.170
     3. Non-parametric pairwise paired test (wilcoxon)
     >>> pg.pairwise_tests(dv='Scores', within='Time', subject='Subject',
     ...                    data=df, parametric=False).round(3)
-      Contrast        A        B  Paired  Parametric  W-val alternative  p-unc  hedges
+      Contrast        A        B  Paired  Parametric  W-val alternative  p_unc  hedges
     0     Time   August  January    True       False  716.0   two-sided  0.144  -0.328
     1     Time   August     June    True       False  564.0   two-sided  0.010  -0.483
     2     Time  January     June    True       False  887.0   two-sided  0.840  -0.170
@@ -205,7 +205,7 @@ def pairwise_tests(
     >>> posthocs = pg.pairwise_tests(dv='Scores', within='Time', subject='Subject',
     ...                               between='Group', padjust='bonf', data=df)
     >>> posthocs.round(3)
-           Contrast     Time        A           B Paired  Parametric      T   dof alternative  p-unc  p-corr p-adjust   BF10  hedges
+           Contrast     Time        A           B Paired  Parametric      T   dof alternative  p_unc  p_corr p_adjust   BF10  hedges
     0          Time        -   August     January   True        True -1.740  59.0   two-sided  0.087   0.261     bonf  0.582  -0.328
     1          Time        -   August        June   True        True -2.743  59.0   two-sided  0.008   0.024     bonf  4.232  -0.483
     2          Time        -  January        June   True        True -1.024  59.0   two-sided  0.310   0.931     bonf  0.232  -0.170
@@ -215,7 +215,7 @@ def pairwise_tests(
     6  Time * Group     June  Control  Meditation  False        True -2.744  58.0   two-sided  0.008   0.024     bonf  5.593  -0.699
     5. Two between-subject factors. The order of the ``between`` factors matters!
     >>> pg.pairwise_tests(dv='Scores', between=['Group', 'Time'], data=df).round(3)
-           Contrast       Group        A           B Paired  Parametric      T    dof alternative  p-unc     BF10  hedges
+           Contrast       Group        A           B Paired  Parametric      T    dof alternative  p_unc     BF10  hedges
     0         Group           -  Control  Meditation  False        True -2.290  178.0   two-sided  0.023    1.813  -0.340
     1          Time           -   August     January  False        True -1.806  118.0   two-sided  0.074    0.839  -0.328
     2          Time           -   August        June  False        True -2.660  118.0   two-sided  0.009    4.499  -0.483
@@ -229,7 +229,7 @@ def pairwise_tests(
     6. Same but without the interaction, and using a directional test
     >>> df.pairwise_tests(dv='Scores', between=['Group', 'Time'], alternative="less",
     ...                    interaction=False).round(3)
-      Contrast        A           B  Paired  Parametric      T    dof alternative  p-unc   BF10  hedges
+      Contrast        A           B  Paired  Parametric      T    dof alternative  p_unc   BF10  hedges
     0    Group  Control  Meditation   False        True -2.290  178.0        less  0.012  3.626  -0.340
     1     Time   August     January   False        True -1.806  118.0        less  0.037  1.679  -0.328
     2     Time   August        June   False        True -2.660  118.0        less  0.004  8.998  -0.483
@@ -305,9 +305,9 @@ def pairwise_tests(
         "W-val",
         "dof",
         "alternative",
-        "p-unc",
-        "p-corr",
-        "p-adjust",
+        "p_unc",
+        "p_corr",
+        "p_adjust",
         "BF10",
         effsize,
     ]
@@ -347,7 +347,7 @@ def pairwise_tests(
         stats = pd.DataFrame(dtype=np.float64, index=range(len(combs)), columns=col_order)
 
         # Force dtype conversion
-        cols_str = ["Contrast", "Time", "A", "B", "alternative", "p-adjust", "BF10"]
+        cols_str = ["Contrast", "Time", "A", "B", "alternative", "p_adjust", "BF10"]
         cols_bool = ["Parametric", "Paired"]
         stats[cols_str] = stats[cols_str].astype(object)
         stats[cols_bool] = stats[cols_bool].astype(bool)
@@ -413,20 +413,20 @@ def pairwise_tests(
             p_val = df_ttest.get("p-val")
             if isinstance(p_val, pd.Series):
                 p_val = p_val.iloc[0] if not p_val.empty else None
-            stats.at[i, "p-unc"] = p_val
+            stats.at[i, "p_unc"] = p_val
             stats.at[i, effsize] = ef
 
         # Multiple comparisons
-        padjust = None if stats["p-unc"].size <= 1 else padjust
+        padjust = None if stats["p_unc"].size <= 1 else padjust
         if padjust is not None:
             if padjust.lower() != "none":
-                _, stats["p-corr"] = multicomp(
-                    stats["p-unc"].to_numpy(dtype=float), alpha=alpha, method=padjust
+                _, stats["p_corr"] = multicomp(
+                    stats["p_unc"].to_numpy(dtype=float), alpha=alpha, method=padjust
                 )
-                stats["p-adjust"] = padjust
+                stats["p_adjust"] = padjust
         else:
-            stats["p-corr"] = None
-            stats["p-adjust"] = None
+            stats["p_corr"] = None
+            stats["p_adjust"] = None
     else:
         # Multiple factors
         if contrast == "multiple_between":
@@ -581,16 +581,16 @@ def pairwise_tests(
                 p_val = df_ttest.get("p-val")
                 if isinstance(p_val, pd.Series):
                     p_val = p_val.iloc[0] if not p_val.empty else None
-                stats.at[ic, "p-unc"] = p_val
+                stats.at[ic, "p_unc"] = p_val
                 stats.at[ic, effsize] = ef
 
             # Multi-comparison columns
             if padjust is not None and padjust.lower() != "none":
                 _, pcor = multicomp(
-                    stats.loc[idxiter, "p-unc"].to_numpy(dtype=float), alpha=alpha, method=padjust
+                    stats.loc[idxiter, "p_unc"].to_numpy(dtype=float), alpha=alpha, method=padjust
                 )
-                stats.loc[idxiter, "p-corr"] = pcor
-                stats.loc[idxiter, "p-adjust"] = padjust
+                stats.loc[idxiter, "p_corr"] = pcor
+                stats.loc[idxiter, "p_adjust"] = padjust
 
     # ---------------------------------------------------------------------
     # Append parametric columns
