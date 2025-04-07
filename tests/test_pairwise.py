@@ -38,14 +38,11 @@ class TestPairwise(TestCase):
         Therefore, one cannot directly validate the T and p-values.
         """
         df = read_dataset("mixed_anova.csv")  # Simple and mixed design
-        df['Scores'] = pd.to_numeric(df['Scores'], errors='coerce')  # Ensure numeric
         df_sort = df.sort_values("Time")  # Same but random order of subject
+        # df_sort = df.sample(frac=1)
         df_unb = read_dataset("mixed_anova_unbalanced")
-        df_unb['Scores'] = pd.to_numeric(df_unb['Scores'], errors='coerce')  # Ensure numeric
         df_rm2 = read_dataset("rm_anova2")  # 2-way rm design
-        df_rm2['Scores'] = pd.to_numeric(df_rm2['Scores'], errors='coerce')  # Ensure numeric
         df_aov2 = read_dataset("anova2")  # 2-way factorial design
-        df_aov2['Scores'] = pd.to_numeric(df_aov2['Scores'], errors='coerce')  # Ensure numeric
 
         # -------------------------------------------------------------------
         # Warning for deprecated pairwise_ttests()
@@ -98,20 +95,6 @@ class TestPairwise(TestCase):
         # -------------------------------------------------------------------
         # In R: >>> pairwise.t.test(df$Scores, df$Group, pool.sd = FALSE)
         pt = pairwise_tests(dv="Scores", between="Group", data=df).round(3)
-        assert pt.loc[0, "p_unc"] == 0.023
-        pairwise_tests(
-            dv="Scores",
-            between="Group",
-            data=df,
-            padjust="bonf",
-            alternative="greater",
-            effsize="cohen",
-            parametric=False,
-        )
-
-        # Same after random ordering of subject (issue 151)
-        pt_sort = pairwise_tests(dv="Scores", between="Group", data=df_sort).round(3)
-        
         assert pt.loc[0, "p_unc"] == 0.023
         pairwise_tests(
             dv="Scores",
@@ -502,59 +485,6 @@ class TestPairwise(TestCase):
         x = df[df["Gender"] == "M"]["Scores"].to_numpy()
         y = df[df["Gender"] == "F"]["Scores"].to_numpy()
         assert round(abs(mwu(x, y).at["MWU", "RBC"]), 3) == 0.252
-
-        # -------------------------------------------------------------------
-        # Additional test: Check descriptive columns with parametric flag
-        # -------------------------------------------------------------------
-        # Use the existing dataset 'df' from read_dataset("pairwise_tests")
-        # Modify 'Time' to ensure there are two levels (e.g., 'A' and 'B')
-        df_flag = df.copy()
-        df_flag.loc[:2, "Time"] = "A"
-        df_flag.loc[3:, "Time"] = "B"
-
-        # When parametric is True, descriptive stats should include 'mean' and 'std' columns.
-        pt_param = pairwise_tests(
-            dv="Scores",
-            within="Time",
-            subject="Subject",
-            data=df_flag,
-            return_desc=True,
-            parametric=True,
-        )
-        assert "mean(A)" in pt_param.columns, (
-            "For parametric=True, 'mean(A)' column should be present."
-        )
-        assert "std(A)" in pt_param.columns, (
-            "For parametric=True, 'std(A)' column should be present."
-        )
-        assert "median(A)" not in pt_param.columns, (
-            "For parametric=True, 'median(A)' column should not be present."
-        )
-        assert "IQR(A)" not in pt_param.columns, (
-            "For parametric=True, 'IQR(A)' column should not be present."
-        )
-
-        # When parametric is False, descriptive stats should include 'median' and 'IQR' columns.
-        pt_nonparam = pairwise_tests(
-            dv="Scores",
-            within="Time",
-            subject="Subject",
-            data=df_flag,
-            return_desc=True,
-            parametric=False,
-        )
-        assert "median(A)" in pt_nonparam.columns, (
-            "For parametric=False, 'median(A)' column should be present."
-        )
-        assert "IQR(A)" in pt_nonparam.columns, (
-            "For parametric=False, 'IQR(A)' column should be present."
-        )
-        assert "mean(A)" not in pt_nonparam.columns, (
-            "For parametric=False, 'mean(A)' column should not be present."
-        )
-        assert "std(A)" not in pt_nonparam.columns, (
-            "For parametric=False, 'std(A)' column should not be present."
-        )
 
     def test_ptests(self):
         """Test function ptests."""

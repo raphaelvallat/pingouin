@@ -373,7 +373,7 @@ def pairwise_tests(
                     x, y, paired=paired, alternative=alternative, correction=correction
                 )
                 stats.at[i, "BF10"] = df_ttest.get("BF10", None)  # Use .get to avoid KeyError
-                stats.at[i, "dof"] = df_ttest.get("dof", None)    # Use .get to avoid KeyError
+                stats.at[i, "dof"] = df_ttest.get("dof", None)  # Use .get to avoid KeyError
             else:
                 if paired:
                     stat_name = "W-val"
@@ -399,7 +399,7 @@ def pairwise_tests(
                     stats.at[i, "IQR(A)"] = iqr(x)
                     stats.at[i, "IQR(B)"] = iqr(y)
             stats.at[i, stat_name] = df_ttest.get(stat_name, None)  # Use .get to avoid KeyError
-            stats.at[i, "p-unc"] = df_ttest.get("p-val", None)      # Use .get to avoid KeyError
+            stats.at[i, "p-unc"] = df_ttest.get("p-val", None)  # Use .get to avoid KeyError
             stats.at[i, effsize] = ef
 
         # Multiple comparisons
@@ -529,7 +529,7 @@ def pairwise_tests(
                         x, y, paired=paired, alternative=alternative, correction=correction
                     )
                     stats.at[ic, "BF10"] = df_ttest.get("BF10", None)  # Use .get to avoid KeyError
-                    stats.at[ic, "dof"] = df_ttest.get("dof", None)    # Use .get to avoid KeyError
+                    stats.at[ic, "dof"] = df_ttest.get("dof", None)  # Use .get to avoid KeyError
                 else:
                     if paired:
                         stat_name = "W-val"
@@ -552,8 +552,10 @@ def pairwise_tests(
                         stats.at[ic, "median(B)"] = np.nanmedian(y)
                         stats.at[ic, "IQR(A)"] = iqr(x)
                         stats.at[ic, "IQR(B)"] = iqr(y)
-                stats.at[ic, stat_name] = df_ttest.get(stat_name, None)  # Use .get to avoid KeyError
-                stats.at[ic, "p-unc"] = df_ttest.get("p-val", None)      # Use .get to avoid KeyError
+                stats.at[ic, stat_name] = df_ttest.get(
+                    stat_name, None
+                )  # Use .get to avoid KeyError
+                stats.at[ic, "p-unc"] = df_ttest.get("p-val", None)  # Use .get to avoid KeyError
                 stats.at[ic, effsize] = ef
 
             # Multi-comparison columns
@@ -578,6 +580,7 @@ def pairwise_tests(
         stats.rename(columns={"Time": factors[0]}, inplace=True)
 
     return _postprocess_dataframe(stats)
+
 
 @pf.register_dataframe_method
 def ptests(
