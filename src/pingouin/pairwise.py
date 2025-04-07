@@ -372,8 +372,15 @@ def pairwise_tests(
                 df_ttest = ttest(
                     x, y, paired=paired, alternative=alternative, correction=correction
                 )
-                stats.at[i, "BF10"] = df_ttest.get("BF10", None)  # Use .get to avoid KeyError
-                stats.at[i, "dof"] = df_ttest.get("dof", None)  # Use .get to avoid KeyError
+                bf10_val = df_ttest.get("BF10")
+                if isinstance(bf10_val, pd.Series):
+                    bf10_val = bf10_val.iloc[0] if not bf10_val.empty else None
+                stats.at[i, "BF10"] = bf10_val
+                
+                dof_val = df_ttest.get("dof")
+                if isinstance(dof_val, pd.Series):
+                    dof_val = dof_val.iloc[0] if not dof_val.empty else None
+                stats.at[i, "dof"] = dof_val                
             else:
                 if paired:
                     stat_name = "W-val"
@@ -398,8 +405,15 @@ def pairwise_tests(
                     stats.at[i, "median(B)"] = np.nanmedian(y)
                     stats.at[i, "IQR(A)"] = iqr(x)
                     stats.at[i, "IQR(B)"] = iqr(y)
-            stats.at[i, stat_name] = df_ttest.get(stat_name, None)  # Use .get to avoid KeyError
-            stats.at[i, "p-unc"] = df_ttest.get("p-val", None)  # Use .get to avoid KeyError
+            stat_val = df_ttest.get(stat_name)
+            if isinstance(stat_val, pd.Series):
+                stat_val = stat_val.iloc[0] if not stat_val.empty else None
+            stats.at[i, stat_name] = stat_val
+            
+            p_val = df_ttest.get("p-val")
+            if isinstance(p_val, pd.Series):
+                p_val = p_val.iloc[0] if not p_val.empty else None
+            stats.at[i, "p-unc"] = p_val
             stats.at[i, effsize] = ef
 
         # Multiple comparisons
@@ -407,7 +421,7 @@ def pairwise_tests(
         if padjust is not None:
             if padjust.lower() != "none":
                 _, stats["p-corr"] = multicomp(
-                    stats["p-unc"].to_numpy(), alpha=alpha, method=padjust
+                    stats["p-unc"].to_numpy(dtype=float), alpha=alpha, method=padjust
                 )
                 stats["p-adjust"] = padjust
         else:
@@ -528,8 +542,15 @@ def pairwise_tests(
                     df_ttest = ttest(
                         x, y, paired=paired, alternative=alternative, correction=correction
                     )
-                    stats.at[ic, "BF10"] = df_ttest.get("BF10", None)  # Use .get to avoid KeyError
-                    stats.at[ic, "dof"] = df_ttest.get("dof", None)  # Use .get to avoid KeyError
+                    bf10_val = df_ttest.get("BF10")
+                    if isinstance(bf10_val, pd.Series):
+                        bf10_val = bf10_val.iloc[0] if not bf10_val.empty else None
+                    stats.at[ic, "BF10"] = bf10_val
+                    
+                    dof_val = df_ttest.get("dof")
+                    if isinstance(dof_val, pd.Series):
+                        dof_val = dof_val.iloc[0] if not dof_val.empty else None
+                    stats.at[ic, "dof"] = dof_val
                 else:
                     if paired:
                         stat_name = "W-val"
@@ -552,16 +573,21 @@ def pairwise_tests(
                         stats.at[ic, "median(B)"] = np.nanmedian(y)
                         stats.at[ic, "IQR(A)"] = iqr(x)
                         stats.at[ic, "IQR(B)"] = iqr(y)
-                stats.at[ic, stat_name] = df_ttest.get(
-                    stat_name, None
-                )  # Use .get to avoid KeyError
-                stats.at[ic, "p-unc"] = df_ttest.get("p-val", None)  # Use .get to avoid KeyError
+                stat_val = df_ttest.get(stat_name)
+                if isinstance(stat_val, pd.Series):
+                    stat_val = stat_val.iloc[0] if not stat_val.empty else None
+                stats.at[ic, stat_name] = stat_val
+                
+                p_val = df_ttest.get("p-val")
+                if isinstance(p_val, pd.Series):
+                    p_val = p_val.iloc[0] if not p_val.empty else None
+                stats.at[ic, "p-unc"] = p_val
                 stats.at[ic, effsize] = ef
 
             # Multi-comparison columns
             if padjust is not None and padjust.lower() != "none":
                 _, pcor = multicomp(
-                    stats.loc[idxiter, "p-unc"].to_numpy(), alpha=alpha, method=padjust
+                    stats.loc[idxiter, "p-unc"].to_numpy(dtype=float), alpha=alpha, method=padjust
                 )
                 stats.loc[idxiter, "p-corr"] = pcor
                 stats.loc[idxiter, "p-adjust"] = padjust
@@ -580,7 +606,6 @@ def pairwise_tests(
         stats.rename(columns={"Time": factors[0]}, inplace=True)
 
     return _postprocess_dataframe(stats)
-
 
 @pf.register_dataframe_method
 def ptests(
