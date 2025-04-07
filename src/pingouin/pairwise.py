@@ -376,11 +376,11 @@ def pairwise_tests(
                 if isinstance(bf10_val, pd.Series):
                     bf10_val = bf10_val.iloc[0] if not bf10_val.empty else None
                 stats.at[i, "BF10"] = bf10_val
-                
+
                 dof_val = df_ttest.get("dof")
                 if isinstance(dof_val, pd.Series):
                     dof_val = dof_val.iloc[0] if not dof_val.empty else None
-                stats.at[i, "dof"] = dof_val                
+                stats.at[i, "dof"] = dof_val
             else:
                 if paired:
                     stat_name = "W-val"
@@ -409,7 +409,7 @@ def pairwise_tests(
             if isinstance(stat_val, pd.Series):
                 stat_val = stat_val.iloc[0] if not stat_val.empty else None
             stats.at[i, stat_name] = stat_val
-            
+
             p_val = df_ttest.get("p-val")
             if isinstance(p_val, pd.Series):
                 p_val = p_val.iloc[0] if not p_val.empty else None
@@ -469,7 +469,9 @@ def pairwise_tests(
             # designs. Indeed, a similar groupby is applied by default on
             # each within-subject factor of a two-way repeated measures design.
             if all([agg[i], marginal]):
-                tmp = data.groupby([subject, f], as_index=False, observed=True, sort=True).mean(numeric_only=True)
+                tmp = data.groupby([subject, f], as_index=False, observed=True, sort=True).mean(
+                    numeric_only=True
+                )
             else:
                 tmp = data
             pt = pairwise_tests(
@@ -546,7 +548,7 @@ def pairwise_tests(
                     if isinstance(bf10_val, pd.Series):
                         bf10_val = bf10_val.iloc[0] if not bf10_val.empty else None
                     stats.at[ic, "BF10"] = bf10_val
-                    
+
                     dof_val = df_ttest.get("dof")
                     if isinstance(dof_val, pd.Series):
                         dof_val = dof_val.iloc[0] if not dof_val.empty else None
@@ -577,7 +579,7 @@ def pairwise_tests(
                 if isinstance(stat_val, pd.Series):
                     stat_val = stat_val.iloc[0] if not stat_val.empty else None
                 stats.at[ic, stat_name] = stat_val
-                
+
                 p_val = df_ttest.get("p-val")
                 if isinstance(p_val, pd.Series):
                     p_val = p_val.iloc[0] if not p_val.empty else None
@@ -606,6 +608,7 @@ def pairwise_tests(
         stats.rename(columns={"Time": factors[0]}, inplace=True)
 
     return _postprocess_dataframe(stats)
+
 
 @pf.register_dataframe_method
 def ptests(
