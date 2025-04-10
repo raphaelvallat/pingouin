@@ -49,6 +49,7 @@ def pairwise_tests(
     within_first=True,
 ):
     """Pairwise tests.
+
     Parameters
     ----------
     data : :py:class:`pandas.DataFrame`
@@ -60,10 +61,11 @@ def pairwise_tests(
         Name of column(s) containing the between-subject factor(s).
     within : string or list with 2 elements
         Name of column(s) containing the within-subject factor(s), i.e. the
-        repeated measurements.
+        repeated measurements. Only a single within-subject factor is supported for mixed analysis
+        (if ``between`` is also specified).
     subject : string
-        Name of column containing the subject identifier. This is mandatory
-        when ``within`` is specified.
+        Name of column containing the subject identifier. This is mandatory when ``within`` is
+        specified.
     parametric : boolean
         If True (default), use the parametric :py:func:`ttest` function.
         If False, use :py:func:`pingouin.wilcoxon` or :py:func:`pingouin.mwu`
@@ -74,6 +76,7 @@ def pairwise_tests(
         design. This is recommended to avoid violating the assumption of
         independence and conflating the degrees of freedom by the
         number of repeated measurements.
+
         .. versionadded:: 0.3.2
     alpha : float
         Significance level
@@ -84,6 +87,7 @@ def pairwise_tests(
         is greater than the mean of ``y``.
     padjust : string
         Method used for testing and adjustment of pvalues.
+
         * ``'none'``: no correction
         * ``'bonf'``: one-step Bonferroni correction
         * ``'sidak'``: one-step Sidak correction
@@ -92,12 +96,13 @@ def pairwise_tests(
         * ``'fdr_by'``: Benjamini/Yekutieli FDR correction
     effsize : string or None
         Effect size type. Available methods are:
+
         * ``'none'``: no effect size
         * ``'cohen'``: Unbiased Cohen d
         * ``'hedges'``: Hedges g
         * ``'r'``: Pearson correlation coefficient
-        * ``'eta-square'``: Eta-square
-        * ``'odds-ratio'``: Odds ratio
+        * ``'eta_square'``: Eta-square
+        * ``'odds_ratio'``: Odds ratio
         * ``'AUC'``: Area Under the Curve
         * ``'CLES'``: Common Language Effect Size
     correction : string or boolean
@@ -105,6 +110,7 @@ def pairwise_tests(
         unequal variances using Welch separate variances T-test. If `'auto'`,
         it will automatically uses Welch T-test when the sample sizes are
         unequal, as recommended by Zimmerman 2004.
+
         .. versionadded:: 0.3.2
     nan_policy : string
         Can be `'listwise'` for listwise deletion of missing values in repeated
@@ -113,21 +119,26 @@ def pairwise_tests(
         appropriate for post-hoc analysis following an ANOVA, however it can drastically reduce
         the power of the test: any subject with one or more missing value(s) will be
         completely removed from the analysis.
+
         .. versionadded:: 0.2.9
     return_desc : boolean
-        "If True, append group means and std to the output dataframe when `parametric=True` (defaut), or median and IQR when `parametric=False`.
+        If True, append group means and std to the output dataframe
     interaction : boolean
         If there are multiple factors and ``interaction`` is True (default),
         Pingouin will also calculate T-tests for the interaction term (see Notes).
+
         .. versionadded:: 0.2.9
     within_first : boolean
         Determines the order of the interaction in mixed design. Pingouin will
         return within * between when this parameter is set to True (default),
         and between * within otherwise.
+
         .. versionadded:: 0.3.6
+
     Returns
     -------
     stats : :py:class:`pandas.DataFrame`
+
         * ``'Contrast'``: Contrast (= independent variable or interaction)
         * ``'A'``: Name of first measurement
         * ``'B'``: Name of second measurement
@@ -135,9 +146,9 @@ def pairwise_tests(
           independent
         * ``'Parametric'``: indicates if (non)-parametric tests were used
         * ``'T'``: T statistic (only if parametric=True)
-        * ``'U-val'``: Mann-Whitney U stat (if parametric=False and unpaired
+        * ``'U_val'``: Mann-Whitney U stat (if parametric=False and unpaired
           data)
-        * ``'W-val'``: Wilcoxon W stat (if parametric=False and paired data)
+        * ``'W_val'``: Wilcoxon W stat (if parametric=False and paired data)
         * ``'dof'``: degrees of freedom (only if parametric=True)
         * ``'alternative'``: tail of the test
         * ``'p_unc'``: Uncorrected p-values
@@ -146,14 +157,17 @@ def pairwise_tests(
         * ``'BF10'``: Bayes Factor
         * ``'hedges'``: effect size (or any effect size defined in
           ``effsize``)
+
     See also
     --------
     ttest, mwu, wilcoxon, compute_effsize, multicomp
+
     Notes
     -----
     Data are expected to be in long-format. If your data is in wide-format,
     you can use the :py:func:`pandas.melt` function to convert from wide to
     long format.
+
     If ``between`` or ``within`` is a list (e.g. ['col1', 'col2']),
     the function returns 1) the pairwise T-tests between each values of the
     first column, 2) the pairwise T-tests between each values of the second
@@ -161,24 +175,32 @@ def pairwise_tests(
     dependent of the order of the list, so ['col1', 'col2'] will not yield the
     same results as ['col2', 'col1']. Furthermore, the interaction will only be
     calculated if ``interaction=True``.
+
     If ``between`` is a list with two elements, the output
     model is between1 + between2 + between1 * between2.
+
     Similarly, if ``within`` is a list with two elements, the output model is
     within1 + within2 + within1 * within2.
+
     If both ``between`` and ``within`` are specified, the output model is
     within + between + within * between (= mixed design), unless
     ``within_first=False`` in which case the model becomes between + within +
-    between * within.
+    between * within. Mixed analysis with two or more within-subject factors are not currently
+    supported.
+
     Missing values in repeated measurements are automatically removed using a
     listwise (default) or pairwise deletion strategy. The former is more conservative, as any
     subject with one or more missing value(s) will be completely removed from the dataframe prior
     to calculating the T-tests. The ``nan_policy`` parameter can therefore have a huge impact
     on the results.
+
     Examples
     --------
     For more examples, please refer to the `Jupyter notebooks
     <https://github.com/raphaelvallat/pingouin/blob/master/notebooks/01_ANOVA.ipynb>`_
+
     1. One between-subject factor
+
     >>> import pandas as pd
     >>> import pingouin as pg
     >>> pd.set_option('display.expand_frame_repr', False)
@@ -187,21 +209,27 @@ def pairwise_tests(
     >>> pg.pairwise_tests(dv='Scores', between='Group', data=df).round(3)
       Contrast        A           B  Paired  Parametric     T    dof alternative  p_unc   BF10  hedges
     0    Group  Control  Meditation   False        True -2.29  178.0   two-sided  0.023  1.813   -0.34
+
     2. One within-subject factor
+
     >>> post_hocs = pg.pairwise_tests(dv='Scores', within='Time', subject='Subject', data=df)
     >>> post_hocs.round(3)
       Contrast        A        B  Paired  Parametric      T   dof alternative  p_unc   BF10  hedges
     0     Time   August  January    True        True -1.740  59.0   two-sided  0.087  0.582  -0.328
     1     Time   August     June    True        True -2.743  59.0   two-sided  0.008  4.232  -0.483
     2     Time  January     June    True        True -1.024  59.0   two-sided  0.310  0.232  -0.170
+
     3. Non-parametric pairwise paired test (wilcoxon)
+
     >>> pg.pairwise_tests(dv='Scores', within='Time', subject='Subject',
     ...                    data=df, parametric=False).round(3)
-      Contrast        A        B  Paired  Parametric  W-val alternative  p_unc  hedges
+      Contrast        A        B  Paired  Parametric  W_val alternative  p_unc  hedges
     0     Time   August  January    True       False  716.0   two-sided  0.144  -0.328
     1     Time   August     June    True       False  564.0   two-sided  0.010  -0.483
     2     Time  January     June    True       False  887.0   two-sided  0.840  -0.170
+
     4. Mixed design (within and between) with bonferroni-corrected p-values
+
     >>> posthocs = pg.pairwise_tests(dv='Scores', within='Time', subject='Subject',
     ...                               between='Group', padjust='bonf', data=df)
     >>> posthocs.round(3)
@@ -213,7 +241,9 @@ def pairwise_tests(
     4  Time * Group   August  Control  Meditation  False        True  0.316  58.0   two-sided  0.753   1.000     bonf  0.274   0.081
     5  Time * Group  January  Control  Meditation  False        True -1.434  58.0   two-sided  0.157   0.471     bonf  0.619  -0.365
     6  Time * Group     June  Control  Meditation  False        True -2.744  58.0   two-sided  0.008   0.024     bonf  5.593  -0.699
+
     5. Two between-subject factors. The order of the ``between`` factors matters!
+
     >>> pg.pairwise_tests(dv='Scores', between=['Group', 'Time'], data=df).round(3)
            Contrast       Group        A           B Paired  Parametric      T    dof alternative  p_unc     BF10  hedges
     0         Group           -  Control  Meditation  False        True -2.290  178.0   two-sided  0.023    1.813  -0.340
@@ -226,7 +256,9 @@ def pairwise_tests(
     7  Group * Time  Meditation   August     January  False        True -2.188   58.0   two-sided  0.033    1.884  -0.558
     8  Group * Time  Meditation   August        June  False        True -4.040   58.0   two-sided  0.000  148.302  -1.030
     9  Group * Time  Meditation  January        June  False        True -1.442   58.0   two-sided  0.155    0.625  -0.367
+
     6. Same but without the interaction, and using a directional test
+
     >>> df.pairwise_tests(dv='Scores', between=['Group', 'Time'], alternative="less",
     ...                    interaction=False).round(3)
       Contrast        A           B  Paired  Parametric      T    dof alternative  p_unc   BF10  hedges
@@ -237,7 +269,6 @@ def pairwise_tests(
     """
     from .parametric import ttest
     from .nonparametric import wilcoxon, mwu
-    from scipy.stats import iqr
 
     # Safety checks
     data = _check_dataframe(
@@ -284,25 +315,22 @@ def pairwise_tests(
     if isinstance(between, (str, int)) and isinstance(within, (str, int)):
         contrast = "within_between"
         assert all([between in data.keys(), within in data.keys()])
-    if parametric:
-        desca, stata, descb, statb = "mean(A)", "std(A)", "mean(B)", "std(B)"
-    if not parametric:
-        desca, stata, descb, statb = "median(A)", "IQR(A)", "median(B)", "IQR(B)"
+
     # Create col_order
     col_order = [
         "Contrast",
         "Time",
         "A",
         "B",
-        desca,
-        stata,
-        descb,
-        statb,
+        "mean_A",
+        "std_A",
+        "mean_B",
+        "std_B",
         "Paired",
         "Parametric",
         "T",
-        "U-val",
-        "W-val",
+        "U_val",
+        "W_val",
         "dof",
         "alternative",
         "p_unc",
@@ -372,21 +400,14 @@ def pairwise_tests(
                 df_ttest = ttest(
                     x, y, paired=paired, alternative=alternative, correction=correction
                 )
-                bf10_val = df_ttest.get("BF10")
-                if isinstance(bf10_val, pd.Series):
-                    bf10_val = bf10_val.iloc[0] if not bf10_val.empty else None
-                stats.at[i, "BF10"] = bf10_val
-                
-                dof_val = df_ttest.get("dof")
-                if isinstance(dof_val, pd.Series):
-                    dof_val = dof_val.iloc[0] if not dof_val.empty else None
-                stats.at[i, "dof"] = dof_val                
+                stats.at[i, "BF10"] = df_ttest.at["T_test", "BF10"]
+                stats.at[i, "dof"] = df_ttest.at["T_test", "dof"]
             else:
                 if paired:
-                    stat_name = "W-val"
+                    stat_name = "W_val"
                     df_ttest = wilcoxon(x, y, alternative=alternative)
                 else:
-                    stat_name = "U-val"
+                    stat_name = "U_val"
                     df_ttest = mwu(x, y, alternative=alternative)
 
             options.update(old_options)  # restore options
@@ -395,25 +416,12 @@ def pairwise_tests(
             ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
 
             if return_desc:
-                if parametric:
-                    stats.at[i, "mean(A)"] = np.nanmean(x)
-                    stats.at[i, "mean(B)"] = np.nanmean(y)
-                    stats.at[i, "std(A)"] = np.nanstd(x, ddof=1)
-                    stats.at[i, "std(B)"] = np.nanstd(y, ddof=1)
-                else:
-                    stats.at[i, "median(A)"] = np.nanmedian(x)
-                    stats.at[i, "median(B)"] = np.nanmedian(y)
-                    stats.at[i, "IQR(A)"] = iqr(x)
-                    stats.at[i, "IQR(B)"] = iqr(y)
-            stat_val = df_ttest.get(stat_name)
-            if isinstance(stat_val, pd.Series):
-                stat_val = stat_val.iloc[0] if not stat_val.empty else None
-            stats.at[i, stat_name] = stat_val
-            
-            p_val = df_ttest.get("p-val")
-            if isinstance(p_val, pd.Series):
-                p_val = p_val.iloc[0] if not p_val.empty else None
-            stats.at[i, "p_unc"] = p_val
+                stats.at[i, "mean_A"] = np.nanmean(x)
+                stats.at[i, "mean_B"] = np.nanmean(y)
+                stats.at[i, "std_A"] = np.nanstd(x, ddof=1)
+                stats.at[i, "std_B"] = np.nanstd(y, ddof=1)
+            stats.at[i, stat_name] = df_ttest[stat_name].iat[0]
+            stats.at[i, "p_unc"] = df_ttest["p_val"].iat[0]
             stats.at[i, effsize] = ef
 
         # Multiple comparisons
@@ -421,7 +429,7 @@ def pairwise_tests(
         if padjust is not None:
             if padjust.lower() != "none":
                 _, stats["p_corr"] = multicomp(
-                    stats["p_unc"].to_numpy(dtype=float), alpha=alpha, method=padjust
+                    stats["p_unc"].to_numpy(), alpha=alpha, method=padjust
                 )
                 stats["p_adjust"] = padjust
         else:
@@ -469,7 +477,9 @@ def pairwise_tests(
             # designs. Indeed, a similar groupby is applied by default on
             # each within-subject factor of a two-way repeated measures design.
             if all([agg[i], marginal]):
-                tmp = data.groupby([subject, f], as_index=False, observed=True, sort=True).mean()
+                tmp = data.groupby([subject, f], as_index=False, observed=True, sort=True).mean(
+                    numeric_only=True
+                )
             else:
                 tmp = data
             pt = pairwise_tests(
@@ -542,52 +552,32 @@ def pairwise_tests(
                     df_ttest = ttest(
                         x, y, paired=paired, alternative=alternative, correction=correction
                     )
-                    bf10_val = df_ttest.get("BF10")
-                    if isinstance(bf10_val, pd.Series):
-                        bf10_val = bf10_val.iloc[0] if not bf10_val.empty else None
-                    stats.at[ic, "BF10"] = bf10_val
-                    
-                    dof_val = df_ttest.get("dof")
-                    if isinstance(dof_val, pd.Series):
-                        dof_val = dof_val.iloc[0] if not dof_val.empty else None
-                    stats.at[ic, "dof"] = dof_val
+                    stats.at[ic, "BF10"] = df_ttest.at["T_test", "BF10"]
+                    stats.at[ic, "dof"] = df_ttest.at["T_test", "dof"]
                 else:
                     if paired:
-                        stat_name = "W-val"
+                        stat_name = "W_val"
                         df_ttest = wilcoxon(x, y, alternative=alternative)
                     else:
-                        stat_name = "U-val"
+                        stat_name = "U_val"
                         df_ttest = mwu(x, y, alternative=alternative)
 
                 options.update(old_options)  # restore options
 
                 # Append to stats
                 if return_desc:
-                    if parametric:
-                        stats.at[ic, "mean(A)"] = np.nanmean(x)
-                        stats.at[ic, "mean(B)"] = np.nanmean(y)
-                        stats.at[ic, "std(A)"] = np.nanstd(x, ddof=1)
-                        stats.at[ic, "std(B)"] = np.nanstd(y, ddof=1)
-                    else:
-                        stats.at[ic, "median(A)"] = np.nanmedian(x)
-                        stats.at[ic, "median(B)"] = np.nanmedian(y)
-                        stats.at[ic, "IQR(A)"] = iqr(x)
-                        stats.at[ic, "IQR(B)"] = iqr(y)
-                stat_val = df_ttest.get(stat_name)
-                if isinstance(stat_val, pd.Series):
-                    stat_val = stat_val.iloc[0] if not stat_val.empty else None
-                stats.at[ic, stat_name] = stat_val
-                
-                p_val = df_ttest.get("p-val")
-                if isinstance(p_val, pd.Series):
-                    p_val = p_val.iloc[0] if not p_val.empty else None
-                stats.at[ic, "p_unc"] = p_val
+                    stats.at[ic, "mean_A"] = np.nanmean(x)
+                    stats.at[ic, "mean_B"] = np.nanmean(y)
+                    stats.at[ic, "std_A"] = np.nanstd(x, ddof=1)
+                    stats.at[ic, "std_B"] = np.nanstd(y, ddof=1)
+                stats.at[ic, stat_name] = df_ttest[stat_name].iat[0]
+                stats.at[ic, "p_unc"] = df_ttest["p_val"].iat[0]
                 stats.at[ic, effsize] = ef
 
             # Multi-comparison columns
             if padjust is not None and padjust.lower() != "none":
                 _, pcor = multicomp(
-                    stats.loc[idxiter, "p_unc"].to_numpy(dtype=float), alpha=alpha, method=padjust
+                    stats.loc[idxiter, "p_unc"].to_numpy(), alpha=alpha, method=padjust
                 )
                 stats.loc[idxiter, "p_corr"] = pcor
                 stats.loc[idxiter, "p_adjust"] = padjust
@@ -602,10 +592,11 @@ def pairwise_tests(
 
     # Rename Time columns
     if contrast in ["multiple_within", "multiple_between", "within_between"] and interaction:
-        stats["Time"].fillna("-", inplace=True)
-        stats.rename(columns={"Time": factors[0]}, inplace=True)
+        stats["Time"] = stats["Time"].fillna("-")
+        stats = stats.rename(columns={"Time": factors[0]})
 
     return _postprocess_dataframe(stats)
+
 
 @pf.register_dataframe_method
 def ptests(
