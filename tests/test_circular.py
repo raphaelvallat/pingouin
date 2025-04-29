@@ -165,7 +165,7 @@ class TestCircular(TestCase):
         # Stack data
         angles = np.concatenate([x1, x2])
         groups = np.array([0] * len(x1) + [1] * len(x2))
-        W, p_value, df = watson_wheeler_test(angles, groups)
+        W, p_value, df = circ_mardia_watson_wheeler(angles, groups)
         np.testing.assert_allclose(W, 3.6783, atol=0.01)
         np.testing.assert_allclose(p_value, 0.159, atol=0.01)
         assert df == 2
