@@ -11,7 +11,7 @@ from pingouin.circular import (
     circ_mean,
     circ_r,
     circ_rayleigh,
-    circ_vtest,
+    circ_vtest,circ_mardia_watson_wheeler,
 )
 
 np.random.seed(123)
@@ -151,3 +151,21 @@ class TestCircular(TestCase):
         v, pval = circ_vtest(x, dir=0.5, w=[0.1, 0.2, 0.3, 0.4, 0.5], d=0.2)
         assert round(v, 3) == 0.637
         assert round(pval, 4) == 0.2309
+
+    def test_circ_mardia_watson_wheeler(self):
+        """Test function circ_mardia_watson_wheeler. Running the following test in r results in data:  1 and 2
+            W = 3.6783, df = 2, p-value = 0.159"""
+        x1_deg = np.array([35, 45, 50, 55, 60, 70, 85, 95, 105, 120])
+        x2_deg = np.array([75, 80, 90, 100, 110, 130, 135, 140, 150, 160, 165])
+
+        # Convert to radians
+        x1 = np.deg2rad(x1_deg)
+        x2 = np.deg2rad(x2_deg)
+
+        # Stack data
+        angles = np.concatenate([x1, x2])
+        groups = np.array([0] * len(x1) + [1] * len(x2))
+        W, p_value, df = watson_wheeler_test(angles, groups)
+        np.testing.assert_allclose(W, 3.6783, atol=0.01)
+        np.testing.assert_allclose(p_value, 0.159, atol=0.01)
+        assert df == 2

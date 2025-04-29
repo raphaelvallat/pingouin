@@ -6,7 +6,7 @@
 # Berens, Philipp. 2009. CircStat: A MATLAB Toolbox for Circular Statistics.
 # Journal of Statistical Software, Articles 31 (10): 1–21.
 import numpy as np
-from scipy.stats import norm
+from scipy.stats import norm, chi2
 
 from .utils import remove_na
 
@@ -764,3 +764,76 @@ def circ_vtest(angles, dir=0.0, w=None, d=None):
     u = v * np.sqrt(2 / n)
     pval = 1 - norm.cdf(u)
     return v, pval
+
+def circ_mardia_watson_wheeler(data, group):
+    """
+    Mardia–Watson–Wheeler two-sample test for circular data.
+
+    Parameters
+    ----------
+    data : array_like
+        Array of circular values (in radians).
+    group : array_like
+        Group labels (same length as `data`), can be more than 2 groups.
+
+    Returns
+    -------
+    stat : float
+        W test statistic.
+    pval : float
+        Associated p-value.
+    df: float
+        Degree of freedom, corresponding to the number of groups.
+
+    Notes
+    -----
+    Based on Batschelet (1981), p. 144. Transitioned from Circular package in R
+    """
+    data = np.asarray(data)
+    group = np.asarray(group)
+    assert len(data) == len(group), "Data and group must be same length"
+    # Remove missing values
+    mask = ~np.isnan(data) & ~pd.isnull(group)
+    data = data[mask]
+    group = group[mask]
+    
+    if len(data) == 0 or len(np.unique(group)) < 2:
+        raise ValueError("No observations or less than two groups after removing missing values.")
+    
+    # Check for ties
+    nb_ties = len(data) - len(np.unique(data))
+    if nb_ties > 0:
+        print(f"Warning: {nb_ties} tie(s) detected. Ties will be broken randomly.")
+    
+
+    group_labels, group_indices = np.unique(group, return_inverse=True)
+    k = len(group_labels)
+    n = len(data)
+    
+    # break ties and circular ranks (scale between 0 - 2 pi)
+    order = np.random.permutation(n)
+    ranks = np.empty_like(order)
+    ranks[order] = np.arange(1, n+1)
+
+    cr = ranks * 2 * np.pi / n
+    
+    # Compute sum of cosine and sine components for each group
+    C = np.zeros(k)
+    S = np.zeros(k)
+    ns = np.zeros(k)
+    for i in range(k):
+        idx = group_indices == i
+        ns[i] = np.sum(idx)
+        C[i] = np.sum(np.cos(cr[idx]))
+        S[i] = np.sum(np.sin(cr[idx]))
+    
+    if k == 2:
+        W = 2 * (n - 1) * (C[0]**2 + S[0]**2) / (ns[0] * ns[1])
+        df = 2
+    else:
+        W = 2 * np.sum((C**2 + S**2) / ns)
+        df = 2 * (k - 1)
+    
+    p_value = 1 - chi2.cdf(W, df)
+
+    return W, p_value, df
