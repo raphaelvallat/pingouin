@@ -810,11 +810,16 @@ def circ_mardia_watson_wheeler(data, group):
     k = len(group_labels)
     n = len(data)
     
-    # break ties and circular ranks (scale between 0 - 2 pi)
-    order = np.random.permutation(n)
-    ranks = np.empty_like(order)
+    # break ties and 
+    rnd = np.random.random(size=n)
+    # lexsort uses the last key as primary, earlier keys as tie-breakers
+    # so we pass (rnd, x)—x is primary, rnd breaks ties
+    order = np.lexsort((rnd, data))
+    ranks = np.empty(n, dtype=int)
     ranks[order] = np.arange(1, n+1)
 
+
+    # circular ranks (scale between 0 - 2 pi)
     cr = ranks * 2 * np.pi / n
     
     # Compute sum of cosine and sine components for each group
