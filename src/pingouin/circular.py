@@ -793,7 +793,7 @@ def circ_mardia_watson_wheeler(data, group):
     group = np.asarray(group)
     assert len(data) == len(group), "Data and group must be same length"
     # Remove missing values
-    mask = ~np.isnan(data) & ~pd.isnull(group)
+    mask = ~np.isnan(data) & (group == group)
     data = data[mask]
     group = group[mask]
     
