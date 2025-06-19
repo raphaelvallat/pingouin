@@ -207,13 +207,16 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
     Pre   0.304021  0.858979    True
     Post  1.265656  0.531088    True
     """
-    assert isinstance(data, (pd.DataFrame, pd.Series, list, np.ndarray))
+    assert isinstance(data, (pd.DataFrame, pd.Series, list, np.ndarray)) \
+        or hasattr(data, '__dataframe__')
     assert method in ["shapiro", "normaltest", "jarque_bera"]
     if isinstance(data, pd.Series):
         data = data.to_frame()
     col_names = ["W", "pval"]
     func = getattr(scipy.stats, method)
-    if isinstance(data, (list, np.ndarray)):
+    # Check if the data is 1D array-like
+    if isinstance(data, (list, np.ndarray)) \
+            or (hasattr(data, '__array__') and data.ndim == 1):
         data = np.asarray(data)
         assert data.ndim == 1, "Data must be 1D."
         assert data.size > 3, "Data must have more than 3 samples."
@@ -222,7 +225,7 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
         stats.columns = col_names
         stats["normal"] = np.where(stats["pval"] > alpha, True, False)
     else:
-        # Data is a Pandas DataFrame
+        # Any other kind of data is assumed to be DataFrame-like
         if dv is None and group is None:
             # Wide-format
             # Get numeric data only
