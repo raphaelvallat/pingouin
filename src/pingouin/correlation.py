@@ -1190,7 +1190,7 @@ def rm_corr(data=None, x=None, y=None, subject=None):
     from pingouin import ancova, power_corr
 
     # Safety checks
-    assert isinstance(data, pd.DataFrame), \
+    assert hasattr(data, '__dataframe__'), \
         "Data must be compatible with DataFrame"
     assert x in data.columns, "The %s column is not in data." % x
     assert y in data.columns, "The %s column is not in data." % y
