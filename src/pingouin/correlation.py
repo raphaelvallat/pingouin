@@ -830,8 +830,7 @@ def partial_corr(
         "pearson",
         "spearman",
     ], 'only "pearson" and "spearman" are supported for partial correlation.'
-    assert hasattr(data, '__dataframe__'), \
-        "Data must be compatible with DataFrame"
+    assert hasattr(data, "__dataframe__"), "Data must be compatible with DataFrame"
     assert data.shape[0] > 2, "Data must have at least 3 samples."
     if covar is not None and (x_covar is not None or y_covar is not None):
         raise ValueError("Cannot specify both covar and {x,y}_covar.")
@@ -1190,8 +1189,7 @@ def rm_corr(data=None, x=None, y=None, subject=None):
     from pingouin import ancova, power_corr
 
     # Safety checks
-    assert hasattr(data, '__dataframe__'), \
-        "Data must be compatible with DataFrame"
+    assert hasattr(data, "__dataframe__"), "Data must be compatible with DataFrame"
     assert x in data.columns, "The %s column is not in data." % x
     assert y in data.columns, "The %s column is not in data." % y
     assert data[x].dtype.kind in "bfiu", "%s must be numeric." % x
