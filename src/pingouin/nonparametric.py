@@ -299,8 +299,7 @@ def mwu(x, y, alternative="two-sided", **kwargs):
     cles = 1 - cles if alternative == "less" else cles
 
     # Effect size 2: rank biserial correlation (Wendt 1972)
-    uval_y = x.shape[0] * y.shape[0] - uval_x
-    rbc = 1 - (2 * uval_y) / diff.size  # diff.size = x.size * y.size
+    rbc = 2 * cles - 1
 
     # Fill output DataFrame
     stats = pd.DataFrame(
