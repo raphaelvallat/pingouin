@@ -54,6 +54,9 @@ def _correl_pvalue(r, n, k=0, alternative="two-sided"):
         "less",
     ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
 
+    if np.isclose(r**2, 1):  # Avoid divide by zero error
+        return 0.0  # Since p value approaches 0 as r approaches 1, just return 0
+
     # Method 1: using a student T distribution
     dof = n - k - 2
     tval = r * np.sqrt(dof / (1 - r**2))
