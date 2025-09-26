@@ -115,6 +115,13 @@ class TestCorrelation(TestCase):
         stats = corr(x, x)
         assert np.isclose(stats.at["pearson", "r"], 1)
         assert np.isclose(stats.at["pearson", "power"], 1)
+
+        # Perfect correlation with percbend method
+        # https://github.com/raphaelvallat/pingouin/issues/453
+        stats = corr(x, x, method="percbend")  # calls _correl_pvalue
+        assert np.isclose(stats.at["percbend", "r"], 1)
+        assert np.isclose(stats.at["percbend", "p_val"], 0)
+
         # When one column is a constant, the correlation is not defined
         # and Pingouin return a DataFrame full of NaN, except for ``n``
         x, y = [1, 1, 1], [1, 2, 3]
