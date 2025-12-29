@@ -68,11 +68,11 @@ class TestNonParametric(TestCase):
         mwu_pg_greater = mwu(x, y, alternative="greater")
         # Similar to R: wilcox.test(df$x, df$y, paired = FALSE, exact = FALSE)
         # Note that the RBC value are compared to JASP in test_pairwise.py
-        assert mwu_scp[0] == mwu_pg.at["MWU", "U-val"]
-        assert mwu_scp[1] == mwu_pg.at["MWU", "p-val"]
+        assert mwu_scp[0] == mwu_pg.at["MWU", "U_val"]
+        assert mwu_scp[1] == mwu_pg.at["MWU", "p_val"]
         # One-sided
         assert (
-            mwu_pg_less.at["MWU", "p-val"]
+            mwu_pg_less.at["MWU", "p_val"]
             == scipy.stats.mannwhitneyu(x, y, use_continuity=True, alternative="less")[1]
         )
         # CLES is compared to:
@@ -90,13 +90,13 @@ class TestNonParametric(TestCase):
         # The p-value, however, is almost identical
         wc_scp = scipy.stats.wilcoxon(x2, y2, correction=True)
         wc_pg = wilcoxon(x2, y2, alternative="two-sided")
-        assert wc_scp[0] == wc_pg.at["Wilcoxon", "W-val"] == 20.5  # JASP
-        assert wc_scp[1] == wc_pg.at["Wilcoxon", "p-val"]
+        assert wc_scp[0] == wc_pg.at["Wilcoxon", "W_val"] == 20.5  # JASP
+        assert wc_scp[1] == wc_pg.at["Wilcoxon", "p_val"]
         # Same but using the pre-computed difference
         # The W and p-values should be similar
         wc_pg2 = wilcoxon(np.array(x2) - np.array(y2))
-        assert wc_pg.at["Wilcoxon", "W-val"] == wc_pg2.at["Wilcoxon", "W-val"]
-        assert wc_pg.at["Wilcoxon", "p-val"] == wc_pg2.at["Wilcoxon", "p-val"]
+        assert wc_pg.at["Wilcoxon", "W_val"] == wc_pg2.at["Wilcoxon", "W_val"]
+        assert wc_pg.at["Wilcoxon", "p_val"] == wc_pg2.at["Wilcoxon", "p_val"]
         assert wc_pg.at["Wilcoxon", "RBC"] == wc_pg2.at["Wilcoxon", "RBC"]
         assert np.isnan(wc_pg2.at["Wilcoxon", "CLES"])
         wc_pg_less = wilcoxon(x2, y2, alternative="less")
@@ -104,7 +104,7 @@ class TestNonParametric(TestCase):
         # Note that the RBC value are compared to JASP in test_pairwise.py
         # The RBC values in JASP does not change according to the tail.
         assert round(wc_pg.at["Wilcoxon", "RBC"], 3) == -0.379
-        assert round(wc_pg_less.at["Wilcoxon", "RBC"], 3) == -0.379
+        assert round(wc_pg_less.at["Wilcoxon", "RBC"], 3) == 0.379
         assert round(wc_pg_greater.at["Wilcoxon", "RBC"], 3) == -0.379
         # CLES is compared to:
         # https://janhove.github.io/reporting/2016/11/16/common-language-effect-sizes
@@ -124,7 +124,7 @@ class TestNonParametric(TestCase):
         # Compare with SciPy built-in function
         H, p = scipy.stats.kruskal(x_nan, y, z, nan_policy="omit")
         assert np.isclose(H, summary.at["Kruskal", "H"])
-        assert np.allclose(p, summary.at["Kruskal", "p-unc"])
+        assert np.allclose(p, summary.at["Kruskal", "p_unc"])
 
     def test_friedman(self):
         """Test function friedman"""
@@ -158,14 +158,14 @@ class TestNonParametric(TestCase):
         # Wide-format
         stats = friedman(df)
         assert np.isclose(stats.at["Friedman", "Q"], Q)
-        assert np.isclose(stats.at["Friedman", "p-unc"], p)
+        assert np.isclose(stats.at["Friedman", "p_unc"], p)
         assert np.isclose(stats.at["Friedman", "ddof1"], 2)
 
         # Long format
         df_long = df.melt(ignore_index=False).reset_index()
         stats = friedman(data=df_long, dv="value", within="variable", subject="index")
         assert np.isclose(stats.at["Friedman", "Q"], Q)
-        assert np.isclose(stats.at["Friedman", "p-unc"], p)
+        assert np.isclose(stats.at["Friedman", "p_unc"], p)
         assert np.isclose(stats.at["Friedman", "ddof1"], 2)
 
         # Compare Kendall's W
@@ -181,7 +181,7 @@ class TestNonParametric(TestCase):
 
         # Using the F-test method, which is more conservative
         stats_f = friedman(df, method="f")
-        assert stats_f.at["Friedman", "p-unc"] > stats.at["Friedman", "p-unc"]
+        assert stats_f.at["Friedman", "p_unc"] > stats.at["Friedman", "p_unc"]
 
     def test_cochran(self):
         """Test function cochran
@@ -192,14 +192,14 @@ class TestNonParametric(TestCase):
         df = read_dataset("cochran")
         st = cochran(dv="Energetic", within="Time", subject="Subject", data=df)
         assert round(st.at["cochran", "Q"], 3) == 6.706
-        assert np.isclose(st.at["cochran", "p-unc"], 0.034981)
+        assert np.isclose(st.at["cochran", "p_unc"], 0.034981)
         # With Categorical
         df["Time"] = df["Time"].astype("category")
         df["Subject"] = df["Subject"].astype("category")
         df["Time"] = df["Time"].cat.add_categories("Unused")
         st = cochran(dv="Energetic", within="Time", subject="Subject", data=df)
         assert round(st.at["cochran", "Q"], 3) == 6.706
-        assert np.isclose(st.at["cochran", "p-unc"], 0.034981)
+        assert np.isclose(st.at["cochran", "p_unc"], 0.034981)
         # With a NaN value
         df.loc[2, "Energetic"] = np.nan
         cochran(dv="Energetic", within="Time", subject="Subject", data=df)

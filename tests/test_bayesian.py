@@ -37,10 +37,10 @@ class TestBayesian(TestCase):
         assert bayesfactor_ttest(3.5, 20, 1) == appr(17.185)
         # Compare against BayesFactor::testBF
         # >>> ttestBF(df$x, df$y, paired = FALSE, rscale = "medium")
-        assert ttest(x, y).at["T-test", "BF10"] == "0.183"
-        assert ttest(x, y, paired=True).at["T-test", "BF10"] == "0.135"
-        assert int(float(ttest(x, z).at["T-test", "BF10"])) == 1290
-        assert int(float(ttest(x, z, paired=True).at["T-test", "BF10"])) == 420
+        assert ttest(x, y).at["T_test", "BF10"] == "0.183"
+        assert ttest(x, y, paired=True).at["T_test", "BF10"] == "0.135"
+        assert int(float(ttest(x, z).at["T_test", "BF10"])) == 1290
+        assert int(float(ttest(x, z, paired=True).at["T_test", "BF10"])) == 420
         # Now check the alternative tails
         assert bayesfactor_ttest(3.5, 20, 20, alternative="greater") > 1
         assert bayesfactor_ttest(3.5, 20, 20, alternative="less") < 1

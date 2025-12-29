@@ -149,7 +149,7 @@ def power_ttest(
             dof = (n - 1) * tsample
             nc = d * np.sqrt(n / tsample)
             tcrit = stats.t.ppf(alpha / tside, dof)
-            return stats.nct.cdf(tcrit, dof, nc)
+            return 1 - stats.nct.sf(tcrit, dof, nc)
 
     elif alternative == "two-sided":
 
@@ -157,7 +157,7 @@ def power_ttest(
             dof = (n - 1) * tsample
             nc = d * np.sqrt(n / tsample)
             tcrit = stats.t.ppf(1 - alpha / tside, dof)
-            return stats.nct.sf(tcrit, dof, nc) + stats.nct.cdf(-tcrit, dof, nc)
+            return stats.nct.sf(tcrit, dof, nc) + (1 - stats.nct.sf(-tcrit, dof, nc))
 
     else:  # Alternative = 'greater'
 
@@ -316,7 +316,7 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative="two-sided
             dof = nx + ny - 2
             nc = d * (1 / np.sqrt(1 / nx + 1 / ny))
             tcrit = stats.t.ppf(alpha / tside, dof)
-            return stats.nct.cdf(tcrit, dof, nc)
+            return 1 - stats.nct.sf(tcrit, dof, nc)
 
     elif alternative == "two-sided":
 
@@ -324,7 +324,7 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative="two-sided
             dof = nx + ny - 2
             nc = d * (1 / np.sqrt(1 / nx + 1 / ny))
             tcrit = stats.t.ppf(1 - alpha / tside, dof)
-            return stats.nct.sf(tcrit, dof, nc) + stats.nct.cdf(-tcrit, dof, nc)
+            return stats.nct.sf(tcrit, dof, nc) + (1 - stats.nct.sf(-tcrit, dof, nc))
 
     else:  # Alternative = 'greater'
 
@@ -655,7 +655,7 @@ def power_rm_anova(eta_squared=None, m=None, n=None, power=None, alpha=0.05, cor
 
     >>> data = data.dropna()
     >>> pg.rm_anova(data, effsize="n2").round(3)
-       Source  ddof1  ddof2      F  p-unc     n2    eps
+       Source  ddof1  ddof2      F  p_unc     n2    eps
     0  Within      3     24  5.201  0.007  0.346  0.694
 
     The repeated measures ANOVA is significant at the 0.05 level. Now, we can

@@ -501,8 +501,8 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
         * ``'cohen'``: Unbiased Cohen d
         * ``'hedges'``: Hedges g
         * ``'pointbiserialr'``: Point-biserial correlation
-        * ``'eta-square'``: Eta-square
-        * ``'odds-ratio'``: Odds ratio
+        * ``'eta_square'``: Eta-square
+        * ``'odds_ratio'``: Odds ratio
         * ``'AUC'``: Area Under the Curve
         * ``'none'``: pass-through (return ``ef``)
 
@@ -570,7 +570,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
 
     >>> import pingouin as pg
     >>> d = .45
-    >>> eta = pg.convert_effsize(d, 'cohen', 'eta-square')
+    >>> eta = pg.convert_effsize(d, 'cohen', 'eta_square')
     >>> print(eta)
     0.048185603807257595
 
@@ -630,10 +630,10 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
         else:
             a = 4
         return d / np.sqrt(d**2 + a)
-    elif ot == "eta-square":
+    elif ot == "eta_square":
         # Cohen 1988
         return (d / 2) ** 2 / (1 + (d / 2) ** 2)
-    elif ot == "odds-ratio":
+    elif ot == "odds_ratio":
         # Borenstein et al. 2009
         return np.exp(d * np.pi / np.sqrt(3))
     elif ot == "r":
@@ -670,8 +670,8 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
         * ``'hedges'``: Hedges g
         * ``'r'``: Pearson correlation coefficient
         * ``'pointbiserialr'``: Point-biserial correlation
-        * ``'eta-square'``: Eta-square
-        * ``'odds-ratio'``: Odds ratio
+        * ``'eta_square'``: Eta-square
+        * ``'odds_ratio'``: Odds ratio
         * ``'AUC'``: Area Under the Curve
         * ``'CLES'``: Common Language Effect Size
 
@@ -775,7 +775,7 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
     y = np.asarray(y)
 
     if x.size != y.size and paired:
-        warnings.warn("x and y have unequal sizes. Switching to " "paired == False.")
+        warnings.warn("x and y have unequal sizes. Switching to paired == False.")
         paired = False
 
     # Remove rows with missing values

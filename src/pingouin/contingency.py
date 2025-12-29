@@ -234,8 +234,8 @@ def chi2_mcnemar(data, x, y, correction=True):
 
         * ``'chi2'``: The test statistic
         * ``'dof'``: The degree of freedom
-        * ``'p-approx'``: The approximated p-value
-        * ``'p-exact'``: The exact p-value
+        * ``'p_approx'``: The approximated p-value
+        * ``'p_exact'``: The exact p-value
 
     Notes
     -----
@@ -304,14 +304,14 @@ def chi2_mcnemar(data, x, y, correction=True):
     The McNemar test should be sensitive to this.
 
     >>> stats
-                chi2  dof  p-approx   p-exact
+                chi2  dof  p_approx   p_exact
     mcnemar  20.020833    1  0.000008  0.000003
     """
     # Python code initially inspired by statsmodel's mcnemar
     assert isinstance(data, pd.DataFrame), "data must be a pandas DataFrame."
-    assert all(
-        isinstance(column, (str, int)) for column in (x, y)
-    ), "column names must be string or int."
+    assert all(isinstance(column, (str, int)) for column in (x, y)), (
+        "column names must be string or int."
+    )
     assert all(column in data.columns for column in (x, y)), "columns are not in dataframe."
 
     for column in (x, y):
@@ -336,9 +336,9 @@ def chi2_mcnemar(data, x, y, correction=True):
     stats = {
         "chi2": chi2,
         "dof": 1,
-        "p-approx": sp_chi2.sf(chi2, 1),
-        "p-exact": pexact,
-        # 'p-mid': pexact - binom.pmf(b, n_discordants, 0.5)
+        "p_approx": sp_chi2.sf(chi2, 1),
+        "p_exact": pexact,
+        # 'p_mid': pexact - binom.pmf(b, n_discordants, 0.5)
     }
 
     stats = pd.DataFrame(stats, index=["mcnemar"])
@@ -367,8 +367,7 @@ def _dichotomize_series(data, column):
             elif lower in ("y", "yes", "present", "true", "t", "positive", "p"):
                 return 1
         raise ValueError(
-            "Invalid value to build a 2x2 contingency "
-            "table on column {}: {}".format(column, elem)
+            "Invalid value to build a 2x2 contingency table on column {}: {}".format(column, elem)
         )
 
     return series.apply(convert_elem)
@@ -423,7 +422,7 @@ def dichotomous_crosstab(data, x, y):
             crosstab.loc[int(not bool(crosstab.index[0])), :] = [0, 0]
         else:  # shape = (1, 1) or shape = (>2, >2)
             raise ValueError(
-                "Both series contain only one unique value. " "Cannot build 2x2 contingency table."
+                "Both series contain only one unique value. Cannot build 2x2 contingency table."
             )
     crosstab = crosstab.sort_index(axis=0).sort_index(axis=1)
     return crosstab

@@ -90,7 +90,7 @@ def _postprocess_dataframe(df):
     `pingouin.options`. The default rounding (number of decimals) is
     determined by `pingouin.options['round']`. You can specify rounding for a
     given column name by the option `'round.column.<colname>'`, e.g.
-    `'round.column.CI95%'`. Analogously, `'round.row.<rowname>'` also works
+    `'round.column.CI95'`. Analogously, `'round.row.<rowname>'` also works
     (where `rowname`) refers to the pandas index), as well as
     `'round.cell.[<rolname>]x[<colname]'`. A cell-based option is used,
     if available; if not, a column-based option is used, if
@@ -327,8 +327,8 @@ def _check_eftype(eftype):
         "cohen",
         "r",
         "pointbiserialr",
-        "eta-square",
-        "odds-ratio",
+        "eta_square",
+        "odds_ratio",
         "auc",
         "cles",
     ]:
@@ -402,7 +402,7 @@ def _is_statsmodels_installed(raise_error=False):
         is_installed = False
     # Raise error (if needed) :
     if raise_error and not is_installed:  # pragma: no cover
-        raise OSError("statsmodels needs to be installed. Please use `pip " "install statsmodels`.")
+        raise OSError("statsmodels needs to be installed. Please use `pip install statsmodels`.")
     return is_installed
 
 
@@ -416,7 +416,7 @@ def _is_sklearn_installed(raise_error=False):
         is_installed = False
     # Raise error (if needed) :
     if raise_error and not is_installed:  # pragma: no cover
-        raise OSError("sklearn needs to be installed. Please use `pip " "install scikit-learn`.")
+        raise OSError("sklearn needs to be installed. Please use `pip install scikit-learn`.")
     return is_installed
 
 
@@ -430,5 +430,5 @@ def _is_mpmath_installed(raise_error=False):
         is_installed = False
     # Raise error (if needed) :
     if raise_error and not is_installed:  # pragma: no cover
-        raise OSError("mpmath needs to be installed. Please use `pip " "install mpmath`.")
+        raise OSError("mpmath needs to be installed. Please use `pip install mpmath`.")
     return is_installed

@@ -1,6 +1,5 @@
 import pandas as pd
 import os.path as op
-from pingouin.utils import print_table
 
 ddir = op.dirname(op.realpath(__file__))
 dts = pd.read_csv(op.join(ddir, "datasets.csv"), sep=",")
