@@ -998,7 +998,9 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
         S = data.cov(numeric_only=True).to_numpy()  # NumPy, otherwise S.mean() != grandmean
         S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
         eig = np.linalg.eigvalsh(S_pop)[1:]
-        eig = eig[eig > 0.001]  # Additional check to remove very low eig
+        # Use a relative tolerance tied to machine precision
+        tol = np.finfo(float).eps * eig.max() * d
+        eig = eig[eig > tol]
         W = np.prod(eig) / (eig.sum() / d) ** d
         logW = np.log(W)
 
