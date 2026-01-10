@@ -781,9 +781,9 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     # very conservative (same behavior as described on real-statistics.com).
 
     formula = f"C({a}, Helmert):C({b}, Helmert) - 1"
-    dm = dmatrix(formula, data, return_type='matrix')
+    dm = dmatrix(formula, data, return_type="matrix")
     n_cols = (n_a - 1) * (n_b - 1)
-    
+
     piv_ab_array = dm[:, :n_cols].reshape(n_s, -1, n_cols).mean(axis=1)
     piv_ab = pd.DataFrame(piv_ab_array)
     eps_ab = epsilon(piv_ab, correction="gg")
