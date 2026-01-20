@@ -37,6 +37,7 @@ dependencies = [
     "seaborn",
     "statsmodels",
     "tabulate",
+    "formulaic",
 ]
 
 [project.optional-dependencies]

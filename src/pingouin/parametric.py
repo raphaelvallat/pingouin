@@ -3,7 +3,6 @@ import warnings
 from collections.abc import Iterable
 import numpy as np
 import pandas as pd
-from patsy import dmatrix
 from scipy.stats import f
 import pandas_flavor as pf
 from pingouin import (
@@ -780,13 +779,8 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     # R and Pingouin. An alternative is to use the lower bound, which is
     # very conservative (same behavior as described on real-statistics.com).
 
-    formula = f"C({a}, Helmert):C({b}, Helmert) - 1"
-    dm = dmatrix(formula, data, return_type="matrix")
-    n_cols = (n_a - 1) * (n_b - 1)
-
-    piv_ab_array = dm[:, :n_cols].reshape(n_s, -1, n_cols).mean(axis=1)
-    piv_ab = pd.DataFrame(piv_ab_array)
-    eps_ab = epsilon(piv_ab, correction="gg")
+    piv_ab_full = data.pivot_table(index=subject, columns=[a, b], values=dv, observed=True)
+    eps_ab = epsilon(piv_ab_full, correction="gg")
 
     # Greenhouse-Geisser correction
     df_a_c, df_as_c = (np.maximum(d * eps_a, 1.0) for d in (df_a, df_as))
