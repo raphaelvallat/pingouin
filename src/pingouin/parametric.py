@@ -1192,7 +1192,7 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     # Effect size
     if effsize == "n2":
         # Get standard eta-square for all effects except residuals (last)
-        all_n2 = (aov["SS"] / aov["SS"].sum()).to_numpy()
+        all_n2 = (aov["SS"] / aov["SS"].sum()).to_numpy(copy=True)
         all_n2[-1] = np.nan
         aov["n2"] = all_n2
     else:
@@ -1733,11 +1733,11 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
 
     # Add effect sizes
     if effsize == "n2":
-        all_effsize = (aov["SS"] / aov["SS"].sum()).to_numpy()
+        all_effsize = (aov["SS"] / aov["SS"].sum()).to_numpy(copy=True)
         all_effsize[-1] = np.nan
     else:
         ss_resid = aov["SS"].iloc[-1]
-        all_effsize = aov["SS"].apply(lambda x: x / (x + ss_resid)).to_numpy()
+        all_effsize = aov["SS"].apply(lambda x: x / (x + ss_resid)).to_numpy(copy=True)
         all_effsize[-1] = np.nan
     aov[effsize] = all_effsize
 
