@@ -717,9 +717,8 @@ def friedman(data=None, dv=None, within=None, subject=None, method="chisq"):
     # Correction for ties
     ties = 0
     for i in range(n):
-        replist, repnum = scipy.stats.find_repeats(X[i])
-        for t in repnum:
-            ties += t * (t * t - 1)
+        _, counts = np.unique(X[i], return_counts=True)
+        ties += np.sum(counts * (counts * counts - 1))
 
     # Compute Kendall's W corrected for ties
     W = (12 * ssbn - 3 * n**2 * k * (k + 1) ** 2) / (n**2 * k * (k - 1) * (k + 1) - n * ties)
