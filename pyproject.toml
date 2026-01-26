@@ -32,7 +32,7 @@ dependencies = [
     "numpy",
     "pandas>=1.5",
     "pandas_flavor",
-    "scikit-learn>=1.2,<1.8.0",
+    "scikit-learn>=1.2",
     "scipy",
     "seaborn",
     "statsmodels",

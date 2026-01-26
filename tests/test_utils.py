@@ -15,6 +15,7 @@ from pingouin.utils import (
     remove_na,
     _flatten_list,
     _is_sklearn_installed,
+    _is_sklearn_version_compatible,
     _is_statsmodels_installed,
     _is_mpmath_installed,
 )
@@ -196,8 +197,12 @@ class TestUtils(TestCase):
         assert isinstance(_is_statsmodels_installed(), bool)
 
     def _is_sklearn_installed(self):
-        """Test function _is_statsmodels_installed."""
+        """Test function _is_sklearn_installed."""
         assert isinstance(_is_sklearn_installed(), bool)
+
+    def _is_sklearn_version_compatible(self):
+        """Test function _is_sklearn_version_compatible."""
+        assert isinstance(_is_sklearn_version_compatible(), bool)
 
     def _is_mpmath_installed(self):
         """Test function _is_mpmath_installed."""
