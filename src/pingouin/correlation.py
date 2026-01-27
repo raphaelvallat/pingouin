@@ -1080,7 +1080,6 @@ def rcorr(
     Extraversion       -0.35            -      497
     Openness           -0.01        0.265        -
     """
-    from numpy import triu_indices_from as tif
     from numpy import format_float_positional as ffp
     from scipy.stats import pearsonr, spearmanr
 
@@ -1100,8 +1099,10 @@ def rcorr(
             mat_upper = self.corr(method=lambda x, y: spearmanr(x, y)[1], numeric_only=True)
 
         if padjust is not None:
-            pvals = mat_upper.to_numpy()[tif(mat, k=1)]
-            mat_upper.to_numpy()[tif(mat, k=1)] = multicomp(pvals, alpha=0.05, method=padjust)[1]
+            pvals = np.triu(mat_upper, k=1)
+            pvals_mcomp = multicomp(pvals, alpha=0.05, method=padjust)[1]
+            mask = np.triu(np.ones(mat_upper.shape), k=1).astype(bool)
+            mat_upper = mat_upper.where(~mask, pvals_mcomp)
 
     # Convert r to text
     mat = mat.astype(str)
@@ -1123,7 +1124,9 @@ def rcorr(
             mat_upper = mat_upper.map(lambda x: ffp(x, precision=decimals))
 
     # Replace upper triangle by p-values or n
-    mat.to_numpy()[tif(mat, k=1)] = mat_upper.to_numpy()[tif(mat, k=1)]
+    mask = np.triu(np.ones(mat.shape), k=1).astype(bool)
+    mat = mat.where(~mask, mat_upper)
+
     return mat
 
 
