@@ -1099,10 +1099,10 @@ def rcorr(
             mat_upper = self.corr(method=lambda x, y: spearmanr(x, y)[1], numeric_only=True)
 
         if padjust is not None:
-            pvals = np.triu(mat_upper, k=1)
-            pvals_mcomp = multicomp(pvals, alpha=0.05, method=padjust)[1]
-            mask = np.triu(np.ones(mat_upper.shape), k=1).astype(bool)
-            mat_upper = mat_upper.where(~mask, pvals_mcomp)
+            mask = np.triu(np.ones(mat.shape, dtype=bool), k=1)
+            pvals = np.where(mask, mat_upper.to_numpy(), 0)
+            pvals_adj = multicomp(pvals, alpha=0.05, method=padjust)[1]
+            mat_upper = mat_upper.where(~mask, pvals_adj)
 
     # Convert r to text
     mat = mat.astype(str)
@@ -1124,7 +1124,7 @@ def rcorr(
             mat_upper = mat_upper.map(lambda x: ffp(x, precision=decimals))
 
     # Replace upper triangle by p-values or n
-    mask = np.triu(np.ones(mat.shape), k=1).astype(bool)
+    mask = np.triu(np.ones(mat.shape, dtype=bool), k=1)
     mat = mat.where(~mask, mat_upper)
 
     return mat
