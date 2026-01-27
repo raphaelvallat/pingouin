@@ -744,14 +744,21 @@ def ptests(
         mat_upper.loc[a, b] = p
 
     if padjust is not None:
-        mask = np.triu(np.ones(mat.shape, dtype=bool), k=1)
-        pvals = np.where(mask, mat_upper.to_numpy(), 0)
-        pvals_adj = multicomp(pvals, alpha=0.05, method=padjust)[1]
-        mat_upper = mat_upper.where(~mask, pvals_adj)
+        mask = np.triu(np.ones(mat_upper.shape, dtype=bool), k=1)
+        triu = mat_upper.where(mask).stack()
+        _, triu.iloc[:] = multicomp(triu.values, alpha=0.05, method="bonf")
+        mat_upper = mat_upper.mask(mask, triu.unstack())
+        # mask = np.triu(np.ones(mat.shape, dtype=bool), k=1)
+        # pvals = np.where(mask, mat_upper.to_numpy(), 0)
+        # pvals_adj = multicomp(pvals, alpha=0.05, method=padjust)[1]
+        # mat_upper = mat_upper.where(~mask, pvals_adj)
 
     # Convert T-values to str, and fill the diagonal with "-"
     mat = mat.astype(str)
-    np.fill_diagonal(mat.to_numpy(), "-")
+
+    # Modification of the diagonal
+    for i in range(len(mat)):
+        mat.iat[i, i] = "-"
 
     def replace_pval(x):
         for key, value in pval_stars.items():

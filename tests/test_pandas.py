@@ -80,7 +80,7 @@ class TestParametric(TestCase):
             )
         )
 
-        # Test parwise correlations
+        # Test pairwise correlations
         corrs = data.pairwise_corr(columns=["X", "M", "Y"], method="spearman")
         corrs2 = pg.pairwise_corr(data=data, columns=["X", "M", "Y"], method="spearman")
         assert corrs["r"].equals(corrs2["r"])

@@ -1097,7 +1097,6 @@ def rcorr(
         else:
             # Method = 'spearman'
             mat_upper = self.corr(method=lambda x, y: spearmanr(x, y)[1], numeric_only=True)
-
         if padjust is not None:
             mask = np.triu(np.ones(mat.shape, dtype=bool), k=1)
             pvals = np.where(mask, mat_upper.to_numpy(), 0)
@@ -1106,8 +1105,10 @@ def rcorr(
 
     # Convert r to text
     mat = mat.astype(str)
-    # Inplace modification of the diagonal
-    np.fill_diagonal(mat.to_numpy(), "-")
+
+    # Modification of the diagonal
+    for i in range(len(mat)):
+        mat.iat[i, i] = "-"
 
     if upper == "pval":
 
