@@ -252,7 +252,6 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
             tval, pval = ttest_rel(x, y, alternative=alternative)
         dof = nx - 1
         se = np.sqrt(np.var(x - y, ddof=1) / nx)
-        bf = bayesfactor_ttest(tval, nx, ny, paired=True, r=r)
     elif ny > 1 and paired is False:
         dof = nx + ny - 2
         vx, vy = x.var(ddof=1), y.var(ddof=1)
