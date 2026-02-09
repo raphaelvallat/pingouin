@@ -115,7 +115,8 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     T-distribution with :math:`n-1` degrees of freedom.
 
     The scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor is approximated
-    using the :py:func:`pingouin.bayesfactor_ttest` function.
+    using the :py:func:`pingouin.bayesfactor_ttest` function. It is only provided for two-sided
+    tests; the BF value will be set to NaN for one-sided tests.
 
     Results have been tested against JASP and the `t.test` R function.
 
@@ -151,14 +152,14 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11., 4.8]
     >>> ttest(pre, post, paired=True, alternative='less').round(2)
-               T  dof alternative  p_val           CI95  cohen_d   BF10  power
-    T_test -2.31    4        less   0.04  [-inf, -0.05]     0.25  3.122   0.12
+               T  dof alternative  p_val           CI95  cohen_d  power
+    T_test -2.31    4        less   0.04  [-inf, -0.05]     0.25   0.12
 
     Now testing the opposite alternative hypothesis
 
     >>> ttest(pre, post, paired=True, alternative='greater').round(2)
-               T  dof alternative  p_val          CI95  cohen_d  BF10  power
-    T_test -2.31    4     greater   0.96  [-1.35, inf]     0.25  0.32   0.02
+               T  dof alternative  p_val          CI95  cohen_d  power
+    T_test -2.31    4     greater   0.96  [-1.35, inf]     0.25   0.02
 
     3. Paired T-test with missing values.
 
@@ -251,7 +252,6 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
             tval, pval = ttest_rel(x, y, alternative=alternative)
         dof = nx - 1
         se = np.sqrt(np.var(x - y, ddof=1) / nx)
-        bf = bayesfactor_ttest(tval, nx, ny, paired=True, r=r)
     elif ny > 1 and paired is False:
         dof = nx + ny - 2
         vx, vy = x.var(ddof=1), y.var(ddof=1)
@@ -311,24 +311,22 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
             # Unequal sample sizes
             power = power_ttest2n(nx, ny, d=d, power=None, alpha=0.05, alternative=alternative)
 
-    # Bayes factor
-    bf = bayesfactor_ttest(tval, nx, ny, paired=paired, alternative=alternative, r=r)
-
     # Create output dictionnary
     stats = {
-        "dof": dof,
         "T": tval,
-        "p_val": pval,
+        "dof": dof,
         "alternative": alternative,
-        "cohen_d": abs(d),
+        "p_val": pval,
         ci_name: [ci],
+        "cohen_d": abs(d),
         "power": power,
-        "BF10": bf,
     }
 
+    if alternative == "two-sided":
+        stats["BF10"] = bayesfactor_ttest(tval, nx, ny, paired=paired, alternative=alternative, r=r)
+
     # Convert to dataframe
-    col_order = ["T", "dof", "alternative", "p_val", ci_name, "cohen_d", "BF10", "power"]
-    stats = pd.DataFrame(stats, columns=col_order, index=["T_test"])
+    stats = pd.DataFrame(stats, index=["T_test"])
     return _postprocess_dataframe(stats)
 
 

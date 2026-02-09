@@ -414,13 +414,11 @@ class TestPairwise(TestCase):
             dv="Scores", within="Drug", subject="Subject", data=df, alternative="greater"
         )
         np.testing.assert_array_equal(pt.loc[:, "p_unc"].round(3), [0.907, 0.941, 0.405])
-        assert all(pt.loc[:, "BF10"].astype(float) < 1)
         # 1.1.2 Tail is less
         pt = pairwise_tests(
             dv="Scores", within="Drug", subject="Subject", data=df, alternative="less"
         )
         np.testing.assert_array_equal(pt.loc[:, "p_unc"].round(3), [0.093, 0.059, 0.595])
-        assert sum(pt.loc[:, "BF10"].astype(float) > 1) == 2
 
         # 1.2 Non-parametric
         # 1.2.1 Tail is greater
@@ -461,11 +459,9 @@ class TestPairwise(TestCase):
         # 2.1.1 Tail is greater
         pt = pairwise_tests(dv="Scores", between="Gender", data=df, alternative="greater")
         assert pt.loc[0, "p_unc"].round(3) == 0.932
-        assert float(pt.loc[0, "BF10"]) < 1
         # 2.1.2 Tail is less
         pt = pairwise_tests(dv="Scores", between="Gender", data=df, alternative="less")
         assert pt.loc[0, "p_unc"].round(3) == 0.068
-        assert float(pt.loc[0, "BF10"]) > 1
 
         # 2.2 Non-parametric
         # 2.2.1 Tail is greater

@@ -36,13 +36,8 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative="two-sided", r=0
         Specify whether the two observations are related (i.e. repeated
         measures) or independent.
     alternative : string
-        Defines the alternative hypothesis, or tail of the test. Must be one of
-        "two-sided" (default), "greater" or "less".
-
-        .. warning:: One-sided Bayes Factor (BF) are simply obtained by
-            doubling the two-sided BF, which is not the same behavior
-            as R or JASP. Be extra careful when interpretating one-sided BF,
-            and if you can, always double-check your results.
+        Defines the alternative hypothesis, or tail of the test. As of Pingouin 0.6.x, only
+        "two-sided" is supported.
     r : float
         Cauchy scale factor. Smaller values of ``r`` (e.g. 0.5), may be
         appropriate when small effect sizes are expected a priori; larger
@@ -108,21 +103,11 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative="two-sided", r=0
     >>> bf = bayesfactor_ttest(3.5, 20, 20, paired=True)
     >>> print("Bayes Factor: %.3f (two-sample paired)" % bf)
     Bayes Factor: 17.185 (two-sample paired)
-
-    3. Now specifying the direction of the test
-
-    >>> tval = -3.5
-    >>> bf_greater = bayesfactor_ttest(tval, 20, alternative='greater')
-    >>> bf_less = bayesfactor_ttest(tval, 20, alternative='less')
-    >>> print("BF10-greater: %.3f | BF10-less: %.3f" % (bf_greater, bf_less))
-    BF10-greater: 0.029 | BF10-less: 34.369
     """
     # Check tail
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    assert alternative == "two-sided", (
+        "Alternative must be 'two-sided' (default). One-sided tests are not supported."
+    )
     one_sample = True if ny is None or ny == 1 else False
 
     # Check T-value
@@ -153,12 +138,6 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative="two-sided", r=0
     with np.errstate(divide="ignore"):
         bf10 = 1 / ((1 + t**2 / df) ** (-(df + 1) / 2) / integr)
 
-    # Tail
-    tail_binary = "two-sided" if alternative == "two-sided" else "one-sided"
-    bf10 = bf10 * (1 / 0.5) if tail_binary == "one-sided" else bf10
-    # Now check the direction of the test
-    if ((alternative == "greater" and t < 0) or (alternative == "less" and t > 0)) and bf10 > 1:
-        bf10 = 1 / bf10
     return bf10
 
 

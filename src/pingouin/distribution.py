@@ -734,7 +734,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
     mean_var = np.diag(S).mean()
     S_mean = S.mean().mean()
     ss_mat = (S**2).sum().sum()
-    ss_rows = (S.mean(1) ** 2).sum().sum()
+    ss_rows = (S.mean(axis=1) ** 2).sum().sum()
     num = (k * (mean_var - S_mean)) ** 2
     den = (k - 1) * (ss_mat - 2 * k * ss_rows + k**2 * S_mean**2)
     eps = np.min([num / den, 1])
