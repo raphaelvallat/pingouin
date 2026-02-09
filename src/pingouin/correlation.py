@@ -110,7 +110,8 @@ def skipped(x, y, corr_type="spearman"):
     Code inspired by Matlab code from Cyril Pernet and Guillaume
     Rousselet [1]_.
 
-    Requires scikit-learn.
+    Requires scikit-learn version below or equal to 1.7.2.
+    For more information see: https://github.com/raphaelvallat/pingouin/issues/481
 
     References
     ----------
@@ -120,9 +121,10 @@ def skipped(x, y, corr_type="spearman"):
        doi:10.3389/fpsyg.2012.00606.
     """
     # Check that sklearn is installed
-    from pingouin.utils import _is_sklearn_installed
+    from pingouin.utils import _is_sklearn_installed, _is_sklearn_version_compatible
 
     _is_sklearn_installed(raise_error=True)
+    _is_sklearn_version_compatible(max_compatible_version="1.7.2")
     from scipy.stats import chi2
     from sklearn.covariance import MinCovDet
 
@@ -481,7 +483,7 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
     removing *bivariate* outliers. Briefly, the Shepherd pi uses a
     bootstrapping of the Mahalanobis distance to identify outliers, while the
     skipped correlation is based on the minimum covariance determinant
-    (which requires scikit-learn). Note that these two methods are
+    (which requires scikit-learn <= 1.7.2). Note that these two methods are
     significantly slower than the previous ones.
 
     The confidence intervals for the correlation coefficient are estimated
@@ -1078,7 +1080,6 @@ def rcorr(
     Extraversion       -0.35            -      497
     Openness           -0.01        0.265        -
     """
-    from numpy import triu_indices_from as tif
     from numpy import format_float_positional as ffp
     from scipy.stats import pearsonr, spearmanr
 
@@ -1096,15 +1097,18 @@ def rcorr(
         else:
             # Method = 'spearman'
             mat_upper = self.corr(method=lambda x, y: spearmanr(x, y)[1], numeric_only=True)
-
         if padjust is not None:
-            pvals = mat_upper.to_numpy()[tif(mat, k=1)]
-            mat_upper.to_numpy()[tif(mat, k=1)] = multicomp(pvals, alpha=0.05, method=padjust)[1]
+            mask = np.triu(np.ones(mat.shape, dtype=bool), k=1)
+            pvals = np.where(mask, mat_upper.to_numpy(), 0)
+            pvals_adj = multicomp(pvals, alpha=0.05, method=padjust)[1]
+            mat_upper = mat_upper.where(~mask, pvals_adj)
 
     # Convert r to text
     mat = mat.astype(str)
-    # Inplace modification of the diagonal
-    np.fill_diagonal(mat.to_numpy(), "-")
+
+    # Modification of the diagonal
+    for i in range(len(mat)):
+        mat.iat[i, i] = "-"
 
     if upper == "pval":
 
@@ -1121,7 +1125,9 @@ def rcorr(
             mat_upper = mat_upper.map(lambda x: ffp(x, precision=decimals))
 
     # Replace upper triangle by p-values or n
-    mat.to_numpy()[tif(mat, k=1)] = mat_upper.to_numpy()[tif(mat, k=1)]
+    mask = np.triu(np.ones(mat.shape, dtype=bool), k=1)
+    mat = mat.where(~mask, mat_upper)
+
     return mat
 
 

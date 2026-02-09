@@ -504,9 +504,7 @@ def _check_multilevel_rm(data, func="epsilon"):
             # a paired T-test to gain scores instead of using repeated measures
             # on two time points. Here we have computed the gain scores.
             data = (
-                data.groupby(level=1, axis=1, observed=True, group_keys=False)
-                .diff(axis=1)
-                .dropna(axis=1)
+                data.T.groupby(level=1, observed=True, group_keys=False).diff().dropna().transpose()
             )
             data = data.droplevel(level=0, axis=1)
         else:

@@ -290,7 +290,6 @@ class TestRegression(TestCase):
 
         # Test **kwargs
         logistic_regression(X, y, solver="sag", C=10, max_iter=10000, penalty="l2")
-        logistic_regression(X, y, solver="sag", multi_class="auto")
 
         # Test regularization coefficients are strictly closer to 0 than
         # unregularized
