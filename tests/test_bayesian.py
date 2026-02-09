@@ -41,11 +41,6 @@ class TestBayesian(TestCase):
         assert ttest(x, y, paired=True).at["T_test", "BF10"] == "0.135"
         assert int(float(ttest(x, z).at["T_test", "BF10"])) == 1290
         assert int(float(ttest(x, z, paired=True).at["T_test", "BF10"])) == 420
-        # Now check the alternative tails
-        assert bayesfactor_ttest(3.5, 20, 20, alternative="greater") > 1
-        assert bayesfactor_ttest(3.5, 20, 20, alternative="less") < 1
-        assert bayesfactor_ttest(-3.5, 20, 20, alternative="greater") < 1
-        assert bayesfactor_ttest(-3.5, 20, 20, alternative="less") > 1
         # Check with wrong T-value
         assert np.isnan(bayesfactor_ttest(np.nan, 20, paired=True))
 

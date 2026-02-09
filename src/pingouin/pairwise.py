@@ -261,11 +261,11 @@ def pairwise_tests(
 
     >>> df.pairwise_tests(dv='Scores', between=['Group', 'Time'], alternative="less",
     ...                    interaction=False).round(3)
-      Contrast        A           B  Paired  Parametric      T    dof alternative  p_unc   BF10  hedges
-    0    Group  Control  Meditation   False        True -2.290  178.0        less  0.012  3.626  -0.340
-    1     Time   August     January   False        True -1.806  118.0        less  0.037  1.679  -0.328
-    2     Time   August        June   False        True -2.660  118.0        less  0.004  8.998  -0.483
-    3     Time  January        June   False        True -0.934  118.0        less  0.176  0.577  -0.170
+      Contrast        A           B  Paired  Parametric      T    dof alternative  p_unc  hedges
+    0    Group  Control  Meditation   False        True -2.290  178.0        less  0.012  -0.340
+    1     Time   August     January   False        True -1.806  118.0        less  0.037  -0.328
+    2     Time   August        June   False        True -2.660  118.0        less  0.004  -0.483
+    3     Time  January        June   False        True -0.934  118.0        less  0.176  -0.170
     """
     from .parametric import ttest
     from .nonparametric import wilcoxon, mwu
@@ -400,7 +400,8 @@ def pairwise_tests(
                 df_ttest = ttest(
                     x, y, paired=paired, alternative=alternative, correction=correction
                 )
-                stats.at[i, "BF10"] = df_ttest.at["T_test", "BF10"]
+                if alternative == "two-sided":
+                    stats.at[i, "BF10"] = df_ttest.at["T_test", "BF10"]
                 stats.at[i, "dof"] = df_ttest.at["T_test", "dof"]
             else:
                 if paired:
@@ -552,7 +553,8 @@ def pairwise_tests(
                     df_ttest = ttest(
                         x, y, paired=paired, alternative=alternative, correction=correction
                     )
-                    stats.at[ic, "BF10"] = df_ttest.at["T_test", "BF10"]
+                    if alternative == "two-sided":
+                        stats.at[ic, "BF10"] = df_ttest.at["T_test", "BF10"]
                     stats.at[ic, "dof"] = df_ttest.at["T_test", "dof"]
                 else:
                     if paired:

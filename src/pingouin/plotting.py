@@ -831,7 +831,7 @@ def plot_shift(
     )
 
     if violin:
-        vl = plt.violinplot([y, x], showextrema=False, vert=False, widths=1)
+        vl = plt.violinplot([y, x], showextrema=False, orientation="horizontal", widths=1)
 
         # Upper plot
         paths = vl["bodies"][0].get_paths()[0]
