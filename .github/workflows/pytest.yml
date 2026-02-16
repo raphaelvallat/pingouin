@@ -102,11 +102,17 @@ jobs:
     - name: Install dependencies (${{ matrix.label }})
       run: |
         uv pip install --group=test . \
+          "${{ matrix.scipy }}" \
+          "${{ matrix.numpy }}" \
+          "${{ matrix.pandas }}" \
           "${{ matrix.statsmodels }}" \
           "${{ matrix.scikit-learn }}"
     
     - name: Display installed versions
       run: |
+        python -c "import scipy; print(f'scipy: {scipy.__version__}')"
+        python -c "import numpy; print(f'numpy: {numpy.__version__}')"
+        python -c "import pandas; print(f'pandas: {pandas.__version__}')"
         python -c "import statsmodels; print(f'statsmodels: {statsmodels.__version__}')"
         python -c "import sklearn; print(f'scikit-learn: {sklearn.__version__}')"
     
