@@ -24,7 +24,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv pip install --group=docs .
+          uv pip install --group=docs --editable .
 
       - name: Build documentation
         run: |
