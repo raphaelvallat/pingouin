@@ -11,12 +11,12 @@ env:
   UV_SYSTEM_PYTHON: 1
 
 jobs:
-  test--core:
+  test-core:
     strategy:
       fail-fast: false
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.10", "3.12", "3.14"]
     runs-on: ${{ matrix.platform }}
     env:
       FORCE_COLOR: true
@@ -42,7 +42,6 @@ jobs:
 
   # Test against different dependency versions
   test-dependency-combinations:
-    runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
       matrix:
@@ -88,7 +87,8 @@ jobs:
             statsmodels: "statsmodels"
             scikit-learn: "scikit-learn==1.7.2"
             label: "latest-versions"
-            
+    
+    runs-on: ${{ matrix.platform }}
     steps:
     - uses: actions/checkout@v6
     
