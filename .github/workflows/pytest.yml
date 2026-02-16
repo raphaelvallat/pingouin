@@ -99,11 +99,11 @@ jobs:
       - name: Install dependencies (${{ matrix.deps.label }})
         run: |
           uv pip install --group=test . \
-          "${{ matrix.deps.scipy }}" \
-          "${{ matrix.deps.numpy }}" \
-          "${{ matrix.deps.pandas }}" \
-          "${{ matrix.deps.statsmodels }}" \
-          "${{ matrix.deps.scikit-learn }}"
+            "${{ matrix.deps.scipy }}" \
+            "${{ matrix.deps.numpy }}" \
+            "${{ matrix.deps.pandas }}" \
+            "${{ matrix.deps.statsmodels }}" \
+            "${{ matrix.deps.scikit-learn }}"
 
       - name: Display installed versions
         run: |
