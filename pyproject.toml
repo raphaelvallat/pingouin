@@ -43,6 +43,8 @@ dependencies = [
 extras = [
     "mpmath",
 ]
+
+[dependency-groups]
 test = [
     "pytest>=6",
     "pytest-cov",
@@ -62,6 +64,8 @@ docs = [
 [project.urls]
 Homepage = "https://pingouin-stats.org/index.html"
 Downloads = "https://github.com/raphaelvallat/pingouin/"
+Issues = "https://github.com/raphaelvallat/pingouin/issues"
+Changelog = "https://pingouin-stats.org/build/html/changelog.html"
 
 [tool.setuptools]
 py-modules = ["pingouin"]

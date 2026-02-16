@@ -122,10 +122,18 @@ To build and install from source, clone this repository or download the source a
 .. code-block:: shell
 
   cd pingouin
-  python -m build            # optional, build a wheel and sdist
-  pip install .              # install the package
-  pip install --editable .   # or editable install
-  pytest                     # test the package
+
+  # optional, build a wheel and sdist
+  python -m build 
+
+  # install the package
+  pip install .                      
+
+  # or editable install with dev dependencies       
+  pip install --group test --group docs --editable .   
+
+   # test the package   
+  pytest                                   
 
 Quick start
 ============

@@ -30,7 +30,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install .[test] "scikit-learn<1.8.0"
+        pip install --group=test . "scikit-learn<1.8.0"
 
     - name: Test with pytest
       run: |
@@ -39,7 +39,7 @@ jobs:
     - name: Build docs
       if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == 3.10 }}
       run: |
-        pip install .[docs]
+        pip install --group=docs .
         make -C docs clean
         make -C docs html
 

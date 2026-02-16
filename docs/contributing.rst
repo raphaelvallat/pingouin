@@ -45,11 +45,11 @@ All changes to the codebase must be properly documented. To ensure that document
 Build locally
 ^^^^^^^^^^^^^
 
-If you want to test the documentation locally, you will need to install additional dependencies. They can be installed with the docs extra:
+If you want to test the documentation locally, you will need to install development dependencies. They can be installed with the `docs` dependency group:
 
 .. code-block:: bash
 
-  $ pip install --upgrade pingouin[docs]
+  $ pip install --upgrade pingouin
 
 and then within the ``pingouin/docs`` directory do:
 
