@@ -97,13 +97,13 @@ jobs:
         uses: astral-sh/setup-uv@v7
 
       - name: Install dependencies (${{ matrix.deps.label }})
-        run: |
-          uv pip install --group=test . \
-            "${{ matrix.deps.scipy }}" \
-            "${{ matrix.deps.numpy }}" \
-            "${{ matrix.deps.pandas }}" \
-            "${{ matrix.deps.statsmodels }}" \
-            "${{ matrix.deps.scikit-learn }}"
+        run: >-
+          uv pip install --group=test .
+          "${{ matrix.deps.scipy }}"
+          "${{ matrix.deps.numpy }}"
+          "${{ matrix.deps.pandas }}"
+          "${{ matrix.deps.statsmodels }}"
+          "${{ matrix.deps.scikit-learn }}"
 
       - name: Display installed versions
         run: |
