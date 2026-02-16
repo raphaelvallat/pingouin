@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FORCE_COLOR: true
-
+      UV_SYSTEM_PYTHON: 1
     steps:
       - uses: actions/checkout@v6
 
