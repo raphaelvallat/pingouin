@@ -1,0 +1,30 @@
+name: Documentation
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up uv (Python 3.13)
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.13"
+          enable-cache: true
+
+      - name: Install dependencies
+        run: |
+          uv pip install --group=docs .
+
+      - name: Build documentation
+        run: |
+          make -C docs clean
+          make -C docs html
+
+      - name: Upload documentation artifacts
+        uses: actions/upload-artifact@v
