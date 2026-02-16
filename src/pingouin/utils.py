@@ -1,11 +1,13 @@
 """Helper functions."""
 
+import collections.abc
+import itertools as it
 import numbers
+
 import numpy as np
 import pandas as pd
-import itertools as it
-import collections.abc
 from tabulate import tabulate
+
 from .config import options
 
 __all__ = [
@@ -281,15 +283,15 @@ def _flatten_list(x, include_tuple=False):
     Examples
     --------
     >>> from pingouin.utils import _flatten_list
-    >>> x = ['X1', ['M1', 'M2'], 'Y1', ['Y2']]
+    >>> x = ["X1", ["M1", "M2"], "Y1", ["Y2"]]
     >>> _flatten_list(x)
     ['X1', 'M1', 'M2', 'Y1', 'Y2']
 
-    >>> x = ['Xaa', 'Xbb', 'Xcc']
+    >>> x = ["Xaa", "Xbb", "Xcc"]
     >>> _flatten_list(x)
     ['Xaa', 'Xbb', 'Xcc']
 
-    >>> x = ['Xaa', ('Xbb', 'Xcc'), (1, 2), (1)]
+    >>> x = ["Xaa", ("Xbb", "Xcc"), (1, 2), (1)]
     >>> _flatten_list(x)
     ['Xaa', ('Xbb', 'Xcc'), (1, 2), 1]
 

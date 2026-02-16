@@ -2,9 +2,9 @@
 # Date: July 2019
 import numpy as np
 import pandas as pd
+
 from pingouin.parametric import ttest
 from pingouin.utils import _postprocess_dataframe
-
 
 __all__ = ["tost"]
 

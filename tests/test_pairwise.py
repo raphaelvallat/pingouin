@@ -1,14 +1,16 @@
-import pytest
+from unittest import TestCase
+
 import numpy as np
 import pandas as pd
-from unittest import TestCase
+import pytest
+
 from pingouin import read_dataset
 from pingouin.pairwise import (
-    pairwise_ttests,
-    pairwise_tests,
     pairwise_corr,
-    pairwise_tukey,
     pairwise_gameshowell,
+    pairwise_tests,
+    pairwise_ttests,
+    pairwise_tukey,
 )
 
 
@@ -485,6 +487,7 @@ class TestPairwise(TestCase):
     def test_ptests(self):
         """Test function ptests."""
         from itertools import combinations
+
         from scipy.stats import ttest_ind, ttest_rel
 
         # Load BFI dataset

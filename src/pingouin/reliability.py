@@ -1,9 +1,9 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import f
+
 from pingouin.config import options
 from pingouin.utils import _postprocess_dataframe
-
 
 __all__ = ["cronbach_alpha", "intraclass_corr"]
 
@@ -98,7 +98,7 @@ def cronbach_alpha(
     Binary wide-format dataframe (with missing values)
 
     >>> import pingouin as pg
-    >>> data = pg.read_dataset('cronbach_wide_missing')
+    >>> data = pg.read_dataset("cronbach_wide_missing")
     >>> # In R: psych:alpha(data, use="pairwise")
     >>> pg.cronbach_alpha(data=data)
     (0.732660835214447, array([0.435, 0.909]))
@@ -106,7 +106,7 @@ def cronbach_alpha(
     After listwise deletion of missing values (remove the entire rows)
 
     >>> # In R: psych:alpha(data, use="complete.obs")
-    >>> pg.cronbach_alpha(data=data, nan_policy='listwise')
+    >>> pg.cronbach_alpha(data=data, nan_policy="listwise")
     (0.8016949152542373, array([0.581, 0.933]))
 
     After imputing the missing values with the median of each column
@@ -116,9 +116,8 @@ def cronbach_alpha(
 
     Likert-type long-format dataframe
 
-    >>> data = pg.read_dataset('cronbach_alpha')
-    >>> pg.cronbach_alpha(data=data, items='Items', scores='Scores',
-    ...                   subject='Subj')
+    >>> data = pg.read_dataset("cronbach_alpha")
+    >>> pg.cronbach_alpha(data=data, items="Items", scores="Scores", subject="Subj")
     (0.5917188485995826, array([0.195, 0.84 ]))
     """
     # Safety check
@@ -243,9 +242,10 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_poli
     ICCs of wine quality assessed by 4 judges.
 
     >>> import pingouin as pg
-    >>> data = pg.read_dataset('icc')
-    >>> icc = pg.intraclass_corr(data=data, targets='Wine', raters='Judge',
-    ...                          ratings='Scores').round(3)
+    >>> data = pg.read_dataset("icc")
+    >>> icc = pg.intraclass_corr(data=data, targets="Wine", raters="Judge", ratings="Scores").round(
+    ...     3
+    ... )
     >>> icc.set_index("Type")
                        Description    ICC       F  df1  df2  pval          CI95
     Type

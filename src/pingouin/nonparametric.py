@@ -1,9 +1,10 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: May 2018
-import scipy
 import numpy as np
 import pandas as pd
-from pingouin import remove_na, _check_dataframe, _postprocess_dataframe
+import scipy
+
+from pingouin import _check_dataframe, _postprocess_dataframe, remove_na
 
 __all__ = [
     "mad",
@@ -84,7 +85,7 @@ def mad(a, normalize=True, axis=0):
     Compare with Scipy >= 1.3
 
     >>> from scipy.stats import median_abs_deviation
-    >>> median_abs_deviation(w, scale='normal', axis=None, nan_policy='omit')
+    >>> median_abs_deviation(w, scale="normal", axis=None, nan_policy="omit")
     1.1607762457644006
     """
     a = np.asarray(a)
@@ -142,7 +143,7 @@ def madmedianrule(a):
     Examples
     --------
     >>> import pingouin as pg
-    >>> a = [-1.09, 1., 0.28, -1.51, -0.58, 6.61, -2.43, -0.43]
+    >>> a = [-1.09, 1.0, 0.28, -1.51, -0.58, 6.61, -2.43, -0.43]
     >>> pg.madmedianrule(a)
     array([False, False, False, False, False,  True, False, False])
     """
@@ -238,29 +239,29 @@ def mwu(x, y, alternative="two-sided", **kwargs):
     >>> np.random.seed(123)
     >>> x = np.random.uniform(low=0, high=1, size=20)
     >>> y = np.random.uniform(low=0.2, high=1.2, size=20)
-    >>> pg.mwu(x, y, alternative='two-sided')
+    >>> pg.mwu(x, y, alternative="two-sided")
          U_val alternative    p_val     RBC    CLES
     MWU   97.0   two-sided  0.00556  -0.515  0.2425
 
     Compare with SciPy
 
     >>> import scipy
-    >>> scipy.stats.mannwhitneyu(x, y, use_continuity=True, alternative='two-sided')
+    >>> scipy.stats.mannwhitneyu(x, y, use_continuity=True, alternative="two-sided")
     MannwhitneyuResult(statistic=97.0, pvalue=0.0055604599321374135)
 
     One-sided test
 
-    >>> pg.mwu(x, y, alternative='greater')
+    >>> pg.mwu(x, y, alternative="greater")
          U_val alternative     p_val     RBC    CLES
     MWU   97.0     greater  0.997442  -0.515  0.2425
 
-    >>> pg.mwu(x, y, alternative='less')
+    >>> pg.mwu(x, y, alternative="less")
          U_val alternative    p_val     RBC    CLES
     MWU   97.0        less  0.00278  -0.515  0.7575
 
     Passing keyword arguments to :py:func:`scipy.stats.mannwhitneyu`:
 
-    >>> pg.mwu(x, y, alternative='two-sided', method='exact')
+    >>> pg.mwu(x, y, alternative="two-sided", method="exact")
          U_val alternative     p_val     RBC    CLES
     MWU   97.0   two-sided  0.004681  -0.515  0.2425
 
@@ -408,7 +409,7 @@ def wilcoxon(x, y=None, alternative="two-sided", **kwargs):
     >>> import pingouin as pg
     >>> x = np.array([20, 22, 19, 20, 22, 18, 24, 20, 19, 24, 26, 13])
     >>> y = np.array([38, 37, 33, 29, 14, 12, 20, 22, 17, 25, 26, 16])
-    >>> pg.wilcoxon(x, y, alternative='two-sided')
+    >>> pg.wilcoxon(x, y, alternative="two-sided")
               W_val alternative     p_val       RBC      CLES
     Wilcoxon   20.5   two-sided  0.288086 -0.378788  0.395833
 
@@ -428,17 +429,17 @@ def wilcoxon(x, y=None, alternative="two-sided", **kwargs):
     The p-value is not exactly similar to Pingouin. This is because Pingouin automatically applies
     a continuity correction. Disabling it gives the same p-value as scipy:
 
-    >>> pg.wilcoxon(x, y, alternative='two-sided', correction=False)
+    >>> pg.wilcoxon(x, y, alternative="two-sided", correction=False)
               W_val alternative     p_val       RBC      CLES
     Wilcoxon   20.5   two-sided  0.288086 -0.378788  0.395833
 
     One-sided test
 
-    >>> pg.wilcoxon(x, y, alternative='greater')
+    >>> pg.wilcoxon(x, y, alternative="greater")
               W_val alternative     p_val       RBC      CLES
     Wilcoxon   20.5     greater  0.865723 -0.378788  0.395833
 
-    >>> pg.wilcoxon(x, y, alternative='less')
+    >>> pg.wilcoxon(x, y, alternative="less")
               W_val alternative     p_val       RBC      CLES
     Wilcoxon   20.5        less  0.144043  0.378788  0.604167
     """
@@ -540,8 +541,8 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
     Compute the Kruskal-Wallis H-test for independent samples.
 
     >>> from pingouin import kruskal, read_dataset
-    >>> df = read_dataset('anova')
-    >>> kruskal(data=df, dv='Pain threshold', between='Hair color')
+    >>> df = read_dataset("anova")
+    >>> kruskal(data=df, dv="Pain threshold", between="Hair color")
                  Source  ddof1         H     p_unc
     Kruskal  Hair color      3  10.58863  0.014172
     """
@@ -658,10 +659,26 @@ def friedman(data=None, dv=None, within=None, subject=None, method="chisq"):
 
     >>> import pandas as pd
     >>> import pingouin as pg
-    >>> df = pd.DataFrame({
-    ...    'white': {0: 10, 1: 8, 2: 7, 3: 9, 4: 7, 5: 4, 6: 5, 7: 6, 8: 5, 9: 10, 10: 4, 11: 7},
-    ...    'red': {0: 7, 1: 5, 2: 8, 3: 6, 4: 5, 5: 7, 6: 9, 7: 6, 8: 4, 9: 6, 10: 7, 11: 3},
-    ...    'rose': {0: 8, 1: 5, 2: 6, 3: 4, 4: 7, 5: 5, 6: 3, 7: 7, 8: 6, 9: 4, 10: 4, 11: 3}})
+    >>> df = pd.DataFrame(
+    ...     {
+    ...         "white": {
+    ...             0: 10,
+    ...             1: 8,
+    ...             2: 7,
+    ...             3: 9,
+    ...             4: 7,
+    ...             5: 4,
+    ...             6: 5,
+    ...             7: 6,
+    ...             8: 5,
+    ...             9: 10,
+    ...             10: 4,
+    ...             11: 7,
+    ...         },
+    ...         "red": {0: 7, 1: 5, 2: 8, 3: 6, 4: 5, 5: 7, 6: 9, 7: 6, 8: 4, 9: 6, 10: 7, 11: 3},
+    ...         "rose": {0: 8, 1: 5, 2: 6, 3: 4, 4: 7, 5: 5, 6: 3, 7: 7, 8: 6, 9: 4, 10: 4, 11: 3},
+    ...     }
+    ... )
     >>> pg.friedman(df)
               Source         W  ddof1    Q     p_unc
     Friedman  Within  0.083333      2  2.0  0.367879
@@ -808,8 +825,8 @@ def cochran(data=None, dv=None, within=None, subject=None):
     Compute the Cochran Q test for repeated measurements.
 
     >>> from pingouin import cochran, read_dataset
-    >>> df = read_dataset('cochran')
-    >>> cochran(data=df, dv='Energetic', within='Time', subject='Subject')
+    >>> df = read_dataset("cochran")
+    >>> cochran(data=df, dv="Energetic", within="Time", subject="Subject")
             Source  dof         Q     p_unc
     cochran   Time    2  6.705882  0.034981
 

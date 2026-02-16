@@ -45,6 +45,9 @@ extras = [
 ]
 
 [dependency-groups]
+dev = [
+    "ruff>=0.15.0",
+]
 test = [
     "pytest>=6",
     "pytest-cov",
@@ -60,6 +63,7 @@ docs = [
     "sphinx-design",
     "sphinx-notfound-page",
 ]
+
 
 [project.urls]
 Homepage = "https://pingouin-stats.org/index.html"
@@ -119,11 +123,30 @@ exclude = [
     "notebooks",  # Skip jupyter notebook examples
 ]
 
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint.flake8-import-conventions.aliases]
+"matplotlib.pyplot" = "plt"
+numpy = "np"
+"numpy.typing" = "npt"
+pandas = "pd"
+seaborn = "sns"
+scipy = "sp"
+
 [tool.ruff.lint]
 select = [
     "E4",  # Subset of pycodestyle rules
     "E7",  # Subset of pycodestyle rules
     "E9",  # Subset of pycodestyle rules
     "F",  # All Pyflakes rules
-    "NPY201",
+    "NPY", # numpy
+    "W", 
+    "I",
+    #"PD", # pandas imports
+    #"UP" # Upgrade pythonv versions
+]
+
+ignore = [
+    "NPY002" # exlude numpy random
 ]

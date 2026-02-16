@@ -1,13 +1,15 @@
-import pytest
-import numpy as np
 from unittest import TestCase
+
+import numpy as np
+import pytest
+
 from pingouin.power import (
+    power_anova,
+    power_chi2,
+    power_corr,
+    power_rm_anova,
     power_ttest,
     power_ttest2n,
-    power_anova,
-    power_rm_anova,
-    power_corr,
-    power_chi2,
 )
 
 

@@ -1,10 +1,11 @@
-import pytest
+from unittest import TestCase
+
 import numpy as np
 import pandas as pd
-from unittest import TestCase
+import pytest
 from scipy.stats import pearsonr, pointbiserialr
 
-from pingouin.effsize import compute_esci, compute_effsize, compute_effsize_from_t, compute_bootci
+from pingouin.effsize import compute_bootci, compute_effsize, compute_effsize_from_t, compute_esci
 from pingouin.effsize import convert_effsize as cef
 
 # Dataset

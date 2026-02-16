@@ -1,9 +1,11 @@
-import pytest
+from unittest import TestCase
+
 import numpy as np
 import pandas as pd
-from unittest import TestCase
-from pingouin.reliability import cronbach_alpha, intraclass_corr
+import pytest
+
 from pingouin import read_dataset
+from pingouin.reliability import cronbach_alpha, intraclass_corr
 
 
 class TestReliability(TestCase):

@@ -1,11 +1,11 @@
-import pytest
-import numpy as np
 from unittest import TestCase
+
+import numpy as np
+import pytest
 from numpy.testing import assert_array_equal as array_equal
 
 from pingouin import read_dataset
-from pingouin.parametric import ttest, anova, rm_anova, mixed_anova, ancova, welch_anova
-
+from pingouin.parametric import ancova, anova, mixed_anova, rm_anova, ttest, welch_anova
 
 # Generate random data for ANOVA
 df = read_dataset("mixed_anova.csv")

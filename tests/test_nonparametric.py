@@ -1,17 +1,19 @@
-import pytest
-import scipy
+from unittest import TestCase
+
 import numpy as np
 import pandas as pd
-from unittest import TestCase
+import pytest
+import scipy
+
 from pingouin.nonparametric import (
+    cochran,
+    friedman,
+    harrelldavis,
+    kruskal,
     mad,
     madmedianrule,
     mwu,
     wilcoxon,
-    kruskal,
-    friedman,
-    cochran,
-    harrelldavis,
 )
 
 np.random.seed(1234)

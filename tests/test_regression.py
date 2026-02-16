@@ -1,21 +1,20 @@
-import pytest
-import numpy as np
-import pandas as pd
 from unittest import TestCase
 
+import numpy as np
+import pandas as pd
+import pytest
+import statsmodels.api as sm
+from numpy.testing import assert_almost_equal, assert_equal
+from pandas.testing import assert_frame_equal
 from scipy.stats import linregress, zscore
 from sklearn.linear_model import LinearRegression
-import statsmodels.api as sm
-
-from pandas.testing import assert_frame_equal
-from numpy.testing import assert_almost_equal, assert_equal
 
 from pingouin import read_dataset
 from pingouin.regression import (
+    _pval_from_bootci,
     linear_regression,
     logistic_regression,
     mediation_analysis,
-    _pval_from_bootci,
 )
 
 # 1st dataset: mediation

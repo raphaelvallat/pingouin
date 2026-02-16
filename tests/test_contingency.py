@@ -1,9 +1,11 @@
-import pytest
+from unittest import TestCase
+
 import numpy as np
 import pandas as pd
-import pingouin as pg
-from unittest import TestCase
+import pytest
 from scipy.stats import chi2_contingency
+
+import pingouin as pg
 
 df_ind = pg.read_dataset("chi2_independence")
 df_mcnemar = pg.read_dataset("chi2_mcnemar")

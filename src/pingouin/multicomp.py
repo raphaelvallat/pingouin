@@ -80,8 +80,8 @@ def fdr(pvals, alpha=0.05, method="fdr_bh"):
     FDR correction of an array of p-values
 
     >>> import pingouin as pg
-    >>> pvals = [.50, .003, .32, .054, .0003]
-    >>> reject, pvals_corr = pg.multicomp(pvals, method='fdr_bh', alpha=.05)
+    >>> pvals = [0.50, 0.003, 0.32, 0.054, 0.0003]
+    >>> reject, pvals_corr = pg.multicomp(pvals, method="fdr_bh", alpha=0.05)
     >>> print(reject, pvals_corr)
     [False  True False False  True] [0.5    0.0075 0.4    0.09   0.0015]
     """
@@ -178,8 +178,8 @@ def bonf(pvals, alpha=0.05):
     Examples
     --------
     >>> import pingouin as pg
-    >>> pvals = [.50, .003, .32, .054, .0003]
-    >>> reject, pvals_corr = pg.multicomp(pvals, method='bonf', alpha=.05)
+    >>> pvals = [0.50, 0.003, 0.32, 0.054, 0.0003]
+    >>> reject, pvals_corr = pg.multicomp(pvals, method="bonf", alpha=0.05)
     >>> print(reject, pvals_corr)
     [False  True False False  True] [1.     0.015  1.     0.27   0.0015]
     """
@@ -251,8 +251,8 @@ def holm(pvals, alpha=0.05):
     Examples
     --------
     >>> import pingouin as pg
-    >>> pvals = [.50, .003, .32, .054, .0003]
-    >>> reject, pvals_corr = pg.multicomp(pvals, method='holm', alpha=.05)
+    >>> pvals = [0.50, 0.003, 0.32, 0.054, 0.0003]
+    >>> reject, pvals_corr = pg.multicomp(pvals, method="holm", alpha=0.05)
     >>> print(reject, pvals_corr)
     [False  True False False  True] [0.64   0.012  0.64   0.162  0.0015]
     """
@@ -327,8 +327,8 @@ def sidak(pvals, alpha=0.05):
     --------
     >>> import numpy as np
     >>> import pingouin as pg
-    >>> pvals = [.50, .003, .32, .054, .0003]
-    >>> reject, pvals_corr = pg.multicomp(pvals, method='sidak', alpha=.05)
+    >>> pvals = [0.50, 0.003, 0.32, 0.054, 0.0003]
+    >>> reject, pvals_corr = pg.multicomp(pvals, method="sidak", alpha=0.05)
     >>> print(reject, np.round(pvals_corr, 4))
     [False  True False False  True] [0.9688 0.0149 0.8546 0.2424 0.0015]
     """
@@ -459,8 +459,8 @@ def multicomp(pvals, alpha=0.05, method="holm"):
     FDR correction of an array of p-values
 
     >>> import pingouin as pg
-    >>> pvals = [.50, .003, .32, .054, .0003]
-    >>> reject, pvals_corr = pg.multicomp(pvals, method='fdr_bh')
+    >>> pvals = [0.50, 0.003, 0.32, 0.054, 0.0003]
+    >>> reject, pvals_corr = pg.multicomp(pvals, method="fdr_bh")
     >>> print(reject, pvals_corr)
     [False  True False False  True] [0.5    0.0075 0.4    0.09   0.0015]
 
@@ -468,7 +468,7 @@ def multicomp(pvals, alpha=0.05, method="holm"):
 
     >>> import numpy as np
     >>> pvals[2] = np.nan
-    >>> reject, pvals_corr = pg.multicomp(pvals, method='holm')
+    >>> reject, pvals_corr = pg.multicomp(pvals, method="holm")
     >>> print(reject, pvals_corr)
     [False  True False False  True] [0.5    0.009     nan 0.108  0.0012]
     """

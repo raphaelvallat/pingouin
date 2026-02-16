@@ -108,7 +108,7 @@ def convert_angles(angles, low=0, high=360, positive=False):
 
     >>> import numpy as np
     >>> rad = [0.1, 3.14, 5, 2, 6]
-    >>> convert_angles(rad, low=0, high=2*np.pi)
+    >>> convert_angles(rad, low=0, high=2 * np.pi)
     array([ 0.1       ,  3.14      , -1.28318531,  2.        , -0.28318531])
 
     4. Convert degrees from a 2-D array
@@ -168,8 +168,8 @@ def circ_axial(angles, n):
     >>> import numpy as np
     >>> from pingouin import read_dataset
     >>> from pingouin.circular import circ_axial
-    >>> df = read_dataset('circular')
-    >>> angles = df['Orientation'].to_numpy()
+    >>> df = read_dataset("circular")
+    >>> angles = df["Orientation"].to_numpy()
     >>> angles = circ_axial(np.deg2rad(angles), 2)
     """
     angles = np.asarray(angles)
@@ -258,7 +258,7 @@ def circ_mean(angles, w=None, axis=0):
 
     >>> from scipy.stats import circmean
     >>> import numpy as np
-    >>> round(circmean(angles, low=0, high=2*np.pi), 4)
+    >>> round(circmean(angles, low=0, high=2 * np.pi), 4)
     1.013
 
     2. Using a 2-D array of angles in degrees
@@ -590,7 +590,7 @@ def circ_corrcl(x, y):
     >>> print(round(r, 3), round(pval, 3))
     0.109 0.971
     """
-    from scipy.stats import pearsonr, chi2
+    from scipy.stats import chi2, pearsonr
 
     x = np.asarray(x)
     y = np.asarray(y)
@@ -662,7 +662,7 @@ def circ_rayleigh(angles, w=None, d=None):
 
     2. Specifying w and d
 
-    >>> z, pval = circ_rayleigh(x, w=[.1, .2, .3, .4, .5], d=0.2)
+    >>> z, pval = circ_rayleigh(x, w=[0.1, 0.2, 0.3, 0.4, 0.5], d=0.2)
     >>> print(round(z, 3), round(pval, 6))
     0.278 0.806997
     """
@@ -741,7 +741,7 @@ def circ_vtest(angles, dir=0.0, w=None, d=None):
 
     2. Specifying w and d
 
-    >>> v, pval = circ_vtest(x, dir=0.5, w=[.1, .2, .3, .4, .5], d=0.2)
+    >>> v, pval = circ_vtest(x, dir=0.5, w=[0.1, 0.2, 0.3, 0.4, 0.5], d=0.2)
     >>> print(round(v, 3), round(pval, 5))
     0.637 0.23086
     """

@@ -1,8 +1,10 @@
-import pytest
-import numpy as np
 from unittest import TestCase
-from pingouin.correlation import corr, rm_corr, partial_corr, skipped, distance_corr, bicor
+
+import numpy as np
+import pytest
+
 from pingouin import read_dataset
+from pingouin.correlation import bicor, corr, distance_corr, partial_corr, rm_corr, skipped
 
 
 class TestCorrelation(TestCase):

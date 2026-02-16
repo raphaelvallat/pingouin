@@ -1,8 +1,10 @@
-import pytest
-import numpy as np
-from numpy.testing import assert_array_almost_equal, assert_array_equal
 from unittest import TestCase
-from pingouin.multicomp import fdr, bonf, holm, sidak, multicomp
+
+import numpy as np
+import pytest
+from numpy.testing import assert_array_almost_equal, assert_array_equal
+
+from pingouin.multicomp import bonf, fdr, holm, multicomp, sidak
 
 pvals = [0.52, 0.12, 0.0001, 0.03, 0.14]
 pvals2 = [0.52, 0.12, 0.10, 0.30, 0.14]
