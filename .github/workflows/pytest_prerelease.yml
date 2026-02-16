@@ -1,0 +1,71 @@
+name: PyTest Pre-Release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 3 * * SUN'
+
+env:
+  FORCE_COLOR: 1
+  UV_SYSTEM_PYTHON: 1
+
+jobs:
+  test-prerelease:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.12", "3.14"]
+    runs-on: ${{ matrix.platform }}
+    continue-on-error: true
+    steps:
+    - uses: actions/checkout@v6
+    
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v7
+    
+    - name: Install dependencies
+      run: |
+        uv pip install --group=test .
+
+    - name: Install scipy prerelease
+      run: |
+        uv pip uninstall scipy
+        uv pip install -U --pre scipy
+
+    - name: Install numpy prerelease
+      run: |
+        uv pip uninstall numpy
+        uv pip install -U --pre numpy
+
+    - name: Install pandas prerelease
+      run: |
+        uv pip uninstall pandas
+        uv pip install -U --pre pandas
+
+    - name: Install statsmodels prerelease
+      run: |
+        uv pip uninstall statsmodels
+        uv pip install -U --pre statsmodels
+
+    - name: Install scikit-learn prerelease
+      run: |
+        uv pip uninstall scikit-learn
+        uv pip install -U --pre scikit-learn
+
+    - name: Install seaborn prerelease
+      run: |
+        uv pip uninstall seaborn
+        uv pip install -U --pre seaborn
+
+    - name: Test with pytest
+      run: uv run pytest --verbose
