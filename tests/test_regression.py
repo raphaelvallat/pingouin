@@ -309,9 +309,10 @@ class TestRegression(TestCase):
         assert_equal(c.loc[:, "names"].to_numpy(), ["Intercept", "X"])
 
         # Error: dependent variable is not binary
+        y_nonbin = y.copy()
+        y_nonbin[3] = 2
         with pytest.raises(ValueError):
-            y[3] = 2
-            logistic_regression(X, y)
+            logistic_regression(X, y_nonbin)
 
         # --------------------------------------------------------------------
         # 2ND dataset (Penguin)-- compare to R
