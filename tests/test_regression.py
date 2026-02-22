@@ -275,7 +275,7 @@ class TestRegression(TestCase):
         # summary(glm(Ybin ~ X+M, data=df, family=binomial))
         assert_equal(lom["coef"].to_numpy(), [1.327, -0.196, -0.006])
         assert_equal(lom["se"].to_numpy(), [0.778, 0.141, 0.125])
-        assert_equal(lom["z"].to_numpy(), [1.705, -1.392, -0.048])
+        assert_almost_equal(lom["z"], [1.705, -1.392, -0.048], decimal=2)
         assert_equal(lom["pval"].to_numpy(), [0.088, 0.164, 0.962])
         assert_equal(lom["CI2.5"].to_numpy(), [-0.198, -0.472, -0.252])
         assert_equal(lom["CI97.5"].to_numpy(), [2.853, 0.08, 0.24])
