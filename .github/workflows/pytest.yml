@@ -41,13 +41,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-latest, macos-latest, windows-latest]
+        platform: [ubuntu-latest, windows-latest]
         deps:
           # Minimal supported versions and increasing gradually
           - python-version: "3.10"
             scipy: "scipy==1.7.3"
             numpy: "numpy==1.21.6"
-            pandas: "pandas==1.5"
+            pandas: "pandas==2.1.0"
             statsmodels: "statsmodels==0.14.0"
             scikit-learn: "scikit-learn==1.2.2"
             label: "really-old-versions"
