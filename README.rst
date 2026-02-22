@@ -80,7 +80,7 @@ The main dependencies of Pingouin are:
 
 * `NumPy <https://numpy.org/>`_ >= 1.22.4
 * `SciPy <https://www.scipy.org/>`_ >= 1.8.0
-* `Pandas <https://pandas.pydata.org/>`_ >= 2.1.0
+* `Pandas <https://pandas.pydata.org/>`_ >= 2.1.1
 * `Pandas-flavor <https://github.com/Zsailer/pandas_flavor>`_
 * `Statsmodels <https://www.statsmodels.org/>`_ >= 0.14.1
 * `Matplotlib <https://matplotlib.org/>`_
@@ -125,16 +125,16 @@ To build and install from source, clone this repository or download the source a
   cd pingouin
 
   # optional, build a wheel and sdist
-  python -m build 
+  python -m build
 
   # install the package
-  pip install .                      
+  pip install .
 
-  # or editable install with dev dependencies       
-  pip install --group test --group docs --editable .   
+  # or editable install with dev dependencies
+  pip install --group test --group docs --editable .
 
-   # test the package   
-  pytest                                   
+   # test the package
+  pytest
 
 Quick start
 ============
