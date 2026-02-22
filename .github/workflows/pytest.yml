@@ -48,7 +48,7 @@ jobs:
             scipy: "scipy==1.8.0"
             numpy: "numpy==1.22.4"
             pandas: "pandas==2.1.0"
-            statsmodels: "statsmodels==0.14.0"
+            statsmodels: "statsmodels==0.14.1"
             scikit-learn: "scikit-learn==1.2.2"
             label: "really-old-versions"
 

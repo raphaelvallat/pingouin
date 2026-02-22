@@ -82,7 +82,7 @@ The main dependencies of Pingouin are:
 * `SciPy <https://www.scipy.org/>`_ >= 1.8.0
 * `Pandas <https://pandas.pydata.org/>`_ >= 2.1.0
 * `Pandas-flavor <https://github.com/Zsailer/pandas_flavor>`_
-* `Statsmodels <https://www.statsmodels.org/>`_ >= 0.14.0
+* `Statsmodels <https://www.statsmodels.org/>`_ >= 0.14.1
 * `Matplotlib <https://matplotlib.org/>`_
 * `Seaborn <https://seaborn.pydata.org/>`_
 * `Scikit-learn <https://scikit-learn.org/>`_ >= 1.2.2
