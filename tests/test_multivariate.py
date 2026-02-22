@@ -1,9 +1,11 @@
+from unittest import TestCase
+
 import numpy as np
 import pandas as pd
 from sklearn import datasets
-from unittest import TestCase
+
 from pingouin import read_dataset
-from pingouin.multivariate import multivariate_normality, multivariate_ttest, box_m
+from pingouin.multivariate import box_m, multivariate_normality, multivariate_ttest
 
 data = read_dataset("multivariate")
 dvs = ["Fever", "Pressure", "Aches"]

@@ -1,19 +1,21 @@
-import pytest
-import matplotlib
-import numpy as np
-from scipy import stats
-import seaborn as sns
-import matplotlib.pyplot as plt
 from unittest import TestCase
+
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import pytest
+import seaborn as sns
+from scipy import stats
+
 from pingouin import read_dataset
 from pingouin.plotting import (
-    plot_blandaltman,
     _ppoints,
-    qqplot,
-    plot_paired,
-    plot_shift,
-    plot_rm_corr,
+    plot_blandaltman,
     plot_circmean,
+    plot_paired,
+    plot_rm_corr,
+    plot_shift,
+    qqplot,
 )
 
 # Disable open figure warning

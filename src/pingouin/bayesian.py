@@ -1,9 +1,10 @@
 """Bayesian functions."""
 
 import warnings
+from math import exp, lgamma, log, pi
+
 import numpy as np
 from scipy.integrate import quad
-from math import pi, exp, log, lgamma
 
 __all__ = ["bayesfactor_ttest", "bayesfactor_pearson", "bayesfactor_binom"]
 
@@ -237,18 +238,18 @@ def bayesfactor_pearson(r, n, alternative="two-sided", method="ly", kappa=1.0):
 
     Compare to Wetzels method:
 
-    >>> bf = bayesfactor_pearson(r, n, method='wetzels')
+    >>> bf = bayesfactor_pearson(r, n, method="wetzels")
     >>> print("Bayes Factor: %.3f" % bf)
     Bayes Factor: 8.221
 
     One-sided test
 
-    >>> bf10pos = bayesfactor_pearson(r, n, alternative='greater')
-    >>> bf10neg = bayesfactor_pearson(r, n, alternative='less')
+    >>> bf10pos = bayesfactor_pearson(r, n, alternative="greater")
+    >>> bf10neg = bayesfactor_pearson(r, n, alternative="less")
     >>> print("BF-pos: %.3f, BF-neg: %.3f" % (bf10pos, bf10neg))
     BF-pos: 21.185, BF-neg: 0.082
     """
-    from scipy.special import gamma, betaln, hyp2f1
+    from scipy.special import betaln, gamma, hyp2f1
 
     assert method.lower() in ["ly", "wetzels"], "Method not recognized."
     assert alternative in [

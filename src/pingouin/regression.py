@@ -1,15 +1,16 @@
 import itertools
 import warnings
+
 import numpy as np
 import pandas as pd
 import pandas_flavor as pf
-from scipy.stats import t, norm
-from scipy.linalg import pinvh, lstsq
+from scipy.linalg import lstsq, pinvh
+from scipy.stats import norm, t
 
 from pingouin.config import options
-from pingouin.utils import remove_na as rm_na
 from pingouin.utils import _flatten_list as _fl
 from pingouin.utils import _postprocess_dataframe
+from pingouin.utils import remove_na as rm_na
 
 __all__ = ["linear_regression", "logistic_regression", "mediation_analysis"]
 
@@ -695,13 +696,12 @@ def logistic_regression(
     >>> import numpy as np
     >>> import pandas as pd
     >>> import pingouin as pg
-    >>> df = pg.read_dataset('penguins')
+    >>> df = pg.read_dataset("penguins")
     >>> # Let's first convert the target variable from string to boolean:
-    >>> df['male'] = (df['sex'] == 'male').astype(int)  # male: 1, female: 0
+    >>> df["male"] = (df["sex"] == "male").astype(int)  # male: 1, female: 0
     >>> # Since there are missing values in our outcome variable, we need to
     >>> # set `remove_na=True` otherwise regression will fail.
-    >>> lom = pg.logistic_regression(df['body_mass_g'], df['male'],
-    ...                              remove_na=True)
+    >>> lom = pg.logistic_regression(df["body_mass_g"], df["male"], remove_na=True)
     >>> lom.round(2)
              names  coef    se     z  pval     CI2.5     CI97.5
     0    Intercept -5.16  0.71 -7.24   0.0     -6.56      -3.77
@@ -712,9 +712,8 @@ def logistic_regression(
     (e.g divide by 1000) in order to get more intuitive coefficients and
     confidence intervals:
 
-    >>> df['body_mass_kg'] = df['body_mass_g'] / 1000
-    >>> lom = pg.logistic_regression(df['body_mass_kg'], df['male'],
-    ...                              remove_na=True)
+    >>> df["body_mass_kg"] = df["body_mass_g"] / 1000
+    >>> lom = pg.logistic_regression(df["body_mass_kg"], df["male"], remove_na=True)
     >>> lom.round(2)
               names  coef    se     z  pval     CI2.5     CI97.5
     0     Intercept -5.16  0.71 -7.24   0.0     -6.56      -3.77
@@ -727,9 +726,9 @@ def logistic_regression(
     first level of our categorical variable (species = Adelie) which will be
     used as the reference level:
 
-    >>> df = pd.get_dummies(df, columns=['species'], dtype=float, drop_first=True)
-    >>> X = df[['body_mass_kg', 'species_Chinstrap', 'species_Gentoo']]
-    >>> y = df['male']
+    >>> df = pd.get_dummies(df, columns=["species"], dtype=float, drop_first=True)
+    >>> X = df[["body_mass_kg", "species_Chinstrap", "species_Gentoo"]]
+    >>> y = df["male"]
     >>> lom = pg.logistic_regression(X, y, remove_na=True)
     >>> lom.round(2)
                    names   coef    se     z  pval     CI2.5     CI97.5
@@ -740,15 +739,15 @@ def logistic_regression(
 
     3. Using NumPy aray and returning only the coefficients
 
-    >>> pg.logistic_regression(X.to_numpy(), y.to_numpy(), coef_only=True,
-    ...                        remove_na=True)
+    >>> pg.logistic_regression(X.to_numpy(), y.to_numpy(), coef_only=True, remove_na=True)
     array([-26.23906892,   7.09826571,  -0.13180626,  -9.71718529])
 
     4. Passing custom parameters to sklearn
 
-    >>> lom = pg.logistic_regression(X, y, solver='sag', max_iter=10000,
-    ...                           random_state=42, remove_na=True)
-    >>> print(lom['coef'].to_numpy())
+    >>> lom = pg.logistic_regression(
+    ...     X, y, solver="sag", max_iter=10000, random_state=42, remove_na=True
+    ... )
+    >>> print(lom["coef"].to_numpy())
     [-25.98248153   7.02881472  -0.13119779  -9.62247569]
 
     **How to interpret the log-odds coefficients?**
@@ -763,12 +762,32 @@ def logistic_regression(
     probability of the student passing the exam?*
 
     >>> # First, let's create the dataframe
-    >>> Hours = [0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 1.75, 2.00, 2.25, 2.50,
-    ...          2.75, 3.00, 3.25, 3.50, 4.00, 4.25, 4.50, 4.75, 5.00, 5.50]
+    >>> Hours = [
+    ...     0.50,
+    ...     0.75,
+    ...     1.00,
+    ...     1.25,
+    ...     1.50,
+    ...     1.75,
+    ...     1.75,
+    ...     2.00,
+    ...     2.25,
+    ...     2.50,
+    ...     2.75,
+    ...     3.00,
+    ...     3.25,
+    ...     3.50,
+    ...     4.00,
+    ...     4.25,
+    ...     4.50,
+    ...     4.75,
+    ...     5.00,
+    ...     5.50,
+    ... ]
     >>> Pass = [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1]
-    >>> df = pd.DataFrame({'HoursStudy': Hours, 'PassExam': Pass})
+    >>> df = pd.DataFrame({"HoursStudy": Hours, "PassExam": Pass})
     >>> # And then run the logistic regression
-    >>> lr = pg.logistic_regression(df['HoursStudy'], df['PassExam']).round(3)
+    >>> lr = pg.logistic_regression(df["HoursStudy"], df["PassExam"]).round(3)
     >>> lr
             names   coef     se      z   pval     CI2.5     CI97.5
     0   Intercept -4.078  1.761 -2.316  0.021    -7.529     -0.626
@@ -1147,9 +1166,8 @@ def mediation_analysis(
     1. Simple mediation analysis
 
     >>> from pingouin import mediation_analysis, read_dataset
-    >>> df = read_dataset('mediation')
-    >>> mediation_analysis(data=df, x='X', m='M', y='Y', alpha=0.05,
-    ...                    seed=42)
+    >>> df = read_dataset("mediation")
+    >>> mediation_analysis(data=df, x="X", m="M", y="Y", alpha=0.05, seed=42)
            path      coef        se          pval     CI2.5     CI97.5  sig
     0     M ~ X  0.561015  0.094480  4.391362e-08  0.373522   0.748509  Yes
     1     Y ~ M  0.654173  0.085831  1.612674e-11  0.483844   0.824501  Yes
@@ -1159,14 +1177,13 @@ def mediation_analysis(
 
     2. Return the indirect bootstrapped beta coefficients
 
-    >>> stats, dist = mediation_analysis(data=df, x='X', m='M', y='Y',
-    ...                                  return_dist=True)
+    >>> stats, dist = mediation_analysis(data=df, x="X", m="M", y="Y", return_dist=True)
     >>> print(dist.shape)
     (500,)
 
     3. Mediation analysis with a binary mediator variable
 
-    >>> mediation_analysis(data=df, x='X', m='Mbin', y='Y', seed=42).round(3)
+    >>> mediation_analysis(data=df, x="X", m="Mbin", y="Y", seed=42).round(3)
            path   coef     se   pval     CI2.5     CI97.5  sig
     0  Mbin ~ X -0.021  0.116  0.857    -0.248      0.206   No
     1  Y ~ Mbin -0.135  0.412  0.743    -0.952      0.682   No
@@ -1176,8 +1193,7 @@ def mediation_analysis(
 
     4. Mediation analysis with covariates
 
-    >>> mediation_analysis(data=df, x='X', m='M', y='Y',
-    ...                    covar=['Mbin', 'Ybin'], seed=42).round(3)
+    >>> mediation_analysis(data=df, x="X", m="M", y="Y", covar=["Mbin", "Ybin"], seed=42).round(3)
            path   coef     se   pval     CI2.5     CI97.5  sig
     0     M ~ X  0.559  0.097  0.000     0.367      0.752  Yes
     1     Y ~ M  0.666  0.086  0.000     0.495      0.837  Yes
@@ -1187,8 +1203,7 @@ def mediation_analysis(
 
     5. Mediation analysis with multiple parallel mediators
 
-    >>> mediation_analysis(data=df, x='X', m=['M', 'Mbin'], y='Y',
-    ...                    seed=42).round(3)
+    >>> mediation_analysis(data=df, x="X", m=["M", "Mbin"], y="Y", seed=42).round(3)
                 path   coef     se   pval     CI2.5     CI97.5  sig
     0          M ~ X  0.561  0.094  0.000     0.374      0.749  Yes
     1       Mbin ~ X -0.005  0.029  0.859    -0.063      0.052   No

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=80.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -29,19 +29,24 @@ dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
     "matplotlib",
-    "numpy",
-    "pandas>=1.5",
+    "numpy>=1.22.4",
+    "pandas>=2.1.1",
     "pandas_flavor",
-    "scikit-learn>=1.2",
-    "scipy",
+    "scikit-learn>=1.2.2",
+    "scipy>=1.8.0",
     "seaborn",
-    "statsmodels",
+    "statsmodels>=0.14.1",
     "tabulate",
 ]
 
 [project.optional-dependencies]
 extras = [
     "mpmath",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.0",
 ]
 test = [
     "pytest>=6",
@@ -59,9 +64,12 @@ docs = [
     "sphinx-notfound-page",
 ]
 
+
 [project.urls]
 Homepage = "https://pingouin-stats.org/index.html"
 Downloads = "https://github.com/raphaelvallat/pingouin/"
+Issues = "https://github.com/raphaelvallat/pingouin/issues"
+Changelog = "https://pingouin-stats.org/build/html/changelog.html"
 
 [tool.setuptools]
 py-modules = ["pingouin"]
@@ -115,11 +123,30 @@ exclude = [
     "notebooks",  # Skip jupyter notebook examples
 ]
 
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint.flake8-import-conventions.aliases]
+"matplotlib.pyplot" = "plt"
+numpy = "np"
+"numpy.typing" = "npt"
+pandas = "pd"
+seaborn = "sns"
+scipy = "sp"
+
 [tool.ruff.lint]
 select = [
     "E4",  # Subset of pycodestyle rules
     "E7",  # Subset of pycodestyle rules
     "E9",  # Subset of pycodestyle rules
     "F",  # All Pyflakes rules
-    "NPY201",
+    "NPY", # numpy
+    "W",
+    "I",
+    #"PD", # pandas imports
+    #"UP" # Upgrade pythonv versions
+]
+
+ignore = [
+    "NPY002" # exlude numpy random
 ]

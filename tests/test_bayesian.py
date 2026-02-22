@@ -1,11 +1,12 @@
-import numpy as np
 from unittest import TestCase
-from scipy.stats import pearsonr
-from pingouin.parametric import ttest
-from pingouin.bayesian import bayesfactor_ttest, bayesfactor_binom
-from pingouin.bayesian import bayesfactor_pearson as bfp
 
+import numpy as np
 from pytest import approx
+from scipy.stats import pearsonr
+
+from pingouin.bayesian import bayesfactor_binom, bayesfactor_ttest
+from pingouin.bayesian import bayesfactor_pearson as bfp
+from pingouin.parametric import ttest
 
 np.random.seed(1234)
 x = np.random.normal(size=100)

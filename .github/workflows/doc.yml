@@ -1,0 +1,38 @@
+name: Documentation
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_COLOR: true
+      UV_SYSTEM_PYTHON: 1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: "pyproject.toml"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install dependencies
+        run: |
+          uv pip install --group=docs --editable .
+
+      - name: Build documentation
+        run: |
+          make -C docs clean
+          make -C docs html
+
+      - name: Upload documentation artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: docs-artifact
+          path: docs/build/html

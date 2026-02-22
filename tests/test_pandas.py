@@ -5,9 +5,11 @@ Authors
 - Raphael Vallat <raphaelvallat9@gmail.com>
 """
 
-import numpy as np
-import pingouin as pg
 from unittest import TestCase
+
+import numpy as np
+
+import pingouin as pg
 
 df = pg.read_dataset("mixed_anova")
 df_aov3 = pg.read_dataset("anova3_unbalanced")

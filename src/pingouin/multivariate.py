@@ -1,7 +1,9 @@
+from collections import namedtuple
+
 import numpy as np
 import pandas as pd
-from collections import namedtuple
-from pingouin.utils import remove_na, _postprocess_dataframe
+
+from pingouin.utils import _postprocess_dataframe, remove_na
 
 __all__ = ["multivariate_normality", "multivariate_ttest", "box_m"]
 
@@ -55,9 +57,9 @@ def multivariate_normality(X, alpha=0.05):
     Examples
     --------
     >>> import pingouin as pg
-    >>> data = pg.read_dataset('multivariate')
-    >>> X = data[['Fever', 'Pressure', 'Aches']]
-    >>> pg.multivariate_normality(X, alpha=.05)
+    >>> data = pg.read_dataset("multivariate")
+    >>> X = data[["Fever", "Pressure", "Aches"]]
+    >>> pg.multivariate_normality(X, alpha=0.05)
     HZResults(hz=0.540086101851555, pval=0.7173686509622386, normal=True)
     """
     from scipy.stats import lognorm
@@ -175,10 +177,10 @@ def multivariate_ttest(X, Y=None, paired=False):
     Two-sample independent Hotelling T-squared test
 
     >>> import pingouin as pg
-    >>> data = pg.read_dataset('multivariate')
-    >>> dvs = ['Fever', 'Pressure', 'Aches']
-    >>> X = data[data['Condition'] == 'Drug'][dvs]
-    >>> Y = data[data['Condition'] == 'Placebo'][dvs]
+    >>> data = pg.read_dataset("multivariate")
+    >>> dvs = ["Fever", "Pressure", "Aches"]
+    >>> X = data[data["Condition"] == "Drug"][dvs]
+    >>> Y = data[data["Condition"] == "Placebo"][dvs]
     >>> pg.multivariate_ttest(X, Y)
                      T2         F  df1  df2      pval
     hotelling  4.228679  1.326644    3   32  0.282898
@@ -319,9 +321,8 @@ def box_m(data, dvs, group, alpha=0.001):
     >>> import pandas as pd
     >>> import pingouin as pg
     >>> from scipy.stats import multivariate_normal as mvn
-    >>> data = pd.DataFrame(mvn.rvs(size=(100, 3), random_state=42),
-    ...                     columns=['A', 'B', 'C'])
-    >>> data['group'] = [1] * 25 + [2] * 25 + [3] * 25 + [4] * 25
+    >>> data = pd.DataFrame(mvn.rvs(size=(100, 3), random_state=42), columns=["A", "B", "C"])
+    >>> data["group"] = [1] * 25 + [2] * 25 + [3] * 25 + [4] * 25
     >>> data.head()
               A         B         C  group
     0  0.496714 -0.138264  0.647689      1
@@ -330,16 +331,15 @@ def box_m(data, dvs, group, alpha=0.001):
     3  0.542560 -0.463418 -0.465730      1
     4  0.241962 -1.913280 -1.724918      1
 
-    >>> pg.box_m(data, dvs=['A', 'B', 'C'], group='group')
+    >>> pg.box_m(data, dvs=["A", "B", "C"], group="group")
               Chi2    df      pval  equal_cov
     box  11.634185  18.0  0.865537       True
 
     2. Box M test with 3 dependent variables of 2 groups (unequal sample size)
 
-    >>> data = pd.DataFrame(mvn.rvs(size=(30, 2), random_state=42),
-    ...                     columns=['A', 'B'])
-    >>> data['group'] = [1] * 20 + [2] * 10
-    >>> pg.box_m(data, dvs=['A', 'B'], group='group')
+    >>> data = pd.DataFrame(mvn.rvs(size=(30, 2), random_state=42), columns=["A", "B"])
+    >>> data["group"] = [1] * 20 + [2] * 10
+    >>> pg.box_m(data, dvs=["A", "B"], group="group")
              Chi2   df      pval  equal_cov
     box  0.706709  3.0  0.871625       True
     """

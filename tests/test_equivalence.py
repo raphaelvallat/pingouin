@@ -1,7 +1,9 @@
 # Author: Antoine Weill--Duflos <antoine@weill-duflos.fr>
 # Date July 2019
-import numpy as np
 from unittest import TestCase
+
+import numpy as np
+
 from pingouin.equivalence import tost
 
 
