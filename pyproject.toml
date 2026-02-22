@@ -29,13 +29,13 @@ dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
     "matplotlib",
-    "numpy",
-    "pandas>=1.5",
+    "numpy>=1.22.4",
+    "pandas>=2.1.1",
     "pandas_flavor",
-    "scikit-learn>=1.2",
-    "scipy",
+    "scikit-learn>=1.2.2",
+    "scipy>=1.8.0",
     "seaborn",
-    "statsmodels",
+    "statsmodels>=0.14.1",
     "tabulate",
 ]
 
@@ -141,7 +141,7 @@ select = [
     "E9",  # Subset of pycodestyle rules
     "F",  # All Pyflakes rules
     "NPY", # numpy
-    "W", 
+    "W",
     "I",
     #"PD", # pandas imports
     #"UP" # Upgrade pythonv versions
