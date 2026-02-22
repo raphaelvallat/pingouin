@@ -846,7 +846,11 @@ def plot_shift(
     )
 
     if violin:
-        vl = plt.violinplot([y, x], showextrema=False, orientation="horizontal", widths=1)
+        import matplotlib as _mpl
+
+        _mpl_ver = tuple(int(v) for v in _mpl.__version__.split(".")[:2])
+        _orient_kw = {"orientation": "horizontal"} if _mpl_ver >= (3, 10) else {"vert": False}
+        vl = plt.violinplot([y, x], showextrema=False, widths=1, **_orient_kw)
 
         # Upper plot
         paths = vl["bodies"][0].get_paths()[0]
