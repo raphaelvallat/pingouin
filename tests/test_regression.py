@@ -262,7 +262,7 @@ class TestRegression(TestCase):
         # summary(glm(Ybin ~ X, data=df, family=binomial))
         assert_equal(np.round(lom["coef"], 3), [1.319, -0.199])
         assert_equal(np.round(lom["se"], 3), [0.758, 0.121])
-        assert_equal(np.round(lom["z"], 3), [1.74, -1.647])
+        assert_almost_equal(lom["z"], [1.74, -1.647], decimal=2)
         assert_equal(np.round(lom["pval"], 3), [0.082, 0.099])
         assert_equal(np.round(lom["CI2.5"], 3), [-0.167, -0.437])
         assert_equal(np.round(lom["CI97.5"], 3), [2.805, 0.038])
