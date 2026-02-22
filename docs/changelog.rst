@@ -3,6 +3,48 @@
 What's new
 ##########
 
+v0.6.0 (February 2026)
+----------------------
+
+This is a major release with several bugfixes and breaking changes, as well as critical updates to the build infrastructure, dependencies and test suite (see `PR489 <https://github.com/raphaelvallat/pingouin/pull/489>`_)
+
+Some of the key highlights are described below:
+
+**Bugfixes**
+
+- Disable one-sided Bayes Factor for T-tests, which were ill-defined (`PR487 <https://github.com/raphaelvallat/pingouin/pull/487>`_)
+- Update RBC calculation for Wilcoxon signed-rank test to be dependent on the alternative (`PR457 <https://github.com/raphaelvallat/pingouin/pull/457>`_)
+- Sphericity fix with very low eigenvalues (`PR482 <https://github.com/raphaelvallat/pingouin/pull/482>`_)
+- Fix divide-by-zero in internal ``_correl_pvalue`` when ``r == 1`` (`PR474 <https://github.com/raphaelvallat/pingouin/pull/474>`_
+- Fix boxplot z-order in :py:func:`pingouin.plot_paired` (`PR442 <https://github.com/raphaelvallat/pingouin/pull/442>`_)
+
+**API breaking changes**
+
+- Column names update (`PR443 <https://github.com/raphaelvallat/pingouin/pull/443>`_): removed characters that restrict column access to the bracket format (df["p_val"]) rather than dot method (df.p_val). This includes:
+    - Replaced dashes with underscores in column names (e.g., p-val --> p_val)
+    - Replaced parentheses with underscores in column names (e.g., mean(A) --> mean_A)
+    - Removed percent signs and brackets in column names (e.g., CI95% --> CI95, CI[97.5%] --> CI97.5)
+
+**Dependency requirements**
+
+This is the first version to be fully compatible with pandas 3.x and numpy 2.x (`PR480 <https://github.com/raphaelvallat/pingouin/pull/480>`_).
+
+This version requires Python >= 3.10 (tested on Python 3.10-3.14) and:
+
+* `NumPy <https://numpy.org/>`_ >= 1.22.4
+* `SciPy <https://www.scipy.org/>`_ >= 1.8.0
+* `Pandas <https://pandas.pydata.org/>`_ >= 2.1.1
+* `Statsmodels <https://www.statsmodels.org/>`_ >= 0.14.1
+* `Scikit-learn <https://scikit-learn.org/>`_ >= 1.2.2
+
+**Build infrastructure**
+
+- Replaced `black <https://black.readthedocs.io/>`_ and `flake8 <https://flake8.pycqa.org/>`_ with `Ruff <https://github.com/astral-sh/ruff>`_ for unified linting and formatting (`PR446 <https://github.com/raphaelvallat/pingouin/pull/446>`_)
+- Adopted `uv <https://docs.astral.sh/uv/>`_ for faster dependency management in CI
+- Extended CI matrix to Ubuntu, macOS and Windows across Python 3.10, 3.12 and 3.14, plus a separate matrix testing minimum through latest dependency versions (`PR489 <https://github.com/raphaelvallat/pingouin/pull/489>`_)
+
+The full changelog can be found on GitHub: https://github.com/raphaelvallat/pingouin/releases/tag/v0.6.0
+
 v0.5.5 (September 2024)
 -----------------------
 
