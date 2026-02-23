@@ -21,6 +21,7 @@ Some of the key highlights are described below:
 **API breaking changes**
 
 - Column names update (`PR443 <https://github.com/raphaelvallat/pingouin/pull/443>`_): removed characters that restrict column access to the bracket format (df["p_val"]) rather than dot method (df.p_val). This includes:
+
     - Replaced dashes with underscores in column names (e.g., p-val --> p_val)
     - Replaced parentheses with underscores in column names (e.g., mean(A) --> mean_A)
     - Removed percent signs and brackets in column names (e.g., CI95% --> CI95, CI[97.5%] --> CI97.5)
