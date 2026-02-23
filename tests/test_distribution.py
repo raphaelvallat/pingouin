@@ -1,16 +1,18 @@
-import pytest
+from unittest import TestCase
+
 import numpy as np
 import pandas as pd
-from unittest import TestCase
+import pytest
+
+from pingouin import read_dataset
 from pingouin.distribution import (
-    gzscore,
-    normality,
     anderson,
     epsilon,
+    gzscore,
     homoscedasticity,
+    normality,
     sphericity,
 )
-from pingouin import read_dataset
 
 # Generate random dataframe
 df = read_dataset("mixed_anova.csv")

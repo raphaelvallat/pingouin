@@ -1,16 +1,18 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
+import warnings
+from itertools import combinations, product
+
 import numpy as np
 import pandas as pd
 import pandas_flavor as pf
-from itertools import combinations, product
-from pingouin.config import options
-from pingouin.parametric import anova
-from pingouin.multicomp import multicomp
-from pingouin.effsize import compute_effsize
-from pingouin.utils import _check_dataframe, _flatten_list, _postprocess_dataframe
 from scipy.stats import studentized_range
-import warnings
+
+from pingouin.config import options
+from pingouin.effsize import compute_effsize
+from pingouin.multicomp import multicomp
+from pingouin.parametric import anova
+from pingouin.utils import _check_dataframe, _flatten_list, _postprocess_dataframe
 
 __all__ = [
     "pairwise_ttests",
@@ -203,16 +205,16 @@ def pairwise_tests(
 
     >>> import pandas as pd
     >>> import pingouin as pg
-    >>> pd.set_option('display.expand_frame_repr', False)
-    >>> pd.set_option('display.max_columns', 20)
-    >>> df = pg.read_dataset('mixed_anova.csv')
-    >>> pg.pairwise_tests(dv='Scores', between='Group', data=df).round(3)
+    >>> pd.set_option("display.expand_frame_repr", False)
+    >>> pd.set_option("display.max_columns", 20)
+    >>> df = pg.read_dataset("mixed_anova.csv")
+    >>> pg.pairwise_tests(dv="Scores", between="Group", data=df).round(3)
       Contrast        A           B  Paired  Parametric     T    dof alternative  p_unc   BF10  hedges
     0    Group  Control  Meditation   False        True -2.29  178.0   two-sided  0.023  1.813   -0.34
 
     2. One within-subject factor
 
-    >>> post_hocs = pg.pairwise_tests(dv='Scores', within='Time', subject='Subject', data=df)
+    >>> post_hocs = pg.pairwise_tests(dv="Scores", within="Time", subject="Subject", data=df)
     >>> post_hocs.round(3)
       Contrast        A        B  Paired  Parametric      T   dof alternative  p_unc   BF10  hedges
     0     Time   August  January    True        True -1.740  59.0   two-sided  0.087  0.582  -0.328
@@ -221,8 +223,9 @@ def pairwise_tests(
 
     3. Non-parametric pairwise paired test (wilcoxon)
 
-    >>> pg.pairwise_tests(dv='Scores', within='Time', subject='Subject',
-    ...                    data=df, parametric=False).round(3)
+    >>> pg.pairwise_tests(
+    ...     dv="Scores", within="Time", subject="Subject", data=df, parametric=False
+    ... ).round(3)
       Contrast        A        B  Paired  Parametric  W_val alternative  p_unc  hedges
     0     Time   August  January    True       False  716.0   two-sided  0.144  -0.328
     1     Time   August     June    True       False  564.0   two-sided  0.010  -0.483
@@ -230,8 +233,9 @@ def pairwise_tests(
 
     4. Mixed design (within and between) with bonferroni-corrected p-values
 
-    >>> posthocs = pg.pairwise_tests(dv='Scores', within='Time', subject='Subject',
-    ...                               between='Group', padjust='bonf', data=df)
+    >>> posthocs = pg.pairwise_tests(
+    ...     dv="Scores", within="Time", subject="Subject", between="Group", padjust="bonf", data=df
+    ... )
     >>> posthocs.round(3)
            Contrast     Time        A           B Paired  Parametric      T   dof alternative  p_unc  p_corr p_adjust   BF10  hedges
     0          Time        -   August     January   True        True -1.740  59.0   two-sided  0.087   0.261     bonf  0.582  -0.328
@@ -244,7 +248,7 @@ def pairwise_tests(
 
     5. Two between-subject factors. The order of the ``between`` factors matters!
 
-    >>> pg.pairwise_tests(dv='Scores', between=['Group', 'Time'], data=df).round(3)
+    >>> pg.pairwise_tests(dv="Scores", between=["Group", "Time"], data=df).round(3)
            Contrast       Group        A           B Paired  Parametric      T    dof alternative  p_unc     BF10  hedges
     0         Group           -  Control  Meditation  False        True -2.290  178.0   two-sided  0.023    1.813  -0.340
     1          Time           -   August     January  False        True -1.806  118.0   two-sided  0.074    0.839  -0.328
@@ -259,16 +263,17 @@ def pairwise_tests(
 
     6. Same but without the interaction, and using a directional test
 
-    >>> df.pairwise_tests(dv='Scores', between=['Group', 'Time'], alternative="less",
-    ...                    interaction=False).round(3)
-      Contrast        A           B  Paired  Parametric      T    dof alternative  p_unc   BF10  hedges
-    0    Group  Control  Meditation   False        True -2.290  178.0        less  0.012  3.626  -0.340
-    1     Time   August     January   False        True -1.806  118.0        less  0.037  1.679  -0.328
-    2     Time   August        June   False        True -2.660  118.0        less  0.004  8.998  -0.483
-    3     Time  January        June   False        True -0.934  118.0        less  0.176  0.577  -0.170
+    >>> df.pairwise_tests(
+    ...     dv="Scores", between=["Group", "Time"], alternative="less", interaction=False
+    ... ).round(3)
+      Contrast        A           B  Paired  Parametric      T    dof alternative  p_unc  hedges
+    0    Group  Control  Meditation   False        True -2.290  178.0        less  0.012  -0.340
+    1     Time   August     January   False        True -1.806  118.0        less  0.037  -0.328
+    2     Time   August        June   False        True -2.660  118.0        less  0.004  -0.483
+    3     Time  January        June   False        True -0.934  118.0        less  0.176  -0.170
     """
+    from .nonparametric import mwu, wilcoxon
     from .parametric import ttest
-    from .nonparametric import wilcoxon, mwu
 
     # Safety checks
     data = _check_dataframe(
@@ -400,7 +405,8 @@ def pairwise_tests(
                 df_ttest = ttest(
                     x, y, paired=paired, alternative=alternative, correction=correction
                 )
-                stats.at[i, "BF10"] = df_ttest.at["T_test", "BF10"]
+                if alternative == "two-sided":
+                    stats.at[i, "BF10"] = df_ttest.at["T_test", "BF10"]
                 stats.at[i, "dof"] = df_ttest.at["T_test", "dof"]
             else:
                 if paired:
@@ -552,7 +558,8 @@ def pairwise_tests(
                     df_ttest = ttest(
                         x, y, paired=paired, alternative=alternative, correction=correction
                     )
-                    stats.at[ic, "BF10"] = df_ttest.at["T_test", "BF10"]
+                    if alternative == "two-sided":
+                        stats.at[ic, "BF10"] = df_ttest.at["T_test", "BF10"]
                     stats.at[ic, "dof"] = df_ttest.at["T_test", "dof"]
                 else:
                     if paired:
@@ -658,8 +665,8 @@ def ptests(
     >>> import pandas as pd
     >>> import pingouin as pg
     >>> # Load an example dataset of personality dimensions
-    >>> df = pg.read_dataset('pairwise_corr').iloc[:30, 1:]
-    >>> df.columns = ["N", "E", "O", 'A', "C"]
+    >>> df = pg.read_dataset("pairwise_corr").iloc[:30, 1:]
+    >>> df.columns = ["N", "E", "O", "A", "C"]
     >>> # Add some missing values
     >>> df.iloc[[2, 5, 20], 2] = np.nan
     >>> df.iloc[[1, 4, 10], 3] = np.nan
@@ -718,7 +725,7 @@ def ptests(
     C  -4.251   3.595  3.785  3.765      -
     """
     from itertools import combinations
-    from numpy import triu_indices_from as tif
+
     from numpy import format_float_positional as ffp
     from scipy.stats import ttest_ind, ttest_rel
 
@@ -745,12 +752,21 @@ def ptests(
         mat_upper.loc[a, b] = p
 
     if padjust is not None:
-        pvals = mat_upper.to_numpy()[tif(mat, k=1)]
-        mat_upper.to_numpy()[tif(mat, k=1)] = multicomp(pvals, alpha=0.05, method=padjust)[1]
+        mask = np.triu(np.ones(mat_upper.shape, dtype=bool), k=1)
+        triu = mat_upper.where(mask).stack()
+        _, triu.iloc[:] = multicomp(triu.values, alpha=0.05, method="bonf")
+        mat_upper = mat_upper.mask(mask, triu.unstack())
+        # mask = np.triu(np.ones(mat.shape, dtype=bool), k=1)
+        # pvals = np.where(mask, mat_upper.to_numpy(), 0)
+        # pvals_adj = multicomp(pvals, alpha=0.05, method=padjust)[1]
+        # mat_upper = mat_upper.where(~mask, pvals_adj)
 
     # Convert T-values to str, and fill the diagonal with "-"
     mat = mat.astype(str)
-    np.fill_diagonal(mat.to_numpy(), "-")
+
+    # Modification of the diagonal
+    for i in range(len(mat)):
+        mat.iat[i, i] = "-"
 
     def replace_pval(x):
         for key, value in pval_stars.items():
@@ -765,7 +781,9 @@ def ptests(
         mat_upper = mat_upper.map(lambda x: ffp(x, precision=decimals))
 
     # Replace upper triangle by p-values
-    mat.to_numpy()[tif(mat, k=1)] = mat_upper.to_numpy()[tif(mat, k=1)]
+    mask = np.triu(np.ones(mat.shape, dtype=bool), k=1)
+    mat = mat.where(~mask, mat_upper)
+
     return mat
 
 
@@ -861,8 +879,8 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     Pairwise Tukey post-hocs on the Penguins dataset.
 
     >>> import pingouin as pg
-    >>> df = pg.read_dataset('penguins')
-    >>> df.pairwise_tukey(dv='body_mass_g', between='species').round(3)
+    >>> df = pg.read_dataset("penguins")
+    >>> df.pairwise_tukey(dv="body_mass_g", between="species").round(3)
                A          B   mean(A)   mean(B)      diff      se       T  p_tukey  hedges
     0     Adelie  Chinstrap  3700.662  3733.088   -32.426  67.512  -0.480    0.881  -0.074
     1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148 -24.495    0.000  -2.860
@@ -1026,9 +1044,8 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     Pairwise Games-Howell post-hocs on the Penguins dataset.
 
     >>> import pingouin as pg
-    >>> df = pg.read_dataset('penguins')
-    >>> pg.pairwise_gameshowell(data=df, dv='body_mass_g',
-    ...                         between='species').round(3)
+    >>> df = pg.read_dataset("penguins")
+    >>> pg.pairwise_gameshowell(data=df, dv="body_mass_g", between="species").round(3)
                A          B   mean(A)   mean(B)      diff      se       T       df  pval  hedges
     0     Adelie  Chinstrap  3700.662  3733.088   -32.426  59.706  -0.543  152.455  0.85  -0.074
     1     Adelie     Gentoo  3700.662  5076.016 -1375.354  58.811 -23.386  249.643  0.00  -2.860
@@ -1230,10 +1247,10 @@ def pairwise_corr(
 
     >>> import pandas as pd
     >>> import pingouin as pg
-    >>> pd.set_option('display.expand_frame_repr', False)
-    >>> pd.set_option('display.max_columns', 20)
-    >>> data = pg.read_dataset('pairwise_corr').iloc[:, 1:]
-    >>> pg.pairwise_corr(data, method='spearman', alternative='greater', padjust='bonf').round(3)
+    >>> pd.set_option("display.expand_frame_repr", False)
+    >>> pd.set_option("display.max_columns", 20)
+    >>> data = pg.read_dataset("pairwise_corr").iloc[:, 1:]
+    >>> pg.pairwise_corr(data, method="spearman", alternative="greater", padjust="bonf").round(3)
                    X                  Y    method alternative    n      r          CI95  p_unc  p_corr p_adjust  power
     0    Neuroticism       Extraversion  spearman     greater  500 -0.325  [-0.39, 1.0]  1.000   1.000     bonf  0.000
     1    Neuroticism           Openness  spearman     greater  500 -0.028   [-0.1, 1.0]  0.735   1.000     bonf  0.012
@@ -1248,8 +1265,9 @@ def pairwise_corr(
 
     2. Robust two-sided biweight midcorrelation with uncorrected p-values
 
-    >>> pcor = pg.pairwise_corr(data, columns=['Openness', 'Extraversion',
-    ...                                        'Neuroticism'], method='bicor')
+    >>> pcor = pg.pairwise_corr(
+    ...     data, columns=["Openness", "Extraversion", "Neuroticism"], method="bicor"
+    ... )
     >>> pcor.round(3)
                   X             Y method alternative    n      r            CI95  p_unc  power
     0      Openness  Extraversion  bicor   two-sided  500  0.247    [0.16, 0.33]  0.000  1.000
@@ -1258,7 +1276,7 @@ def pairwise_corr(
 
     3. One-versus-all pairwise correlations
 
-    >>> pg.pairwise_corr(data, columns=['Neuroticism']).round(3)
+    >>> pg.pairwise_corr(data, columns=["Neuroticism"]).round(3)
                  X                  Y   method alternative    n      r            CI95  p_unc       BF10  power
     0  Neuroticism       Extraversion  pearson   two-sided  500 -0.350  [-0.42, -0.27]  0.000  6.765e+12  1.000
     1  Neuroticism           Openness  pearson   two-sided  500 -0.010    [-0.1, 0.08]  0.817      0.058  0.056
@@ -1267,7 +1285,7 @@ def pairwise_corr(
 
     4. Pairwise correlations between two lists of columns (cartesian product)
 
-    >>> columns = [['Neuroticism', 'Extraversion'], ['Openness']]
+    >>> columns = [["Neuroticism", "Extraversion"], ["Openness"]]
     >>> pg.pairwise_corr(data, columns).round(3)
                   X         Y   method alternative    n      r          CI95  p_unc       BF10  power
     0   Neuroticism  Openness  pearson   two-sided  500 -0.010  [-0.1, 0.08]  0.817      0.058  0.056
@@ -1275,11 +1293,11 @@ def pairwise_corr(
 
     5. As a Pandas method
 
-    >>> pcor = data.pairwise_corr(covar='Neuroticism', method='spearman')
+    >>> pcor = data.pairwise_corr(covar="Neuroticism", method="spearman")
 
     6. Pairwise partial correlation
 
-    >>> pg.pairwise_corr(data, covar=['Neuroticism', 'Openness'])
+    >>> pg.pairwise_corr(data, covar=["Neuroticism", "Openness"])
                    X                  Y   method                        covar alternative    n         r           CI95     p_unc
     0   Extraversion      Agreeableness  pearson  ['Neuroticism', 'Openness']   two-sided  500 -0.038737  [-0.13, 0.05]  0.388361
     1   Extraversion  Conscientiousness  pearson  ['Neuroticism', 'Openness']   two-sided  500 -0.071427  [-0.16, 0.02]  0.111389
@@ -1287,7 +1305,7 @@ def pairwise_corr(
 
     7. Pairwise partial correlation matrix using :py:func:`pingouin.pcorr`
 
-    >>> data[['Neuroticism', 'Openness', 'Extraversion']].pcorr().round(3)
+    >>> data[["Neuroticism", "Openness", "Extraversion"]].pcorr().round(3)
                   Neuroticism  Openness  Extraversion
     Neuroticism         1.000     0.092        -0.360
     Openness            0.092     1.000         0.281
@@ -1295,7 +1313,7 @@ def pairwise_corr(
 
     8. Correlation matrix with p-values using :py:func:`pingouin.rcorr`
 
-    >>> data[['Neuroticism', 'Openness', 'Extraversion']].rcorr()
+    >>> data[["Neuroticism", "Openness", "Extraversion"]].rcorr()
                  Neuroticism Openness Extraversion
     Neuroticism            -                   ***
     Openness           -0.01        -          ***

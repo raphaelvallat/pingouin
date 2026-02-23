@@ -1,5 +1,6 @@
-import pingouin
 from unittest import TestCase
+
+import pingouin
 from pingouin.config import set_default_options
 
 expected_default_options = pingouin.options.copy()

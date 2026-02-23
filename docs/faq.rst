@@ -15,7 +15,7 @@ To install Pingouin, open a command prompt (or Terminal or Anaconda Prompt) and 
 
 .. code-block:: bash
 
-    pip install pingouin --upgrade
+    pip install --upgrade pingouin
 
 You should now be able to use Pingouin. To try it, you need to open an interactive Python console (either `IPython <https://ipython.org/>`_ or `Jupyter <https://jupyter.readthedocs.io/en/latest/index.html>`_). For example, type the following command in a command prompt:
 

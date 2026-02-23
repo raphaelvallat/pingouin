@@ -11,7 +11,7 @@
 .. image:: https://img.shields.io/github/license/raphaelvallat/pingouin.svg
   :target: https://github.com/raphaelvallat/pingouin/blob/master/LICENSE
 
-.. image:: https://github.com/raphaelvallat/pingouin/actions/workflows/python_tests.yml/badge.svg
+.. image:: https://github.com/raphaelvallat/pingouin/actions/workflows/pytest.yml/badge.svg
   :target: https://github.com/raphaelvallat/pingouin/actions
 
 .. image:: https://codecov.io/gh/raphaelvallat/pingouin/branch/master/graph/badge.svg
@@ -76,22 +76,23 @@ Installation
 Dependencies
 ------------
 
-The main dependencies of Pingouin are :
+The main dependencies of Pingouin are:
 
-* `NumPy <https://numpy.org/>`_
-* `SciPy <https://www.scipy.org/>`_
-* `Pandas <https://pandas.pydata.org/>`_
+* `NumPy <https://numpy.org/>`_ >= 1.22.4
+* `SciPy <https://www.scipy.org/>`_ >= 1.8.0
+* `Pandas <https://pandas.pydata.org/>`_ >= 2.1.1
 * `Pandas-flavor <https://github.com/Zsailer/pandas_flavor>`_
-* `Statsmodels <https://www.statsmodels.org/>`_
+* `Statsmodels <https://www.statsmodels.org/>`_ >= 0.14.1
 * `Matplotlib <https://matplotlib.org/>`_
 * `Seaborn <https://seaborn.pydata.org/>`_
+* `Scikit-learn <https://scikit-learn.org/>`_ >= 1.2.2
+* `Tabulate <https://github.com/astanin/python-tabulate>`_
 
-In addition, some functions require :
+Some functions additionally require:
 
-* `Scikit-learn <https://scikit-learn.org/>`_
 * `Mpmath <http://mpmath.org/>`_
 
-Pingouin is a Python 3 package and is currently tested for Python 3.8-3.11.
+Pingouin is a Python 3 package and is currently tested for Python 3.10+.
 
 User installation
 -----------------
@@ -122,10 +123,18 @@ To build and install from source, clone this repository or download the source a
 .. code-block:: shell
 
   cd pingouin
-  python -m build            # optional, build a wheel and sdist
-  pip install .              # install the package
-  pip install --editable .   # or editable install
-  pytest                     # test the package
+
+  # optional, build a wheel and sdist
+  python -m build
+
+  # install the package
+  pip install .
+
+  # or editable install with dev dependencies
+  pip install --group test --group docs --editable .
+
+   # test the package
+  pytest
 
 Quick start
 ============

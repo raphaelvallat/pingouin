@@ -1,18 +1,20 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 import warnings
 from collections.abc import Iterable
+
 import numpy as np
 import pandas as pd
-from scipy.stats import f
 import pandas_flavor as pf
+from scipy.stats import f
+
 from pingouin import (
     _check_dataframe,
-    remove_na,
     _flatten_list,
+    _postprocess_dataframe,
     bayesfactor_ttest,
     epsilon,
+    remove_na,
     sphericity,
-    _postprocess_dataframe,
 )
 
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova", "ancova"]
@@ -115,7 +117,8 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     T-distribution with :math:`n-1` degrees of freedom.
 
     The scaled Jeffrey-Zellner-Siow (JZS) Bayes Factor is approximated
-    using the :py:func:`pingouin.bayesfactor_ttest` function.
+    using the :py:func:`pingouin.bayesfactor_ttest` function. It is only provided for two-sided
+    tests; the BF value will be set to NaN for one-sided tests.
 
     Results have been tested against JASP and the `t.test` R function.
 
@@ -149,22 +152,22 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     2. One sided paired T-test.
 
     >>> pre = [5.5, 2.4, 6.8, 9.6, 4.2]
-    >>> post = [6.4, 3.4, 6.4, 11., 4.8]
-    >>> ttest(pre, post, paired=True, alternative='less').round(2)
-               T  dof alternative  p_val           CI95  cohen_d   BF10  power
-    T_test -2.31    4        less   0.04  [-inf, -0.05]     0.25  3.122   0.12
+    >>> post = [6.4, 3.4, 6.4, 11.0, 4.8]
+    >>> ttest(pre, post, paired=True, alternative="less").round(2)
+               T  dof alternative  p_val           CI95  cohen_d  power
+    T_test -2.31    4        less   0.04  [-inf, -0.05]     0.25   0.12
 
     Now testing the opposite alternative hypothesis
 
-    >>> ttest(pre, post, paired=True, alternative='greater').round(2)
-               T  dof alternative  p_val          CI95  cohen_d  BF10  power
-    T_test -2.31    4     greater   0.96  [-1.35, inf]     0.25  0.32   0.02
+    >>> ttest(pre, post, paired=True, alternative="greater").round(2)
+               T  dof alternative  p_val          CI95  cohen_d  power
+    T_test -2.31    4     greater   0.96  [-1.35, inf]     0.25   0.02
 
     3. Paired T-test with missing values.
 
     >>> import numpy as np
     >>> pre = [5.5, 2.4, np.nan, 9.6, 4.2]
-    >>> post = [6.4, 3.4, 6.4, 11., 4.8]
+    >>> post = [6.4, 3.4, 6.4, 11.0, 4.8]
     >>> ttest(pre, post, paired=True).round(3)
                 T  dof alternative  p_val           CI95  cohen_d   BF10  power
     T_test -5.902    3   two-sided   0.01  [-1.5, -0.45]    0.306  7.169  0.073
@@ -204,14 +207,14 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> np.round(ttest_ind(x, y, equal_var=True), 6)  # T value and p-value
     array([1.971859, 0.057056])
     """
-    from scipy.stats import t, ttest_rel, ttest_ind, ttest_1samp
+    from scipy.stats import t, ttest_1samp, ttest_ind, ttest_rel
 
     try:  # pragma: no cover
-        from scipy.stats._stats_py import _unequal_var_ttest_denom, _equal_var_ttest_denom
+        from scipy.stats._stats_py import _equal_var_ttest_denom, _unequal_var_ttest_denom
     except ImportError:  # pragma: no cover
         # Fallback for scipy<1.8.0
-        from scipy.stats.stats import _unequal_var_ttest_denom, _equal_var_ttest_denom
-    from pingouin import power_ttest, power_ttest2n, compute_effsize
+        from scipy.stats.stats import _equal_var_ttest_denom, _unequal_var_ttest_denom
+    from pingouin import compute_effsize, power_ttest, power_ttest2n
 
     # Check arguments
     assert alternative in [
@@ -251,7 +254,6 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
             tval, pval = ttest_rel(x, y, alternative=alternative)
         dof = nx - 1
         se = np.sqrt(np.var(x - y, ddof=1) / nx)
-        bf = bayesfactor_ttest(tval, nx, ny, paired=True, r=r)
     elif ny > 1 and paired is False:
         dof = nx + ny - 2
         vx, vy = x.var(ddof=1), y.var(ddof=1)
@@ -311,24 +313,22 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
             # Unequal sample sizes
             power = power_ttest2n(nx, ny, d=d, power=None, alpha=0.05, alternative=alternative)
 
-    # Bayes factor
-    bf = bayesfactor_ttest(tval, nx, ny, paired=paired, alternative=alternative, r=r)
-
     # Create output dictionnary
     stats = {
-        "dof": dof,
         "T": tval,
-        "p_val": pval,
+        "dof": dof,
         "alternative": alternative,
-        "cohen_d": abs(d),
+        "p_val": pval,
         ci_name: [ci],
+        "cohen_d": abs(d),
         "power": power,
-        "BF10": bf,
     }
 
+    if alternative == "two-sided":
+        stats["BF10"] = bayesfactor_ttest(tval, nx, ny, paired=paired, alternative=alternative, r=r)
+
     # Convert to dataframe
-    col_order = ["T", "dof", "alternative", "p_val", ci_name, "cohen_d", "BF10", "power"]
-    stats = pd.DataFrame(stats, columns=col_order, index=["T_test"])
+    stats = pd.DataFrame(stats, index=["T_test"])
     return _postprocess_dataframe(stats)
 
 
@@ -476,7 +476,7 @@ def rm_anova(
     1. One-way repeated measures ANOVA using a wide-format dataset
 
     >>> import pingouin as pg
-    >>> data = pg.read_dataset('rm_anova_wide')
+    >>> data = pg.read_dataset("rm_anova_wide")
     >>> pg.rm_anova(data)
        Source  ddof1  ddof2         F     p_unc       ng2       eps
     0  Within      3     24  5.200652  0.006557  0.346392  0.694329
@@ -488,9 +488,15 @@ def rm_anova(
     means that we want to get the partial eta-squared effect size instead
     of the default (generalized) eta-squared.
 
-    >>> df = pg.read_dataset('rm_anova')
-    >>> aov = pg.rm_anova(dv='DesireToKill', within='Disgustingness',
-    ...                   subject='Subject', data=df, detailed=True, effsize="np2")
+    >>> df = pg.read_dataset("rm_anova")
+    >>> aov = pg.rm_anova(
+    ...     dv="DesireToKill",
+    ...     within="Disgustingness",
+    ...     subject="Subject",
+    ...     data=df,
+    ...     detailed=True,
+    ...     effsize="np2",
+    ... )
     >>> aov.round(3)
                Source       SS  DF      MS       F  p_unc    np2  eps
     0  Disgustingness   27.485   1  27.485  12.044  0.001  0.116  1.0
@@ -498,12 +504,16 @@ def rm_anova(
 
     3. Two-way repeated-measures ANOVA
 
-    >>> aov = pg.rm_anova(dv='DesireToKill', within=['Disgustingness', 'Frighteningness'],
-    ...                   subject='Subject', data=df)
+    >>> aov = pg.rm_anova(
+    ...     dv="DesireToKill",
+    ...     within=["Disgustingness", "Frighteningness"],
+    ...     subject="Subject",
+    ...     data=df,
+    ... )
 
     4. As a :py:class:`pandas.DataFrame` method
 
-    >>> df.rm_anova(dv='DesireToKill', within='Disgustingness', subject='Subject',  detailed=False)
+    >>> df.rm_anova(dv="DesireToKill", within="Disgustingness", subject="Subject", detailed=False)
                Source  ddof1  ddof2          F     p_unc       ng2  eps
     0  Disgustingness      1     92  12.043878  0.000793  0.025784  1.0
     """
@@ -910,9 +920,8 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
     One-way ANOVA
 
     >>> import pingouin as pg
-    >>> df = pg.read_dataset('anova')
-    >>> aov = pg.anova(dv='Pain threshold', between='Hair color', data=df,
-    ...                detailed=True)
+    >>> df = pg.read_dataset("anova")
+    >>> aov = pg.anova(dv="Pain threshold", between="Hair color", data=df, detailed=True)
     >>> aov.round(3)
            Source        SS  DF       MS      F  p_unc    np2
     0  Hair color  1360.726   3  453.575  6.791  0.004  0.576
@@ -923,14 +932,13 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
     a method (= built-in function) of our pandas dataframe. In that case,
     we don't have to specify ``data`` anymore.
 
-    >>> df.anova(dv='Pain threshold', between='Hair color', detailed=False,
-    ...          effsize='n2')
+    >>> df.anova(dv="Pain threshold", between="Hair color", detailed=False, effsize="n2")
            Source  ddof1  ddof2         F     p_unc        n2
     0  Hair color      3     15  6.791407  0.004114  0.575962
 
     Two-way ANOVA with balanced design
 
-    >>> data = pg.read_dataset('anova2')
+    >>> data = pg.read_dataset("anova2")
     >>> data.anova(dv="Yield", between=["Blend", "Crop"]).round(3)
              Source        SS  DF        MS      F  p_unc    np2
     0         Blend     2.042   1     2.042  0.004  0.952  0.000
@@ -940,9 +948,8 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
 
     Two-way ANOVA with unbalanced design (requires statsmodels)
 
-    >>> data = pg.read_dataset('anova2_unbalanced')
-    >>> data.anova(dv="Scores", between=["Diet", "Exercise"],
-    ...            effsize="n2").round(3)
+    >>> data = pg.read_dataset("anova2_unbalanced")
+    >>> data.anova(dv="Scores", between=["Diet", "Exercise"], effsize="n2").round(3)
                 Source       SS   DF       MS      F  p_unc     n2
     0             Diet  390.625  1.0  390.625  7.423  0.034  0.433
     1         Exercise  180.625  1.0  180.625  3.432  0.113  0.200
@@ -951,9 +958,8 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
 
     Three-way ANOVA, type 3 sums of squares (requires statsmodels)
 
-    >>> data = pg.read_dataset('anova3')
-    >>> data.anova(dv='Cholesterol', between=['Sex', 'Risk', 'Drug'],
-    ...            ss_type=3).round(3)
+    >>> data = pg.read_dataset("anova3")
+    >>> data.anova(dv="Cholesterol", between=["Sex", "Risk", "Drug"], ss_type=3).round(3)
                   Source      SS    DF      MS       F  p_unc    np2
     0                Sex   2.075   1.0   2.075   2.462  0.123  0.049
     1               Risk  11.332   1.0  11.332  13.449  0.001  0.219
@@ -1192,7 +1198,7 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     # Effect size
     if effsize == "n2":
         # Get standard eta-square for all effects except residuals (last)
-        all_n2 = (aov["SS"] / aov["SS"].sum()).to_numpy()
+        all_n2 = (aov["SS"] / aov["SS"].sum()).to_numpy(copy=True)
         all_n2[-1] = np.nan
         aov["n2"] = all_n2
     else:
@@ -1324,8 +1330,8 @@ def welch_anova(data=None, dv=None, between=None):
     1. One-way Welch ANOVA on the pain threshold dataset.
 
     >>> from pingouin import welch_anova, read_dataset
-    >>> df = read_dataset('anova')
-    >>> aov = welch_anova(dv='Pain threshold', between='Hair color', data=df)
+    >>> df = read_dataset("anova")
+    >>> aov = welch_anova(dv="Pain threshold", between="Hair color", data=df)
     >>> aov
            Source  ddof1     ddof2         F     p_unc       np2
     0  Hair color      3  8.329841  5.890115  0.018813  0.575962
@@ -1448,9 +1454,8 @@ def mixed_anova(
     Compute a two-way mixed model ANOVA.
 
     >>> from pingouin import mixed_anova, read_dataset
-    >>> df = read_dataset('mixed_anova')
-    >>> aov = mixed_anova(dv='Scores', between='Group',
-    ...                   within='Time', subject='Subject', data=df)
+    >>> df = read_dataset("mixed_anova")
+    >>> aov = mixed_anova(dv="Scores", between="Group", within="Time", subject="Subject", data=df)
     >>> aov.round(3)
             Source     SS  DF1  DF2     MS      F  p_unc    np2    eps
     0        Group  5.460    1   58  5.460  5.052  0.028  0.080    NaN
@@ -1461,8 +1466,9 @@ def mixed_anova(
     can also apply this function directly as a method of the dataframe, in
     which case we do not need to specify ``data=df`` anymore.
 
-    >>> df.mixed_anova(dv='Scores', between='Group', within='Time',
-    ...                subject='Subject', effsize="ng2").round(3)
+    >>> df.mixed_anova(
+    ...     dv="Scores", between="Group", within="Time", subject="Subject", effsize="ng2"
+    ... ).round(3)
             Source     SS  DF1  DF2     MS      F  p_unc    ng2    eps
     0        Group  5.460    1   58  5.460  5.052  0.028  0.031    NaN
     1         Time  7.628    2  116  3.814  4.027  0.020  0.042  0.999
@@ -1666,8 +1672,8 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     and family income as a covariate.
 
     >>> from pingouin import ancova, read_dataset
-    >>> df = read_dataset('ancova')
-    >>> ancova(data=df, dv='Scores', covar='Income', between='Method')
+    >>> df = read_dataset("ancova")
+    >>> ancova(data=df, dv="Scores", covar="Income", between="Method")
          Source           SS  DF          F     p_unc       np2
     0    Method   571.029883   3   3.336482  0.031940  0.244077
     1    Income  1678.352687   1  29.419438  0.000006  0.486920
@@ -1676,8 +1682,7 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     2. Evaluate the reading scores of students with different teaching method
     and family income + BMI as a covariate.
 
-    >>> ancova(data=df, dv='Scores', covar=['Income', 'BMI'], between='Method',
-    ...        effsize="n2")
+    >>> ancova(data=df, dv="Scores", covar=["Income", "BMI"], between="Method", effsize="n2")
          Source           SS  DF          F     p_unc        n2
     0    Method   552.284043   3   3.232550  0.036113  0.141802
     1    Income  1573.952434   1  27.637304  0.000011  0.404121
@@ -1733,11 +1738,11 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
 
     # Add effect sizes
     if effsize == "n2":
-        all_effsize = (aov["SS"] / aov["SS"].sum()).to_numpy()
+        all_effsize = (aov["SS"] / aov["SS"].sum()).to_numpy(copy=True)
         all_effsize[-1] = np.nan
     else:
         ss_resid = aov["SS"].iloc[-1]
-        all_effsize = aov["SS"].apply(lambda x: x / (x + ss_resid)).to_numpy()
+        all_effsize = aov["SS"].apply(lambda x: x / (x + ss_resid)).to_numpy(copy=True)
         all_effsize[-1] = np.nan
     aov[effsize] = all_effsize
 

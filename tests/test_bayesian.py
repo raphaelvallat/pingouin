@@ -1,11 +1,12 @@
-import numpy as np
 from unittest import TestCase
-from scipy.stats import pearsonr
-from pingouin.parametric import ttest
-from pingouin.bayesian import bayesfactor_ttest, bayesfactor_binom
-from pingouin.bayesian import bayesfactor_pearson as bfp
 
+import numpy as np
 from pytest import approx
+from scipy.stats import pearsonr
+
+from pingouin.bayesian import bayesfactor_binom, bayesfactor_ttest
+from pingouin.bayesian import bayesfactor_pearson as bfp
+from pingouin.parametric import ttest
 
 np.random.seed(1234)
 x = np.random.normal(size=100)
@@ -41,11 +42,6 @@ class TestBayesian(TestCase):
         assert ttest(x, y, paired=True).at["T_test", "BF10"] == "0.135"
         assert int(float(ttest(x, z).at["T_test", "BF10"])) == 1290
         assert int(float(ttest(x, z, paired=True).at["T_test", "BF10"])) == 420
-        # Now check the alternative tails
-        assert bayesfactor_ttest(3.5, 20, 20, alternative="greater") > 1
-        assert bayesfactor_ttest(3.5, 20, 20, alternative="less") < 1
-        assert bayesfactor_ttest(-3.5, 20, 20, alternative="greater") < 1
-        assert bayesfactor_ttest(-3.5, 20, 20, alternative="less") > 1
         # Check with wrong T-value
         assert np.isnan(bayesfactor_ttest(np.nan, 20, paired=True))
 

@@ -1,10 +1,12 @@
-import pytest
-import numpy as np
 from unittest import TestCase
+
+import numpy as np
+import pytest
 from scipy.stats import circmean
+
 from pingouin import read_dataset
-from pingouin.circular import convert_angles, _checkangles
 from pingouin.circular import (
+    _checkangles,
     circ_axial,
     circ_corrcc,
     circ_corrcl,
@@ -12,6 +14,7 @@ from pingouin.circular import (
     circ_r,
     circ_rayleigh,
     circ_vtest,
+    convert_angles,
 )
 
 np.random.seed(123)

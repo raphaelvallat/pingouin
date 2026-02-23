@@ -5,9 +5,11 @@ Authors
 - Raphael Vallat <raphaelvallat9@gmail.com>
 """
 
-import numpy as np
-import pingouin as pg
 from unittest import TestCase
+
+import numpy as np
+
+import pingouin as pg
 
 df = pg.read_dataset("mixed_anova")
 df_aov3 = pg.read_dataset("anova3_unbalanced")
@@ -80,7 +82,7 @@ class TestParametric(TestCase):
             )
         )
 
-        # Test parwise correlations
+        # Test pairwise correlations
         corrs = data.pairwise_corr(columns=["X", "M", "Y"], method="spearman")
         corrs2 = pg.pairwise_corr(data=data, columns=["X", "M", "Y"], method="spearman")
         assert corrs["r"].equals(corrs2["r"])

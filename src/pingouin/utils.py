@@ -1,11 +1,13 @@
 """Helper functions."""
 
+import collections.abc
+import itertools as it
 import numbers
+
 import numpy as np
 import pandas as pd
-import itertools as it
-import collections.abc
 from tabulate import tabulate
+
 from .config import options
 
 __all__ = [
@@ -17,6 +19,7 @@ __all__ = [
     "_flatten_list",
     "_check_dataframe",
     "_is_sklearn_installed",
+    "_is_sklearn_version_compatible",
     "_is_statsmodels_installed",
     "_is_mpmath_installed",
 ]
@@ -280,15 +283,15 @@ def _flatten_list(x, include_tuple=False):
     Examples
     --------
     >>> from pingouin.utils import _flatten_list
-    >>> x = ['X1', ['M1', 'M2'], 'Y1', ['Y2']]
+    >>> x = ["X1", ["M1", "M2"], "Y1", ["Y2"]]
     >>> _flatten_list(x)
     ['X1', 'M1', 'M2', 'Y1', 'Y2']
 
-    >>> x = ['Xaa', 'Xbb', 'Xcc']
+    >>> x = ["Xaa", "Xbb", "Xcc"]
     >>> _flatten_list(x)
     ['Xaa', 'Xbb', 'Xcc']
 
-    >>> x = ['Xaa', ('Xbb', 'Xcc'), (1, 2), (1)]
+    >>> x = ["Xaa", ("Xbb", "Xcc"), (1, 2), (1)]
     >>> _flatten_list(x)
     ['Xaa', ('Xbb', 'Xcc'), (1, 2), 1]
 
@@ -418,6 +421,35 @@ def _is_sklearn_installed(raise_error=False):
     if raise_error and not is_installed:  # pragma: no cover
         raise OSError("sklearn needs to be installed. Please use `pip install scikit-learn`.")
     return is_installed
+
+
+def _is_sklearn_version_compatible(max_compatible_version):
+    """
+    Checks if installed scikit-learn version is compatible.
+    Requires that scikit-learn is installed.
+
+    Args:
+        max_compatible_version (str): Maximum compatible version of sklearn.
+
+    Returns:
+        bool: True if sklearn version is compatible, False otherwise.
+
+    Raises:
+        Exception if sklearn version is not compatible
+    """
+    import sklearn  # noqa
+    from packaging import version
+
+    installed_version = version.parse(sklearn.__version__)
+    max_compatible_version = version.parse(max_compatible_version)
+    version_compatible = installed_version <= max_compatible_version
+
+    if version_compatible is False:
+        raise Exception(
+            f"sklearn version {sklearn.__version__} is installed and is not compatible."
+            f"Please install scikit-learn version <= {max_compatible_version}."
+        )
+    return version_compatible
 
 
 def _is_mpmath_installed(raise_error=False):

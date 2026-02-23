@@ -1,11 +1,12 @@
 import warnings
-import scipy.stats
+from collections import namedtuple
+
 import numpy as np
 import pandas as pd
-from collections import namedtuple
-from pingouin.utils import _flatten_list as _fl
-from pingouin.utils import remove_na, _postprocess_dataframe
+import scipy.stats
 
+from pingouin.utils import _flatten_list as _fl
+from pingouin.utils import _postprocess_dataframe, remove_na
 
 __all__ = ["gzscore", "normality", "homoscedasticity", "anderson", "epsilon", "sphericity"]
 
@@ -172,9 +173,9 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
 
     2. Omnibus test on a wide-format dataframe with missing values
 
-    >>> data = pg.read_dataset('mediation')
-    >>> data.loc[1, 'X'] = np.nan
-    >>> pg.normality(data, method='normaltest').round(3)
+    >>> data = pg.read_dataset("mediation")
+    >>> data.loc[1, "X"] = np.nan
+    >>> pg.normality(data, method="normaltest").round(3)
                 W   pval  normal
     X       1.792  0.408    True
     M       0.492  0.782    True
@@ -186,14 +187,14 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
 
     3. Pandas Series
 
-    >>> pg.normality(data['X'], method='normaltest')
+    >>> pg.normality(data["X"], method="normaltest")
               W      pval  normal
     X  1.791839  0.408232    True
 
     4. Long-format dataframe
 
-    >>> data = pg.read_dataset('rm_anova2')
-    >>> pg.normality(data, dv='Performance', group='Time')
+    >>> data = pg.read_dataset("rm_anova2")
+    >>> pg.normality(data, dv="Performance", group="Time")
                  W      pval  normal
     Time
     Pre   0.967718  0.478773    True
@@ -201,7 +202,7 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
 
     5. Same but using the Jarque-Bera test
 
-    >>> pg.normality(data, dv='Performance', group='Time', method="jarque_bera")
+    >>> pg.normality(data, dv="Performance", group="Time", method="jarque_bera")
                  W      pval  normal
     Time
     Pre   0.304021  0.858979    True
@@ -346,14 +347,14 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=0.05, **k
 
     >>> import numpy as np
     >>> import pingouin as pg
-    >>> data = pg.read_dataset('mediation')
-    >>> pg.homoscedasticity(data[['X', 'Y', 'M']])
+    >>> data = pg.read_dataset("mediation")
+    >>> pg.homoscedasticity(data[["X", "Y", "M"]])
                    W      pval  equal_var
     levene  1.173518  0.310707       True
 
     2. Same data but using a long-format dataframe
 
-    >>> data_long = data[['X', 'Y', 'M']].melt()
+    >>> data_long = data[["X", "Y", "M"]].melt()
     >>> pg.homoscedasticity(data_long, dv="value", group="variable")
                    W      pval  equal_var
     levene  1.173518  0.310707       True
@@ -367,7 +368,7 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=0.05, **k
     4. Bartlett test using a list of iterables
 
     >>> data = [[4, 8, 9, 20, 14], np.array([5, 8, 15, 45, 12])]
-    >>> pg.homoscedasticity(data, method="bartlett", alpha=.05)
+    >>> pg.homoscedasticity(data, method="bartlett", alpha=0.05)
                      T      pval  equal_var
     bartlett  2.873569  0.090045       True
     """
@@ -504,9 +505,7 @@ def _check_multilevel_rm(data, func="epsilon"):
             # a paired T-test to gain scores instead of using repeated measures
             # on two time points. Here we have computed the gain scores.
             data = (
-                data.groupby(level=1, axis=1, observed=True, group_keys=False)
-                .diff(axis=1)
-                .dropna(axis=1)
+                data.T.groupby(level=1, observed=True, group_keys=False).diff().dropna().transpose()
             )
             data = data.droplevel(level=0, axis=1)
         else:
@@ -631,18 +630,22 @@ def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
 
     >>> import pandas as pd
     >>> import pingouin as pg
-    >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
-    ...                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
-    ...                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
-    >>> gg = pg.epsilon(data, correction='gg')
-    >>> hf = pg.epsilon(data, correction='hf')
-    >>> lb = pg.epsilon(data, correction='lb')
+    >>> data = pd.DataFrame(
+    ...     {
+    ...         "A": [2.2, 3.1, 4.3, 4.1, 7.2],
+    ...         "B": [1.1, 2.5, 4.1, 5.2, 6.4],
+    ...         "C": [8.2, 4.5, 3.4, 6.2, 7.2],
+    ...     }
+    ... )
+    >>> gg = pg.epsilon(data, correction="gg")
+    >>> hf = pg.epsilon(data, correction="hf")
+    >>> lb = pg.epsilon(data, correction="lb")
     >>> print("%.2f %.2f %.2f" % (lb, gg, hf))
     0.50 0.56 0.62
 
     Now using a long-format dataframe
 
-    >>> data = pg.read_dataset('rm_anova2')
+    >>> data = pg.read_dataset("rm_anova2")
     >>> data.head()
        Subject Time   Metric  Performance
     0        1  Pre  Product           13
@@ -653,8 +656,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
 
     Let's first calculate the epsilon of the *Time* within-subject factor
 
-    >>> pg.epsilon(data, dv='Performance', subject='Subject',
-    ...            within='Time')
+    >>> pg.epsilon(data, dv="Performance", subject="Subject", within="Time")
     1.0
 
     Since *Time* has only two levels (Pre and Post), the sphericity assumption
@@ -662,8 +664,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
 
     The *Metric* factor, however, has three levels:
 
-    >>> round(pg.epsilon(data, dv='Performance', subject='Subject',
-    ...                  within=['Metric']), 3)
+    >>> round(pg.epsilon(data, dv="Performance", subject="Subject", within=["Metric"]), 3)
     0.969
 
     The epsilon value is very close to 1, meaning that there is no major
@@ -672,15 +673,14 @@ def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
     Now, let's calculate the epsilon for the interaction between the two
     repeated measures factor:
 
-    >>> round(pg.epsilon(data, dv='Performance', subject='Subject',
-    ...                  within=['Time', 'Metric']), 3)
+    >>> round(pg.epsilon(data, dv="Performance", subject="Subject", within=["Time", "Metric"]), 3)
     0.727
 
     Alternatively, we could use a wide-format dataframe with two column
     levels:
 
     >>> # Pivot from long-format to wide-format
-    >>> piv = data.pivot(index='Subject', columns=['Time', 'Metric'], values='Performance')
+    >>> piv = data.pivot(index="Subject", columns=["Time", "Metric"], values="Performance")
     >>> piv.head()
     Time        Pre                  Post
     Metric  Product Client Action Product Client Action
@@ -736,7 +736,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
     mean_var = np.diag(S).mean()
     S_mean = S.mean().mean()
     ss_mat = (S**2).sum().sum()
-    ss_rows = (S.mean(1) ** 2).sum().sum()
+    ss_rows = (S.mean(axis=1) ** 2).sum().sum()
     num = (k * (mean_var - S_mean)) ** 2
     den = (k - 1) * (ss_mat - 2 * k * ss_rows + k**2 * S_mean**2)
     eps = np.min([num / den, 1])
@@ -874,21 +874,25 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
 
     >>> import pandas as pd
     >>> import pingouin as pg
-    >>> data = pd.DataFrame({'A': [2.2, 3.1, 4.3, 4.1, 7.2],
-    ...                      'B': [1.1, 2.5, 4.1, 5.2, 6.4],
-    ...                      'C': [8.2, 4.5, 3.4, 6.2, 7.2]})
+    >>> data = pd.DataFrame(
+    ...     {
+    ...         "A": [2.2, 3.1, 4.3, 4.1, 7.2],
+    ...         "B": [1.1, 2.5, 4.1, 5.2, 6.4],
+    ...         "C": [8.2, 4.5, 3.4, 6.2, 7.2],
+    ...     }
+    ... )
     >>> spher, W, chisq, dof, pval = pg.sphericity(data)
     >>> print(spher, round(W, 3), round(chisq, 3), dof, round(pval, 3))
     True 0.21 4.677 2 0.096
 
     John, Nagao and Sugiura (JNS) test
 
-    >>> round(pg.sphericity(data, method='jns')[-1], 3)  # P-value only
+    >>> round(pg.sphericity(data, method="jns")[-1], 3)  # P-value only
     0.046
 
     Now using a long-format dataframe
 
-    >>> data = pg.read_dataset('rm_anova2')
+    >>> data = pg.read_dataset("rm_anova2")
     >>> data.head()
        Subject Time   Metric  Performance
     0        1  Pre  Product           13
@@ -899,8 +903,7 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
 
     Let's first test sphericity for the *Time* within-subject factor
 
-    >>> pg.sphericity(data, dv='Performance', subject='Subject',
-    ...            within='Time')
+    >>> pg.sphericity(data, dv="Performance", subject="Subject", within="Time")
     (True, nan, nan, 1, 1.0)
 
     Since *Time* has only two levels (Pre and Post), the sphericity assumption
@@ -908,8 +911,7 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
 
     The *Metric* factor, however, has three levels:
 
-    >>> round(pg.sphericity(data, dv='Performance', subject='Subject',
-    ...                     within=['Metric'])[-1], 3)
+    >>> round(pg.sphericity(data, dv="Performance", subject="Subject", within=["Metric"])[-1], 3)
     0.878
 
     The p-value value is very large, and the test therefore indicates that
@@ -920,9 +922,9 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
     if at least one of the two within-subject factors has no more than two
     levels.
 
-    >>> spher, _, chisq, dof, pval = pg.sphericity(data, dv='Performance',
-    ...                                            subject='Subject',
-    ...                                            within=['Time', 'Metric'])
+    >>> spher, _, chisq, dof, pval = pg.sphericity(
+    ...     data, dv="Performance", subject="Subject", within=["Time", "Metric"]
+    ... )
     >>> print(spher, round(chisq, 3), dof, round(pval, 3))
     True 3.763 2 0.152
 
@@ -933,7 +935,7 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
     levels:
 
     >>> # Pivot from long-format to wide-format
-    >>> piv = data.pivot(index='Subject', columns=['Time', 'Metric'], values='Performance')
+    >>> piv = data.pivot(index="Subject", columns=["Time", "Metric"], values="Performance")
     >>> piv.head()
     Time        Pre                  Post
     Metric  Product Client Action Product Client Action
@@ -1000,7 +1002,9 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
         S = data.cov(numeric_only=True).to_numpy()  # NumPy, otherwise S.mean() != grandmean
         S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
         eig = np.linalg.eigvalsh(S_pop)[1:]
-        eig = eig[eig > 0.001]  # Additional check to remove very low eig
+        # Use a relative tolerance tied to machine precision
+        tol = np.finfo(float).eps * eig.max() * d
+        eig = eig[eig > tol]
         W = np.prod(eig) / (eig.sum() / d) ** d
         logW = np.log(W)
 

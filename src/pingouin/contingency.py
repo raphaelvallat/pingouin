@@ -1,13 +1,13 @@
 # Date: May 2019
 import warnings
+
 import numpy as np
 import pandas as pd
-
+from scipy.stats import binom, power_divergence
+from scipy.stats import chi2 as sp_chi2
 from scipy.stats.contingency import expected_freq
-from scipy.stats import power_divergence, binom, chi2 as sp_chi2
 
-from pingouin import power_chi2, _postprocess_dataframe
-
+from pingouin import _postprocess_dataframe, power_chi2
 
 __all__ = ["chi2_independence", "chi2_mcnemar", "dichotomous_crosstab"]
 
@@ -292,8 +292,8 @@ def chi2_mcnemar(data, x, y, correction=True):
     Examples
     --------
     >>> import pingouin as pg
-    >>> data = pg.read_dataset('chi2_mcnemar')
-    >>> observed, stats = pg.chi2_mcnemar(data, 'treatment_X', 'treatment_Y')
+    >>> data = pg.read_dataset("chi2_mcnemar")
+    >>> observed, stats = pg.chi2_mcnemar(data, "treatment_X", "treatment_Y")
     >>> observed
     treatment_Y   0   1
     treatment_X

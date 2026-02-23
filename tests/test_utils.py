@@ -1,22 +1,23 @@
-import pandas as pd
+from unittest import TestCase
+
 import numpy as np
+import pandas as pd
 import pytest
 
 import pingouin
-
-from unittest import TestCase
 from pingouin.utils import (
-    print_table,
-    _postprocess_dataframe,
-    _get_round_setting_for,
-    _perm_pval,
-    _check_eftype,
     _check_dataframe,
-    remove_na,
+    _check_eftype,
     _flatten_list,
-    _is_sklearn_installed,
-    _is_statsmodels_installed,
+    _get_round_setting_for,
     _is_mpmath_installed,
+    _is_sklearn_installed,
+    _is_sklearn_version_compatible,
+    _is_statsmodels_installed,
+    _perm_pval,
+    _postprocess_dataframe,
+    print_table,
+    remove_na,
 )
 
 # Dataset
@@ -196,8 +197,12 @@ class TestUtils(TestCase):
         assert isinstance(_is_statsmodels_installed(), bool)
 
     def _is_sklearn_installed(self):
-        """Test function _is_statsmodels_installed."""
+        """Test function _is_sklearn_installed."""
         assert isinstance(_is_sklearn_installed(), bool)
+
+    def _is_sklearn_version_compatible(self):
+        """Test function _is_sklearn_version_compatible."""
+        assert isinstance(_is_sklearn_version_compatible(), bool)
 
     def _is_mpmath_installed(self):
         """Test function _is_mpmath_installed."""
