@@ -788,7 +788,9 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     # Note that the GG epsilon of the interaction slightly differs between
     # R and Pingouin. An alternative is to use the lower bound, which is
     # very conservative (same behavior as described on real-statistics.com).
-    eps_ab = epsilon(data_piv, correction="gg")
+
+    piv_ab_full = data.pivot_table(index=subject, columns=[a, b], values=dv, observed=True)
+    eps_ab = epsilon(piv_ab_full, correction="gg")
 
     # Greenhouse-Geisser correction
     df_a_c, df_as_c = (np.maximum(d * eps_a, 1.0) for d in (df_a, df_as))

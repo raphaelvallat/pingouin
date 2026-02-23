@@ -463,6 +463,19 @@ class TestParametric(TestCase):
         with pytest.raises(ValueError):
             df2.rm_anova(dv="BOLD", within=["Session", "Time", "Wrong"], subject="Subj")
 
+        def test_rm_anova2_interaction_epsilon_check(self):
+            """Test interaction epsilon matching R/JASP results"""
+            data = read_dataset("rm_anova2")
+            aov = rm_anova(
+                data=data,
+                subject="Subject",
+                within=["Time", "Metric"],
+                dv="Performance",
+                correction=True,
+            ).round(5)
+
+            assert aov.at[2, "eps"] == 0.72717
+
     def test_mixed_anova(self):
         """Test function anova.
         Compare with JASP and ezANOVA.
