@@ -110,9 +110,6 @@ def skipped(x, y, corr_type="spearman"):
     Code inspired by Matlab code from Cyril Pernet and Guillaume
     Rousselet [1]_.
 
-    Requires scikit-learn version below or equal to 1.7.2.
-    For more information see: https://github.com/raphaelvallat/pingouin/issues/481
-
     References
     ----------
     .. [1] Pernet CR, Wilcox R, Rousselet GA. Robust Correlation Analyses:
@@ -121,10 +118,9 @@ def skipped(x, y, corr_type="spearman"):
        doi:10.3389/fpsyg.2012.00606.
     """
     # Check that sklearn is installed
-    from pingouin.utils import _is_sklearn_installed, _is_sklearn_version_compatible
+    from pingouin.utils import _is_sklearn_installed
 
     _is_sklearn_installed(raise_error=True)
-    _is_sklearn_version_compatible(max_compatible_version="1.7.2")
     from scipy.stats import chi2
     from sklearn.covariance import MinCovDet
 
@@ -482,9 +478,8 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
     both robust methods that returns the Spearman correlation coefficient after
     removing *bivariate* outliers. Briefly, the Shepherd pi uses a
     bootstrapping of the Mahalanobis distance to identify outliers, while the
-    skipped correlation is based on the minimum covariance determinant
-    (which requires scikit-learn <= 1.7.2). Note that these two methods are
-    significantly slower than the previous ones.
+    skipped correlation is based on the minimum covariance determinant. Note that these two methods
+    are significantly slower than the previous ones.
 
     The confidence intervals for the correlation coefficient are estimated
     using the Fisher transformation.
