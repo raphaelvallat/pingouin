@@ -24,7 +24,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv pip install --group=test . "scikit-learn<1.8.0"
+          uv pip install --group=test .
 
       - name: Run tests with coverage
         run: |

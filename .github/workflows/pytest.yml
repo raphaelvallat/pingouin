@@ -31,7 +31,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv pip install --group=test . "scikit-learn<1.8.0"
+          uv pip install --group=test .
 
       - name: Test with pytest
         run: uv run pytest --verbose
@@ -81,7 +81,7 @@ jobs:
             numpy: "numpy"
             pandas: "pandas"
             statsmodels: "statsmodels"
-            scikit-learn: "scikit-learn==1.7.2"
+            scikit-learn: "scikit-learn"
             label: "latest-versions"
 
     runs-on: ${{ matrix.platform }}
