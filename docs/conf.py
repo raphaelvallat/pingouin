@@ -177,6 +177,21 @@ def linkcode_resolve(domain, info):
     )
 
 
+# -- 404 page  ------------------------------------------------
+
+# Remove default url prefix on 404 pages
+# https://sphinx-notfound-page.readthedocs.io/en/latest/configuration.html#confval-notfound_urls_prefix
+notfound_urls_prefix = None
+
+notfound_context = {
+    "title": "Page Not Found (404)",
+    "body": """
+        <h1>Page Not Found</h1>
+        <p>Sorry, we couldn't find that page.</p>
+        <p>Try using the search box or go to the homepage.</p>
+        """,
+}
+
 # -- Intersphinx ------------------------------------------------
 
 intersphinx_mapping = {

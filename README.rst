@@ -11,7 +11,7 @@
 .. image:: https://img.shields.io/github/license/raphaelvallat/pingouin.svg
   :target: https://github.com/raphaelvallat/pingouin/blob/master/LICENSE
 
-.. image:: https://github.com/raphaelvallat/pingouin/actions/workflows/python_tests.yml/badge.svg
+.. image:: https://github.com/raphaelvallat/pingouin/actions/workflows/pytest.yml/badge.svg
   :target: https://github.com/raphaelvallat/pingouin/actions
 
 .. image:: https://codecov.io/gh/raphaelvallat/pingouin/branch/master/graph/badge.svg
