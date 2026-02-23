@@ -25,7 +25,7 @@ jobs:
     continue-on-error: true
     steps:
     - uses: actions/checkout@v6
-    
+
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
@@ -33,10 +33,10 @@ jobs:
 
     - name: Set up uv
       uses: astral-sh/setup-uv@v7
-    
+
     - name: Install dependencies
       run: |
-        uv pip install --group=test .
+        uv pip install --group=test . "scikit-learn<1.8.0"
 
     - name: Install scipy prerelease
       run: |
@@ -58,10 +58,10 @@ jobs:
         uv pip uninstall statsmodels
         uv pip install -U --pre statsmodels
 
-    - name: Install scikit-learn prerelease
-      run: |
-        uv pip uninstall scikit-learn
-        uv pip install -U --pre scikit-learn
+    # - name: Install scikit-learn prerelease
+    #   run: |
+    #     uv pip uninstall scikit-learn
+    #     uv pip install -U --pre scikit-learn
 
     - name: Install seaborn prerelease
       run: |
