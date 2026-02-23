@@ -176,6 +176,7 @@ def linkcode_resolve(domain, info):
         f"#L{start_line}-L{end_line}"
     )
 
+
 # -- 404 page  ------------------------------------------------
 
 # Remove default url prefix on 404 pages
