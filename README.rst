@@ -29,7 +29,7 @@
 .. image::  https://pingouin-stats.org/_images/logo_pingouin.png
    :align:   center
 
-**Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy. Some of its main features are listed below. For a full list of available functions, please refer to the `API documentation <https://pingouin-stats.org/build/html/api.html#>`_.
+**Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy. Some of its main features are listed below. For a full list of available functions, please refer to the `API documentation <https://pingouin-stats.org/api.html>`_.
 
 1. ANOVAs: N-ways, repeated measures, mixed, ancova
 
@@ -97,7 +97,13 @@ Pingouin is a Python 3 package and is currently tested for Python 3.10+.
 User installation
 -----------------
 
-Pingouin can be easily installed using pip
+Pingouin can be easily installed using `uv <https://docs.astral.sh/uv/>`_
+
+.. code-block:: shell
+
+  uv pip install pingouin
+
+pip
 
 .. code-block:: shell
 
@@ -113,28 +119,21 @@ New releases are frequent so always make sure that you have the latest version:
 
 .. code-block:: shell
 
-  pip install --upgrade pingouin
+  uv pip install --upgrade pingouin
 
 Development
 -----------
 
-To build and install from source, clone this repository or download the source archive and decompress the files
+To build and install from source, clone this repository and install in editable mode with `uv <https://docs.astral.sh/uv/>`_
 
 .. code-block:: shell
 
+  git clone https://github.com/raphaelvallat/pingouin.git
   cd pingouin
+  uv pip install --group=test --editable .
 
-  # optional, build a wheel and sdist
-  python -m build
-
-  # install the package
-  pip install .
-
-  # or editable install with dev dependencies
-  pip install --group test --group docs --editable .
-
-   # test the package
-  pytest
+  # test the package
+  pytest --verbose
 
 Quick start
 ============
