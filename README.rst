@@ -141,7 +141,7 @@ Quick start
 Click on the link below and navigate to the notebooks/ folder to run a collection of interactive Jupyter notebooks showing the main functionalities of Pingouin. No need to install Pingouin beforehand, the notebooks run in a Binder environment.
 
 .. image:: https://mybinder.org/badge.svg
-    :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
+    :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/main
 
 10 minutes to Pingouin
 ----------------------
