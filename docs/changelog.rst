@@ -46,6 +46,8 @@ This version requires Python >= 3.10 (tested on Python 3.10-3.14) and:
 
 The full changelog can be found on GitHub: https://github.com/raphaelvallat/pingouin/releases/tag/v0.6.0
 
+*************
+
 v0.5.5 (September 2024)
 -----------------------
 
