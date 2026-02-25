@@ -5,8 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: astral-sh/ruff-action@v3
+      - uses: astral-sh/setup-uv@v7
       - name: "Linting"
-        run: ruff check
+        run: uvx ruff check
       - name: "Formatting"
-        run: ruff format --check
+        run: uvx ruff format --check
