@@ -4,6 +4,10 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'pyproject.toml'
 
 jobs:
   coverage:
