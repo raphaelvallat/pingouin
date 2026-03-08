@@ -8,11 +8,11 @@ import pandas as pd
 import pandas_flavor as pf
 from scipy.stats import studentized_range
 
-from pingouin.config import options
-from pingouin.effsize import compute_effsize
-from pingouin.multicomp import multicomp
-from pingouin.parametric import anova
-from pingouin.utils import _check_dataframe, _flatten_list, _postprocess_dataframe
+from .config import options
+from .effsize import compute_effsize
+from .multicomp import multicomp
+from .parametric import anova
+from .utils import _check_dataframe, _flatten_list, _postprocess_dataframe
 
 __all__ = [
     "pairwise_ttests",

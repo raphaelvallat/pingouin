@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import scipy
 
-from pingouin import _check_dataframe, _postprocess_dataframe, remove_na
+from .utils import _check_dataframe, _postprocess_dataframe, remove_na
 
 __all__ = [
     "mad",

@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import f
 
-from pingouin.config import options
-from pingouin.utils import _postprocess_dataframe
+from .config import options
+from .utils import _postprocess_dataframe
 
 __all__ = ["cronbach_alpha", "intraclass_corr"]
 

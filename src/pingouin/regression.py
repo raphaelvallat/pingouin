@@ -7,10 +7,10 @@ import pandas_flavor as pf
 from scipy.linalg import lstsq, pinvh
 from scipy.stats import norm, t
 
-from pingouin.config import options
-from pingouin.utils import _flatten_list as _fl
-from pingouin.utils import _postprocess_dataframe
-from pingouin.utils import remove_na as rm_na
+from .config import options
+from .utils import _flatten_list as _fl
+from .utils import _postprocess_dataframe
+from .utils import remove_na as rm_na
 
 __all__ = ["linear_regression", "logistic_regression", "mediation_analysis"]
 

@@ -7,7 +7,8 @@ from scipy.stats import binom, power_divergence
 from scipy.stats import chi2 as sp_chi2
 from scipy.stats.contingency import expected_freq
 
-from pingouin import _postprocess_dataframe, power_chi2
+from .power import power_chi2
+from .utils import _postprocess_dataframe
 
 __all__ = ["chi2_independence", "chi2_mcnemar", "dichotomous_crosstab"]
 
