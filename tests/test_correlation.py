@@ -201,6 +201,25 @@ class TestCorrelation(TestCase):
             partial_corr(data=df, x="cv1", y="y", covar=["cv1", "cv2"])
         assert str(error_info.value) == "x and covar must be independent"
 
+        # Issue #387: semi-partial correlation with x_covar/y_covar=None should not raise
+        pc = partial_corr(data=df, x="x", y="y", x_covar=["cv1", "cv2", "cv3"])
+        assert pc.at["pearson", "r"] is not None
+
+        # Issue #375: covariate numerically identical to x or y raises ValueError
+        df_375 = df.copy()
+        df_375["z"] = df["y"].values
+        with pytest.raises(ValueError, match="numerically identical to y"):
+            partial_corr(data=df_375, x="x", y="y", covar="z")
+        df_375["z"] = df["x"].values
+        with pytest.raises(ValueError, match="numerically identical to x"):
+            partial_corr(data=df_375, x="x", y="y", covar="z")
+
+        # Issue #435: rank-deficient covariance matrix (perfect multicollinearity) warns
+        df_435 = df.copy()
+        df_435["cv4"] = df["cv1"] + df["cv2"]  # Perfect linear combination
+        with pytest.warns(UserWarning, match="rank-deficient"):
+            partial_corr(data=df_435, x="x", y="y", covar=["cv1", "cv2", "cv4"])
+
     def test_rmcorr(self):
         """Test function rm_corr"""
         df = read_dataset("rm_corr")

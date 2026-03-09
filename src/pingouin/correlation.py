@@ -868,12 +868,35 @@ def partial_corr(
     k = data.shape[1] - 2  # Number of covariates
     assert n > 2, "Data must have at least 3 non-NAN samples."
 
+    # Check that no covariate is numerically identical to x or y (issue #375)
+    for c in col[2:]:
+        if np.allclose(data[x].to_numpy(), data[c].to_numpy()):
+            raise ValueError(
+                f"Covariate '{c}' is numerically identical to x='{x}'. "
+                "Partial correlation is undefined."
+            )
+        if np.allclose(data[y].to_numpy(), data[c].to_numpy()):
+            raise ValueError(
+                f"Covariate '{c}' is numerically identical to y='{y}'. "
+                "Partial correlation is undefined."
+            )
+
     # Calculate the partial corrrelation matrix - similar to pingouin.pcorr()
     if method == "spearman":
         # Convert the data to rank, similar to R cov()
         V = data.rank(na_option="keep").cov(numeric_only=True)
     else:
         V = data.cov(numeric_only=True)
+
+    # Warn if covariance matrix is rank-deficient (issue #435)
+    if np.linalg.matrix_rank(V) < V.shape[0]:
+        warnings.warn(
+            "The covariance matrix is rank-deficient, likely due to multicollinearity "
+            "among the covariates. Partial correlation results may be unreliable.",
+            UserWarning,
+            stacklevel=2,
+        )
+
     Vi = np.linalg.pinv(V, hermitian=True)  # Inverse covariance matrix
     Vi_diag = Vi.diagonal()
     D = np.diag(np.sqrt(1 / Vi_diag))
