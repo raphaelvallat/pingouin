@@ -156,18 +156,25 @@ def cronbach_alpha(
 
 
 def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_policy="raise"):
-    """Intraclass correlation.
+    """
+    Compute intraclass correlation (ICC) coefficients to assess measurement reliability.
+
+    This function provides six variants of the ICC to evaluate how consistently targets
+    (e.g., patients, samples) are rated across different measurements (e.g., raters, days).
+    It follows the practical guidance of Liljequist et al. (2019) [2]_, which suggests
+    calculating all ICC types together rather than picking a single statistical
+    model upfront.
 
     Parameters
     ----------
     data : :py:class:`pandas.DataFrame`
-        Long-format dataframe. Data must be fully balanced.
+        Long-format dataframe containing the targets, raters, and scores.
     targets : string
-        Name of column in ``data`` containing the targets.
+        Name of the column containing the subjects or items being measured.
     raters : string
-        Name of column in ``data`` containing the raters.
+        Name of the column containing the raters, sessions, or conditions.
     ratings : string
-        Name of column in ``data`` containing the ratings.
+        Name of the column containing the numerical scores or values.
     nan_policy : str
         Defines how to handle when input contains missing values (nan).
         `'raise'` (default) throws an error, `'omit'` performs the calculations
@@ -179,62 +186,83 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_poli
     Returns
     -------
     stats : :py:class:`pandas.DataFrame`
-        Output dataframe:
+        Summary table with one row per ICC variant, containing:
 
-        * ``'Type'``: ICC type
-        * ``'ICC'``: intraclass correlation
-        * ``'F'``: F statistic
-        * ``'df1'``: numerator degree of freedom
-        * ``'df2'``: denominator degree of freedom
-        * ``'pval'``: p-value
-        * ``'CI95'``: 95% confidence intervals around the ICC
+        * ``'Type'``: ICC variant (e.g., ``ICC(1,1)``, ``ICC(A,1)``, ``ICC(C,1)``).
+        * ``'ICC'``: the intraclass correlation coefficient.
+        * ``'F'``, ``'pval'``: F-test results for detecting systematic differences (bias) between
+          raters. A significant p-value suggests that rater means differ, indicating non-negligible
+          bias.
+        * ``'df1'``, ``'df2'``: degrees of freedom for the F-test.
+        * ``'CI95'``: 95% confidence interval for the ICC.
 
     Notes
     -----
-    The intraclass correlation (ICC) [1]_ measures the reliability of ratings
-    by comparing the variability between targets to the total variability across
-    all ratings. It is computed as the ratio of between-target variance to total
-    variance, with values typically ranging from 0 (no reliability) to 1
-    (perfect reliability).
+    The ICC measures the ratio of between-target variance to total variance [1]_.
+    It reflects how consistently targets (e.g., patients, samples) are measured
+    across raters or sessions, with values typically ranging from 0 (no
+    reliability) to 1 (perfect reliability).
 
     Pingouin follows the notation of Liljequist et al. (2019) [2]_, based on
     McGraw and Wong (1996) [3]_. Six ICC variants are returned, organized along
     two dimensions.
 
-    **Formula (first index):**
+    **How bias is handled (first index):**
 
-    - **ICC(1,k)**: Assumes no systematic differences (bias) between raters.
-      Rater variance is absorbed into the residual error. This formula is only
-      valid when bias is absent.
+    - **ICC(1,)**: Assumes raters are interchangeable with no systematic
+      bias. Only valid when rater means are roughly equal.
+    - **ICC(A,)**: Absolute agreement. Penalises systematic differences
+      between raters: "do raters give the same scores?"
+    - **ICC(C,)**: Consistency. Ignores systematic differences between
+      raters: "do raters rank targets in the same order?"
+      Equivalent to the reliability expected if rater biases were removed.
 
-    - **ICC(A,k)**: Absolute agreement. Raters may introduce systematic offsets
-      (bias). Bias contributes to the error term, so the ICC reflects whether
-      different raters assign the same absolute values to targets.
+    **Single or averaged scores (second index):**
 
-    - **ICC(C,k)**: Consistency. Allows for bias but excludes it from the
-      denominator. Reflects whether raters rank targets in the same order,
-      regardless of systematic offsets. ICC(C,k) can be interpreted as the
-      reliability that would be obtained if biases were absent or corrected for.
+    - **1**: Reliability of one rating by a single rater.
+    - **k**: Reliability of the mean across all :math:`k` raters
 
-    **Number of ratings (second index):**
+    **Practical guidance**:
 
-    - **1**: Reliability of a single rating.
-    - **k**: Reliability of the mean of :math:`k` ratings (Spearman-Brown
-      adjusted).
+    Liljequist et al. (2019) recommend computing all three single-score ICCs
+    together and comparing them, rather than selecting a single model upfront.
 
-    **Practical guidance** [2]_:
+    *1. Detecting bias (systematic errors):*
 
-    Compute all three single-rating ICCs and compare them. When ICC(1,1),
-    ICC(A,1), and ICC(C,1) are approximately equal, systematic bias between
-    raters is likely negligible and ICC(1,1) may be reported. When ICC(C,1) is
-    notably larger than ICC(A,1), bias is likely present, ICC(1,1) is no longer
-    valid, and both ICC(A,1) and ICC(C,1) should be reported together with
-    their confidence intervals. The F statistic and p-value in the output test
-    whether rater means differ significantly, providing a formal check for the
-    presence of bias. ICC(A,k) and ICC(C,k) yield identical numerical results
-    regardless of whether raters are treated as randomly sampled or fixed [2]_.
+    Start by comparing ICC(1,1), ICC(A,1), and ICC(C,1). When they are
+    approximately equal, systematic bias between raters is likely negligible.
+    When ICC(C,1) is notably larger than ICC(A,1), non-negligible bias is
+    likely present. In that case, ICC(1,1) is invalid and should not be
+    reported. The F statistic and p-value in the output provide a formal test
+    of whether rater means differ significantly.
 
-    This function has been tested against the ICC function of the R psych
+    *2. Agreement vs. consistency:*
+
+    When bias is present, both ICC(A,1) and ICC(C,1) should be reported
+    together with their confidence intervals. ICC(A,1) reflects absolute
+    agreement (do raters assign the same values?), while ICC(C,1) reflects
+    consistency (do raters rank targets in the same order?).
+
+    *3. Single vs. average ratings:*
+
+    Use the single-score variants (ICC(1,1), ICC(A,1), ICC(C,1)) when
+    reporting the reliability of one rating. Use the average-score variants
+    (ICC(1,k), ICC(A,k), ICC(C,k)) when the final measurement will be the
+    mean of :math:`k` ratings.
+
+    **Interpretation guidelines:**
+
+    General benchmarks for ICC values:
+
+    * < 0.50: Poor
+    * 0.50 - 0.75: Moderate
+    * 0.75 - 0.90: Good
+    * > 0.90: Excellent
+
+    Whether a given ICC is acceptable depends on the intended clinical or
+    practical context, not on these thresholds alone.
+
+    This function has been validated against the ICC function of the R psych
     package. The current implementation uses ANOVA rather than linear mixed
     effects models and requires complete, balanced data.
 
