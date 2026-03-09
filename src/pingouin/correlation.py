@@ -7,12 +7,12 @@ import pandas_flavor as pf
 from scipy.spatial.distance import pdist, squareform
 from scipy.stats import kendalltau, pearsonr, spearmanr
 
-from pingouin.bayesian import bayesfactor_pearson
-from pingouin.config import options
-from pingouin.effsize import compute_esci
-from pingouin.multicomp import multicomp
-from pingouin.power import power_corr
-from pingouin.utils import _perm_pval, _postprocess_dataframe, remove_na
+from .bayesian import bayesfactor_pearson
+from .config import options
+from .effsize import compute_esci
+from .multicomp import multicomp
+from .power import power_corr
+from .utils import _perm_pval, _postprocess_dataframe, remove_na
 
 __all__ = ["corr", "partial_corr", "pcorr", "rcorr", "rm_corr", "distance_corr"]
 

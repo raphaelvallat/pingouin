@@ -5,10 +5,7 @@ import warnings
 import numpy as np
 from scipy.stats import pearsonr
 
-from pingouin.utils import _check_eftype, remove_na
-
-# from pingouin.distribution import homoscedasticity
-
+from .utils import _check_eftype, remove_na
 
 __all__ = [
     "compute_esci",

@@ -3,7 +3,7 @@ from collections import namedtuple
 import numpy as np
 import pandas as pd
 
-from pingouin.utils import _postprocess_dataframe, remove_na
+from .utils import _postprocess_dataframe, remove_na
 
 __all__ = ["multivariate_normality", "multivariate_ttest", "box_m"]
 

@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 import scipy.stats
 
-from pingouin.utils import _flatten_list as _fl
-from pingouin.utils import _postprocess_dataframe, remove_na
+from .utils import _flatten_list as _fl
+from .utils import _postprocess_dataframe, remove_na
 
 __all__ = ["gzscore", "normality", "homoscedasticity", "anderson", "epsilon", "sphericity"]
 
