@@ -118,7 +118,7 @@ Quick start
 * If you want to see *Pingouin in action*, please click on the link below and navigate to the *notebooks/* folder to open a collection of interactive Jupyter notebooks.
 
   .. image:: https://mybinder.org/badge.svg
-      :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
+      :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/main
 
 10 minutes to Pingouin
 ----------------------
