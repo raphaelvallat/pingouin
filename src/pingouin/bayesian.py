@@ -300,24 +300,62 @@ def bayesfactor_pearson(r, n, alternative="two-sided", method="ly", kappa=1.0):
 
         if alternative != "two-sided":
             # Directional test.
-            # We need mpmath for the generalized hypergeometric function
+            # We need mpmath for the generalized hypergeometric function.
+            # We also recompute bf10 in mpmath to avoid catastrophic cancellation
+            # when bf10pos or bf10neg is much smaller than bf10 (e.g. large |r|
+            # with the "wrong" sign). See https://github.com/raphaelvallat/pingouin/issues/427
             from .utils import _is_mpmath_installed
 
             _is_mpmath_installed(raise_error=True)
-            from mpmath import hyp3f2
+            import mpmath
 
-            hyper_term = float(hyp3f2(1, n / 2, n / 2, 3 / 2, (2 + k * (n + 1)) / (2 * k), r**2))
-            log_term = 2 * (lgamma(n / 2) - lgamma((n - 1) / 2)) - lbeta
-            C = 2 ** ((3 * k - 2) / k) * k * r / (2 + (n - 1) * k) * exp(log_term) * hyper_term
+            mp_k = mpmath.mpf(k)
+            mp_n = mpmath.mpf(n)
+            mp_r = mpmath.mpf(r)
 
-            bf10neg = bf10 - C
-            bf10pos = 2 * bf10 - bf10neg
+            # Recompute bf10 (two-sided) in mpmath precision (eq. 25 of Ly et al., 2016)
+            mp_lbeta = mpmath.log(mpmath.beta(1 / mp_k, 1 / mp_k))
+            mp_log_hyperterm = mpmath.log(
+                mpmath.hyp2f1((mp_n - 1) / 2, (mp_n - 1) / 2, (mp_n + 2 / mp_k) / 2, mp_r**2)
+            )
+            bf10_mp = mpmath.exp(
+                (1 - 2 / mp_k) * mpmath.log(2)
+                + mpmath.log(mpmath.pi) / 2
+                - mp_lbeta
+                + mpmath.loggamma((mp_n + 2 / mp_k - 1) / 2)
+                - mpmath.loggamma((mp_n + 2 / mp_k) / 2)
+                + mp_log_hyperterm
+            )
+
+            # Compute the directional correction term C (eq. 27-28 of Ly et al., 2016)
+            hyper_term_mp = mpmath.hyp3f2(
+                1,
+                mp_n / 2,
+                mp_n / 2,
+                mpmath.mpf(3) / 2,
+                (2 + mp_k * (mp_n + 1)) / (2 * mp_k),
+                mp_r**2,
+            )
+            mp_log_term = (
+                2 * (mpmath.loggamma(mp_n / 2) - mpmath.loggamma((mp_n - 1) / 2)) - mp_lbeta
+            )
+            C_mp = (
+                mpmath.power(2, (3 * mp_k - 2) / mp_k)
+                * mp_k
+                * mp_r
+                / (2 + (mp_n - 1) * mp_k)
+                * mpmath.exp(mp_log_term)
+                * hyper_term_mp
+            )
+
+            bf10neg_mp = bf10_mp - C_mp
+            bf10pos_mp = bf10_mp + C_mp
             if alternative == "greater":
                 # We expect the correlation to be positive
-                bf10 = bf10pos
+                bf10 = float(max(bf10pos_mp, mpmath.mpf(0)))
             else:
                 # We expect the correlation to be negative
-                bf10 = bf10neg
+                bf10 = float(max(bf10neg_mp, mpmath.mpf(0)))
 
     return bf10
 
