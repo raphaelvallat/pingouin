@@ -77,6 +77,27 @@ class TestBayesian(TestCase):
         assert bfp(-0.6, 20, method="wetzels") == appr(8.221)
         assert bfp(0.6, 10, method="wetzels") == appr(1.278)
 
+        # Regression test for https://github.com/raphaelvallat/pingouin/issues/427
+        # When r is strongly negative, BF_greater must be near 0 (not spuriously large).
+        # Previously, catastrophic float64 cancellation caused BF_greater ~ 976 here.
+        assert bfp(-0.856, 64, alternative="greater") == appr(0.0)
+        assert bfp(-0.856, 64, alternative="less") == appr(
+            2 * bfp(-0.856, 64, alternative="two-sided"), rel=True
+        )
+        # Symmetry: BF_pos(r) == BF_neg(-r) and vice versa
+        assert bfp(0.856, 64, alternative="greater") == appr(
+            bfp(-0.856, 64, alternative="less"), rel=True
+        )
+        assert bfp(0.856, 64, alternative="less") == appr(
+            bfp(-0.856, 64, alternative="greater"), rel=True
+        )
+        # BF_pos + BF_neg == 2 * BF_10 (eq. 27-28 of Ly et al., 2016)
+        for r_val in [0.3, -0.3, 0.7, -0.7, -0.856]:
+            bf_two = bfp(r_val, 64, alternative="two-sided")
+            bf_pos = bfp(r_val, 64, alternative="greater")
+            bf_neg = bfp(r_val, 64, alternative="less")
+            assert bf_pos + bf_neg == appr(2 * bf_two, rel=True, thresh=1e-6)
+
         # Wrong input
         assert np.isnan(bfp(np.nan, 20))
         assert np.isnan(bfp(0.8, 1))
