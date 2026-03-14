@@ -89,7 +89,7 @@ version = {attr = "pingouin.__version__"}
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--showlocals --durations=10 --maxfail=2 --cov"
+addopts = "--showlocals --durations=10"
 doctest_optionflags= ["NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL"]
 filterwarnings = [
     "ignore::UserWarning",

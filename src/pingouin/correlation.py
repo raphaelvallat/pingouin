@@ -856,8 +856,10 @@ def partial_corr(
     else:
         assert x != covar, "x and covar must be independent"
         assert y != covar, "y and covar must be independent"
-    # Check that columns exist
+    # Build column lists; covariates is used later for data-value checks
+    covariates = _flatten_list([covar, x_covar, y_covar])
     col = _flatten_list([x, y, covar, x_covar, y_covar])
+    # Check that columns exist
     assert all([c in data for c in col]), "columns are not in dataframe."
     # Check that columns are numeric
     assert all([data[c].dtype.kind in "bfiu" for c in col])
@@ -868,12 +870,35 @@ def partial_corr(
     k = data.shape[1] - 2  # Number of covariates
     assert n > 2, "Data must have at least 3 non-NAN samples."
 
+    # Check that no covariate is numerically identical to x or y (issue #375)
+    for c in covariates:
+        if np.allclose(data[x].to_numpy(), data[c].to_numpy()):
+            raise ValueError(
+                f"Covariate '{c}' is numerically identical to x='{x}'. "
+                "Partial correlation is undefined."
+            )
+        if np.allclose(data[y].to_numpy(), data[c].to_numpy()):
+            raise ValueError(
+                f"Covariate '{c}' is numerically identical to y='{y}'. "
+                "Partial correlation is undefined."
+            )
+
     # Calculate the partial corrrelation matrix - similar to pingouin.pcorr()
     if method == "spearman":
         # Convert the data to rank, similar to R cov()
-        V = data.rank(na_option="keep").cov(numeric_only=True)
+        V = data.rank(na_option="keep").cov()
     else:
-        V = data.cov(numeric_only=True)
+        V = data.cov()
+
+    # Warn if covariance matrix is rank-deficient (issue #435)
+    if np.linalg.matrix_rank(V) < V.shape[0]:
+        warnings.warn(
+            "The covariance matrix is rank-deficient, likely due to multicollinearity "
+            "among the covariates. Partial correlation results may be unreliable.",
+            UserWarning,
+            stacklevel=2,
+        )
+
     Vi = np.linalg.pinv(V, hermitian=True)  # Inverse covariance matrix
     Vi_diag = Vi.diagonal()
     D = np.diag(np.sqrt(1 / Vi_diag))
@@ -898,6 +923,9 @@ def partial_corr(
         # Correlation failed. Return NaN. When would this happen?
         return pd.DataFrame({"n": n, "r": np.nan, "CI95": np.nan, "p_val": np.nan}, index=[method])
 
+    # Clip r to [-1, 1] to guard against floating-point drift from pinv
+    r = float(np.clip(r, -1, 1))
+
     # Compute the two-sided p-value and confidence intervals
     # https://online.stat.psu.edu/stat505/lesson/6/6.3
     pval = _correl_pvalue(r, n, k, alternative)
@@ -918,7 +946,7 @@ def partial_corr(
 
     # Define order
     col_keep = ["n", "r", "CI95", "p_val"]
-    col_order = [k for k in col_keep if k in stats.keys().tolist()]
+    col_order = [c for c in col_keep if c in stats.keys().tolist()]
     return _postprocess_dataframe(stats)[col_order]
 
 
@@ -968,9 +996,17 @@ def pcorr(self):
     M  0.412804  0.540140  1.000000
     """
     V = self.cov(numeric_only=True)  # Covariance matrix
+    if np.linalg.matrix_rank(V) < V.shape[0]:
+        warnings.warn(
+            "The covariance matrix is rank-deficient, likely due to multicollinearity. "
+            "Partial correlation results may be unreliable.",
+            UserWarning,
+            stacklevel=2,
+        )
     Vi = np.linalg.pinv(V, hermitian=True)  # Inverse covariance matrix
     D = np.diag(np.sqrt(1 / np.diag(Vi)))
     pcor = -1 * (D @ Vi @ D)  # Partial correlation matrix
+    np.clip(pcor, -1, 1, out=pcor)  # Guard against floating-point drift
     pcor[np.diag_indices_from(pcor)] = 1
     return pd.DataFrame(pcor, index=V.index, columns=V.columns)
 
