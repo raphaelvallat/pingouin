@@ -156,18 +156,25 @@ def cronbach_alpha(
 
 
 def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_policy="raise"):
-    """Intraclass correlation.
+    """
+    Compute intraclass correlation (ICC) coefficients to assess measurement reliability.
+
+    This function provides six variants of the ICC to evaluate how consistently targets
+    (e.g., patients, samples) are rated across different measurements (e.g., raters, days).
+    It follows the practical guidance of Liljequist et al. (2019) [2]_, which suggests
+    calculating all ICC types together rather than picking a single statistical
+    model upfront.
 
     Parameters
     ----------
     data : :py:class:`pandas.DataFrame`
-        Long-format dataframe. Data must be fully balanced.
+        Long-format dataframe containing the targets, raters, and scores.
     targets : string
-        Name of column in ``data`` containing the targets.
+        Name of the column containing the subjects or items being measured.
     raters : string
-        Name of column in ``data`` containing the raters.
+        Name of the column containing the raters, sessions, or conditions.
     ratings : string
-        Name of column in ``data`` containing the ratings.
+        Name of the column containing the numerical scores or values.
     nan_policy : str
         Defines how to handle when input contains missing values (nan).
         `'raise'` (default) throws an error, `'omit'` performs the calculations
@@ -179,63 +186,97 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_poli
     Returns
     -------
     stats : :py:class:`pandas.DataFrame`
-        Output dataframe:
+        Summary table with one row per ICC variant, containing:
 
-        * ``'Type'``: ICC type
-        * ``'Description'``: description of the ICC
-        * ``'ICC'``: intraclass correlation
-        * ``'F'``: F statistic
-        * ``'df1'``: numerator degree of freedom
-        * ``'df2'``: denominator degree of freedom
-        * ``'pval'``: p-value
-        * ``'CI95'``: 95% confidence intervals around the ICC
+        * ``'Type'``: ICC variant (e.g., ``ICC(1,1)``, ``ICC(A,1)``, ``ICC(C,1)``).
+        * ``'ICC'``: the intraclass correlation coefficient.
+        * ``'F'``, ``'pval'``: F-test results for detecting systematic differences (bias) between
+          raters. A significant p-value suggests that rater means differ, indicating non-negligible
+          bias.
+        * ``'df1'``, ``'df2'``: degrees of freedom for the F-test.
+        * ``'CI95'``: 95% confidence interval for the ICC.
 
     Notes
     -----
-    The intraclass correlation (ICC, [1]_) assesses the reliability of ratings
-    by comparing the variability of different ratings of the same subject to
-    the total variation across all ratings and all subjects.
+    The ICC measures the ratio of between-target variance to total variance [1]_.
+    It reflects how consistently targets (e.g., patients, samples) are measured
+    across raters or sessions, with values typically ranging from 0 (no
+    reliability) to 1 (perfect reliability).
 
-    Shrout and Fleiss (1979) [2]_ describe six cases of reliability of ratings
-    done by :math:`k` raters on :math:`n` targets. Pingouin returns all six
-    cases with corresponding F and p-values, as well as 95% confidence
-    intervals.
+    Pingouin follows the notation of Liljequist et al. (2019) [2]_, based on
+    McGraw and Wong (1996) [3]_. Six ICC variants are returned, organized along
+    two dimensions.
 
-    From the documentation of the ICC function in the `psych
-    <https://cran.r-project.org/web/packages/psych/psych.pdf>`_ R package:
+    **How bias is handled (first index):**
 
-    - **ICC1**: Each target is rated by a different rater and the raters are
-      selected at random. This is a one-way ANOVA fixed effects model.
+    - **ICC(1,)**: Assumes raters are interchangeable with no systematic
+      bias. Only valid when rater means are roughly equal.
+    - **ICC(A,)**: Absolute agreement. Penalises systematic differences
+      between raters: "do raters give the same scores?"
+    - **ICC(C,)**: Consistency. Ignores systematic differences between
+      raters: "do raters rank targets in the same order?"
+      Equivalent to the reliability expected if rater biases were removed.
 
-    - **ICC2**: A random sample of :math:`k` raters rate each target. The
-      measure is one of absolute agreement in the ratings. ICC1 is sensitive
-      to differences in means between raters and is a measure of absolute
-      agreement.
+    **Single or averaged scores (second index):**
 
-    - **ICC3**: A fixed set of :math:`k` raters rate each target. There is no
-      generalization to a larger population of raters. ICC2 and ICC3 remove
-      mean differences between raters, but are sensitive to interactions.
-      The difference between ICC2 and ICC3 is whether raters are seen as fixed
-      or random effects.
+    - **1**: Reliability of one rating by a single rater.
+    - **k**: Reliability of the mean across all :math:`k` raters
 
-    Then, for each of these cases, the reliability can either be estimated for
-    a single rating or for the average of :math:`k` ratings. The 1 rating case
-    is equivalent to the average intercorrelation, while the :math:`k` rating
-    case is equivalent to the Spearman Brown adjusted reliability.
-    **ICC1k**, **ICC2k**, **ICC3K** reflect the means of :math:`k` raters.
+    **Practical guidance**:
 
-    This function has been tested against the ICC function of the R psych
-    package. Note however that contrarily to the R implementation, the
-    current implementation does not use linear mixed effect but regular ANOVA,
-    which means that it only works with complete-case data (no missing values).
+    Liljequist et al. (2019) recommend computing all three single-score ICCs
+    together and comparing them, rather than selecting a single model upfront.
+
+    *1. Detecting bias (systematic errors):*
+
+    Start by comparing ICC(1,1), ICC(A,1), and ICC(C,1). When they are
+    approximately equal, systematic bias between raters is likely negligible.
+    When ICC(C,1) is notably larger than ICC(A,1), non-negligible bias is
+    likely present. In that case, ICC(1,1) is invalid and should not be
+    reported. The F statistic and p-value in the output provide a formal test
+    of whether rater means differ significantly.
+
+    *2. Agreement vs. consistency:*
+
+    When bias is present, both ICC(A,1) and ICC(C,1) should be reported
+    together with their confidence intervals. ICC(A,1) reflects absolute
+    agreement (do raters assign the same values?), while ICC(C,1) reflects
+    consistency (do raters rank targets in the same order?).
+
+    *3. Single vs. average ratings:*
+
+    Use the single-score variants (ICC(1,1), ICC(A,1), ICC(C,1)) when
+    reporting the reliability of one rating. Use the average-score variants
+    (ICC(1,k), ICC(A,k), ICC(C,k)) when the final measurement will be the
+    mean of :math:`k` ratings.
+
+    **Interpretation guidelines:**
+
+    General benchmarks for ICC values:
+
+    * < 0.50: Poor
+    * 0.50 - 0.75: Moderate
+    * 0.75 - 0.90: Good
+    * > 0.90: Excellent
+
+    Whether a given ICC is acceptable depends on the intended clinical or
+    practical context, not on these thresholds alone.
+
+    This function has been validated against the ICC function of the R psych
+    package. The current implementation uses ANOVA rather than linear mixed
+    effects models and requires complete, balanced data.
 
     References
     ----------
     .. [1] http://www.real-statistics.com/reliability/intraclass-correlation/
 
-    .. [2] Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations:
-           uses in assessing rater reliability. Psychological bulletin, 86(2),
-           420.
+    .. [2] Liljequist, D., Elfving, B., & Skavberg Roaldsen, K. (2019).
+           Intraclass correlation - A discussion and demonstration of basic
+           features. PLOS ONE, 14(7), e0219854.
+
+    .. [3] McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some
+           intraclass correlation coefficients. Psychological Methods, 1(1),
+           30-46.
 
     Examples
     --------
@@ -247,14 +288,14 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_poli
     ...     3
     ... )
     >>> icc.set_index("Type")
-                       Description    ICC       F  df1  df2  pval          CI95
+              ICC       F  df1  df2  pval          CI95
     Type
-    ICC1    Single raters absolute  0.728  11.680    7   24   0.0  [0.43, 0.93]
-    ICC2      Single random raters  0.728  11.787    7   21   0.0  [0.43, 0.93]
-    ICC3       Single fixed raters  0.729  11.787    7   21   0.0  [0.43, 0.93]
-    ICC1k  Average raters absolute  0.914  11.680    7   24   0.0  [0.75, 0.98]
-    ICC2k    Average random raters  0.914  11.787    7   21   0.0  [0.75, 0.98]
-    ICC3k     Average fixed raters  0.915  11.787    7   21   0.0  [0.75, 0.98]
+    ICC(1,1)  0.728  11.680    7   24   0.0  [0.43, 0.93]
+    ICC(A,1)  0.728  11.787    7   21   0.0  [0.43, 0.93]
+    ICC(C,1)  0.729  11.787    7   21   0.0  [0.43, 0.93]
+    ICC(1,k)  0.914  11.680    7   24   0.0  [0.75, 0.98]
+    ICC(A,k)  0.914  11.787    7   21   0.0  [0.75, 0.98]
+    ICC(C,k)  0.915  11.787    7   21   0.0  [0.75, 0.98]
     """
     from pingouin import anova
 
@@ -328,15 +369,7 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_poli
 
     # Create output dataframe
     stats = {
-        "Type": ["ICC1", "ICC2", "ICC3", "ICC1k", "ICC2k", "ICC3k"],
-        "Description": [
-            "Single raters absolute",
-            "Single random raters",
-            "Single fixed raters",
-            "Average raters absolute",
-            "Average random raters",
-            "Average fixed raters",
-        ],
+        "Type": ["ICC(1,1)", "ICC(A,1)", "ICC(C,1)", "ICC(1,k)", "ICC(A,k)", "ICC(C,k)"],
         "ICC": [icc1, icc2, icc3, icc1k, icc2k, icc3k],
         "F": [f1k, f2k, f2k, f1k, f2k, f2k],
         "df1": n - 1,
