@@ -12,7 +12,7 @@ Code guidelines
 
 *Before starting new code*, we highly recommend opening an issue on `GitHub <https://github.com/raphaelvallat/pingouin>`_ to discuss potential changes.
 
-* Please follow `PEP 8 <https://peps.python.org/pep-0008/>`_ Python style guidelines. Pingouin uses `Ruff <https://github.com/astral-sh/ruff>`_ for linting and formatting. Before submitting a PR, please run the following commands from the root folder of Pingouin to sort imports and format code:
+* Please follow `PEP 8 <https://peps.python.org/pep-0008/>`_ Python style guidelines. Pingouin uses `Ruff <https://github.com/astral-sh/ruff>`_ for linting and formatting. The easiest way to ensure your code is properly formatted before committing is to use the `pre-commit <https://pre-commit.com/>`_ hooks (see :ref:`pre-commit-hooks`). Alternatively, you can run the following commands manually from the root folder of Pingouin:
 
   .. code-block:: bash
 
@@ -34,22 +34,30 @@ Code guidelines
 
      $ pytest --verbose
 
+.. _pre-commit-hooks:
+
+Pre-commit hooks
+-----------------
+
+Pingouin uses `pre-commit <https://pre-commit.com/>`_ to automatically run Ruff linting and formatting on every commit. To set it up:
+
+.. code-block:: bash
+
+  $ uv pip install pre-commit
+  $ pre-commit install
+
+Once installed, Ruff will run automatically on all staged files before each commit.
+
 Setting up a development environment
 -------------------------------------
 
-Pingouin uses `uv <https://docs.astral.sh/uv/>`_ for fast dependency management. To set up a local development environment, first clone the repository and then install the package in editable mode with the test dependencies:
+Pingouin uses `uv <https://docs.astral.sh/uv/>`_ for fast dependency management. To set up a local development environment, first clone the repository and then install the package in editable mode with all development dependencies (testing, linting, pre-commit):
 
 .. code-block:: bash
 
   $ git clone https://github.com/raphaelvallat/pingouin.git
   $ cd pingouin
-  $ uv pip install --group=test --editable .
-
-To also install the development tools (Ruff), add the ``dev`` group:
-
-.. code-block:: bash
-
-  $ uv pip install --group=dev --group=test --editable .
+  $ uv pip install --group=dev --editable .
 
 Continuous Integration
 -----------------------

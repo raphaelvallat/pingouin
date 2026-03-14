@@ -35,7 +35,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv pip install --group=test .
+          uv pip install --group=dev .
 
       - name: Test with pytest
         run: uv run pytest --verbose
@@ -105,7 +105,7 @@ jobs:
 
       - name: Install dependencies (${{ matrix.deps.label }})
         run: >-
-          uv pip install --group=test .
+          uv pip install --group=dev .
           "${{ matrix.deps.scipy }}"
           "${{ matrix.deps.pandas }}"
           "${{ matrix.deps.statsmodels }}"

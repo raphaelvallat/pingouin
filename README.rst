@@ -130,7 +130,7 @@ To build and install from source, clone this repository and install in editable 
 
   git clone https://github.com/raphaelvallat/pingouin.git
   cd pingouin
-  uv pip install --group=test --editable .
+  uv pip install --group=dev --editable .
 
   # test the package
   pytest --verbose
