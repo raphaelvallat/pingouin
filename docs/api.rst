@@ -181,7 +181,6 @@ Plotting
       plot_blandaltman
       plot_circmean
       plot_paired
-      plot_shift
       plot_rm_corr
       qqplot
 
