@@ -36,7 +36,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        uv pip install --group=test .
+        uv pip install --group=dev .
 
     - name: Install scipy prerelease
       run: |

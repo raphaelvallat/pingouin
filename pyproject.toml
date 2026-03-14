@@ -46,9 +46,8 @@ extras = [
 
 [dependency-groups]
 dev = [
+    "pre-commit",
     "ruff>=0.15.0",
-]
-test = [
     "pytest>=6",
     "pytest-cov",
     # Ensure coverage is new enough for `source_pkgs`.
