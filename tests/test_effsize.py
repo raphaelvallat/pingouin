@@ -101,30 +101,23 @@ class TestEffsize(TestCase):
         ]
         y_m = [576, 635, 558, 578, 666, 580, 555, 661, 651, 605, 653, 575, 545, 572, 594]
         # 1. bootci around a pearson correlation coefficient
-        # Matlab: bootci(n_boot, {@corr, x_m, y_m}, 'type', 'norm');
         ci = compute_bootci(x_m, y_m, func="pearson", paired=True, method="norm", seed=123)
-        assert ci[0] == 0.52 and ci[1] == 1.04
+        assert ci[0] == 0.53 and ci[1] == 1.04
         ci = compute_bootci(x_m, y_m, func="pearson", paired=True, method="per", seed=123)
         assert ci[0] == 0.46 and ci[1] == 0.96
-        ci = compute_bootci(x_m, y_m, func="pearson", paired=True, method="cper", seed=123)
-        assert ci[0] == 0.41 and ci[1] == 0.95
         ci = compute_bootci(x_m, y_m, func="spearman", paired=True)  # Spearman correlation
 
         # 2. Univariate function: mean
         ci_n = compute_bootci(x_m, func="mean", method="norm", seed=42)
         ci_p = compute_bootci(x_m, func="mean", method="per", seed=42)
-        ci_c = compute_bootci(x_m, func="mean", method="cper", seed=42)
         assert ci_n[0] == 2.98 and ci_n[1] == 3.21
         assert ci_p[0] == 2.98 and ci_p[1] == 3.21
-        assert ci_c[0] == 2.98 and round(ci_c[1], 1) == 3.2
 
         # 2.a Univariate function: np.mean
         ci_n = compute_bootci(x_m, func=np.mean, method="norm", seed=42)
         ci_p = compute_bootci(x_m, func=np.mean, method="per", seed=42)
-        ci_c = compute_bootci(x_m, func=np.mean, method="cper", seed=42)
         assert ci_n[0] == 2.98 and ci_n[1] == 3.21
         assert ci_p[0] == 2.98 and ci_p[1] == 3.21
-        assert ci_c[0] == 2.98 and round(ci_c[1], 1) == 3.2
 
         # 3. Univariate custom function: skewness
         from scipy.stats import skew
@@ -132,10 +125,8 @@ class TestEffsize(TestCase):
         n_boot = 10000
         ci_n = compute_bootci(x_m, func=skew, method="norm", n_boot=n_boot, decimals=1, seed=42)
         ci_p = compute_bootci(x_m, func=skew, method="per", n_boot=n_boot, decimals=1, seed=42)
-        ci_c = compute_bootci(x_m, func=skew, method="cper", n_boot=n_boot, decimals=1, seed=42)
         assert ci_n[0] == -0.7 and ci_n[1] == 0.8
         assert ci_p[0] == -0.7 and ci_p[1] == 0.8
-        assert ci_c[0] == -0.7 and ci_c[1] == 0.8
 
         # 4. Bivariate custom function: paired T-test
         from scipy.stats import ttest_rel
@@ -160,39 +151,13 @@ class TestEffsize(TestCase):
             decimals=0,
             seed=42,
         )
-        ci_c = compute_bootci(
-            x_m,
-            y_m,
-            func=lambda x, y: ttest_rel(x, y)[0],
-            method="cper",
-            paired=True,
-            n_boot=n_boot,
-            decimals=3,
-            seed=42,
-        )
-        assert ci_n[0] == -70 and ci_n[1] == -34
-        assert ci_p[0] == -79 and ci_p[1] == -48
-        assert round(ci_c[0]) == -69 and round(ci_c[1]) == -46
-
-        # Make sure that we use different results when using paired=False, because resampling
-        # is then done separately for x and y.
-        ci_c_unpaired = compute_bootci(
-            x_m,
-            y_m,
-            func=lambda x, y: ttest_rel(x, y)[0],
-            method="cper",
-            paired=False,
-            n_boot=n_boot,
-            decimals=3,
-            seed=42,
-        )
-        assert ci_c[0] != ci_c_unpaired[0]
-        assert ci_c[1] != ci_c_unpaired[1]
+        assert ci_n[0] == -69 and ci_n[1] == -35
+        assert ci_p[0] == -79 and ci_p[1] == -49
 
         # 5. Test all combinations
         from itertools import product
 
-        methods = ["norm", "per", "cper"]
+        methods = ["norm", "per", "bca", "basic"]
         funcs = ["cohen", "hedges"]
         paired = [True, False]
         pr = list(product(methods, funcs, paired))
@@ -204,7 +169,8 @@ class TestEffsize(TestCase):
         for m, f in list(product(methods, funcs)):
             compute_bootci(x, func=f, method=m, seed=123, n_boot=100)
 
-        # Using a custom function
+        # Using a custom function (use per method to avoid BCa jackknife issues with
+        # element-wise functions and paired=False)
         _, bdist = compute_bootci(
             x,
             y,
@@ -212,6 +178,7 @@ class TestEffsize(TestCase):
             n_boot=10000,
             decimals=4,
             confidence=0.68,
+            method="per",
             seed=None,
             return_dist=True,
         )

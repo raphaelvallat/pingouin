@@ -49,7 +49,7 @@ jobs:
         deps:
           # Minimal supported versions and increasing gradually
           - python-version: "3.10"
-            scipy: "scipy==1.8.0"
+            scipy: "scipy==1.10.0"
             numpy: "numpy==1.22.4"
             pandas: "pandas==2.1.1"
             statsmodels: "statsmodels==0.14.1"
@@ -57,7 +57,7 @@ jobs:
             label: "really-old-versions"
 
           - python-version: "3.11"
-            scipy: "scipy==1.9.3"
+            scipy: "scipy==1.11.0"
             numpy: "numpy==1.25.2"
             pandas: "pandas==2.2.0"
             statsmodels: "statsmodels==0.14.3"
