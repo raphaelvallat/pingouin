@@ -716,7 +716,7 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
         {\\sqrt{\\frac{(\\sigma_1^2 + \\sigma_2^2)}{2}}}
 
     The Cohen :math:`d_z` (``eftype='cohen_dz'``) uses the standard deviation of the
-    *difference scores* and is commonly reported for paired-samples designs:
+    *difference scores* (Lakens, 2013):
 
     .. math::
 
