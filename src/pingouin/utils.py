@@ -328,6 +328,7 @@ def _check_eftype(eftype):
         "none",
         "hedges",
         "cohen",
+        "cohen_dz",
         "r",
         "pointbiserialr",
         "eta_square",

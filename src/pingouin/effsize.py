@@ -664,8 +664,9 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
     ----------
     x : np.array or list
         First set of observations.
-    y : np.array or list
-        Second set of observations.
+    y : np.array, list, or float
+        Second set of observations, or a scalar representing the population mean for a
+        one-sample test (e.g. ``y=0`` to compare ``x`` against zero).
     paired : boolean
         If True, uses Cohen d-avg formula to correct for repeated measurements
         (see Notes).
@@ -675,6 +676,7 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
 
         * ``'none'``: no effect size
         * ``'cohen'``: Unbiased Cohen d
+        * ``'cohen_dz'``: Cohen :math:`d_z` (paired samples only, see Notes)
         * ``'hedges'``: Hedges g
         * ``'r'``: Pearson correlation coefficient
         * ``'pointbiserialr'``: Point-biserial correlation
@@ -712,6 +714,22 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
 
         d_{avg} = \\frac{\\overline{X} - \\overline{Y}}
         {\\sqrt{\\frac{(\\sigma_1^2 + \\sigma_2^2)}{2}}}
+
+    The Cohen :math:`d_z` (``eftype='cohen_dz'``) uses the standard deviation of the
+    *difference scores* and is commonly reported for paired-samples designs:
+
+    .. math::
+
+        d_z = \\frac{\\overline{X - Y}}{\\sigma_{X-Y}}
+
+    Note that :math:`d_z = t / \\sqrt{n}` where :math:`t` is the paired t-statistic and
+    :math:`n` is the number of pairs. ``cohen_dz`` requires ``paired=True``, if ``paired=False``
+    a warning is raised and the standard Cohen's d is returned instead.
+
+    **One-sample test**: if ``y`` is a scalar (e.g. a known population mean :math:`\\mu`), the
+    effect size is computed as:
+
+    .. math:: d = \\frac{\\overline{X} - \\mu}{\\sigma_X}
 
     The Cohen's d is a biased estimate of the population effect size, especially for small samples
     (n < 20). It is often preferable to use the corrected Hedges :math:`g` instead:
@@ -773,6 +791,21 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
 
     >>> pg.compute_effsize(y, x, eftype="cles")
     0.7142857142857143
+
+    4. One-sample Cohen d: compare ``x`` against a known population mean (e.g. 0).
+
+    >>> x = [1, 2, 3, 4, 5, 6, 7]
+    >>> pg.compute_effsize(x, y=0, eftype="cohen")
+    1.8516401995451028
+
+    This is equivalent to ``(mean(x) - 0) / std(x, ddof=1)``.
+
+    5. Cohen :math:`d_z` for paired samples.
+
+    >>> x = [1, 2, 3, 4, 5, 6, 7]
+    >>> y = [1, 3, 5, 7, 9, 11, 13]
+    >>> pg.compute_effsize(x, y, paired=True, eftype="cohen_dz")
+    -1.3887301496588271
     """
     # Check arguments
     if not _check_eftype(eftype):
@@ -802,20 +835,31 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
         # Compute exact CLES (see pingouin.wilcoxon)
         diff = x[:, None] - y
         return np.where(diff == 0, 0.5, diff > 0).mean()
-    else:
-        # Compute unbiased Cohen's d effect size
+    elif eftype.lower() == "cohen_dz":
+        # Cohen's dz: uses SD of difference scores (paired samples only)
         if not paired:
-            # https://en.wikipedia.org/wiki/Effect_size
-            dof = nx + ny - 2
-            poolsd = np.sqrt(((nx - 1) * x.var(ddof=1) + (ny - 1) * y.var(ddof=1)) / dof)
-            d = (x.mean() - y.mean()) / poolsd
+            warnings.warn(
+                "Cohen's dz is only defined for paired samples. "
+                "Computing regular Cohen's d instead."
+            )
         else:
-            # Report Cohen d-avg (Cumming 2012; Lakens 2013)
-            # Careful, the formula in Lakens 2013 is wrong. Updated in Pingouin
-            # v0.3.4 to use the formula provided by Cummings 2012.
-            # Before that the denominator was just (SD1 + SD2) / 2
-            d = (x.mean() - y.mean()) / np.sqrt((x.var(ddof=1) + y.var(ddof=1)) / 2)
-        return convert_effsize(d, "cohen", eftype, nx=nx, ny=ny)
+            diff = x - y
+            return diff.mean() / diff.std(ddof=1)
+        # Fall through to regular Cohen's d if not paired
+        eftype = "cohen"
+    # Compute unbiased Cohen's d effect size
+    if not paired:
+        # https://en.wikipedia.org/wiki/Effect_size
+        dof = nx + ny - 2
+        poolsd = np.sqrt(((nx - 1) * x.var(ddof=1) + (ny - 1) * y.var(ddof=1)) / dof)
+        d = (x.mean() - y.mean()) / poolsd
+    else:
+        # Report Cohen d-avg (Cumming 2012; Lakens 2013)
+        # Careful, the formula in Lakens 2013 is wrong. Updated in Pingouin
+        # v0.3.4 to use the formula provided by Cummings 2012.
+        # Before that the denominator was just (SD1 + SD2) / 2
+        d = (x.mean() - y.mean()) / np.sqrt((x.var(ddof=1) + y.var(ddof=1)) / 2)
+    return convert_effsize(d, "cohen", eftype, nx=nx, ny=ny)
 
 
 def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype="cohen"):

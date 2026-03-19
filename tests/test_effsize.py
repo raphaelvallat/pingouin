@@ -315,6 +315,31 @@ class TestEffsize(TestCase):
         assert np.isclose(cl, 0.3958333)
         assert np.isclose((1 - cl), compute_effsize(x=y2, y=x2, eftype="cles"))
 
+        # One-sample: passing a scalar as y (issue #507)
+        # Cohen d = (mean(x) - mu) / std(x, ddof=1)
+        mu = 2.0
+        d_onesample = compute_effsize(x=x, y=mu, eftype="cohen")
+        assert np.isclose(d_onesample, (np.mean(x) - mu) / np.std(x, ddof=1))
+        # y=0 is a common use-case
+        d_zero = compute_effsize(x=x, y=0, eftype="cohen")
+        assert np.isclose(d_zero, np.mean(x) / np.std(x, ddof=1))
+
+        # Cohen's dz for paired samples (issue #450)
+        # dz = mean(x - y) / std(x - y, ddof=1) = t / sqrt(n)
+        dz = compute_effsize(x=x, y=y, paired=True, eftype="cohen_dz")
+        diff = np.array(x) - np.array(y)
+        assert np.isclose(dz, diff.mean() / diff.std(ddof=1))
+        # Verify equivalence with t / sqrt(n)
+        from scipy.stats import ttest_rel
+
+        tval, _ = ttest_rel(x, y)
+        assert np.isclose(dz, tval / np.sqrt(nx))
+        # cohen_dz with paired=False should warn and fall back to Cohen's d
+        with pytest.warns(UserWarning):
+            d_fallback = compute_effsize(x=x, y=y, paired=False, eftype="cohen_dz")
+        d_cohen = compute_effsize(x=x, y=y, paired=False, eftype="cohen")
+        assert np.isclose(d_fallback, d_cohen)
+
     def test_compute_effsize_from_t(self):
         """Test function compute_effsize_from_t"""
         tval, nx, ny = 2.90, 35, 25
