@@ -3,6 +3,39 @@
 What's new
 ##########
 
+v0.6.1 (March 2026)
+-------------------
+
+This is a minor release with several bugfixes, one new feature, and internal improvements.
+
+**New features**
+
+- :py:func:`pingouin.compute_effsize` now supports **Cohen's** :math:`d_z` for paired-samples designs via the new ``eftype='cohen_dz'`` option (:math:`d_z = \bar{X-Y} / \sigma_{X-Y}`). Additionally, the ``y`` parameter now accepts a scalar (population mean :math:`\mu`), enabling one-sample effect sizes without any API changes. (`PR508 <https://github.com/raphaelvallat/pingouin/pull/508>`_)
+
+**Improvements**
+
+- :py:func:`pingouin.compute_bootci` has been refactored to delegate to :py:func:`scipy.stats.bootstrap`, replacing the internal custom implementation. The default confidence interval method has been upgraded to bias-corrected and accelerated (BCa). This raises the minimum SciPy requirement to **1.10**. (`PR505 <https://github.com/raphaelvallat/pingouin/pull/505>`_)
+- :py:func:`pingouin.intraclass_corr`: updated ICC type labels in the output dataframe and documentation to be more explicit and consistent. (`PR501 <https://github.com/raphaelvallat/pingouin/pull/501>`_)
+
+**Bugfixes**
+
+- :py:func:`pingouin.partial_corr` and :py:func:`pingouin.pcorr`: fixed numerical instability that could return wildly incorrect results when input variables differed by many orders of magnitude (e.g. 1e-4 vs 1e4). The fix standardizes the data before computing the covariance matrix, which is mathematically equivalent but numerically stable. (`PR510 <https://github.com/raphaelvallat/pingouin/pull/510>`_)
+- :py:func:`pingouin.partial_corr`: now raises a ``ValueError`` with a descriptive message when identical covariates are passed, and emits a warning when the covariance matrix is rank-deficient. (`PR500 <https://github.com/raphaelvallat/pingouin/pull/500>`_)
+- :py:func:`pingouin.bayesfactor_pearson`: fixed catastrophic float64 cancellation in one-sided tests for strongly negative ``r`` values, which previously returned arbitrarily large incorrect Bayes Factors. (`PR503 <https://github.com/raphaelvallat/pingouin/pull/503>`_)
+- :py:func:`pingouin.logistic_regression`: fixed compatibility with scikit-learn >= 1.8, which deprecated ``penalty=None``. (`PR504 <https://github.com/raphaelvallat/pingouin/pull/504>`_)
+
+**Breaking changes**
+
+- Removed the ``plot_shift`` function, which had not kept pace with the quality standards of the rest of the library. (`PR502 <https://github.com/raphaelvallat/pingouin/pull/502>`_)
+
+**Dependency requirements**
+
+- Minimum `SciPy <https://www.scipy.org/>`_ version bumped from 1.8.0 to **1.10**.
+
+The full changelog can be found on GitHub: https://github.com/raphaelvallat/pingouin/releases/tag/v0.6.1
+
+*************
+
 v0.6.0 (February 2026)
 ----------------------
 
