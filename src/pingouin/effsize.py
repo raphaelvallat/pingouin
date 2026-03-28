@@ -134,6 +134,13 @@ def compute_esci(
     >>> ci = pg.compute_esci(stat, nx=nx, ny=ny, eftype="cohen", decimals=3)
     >>> print(round(stat, 4), ci)
     0.1538 [-0.737  1.045]
+
+    3. Confidence interval of a one-sample Cohen d (compare ``x`` against a known population mean)
+
+    >>> stat = pg.compute_effsize(x, y=0, eftype="cohen")
+    >>> ci = pg.compute_esci(stat, nx=nx, ny=1, eftype="cohen", decimals=3)
+    >>> print(round(stat, 4), ci)
+    2.816 [1.319 4.313]
     """
     from scipy.stats import norm, t
 
