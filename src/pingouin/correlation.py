@@ -888,7 +888,10 @@ def partial_corr(
         # Convert the data to rank, similar to R cov()
         V = data.rank(na_option="keep").cov()
     else:
-        V = data.cov()
+        # Standardize data before computing covariance to improve numerical stability
+        # when variables differ greatly in magnitude. Partial/semi-partial correlation
+        # is scale-invariant, so this does not affect the result. See GitHub #411, #509.
+        V = ((data - data.mean()) / data.std()).cov()
 
     # Warn if covariance matrix is rank-deficient (issue #435)
     if np.linalg.matrix_rank(V) < V.shape[0]:
@@ -995,7 +998,10 @@ def pcorr(self):
     Y  0.036649  1.000000  0.540140
     M  0.412804  0.540140  1.000000
     """
-    V = self.cov(numeric_only=True)  # Covariance matrix
+    # Standardize before computing covariance for numerical stability when variables
+    # differ greatly in magnitude. Partial correlation is scale-invariant. See #411, #509.
+    _num = self.select_dtypes("number")
+    V = ((_num - _num.mean()) / _num.std()).cov()
     if np.linalg.matrix_rank(V) < V.shape[0]:
         warnings.warn(
             "The covariance matrix is rank-deficient, likely due to multicollinearity. "

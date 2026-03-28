@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 import numpy as np
+import pandas as pd
 import pytest
 
 from pingouin import read_dataset
@@ -219,6 +220,23 @@ class TestCorrelation(TestCase):
         df_435["cv4"] = df["cv1"] + df["cv2"]  # Perfect linear combination
         with pytest.warns(UserWarning, match="rank-deficient"):
             partial_corr(data=df_435, x="x", y="y", covar=["cv1", "cv2", "cv4"])
+
+        # Issues #411, #509: numerical stability when variables differ by many orders of magnitude
+        rng = np.random.default_rng(42)
+        n = 22
+        covar_1 = rng.standard_normal(n)
+        covar_2_normal = rng.standard_normal(n)
+        covar_2_large = covar_2_normal * 1e4
+        x = rng.standard_normal(n) * 1e-4
+        y = covar_1 + rng.standard_normal(n)
+        df_normal = pd.DataFrame({"x": x, "y": y, "covar_1": covar_1, "covar_2": covar_2_normal})
+        df_large = pd.DataFrame({"x": x, "y": y, "covar_1": covar_1, "covar_2": covar_2_large})
+        pc_normal = partial_corr(data=df_normal, x="x", y="y", covar=["covar_1", "covar_2"])
+        pc_large = partial_corr(data=df_large, x="x", y="y", covar=["covar_1", "covar_2"])
+        assert np.isclose(pc_normal.at["pearson", "r"], pc_large.at["pearson", "r"], atol=1e-6)
+        assert np.isclose(
+            pc_normal.at["pearson", "p_val"], pc_large.at["pearson", "p_val"], atol=1e-6
+        )
 
     def test_rmcorr(self):
         """Test function rm_corr"""
