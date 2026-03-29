@@ -34,6 +34,9 @@ copyright = "2018-{}, Raphael Vallat".format(time.strftime("%Y"))
 version = pingouin.__version__
 release = pingouin.__version__
 
+doc_version = os.environ.get("DOC_VERSION")  # "dev", "stable", or None (local build)
+version_match = "dev" if doc_version == "dev" else version
+
 # Sphinx-issues configuration
 issues_github_path = "raphaelvallat/pingouin"
 
@@ -91,6 +94,7 @@ html_theme = "pydata_sphinx_theme"
 html_favicon = "pictures/pingouin_blue.svg"
 
 html_static_path = ["_static"]
+html_extra_path = ["switcher.json"]
 html_css_files = ["css/custom.css"]
 
 html_show_sourcelink = True
@@ -103,8 +107,12 @@ html_theme_options = {
         "image_dark": "pictures/pingouin.svg",
         "alt_text": "pingouin homepage",
     },
+    "switcher": {
+        "json_url": "https://pingouin-stats.org/switcher.json",
+        "version_match": version_match,
+    },
     "navbar_persistent": ["search-button"],
-    "navbar_end": ["navbar-icon-links", "theme-switcher"],
+    "navbar_end": ["version-switcher", "navbar-icon-links", "theme-switcher"],
     "navbar_align": "left",
     "header_links_before_dropdown": 3,
     "back_to_top_button": True,
@@ -121,6 +129,12 @@ html_theme_options = {
     "pygments_light_style": "vs",
     "pygments_dark_style": "monokai",
 }
+
+if doc_version == "dev":
+    html_theme_options["announcement"] = (
+        "You are reading the <strong>development</strong> version of the pingouin docs. "
+        'For the latest stable release, see <a href="https://pingouin-stats.org/stable/">stable docs</a>.'
+    )
 
 html_sidebars = {
     "citing": [],
