@@ -214,6 +214,28 @@ class TestContingency(TestCase):
         assert np.isclose(stats_rxc.at["cmh", "pval"], 0.3345, atol=1e-04)
         assert np.isnan(stats_rxc.at["cmh", "mh_oddsratio"])
 
+        # Comparing 2x2xK results against R (stats::mantelhaen.test)
+        # Agresti (2002) Job Satisfaction table (2x2x2):
+        #   corrected:   M^2 = 3.6286, df = 1, p = 0.0568,  MH OR = 3.271605
+        #   uncorrected: M^2 = 4.731,  df = 1, p = 0.02962, MH OR = 3.271605
+        data_agresti["income_low"] = data_agresti["income"].isin(["<5000", "5000-15000"]).astype(int)
+        data_agresti["sat_high"] = data_agresti["satisfaction"].isin(["Moderately Satisfied", "Very Satisfied"]).astype(int)
+
+        observed_list, stats = pg.cochran_mantel_haenszel(data_agresti, "income_low", "sat_high", "gender")
+        _, stats_no_correction = pg.cochran_mantel_haenszel(data_agresti, "income_low", "sat_high", "gender", correction=False)
+        assert isinstance(observed_list, list)
+        assert len(observed_list) == 2
+        assert np.isclose(stats.at["cmh", "cmh"], 3.6286, atol=1e-04)
+        assert stats.at["cmh", "dof"] == 1
+        assert np.isclose(stats.at["cmh", "pval"], 0.0568, atol=1e-04)
+        assert np.isclose(stats.at["cmh", "mh_oddsratio"], 3.271605, atol=1e-06)
+        assert np.isclose(stats_no_correction.at["cmh", "cmh"], 4.731, atol=1e-03)
+        assert stats_no_correction.at["cmh", "dof"] == 1
+        assert np.isclose(stats_no_correction.at["cmh", "pval"], 0.02962, atol=1e-04)
+        assert np.isclose(stats_no_correction.at["cmh", "mh_oddsratio"], 3.271605, atol=1e-06)
+        # The uncorrected CMH statistic should be larger than the corrected one
+        assert stats_no_correction.at["cmh", "cmh"] > stats.at["cmh", "cmh"]
+
     def test_dichotomize_series(self):
         """Test function _dichotomize_series."""
         # Integer
