@@ -10,7 +10,12 @@ from scipy.stats.contingency import expected_freq
 from .power import power_chi2
 from .utils import _postprocess_dataframe
 
-__all__ = ["chi2_independence", "chi2_mcnemar", "dichotomous_crosstab"]
+__all__ = [
+    "chi2_independence",
+    "chi2_mcnemar",
+    "cochran_mantel_haenszel",
+    "dichotomous_crosstab",
+]
 
 
 ###############################################################################
@@ -345,6 +350,184 @@ def chi2_mcnemar(data, x, y, correction=True):
     stats = pd.DataFrame(stats, index=["mcnemar"])
 
     return observed, _postprocess_dataframe(stats)
+
+
+def cochran_mantel_haenszel(data, x, y, stratum, correction=True):
+    """
+    Performs the Cochran–Mantel–Haenszel test of independence of two
+    categorical variables, stratified by one or more control variables.
+
+    Parameters
+    ----------
+    data : :py:class:`pandas.DataFrame`
+        The dataframe containing the ocurrences for the test.
+    x, y : string
+        The variables names for the test. Must be names of columns in ``data``.
+        Pingouin computes the generalized RxCxK Cochran-Mantel-Haenszel
+        statistic with :math:`(R - 1)(C - 1)` degrees of freedom. For 2x2xK
+        tables, this corresponds to a 1 degree of freedom CMH test.
+    stratum : string or list of strings
+        The name(s) of column(s) in ``data`` containing the stratifying
+        variable(s). The test will be computed separately for each combination
+        of stratum values and then combined into a single test statistic.
+
+        .. warning:: Missing values are not allowed.
+
+    correction : bool
+        Whether to apply continuity correction (0.5) to the CMH statistic.
+
+    Returns
+    -------
+    observed : list of :py:class:`pandas.DataFrame`
+        List of observed contingency tables for each stratum level.
+    stats : :py:class:`pandas.DataFrame`
+        The test summary:
+
+        * ``'cmh'``: The CMH test statistic
+        * ``'dof'``: The degree of freedom :math:`(R - 1)(C - 1)`
+        * ``'pval'``: The p-value of the test
+        * ``'mh_oddsratio'``: The Mantel–Haenszel odds ratio estimate for
+          2x2xK tables (``NaN`` otherwise)
+
+    Notes
+    -----
+    The Cochran–Mantel–Haenszel test is used to test the association between
+    two categorical variables while controlling for one or more stratifying
+    variables.
+
+    Pingouin computes the generalized CMH statistic for RxCxK tables, which
+    follows a chi-squared distribution with :math:`(R - 1)(C - 1)` degrees of
+    freedom. For 2x2xK tables (:math:`(R - 1)(C - 1) = 1`), this reduces to the
+    scalar CMH statistic.
+
+    The Mantel–Haenszel odds ratio is computed as:
+
+    .. math::
+
+        \\text{OR}_{MH} = \\frac{\\sum_i (a_i d_i / n_i)}{\\sum_i (b_i c_i / n_i)}
+
+    where :math:`a_i, b_i, c_i, d_i` are the entries of the 2x2 table in
+    stratum :math:`i` and :math:`n_i` is the total count in stratum :math:`i`.
+
+    References
+    ----------
+    * Cochran, W. G. (1954). Some methods for strengthening the common x² tests.
+      Biometrics, 10, 417–451.
+
+    * Mantel, N., & Haenszel, W. (1959), Statistical Aspects of the Analysis of
+      Data From Retrospective Studies of Disease. Journal of the National Cancer
+      Institute, 22(4), 719–748.
+
+    Examples
+    --------
+    >>> import pingouin as pg
+    >>> data = pg.read_dataset("cochran_mantel_haenszel")
+    >>> # Expand frequency table to one row per observation
+    >>> data = data.loc[data.index.repeat(data["count"])].reset_index(drop=True)
+    >>> observed, stats = pg.cochran_mantel_haenszel(
+    ...     data, x="income", y="satisfaction", stratum="gender"
+    ... )
+    >>> stats
+               cmh  dof      pval  mh_oddsratio
+    cmh  10.200089    9  0.334531           NaN
+    """
+    # Handle stratum as either a single column or list of columns
+    if isinstance(stratum, (str, int)):
+        stratum_cols = [stratum]
+    elif isinstance(stratum, (list, tuple)):
+        stratum_cols = list(stratum)
+    else:
+        raise AssertionError("stratum must be a string, int, list, or tuple.")
+
+    # Input validation
+    assert isinstance(data, pd.DataFrame), "data must be a pandas DataFrame."
+    assert len(stratum_cols) > 0, "stratum must contain at least one column name."
+
+    columns = (x, y, *stratum_cols)
+    assert all(isinstance(column, (str, int)) for column in columns), (
+        "column names must be string or int."
+    )
+    assert all(column in data.columns for column in columns), "columns are not in dataframe."
+
+    for column in (x, y) + tuple(stratum_cols):
+        if data[column].isna().any():
+            raise ValueError("Null values are not allowed.")
+
+    # Create groups by stratum
+    if len(stratum_cols) == 1:
+        grouped = data.groupby(stratum_cols[0], sort=False)
+    else:
+        grouped = data.groupby(stratum_cols, sort=False)
+
+    n_levels_x = data[x].nunique(dropna=False)
+    n_levels_y = data[y].nunique(dropna=False)
+
+    if n_levels_x < 2 or n_levels_y < 2:
+        raise ValueError("x and y must each have at least two levels.")
+
+    observed_tables = []
+    x_levels = pd.Index(pd.unique(data[x]))
+    y_levels = pd.Index(pd.unique(data[y]))
+    nparams = (len(x_levels) - 1) * (len(y_levels) - 1)
+
+    if nparams < 1:
+        raise ValueError("x and y must each have at least two levels.")
+
+    u = np.zeros(nparams, dtype=float)
+    v = np.zeros((nparams, nparams), dtype=float)
+
+    mh_or_num = 0.0
+    mh_or_den = 0.0
+    compute_mh_or = len(x_levels) == 2 and len(y_levels) == 2
+
+    for _, group_data in grouped:
+        obs_table = pd.crosstab(group_data[x], group_data[y], dropna=False)
+        obs_table = obs_table.reindex(index=x_levels, columns=y_levels, fill_value=0)
+        observed_tables.append(obs_table)
+
+        obs = obs_table.to_numpy(dtype=float)
+        n = obs.sum()
+        if n <= 1:
+            continue
+
+        row_sum = obs.sum(axis=1)
+        col_sum = obs.sum(axis=0)
+        expected = np.outer(row_sum, col_sum) / n
+
+        u += (obs[:-1, :-1] - expected[:-1, :-1]).ravel(order="C")
+
+        a = np.diag(row_sum[:-1]) - np.outer(row_sum[:-1], row_sum[:-1]) / n
+        b = np.diag(col_sum[:-1]) - np.outer(col_sum[:-1], col_sum[:-1]) / n
+        v += np.kron(a, b) / (n - 1)
+
+        if compute_mh_or:
+            mh_or_num += (obs[0, 0] * obs[1, 1]) / n
+            mh_or_den += (obs[0, 1] * obs[1, 0]) / n
+
+    if np.allclose(v, 0):
+        raise ValueError("Cannot compute CMH test: no variation in stratified tables.")
+
+    dof = nparams
+    if dof == 1 and correction:
+        chi2_cmh = (np.abs(float(u[0])) - 0.5) ** 2 / float(v[0, 0])
+    else:
+        chi2_cmh = float(u @ np.linalg.pinv(v) @ u)
+    pval = sp_chi2.sf(chi2_cmh, dof)
+
+    mh_or = np.nan
+    if compute_mh_or and mh_or_den != 0:
+        mh_or = mh_or_num / mh_or_den
+
+    stats = {
+        "cmh": chi2_cmh,
+        "dof": dof,
+        "pval": pval,
+        "mh_oddsratio": mh_or,
+    }
+
+    stats_df = pd.DataFrame(stats, index=["cmh"])
+
+    return observed_tables, _postprocess_dataframe(stats_df)
 
 
 ###############################################################################
