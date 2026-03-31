@@ -505,9 +505,7 @@ def cochran_mantel_haenszel(data, x, y, stratum, correction=True):
             mh_or_den += (obs[0, 1] * obs[1, 0]) / n
 
     if np.allclose(v, 0):
-        raise ValueError(
-            "Cannot compute CMH test: no variation in stratified tables."
-        )
+        raise ValueError("Cannot compute CMH test: no variation in stratified tables.")
 
     dof = nparams
     if dof == 1 and correction:
