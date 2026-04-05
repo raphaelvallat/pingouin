@@ -44,6 +44,8 @@ class TestPlotting(TestCase):
         plot_blandaltman(x, y, annotate=False)
         plot_blandaltman(x, y, xaxis="x", confidence=None)
         plot_blandaltman(x, y, xaxis="y", color="green", s=10)
+        plot_blandaltman(x, y, percentage=True)
+        plot_blandaltman(x, y, percentage=True, confidence=None, annotate=False)
         plt.close("all")
 
     def test_ppoints(self):

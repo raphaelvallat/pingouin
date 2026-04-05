@@ -26,7 +26,15 @@ __all__ = [
 
 
 def plot_blandaltman(
-    x, y, agreement=1.96, xaxis="mean", confidence=0.95, annotate=True, ax=None, **kwargs
+    x,
+    y,
+    agreement=1.96,
+    xaxis="mean",
+    confidence=0.95,
+    annotate=True,
+    percentage=False,
+    ax=None,
+    **kwargs,
 ):
     """
     Generate a Bland-Altman plot to compare two sets of measurements.
@@ -36,22 +44,25 @@ def plot_blandaltman(
     x, y : pd.Series, np.array, or list
         First and second measurements.
     agreement : float
-        Multiple of the standard deviation to plot agreement limits.
-        The defaults is 1.96, which corresponds to 95% confidence interval if
-        the differences are normally distributed.
+        Multiple of the standard deviation used to compute the limits of
+        agreement (LoA). The default is 1.96, which gives LoA that contain
+        approximately 95% of differences when they are normally distributed.
     xaxis : str
         Define which measurements should be used as the reference (x-axis).
         Default is to use the average of x and y ("mean"). Accepted values are
         "mean", "x" or "y".
-    confidence : float
-        If not None, plot the specified percentage confidence interval of
-        the mean and limits of agreement. The CIs of the mean difference and
-        agreement limits describe a possible error in the
-        estimate due to a sampling error. The greater the sample size,
-        the narrower the CIs will be.
+    confidence : float or None
+        If not None, plot the specified confidence interval of the mean
+        difference and limits of agreement. These bands represent sampling
+        uncertainty around the point estimates (not prediction intervals):
+        the larger the sample size, the narrower the bands. Default is 0.95.
     annotate : bool
-        If True (default), annotate the values for the mean difference
-        and agreement limits.
+        If True (default), annotate the mean difference and upper/lower limits
+        of agreement values on the right-hand side of the plot.
+    percentage : bool
+        If True, plot percentage differences relative to the mean of each
+        pair, i.e. ``(x - y) / mean(x, y) * 100``. Useful when measurement
+        variability scales with magnitude. Default is False.
     ax : matplotlib axes
         Axis on which to draw the plot.
     **kwargs : optional
@@ -84,7 +95,8 @@ def plot_blandaltman(
     The 95% limits of agreement can be unreliable estimates of the population
     parameters especially for small sample sizes so, when comparing methods
     or assessing repeatability, it is important to calculate confidence
-    intervals for the 95% limits of agreement.
+    intervals for the 95% limits of agreement. The standard error of the
+    limits of agreement is √(3s²/n), per Bland & Altman (1986) [1]_.
 
     The code is an adaptation of the
     `PyCompare <https://github.com/jaketmp/pyCompare>`_ package. The present
@@ -127,21 +139,27 @@ def plot_blandaltman(
     _scatter_kwargs = {"color": "tab:blue", "alpha": 0.8}
     _scatter_kwargs.update(kwargs)
 
-    # Calculate mean, STD and SEM of x - y
+    # Calculate differences — absolute or percentage
+    mean_xy = np.vstack((x, y)).mean(0)
+    if percentage:
+        diff = (x - y) / mean_xy * 100
+    else:
+        diff = x - y
+
+    # Calculate mean, STD and SEM of the differences
     n = x.size
     dof = n - 1
-    diff = x - y
     mean_diff = np.mean(diff)
     std_diff = np.std(diff, ddof=1)
     mean_diff_se = np.sqrt(std_diff**2 / n)
-    # Limits of agreements
+    # Limits of agreement and their SE (Bland & Altman, 1986: SE = sqrt(3s²/n))
     high = mean_diff + agreement * std_diff
     low = mean_diff - agreement * std_diff
     high_low_se = np.sqrt(3 * std_diff**2 / n)
 
     # Define x-axis
     if xaxis == "mean":
-        xval = np.vstack((x, y)).mean(0)
+        xval = mean_xy
         xlabel = f"Mean of {xname} and {yname}"
     elif xaxis == "x":
         xval = x
@@ -154,11 +172,12 @@ def plot_blandaltman(
     if ax is None:
         ax = plt.gca()
 
-    # Plot the mean diff, limits of agreement and scatter
+    # Zero line (perfect agreement), then bias and LoA
+    ax.axhline(0, color="lightgray", linestyle="solid", lw=1, zorder=0)
     ax.scatter(xval, diff, **_scatter_kwargs)
     ax.axhline(mean_diff, color="k", linestyle="-", lw=2)
-    ax.axhline(high, color="k", linestyle=":", lw=1.5)
-    ax.axhline(low, color="k", linestyle=":", lw=1.5)
+    ax.axhline(high, color="k", linestyle="--", lw=1.5)
+    ax.axhline(low, color="k", linestyle="--", lw=1.5)
 
     # Annotate values
     if annotate:
@@ -169,26 +188,42 @@ def plot_blandaltman(
         ax.text(xloc, mean_diff + offset, "Mean", ha="right", va="bottom", transform=trans)
         ax.text(xloc, mean_diff - offset, "%.2f" % mean_diff, ha="right", va="top", transform=trans)
         ax.text(
-            xloc, high + offset, "+%.2f SD" % agreement, ha="right", va="bottom", transform=trans
+            xloc,
+            high + offset,
+            f"+{agreement:.2f}\u00d7SD",
+            ha="right",
+            va="bottom",
+            transform=trans,
         )
         ax.text(xloc, high - offset, "%.2f" % high, ha="right", va="top", transform=trans)
-        ax.text(xloc, low - offset, "-%.2f SD" % agreement, ha="right", va="top", transform=trans)
+        ax.text(
+            xloc,
+            low - offset,
+            f"\u2212{agreement:.2f}\u00d7SD",
+            ha="right",
+            va="top",
+            transform=trans,
+        )
         ax.text(xloc, low + offset, "%.2f" % low, ha="right", va="bottom", transform=trans)
 
-    # Add 95% confidence intervals for mean bias and limits of agreement
+    # Confidence intervals for mean bias and limits of agreement
     if confidence is not None:
         assert 0 < confidence < 1
         ci = dict()
         ci["mean"] = stats.t.interval(confidence, dof, loc=mean_diff, scale=mean_diff_se)
         ci["high"] = stats.t.interval(confidence, dof, loc=high, scale=high_low_se)
         ci["low"] = stats.t.interval(confidence, dof, loc=low, scale=high_low_se)
-        ax.axhspan(ci["mean"][0], ci["mean"][1], facecolor="tab:grey", alpha=0.2)
-        ax.axhspan(ci["high"][0], ci["high"][1], facecolor=_scatter_kwargs["color"], alpha=0.2)
-        ax.axhspan(ci["low"][0], ci["low"][1], facecolor=_scatter_kwargs["color"], alpha=0.2)
+        # Bias CI in grey, LoA CIs in blue — independent of scatter color
+        ax.axhspan(ci["mean"][0], ci["mean"][1], facecolor="tab:gray", alpha=0.2)
+        ax.axhspan(ci["high"][0], ci["high"][1], facecolor="tab:blue", alpha=0.2)
+        ax.axhspan(ci["low"][0], ci["low"][1], facecolor="tab:blue", alpha=0.2)
 
-    # Labels
-    ax.set_ylabel(f"{xname} - {yname}")
+    # Labels and symmetric y-axis
+    unit = " [%]" if percentage else ""
+    ax.set_ylabel(f"{xname} \u2212 {yname}{unit}")
     ax.set_xlabel(xlabel)
+    bound = max(abs(lim) for lim in ax.get_ylim())
+    ax.set_ylim(-bound, bound)
     return ax
 
 
