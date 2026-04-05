@@ -46,6 +46,9 @@ class TestPlotting(TestCase):
         plot_blandaltman(x, y, xaxis="y", color="green", s=10)
         plot_blandaltman(x, y, percentage=True)
         plot_blandaltman(x, y, percentage=True, confidence=None, annotate=False)
+        # percentage=True raises ValueError when mean(x, y) == 0 for any pair
+        with pytest.raises(ValueError, match="zero"):
+            plot_blandaltman(np.array([1.0, -1.0]), np.array([-1.0, 1.0]), percentage=True)
         plt.close("all")
 
     def test_ppoints(self):

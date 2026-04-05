@@ -142,6 +142,11 @@ def plot_blandaltman(
     # Calculate differences — absolute or percentage
     mean_xy = np.vstack((x, y)).mean(0)
     if percentage:
+        if np.any(mean_xy == 0):
+            raise ValueError(
+                "Percentage differences are undefined when the mean of `x` and `y` "
+                "is zero for one or more paired observations."
+            )
         diff = (x - y) / mean_xy * 100
     else:
         diff = x - y
@@ -272,9 +277,9 @@ def qqplot(
     sparams : tuple, optional
         Distribution-specific shape parameters (shape parameters, location,
         and scale). See :py:func:`scipy.stats.probplot` for more details.
-    confidence : float
+    confidence : float or bool
         Confidence level (.95 = 95%) for point-wise confidence envelope.
-        Can be disabled by passing False.
+        Pass False to disable the confidence envelope.
     square : bool
         If True (default), ensure equal aspect ratio between X and Y axes.
     line_kwargs : dict or None
@@ -508,16 +513,16 @@ def plot_paired(
         .. versionadded:: 0.3.9
     ax : matplotlib axes
         Axis on which to draw the plot.
-    colors : list of str
-        Line colors names. Default is green when value increases from A to B,
-        indianred when value decreases from A to B and grey when the value is
-        the same in both measurements.
-    pointplot_kwargs : dict
-        Dictionnary of optional arguments that are passed to the
-        :py:func:`seaborn.pointplot` function.
-    boxplot_kwargs : dict
-        Dictionnary of optional arguments that are passed to the
-        :py:func:`seaborn.boxplot` function.
+    colors : list of str or None
+        Line colors names. Default (None) uses green when value increases from
+        A to B, indianred when value decreases from A to B, and grey when the
+        value is the same in both measurements.
+    pointplot_kwargs : dict or None
+        Optional keyword arguments passed to :py:func:`seaborn.pointplot`.
+        When None, internal defaults are used.
+    boxplot_kwargs : dict or None
+        Optional keyword arguments passed to :py:func:`seaborn.boxplot`.
+        When None, internal defaults are used.
 
     Returns
     -------
@@ -750,12 +755,15 @@ def plot_rm_corr(
     legend : boolean
         If True, add legend to plot. Legend will show all the unique values in
         ``subject``.
-    kwargs_facetgrid : dict
-        Optional keyword arguments passed to :py:class:`seaborn.FacetGrid`
-    kwargs_line : dict
-        Optional keyword arguments passed to :py:class:`matplotlib.pyplot.plot`
-    kwargs_scatter : dict
-        Optional keyword arguments passed to :py:class:`matplotlib.pyplot.scatter`
+    kwargs_facetgrid : dict or None
+        Optional keyword arguments passed to :py:class:`seaborn.FacetGrid`.
+        When None, internal defaults are used.
+    kwargs_line : dict or None
+        Optional keyword arguments passed to :py:class:`matplotlib.pyplot.plot`.
+        When None, internal defaults are used.
+    kwargs_scatter : dict or None
+        Optional keyword arguments passed to :py:class:`matplotlib.pyplot.scatter`.
+        When None, internal defaults are used.
 
     Returns
     -------
@@ -944,6 +952,10 @@ def plot_circmean(
     angles = np.asarray(angles)
     assert angles.ndim == 1, "angles must be a one-dimensional array."
     assert angles.size > 1, "angles must have at least 2 values."
+    if kwargs_markers is not None and not isinstance(kwargs_markers, dict):
+        raise TypeError("`kwargs_markers` must be a dict or None.")
+    if kwargs_arrow is not None and not isinstance(kwargs_arrow, dict):
+        raise TypeError("`kwargs_arrow` must be a dict or None.")
 
     # Merge caller-supplied kwargs over defaults
     _kwargs_markers = {
