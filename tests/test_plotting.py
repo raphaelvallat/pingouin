@@ -90,6 +90,9 @@ class TestPlotting(TestCase):
         # Error: required parameters are not specified
         with pytest.raises(ValueError):
             qqplot(x_ln, dist="lognorm", sparams=())
+        # Custom line and CI kwargs; square=False
+        qqplot(x, line_kwargs={"color": "k", "lw": 1}, ci_kwargs={"color": "k", "ls": ":"})
+        qqplot(x, square=False)
         plt.close("all")
 
     def test_plot_paired(self):
@@ -106,6 +109,23 @@ class TestPlotting(TestCase):
         plot_paired(
             data=df, dv="Scores", within="Time", subject="Subject", order=["June", "August"], ax=ax2
         )
+        # Explicit colors (exercises the colors-is-not-None branch)
+        plot_paired(
+            data=df,
+            dv="Scores",
+            within="Time",
+            subject="Subject",
+            colors=["blue", "grey", "red"],
+        )
+        # Mismatched order length raises ValueError
+        with pytest.raises(ValueError):
+            plot_paired(
+                data=df,
+                dv="Scores",
+                within="Time",
+                subject="Subject",
+                order=["June", "August", "Extra"],
+            )
         plot_paired(
             data=df,
             dv="Scores",
@@ -145,6 +165,26 @@ class TestPlotting(TestCase):
         g = plot_rm_corr(data=df, x="pH", y="PacO2", subject="Subject")
         g = plot_rm_corr(data=df, x="pH", y="PacO2", subject="Subject", legend=False)
         assert isinstance(g, sns.FacetGrid)
+        # legend=True exercises g.add_legend()
+        g = plot_rm_corr(data=df, x="pH", y="PacO2", subject="Subject", legend=True)
+        assert isinstance(g, sns.FacetGrid)
+        # Passing a palette in kwargs_facetgrid exercises the palette-already-set branch
+        g = plot_rm_corr(
+            data=df,
+            x="pH",
+            y="PacO2",
+            subject="Subject",
+            kwargs_facetgrid={"height": 4, "aspect": 1, "palette": "Set2"},
+        )
+        assert isinstance(g, sns.FacetGrid)
+        # Fewer than 3 subjects raises ValueError
+        with pytest.raises(ValueError):
+            plot_rm_corr(
+                data=df.query("Subject in [1, 2]"),
+                x="pH",
+                y="PacO2",
+                subject="Subject",
+            )
         plt.close("all")
 
     def test_plot_circmean(self):
@@ -157,5 +197,9 @@ class TestPlotting(TestCase):
         ax = plot_circmean(angles)
         assert isinstance(ax, matplotlib.axes.Axes)
         ax = plot_circmean(angles, kwargs_markers={}, kwargs_arrow={})
+        assert isinstance(ax, matplotlib.axes.Axes)
+        # Explicit ax exercises the ax-is-not-None branch; square=False skips set_aspect
+        _, ax2 = plt.subplots(1, 1)
+        ax = plot_circmean(angles, ax=ax2, square=False)
         assert isinstance(ax, matplotlib.axes.Axes)
         plt.close("all")
