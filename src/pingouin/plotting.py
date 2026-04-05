@@ -412,7 +412,7 @@ def qqplot(
     shape = fit_params[:-2] if len(fit_params) > 2 else None
 
     # Observed values to observed quantiles
-    if loc != 0 or scale != 1:
+    if loc != 0 or scale != 1:  # pragma: no branch
         observed = (np.sort(observed) - fit_params[-2]) / fit_params[-1]
 
     # Linear regression
