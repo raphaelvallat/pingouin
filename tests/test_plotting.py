@@ -201,6 +201,11 @@ class TestPlotting(TestCase):
         assert isinstance(ax, matplotlib.axes.Axes)
         ax = plot_circmean(angles, kwargs_markers={}, kwargs_arrow={})
         assert isinstance(ax, matplotlib.axes.Axes)
+        # Non-dict kwargs raise TypeError
+        with pytest.raises(TypeError):
+            plot_circmean(angles, kwargs_markers="red")
+        with pytest.raises(TypeError):
+            plot_circmean(angles, kwargs_arrow="red")
         # Explicit ax exercises the ax-is-not-None branch; square=False skips set_aspect
         _, ax2 = plt.subplots(1, 1)
         ax = plot_circmean(angles, ax=ax2, square=False)
