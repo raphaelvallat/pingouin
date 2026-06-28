@@ -6,6 +6,7 @@ import pytest
 import scipy
 
 from pingouin.nonparametric import (
+    brunner_munzel,
     cochran,
     friedman,
     harrelldavis,
@@ -245,3 +246,120 @@ class TestNonParametric(TestCase):
         np.testing.assert_array_almost_equal(
             harrelldavis(p, [0.25, 0.75], -1), np.apply_over_axes(func, p, 1)
         )
+
+    def test_brunner_munzel_basic(self):
+        """Test brunner_munzel statistic and p-value match scipy reference."""
+        # Standard example from scipy documentation
+        x1 = [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1]
+        x2 = [3, 3, 4, 3, 1, 2, 3, 1, 1, 5, 4]
+        result = brunner_munzel(x1, x2, alternative="two-sided")
+        sp_result = scipy.stats.brunnermunzel(x1, x2, alternative="two-sided")
+        assert np.isclose(result.at["BrunnerMunzel", "W-val"], sp_result.statistic)
+        assert np.isclose(result.at["BrunnerMunzel", "p-val"], sp_result.pvalue)
+        # Known values from scipy docs: W ~ 3.1375, p ~ 0.00579
+        assert np.isclose(result.at["BrunnerMunzel", "W-val"], 3.1374674823029505, rtol=1e-5)
+        assert np.isclose(result.at["BrunnerMunzel", "p-val"], 0.0057862086661515377, rtol=1e-5)
+
+    def test_brunner_munzel_identical_groups(self):
+        """Test that identical groups yield p-value of 1.0."""
+        a = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+        result = brunner_munzel(a, a.copy())
+        assert np.isclose(result.at["BrunnerMunzel", "p-val"], 1.0)
+        # CLES should be 0.5 (stochastic equality)
+        assert np.isclose(result.at["BrunnerMunzel", "CLES"], 0.5)
+
+    def test_brunner_munzel_clear_difference(self):
+        """Test that groups with a clear difference produce a small p-value."""
+        # Use overlapping groups (not perfectly separated) to avoid the degenerate case
+        # where S^2 = 0 and the Brunner-Munzel statistic is undefined.
+        np.random.seed(42)
+        x = np.random.normal(0, 2, 50)
+        y = np.random.normal(4, 2, 50)
+        result = brunner_munzel(x, y)
+        # Should match scipy
+        sp_result = scipy.stats.brunnermunzel(x, y)
+        assert np.isclose(result.at["BrunnerMunzel", "p-val"], sp_result.pvalue)
+        assert result.at["BrunnerMunzel", "p-val"] < 0.001
+        # x << y, so CLES = P(X > Y) should be well below 0.5
+        assert result.at["BrunnerMunzel", "CLES"] < 0.25
+
+    def test_brunner_munzel_alternative_less(self):
+        """Test one-sided 'less' alternative matches scipy."""
+        x1 = [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1]
+        x2 = [3, 3, 4, 3, 1, 2, 3, 1, 1, 5, 4]
+        result = brunner_munzel(x1, x2, alternative="less")
+        sp_result = scipy.stats.brunnermunzel(x1, x2, alternative="less")
+        assert np.isclose(result.at["BrunnerMunzel", "p-val"], sp_result.pvalue)
+        # x1 < x2 stochastically, so 'less' should give small p
+        assert result.at["BrunnerMunzel", "p-val"] < 0.01
+
+    def test_brunner_munzel_alternative_greater(self):
+        """Test one-sided 'greater' alternative matches scipy."""
+        x1 = [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1]
+        x2 = [3, 3, 4, 3, 1, 2, 3, 1, 1, 5, 4]
+        result = brunner_munzel(x1, x2, alternative="greater")
+        sp_result = scipy.stats.brunnermunzel(x1, x2, alternative="greater")
+        assert np.isclose(result.at["BrunnerMunzel", "p-val"], sp_result.pvalue)
+        # x1 is NOT greater than x2, so 'greater' should give large p
+        assert result.at["BrunnerMunzel", "p-val"] > 0.99
+
+    def test_brunner_munzel_effect_size_range(self):
+        """Test that CLES is in [0, 1] and RBC is in [-1, 1]."""
+        np.random.seed(99)
+        for _ in range(10):
+            x = np.random.normal(np.random.uniform(-2, 2), 1, 20)
+            y = np.random.normal(np.random.uniform(-2, 2), 1, 20)
+            result = brunner_munzel(x, y)
+            cles = result.at["BrunnerMunzel", "CLES"]
+            rbc = result.at["BrunnerMunzel", "RBC"]
+            assert 0.0 <= cles <= 1.0, f"CLES={cles} out of [0, 1]"
+            assert -1.0 <= rbc <= 1.0, f"RBC={rbc} out of [-1, 1]"
+            # RBC should be linear rescaling of CLES
+            assert np.isclose(rbc, 2 * cles - 1)
+
+    def test_brunner_munzel_nan_propagate(self):
+        """Test that NaN in input propagates to output when nan_policy='propagate'."""
+        x = np.array([1.0, 2.0, np.nan, 4.0, 5.0])
+        y = np.array([2.0, 3.0, 4.0, 5.0, 6.0])
+        result = brunner_munzel(x, y, nan_policy="propagate")
+        assert np.isnan(result.at["BrunnerMunzel", "W-val"])
+        assert np.isnan(result.at["BrunnerMunzel", "p-val"])
+        assert np.isnan(result.at["BrunnerMunzel", "CLES"])
+
+    def test_brunner_munzel_nan_omit(self):
+        """Test that NaN values are omitted when nan_policy='omit'."""
+        x_clean = np.array([1.0, 2.0, 4.0, 5.0])
+        x_nan = np.array([1.0, 2.0, np.nan, 4.0, 5.0])
+        y = np.array([2.0, 3.0, 4.0, 5.0, 6.0])
+        result_clean = brunner_munzel(x_clean, y)
+        result_omit = brunner_munzel(x_nan, y, nan_policy="omit")
+        assert np.isclose(
+            result_clean.at["BrunnerMunzel", "W-val"],
+            result_omit.at["BrunnerMunzel", "W-val"],
+        )
+
+    def test_brunner_munzel_nan_raise(self):
+        """Test that NaN raises ValueError when nan_policy='raise'."""
+        x = np.array([1.0, np.nan, 3.0])
+        y = np.array([2.0, 3.0, 4.0])
+        with pytest.raises(ValueError):
+            brunner_munzel(x, y, nan_policy="raise")
+
+    def test_brunner_munzel_output_columns(self):
+        """Test that output DataFrame has the expected columns and index."""
+        x1 = [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1]
+        x2 = [3, 3, 4, 3, 1, 2, 3, 1, 1, 5, 4]
+        result = brunner_munzel(x1, x2)
+        expected_cols = {"W-val", "dof", "alternative", "p-val", "RBC", "CLES"}
+        assert set(result.columns) == expected_cols
+        assert result.index[0] == "BrunnerMunzel"
+        assert result.at["BrunnerMunzel", "alternative"] == "two-sided"
+
+    def test_brunner_munzel_export(self):
+        """Test that brunner_munzel is accessible via pingouin top-level namespace."""
+        import pingouin as pg
+        assert hasattr(pg, "brunner_munzel")
+        x1 = [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1]
+        x2 = [3, 3, 4, 3, 1, 2, 3, 1, 1, 5, 4]
+        result = pg.brunner_munzel(x1, x2)
+        assert isinstance(result, pd.DataFrame)

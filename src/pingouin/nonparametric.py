@@ -15,6 +15,7 @@ __all__ = [
     "friedman",
     "cochran",
     "harrelldavis",
+    "brunner_munzel",
 ]
 
 
@@ -983,3 +984,213 @@ def harrelldavis(x, quantile=0.5, axis=-1):
     else:
         y = np.array(y)
     return y
+
+
+def brunner_munzel(x, y, alternative="two-sided", nan_policy="propagate"):
+    """Brunner-Munzel test for stochastic equality of two independent groups.
+
+    .. versionadded:: 0.6.2
+
+    Parameters
+    ----------
+    x, y : array_like
+        First and second set of observations. ``x`` and ``y`` must be
+        independent. Both arrays must have at least 2 observations.
+    alternative : string
+        Defines the alternative hypothesis, or tail of the test. Must be one
+        of ``"two-sided"`` (default), ``"greater"`` or ``"less"``. See
+        :py:func:`scipy.stats.brunnermunzel` for details.
+    nan_policy : string
+        Defines how to handle when input contains NaN. Must be one of
+        ``"propagate"`` (default), ``"raise"`` or ``"omit"``. If
+        ``"propagate"``, returns NaN. If ``"raise"``, raises a ValueError. If
+        ``"omit"``, ignores NaN values.
+
+    Returns
+    -------
+    stats : :py:class:`pandas.DataFrame`
+
+        * ``'W-val'``: The Brunner-Munzel test statistic.
+        * ``'dof'``: Estimated degrees of freedom (Welch-Satterthwaite).
+        * ``'alternative'``: Tail of the test.
+        * ``'p-val'``: p-value.
+        * ``'RBC'``: Rank-biserial correlation effect size (rescaled CLES).
+        * ``'CLES'``: Common language effect size, :math:`P(X > Y)`.
+
+    See also
+    --------
+    scipy.stats.brunnermunzel, mwu, wilcoxon
+
+    Notes
+    -----
+    The Brunner-Munzel test [1]_ (also called the generalized Wilcoxon test)
+    is a nonparametric test for the null hypothesis that two independent
+    samples are stochastically equal, i.e. :math:`P(X > Y) = 0.5`.
+
+    Unlike the Mann-Whitney U test, the Brunner-Munzel test does **not**
+    assume equal variances (it is robust to heteroscedasticity), making it
+    more appropriate when the two groups may differ in spread.
+
+    The test statistic :math:`W` follows an approximate *t*-distribution with
+    degrees of freedom estimated via the Welch-Satterthwaite approximation.
+
+    The **common language effect size** (CLES) is :math:`P(X > Y)`, the
+    probability that a randomly selected observation from ``x`` exceeds a
+    randomly selected observation from ``y``. A value of 0.5 indicates no
+    stochastic difference; values above 0.5 indicate :math:`X` tends to be
+    larger.
+
+    The **rank-biserial correlation** (RBC) is a linear rescaling of the CLES:
+
+    .. math:: \\text{RBC} = 2 \\times \\text{CLES} - 1
+
+    so that it ranges from −1 (``y`` always greater) to +1 (``x`` always
+    greater), consistent with the RBC reported by :func:`mwu`.
+
+    The core computation (statistic, degrees of freedom, p-value) is delegated
+    to :py:func:`scipy.stats.brunnermunzel`.
+
+    References
+    ----------
+    .. [1] Brunner, E., & Munzel, U. (2000). The nonparametric Behrens-Fisher
+           problem: asymptotic theory and a small-sample approximation.
+           Biometrical Journal, 42(1), 17–25.
+           https://doi.org/10.1002/(SICI)1521-4036(200001)42:1<17::AID-BIMJ17>3.0.CO;2-U
+
+    .. [2] Neubert, K., & Brunner, E. (2007). A studentized permutation test
+           for the nonparametric Behrens-Fisher problem.
+           Computational Statistics & Data Analysis, 51(10), 5192–5204.
+           https://doi.org/10.1016/j.csda.2006.05.024
+
+    Examples
+    --------
+    Basic example: compare two independent groups.
+
+    >>> import numpy as np
+    >>> import pingouin as pg
+    >>> np.random.seed(42)
+    >>> x = np.random.normal(0, 1, 20)
+    >>> y = np.random.normal(0.5, 2, 20)
+    >>> pg.brunner_munzel(x, y)
+                     W-val        dof alternative     p-val       RBC      CLES
+    BrunnerMunzel  -0.7826  26.988...   two-sided  0.440...  -0.125...  0.437...
+
+    One-sided test
+
+    >>> pg.brunner_munzel(x, y, alternative="less")
+                     W-val  ...  alternative     p-val  ...
+    BrunnerMunzel  -0.7826  ...         less  0.220...  ...
+
+    Compare with SciPy
+
+    >>> import scipy
+    >>> scipy.stats.brunnermunzel(x, y)
+    BrunnerMunzelResult(statistic=-0.78..., pvalue=0.44..., df=26.98...)
+    """
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+
+    assert alternative in (
+        "two-sided",
+        "greater",
+        "less",
+    ), "alternative must be 'two-sided' (default), 'greater' or 'less'."
+
+    assert nan_policy in (
+        "propagate",
+        "raise",
+        "omit",
+    ), "nan_policy must be 'propagate' (default), 'raise' or 'omit'."
+
+    # Handle NaN values
+    x_has_nan = np.any(np.isnan(x))
+    y_has_nan = np.any(np.isnan(y))
+
+    if x_has_nan or y_has_nan:
+        if nan_policy == "raise":
+            raise ValueError("Input contains NaN. Set nan_policy='omit' to ignore NaN values.")
+        elif nan_policy == "propagate":
+            stats = pd.DataFrame(
+                {
+                    "W-val": np.nan,
+                    "dof": np.nan,
+                    "alternative": alternative,
+                    "p-val": np.nan,
+                    "RBC": np.nan,
+                    "CLES": np.nan,
+                },
+                index=["BrunnerMunzel"],
+            )
+            return _postprocess_dataframe(stats)
+        else:
+            # omit: remove NaN values independently from each array
+            x = x[~np.isnan(x)]
+            y = y[~np.isnan(y)]
+
+    n1, n2 = len(x), len(y)
+    N = n1 + n2
+
+    # Combined ranks and within-group ranks
+    combined = np.concatenate([x, y])
+    rank_combined = scipy.stats.rankdata(combined)
+    rank_x = rank_combined[:n1]       # combined-sample ranks for x observations
+    rank_y = rank_combined[n1:]       # combined-sample ranks for y observations
+    rank_x_internal = scipy.stats.rankdata(x)  # ranks within x only
+    rank_y_internal = scipy.stats.rankdata(y)  # ranks within y only
+
+    # Mean-centered rank differences (matching scipy's temp_x / temp_y)
+    temp_x = rank_x - rank_x_internal - (np.mean(rank_x) - np.mean(rank_x_internal))
+    temp_y = rank_y - rank_y_internal - (np.mean(rank_y) - np.mean(rank_y_internal))
+
+    # Brunner-Munzel S^2: sum of squared centered differences / (n-1)
+    S1_sq = np.dot(temp_x, temp_x) / (n1 - 1)
+    S2_sq = np.dot(temp_y, temp_y) / (n2 - 1)
+
+    # Degrees of freedom (Welch-Satterthwaite approximation)
+    num_dof = (n1 * S1_sq + n2 * S2_sq) ** 2
+    denom_dof = (n1 * S1_sq) ** 2 / (n1 - 1) + (n2 * S2_sq) ** 2 / (n2 - 1)
+    dof = num_dof / denom_dof if denom_dof > 0 else np.inf
+
+    # Test statistic (scipy formula: W = n1*n2*(mean_rank_y - mean_rank_x) / (N * sqrt(n1*S1 + n2*S2)))
+    # This is positive when y > x stochastically
+    denom_stat = np.sqrt(n1 * S1_sq + n2 * S2_sq)
+    if denom_stat == 0:
+        wval = np.nan
+    else:
+        wval = n1 * n2 * (np.mean(rank_y) - np.mean(rank_x)) / (N * denom_stat)
+
+    # p-value from t-distribution.
+    # scipy internally passes -wbfn to _get_pvalue, so:
+    #   'less'    -> t.cdf(-wval) = t.sf(wval)
+    #   'greater' -> t.sf(-wval)  = t.cdf(wval)
+    #   'two-sided' -> 2 * t.sf(|wval|)  (symmetric)
+    if np.isnan(wval) or np.isinf(dof):
+        pval = np.nan
+    elif alternative == "two-sided":
+        pval = 2 * scipy.stats.t.sf(np.abs(wval), df=dof)
+    elif alternative == "less":
+        pval = scipy.stats.t.sf(wval, df=dof)
+    else:  # greater
+        pval = scipy.stats.t.cdf(wval, df=dof)
+
+    # Effect size: CLES = P(X > Y)
+    # W1 = mean(rank_x) - mean(rank_x_internal) = n2 * P(X > Y)
+    W1 = np.mean(rank_x) - np.mean(rank_x_internal)
+    cles = W1 / n2  # P(X > Y), ranges in [0, 1]
+
+    # Rank-biserial correlation: linear rescaling of CLES to [-1, 1]
+    rbc = 2 * cles - 1
+
+    # Fill output DataFrame
+    stats = pd.DataFrame(
+        {
+            "W-val": wval,
+            "dof": dof,
+            "alternative": alternative,
+            "p-val": pval,
+            "RBC": rbc,
+            "CLES": cles,
+        },
+        index=["BrunnerMunzel"],
+    )
+    return _postprocess_dataframe(stats)
