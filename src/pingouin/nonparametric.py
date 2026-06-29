@@ -15,6 +15,7 @@ __all__ = [
     "friedman",
     "cochran",
     "harrelldavis",
+    "yuen",
 ]
 
 
@@ -983,3 +984,199 @@ def harrelldavis(x, quantile=0.5, axis=-1):
     else:
         y = np.array(y)
     return y
+
+
+def yuen(x, y, trim=0.2, alternative="two-sided", nan_policy="propagate"):
+    r"""
+    Yuen's two-sample trimmed-mean t-test.
+
+    Parameters
+    ----------
+    x, y : array_like
+        Observations from the two independent samples.  Must have at least
+        ``2 * ceil(trim * n) + 1`` observations each after removing NaNs.
+    trim : float
+        Proportion to trim from each tail of each sample, in (0, 0.5).
+        Default is 0.2 (20 % from each side), following Wilcox (2012).
+    alternative : {"two-sided", "greater", "less"}
+        Defines the alternative hypothesis:
+
+        * ``"two-sided"`` (default): :math:`\mu_x^{(t)} \ne \mu_y^{(t)}`
+        * ``"greater"``: :math:`\mu_x^{(t)} > \mu_y^{(t)}`
+        * ``"less"``: :math:`\mu_x^{(t)} < \mu_y^{(t)}`
+
+    nan_policy : {"propagate", "raise", "omit"}
+        Defines how to handle NaN values.  ``"propagate"`` returns NaN,
+        ``"raise"`` throws an error, ``"omit"`` removes NaN before testing.
+
+    Returns
+    -------
+    stats : :py:class:`pandas.DataFrame`
+
+        * ``'T'`` : Yuen test statistic
+        * ``'dof'`` : Welch–Satterthwaite degrees of freedom
+        * ``'alternative'`` : tail of the test
+        * ``'p_val'`` : p-value (two-sided or one-sided)
+        * ``'trim'`` : trimming proportion used
+        * ``'tail_mean_x'`` : trimmed mean of *x*
+        * ``'tail_mean_y'`` : trimmed mean of *y*
+
+    See also
+    --------
+    ttest, mwu, wilcoxon
+
+    Notes
+    -----
+    Yuen (1974) showed that for independent samples, the test based on
+    trimmed means is robust to violations of normality **and** to unequal
+    variances even when the two samples differ in skewness or kurtosis.
+    Unlike the Mann–Whitney U test, it directly tests differences in
+    *location* (trimmed means) and works on interval-scale data.
+
+    Let :math:`h_j = n_j - 2 g_j` be the effective sample size after
+    removing :math:`g_j = \lfloor \text{trim} \cdot n_j \rfloor` observations
+    from each tail of sample *j*.  Define the *Winsorized* sample by
+    replacing the smallest :math:`g_j` values with :math:`x_{(g_j+1)}` and
+    the largest :math:`g_j` values with :math:`x_{(n_j - g_j)}`.  Let
+    :math:`SW_j` be the sum of squared deviations of the Winsorized sample
+    from its mean.  Then:
+
+    .. math::
+
+        d_j = \frac{SW_j}{h_j (h_j - 1)}, \qquad
+        T_Y = \frac{\bar{x}_t - \bar{y}_t}{\sqrt{d_x + d_y}}
+
+    where :math:`\bar{x}_t` is the trimmed mean of *x*.  The degrees of
+    freedom are approximated by the Welch–Satterthwaite formula:
+
+    .. math::
+
+        \nu = \frac{(d_x + d_y)^2}{d_x^2/(h_x-1) + d_y^2/(h_y-1)}
+
+    References
+    ----------
+    .. [1] Yuen, K. K. (1974). The two-sample trimmed t for unequal
+           population variances. *Biometrika*, 61(1), 165–170.
+
+    .. [2] Wilcox, R. R. (2012). *Introduction to Robust Estimation and
+           Hypothesis Testing* (3rd ed.). Academic Press.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import pingouin as pg
+    >>> rng = np.random.default_rng(42)
+    >>> x = rng.normal(0, 1, 30)
+    >>> y = rng.normal(0.5, 2, 30)
+    >>> pg.yuen(x, y)
+              T         dof alternative     p_val  trim  tail_mean_x  tail_mean_y
+    Yuen  -1.3...  ...  two-sided  0...       0.2     ...          ...
+
+    Compare with standard Welch t-test:
+
+    >>> pg.ttest(x, y)
+              T   dof alternative     p_val  ...
+    T-test  ...   ...   two-sided  0...  ...
+
+    One-sided test:
+
+    >>> pg.yuen(x, y, alternative="less")
+              T         dof alternative     p_val  trim  tail_mean_x  tail_mean_y
+    Yuen  -1.3...  ...        less  0...       0.2     ...          ...
+    """
+    # --- Input validation -----------------------------------------------
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+
+    if x.ndim != 1 or y.ndim != 1:
+        raise ValueError("x and y must be 1-D arrays.")
+    if not 0.0 < trim < 0.5:
+        raise ValueError("trim must be in the open interval (0, 0.5).")
+    if alternative not in ("two-sided", "greater", "less"):
+        raise ValueError("alternative must be 'two-sided', 'greater', or 'less'.")
+
+    # --- NaN handling ---------------------------------------------------
+    if nan_policy == "propagate":
+        if np.isnan(x).any() or np.isnan(y).any():
+            return pd.DataFrame(
+                {"T": [np.nan], "dof": [np.nan], "alternative": [alternative],
+                 "p_val": [np.nan], "trim": [trim],
+                 "tail_mean_x": [np.nan], "tail_mean_y": [np.nan]},
+                index=["Yuen"],
+            )
+    elif nan_policy == "omit":
+        x = x[~np.isnan(x)]
+        y = y[~np.isnan(y)]
+    elif nan_policy == "raise":
+        if np.isnan(x).any() or np.isnan(y).any():
+            raise ValueError("Input contains NaN values.")
+
+    nx, ny = len(x), len(y)
+
+    # Number of observations trimmed from each side
+    gx = int(np.floor(trim * nx))
+    gy = int(np.floor(trim * ny))
+
+    # Effective (trimmed) sample sizes
+    hx = nx - 2 * gx
+    hy = ny - 2 * gy
+
+    if hx < 2 or hy < 2:
+        raise ValueError(
+            f"Not enough observations after trimming. "
+            f"hx={hx}, hy={hy}. Reduce trim or use larger samples."
+        )
+
+    # Sort and compute trimmed means
+    xs = np.sort(x)
+    ys = np.sort(y)
+    tx = xs[gx : nx - gx].mean()  # trimmed mean of x
+    ty = ys[gy : ny - gy].mean()  # trimmed mean of y
+
+    # Winsorize: replace extremes with the nearest non-trimmed value
+    wx = xs.copy()
+    wx[:gx] = xs[gx]
+    if gx > 0:
+        wx[nx - gx:] = xs[nx - gx - 1]
+
+    wy = ys.copy()
+    wy[:gy] = ys[gy]
+    if gy > 0:
+        wy[ny - gy:] = ys[ny - gy - 1]
+
+    # Sum of squared deviations of Winsorized samples from their means
+    swx = np.sum((wx - wx.mean()) ** 2)
+    swy = np.sum((wy - wy.mean()) ** 2)
+
+    # Effective variance of the trimmed mean (Wilcox 2012, eq. 4.5)
+    dx = swx / (hx * (hx - 1))
+    dy = swy / (hy * (hy - 1))
+
+    se = np.sqrt(dx + dy)
+    if se == 0.0:
+        raise ValueError("Standard error is zero; samples may be constant.")
+
+    # Test statistic and degrees of freedom (Welch-Satterthwaite)
+    T = (tx - ty) / se
+    dof = (dx + dy) ** 2 / (dx**2 / (hx - 1) + dy**2 / (hy - 1))
+
+    # p-value
+    if alternative == "two-sided":
+        p_val = 2 * scipy.stats.t.sf(abs(T), dof)
+    elif alternative == "greater":
+        p_val = scipy.stats.t.sf(T, dof)
+    else:  # less
+        p_val = scipy.stats.t.cdf(T, dof)
+
+    return pd.DataFrame(
+        {
+            "T": [round(T, 6)],
+            "dof": [round(dof, 4)],
+            "alternative": [alternative],
+            "p_val": [p_val],
+            "trim": [trim],
+            "tail_mean_x": [round(tx, 6)],
+            "tail_mean_y": [round(ty, 6)],
+        },
+        index=["Yuen"],
+    )
