@@ -49,6 +49,23 @@ class TestPlotting(TestCase):
         # percentage=True raises ValueError when mean(x, y) == 0 for any pair
         with pytest.raises(ValueError, match="zero"):
             plot_blandaltman(np.array([1.0, -1.0]), np.array([-1.0, 1.0]), percentage=True)
+        # percentage=True must preserve the sign of the difference when the data is negative
+        _, ax3 = plt.subplots()
+        plot_blandaltman(
+            np.array([-10.0, -20.0, -30.0]),
+            np.array([-11.0, -22.0, -33.0]),
+            percentage=True,
+            ax=ax3,
+        )
+        assert (ax3.collections[0].get_offsets()[:, 1] > 0).all()
+        # The y-axis is only symmetric around zero when explicitly requested
+        _, (ax4, ax5) = plt.subplots(1, 2, figsize=(9, 4))
+        plot_blandaltman(x, y, ax=ax4)
+        low, high = ax4.get_ylim()
+        assert abs(low) != pytest.approx(abs(high))
+        plot_blandaltman(x, y, symmetric_ylim=True, ax=ax5)
+        low, high = ax5.get_ylim()
+        assert low == -high
         plt.close("all")
 
     def test_ppoints(self):
@@ -95,7 +112,14 @@ class TestPlotting(TestCase):
             qqplot(x_ln, dist="lognorm", sparams=())
         # Custom line and CI kwargs; square=False
         qqplot(x, line_kwargs={"color": "k", "lw": 1}, ci_kwargs={"color": "k", "ls": ":"})
+        # Canonical Matplotlib names must override the aliases used in the defaults
+        qqplot(x, line_kwargs={"linewidth": 1}, ci_kwargs={"linestyle": ":", "linewidth": 1})
         qqplot(x, square=False)
+        # An exact identity fit (loc = 0, scale = 1) skips the standardization
+        assert isinstance(qqplot(np.array([-1.0, 1.0])), matplotlib.axes.Axes)
+        # Zero-variance input raises ValueError instead of dividing by zero
+        with pytest.raises(ValueError, match="identical"):
+            qqplot(np.zeros(20))
         plt.close("all")
 
     def test_plot_paired(self):
@@ -120,6 +144,12 @@ class TestPlotting(TestCase):
             subject="Subject",
             colors=["blue", "grey", "red"],
         )
+        # Patches already present on a user-supplied axis must not be restyled
+        _, ax3 = plt.subplots()
+        span = ax3.axvspan(-0.5, 0.5, facecolor="orange")
+        facecolor = span.get_facecolor()
+        plot_paired(data=df, dv="Scores", within="Time", subject="Subject", ax=ax3)
+        assert span.get_facecolor() == facecolor
         # Mismatched order length raises ValueError
         with pytest.raises(ValueError):
             plot_paired(
@@ -200,6 +230,11 @@ class TestPlotting(TestCase):
         ax = plot_circmean(angles)
         assert isinstance(ax, matplotlib.axes.Axes)
         ax = plot_circmean(angles, kwargs_markers={}, kwargs_arrow={})
+        assert isinstance(ax, matplotlib.axes.Axes)
+        # Canonical Matplotlib names must override the aliases used in the defaults
+        ax = plot_circmean(
+            angles, kwargs_markers={"markersize": 5}, kwargs_arrow={"facecolor": "k"}
+        )
         assert isinstance(ax, matplotlib.axes.Axes)
         # Non-dict kwargs raise TypeError
         with pytest.raises(TypeError):

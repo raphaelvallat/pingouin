@@ -10,6 +10,9 @@ import matplotlib.transforms as transforms
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from matplotlib.cbook import normalize_kwargs
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 from scipy import stats
 
 # Set default Seaborn preferences (disabled Pingouin >= 0.3.4)
@@ -33,6 +36,7 @@ def plot_blandaltman(
     confidence=0.95,
     annotate=True,
     percentage=False,
+    symmetric_ylim=False,
     ax=None,
     **kwargs,
 ):
@@ -61,8 +65,20 @@ def plot_blandaltman(
         of agreement values on the right-hand side of the plot.
     percentage : bool
         If True, plot percentage differences relative to the mean of each
-        pair, i.e. ``(x - y) / mean(x, y) * 100``. Useful when measurement
-        variability scales with magnitude. Default is False.
+        pair, i.e. ``(x - y) / abs(mean(x, y)) * 100``. Useful when measurement
+        variability scales with magnitude. This is only meaningful for
+        ratio-scale measurements that stay away from zero: the percentage
+        difference grows without bound as the mean of a pair approaches zero.
+        Default is False.
+
+        .. versionadded:: 0.6.2
+    symmetric_ylim : bool
+        If True, force the y-axis to be symmetric around zero. This avoids
+        conveying a visual bias when the mean difference is close to zero, but
+        compresses the data into a narrow band when the bias is large relative
+        to the spread of the differences. Default is False.
+
+        .. versionadded:: 0.6.2
     ax : matplotlib axes
         Axis on which to draw the plot.
     **kwargs : optional
@@ -147,7 +163,9 @@ def plot_blandaltman(
                 "Percentage differences are undefined when the mean of `x` and `y` "
                 "is zero for one or more paired observations."
             )
-        diff = (x - y) / mean_xy * 100
+        # Divide by the absolute mean, otherwise the sign of the difference would be
+        # flipped for pairs with a negative mean.
+        diff = (x - y) / np.abs(mean_xy) * 100
     else:
         diff = x - y
 
@@ -223,12 +241,13 @@ def plot_blandaltman(
         ax.axhspan(ci["high"][0], ci["high"][1], facecolor="tab:blue", alpha=0.2)
         ax.axhspan(ci["low"][0], ci["low"][1], facecolor="tab:blue", alpha=0.2)
 
-    # Labels and symmetric y-axis
+    # Labels and (optional) symmetric y-axis
     unit = " [%]" if percentage else ""
     ax.set_ylabel(f"{xname} \u2212 {yname}{unit}")
     ax.set_xlabel(xlabel)
-    bound = max(abs(lim) for lim in ax.get_ylim())
-    ax.set_ylim(-bound, bound)
+    if symmetric_ylim:
+        bound = max(abs(lim) for lim in ax.get_ylim())
+        ax.set_ylim(-bound, bound)
     return ax
 
 
@@ -285,10 +304,16 @@ def qqplot(
     line_kwargs : dict or None
         Optional keyword arguments passed to :py:func:`matplotlib.pyplot.plot`
         for the regression line. Default style is ``{"color": "r", "lw": 2}``.
+        Matplotlib aliases and their canonical names (e.g. ``lw`` and
+        ``linewidth``) are interchangeable.
+
+        .. versionadded:: 0.6.2
     ci_kwargs : dict or None
         Optional keyword arguments passed to :py:func:`matplotlib.pyplot.plot`
         for the confidence envelope lines. Default style is
         ``{"color": "r", "ls": "--", "lw": 1.25}``.
+
+        .. versionadded:: 0.6.2
     ax : matplotlib axes
         Axis on which to draw the plot.
     **kwargs : optional
@@ -386,16 +411,21 @@ def qqplot(
     # Update default kwargs with specified inputs
     _scatter_kwargs = {"marker": "o", "color": "blue"}
     _scatter_kwargs.update(kwargs)
-    _line_kwargs = {"color": "r", "lw": 2}
-    _line_kwargs.update(line_kwargs or {})
-    _ci_kwargs = {"color": "r", "ls": "--", "lw": 1.25}
-    _ci_kwargs.update(ci_kwargs or {})
+    # Canonicalize Matplotlib aliases before merging (e.g. "ls" -> "linestyle"), otherwise
+    # a caller passing the long form would collide with the alias used in the defaults.
+    _line_kwargs = normalize_kwargs({"color": "r", "lw": 2}, Line2D)
+    _line_kwargs.update(normalize_kwargs(line_kwargs or {}, Line2D))
+    _ci_kwargs = normalize_kwargs({"color": "r", "ls": "--", "lw": 1.25}, Line2D)
+    _ci_kwargs.update(normalize_kwargs(ci_kwargs or {}, Line2D))
 
     if isinstance(dist, str):
         dist = getattr(stats, dist)
 
     x = np.asarray(x)
     x = x[~np.isnan(x)]  # NaN are automatically removed
+    if x.size > 0 and np.ptp(x) == 0:
+        # A degenerate fit (scale = 0) would divide by zero when standardizing below
+        raise ValueError("All values in `x` are identical: a Q-Q plot requires some variance.")
 
     # Check sparams: if single parameter, tuple becomes int
     if not isinstance(sparams, (tuple, list)):
@@ -417,8 +447,8 @@ def qqplot(
     shape = fit_params[:-2] if len(fit_params) > 2 else None
 
     # Observed values to observed quantiles
-    if loc != 0 or scale != 1:  # pragma: no branch
-        observed = (np.sort(observed) - fit_params[-2]) / fit_params[-1]
+    if loc != 0 or scale != 1:
+        observed = (np.sort(observed) - loc) / scale
 
     # Linear regression
     slope, intercept, r, _, _ = stats.linregress(theor, observed)
@@ -705,10 +735,15 @@ def plot_paired(
         # Set boxplot x and y depending on orientation
         _xbp = within if orient == "v" else dv
         _ybp = dv if orient == "v" else within
+        # Keep track of the patches already present, e.g. on a user-supplied axis, so that
+        # only the ones created by the boxplot below are made transparent.
+        pre_existing = {id(patch) for patch in ax.patches}
         sns.boxplot(data=data, x=_xbp, y=_ybp, order=order, ax=ax, orient=orient, **_boxplot_kwargs)
 
         # Set alpha to patch of boxplot but not to whiskers
         for patch in ax.patches:
+            if id(patch) in pre_existing:
+                continue
             r, g, b, a = patch.get_facecolor()
             patch.set_facecolor((r, g, b, 0.75))
     else:
@@ -898,14 +933,18 @@ def plot_circmean(
         If True (default), ensure equal aspect ratio between X and Y axes.
     ax : matplotlib axes
         Axis on which to draw the plot.
-    kwargs_markers : dict
+    kwargs_markers : dict or None
         Optional keywords arguments that are passed to
         :obj:`matplotlib.axes.Axes.plot`
-        to control the markers aesthetics.
-    kwargs_arrow : dict
+        to control the markers aesthetics. When None, internal defaults are
+        used. Matplotlib aliases and their canonical names (e.g. ``ms`` and
+        ``markersize``) are interchangeable.
+    kwargs_arrow : dict or None
         Optional keywords arguments that are passed to
         :obj:`matplotlib.axes.Axes.arrow`
-        to control the arrow aesthetics.
+        to control the arrow aesthetics. When None, internal defaults are
+        used. Matplotlib aliases and their canonical names (e.g. ``fc`` and
+        ``facecolor``) are interchangeable.
 
     Returns
     -------
@@ -957,22 +996,17 @@ def plot_circmean(
     if kwargs_arrow is not None and not isinstance(kwargs_arrow, dict):
         raise TypeError("`kwargs_arrow` must be a dict or None.")
 
-    # Merge caller-supplied kwargs over defaults
-    _kwargs_markers = {
-        "color": "tab:blue",
-        "marker": "o",
-        "mfc": "none",
-        "ms": 10,
-        **(kwargs_markers or {}),
-    }
-    _kwargs_arrow = {
-        "width": 0.01,
-        "head_width": 0.1,
-        "head_length": 0.1,
-        "fc": "tab:red",
-        "ec": "tab:red",
-        **(kwargs_arrow or {}),
-    }
+    # Merge caller-supplied kwargs over defaults. Matplotlib aliases are canonicalized
+    # first (e.g. "ms" -> "markersize") so that either form overrides the defaults.
+    _kwargs_markers = normalize_kwargs(
+        {"color": "tab:blue", "marker": "o", "mfc": "none", "ms": 10}, Line2D
+    )
+    _kwargs_markers.update(normalize_kwargs(kwargs_markers or {}, Line2D))
+    _kwargs_arrow = normalize_kwargs(
+        {"width": 0.01, "head_width": 0.1, "head_length": 0.1, "fc": "tab:red", "ec": "tab:red"},
+        Patch,
+    )
+    _kwargs_arrow.update(normalize_kwargs(kwargs_arrow or {}, Patch))
 
     # Convert angles to unit vector
     z = np.exp(1j * angles)
