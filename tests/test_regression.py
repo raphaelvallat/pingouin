@@ -422,3 +422,34 @@ class TestRegression(TestCase):
         assert _pval_from_bootci(bt2, 0) == 1
         assert _pval_from_bootci(bt2, 0.9) < 0.10
         assert _pval_from_bootci(bt3, 0.9) < _pval_from_bootci(bt2, 0.9)
+
+
+@pytest.mark.parametrize("scale", [1.0, 1e-8, 1e8])
+@pytest.mark.parametrize("weighted", [False, True])
+@pytest.mark.parametrize("add_intercept", [False, True])
+def test_linear_regression_covariance_under_rescaling(scale, weighted, add_intercept):
+    rng = np.random.default_rng(42)
+    X = rng.normal(size=(100, 2))
+    X[:, 0] *= scale
+    y = rng.normal(size=100)
+    weights = rng.uniform(0.5, 2, size=100) if weighted else None
+    result = linear_regression(X, y, add_intercept=add_intercept, weights=weights)
+    design = sm.add_constant(X) if add_intercept else X
+    reference = sm.WLS(y, design, weights=weights).fit() if weighted else sm.OLS(y, design).fit()
+    np.testing.assert_allclose(result["coef"], reference.params, rtol=1e-6, atol=1e-10)
+    np.testing.assert_allclose(result["se"], reference.bse, rtol=1e-6)
+    np.testing.assert_allclose(result["T"], reference.tvalues, rtol=1e-6, atol=1e-8)
+    np.testing.assert_allclose(result["pval"], reference.pvalues, rtol=1e-6, atol=1e-8)
+    np.testing.assert_allclose(result[["CI2.5", "CI97.5"]], reference.conf_int(), rtol=1e-6)
+
+
+@pytest.mark.parametrize("scale", [1.0, 1e-8, 1e8])
+def test_linear_regression_small_units_match_linregress(scale):
+    rng = np.random.default_rng(42)
+    x = rng.normal(size=100) * scale
+    y = rng.normal(size=100)
+    result = linear_regression(x, y)
+    reference = linregress(x, y)
+    np.testing.assert_allclose(result["se"].iloc[1], reference.stderr, rtol=1e-7)
+    np.testing.assert_allclose(result["pval"].iloc[1], reference.pvalue, rtol=1e-7)
+    assert result["pval"].iloc[1] > 0.3

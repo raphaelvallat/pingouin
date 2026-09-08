@@ -449,7 +449,12 @@ def linear_regression(
 
     # Compute mean squared error, variance and SE
     mse = ss_res / df_resid
-    beta_var = mse * (np.linalg.pinv(Xw.T @ Xw).diagonal())
+    # Inverting Xw.T @ Xw squares the condition number and can discard
+    # estimable directions when predictors have different units. Form the
+    # covariance from the design SVD, retaining the rank used by lstsq.
+    _, singular_values, vt = np.linalg.svd(Xw.astype(coef.dtype), full_matrices=False)
+    scaled_vt = vt[:rank] / singular_values[:rank, np.newaxis]
+    beta_var = mse * np.sum(scaled_vt**2, axis=0)
     beta_se = np.sqrt(beta_var)
 
     # Compute T and p-values
