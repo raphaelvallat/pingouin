@@ -1148,7 +1148,8 @@ def rcorr(
             mat_upper = self.corr(method=lambda x, y: spearmanr(x, y)[1], numeric_only=True)
         if padjust is not None:
             mask = np.triu(np.ones(mat.shape, dtype=bool), k=1)
-            pvals = np.where(mask, mat_upper.to_numpy(), 0)
+            # Only unique pairs belong to the test family; multicomp ignores NaNs.
+            pvals = np.where(mask, mat_upper.to_numpy(), np.nan)
             pvals_adj = multicomp(pvals, alpha=0.05, method=padjust)[1]
             mat_upper = mat_upper.where(~mask, pvals_adj)
 
