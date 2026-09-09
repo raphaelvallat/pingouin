@@ -85,6 +85,12 @@ class TestMulticomp(TestCase):
         # With NaN values
         _, pval_corr = sidak(pvals2_NA)
         assert_array_almost_equal(pval_corr, [0.94691584, np.nan, 0.3439, 0.7599, 0.45299184])
+        # Empty test family (all NaN) must return NaN, not 0 (= 1 - (1 - nan) ** 0)
+        reject, pval_corr = sidak([np.nan, np.nan])
+        assert_array_equal(reject, [False, False])
+        assert np.isnan(pval_corr).all()
+        _, pval_corr = multicomp([np.nan, np.nan], method="sidak")
+        assert np.isnan(pval_corr).all()
 
     def test_holm(self):
         """Test function holm.

@@ -1,7 +1,7 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
 import numpy as np
-from pandas import Series
+from pandas import DataFrame, Series
 
 __all__ = ["multicomp"]
 
@@ -335,7 +335,11 @@ def sidak(pvals, alpha=0.05):
     pvals = np.asarray(pvals)
     num_nan = np.isnan(pvals).sum()
     ntests = float(pvals.size) - num_nan
-    pvals_corrected = 1 - np.power((1.0 - pvals), ntests)
+    if ntests == 0:
+        # Empty test family (all p-values are NaN): ``1 - (1 - nan) ** 0`` would evaluate to 0.
+        pvals_corrected = np.full(pvals.shape, np.nan)
+    else:
+        pvals_corrected = 1 - np.power((1.0 - pvals), ntests)
     pvals_corrected = np.clip(pvals_corrected, None, 1)
     with np.errstate(invalid="ignore"):
         reject = np.less(pvals_corrected, alpha)
@@ -496,3 +500,30 @@ def multicomp(pvals, alpha=0.05, method="holm"):
     else:
         raise ValueError("Multiple comparison method not recognized")
     return reject, pvals_corrected
+
+
+def _multicomp_triu(mat_upper, method, alpha=0.05):
+    """Adjust the strict upper triangle of a square p-value matrix for multiple comparisons.
+
+    Used by :py:func:`pingouin.rcorr` and :py:func:`pingouin.ptests`. Only the ``n * (n - 1) / 2``
+    unique pairs (strict upper triangle) form the test family. The diagonal and the lower triangle
+    are placeholders, not tests, and are returned unchanged.
+
+    Parameters
+    ----------
+    mat_upper : :py:class:`pandas.DataFrame`
+        Square matrix with the uncorrected p-values on the strict upper triangle.
+    method : string
+        Correction method, see :py:func:`pingouin.multicomp`.
+    alpha : float
+        Significance level.
+
+    Returns
+    -------
+    mat_adj : :py:class:`pandas.DataFrame`
+        Copy of ``mat_upper`` with the strict upper triangle replaced by the corrected p-values.
+    """
+    mask = np.triu(np.ones(mat_upper.shape, dtype=bool), k=1)
+    pvals_adj = mat_upper.to_numpy(dtype=float).copy()
+    pvals_adj[mask] = multicomp(pvals_adj[mask], alpha=alpha, method=method)[1]
+    return DataFrame(pvals_adj, index=mat_upper.index, columns=mat_upper.columns)

@@ -10,7 +10,7 @@ from scipy.stats import studentized_range
 
 from .config import options
 from .effsize import compute_effsize
-from .multicomp import multicomp
+from .multicomp import _multicomp_triu, multicomp
 from .parametric import anova
 from .utils import _check_dataframe, _flatten_list, _postprocess_dataframe
 
@@ -752,14 +752,8 @@ def ptests(
         mat_upper.loc[a, b] = p
 
     if padjust is not None:
-        mask = np.triu(np.ones(mat_upper.shape, dtype=bool), k=1)
-        triu = mat_upper.where(mask).stack()
-        _, triu.iloc[:] = multicomp(triu.values, alpha=0.05, method="bonf")
-        mat_upper = mat_upper.mask(mask, triu.unstack())
-        # mask = np.triu(np.ones(mat.shape, dtype=bool), k=1)
-        # pvals = np.where(mask, mat_upper.to_numpy(), 0)
-        # pvals_adj = multicomp(pvals, alpha=0.05, method=padjust)[1]
-        # mat_upper = mat_upper.where(~mask, pvals_adj)
+        # Only the unique pairs (strict upper triangle) belong to the test family.
+        mat_upper = _multicomp_triu(mat_upper, method=padjust, alpha=0.05)
 
     # Convert T-values to str, and fill the diagonal with "-"
     mat = mat.astype(str)
