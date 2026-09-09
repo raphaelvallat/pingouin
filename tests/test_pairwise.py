@@ -528,6 +528,20 @@ class TestPairwise(TestCase):
             p = min(p * len(combs), 1)
             assert round(p, 7) == float(pt.at[a, b])
 
+        # Other correction methods must be honored, not silently replaced by Bonferroni
+        from pingouin.multicomp import multicomp
+
+        pvals = np.array([ttest_rel(df[a], df[b], nan_policy="omit")[1] for a, b in combs])
+        for padjust in ["holm", "sidak", "fdr_bh", "fdr_by"]:
+            pt = df.ptests(decimals=7, paired=True, stars=False, padjust=padjust)
+            actual = np.array([float(pt.at[a, b]) for a, b in combs])
+            np.testing.assert_allclose(actual, multicomp(pvals, method=padjust)[1], atol=1e-7)
+        pt_holm = df.ptests(paired=True, stars=False, padjust="holm")
+        pt_bonf = df.ptests(paired=True, stars=False, padjust="bonf")
+        assert not pt_holm.equals(pt_bonf)
+        with pytest.raises(ValueError):
+            df.ptests(padjust="wrong")
+
     def test_pairwise_tukey(self):
         """Test function pairwise_tukey.
 
