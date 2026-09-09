@@ -802,7 +802,7 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
     if ny == 1:
         # Case 1: One-sample Test
         d = (x.mean() - y) / x.std(ddof=1)
-        return d
+        return convert_effsize(d, "cohen", eftype, nx=nx, ny=ny)
     if eftype.lower() == "r":
         # Return correlation coefficient (useful for CI bootstrapping)
         r, _ = pearsonr(x, y)
