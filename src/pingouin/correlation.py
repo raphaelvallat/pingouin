@@ -10,7 +10,7 @@ from scipy.stats import kendalltau, pearsonr, spearmanr
 from .bayesian import bayesfactor_pearson
 from .config import options
 from .effsize import compute_esci
-from .multicomp import multicomp
+from .multicomp import _multicomp_triu
 from .power import power_corr
 from .utils import _perm_pval, _postprocess_dataframe, remove_na
 
@@ -1147,11 +1147,8 @@ def rcorr(
             # Method = 'spearman'
             mat_upper = self.corr(method=lambda x, y: spearmanr(x, y)[1], numeric_only=True)
         if padjust is not None:
-            mask = np.triu(np.ones(mat.shape, dtype=bool), k=1)
-            # Only unique pairs belong to the test family; multicomp ignores NaNs.
-            pvals = np.where(mask, mat_upper.to_numpy(), np.nan)
-            pvals_adj = multicomp(pvals, alpha=0.05, method=padjust)[1]
-            mat_upper = mat_upper.where(~mask, pvals_adj)
+            # Only the unique pairs (strict upper triangle) belong to the test family.
+            mat_upper = _multicomp_triu(mat_upper, method=padjust, alpha=0.05)
 
     # Convert r to text
     mat = mat.astype(str)
