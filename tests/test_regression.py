@@ -476,7 +476,7 @@ def test_linear_regression_exactly_collinear_dummies():
 
 def test_linear_regression_saturated_design():
     # n == p (zero residual degrees of freedom) used to raise a broadcast
-    # error. It should behave like the n < p case: SE inf and p-value NaN.
+    # error. It should behave like the n < p case: non-finite SE and NaN p-value.
     rng = np.random.default_rng(0)
     y = rng.normal(size=4)
     with warnings.catch_warnings():
@@ -485,5 +485,5 @@ def test_linear_regression_saturated_design():
         wide = linear_regression(rng.normal(size=(4, 5)), y)
     assert square.shape[0] == 4
     for res in (square, wide):
-        assert np.isinf(res["se"]).all()
+        assert not np.isfinite(res["se"]).any()
         assert res["pval"].isna().all()

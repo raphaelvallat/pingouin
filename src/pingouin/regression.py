@@ -415,8 +415,7 @@ def linear_regression(
     # (machine epsilon) is too strict and lets exactly collinear designs pass
     # as full rank, so we use the same tolerance as numpy.linalg.matrix_rank.
     rcond = max(Xw.shape) * np.finfo(float).eps
-    coef, ss_res, rank, _ = lstsq(Xw, yw, cond=rcond)
-    ss_res = ss_res[0] if ss_res.shape == (1,) else ss_res
+    coef, _, rank, _ = lstsq(Xw, yw, cond=rcond)
     if coef_only:
         return coef
     if rank < Xw.shape[1]:
@@ -435,10 +434,9 @@ def linear_regression(
     # Calculate predicted values and (weighted) residuals
     pred = Xw @ coef
     resid = yw - pred
-    if np.size(ss_res) == 0:
-        # lstsq returns an empty ss_res when the design is rank deficient or
-        # when n <= p, so compute it from the residuals instead.
-        ss_res = (resid**2).sum()
+    # Do not rely on the residues returned by lstsq: depending on the SciPy
+    # version they are empty or NaN for rank-deficient and n <= p designs.
+    ss_res = (resid**2).sum()
 
     # Calculate total (weighted) sums of squares and R^2
     ss_tot = yw @ yw
