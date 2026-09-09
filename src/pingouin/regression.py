@@ -419,9 +419,7 @@ def linear_regression(
     ss_res = ss_res[0] if ss_res.shape == (1,) else ss_res
     if coef_only:
         return coef
-    calc_ss_res = False
     if rank < Xw.shape[1]:
-        # in this case, ss_res is of shape (0,), i.e., an empty array
         warnings.warn(
             "Design matrix supplied with `X` parameter is rank "
             f"deficient (rank {rank} with {Xw.shape[1]} columns). "
@@ -429,7 +427,6 @@ def linear_regression(
             "are a linear combination of one of more of the "
             "other columns."
         )
-        calc_ss_res = True
 
     # Degrees of freedom
     df_model = rank - constant
@@ -438,8 +435,9 @@ def linear_regression(
     # Calculate predicted values and (weighted) residuals
     pred = Xw @ coef
     resid = yw - pred
-    if calc_ss_res:
-        # In case we did not get ss_res from lstsq due to rank deficiency
+    if np.size(ss_res) == 0:
+        # lstsq returns an empty ss_res when the design is rank deficient or
+        # when n <= p, so compute it from the residuals instead.
         ss_res = (resid**2).sum()
 
     # Calculate total (weighted) sums of squares and R^2
@@ -456,7 +454,7 @@ def linear_regression(
     # Inverting Xw.T @ Xw squares the condition number and can discard
     # estimable directions when predictors have different units. Form the
     # covariance from the design SVD, retaining the rank used by lstsq.
-    _, singular_values, vt = np.linalg.svd(Xw.astype(coef.dtype), full_matrices=False)
+    _, singular_values, vt = np.linalg.svd(Xw.astype(coef.dtype, copy=False), full_matrices=False)
     scaled_vt = vt[:rank] / singular_values[:rank, np.newaxis]
     beta_var = mse * np.sum(scaled_vt**2, axis=0)
     beta_se = np.sqrt(beta_var)

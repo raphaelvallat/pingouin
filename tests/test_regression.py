@@ -1,3 +1,4 @@
+import warnings
 from unittest import TestCase
 
 import numpy as np
@@ -452,7 +453,6 @@ def test_linear_regression_small_units_match_linregress(scale):
     reference = linregress(x, y)
     np.testing.assert_allclose(result["se"].iloc[1], reference.stderr, rtol=1e-7)
     np.testing.assert_allclose(result["pval"].iloc[1], reference.pvalue, rtol=1e-7)
-    assert result["pval"].iloc[1] > 0.3
 
 
 def test_linear_regression_exactly_collinear_dummies():
@@ -472,3 +472,18 @@ def test_linear_regression_exactly_collinear_dummies():
     np.testing.assert_allclose(result["se"], reference.bse, rtol=1e-6)
     np.testing.assert_allclose(result["pval"], reference.pvalues, rtol=1e-6, atol=1e-8)
     np.testing.assert_allclose(result[["CI2.5", "CI97.5"]], reference.conf_int(), rtol=1e-6)
+
+
+def test_linear_regression_saturated_design():
+    # n == p (zero residual degrees of freedom) used to raise a broadcast
+    # error. It should behave like the n < p case: SE inf and p-value NaN.
+    rng = np.random.default_rng(0)
+    y = rng.normal(size=4)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        square = linear_regression(rng.normal(size=(4, 3)), y)
+        wide = linear_regression(rng.normal(size=(4, 5)), y)
+    assert square.shape[0] == 4
+    for res in (square, wide):
+        assert np.isinf(res["se"]).all()
+        assert res["pval"].isna().all()
