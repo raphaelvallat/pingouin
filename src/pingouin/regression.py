@@ -411,7 +411,11 @@ def linear_regression(
         yw = y
 
     # FIT (WEIGHTED) LEAST SQUARES REGRESSION
-    coef, ss_res, rank, _ = lstsq(Xw, yw, cond=None)
+    # Singular values below rcond * s_max are treated as zero. The default
+    # (machine epsilon) is too strict and lets exactly collinear designs pass
+    # as full rank, so we use the same tolerance as numpy.linalg.matrix_rank.
+    rcond = max(Xw.shape) * np.finfo(float).eps
+    coef, ss_res, rank, _ = lstsq(Xw, yw, cond=rcond)
     ss_res = ss_res[0] if ss_res.shape == (1,) else ss_res
     if coef_only:
         return coef

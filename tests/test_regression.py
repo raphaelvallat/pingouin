@@ -453,3 +453,22 @@ def test_linear_regression_small_units_match_linregress(scale):
     np.testing.assert_allclose(result["se"].iloc[1], reference.stderr, rtol=1e-7)
     np.testing.assert_allclose(result["pval"].iloc[1], reference.pvalue, rtol=1e-7)
     assert result["pval"].iloc[1] > 0.3
+
+
+def test_linear_regression_exactly_collinear_dummies():
+    # Intercept + full set of one-hot dummies is exactly rank deficient. With
+    # lstsq's default tolerance (machine epsilon) this design is misreported
+    # as full rank for this seed, giving coefficients and SE around 1e13 and
+    # no warning. The truncated-SVD covariance must match statsmodels.
+    rng = np.random.default_rng(3)
+    n = 190
+    groups = rng.integers(0, 3, n)
+    X = np.column_stack([np.eye(3)[groups], rng.normal(size=n)])
+    y = rng.normal(size=n)
+    with pytest.warns(UserWarning, match="rank 4 with 5 columns"):
+        result = linear_regression(X, y, add_intercept=True)
+    reference = sm.OLS(y, sm.add_constant(X)).fit()
+    np.testing.assert_allclose(result["coef"], reference.params, rtol=1e-6, atol=1e-10)
+    np.testing.assert_allclose(result["se"], reference.bse, rtol=1e-6)
+    np.testing.assert_allclose(result["pval"], reference.pvalues, rtol=1e-6, atol=1e-8)
+    np.testing.assert_allclose(result[["CI2.5", "CI97.5"]], reference.conf_int(), rtol=1e-6)
