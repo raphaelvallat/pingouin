@@ -492,12 +492,12 @@ def linear_regression(
         )
         if "Intercept" in names:
             # Intercept is the first column
-            reli = _relimp(data.drop(columns=["Intercept"]).cov(numeric_only=True))
+            reli = _relimp(data.drop(columns=["Intercept"]).corr(numeric_only=True))
             reli["names"] = ["Intercept"] + reli["names"]
             reli["relimp"] = np.insert(reli["relimp"], 0, np.nan)
             reli["relimp_perc"] = np.insert(reli["relimp_perc"], 0, np.nan)
         else:
-            reli = _relimp(data.cov(numeric_only=True))
+            reli = _relimp(data.corr(numeric_only=True))
         stats.update(reli)
 
     if as_dataframe:
@@ -529,7 +529,7 @@ def _relimp(S):
     Parameters
     ----------
     S : pd.DataFrame
-        Covariance matrix. The target variable MUST be the FIRST column,
+        Correlation matrix. The target variable MUST be the FIRST column,
         followed by the predictors (excluding the intercept).
     """
     assert isinstance(S, pd.DataFrame)
