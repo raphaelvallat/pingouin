@@ -240,6 +240,21 @@ class TestEffsize(TestCase):
         with pytest.raises(ValueError):
             cef(d, "AUC", "eta_square")
 
+    def test_compute_effsize_one_sample_eftype(self):
+        """One-sample effect sizes must honor eftype, not always return Cohen d."""
+        from pingouin.effsize import convert_effsize
+
+        xs = [1, 2, 3, 4, 5, 6, 7]
+        d = compute_effsize(xs, y=0, eftype="cohen")
+        # eta-squared is bounded in [0, 1] by definition; the one-sample path
+        # used to return the raw Cohen d (1.85), which is out of range.
+        eta = compute_effsize(xs, y=0, eftype="eta_square")
+        assert 0 <= eta <= 1
+        # other types must match convert_effsize applied to the one-sample d
+        for eftype in ["hedges", "odds_ratio", "eta_square"]:
+            expected = convert_effsize(d, "cohen", eftype, nx=len(xs), ny=1)
+            assert np.isclose(compute_effsize(xs, y=0, eftype=eftype), expected)
+
     def test_compute_effsize(self):
         """Test function compute_effsize"""
         compute_effsize(x=x, y=y, eftype="cohen", paired=False)
