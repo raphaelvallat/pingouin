@@ -7,7 +7,7 @@ import pandas_flavor as pf
 from scipy.stats import f
 
 from .bayesian import bayesfactor_ttest
-from .distribution import _contrast_cov, _mauchly, epsilon, sphericity
+from .distribution import _contrast_cov, _gg_epsilon, _mauchly_sphericity
 from .utils import _check_dataframe, _flatten_list, _postprocess_dataframe, remove_na
 
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova", "ancova"]
@@ -323,6 +323,27 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     return _postprocess_dataframe(stats)
 
 
+def _pivot_rm(data, dv, within, subject, between=None):
+    """Wide-format table of a repeated measures design, and the matching long-format data.
+
+    Pivoting and melting the table has several effects:
+    1) Force missing values to be explicit (a NaN cell is created)
+    2) Automatic collapsing to the mean if multiple within factors are present
+    3) Remove subjects with missing values (listwise deletion).
+    The latter is the same behavior as JASP (= strict complete-case analysis).
+    For a mixed design, ``between`` is added to the index of the wide-format table.
+    """
+    index = subject if between is None else [subject, between]
+    data_piv = data.pivot_table(index=index, columns=within, values=dv, observed=True).dropna()
+    data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
+    return data_piv, data
+
+
+def _gg_corrected_pval(fval, ddof1, ddof2, eps):
+    """P-value(s) of the F-test(s) with Greenhouse-Geisser corrected degrees of freedom."""
+    return f(np.maximum(ddof1 * eps, 1.0), np.maximum(ddof2 * eps, 1.0)).sf(fval)
+
+
 @pf.register_dataframe_method
 def rm_anova(
     data=None, dv=None, within=None, subject=None, correction="auto", detailed=False, effsize="ng2"
@@ -528,14 +549,8 @@ def rm_anova(
     assert not data[within].isnull().any(), "Cannot have missing values in `within`."
     assert not data[subject].isnull().any(), "Cannot have missing values in `subject`."
 
-    # Pivot and melt the table. This has several effects:
-    # 1) Force missing values to be explicit (a NaN cell is created)
-    # 2) Automatic collapsing to the mean if multiple within factors are present
-    # 3) If using dropna, remove rows with missing values (listwise deletion).
-    # The latter is the same behavior as JASP (= strict complete-case analysis).
-    data_piv = data.pivot_table(index=subject, columns=within, values=dv, observed=True)
-    data_piv = data_piv.dropna()
-    data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
+    # Wide-format table, and complete-case long-format data
+    data_piv, data = _pivot_rm(data, dv, within, subject)
 
     # Groupby
     # I think that observed=True is actually not needed here since we have already used
@@ -575,22 +590,16 @@ def rm_anova(
         # (Generalized) eta-squared, ng2 == n2
         ef = ss_with / (ss_with + ss_resall)
 
-    # Compute sphericity using Mauchly test, on the wide-format dataframe
+    # Epsilon and Mauchly's test of sphericity, from the covariance matrix of the contrasts
+    M = _contrast_cov(data_piv)
+    eps = _gg_epsilon(M)
+    spher, W_spher, p_spher = _mauchly_sphericity(M, n_obs - 1, n_rm)
     # Sphericity assumption only applies if there are more than 2 levels
-    if correction == "auto" or (correction is True and n_rm >= 3):
-        spher, W_spher, _, _, p_spher = sphericity(data_piv, alpha=0.05)
-        if correction == "auto":
-            correction = True if not spher else False
-    else:
-        correction = False
-
-    # Compute epsilon adjustement factor
-    eps = epsilon(data_piv, correction="gg")
+    correction = not spher if correction == "auto" else (bool(correction) and n_rm >= 3)
 
     # If required, apply Greenhouse-Geisser correction for sphericity
     if correction:
-        corr_ddof1, corr_ddof2 = (np.maximum(d * eps, 1.0) for d in (ddof1, ddof2))
-        p_corr = f(corr_ddof1, corr_ddof2).sf(fval)
+        p_corr = _gg_corrected_pval(fval, ddof1, ddof2, eps)
 
     # Create output dataframe
     if not detailed:
@@ -679,14 +688,8 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     assert not data[b].isnull().any(), "Cannot have missing values in %s" % b
     assert not data[subject].isnull().any(), "Cannot have missing values in %s" % subject
 
-    # Pivot and melt the table. This has several effects:
-    # 1) Force missing values to be explicit (a NaN cell is created)
-    # 2) Automatic collapsing to the mean if multiple within factors are present
-    # 3) If using dropna, remove rows with missing values (listwise deletion).
-    # The latter is the same behavior as JASP (= strict complete-case analysis).
-    data_piv = data.pivot_table(index=subject, columns=within, values=dv, observed=True)
-    data_piv = data_piv.dropna()
-    data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
+    # Wide-format table, and complete-case long-format data
+    data_piv, data = _pivot_rm(data, dv, within, subject)
 
     # Group sizes and grandmean
     n_a = data[a].nunique()
@@ -730,85 +733,56 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     df_tot = n_a * n_b * n_s - 1
     df_abs = df_tot - df_a - df_b - df_s - df_ab - df_as - df_bs
 
-    # Mean squares
-    ms_a = ss_a / df_a
-    ms_b = ss_b / df_b
-    ms_ab = ss_ab / df_ab
-    ms_as = ss_as / df_as
-    ms_bs = ss_bs / df_bs
-    ms_abs = ss_abs / df_abs
+    # Effects of A, B and A * B, and their respective error terms
+    ss = np.array([ss_a, ss_b, ss_ab])
+    ddof1 = np.array([df_a, df_b, df_ab])
+    ss_err = np.array([ss_as, ss_bs, ss_abs])
+    ddof2 = np.array([df_as, df_bs, df_abs])
 
-    # F-values
-    f_a = ms_a / ms_as
-    f_b = ms_b / ms_bs
-    f_ab = ms_ab / ms_abs
-
-    # P-values
-    p_a = f(df_a, df_as).sf(f_a)
-    p_b = f(df_b, df_bs).sf(f_b)
-    p_ab = f(df_ab, df_abs).sf(f_ab)
+    # Mean squares, F-values and p-values
+    ms = ss / ddof1
+    fval = ms / (ss_err / ddof2)
+    p_unc = f(ddof1, ddof2).sf(fval)
 
     # Effect sizes
     if effsize == "n2":
         # ..Eta-squared
-        ef_a = ss_a / ss_tot
-        ef_b = ss_b / ss_tot
-        ef_ab = ss_ab / ss_tot
+        ef = ss / ss_tot
     elif effsize == "ng2":
         # .. Generalized eta-squared (from Bakeman 2005 Table 1) -- default
-        ef_a = ss_a / (ss_a + ss_s + ss_as + ss_bs + ss_abs)
-        ef_b = ss_b / (ss_b + ss_s + ss_as + ss_bs + ss_abs)
-        ef_ab = ss_ab / (ss_ab + ss_s + ss_as + ss_bs + ss_abs)
+        ef = ss / (ss + ss_s + ss_as + ss_bs + ss_abs)
     else:
         # .. Partial eta squared
-        ef_a = (f_a * df_a) / (f_a * df_a + df_as)
-        ef_b = (f_b * df_b) / (f_b * df_b + df_bs)
-        ef_ab = (f_ab * df_ab) / (f_ab * df_ab + df_abs)
+        ef = ss / (ss + ss_err)
 
-    # Epsilon
-    piv_a = data.pivot_table(index=subject, columns=a, values=dv, observed=True)
-    piv_b = data.pivot_table(index=subject, columns=b, values=dv, observed=True)
-    eps_a = epsilon(piv_a, correction="gg")
-    eps_b = epsilon(piv_b, correction="gg")
-    eps_ab = epsilon(data_piv, correction="gg")
-
-    # Greenhouse-Geisser correction
-    df_a_c, df_as_c = (np.maximum(d * eps_a, 1.0) for d in (df_a, df_as))
-    df_b_c, df_bs_c = (np.maximum(d * eps_b, 1.0) for d in (df_b, df_bs))
-    df_ab_c, df_abs_c = (np.maximum(d * eps_ab, 1.0) for d in (df_ab, df_abs))
-    p_a_corr = f(df_a_c, df_as_c).sf(f_a)
-    p_b_corr = f(df_b_c, df_bs_c).sf(f_b)
-    p_ab_corr = f(df_ab_c, df_abs_c).sf(f_ab)
-
-    # Mauchly's test of sphericity
-    def _spher(piv):
+    # Epsilon and Mauchly's test of sphericity of each effect, from the covariance matrix of the
+    # orthonormal contrasts. The main effects use the subject means across the other factor.
+    # Same as R / afex, Mauchly's test uses the total number of conditions (n_a * n_b) in the
+    # chi-square approximation, including for the main effects.
+    eps, spher = [], []
+    for fac in [a, b, None]:
+        piv = data_piv if fac is None else data_piv.T.groupby(level=fac, observed=True).mean().T
         M = _contrast_cov(piv)
-        # Sphericity is always met with only one degree of freedom (e.g. two levels)
-        if M.shape[0] <= 1:
-            return True, np.nan, 1.0
-        # Same as R / afex, which use the total number of conditions (n_a * n_b) in the
-        # chi-square approximation, including for the main effects
-        W, _, _, p_spher = _mauchly(M, n_s - 1, n_a * n_b)
-        return bool(p_spher > 0.05), W, p_spher
-
-    spher_a, spher_b, spher_ab = _spher(piv_a), _spher(piv_b), _spher(data_piv)
+        eps.append(_gg_epsilon(M))
+        spher.append(_mauchly_sphericity(M, n_s - 1, n_a * n_b))
+    eps = np.array(eps)
 
     # Create dataframe
     aov = pd.DataFrame(
         {
             "Source": [a, b, a + " * " + b],
-            "SS": [ss_a, ss_b, ss_ab],
-            "ddof1": [df_a, df_b, df_ab],
-            "ddof2": [df_as, df_bs, df_abs],
-            "MS": [ms_a, ms_b, ms_ab],
-            "F": [f_a, f_b, f_ab],
-            "p_unc": [p_a, p_b, p_ab],
-            "p_GG_corr": [p_a_corr, p_b_corr, p_ab_corr],
-            effsize: [ef_a, ef_b, ef_ab],
-            "eps": [eps_a, eps_b, eps_ab],
-            "sphericity": [spher_a[0], spher_b[0], spher_ab[0]],
-            "W_spher": [spher_a[1], spher_b[1], spher_ab[1]],
-            "p_spher": [spher_a[2], spher_b[2], spher_ab[2]],
+            "SS": ss,
+            "ddof1": ddof1,
+            "ddof2": ddof2,
+            "MS": ms,
+            "F": fval,
+            "p_unc": p_unc,
+            "p_GG_corr": _gg_corrected_pval(fval, ddof1, ddof2, eps),
+            effsize: ef,
+            "eps": eps,
+            "sphericity": [sph[0] for sph in spher],
+            "W_spher": [sph[1] for sph in spher],
+            "p_spher": [sph[2] for sph in spher],
         }
     )
     return _postprocess_dataframe(aov)
@@ -1070,67 +1044,49 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     data = data.reset_index(drop=True)
     _check_no_empty_cells(data, between)
     grp_both = data.groupby(between, observed=True, group_keys=False)[dv]
-    ng1, ng2 = data[fac1].nunique(), data[fac2].nunique()
-
-    if grp_both.count().nunique() == 1:
-        # BALANCED DESIGN
-        aov_fac1 = anova(data=data, dv=dv, between=fac1, detailed=True)
-        aov_fac2 = anova(data=data, dv=dv, between=fac2, detailed=True)
-        # Sums of squares
-        ss_fac1 = aov_fac1.at[0, "SS"]
-        ss_fac2 = aov_fac2.at[0, "SS"]
-        ss_tot = ((data[dv] - data[dv].mean(numeric_only=True)) ** 2).sum()
-        ss_resid = np.sum(grp_both.apply(lambda x: (x - x.mean()) ** 2))
-        ss_inter = ss_tot - (ss_resid + ss_fac1 + ss_fac2)
-        # Degrees of freedom
-        df_fac1 = aov_fac1.at[0, "DF"]
-        df_fac2 = aov_fac2.at[0, "DF"]
-        df_inter = (ng1 - 1) * (ng2 - 1)
-        df_resid = data[dv].size - (ng1 * ng2)
-    else:
+    if grp_both.count().nunique() > 1:
         # UNBALANCED DESIGN
         return anovan(dv=dv, between=between, data=data, ss_type=ss_type, effsize=effsize)
 
-    # Mean squares
-    ms_fac1 = ss_fac1 / df_fac1
-    ms_fac2 = ss_fac2 / df_fac2
-    ms_inter = ss_inter / df_inter
+    # BALANCED DESIGN
+    mu = data[dv].mean()
+    ss_tot = ((data[dv] - mu) ** 2).sum()
+    ss_resid = ((data[dv] - grp_both.transform("mean")) ** 2).sum()
+    df_resid = data[dv].size - grp_both.ngroups
+    # Main effects of each factor, and interaction
+    ss, ddof1 = [], []
+    for fac in between:
+        grp = data.groupby(fac, observed=True)[dv]
+        ss.append(((grp.mean() - mu) ** 2 * grp.count()).sum())
+        ddof1.append(grp.ngroups - 1)
+    ss.append(ss_tot - (ss_resid + sum(ss)))
+    ddof1.append(ddof1[0] * ddof1[1])
+    ss, ddof1 = np.array(ss), np.array(ddof1)
+
+    # Mean squares, F-values and p-values
+    ms = ss / ddof1
     ms_resid = ss_resid / df_resid
-
-    # F-values
-    fval_fac1 = ms_fac1 / ms_resid
-    fval_fac2 = ms_fac2 / ms_resid
-    fval_inter = ms_inter / ms_resid
-
-    # P-values
-    pval_fac1 = f(df_fac1, df_resid).sf(fval_fac1)
-    pval_fac2 = f(df_fac2, df_resid).sf(fval_fac2)
-    pval_inter = f(df_inter, df_resid).sf(fval_inter)
+    fval = ms / ms_resid
+    pval = f(ddof1, df_resid).sf(fval)
 
     # Effect size
     if effsize == "n2":
         # Standard eta-square
-        n2_fac1 = ss_fac1 / ss_tot
-        n2_fac2 = ss_fac2 / ss_tot
-        n2_inter = ss_inter / ss_tot
-        all_effsize = [n2_fac1, n2_fac2, n2_inter, np.nan]
+        ef = ss / ss_tot
     else:
         # ..Partial eta-square
-        np2_fac1 = ss_fac1 / (ss_fac1 + ss_resid)
-        np2_fac2 = ss_fac2 / (ss_fac2 + ss_resid)
-        np2_inter = ss_inter / (ss_inter + ss_resid)
-        all_effsize = [np2_fac1, np2_fac2, np2_inter, np.nan]
+        ef = ss / (ss + ss_resid)
 
     # Create output dataframe
     aov = pd.DataFrame(
         {
             "Source": [fac1, fac2, fac1 + " * " + fac2, "Residual"],
-            "SS": [ss_fac1, ss_fac2, ss_inter, ss_resid],
-            "DF": [df_fac1, df_fac2, df_inter, df_resid],
-            "MS": [ms_fac1, ms_fac2, ms_inter, ms_resid],
-            "F": [fval_fac1, fval_fac2, fval_inter, np.nan],
-            "p_unc": [pval_fac1, pval_fac2, pval_inter, np.nan],
-            effsize: all_effsize,
+            "SS": [*ss, ss_resid],
+            "DF": [*ddof1, df_resid],
+            "MS": [*ms, ms_resid],
+            "F": [*fval, np.nan],
+            "p_unc": [*pval, np.nan],
+            effsize: [*ef, np.nan],
         }
     )
 
@@ -1150,6 +1106,17 @@ def _check_no_empty_cells(data, between):
             "Each combination of the between-subject factors must have at least one "
             "observation. The interaction cannot be estimated with empty cells."
         )
+
+
+def _eta_squared(ss, effsize):
+    """Eta-squared (``"n2"``) or partial eta-squared (``"np2"``) of each row of an ANOVA table.
+
+    ``ss`` are the sums of squares of the table, the last row being the residuals.
+    """
+    ss = np.asarray(ss, dtype=float)
+    ef = ss / ss.sum() if effsize == "n2" else ss / (ss + ss[-1])
+    ef[-1] = np.nan
+    return ef
 
 
 def _remove_unused_categories(data):
@@ -1224,13 +1191,7 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     aov["MS"] = aov["SS"] / aov["DF"]
 
     # Effect size
-    if effsize == "n2":
-        # Get standard eta-square for all effects except residuals (last)
-        all_n2 = (aov["SS"] / aov["SS"].sum()).to_numpy(copy=True)
-        all_n2[-1] = np.nan
-        aov["n2"] = all_n2
-    else:
-        aov["np2"] = (aov["F"] * aov["DF"]) / (aov["F"] * aov["DF"] + aov.iloc[-1, 2])
+    aov[effsize] = _eta_squared(aov["SS"], effsize)
 
     def format_source(x):
         for fac in between:
@@ -1532,14 +1493,8 @@ def mixed_anova(
         dv=dv, within=within, between=between, data=data, subject=subject, effects="interaction"
     )
 
-    # Pivot and melt the table. This has several effects:
-    # 1) Force missing values to be explicit (a NaN cell is created)
-    # 2) Automatic collapsing to the mean if multiple within factors are present
-    # 3) If using dropna, remove rows with missing values (listwise deletion).
-    # The latter is the same behavior as JASP (= strict complete-case analysis).
-    data_piv = data.pivot_table(index=[subject, between], columns=within, values=dv, observed=True)
-    data_piv = data_piv.dropna()
-    data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
+    # Wide-format table (subjects x within), and complete-case long-format data
+    data_piv, data = _pivot_rm(data, dv, within, subject, between=between)
 
     # Check that subject IDs do not overlap between groups: the subject ID
     # should have a unique range / set of values for each between-subject
@@ -1555,117 +1510,81 @@ def mixed_anova(
     # SUMS OF SQUARES
     grandmean = data[dv].mean(numeric_only=True)
     ss_total = ((data[dv] - grandmean) ** 2).sum()
-    # Extract main effects of within and between factors
-    # Sphericity correction is computed below, from the mixed-design residuals
-    aov_with = rm_anova(
-        dv=dv, within=within, subject=subject, data=data, correction=False, detailed=True
-    )
-    aov_betw = anova(dv=dv, between=between, data=data, detailed=True)
-    ss_betw = aov_betw.at[0, "SS"]
-    ss_with = aov_with.at[0, "SS"]
-    # Extract residuals and interactions
-    grp = data.groupby([between, within], observed=True, group_keys=False)[dv]
+    grp_betw = data.groupby(between, observed=True)[dv]
+    grp_with = data.groupby(within, observed=True)[dv]
+    ss_betw = ((grp_betw.mean() - grandmean) ** 2 * grp_betw.count()).sum()
+    ss_with = ((grp_with.mean() - grandmean) ** 2 * grp_with.count()).sum()
     # ssresall = residuals within + residuals between
-    ss_resall = grp.apply(lambda x: (x - x.mean()) ** 2).sum()
+    grp = data.groupby([between, within], observed=True)[dv]
+    ss_resall = ((data[dv] - grp.transform("mean")) ** 2).sum()
     # Interaction
     ss_inter = ss_total - (ss_resall + ss_with + ss_betw)
-    ss_reswith = aov_with.at[1, "SS"] - ss_inter
-    ss_resbetw = ss_total - (ss_with + ss_betw + ss_reswith + ss_inter)
+    # Variability between subjects, which is split into the between-subject factor and its error
+    n_rm = data_piv.shape[1]
+    ss_subj = n_rm * ((data_piv.mean(axis=1) - grandmean) ** 2).sum()
+    ss_resbetw = ss_subj - ss_betw
+    ss_reswith = ss_total - (ss_with + ss_subj + ss_inter)
 
     # DEGREES OF FREEDOM
-    n_obs = data.groupby(within, observed=True)[dv].count().max()
-    df_with = aov_with.at[0, "DF"]
-    df_betw = aov_betw.at[0, "DF"]
-    df_resbetw = n_obs - data.groupby(between, observed=True)[dv].count().count()
+    n_subj, n_groups = data_piv.shape[0], grp_betw.ngroups
+    df_betw = n_groups - 1
+    df_with = n_rm - 1
+    df_inter = df_with * df_betw
+    df_resbetw = n_subj - n_groups
     df_reswith = df_with * df_resbetw
-    df_inter = aov_with.at[0, "DF"] * aov_betw.at[0, "DF"]
 
-    # MEAN SQUARES
-    ms_betw = aov_betw.at[0, "MS"]
-    ms_with = aov_with.at[0, "MS"]
-    ms_resbetw = ss_resbetw / df_resbetw
-    ms_reswith = ss_reswith / df_reswith
-    ms_inter = ss_inter / df_inter
+    # Between, within and interaction effects, and their respective error terms
+    ss = np.array([ss_betw, ss_with, ss_inter])
+    ddof1 = np.array([df_betw, df_with, df_inter])
+    ss_err = np.array([ss_resbetw, ss_reswith, ss_reswith])
+    ddof2 = np.array([df_resbetw, df_reswith, df_reswith])
 
-    # F VALUES
-    f_betw = ms_betw / ms_resbetw
-    f_with = ms_with / ms_reswith
-    f_inter = ms_inter / ms_reswith
-
-    # P-values
-    p_betw = f(df_betw, df_resbetw).sf(f_betw)
-    p_with = f(df_with, df_reswith).sf(f_with)
-    p_inter = f(df_inter, df_reswith).sf(f_inter)
+    # MEAN SQUARES, F-VALUES AND P-VALUES
+    ms = ss / ddof1
+    fval = ms / (ss_err / ddof2)
+    p_unc = f(ddof1, ddof2).sf(fval)
 
     # SPHERICITY
     # Epsilon and Mauchly's test are computed from the pooled within-group covariance matrix,
     # i.e. after removing the between-group mean differences at each level of the within factor
     # (same as SPSS, R car::Anova / afex / ez). Using the total covariance instead would treat
     # group differences as departure from sphericity.
-    n_rm = data_piv.shape[1]
     resid = data_piv - data_piv.groupby(level=between, observed=True).transform("mean")
-    # Sphericity is always met with only two repeated measures
-    spher, W_spher, p_spher = True, np.nan, 1.0
-    if n_rm >= 3 and correction in ["auto", True]:
-        W_spher, _, _, p_spher = _mauchly(_contrast_cov(resid), df_resbetw, n_rm)
-        spher = bool(p_spher > 0.05)
-    correction = not spher if correction == "auto" else (correction is True and n_rm >= 3)
+    M = _contrast_cov(resid)
     # GG epsilon is invariant to the scaling of the covariance matrix (N - 1 vs N - n_groups)
-    eps = epsilon(resid, correction="gg")
-    if correction:
-        # Same epsilon for the within factor and the interaction
-        corr_ddof2 = np.maximum(df_reswith * eps, 1.0)
-        p_with_corr = f(np.maximum(df_with * eps, 1.0), corr_ddof2).sf(f_with)
-        p_inter_corr = f(np.maximum(df_inter * eps, 1.0), corr_ddof2).sf(f_inter)
+    eps = _gg_epsilon(M)
+    spher, W_spher, p_spher = _mauchly_sphericity(M, df_resbetw, n_rm)
+    # Sphericity is always met with only two repeated measures
+    correction = not spher if correction == "auto" else (bool(correction) and n_rm >= 3)
 
     # Effects sizes (see Bakeman 2005)
     if effsize == "n2":
         # Standard eta-squared
-        ef_betw = ss_betw / ss_total
-        ef_with = ss_with / ss_total
-        ef_inter = ss_inter / ss_total
+        ef = ss / ss_total
     elif effsize == "ng2":
         # Generalized eta-square
-        ef_betw = ss_betw / (ss_betw + ss_resall)
-        ef_with = ss_with / (ss_with + ss_resall)
-        ef_inter = ss_inter / (ss_inter + ss_resall)
+        ef = ss / (ss + ss_resall)
     else:
         # Partial eta-squared (default)
-        # ef_betw = f_betw * df_betw / (f_betw * df_betw + df_resbetw)
-        # ef_with = f_with * df_with / (f_with * df_with + df_reswith)
-        ef_betw = ss_betw / (ss_betw + ss_resbetw)
-        ef_with = ss_with / (ss_with + ss_reswith)
-        ef_inter = ss_inter / (ss_inter + ss_reswith)
+        ef = ss / (ss + ss_err)
 
     # Stats table
-    aov = pd.concat(
-        [aov_betw.drop(1), aov_with.drop(1).drop(columns="eps")],
-        axis=0,
-        sort=False,
-        ignore_index=True,
-    )
-    # Update values
-    aov.rename(columns={"DF": "DF1"}, inplace=True)
-    aov.at[0, "F"], aov.at[1, "F"] = f_betw, f_with
-    aov.at[0, "p_unc"], aov.at[1, "p_unc"] = p_betw, p_with
-    aov.at[0, effsize], aov.at[1, effsize] = ef_betw, ef_with
-    aov_inter = pd.DataFrame(
+    aov = pd.DataFrame(
         {
-            "Source": "Interaction",
-            "SS": ss_inter,
-            "DF1": df_inter,
-            "MS": ms_inter,
-            "F": f_inter,
-            "p_unc": p_inter,
-            effsize: ef_inter,
-        },
-        index=[2],
+            "Source": [between, within, "Interaction"],
+            "SS": ss,
+            "DF1": ddof1,
+            "DF2": ddof2,
+            "MS": ms,
+            "F": fval,
+            "p_unc": p_unc,
+            effsize: ef,
+            "eps": [np.nan, eps, eps],
+        }
     )
-    aov = pd.concat([aov, aov_inter], axis=0, sort=False, ignore_index=True)
-    aov["DF2"] = [df_resbetw, df_reswith, df_reswith]
-    aov["eps"] = [np.nan, eps, eps]
     if correction:
-        aov["p_GG_corr"] = [np.nan, p_with_corr, p_inter_corr]
+        # Same epsilon for the within factor and the interaction
+        aov["p_GG_corr"] = [np.nan, *_gg_corrected_pval(fval[1:], ddof1[1:], ddof2[1:], eps)]
         aov["W_spher"] = [np.nan, W_spher, W_spher]
         aov["p_spher"] = [np.nan, p_spher, p_spher]
         aov["sphericity"] = [np.nan, spher, spher]
@@ -1810,14 +1729,7 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     aov["DF"] = aov["DF"].astype(int)
 
     # Add effect sizes
-    if effsize == "n2":
-        all_effsize = (aov["SS"] / aov["SS"].sum()).to_numpy(copy=True)
-        all_effsize[-1] = np.nan
-    else:
-        ss_resid = aov["SS"].iloc[-1]
-        all_effsize = aov["SS"].apply(lambda x: x / (x + ss_resid)).to_numpy(copy=True)
-        all_effsize[-1] = np.nan
-    aov[effsize] = all_effsize
+    aov[effsize] = _eta_squared(aov["SS"], effsize)
 
     # Add bw as an attribute (for rm_corr function)
     aov = _postprocess_dataframe(aov)
