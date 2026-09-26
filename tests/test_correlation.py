@@ -252,6 +252,14 @@ class TestCorrelation(TestCase):
             pc_normal.at["pearson", "p_val"], pc_large.at["pearson", "p_val"], atol=1e-6
         )
 
+        # A constant variable (zero variance) returns NaN instead of failing
+        df_const = df_normal.assign(covar_1=1.0)
+        for method in ["pearson", "spearman"]:
+            for kwargs in [{"x": "covar_1", "covar": "covar_2"}, {"x": "x", "covar": "covar_1"}]:
+                stats = partial_corr(data=df_const, y="y", method=method, **kwargs)
+                assert stats.at[method, "n"] == n
+                assert np.isnan(stats.at[method, "r"])
+
     def test_rmcorr(self):
         """Test function rm_corr"""
         df = read_dataset("rm_corr")

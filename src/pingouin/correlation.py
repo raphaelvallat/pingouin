@@ -68,7 +68,7 @@ def _correl_pvalue(r, n, k=0, alternative="two-sided"):
         pval = t.cdf(tval, dof)
     elif alternative == "greater":
         pval = t.sf(tval, dof)
-    elif alternative == "two-sided":
+    else:  # alternative = "two-sided"
         pval = 2 * t.sf(np.abs(tval), dof)
     return pval
 
@@ -638,9 +638,8 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
     n_outliers = int(outliers.sum()) if outliers is not None else 0
     n_clean = n - n_outliers
 
-    # Rounding errors caused an r value marginally beyond 1
-    if abs(r) > 1 and np.isclose(abs(r), 1):
-        r = np.clip(r, -1, 1)
+    # Guard against rounding errors causing an r value marginally beyond 1
+    r = np.clip(r, -1, 1)
 
     # Compute the parametric 95% confidence interval and power
     if abs(r) == 1:
@@ -884,6 +883,10 @@ def partial_corr(
                 "Partial correlation is undefined."
             )
 
+    if (data.nunique() < 2).any():
+        # A constant variable has zero variance: the partial correlation is not defined
+        return pd.DataFrame({"n": n, "r": np.nan, "CI95": np.nan, "p_val": np.nan}, index=[method])
+
     # Calculate the partial corrrelation matrix - similar to pingouin.pcorr()
     if method == "spearman":
         # Convert the data to rank, similar to R cov()
@@ -922,10 +925,6 @@ def partial_corr(
             r = spcor[0, 1]  # y_covar is removed from y
         else:
             r = spcor[1, 0]  # x_covar is removed from x
-
-    if np.isnan(r):
-        # Correlation failed. Return NaN. When would this happen?
-        return pd.DataFrame({"n": n, "r": np.nan, "CI95": np.nan, "p_val": np.nan}, index=[method])
 
     # Clip r to [-1, 1] to guard against floating-point drift from pinv
     r = float(np.clip(r, -1, 1))
