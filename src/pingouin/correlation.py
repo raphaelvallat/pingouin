@@ -55,7 +55,11 @@ def _correl_pvalue(r, n, k=0, alternative="two-sided"):
     ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
 
     if np.isclose(r**2, 1):  # Avoid divide by zero error
-        return 0.0  # Since p value approaches 0 as r approaches 1, just return 0
+        # p-value approaches 0 as |r| approaches 1, unless r is in the opposite
+        # direction of the one-sided alternative, in which case it approaches 1.
+        if (alternative == "greater" and r < 0) or (alternative == "less" and r > 0):
+            return 1.0
+        return 0.0
 
     # Method 1: using a student T distribution
     dof = n - k - 2
@@ -64,13 +68,8 @@ def _correl_pvalue(r, n, k=0, alternative="two-sided"):
         pval = t.cdf(tval, dof)
     elif alternative == "greater":
         pval = t.sf(tval, dof)
-    elif alternative == "two-sided":
+    else:  # alternative = "two-sided"
         pval = 2 * t.sf(np.abs(tval), dof)
-
-    # Method 2: beta distribution (similar to scipy.stats.pearsonr, faster)
-    # from scipy.special import btdtr
-    # ab = (n - k) / 2 - 1
-    # pval = 2 * btdtr(ab, ab, 0.5 * (1 - abs(np.float64(r))))
     return pval
 
 
@@ -143,11 +142,11 @@ def skipped(x, y, corr_type="spearman"):
 
     B = X - center
     bot = (B**2).sum(axis=1)
-    # Loop over rows
-    dis = np.zeros(shape=(nrows, nrows))
-    for i in np.arange(nrows):
-        if bot[i] != 0:  # Avoid division by zero error
-            dis[i, :] = np.linalg.norm(B.dot(B[i, :, None]) * B[i, :] / bot[i], axis=1)
+    # Norm of the projection of each row of B onto each other row of B:
+    # ||(B @ B[i]) * B[i] / bot[i]|| = |B @ B[i]| / sqrt(bot[i])
+    with np.errstate(divide="ignore", invalid="ignore"):
+        dis = np.abs(B @ B.T) / np.sqrt(bot)[:, None]
+    dis[bot == 0] = 0  # Avoid division by zero error
 
     # Detect outliers
     def idealf(x):
@@ -165,7 +164,7 @@ def skipped(x, y, corr_type="spearman"):
     # MAD = mad(dis, axis=1)
     iqr = np.apply_along_axis(idealf, 1, dis)
     thresh = np.median(dis, axis=1) + gval * iqr
-    outliers = np.apply_along_axis(np.greater, 0, dis, thresh).any(axis=0)
+    outliers = (dis > thresh[:, None]).any(axis=0)
     # Compute correlation on remaining data
     if corr_type == "spearman":
         r, pval = spearmanr(X[~outliers, 0], X[~outliers, 1])
@@ -600,12 +599,14 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
     n = x.size
 
     # Compute correlation coefficient and two-sided p-value
+    outliers = None
     if method == "pearson":
         r, pval = pearsonr(x, y)
     elif method == "spearman":
         r, pval = spearmanr(x, y, **kwargs)
     elif method == "kendall":
-        r, pval = kendalltau(x, y, **kwargs)
+        # Kendall tau has its own null distribution: let scipy handle one-sided tests
+        r, pval = kendalltau(x, y, alternative=alternative, **kwargs)
     elif method == "bicor":
         r, pval = bicor(x, y, **kwargs)
     elif method == "percbend":
@@ -634,12 +635,11 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
         )
 
     # Sample size after outlier removal
-    n_outliers = sum(outliers) if "outliers" in locals() else 0
+    n_outliers = int(outliers.sum()) if outliers is not None else 0
     n_clean = n - n_outliers
 
-    # Rounding errors caused an r value marginally beyond 1
-    if abs(r) > 1 and np.isclose(abs(r), 1):
-        r = np.clip(r, -1, 1)
+    # Guard against rounding errors causing an r value marginally beyond 1
+    r = np.clip(r, -1, 1)
 
     # Compute the parametric 95% confidence interval and power
     if abs(r) == 1:
@@ -651,8 +651,8 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
         )
         pr = power_corr(r=r, n=n_clean, power=None, alpha=0.05, alternative=alternative)
 
-    # Recompute p-value if tail is one-sided
-    if alternative != "two-sided":
+    # Recompute p-value if tail is one-sided (Student t approximation, not valid for Kendall)
+    if alternative != "two-sided" and method != "kendall":
         pval = _correl_pvalue(r, n_clean, k=0, alternative=alternative)
 
     # Create dictionnary
@@ -883,6 +883,10 @@ def partial_corr(
                 "Partial correlation is undefined."
             )
 
+    if (data.nunique() < 2).any():
+        # A constant variable has zero variance: the partial correlation is not defined
+        return pd.DataFrame({"n": n, "r": np.nan, "CI95": np.nan, "p_val": np.nan}, index=[method])
+
     # Calculate the partial corrrelation matrix - similar to pingouin.pcorr()
     if method == "spearman":
         # Convert the data to rank, similar to R cov()
@@ -921,10 +925,6 @@ def partial_corr(
             r = spcor[0, 1]  # y_covar is removed from y
         else:
             r = spcor[1, 0]  # x_covar is removed from x
-
-    if np.isnan(r):
-        # Correlation failed. Return NaN. When would this happen?
-        return pd.DataFrame({"n": n, "r": np.nan, "CI95": np.nan, "p_val": np.nan}, index=[method])
 
     # Clip r to [-1, 1] to guard against floating-point drift from pinv
     r = float(np.clip(r, -1, 1))
@@ -1130,22 +1130,28 @@ def rcorr(
     Openness           -0.01        0.265        -
     """
     from numpy import format_float_positional as ffp
-    from scipy.stats import pearsonr, spearmanr
+    from scipy.special import stdtr
 
     # Safety check
     assert isinstance(pval_stars, dict), "pval_stars must be a dictionnary."
     assert isinstance(decimals, int), "decimals must be an int."
     assert method in ["pearson", "spearman"], "Method is not recognized."
     assert upper in ["pval", "n"], "upper must be either `pval` or `n`."
-    mat = self.corr(method=method, numeric_only=True).round(decimals)
+    r = self.corr(method=method, numeric_only=True)
+    mat = r.round(decimals)
+    # Pairwise sample size (pairwise deletion of missing values), for all pairs at once
+    notna = self[r.columns].notna().to_numpy(dtype=float)
+    npairs = notna.T @ notna
     if upper == "n":
-        mat_upper = self.corr(method=lambda x, y: len(x), numeric_only=True).astype(int)
+        mat_upper = pd.DataFrame(npairs.astype(int), index=r.index, columns=r.columns)
     else:
-        if method == "pearson":
-            mat_upper = self.corr(method=lambda x, y: pearsonr(x, y)[1], numeric_only=True)
-        else:
-            # Method = 'spearman'
-            mat_upper = self.corr(method=lambda x, y: spearmanr(x, y)[1], numeric_only=True)
+        # Two-sided p-values from the Student t distribution, vectorized over all pairs. This is
+        # the same as scipy.stats.pearsonr (and spearmanr for Spearman) applied to each pair.
+        dof = npairs - 2
+        with np.errstate(divide="ignore", invalid="ignore"):
+            tval = r.to_numpy() * np.sqrt(dof / (1 - r.to_numpy() ** 2))
+        pval = np.clip(2 * stdtr(dof, -np.abs(tval)), 0, 1)
+        mat_upper = pd.DataFrame(pval, index=r.index, columns=r.columns)
         if padjust is not None:
             # Only the unique pairs (strict upper triangle) belong to the test family.
             mat_upper = _multicomp_triu(mat_upper, method=padjust, alpha=0.05)
@@ -1160,7 +1166,8 @@ def rcorr(
     if upper == "pval":
 
         def replace_pval(x):
-            for key, value in pval_stars.items():
+            # Check the smallest thresholds first, regardless of the dict order
+            for key, value in sorted(pval_stars.items()):
                 if x < key:
                     return value
             return ""
@@ -1242,7 +1249,7 @@ def rm_corr(data=None, x=None, y=None, subject=None):
         >>> df = pg.read_dataset("rm_corr")
         >>> g = pg.plot_rm_corr(data=df, x="pH", y="PacO2", subject="Subject")
     """
-    from pingouin import ancova, power_corr
+    from pingouin import ancova
 
     # Safety checks
     assert isinstance(data, pd.DataFrame), "Data must be a DataFrame"
@@ -1261,8 +1268,10 @@ def rm_corr(data=None, x=None, y=None, subject=None):
     # For max precision, make sure rounding is disabled
     old_options = options.copy()
     options["round"] = None
-    aov = ancova(dv=y, covar=x, between=subject, data=data)
-    options.update(old_options)  # restore options
+    try:
+        aov = ancova(dv=y, covar=x, between=subject, data=data)
+    finally:
+        options.update(old_options)  # restore options, even if ancova fails
     bw = aov.bw_  # Beta within parameter
     sign = np.sign(bw)
     dof = int(aov.at[2, "DF"])

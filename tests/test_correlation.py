@@ -125,6 +125,20 @@ class TestCorrelation(TestCase):
         stats = corr(x, x, method="percbend")  # calls _correl_pvalue
         assert np.isclose(stats.at["percbend", "r"], 1)
         assert np.isclose(stats.at["percbend", "p_val"], 0)
+        # Perfect correlation in the opposite direction of a one-sided test
+        assert corr(x, x, alternative="less").at["pearson", "p_val"] == 1
+        assert corr(x, -x, alternative="greater").at["pearson", "p_val"] == 1
+        assert corr(x, x, alternative="greater").at["pearson", "p_val"] == 0
+
+        # One-sided Kendall p-values use the Kendall null distribution, not a t-approximation
+        from scipy.stats import kendalltau
+
+        rng = np.random.default_rng(0)
+        xk = rng.normal(size=30)
+        yk = 0.3 * xk + rng.normal(size=30)
+        for alt in ["greater", "less"]:
+            pval = corr(xk, yk, method="kendall", alternative=alt).at["kendall", "p_val"]
+            assert np.isclose(pval, kendalltau(xk, yk, alternative=alt)[1])
 
         # When one column is a constant, the correlation is not defined
         # and Pingouin return a DataFrame full of NaN, except for ``n``
@@ -237,6 +251,14 @@ class TestCorrelation(TestCase):
         assert np.isclose(
             pc_normal.at["pearson", "p_val"], pc_large.at["pearson", "p_val"], atol=1e-6
         )
+
+        # A constant variable (zero variance) returns NaN instead of failing
+        df_const = df_normal.assign(covar_1=1.0)
+        for method in ["pearson", "spearman"]:
+            for kwargs in [{"x": "covar_1", "covar": "covar_2"}, {"x": "x", "covar": "covar_1"}]:
+                stats = partial_corr(data=df_const, y="y", method=method, **kwargs)
+                assert stats.at[method, "n"] == n
+                assert np.isnan(stats.at[method, "r"])
 
     def test_rmcorr(self):
         """Test function rm_corr"""
