@@ -101,8 +101,9 @@ class TestNonParametric(TestCase):
         assert wc_pg.at["Wilcoxon", "p_val"] == wc_pg2.at["Wilcoxon", "p_val"]
         assert wc_pg.at["Wilcoxon", "RBC"] == wc_pg2.at["Wilcoxon", "RBC"]
         assert np.isnan(wc_pg2.at["Wilcoxon", "CLES"])
-        wc_pg_less = wilcoxon(x2, y2, alternative="less")
-        wc_pg_greater = wilcoxon(x2, y2, alternative="greater")
+        # RBC and CLES do not depend on the p-value method: skip the slow permutation p-value
+        wc_pg_less = wilcoxon(x2, y2, alternative="less", method="asymptotic")
+        wc_pg_greater = wilcoxon(x2, y2, alternative="greater", method="asymptotic")
         # Note that the RBC value are compared to JASP in test_pairwise.py
         # The RBC values in JASP does not change according to the tail.
         assert round(wc_pg.at["Wilcoxon", "RBC"], 3) == -0.379

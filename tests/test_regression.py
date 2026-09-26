@@ -410,8 +410,9 @@ class TestRegression(TestCase):
         assert np.isclose(ma_both.at[1, "coef"], ma_bin.at[0, "coef"])
         assert np.isclose(ma_both.at[0, "coef"], ma.at[0, "coef"])
 
-        # Check with a binary mediator
-        ma = mediation_analysis(data=df, x="X", m="Mbin", y="Y", n_boot=2000)
+        # Check with a binary mediator. Each bootstrap sample fits a logistic regression, so
+        # n_boot is kept small: only the significance of the indirect effect depends on it.
+        ma = mediation_analysis(data=df, x="X", m="Mbin", y="Y", n_boot=500)
         assert_almost_equal(ma["coef"][0], -0.0208, decimal=2)
 
         # Indirect effect
@@ -427,11 +428,11 @@ class TestRegression(TestCase):
         # Check if `logreg_kwargs` is being passed on to `LogisticRegression`
         with pytest.raises(ValueError):
             mediation_analysis(
-                data=df, x="X", m="Mbin", y="Y", n_boot=2000, logreg_kwargs=dict(max_iter=-1)
+                data=df, x="X", m="Mbin", y="Y", n_boot=10, logreg_kwargs=dict(max_iter=-1)
             )
         # Solve with 0 iterations and make sure that the results are different
         ma = mediation_analysis(
-            data=df, x="X", m="Mbin", y="Y", n_boot=2000, logreg_kwargs=dict(max_iter=0)
+            data=df, x="X", m="Mbin", y="Y", n_boot=10, logreg_kwargs=dict(max_iter=0)
         )
         with pytest.raises(AssertionError):
             assert_almost_equal(ma["coef"][0], -0.0208, decimal=2)
