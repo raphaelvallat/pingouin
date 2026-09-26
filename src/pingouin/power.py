@@ -27,6 +27,17 @@ def _solve(func, lower, upper):
         return np.nan
 
 
+def _ncf_sf(fcrit, dof1, dof2, nc):
+    """Survival function of the non-central F distribution, i.e. the power of an F-test.
+
+    The non-centrality parameter is capped at 1e9: SciPy < 1.11 aborts the Python process (Boost
+    integer overflow) when nc > ~4.3e9, which the root-finding brackets can easily reach. Power
+    is saturated long before that for any realistic design, so this only matters if the true
+    solution requires nc > 1e9.
+    """
+    return stats.ncf.sf(fcrit, dof1, dof2, np.minimum(nc, 1e9))
+
+
 def _power_nct(nc, dof, alpha, alternative):
     """Power of a T-test, given the non-centrality parameter and degrees of freedom."""
     if alternative == "less":
@@ -416,7 +427,7 @@ def power_anova(eta_squared=None, k=None, n=None, power=None, alpha=0.05):
         dof1 = k - 1
         dof2 = (n * k) - k
         fcrit = stats.f.ppf(1 - alpha, dof1, dof2)
-        return stats.ncf.sf(fcrit, dof1, dof2, nc)
+        return _ncf_sf(fcrit, dof1, dof2, nc)
 
     # Evaluate missing variable
     if power is None:
@@ -612,7 +623,7 @@ def power_rm_anova(eta_squared=None, m=None, n=None, power=None, alpha=0.05, cor
         dof2 = (n - 1) * dof1
         nc = (f_sq * n * m * epsilon) / (1 - corr)
         fcrit = stats.f.ppf(1 - alpha, dof1, dof2)
-        return stats.ncf.sf(fcrit, dof1, dof2, nc)
+        return _ncf_sf(fcrit, dof1, dof2, nc)
 
     # Evaluate missing variable
     if power is None:
