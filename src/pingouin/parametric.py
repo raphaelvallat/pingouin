@@ -8,7 +8,7 @@ import pandas_flavor as pf
 from scipy.stats import f
 
 from .bayesian import bayesfactor_ttest
-from .distribution import epsilon, sphericity
+from .distribution import _mauchly, epsilon, sphericity
 from .utils import _check_dataframe, _flatten_list, _postprocess_dataframe, remove_na
 
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova", "ancova"]
@@ -1396,8 +1396,8 @@ def mixed_anova(
     between : string
         Name of column containing the between factor.
     correction : string or boolean
-        If True, return Greenhouse-Geisser corrected p-value.
-        If `'auto'` (default), compute Mauchly's test of sphericity to
+        If True, return Greenhouse-Geisser corrected p-values for the within factor and
+        the interaction. If `'auto'` (default), compute Mauchly's test of sphericity to
         determine whether the p-values needs to be corrected.
     effsize : str
         Effect size. Must be one of 'np2' (partial eta-squared), 'n2'
@@ -1430,6 +1430,12 @@ def mixed_anova(
     If your data is in wide-format, you can use the :py:func:`pandas.melt()`
     function to convert from wide to long format.
 
+    The Greenhouse-Geisser epsilon and Mauchly's test of sphericity are computed from the pooled
+    within-group covariance matrix of the repeated measurements, i.e. after removing the
+    between-group differences in means. This is the same as SPSS, JASP and the afex / car R
+    packages. The same epsilon is used to correct the p-values of both the within factor and the
+    interaction.
+
     Missing values are automatically removed using a strict listwise approach (= complete-case
     analysis). In other words, any subject with one or more missing value(s) is completely removed
     from the dataframe prior to running the test. This could drastically decrease the power of the
@@ -1453,8 +1459,8 @@ def mixed_anova(
     >>> aov.round(3)
             Source     SS  DF1  DF2     MS      F  p_unc    np2    eps
     0        Group  5.460    1   58  5.460  5.052  0.028  0.080    NaN
-    1         Time  7.628    2  116  3.814  4.027  0.020  0.065  0.999
-    2  Interaction  5.167    2  116  2.584  2.728  0.070  0.045    NaN
+    1         Time  7.628    2  116  3.814  4.027  0.020  0.065  0.998
+    2  Interaction  5.167    2  116  2.584  2.728  0.070  0.045  0.998
 
     Same but reporting a generalized eta-squared effect size. Notice how we
     can also apply this function directly as a method of the dataframe, in
@@ -1465,8 +1471,8 @@ def mixed_anova(
     ... ).round(3)
             Source     SS  DF1  DF2     MS      F  p_unc    ng2    eps
     0        Group  5.460    1   58  5.460  5.052  0.028  0.031    NaN
-    1         Time  7.628    2  116  3.814  4.027  0.020  0.042  0.999
-    2  Interaction  5.167    2  116  2.584  2.728  0.070  0.029    NaN
+    1         Time  7.628    2  116  3.814  4.027  0.020  0.042  0.998
+    2  Interaction  5.167    2  116  2.584  2.728  0.070  0.029  0.998
     """
     assert effsize in ["n2", "np2", "ng2"], "effsize must be n2, np2 or ng2."
 
@@ -1509,8 +1515,9 @@ def mixed_anova(
     grandmean = data[dv].mean(numeric_only=True)
     ss_total = ((data[dv] - grandmean) ** 2).sum()
     # Extract main effects of within and between factors
+    # Sphericity correction is computed below, from the mixed-design residuals
     aov_with = rm_anova(
-        dv=dv, within=within, subject=subject, data=data, correction=correction, detailed=True
+        dv=dv, within=within, subject=subject, data=data, correction=False, detailed=True
     )
     aov_betw = anova(dv=dv, between=between, data=data, detailed=True)
     ss_betw = aov_betw.at[0, "SS"]
@@ -1549,6 +1556,31 @@ def mixed_anova(
     p_with = f(df_with, df_reswith).sf(f_with)
     p_inter = f(df_inter, df_reswith).sf(f_inter)
 
+    # SPHERICITY
+    # Epsilon and Mauchly's test are computed from the pooled within-group covariance matrix,
+    # i.e. after removing the between-group mean differences at each level of the within factor
+    # (same as SPSS, R car::Anova / afex / ez). Using the total covariance instead would treat
+    # group differences as departure from sphericity.
+    n_rm = data_piv.shape[1]
+    resid = data_piv - data_piv.groupby(level=between, observed=True).transform("mean")
+    if correction == "auto" or (correction is True and n_rm >= 3):
+        if n_rm >= 3:
+            W_spher, _, _, p_spher = _mauchly(resid.cov().to_numpy(), df_resbetw)
+            spher = bool(p_spher > 0.05)
+        else:
+            spher, W_spher, p_spher = True, np.nan, 1.0
+        if correction == "auto":
+            correction = not spher
+    else:
+        correction = False
+    # GG epsilon is invariant to the scaling of the covariance matrix (N - 1 vs N - n_groups)
+    eps = epsilon(resid, correction="gg")
+    if correction:
+        # Same epsilon for the within factor and the interaction
+        corr_ddof2 = np.maximum(df_reswith * eps, 1.0)
+        p_with_corr = f(np.maximum(df_with * eps, 1.0), corr_ddof2).sf(f_with)
+        p_inter_corr = f(np.maximum(df_inter * eps, 1.0), corr_ddof2).sf(f_inter)
+
     # Effects sizes (see Bakeman 2005)
     if effsize == "n2":
         # Standard eta-squared
@@ -1569,7 +1601,12 @@ def mixed_anova(
         ef_inter = ss_inter / (ss_inter + ss_reswith)
 
     # Stats table
-    aov = pd.concat([aov_betw.drop(1), aov_with.drop(1)], axis=0, sort=False, ignore_index=True)
+    aov = pd.concat(
+        [aov_betw.drop(1), aov_with.drop(1).drop(columns="eps")],
+        axis=0,
+        sort=False,
+        ignore_index=True,
+    )
     # Update values
     aov.rename(columns={"DF": "DF1"}, inplace=True)
     aov.at[0, "F"], aov.at[1, "F"] = f_betw, f_with
@@ -1589,7 +1626,12 @@ def mixed_anova(
     )
     aov = pd.concat([aov, aov_inter], axis=0, sort=False, ignore_index=True)
     aov["DF2"] = [df_resbetw, df_reswith, df_reswith]
-    aov["eps"] = [np.nan, aov_with.at[0, "eps"], np.nan]
+    aov["eps"] = [np.nan, eps, eps]
+    if correction:
+        aov["p_GG_corr"] = [np.nan, p_with_corr, p_inter_corr]
+        aov["W_spher"] = [np.nan, W_spher, W_spher]
+        aov["p_spher"] = [np.nan, p_spher, p_spher]
+        aov["sphericity"] = [np.nan, spher, spher]
     col_order = [
         "Source",
         "SS",
