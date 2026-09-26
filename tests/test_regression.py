@@ -576,3 +576,34 @@ def test_duplicate_columns():
     # Centered columns whose weighted sums cancel out
     c = np.tile([1.0, -1.0], 500)
     assert_equal(_duplicate_columns(np.column_stack([c, -c, c, 1e6 * c])), [2])
+
+
+@pytest.mark.parametrize("position", [0, 1, 2, 3])
+def test_linear_regression_zero_column(position):
+    # The coefficient and SE of an all-zero column must be exactly zero, with NaN T and p-values,
+    # wherever the column is. Rounding noise of the SVD gave a coefficient and SE of ~1e-17
+    # with an arbitrary, sometimes "significant", T-value.
+    rng = np.random.default_rng(0)
+    x = rng.normal(size=(200, 3))
+    y = rng.normal(size=200)
+    ref = linear_regression(x, y)
+    X = np.insert(x, position, 0, axis=1)
+    with pytest.warns(UserWarning, match="rank 4 with 5 columns"):
+        lm = linear_regression(X, y)
+    zero = position + 1  # Shifted by the intercept
+    assert lm.at[zero, "coef"] == 0 and lm.at[zero, "se"] == 0
+    assert np.isnan(lm.at[zero, "T"]) and np.isnan(lm.at[zero, "pval"])
+    others = lm.drop(index=zero).reset_index(drop=True)
+    assert_allclose(others[["coef", "se", "T", "pval"]], ref[["coef", "se", "T", "pval"]])
+
+
+def test_regression_boolean_predictors():
+    rng = np.random.default_rng(0)
+    X = pd.DataFrame({"a": rng.random(100) > 0.5, "b": rng.random(100) > 0.3})
+    y = rng.normal(size=100)
+    ybin = (rng.random(100) > 0.5).astype(int)
+    assert_frame_equal(
+        linear_regression(X, y, add_intercept=False),
+        linear_regression(X.astype(float), y, add_intercept=False),
+    )
+    assert_frame_equal(logistic_regression(X, ybin), logistic_regression(X.astype(float), ybin))

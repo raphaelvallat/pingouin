@@ -484,8 +484,8 @@ def _prepare_Xy(X, y, remove_na=False):
     else:
         names = []
 
-    # Convert input to numpy array
-    X = np.asarray(X)
+    # Convert input to numpy array. X is cast to float, e.g. for boolean predictors.
+    X = np.asarray(X, dtype=float)
     y = np.asarray(y)
     assert y.ndim == 1, "y must be one-dimensional."
 
@@ -525,20 +525,31 @@ def _lstsq(X, y=None):
     directions when the predictors have different units. Instead, singular values of ``X``
     below ``max(n, p) * eps * s_max`` are treated as zero (same tolerance as
     :py:func:`numpy.linalg.matrix_rank`) and the covariance is formed from the others. This
-    single rank decision handles all-zero, duplicate and collinear columns alike.
+    single rank decision handles duplicate and collinear columns alike.
+
+    All-zero columns are excluded from the decomposition, and their coefficient and variance are
+    set to exactly zero. Otherwise, the rounding noise of the SVD leaks into these columns and
+    gives a coefficient and a variance of ~1e-17, whose ratio (the T-value) is arbitrary.
 
     The SVD is computed on the small triangular factor of a QR decomposition of ``X``, which has
     the same singular values and is much cheaper than an SVD of a tall ``X``. Appending ``y`` to
     ``X`` before the QR gives ``Q.T @ y`` without forming ``Q``.
     """
     n, p = X.shape
-    A = X if y is None else np.column_stack((X, y))
+    coef, unscaled_var = np.zeros(p), np.zeros(p)
+    nonzero = X.any(axis=0)
+    if not nonzero.any():
+        return (None if y is None else coef), unscaled_var, 0
+    Xnz = X[:, nonzero] if not nonzero.all() else X
+    A = Xnz if y is None else np.column_stack((Xnz, y))
     R = np.linalg.qr(A.astype(float, copy=False), mode="r")
-    u, s, vt = np.linalg.svd(R[:, :p], full_matrices=False)
+    u, s, vt = np.linalg.svd(R[:, : Xnz.shape[1]], full_matrices=False)
     rank = int(np.sum(s > max(n, p) * np.finfo(float).eps * s[0]))
     scaled_vt = vt[:rank] / s[:rank, np.newaxis]
-    unscaled_var = np.sum(scaled_vt**2, axis=0)
-    coef = None if y is None else scaled_vt.T @ (u[:, :rank].T @ R[:, p])
+    unscaled_var[nonzero] = np.sum(scaled_vt**2, axis=0)
+    if y is None:
+        return None, unscaled_var, rank
+    coef[nonzero] = scaled_vt.T @ (u[:, :rank].T @ R[:, -1])
     return coef, unscaled_var, rank
 
 
