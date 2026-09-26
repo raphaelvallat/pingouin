@@ -551,6 +551,29 @@ def _mauchly(M, df_resid, k):
     return W, chi_sq, ddof, pval
 
 
+def _gg_epsilon(M):
+    """Greenhouse-Geisser epsilon from the (d, d) covariance matrix of orthonormal contrasts.
+
+    Epsilon is always 1 with only one degree of freedom (e.g. two repeated measures).
+    """
+    d = M.shape[0]
+    if d <= 1:
+        return 1.0
+    return np.min([np.trace(M) ** 2 / (d * np.trace(M @ M)), 1])
+
+
+def _mauchly_sphericity(M, df_resid, k, alpha=0.05):
+    """Mauchly's test of sphericity, as reported in the repeated measures ANOVA tables.
+
+    Same parameters as :py:func:`_mauchly`. Returns whether sphericity is met, W and the p-value.
+    Sphericity is always met with only one degree of freedom (e.g. two repeated measures).
+    """
+    if M.shape[0] <= 1:
+        return True, np.nan, 1.0
+    W, _, _, pval = _mauchly(M, df_resid, k)
+    return bool(pval > alpha), W, pval
+
+
 def _long_to_wide_rm(data, dv=None, within=None, subject=None):
     """Convert long-format dataframe to wide-format.
     This internal function is used in pingouin.epsilon and pingouin.sphericity.
@@ -571,6 +594,19 @@ def _long_to_wide_rm(data, dv=None, within=None, subject=None):
         data, index=subject, values=dv, columns=within, aggfunc="mean", dropna=True, observed=True
     )
     return data
+
+
+def _wide_rm(data, dv=None, within=None, subject=None):
+    """Wide-format dataframe of a repeated measures design, without missing values.
+
+    ``data`` is converted from long to wide format if ``dv``, ``within`` and ``subject`` are
+    specified. Rows with missing values are removed (listwise deletion).
+    This internal function is used in pingouin.epsilon and pingouin.sphericity.
+    """
+    assert isinstance(data, pd.DataFrame), "Data must be a pandas Dataframe."
+    if all([v is not None for v in [dv, within, subject]]):
+        data = _long_to_wide_rm(data, dv=dv, within=within, subject=subject)
+    return data.dropna()
 
 
 def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
@@ -717,18 +753,8 @@ def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
 
     which gives the same epsilon value as the long-format dataframe.
     """
-    assert isinstance(data, pd.DataFrame), "Data must be a pandas Dataframe."
-
-    # If data is in long-format, convert to wide-format
-    if all([v is not None for v in [dv, within, subject]]):
-        data = _long_to_wide_rm(data, dv=dv, within=within, subject=subject)
-
-    # From now on we assume that data is in wide-format and contains only
-    # the relevant columns.
-    # Drop rows with missing values
-    data = data.dropna()
-
-    # Covariance matrix of the orthonormal contrasts
+    # Wide-format data without missing values, and covariance matrix of the orthonormal contrasts
+    data = _wide_rm(data, dv=dv, within=within, subject=subject)
     M = _contrast_cov(data)
     n, dof = data.shape[0], M.shape[0]
 
@@ -741,7 +767,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
         return 1 / dof
 
     # Greenhouse-Geisser
-    eps = np.min([np.trace(M) ** 2 / (dof * np.trace(M @ M)), 1])
+    eps = _gg_epsilon(M)
 
     # Huynh-Feldt
     if correction == "hf":
@@ -939,18 +965,8 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
 
     which gives the same output as the long-format dataframe.
     """
-    assert isinstance(data, pd.DataFrame), "Data must be a pandas Dataframe."
-
-    # If data is in long-format, convert to wide-format
-    if all([v is not None for v in [dv, within, subject]]):
-        data = _long_to_wide_rm(data, dv=dv, within=within, subject=subject)
-
-    # From now on we assume that data is in wide-format and contains only
-    # the relevant columns.
-    # Remove rows with missing values in wide-format dataframe
-    data = data.dropna()
-
-    # Covariance matrix of the orthonormal contrasts
+    # Wide-format data without missing values, and covariance matrix of the orthonormal contrasts
+    data = _wide_rm(data, dv=dv, within=within, subject=subject)
     M = _contrast_cov(data)
     n, d = data.shape[0], M.shape[0]
 

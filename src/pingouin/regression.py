@@ -312,42 +312,8 @@ def linear_regression(
     0  Intercept  9.00  2.03  4.42  0.01  0.51    0.39      3.35      14.64
     1         x1  1.04  0.50  2.06  0.11  0.51    0.39     -0.36       2.44
     """
-    # Extract names if X is a Dataframe or Series
-    if isinstance(X, pd.DataFrame):
-        names = X.keys().tolist()
-    elif isinstance(X, pd.Series):
-        names = [X.name]
-    else:
-        names = []
-
-    # Convert input to numpy array
-    X = np.asarray(X)
-    y = np.asarray(y)
-    assert y.ndim == 1, "y must be one-dimensional."
     assert 0 < alpha < 1
-
-    if X.ndim == 1:
-        # Convert to (n_samples, n_features) shape
-        X = X[..., np.newaxis]
-
-    # Check for NaN / Inf
-    if remove_na:
-        X, y = rm_na(X, y[..., np.newaxis], paired=True, axis="rows")
-        y = np.squeeze(y)
-    y_gd = np.isfinite(y).all()
-    X_gd = np.isfinite(X).all()
-    assert y_gd, (
-        "Target (y) contains NaN or Inf. Please remove them manually or use remove_na=True."
-    )
-    assert X_gd, (
-        "Predictors (X) contain NaN or Inf. Please remove them manually or use remove_na=True."
-    )
-
-    # Check that X and y have same length
-    assert y.shape[0] == X.shape[0], "X and y must have same number of samples"
-
-    if not names:
-        names = ["x" + str(i + 1) for i in range(X.shape[1])]
+    X, y, names = _prepare_Xy(X, y, remove_na)
 
     if add_intercept:
         # Add intercept
@@ -518,6 +484,48 @@ def linear_regression(
             stats["yw"] = yw
             stats["Xw"] = Xw
     return stats
+
+
+def _prepare_Xy(X, y, remove_na=False):
+    """Validate the predictors and target of a regression.
+
+    Returns ``X`` as a (n_samples, n_features) array, ``y`` as a (n_samples,) array and the names
+    of the predictors, which are extracted from ``X`` if it is a DataFrame or a Series.
+    """
+    # Extract names if X is a Dataframe or Series
+    if isinstance(X, pd.DataFrame):
+        names = X.keys().tolist()
+    elif isinstance(X, pd.Series):
+        names = [X.name]
+    else:
+        names = []
+
+    # Convert input to numpy array
+    X = np.asarray(X)
+    y = np.asarray(y)
+    assert y.ndim == 1, "y must be one-dimensional."
+
+    if X.ndim == 1:
+        # Convert to (n_samples, n_features) shape
+        X = X[..., np.newaxis]
+
+    # Check for NaN / Inf
+    if remove_na:
+        X, y = rm_na(X, y[..., np.newaxis], paired=True, axis="rows")
+        y = np.squeeze(y)
+    assert np.isfinite(y).all(), (
+        "Target (y) contains NaN or Inf. Please remove them manually or use remove_na=True."
+    )
+    assert np.isfinite(X).all(), (
+        "Predictors (X) contain NaN or Inf. Please remove them manually or use remove_na=True."
+    )
+
+    # Check that X and y have same length
+    assert y.shape[0] == X.shape[0], "X and y must have same number of samples"
+
+    if not names:
+        names = ["x" + str(i + 1) for i in range(X.shape[1])]
+    return X, y, names
 
 
 def _duplicate_columns(X):
@@ -821,46 +829,12 @@ def logistic_regression(
     _is_sklearn_installed(raise_error=True)
     from sklearn.linear_model import LogisticRegression
 
-    # Extract names if X is a Dataframe or Series
-    if isinstance(X, pd.DataFrame):
-        names = X.keys().tolist()
-    elif isinstance(X, pd.Series):
-        names = [X.name]
-    else:
-        names = []
-
-    # Convert to numpy array
-    X = np.asarray(X)
-    y = np.asarray(y)
-    assert y.ndim == 1, "y must be one-dimensional."
     assert 0 < alpha < 1, "alpha must be between 0 and 1."
-
-    # Add axis if only one-dimensional array
-    if X.ndim == 1:
-        X = X[..., np.newaxis]
-
-    # Check for NaN /  Inf
-    if remove_na:
-        X, y = rm_na(X, y[..., np.newaxis], paired=True, axis="rows")
-        y = np.squeeze(y)
-    y_gd = np.isfinite(y).all()
-    X_gd = np.isfinite(X).all()
-    assert y_gd, (
-        "Target (y) contains NaN or Inf. Please remove them manually or use remove_na=True."
-    )
-    assert X_gd, (
-        "Predictors (X) contain NaN or Inf. Please remove them manually or use remove_na=True."
-    )
-
-    # Check that X and y have same length
-    assert y.shape[0] == X.shape[0], "X and y must have same number of samples"
+    X, y, names = _prepare_Xy(X, y, remove_na)
 
     # Check that y is binary
     if np.unique(y).size != 2:
         raise ValueError("Dependent variable must be binary.")
-
-    if not names:
-        names = ["x" + str(i + 1) for i in range(X.shape[1])]
 
     # We also want to make sure that there is no column
     # with only one unique value, otherwise the regression fails

@@ -394,6 +394,16 @@ class TestParametric(TestCase):
 
         https://github.com/raphaelvallat/pingouin/issues/251
         """
+        # Boolean-like correction (e.g. numpy bool) behaves like a Python bool
+        df_wide = read_dataset("rm_anova_wide")
+        aov_true = rm_anova(df_wide, correction=True)
+        assert "p_GG_corr" in aov_true.columns
+        assert aov_true.equals(rm_anova(df_wide, correction=np.bool_(True)))
+        df_mix = read_dataset("mixed_anova")
+        kwargs = dict(dv="Scores", within="Time", subject="Subject", between="Group")
+        aov_true = mixed_anova(df_mix, correction=True, **kwargs)
+        assert "p_GG_corr" in aov_true.columns
+        assert aov_true.equals(mixed_anova(df_mix, correction=np.bool_(True), **kwargs))
         rm_anova(
             dv="Scores", within="Time", subject="Subject", data=df, correction=False, detailed=False
         )
