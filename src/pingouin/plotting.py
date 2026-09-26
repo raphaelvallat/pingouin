@@ -73,14 +73,14 @@ def plot_blandaltman(
         difference grows without bound as the mean of a pair approaches zero.
         Default is False.
 
-        .. versionadded:: 0.6.2
+        .. versionadded:: 0.7.0
     symmetric_ylim : bool
         If True, force the y-axis to be symmetric around zero. This avoids
         conveying a visual bias when the mean difference is close to zero, but
         compresses the data into a narrow band when the bias is large relative
         to the spread of the differences. Default is False.
 
-        .. versionadded:: 0.6.2
+        .. versionadded:: 0.7.0
     ax : matplotlib axes
         Axis on which to draw the plot.
     **kwargs : optional
@@ -309,13 +309,13 @@ def qqplot(
         Matplotlib aliases and their canonical names (e.g. ``lw`` and
         ``linewidth``) are interchangeable.
 
-        .. versionadded:: 0.6.2
+        .. versionadded:: 0.7.0
     ci_kwargs : dict or None
         Optional keyword arguments passed to :py:func:`matplotlib.pyplot.plot`
         for the confidence envelope lines. Default style is
         ``{"color": "r", "ls": "--", "lw": 1.25}``.
 
-        .. versionadded:: 0.6.2
+        .. versionadded:: 0.7.0
     ax : matplotlib axes
         Axis on which to draw the plot.
     **kwargs : optional

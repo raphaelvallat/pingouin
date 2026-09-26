@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 import pandas as pd
 import pandas_flavor as pf
-from scipy.linalg import lstsq, pinvh
+from scipy.linalg import pinvh
 from scipy.stats import norm, t
 
 from .config import _no_rounding
@@ -128,8 +128,8 @@ def linear_regression(
     Notes
     -----
     The :math:`\\beta` coefficients are estimated using an ordinary least
-    squares (OLS) regression, as implemented in the
-    :py:func:`scipy.linalg.lstsq` function. The OLS method minimizes
+    squares (OLS) regression, computed from a singular value decomposition of
+    the design matrix. The OLS method minimizes
     the sum of squared residuals, and leads to a closed-form expression for
     the estimated :math:`\\beta`:
 
@@ -178,9 +178,21 @@ def linear_regression(
     and the R package `relaimpo
     <https://cran.r-project.org/web/packages/relaimpo/relaimpo.pdf>`_.
 
-    Note that Pingouin will automatically remove any duplicate columns
-    from :math:`X`, as well as any column with only one unique value
-    (constant), excluding the intercept.
+    If one or more columns of :math:`X` are a linear combination of the
+    others (e.g. duplicate columns, all-zero columns, or a constant column
+    in addition to the intercept), the design matrix is rank deficient. A
+    warning is raised, singular values below
+    :math:`\\max(n, p) \\cdot \\epsilon \\cdot \\sigma_{\\max}` are treated as zero (the
+    tolerance of :py:func:`numpy.linalg.matrix_rank`), and the minimum-norm
+    solution is returned, as in statsmodels. The coefficients of the collinear
+    columns are then not unique: for example, the effect of a duplicated
+    column is split equally between the two copies, with the same T-value
+    as when the column is only included once. The T-value and p-value of an
+    all-zero column are NaN.
+
+    .. versionchanged:: 0.7.0
+        Duplicate, all-zero and extra constant columns are no longer removed
+        from :math:`X`.
 
     Results have been compared against sklearn, R, statsmodels and JASP.
 
@@ -320,37 +332,18 @@ def linear_regression(
         X = np.column_stack((np.ones(X.shape[0]), X))
         names.insert(0, "Intercept")
 
-    # FINAL CHECKS BEFORE RUNNING LEAST SQUARES REGRESSION
-    # 1. Let's remove column(s) with only zero, otherwise the regression fails
-    n_nonzero = np.count_nonzero(X, axis=0)
-    idx_zero = np.flatnonzero(n_nonzero == 0)  # Find columns that are only 0
-    if len(idx_zero):
-        X = np.delete(X, idx_zero, 1)
-        names = np.delete(names, idx_zero)
+    # Is there a constant (e.g. the intercept) in the design? Used for the dof and R^2. No column
+    # is removed: all-zero, duplicate or collinear constant columns make the design rank
+    # deficient, which is handled below with a single rank decision.
+    is_const = (np.ptp(X, axis=0) == 0) & (X[0] != 0)
+    constant = int(is_const.any())
 
-    # 2. We also want to make sure that there is no more than one constant
-    # column (= intercept), otherwise the regression fails
-    # This is equivalent, but much faster, to pd.DataFrame(X).nunique()
-    idx_unique = np.where(np.all(X == X[0, :], axis=0))[0]
-    if len(idx_unique) > 1:
-        # We remove all but the first "Intercept" column.
-        X = np.delete(X, idx_unique[1:], 1)
-        names = np.delete(names, idx_unique[1:])
-    # Is there a constant in our predictor matrix? Useful for dof and R^2.
-    constant = 1 if len(idx_unique) > 0 else 0
-
-    # 3. Finally, we want to remove duplicate columns
-    idx_duplicate = _duplicate_columns(X)
-    if len(idx_duplicate):
-        X = np.delete(X, idx_duplicate, 1)
-        names = np.delete(names, idx_duplicate)
-
-    # 4. Check that we have enough samples / features
+    # Check that we have enough samples / features
     n, p = X.shape[0], X.shape[1]
     assert n >= 3, "At least three valid samples are required in X."
     assert p >= 1, "X must have at least one valid column."
 
-    # 5. Handle weights
+    # Handle weights
     if weights is not None:
         if relimp:
             raise ValueError("relimp = True is not supported when using weights.")
@@ -373,11 +366,7 @@ def linear_regression(
         yw = y
 
     # FIT (WEIGHTED) LEAST SQUARES REGRESSION
-    # Singular values below rcond * s_max are treated as zero. The default
-    # (machine epsilon) is too strict and lets exactly collinear designs pass
-    # as full rank, so we use the same tolerance as numpy.linalg.matrix_rank.
-    rcond = max(Xw.shape) * np.finfo(float).eps
-    coef, _, rank, _ = lstsq(Xw, yw, cond=rcond)
+    coef, unscaled_var, rank = _lstsq(Xw, yw)
     if coef_only:
         return coef
     if rank < Xw.shape[1]:
@@ -396,8 +385,6 @@ def linear_regression(
     # Calculate predicted values and (weighted) residuals
     pred = Xw @ coef
     resid = yw - pred
-    # Do not rely on the residues returned by lstsq: depending on the SciPy
-    # version they are empty or NaN for rank-deficient and n <= p designs.
     ss_res = (resid**2).sum()
 
     # Calculate total (weighted) sums of squares and R^2
@@ -411,16 +398,12 @@ def linear_regression(
 
     # Compute mean squared error, variance and SE
     mse = ss_res / df_resid
-    # Inverting Xw.T @ Xw squares the condition number and can discard
-    # estimable directions when predictors have different units. Form the
-    # covariance from the design SVD, retaining the rank used by lstsq.
-    _, singular_values, vt = np.linalg.svd(Xw.astype(coef.dtype, copy=False), full_matrices=False)
-    scaled_vt = vt[:rank] / singular_values[:rank, np.newaxis]
-    beta_var = mse * np.sum(scaled_vt**2, axis=0)
-    beta_se = np.sqrt(beta_var)
+    beta_se = np.sqrt(mse * unscaled_var)
 
-    # Compute T and p-values
-    T = coef / beta_se
+    # Compute T and p-values. The coefficient and SE of an all-zero column are both zero, which
+    # gives a NaN T-value and p-value.
+    with np.errstate(divide="ignore", invalid="ignore"):
+        T = coef / beta_se
     pval = 2 * t.sf(np.fabs(T), df_resid)
 
     # Compute confidence intervals
@@ -448,21 +431,22 @@ def linear_regression(
 
     # Relative importance
     if relimp:
-        data = pd.concat(
-            [pd.DataFrame(y, columns=["y"]), pd.DataFrame(X, columns=names)], sort=False, axis=1
-        )
         # Relative importance is computed on the correlation matrix, which makes it
         # invariant to the scale of the predictors. The correlation of a constant
-        # column is undefined (NaN), so the constant column (at most one after the
-        # checks above, e.g. the Intercept) is excluded and re-inserted afterwards.
-        idx_const = np.flatnonzero(np.all(X == X[0, :], axis=0))
-        const_names = [names[i] for i in idx_const]
-        reli = _relimp(data.drop(columns=const_names).corr(numeric_only=True))
-        for i, name in zip(idx_const, const_names):
+        # column (e.g. the Intercept) is undefined, so the constant columns are
+        # excluded and re-inserted afterwards.
+        idx_const = np.flatnonzero(np.ptp(X, axis=0) == 0)
+        idx_var = np.flatnonzero(np.ptp(X, axis=0) != 0)
+        S = pd.DataFrame(
+            np.corrcoef(np.column_stack((y, X[:, idx_var])), rowvar=False),
+            columns=["y", *[names[i] for i in idx_var]],
+        )
+        reli = _relimp(S)
+        for i in idx_const:
             # The intercept has no relative importance, and a user-defined constant
             # column explains no variance in y.
-            fill = np.nan if name == "Intercept" else 0.0
-            reli["names"].insert(i, name)
+            fill = np.nan if add_intercept and i == 0 else 0.0
+            reli["names"].insert(i, names[i])
             reli["relimp"] = np.insert(reli["relimp"], i, fill)
             reli["relimp_perc"] = np.insert(reli["relimp_perc"], i, fill)
         stats.update(reli)
@@ -500,9 +484,9 @@ def _prepare_Xy(X, y, remove_na=False):
     else:
         names = []
 
-    # Convert input to numpy array
-    X = np.asarray(X)
-    y = np.asarray(y)
+    # Convert input to numpy array. X and y are cast to float, e.g. for boolean inputs.
+    X = np.asarray(X, dtype=float)
+    y = np.asarray(y, dtype=float)
     assert y.ndim == 1, "y must be one-dimensional."
 
     if X.ndim == 1:
@@ -528,12 +512,60 @@ def _prepare_Xy(X, y, remove_na=False):
     return X, y, names
 
 
+def _lstsq(X, y=None):
+    """Minimum-norm least squares solution and unscaled variance of the coefficients.
+
+    Returns the coefficients of ``y ~ X`` (None if ``y`` is None), the diagonal of the
+    pseudo-inverse of ``X.T @ X`` and the rank of ``X``. The covariance of the coefficients is
+    the diagonal multiplied by the residual variance (linear regression) or, if ``X`` is
+    whitened by the square root of the IRLS weights, it is the covariance itself (logistic
+    regression).
+
+    Inverting ``X.T @ X`` squares the condition number of ``X`` and discards estimable
+    directions when the predictors have different units. Instead, singular values of ``X``
+    below ``max(n, p) * eps * s_max`` are treated as zero (same tolerance as
+    :py:func:`numpy.linalg.matrix_rank`) and the covariance is formed from the others. This
+    single rank decision handles duplicate and collinear columns alike.
+
+    All-zero columns are excluded from the decomposition, and their coefficient and variance are
+    set to exactly zero. Otherwise, the rounding noise of the SVD leaks into these columns and
+    gives a coefficient and a variance of ~1e-17, whose ratio (the T-value) is arbitrary.
+
+    The SVD is computed on the small triangular factor of a QR decomposition of ``X``, which has
+    the same singular values and is much cheaper than an SVD of a tall ``X``. Appending ``y`` to
+    ``X`` before the QR gives ``Q.T @ y`` without forming ``Q``.
+    """
+    n, p = X.shape
+    coef, unscaled_var = np.zeros(p), np.zeros(p)
+    nonzero = X.any(axis=0)
+    if not nonzero.any():
+        return (None if y is None else coef), unscaled_var, 0
+    Xnz = X[:, nonzero] if not nonzero.all() else X
+    A = Xnz if y is None else np.column_stack((Xnz, y))
+    R = np.linalg.qr(A.astype(float, copy=False), mode="r")
+    u, s, vt = np.linalg.svd(R[:, : Xnz.shape[1]], full_matrices=False)
+    rank = int(np.sum(s > max(n, p) * np.finfo(float).eps * s[0]))
+    scaled_vt = vt[:rank] / s[:rank, np.newaxis]
+    unscaled_var[nonzero] = np.sum(scaled_vt**2, axis=0)
+    if y is None:
+        return None, unscaled_var, rank
+    coef[nonzero] = scaled_vt.T @ (u[:, :rank].T @ R[:, -1])
+    return coef, unscaled_var, rank
+
+
 def _duplicate_columns(X):
     """Indices of the columns of ``X`` that are exact duplicates of an earlier column."""
-    if X.shape[1] < 2:
-        return np.array([], dtype=int)
-    _, idx_first = np.unique(X, axis=1, return_index=True)
-    return np.setdiff1d(np.arange(X.shape[1]), idx_first)
+    # Duplicate columns have the same weighted sum, up to a rounding error much smaller than
+    # the weighted sum of absolute values. Only the columns whose sums are within that
+    # tolerance need to be compared element-wise.
+    w = np.linspace(1, 2, X.shape[0])
+    fingerprint, tol = w @ X, 1e-8 * (w @ np.abs(X))
+    idx_duplicate = []
+    for j in range(1, X.shape[1]):
+        candidates = np.flatnonzero(np.abs(fingerprint[:j] - fingerprint[j]) <= tol[j])
+        if any(np.array_equal(X[:, i], X[:, j]) for i in candidates):
+            idx_duplicate.append(j)
+    return np.array(idx_duplicate, dtype=int)
 
 
 def _relimp(S):
@@ -832,15 +864,14 @@ def logistic_regression(
     if np.unique(y).size != 2:
         raise ValueError("Dependent variable must be binary.")
 
-    # We also want to make sure that there is no column
-    # with only one unique value, otherwise the regression fails
-    # This is equivalent, but much faster, to pd.DataFrame(X).nunique()
-    idx_unique = np.where(np.all(X == X[0, :], axis=0))[0]
+    # Remove the constant columns, which are collinear with the intercept, and the duplicate
+    # columns. Unlike linear_regression, scikit-learn does not return the minimum-norm solution
+    # for a rank-deficient design.
+    idx_unique = np.flatnonzero(np.ptp(X, axis=0) == 0)
     if len(idx_unique):
         X = np.delete(X, idx_unique, 1)
         names = np.delete(names, idx_unique).tolist()
 
-    # Finally, we want to remove duplicate columns
     idx_duplicate = _duplicate_columns(X)
     if len(idx_duplicate):
         X = np.delete(X, idx_duplicate, 1)
@@ -876,14 +907,14 @@ def logistic_regression(
     if coef_only:
         return coef
 
-    # Fisher Information Matrix
-    n, p = X_design.shape
+    # The covariance of the coefficients is the inverse of the Fisher information matrix
+    # X.T @ W @ X, with W = p * (1 - p) = 1 / (2 * (1 + cosh(logit))). It is computed from the
+    # whitened design sqrt(W) @ X to avoid squaring its condition number.
     denom = 2 * (1 + np.cosh(lom.decision_function(X)))
-    fim = (X_design / denom[:, None]).T @ X_design
-    crao = np.linalg.pinv(fim)
+    _, var, _ = _lstsq(X_design / np.sqrt(denom)[:, None])
 
     # Standard error and Z-scores
-    se = np.sqrt(np.diag(crao))
+    se = np.sqrt(var)
     z_scores = coef / se
 
     # Two-tailed p-values
@@ -917,14 +948,12 @@ def logistic_regression(
 
 
 def _ols_coef(X, y):
-    """Least squares coefficients of y ~ 1 + X.
+    """Least squares coefficients of y ~ 1 + X, without the input checks of linear_regression.
 
-    Unlike :py:func:`linear_regression`, no column is ever removed from the design matrix, so
-    that the position of each coefficient is fixed across bootstrap samples, even when a
-    covariate is constant in a given sample.
+    No column is removed from the design matrix, so that the position of each coefficient is
+    fixed across bootstrap samples, even when a covariate is constant in a given sample.
     """
-    X = np.column_stack((np.ones(X.shape[0]), X))
-    return lstsq(X, y, cond=max(X.shape) * np.finfo(float).eps)[0]
+    return _lstsq(np.column_stack((np.ones(X.shape[0]), X)), y)[0]
 
 
 def _point_estimate(X_val, XM_val, M_val, y_val, idx, n_mediator, m_binary, **logreg_kwargs):
