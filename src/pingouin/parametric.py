@@ -356,9 +356,9 @@ def rm_anova(
         sphericity to determine whether the p-values needs to be corrected
         (see :py:func:`pingouin.sphericity`).
 
-        The default for two-way design is to return both the uncorrected and
-        Greenhouse-Geisser corrected p-values. Note that sphericity test for
-        two-way design are not currently implemented in Pingouin.
+        For two-way design, this argument is ignored: both the uncorrected and
+        Greenhouse-Geisser corrected p-values are always returned, together with
+        Mauchly's test of sphericity for each effect.
     detailed : boolean
         If True, return a full ANOVA table.
     effsize : string
@@ -449,10 +449,11 @@ def rm_anova(
     ANOVA if many missing values are present. In that case, we strongly recommend using linear
     mixed effect modelling, which can handle missing values in repeated measures.
 
-    .. note:: Mauchly's test of sphericity is not reported for two-way repeated measures ANOVA.
-        Use :py:func:`pingouin.sphericity` with ``within=[factor1, factor2]`` to test sphericity
-        of the interaction, or refer to the Greenhouse-Geisser epsilon value
-        (a value close to 1 indicates that sphericity is met).
+    For two-way repeated measures ANOVA, the epsilon and Mauchly's test of sphericity of the
+    interaction are computed using the Kronecker product of the orthonormal contrasts of each
+    factor, as in R, SPSS and JASP. For the main effects, the p-value of Mauchly's test uses the
+    same chi-square approximation as R (afex / car), and can therefore very slightly differ from
+    :py:func:`pingouin.sphericity` applied to the main effect alone.
 
     Examples
     --------
@@ -778,6 +779,19 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     p_b_corr = f(df_b_c, df_bs_c).sf(f_b)
     p_ab_corr = f(df_ab_c, df_abs_c).sf(f_ab)
 
+    # Mauchly's test of sphericity
+    def _spher(piv):
+        M = _contrast_cov(piv)
+        # Sphericity is always met with only one degree of freedom (e.g. two levels)
+        if M.shape[0] <= 1:
+            return True, np.nan, 1.0
+        # Same as R / afex, which use the total number of conditions (n_a * n_b) in the
+        # chi-square approximation, including for the main effects
+        W, _, _, p_spher = _mauchly(M, n_s - 1, n_a * n_b)
+        return bool(p_spher > 0.05), W, p_spher
+
+    spher_a, spher_b, spher_ab = _spher(piv_a), _spher(piv_b), _spher(data_piv)
+
     # Create dataframe
     aov = pd.DataFrame(
         {
@@ -791,6 +805,9 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
             "p_GG_corr": [p_a_corr, p_b_corr, p_ab_corr],
             effsize: [ef_a, ef_b, ef_ab],
             "eps": [eps_a, eps_b, eps_ab],
+            "sphericity": [spher_a[0], spher_b[0], spher_ab[0]],
+            "W_spher": [spher_a[1], spher_b[1], spher_ab[1]],
+            "p_spher": [spher_a[2], spher_b[2], spher_ab[2]],
         }
     )
     return _postprocess_dataframe(aov)
