@@ -59,8 +59,9 @@ def multivariate_normality(X, alpha=0.05):
     >>> import pingouin as pg
     >>> data = pg.read_dataset("multivariate")
     >>> X = data[["Fever", "Pressure", "Aches"]]
-    >>> pg.multivariate_normality(X, alpha=0.05)
-    HZResults(hz=0.540086101851555, pval=0.7173686509622386, normal=True)
+    >>> hz, pval, normal = pg.multivariate_normality(X, alpha=0.05)
+    >>> round(hz, 3), round(pval, 3), normal
+    (0.54, 0.717, True)
     """
     from scipy.stats import lognorm
 

@@ -167,9 +167,9 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
     >>> import pingouin as pg
     >>> np.random.seed(123)
     >>> x = np.random.normal(size=100)
-    >>> pg.normality(x)
-             W      pval  normal
-    0  0.98414  0.274886    True
+    >>> pg.normality(x).round(3)
+           W   pval  normal
+    0  0.984  0.275    True
 
     2. Omnibus test on a wide-format dataframe with missing values
 
@@ -194,11 +194,11 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
     4. Long-format dataframe
 
     >>> data = pg.read_dataset("rm_anova2")
-    >>> pg.normality(data, dv="Performance", group="Time")
-                 W      pval  normal
+    >>> pg.normality(data, dv="Performance", group="Time").round(3)
+              W   pval  normal
     Time
-    Pre   0.967718  0.478773    True
-    Post  0.940728  0.095157    True
+    Pre   0.968  0.479    True
+    Post  0.941  0.095    True
 
     5. Same but using the Jarque-Bera test
 
@@ -382,25 +382,27 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=0.05, **k
             # Get numeric data only
             numdata = data._get_numeric_data()
             assert numdata.shape[1] > 1, "Data must have at least two columns."
-            statistic, p = func(*numdata.to_numpy().T, **kwargs)
+            samples = numdata.to_numpy().T
         else:
             # Long-format
             assert group in data.columns
             assert dv in data.columns
             grp = data.groupby(group, observed=True)[dv]
             assert grp.ngroups > 1, "Data must have at least two columns."
-            statistic, p = func(*grp.apply(list), **kwargs)
+            samples = grp.apply(list)
     elif isinstance(data, list):
         # Check that list contains other list or np.ndarray
         assert all(isinstance(el, (list, np.ndarray)) for el in data)
         assert len(data) > 1, "Data must have at least two iterables."
-        statistic, p = func(*data, **kwargs)
+        samples = data
     else:
         # Data is a dict
         assert all(isinstance(el, (list, np.ndarray)) for el in data.values())
         assert len(data) > 1, "Data must have at least two iterables."
-        statistic, p = func(*data.values(), **kwargs)
+        samples = data.values()
 
+    # Cast to float: scipy.stats.bartlett fails with integer inputs in SciPy >= 1.17
+    statistic, p = func(*[np.asarray(x, dtype=float) for x in samples], **kwargs)
     equal_var = True if p > alpha else False
     stat_name = "W" if method.lower() == "levene" else "T"
     stats = pd.DataFrame({stat_name: statistic, "pval": p, "equal_var": equal_var}, index=[method])

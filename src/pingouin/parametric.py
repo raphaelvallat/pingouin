@@ -59,8 +59,8 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
         * ``'p_val'``: p-value
         * ``'CI95'``: confidence intervals of the difference in means
         * ``'cohen_d'``: Cohen d effect size
-        * ``'BF10'``: Bayes Factor of the alternative hypothesis
         * ``'power'``: achieved power of the test ( = 1 - type II error)
+        * ``'BF10'``: Bayes Factor of the alternative hypothesis
 
     See also
     --------
@@ -140,8 +140,8 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> from pingouin import ttest
     >>> x = [5.5, 2.4, 6.8, 9.6, 4.2]
     >>> ttest(x, 4).round(2)
-              T  dof alternative  p_val          CI95  cohen_d   BF10  power
-    T_test  1.4    4   two-sided   0.23  [2.32, 9.08]     0.62  0.766   0.19
+              T  dof alternative  p_val          CI95  cohen_d  power   BF10
+    T_test  1.4    4   two-sided   0.23  [2.32, 9.08]     0.62   0.19  0.766
 
     2. One sided paired T-test.
 
@@ -163,8 +163,8 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> pre = [5.5, 2.4, np.nan, 9.6, 4.2]
     >>> post = [6.4, 3.4, 6.4, 11.0, 4.8]
     >>> ttest(pre, post, paired=True).round(3)
-                T  dof alternative  p_val           CI95  cohen_d   BF10  power
-    T_test -5.902    3   two-sided   0.01  [-1.5, -0.45]    0.306  7.169  0.073
+                T  dof alternative  p_val           CI95  cohen_d  power   BF10
+    T_test -5.902    3   two-sided   0.01  [-1.5, -0.45]    0.306  0.073  7.169
 
     Compare with SciPy
 
@@ -178,22 +178,22 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> x = np.random.normal(loc=7, size=20)
     >>> y = np.random.normal(loc=4, size=20)
     >>> ttest(x, y)
-                   T  dof alternative         p_val          CI95   cohen_d       BF10  power
-    T_test  9.106452   38   two-sided  4.306971e-11  [2.64, 4.15]  2.879713  1.366e+08    1.0
+                   T  dof alternative         p_val          CI95   cohen_d  power       BF10
+    T_test  9.106452   38   two-sided  4.306971e-11  [2.64, 4.15]  2.879713    1.0  1.366e+08
 
     5. Independent two-sample T-test with unequal sample size. A Welch's T-test is used.
 
     >>> np.random.seed(123)
     >>> y = np.random.normal(loc=6.5, size=15)
     >>> ttest(x, y)
-                   T        dof alternative     p_val           CI95   cohen_d   BF10     power
-    T_test  1.996537  31.567592   two-sided  0.054561  [-0.02, 1.65]  0.673518  1.469  0.481867
+                   T        dof alternative     p_val           CI95   cohen_d     power   BF10
+    T_test  1.996537  31.567592   two-sided  0.054561  [-0.02, 1.65]  0.673518  0.481867  1.469
 
     6. However, the Welch's correction can be disabled:
 
     >>> ttest(x, y, correction=False)
-                   T  dof alternative     p_val           CI95   cohen_d   BF10     power
-    T_test  1.971859   33   two-sided  0.057056  [-0.03, 1.66]  0.673518  1.418  0.481867
+                   T  dof alternative     p_val           CI95   cohen_d     power   BF10
+    T_test  1.971859   33   two-sided  0.057056  [-0.03, 1.66]  0.673518  0.481867  1.418
 
     Compare with SciPy
 

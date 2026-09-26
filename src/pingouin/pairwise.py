@@ -875,7 +875,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     >>> import pingouin as pg
     >>> df = pg.read_dataset("penguins")
     >>> df.pairwise_tukey(dv="body_mass_g", between="species").round(3)
-               A          B   mean(A)   mean(B)      diff      se       T  p_tukey  hedges
+               A          B    mean_A    mean_B      diff      se       T  p_tukey  hedges
     0     Adelie  Chinstrap  3700.662  3733.088   -32.426  67.512  -0.480    0.881  -0.074
     1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148 -24.495    0.000  -2.860
     2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857 -19.224    0.000  -2.875
@@ -1040,7 +1040,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     >>> import pingouin as pg
     >>> df = pg.read_dataset("penguins")
     >>> pg.pairwise_gameshowell(data=df, dv="body_mass_g", between="species").round(3)
-               A          B   mean(A)   mean(B)      diff      se       T       df  pval  hedges
+               A          B    mean_A    mean_B      diff      se       T       df  pval  hedges
     0     Adelie  Chinstrap  3700.662  3733.088   -32.426  59.706  -0.543  152.455  0.85  -0.074
     1     Adelie     Gentoo  3700.662  5076.016 -1375.354  58.811 -23.386  249.643  0.00  -2.860
     2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  65.103 -20.628  170.404  0.00  -2.875
