@@ -1,18 +1,12 @@
-name: Deploy Development Documentation to GitHub Pages
+name: Deploy Stable Documentation to GitHub Pages
 
 on:
-  push:
-    branches: [main]
+  release:
+    types: [published]
   workflow_dispatch:
 
-# Cancel any in-progress job or run
-# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  deploy-dev-docs:
+  deploy-stable-docs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -31,17 +25,40 @@ jobs:
     - name: Install dependencies
       run: |
         uv pip install --group=docs --editable .
-    - name: Build development documentation
+    - name: Update switcher.json with current stable version
+      run: |
+        python -c "
+        import json, pingouin
+        stable_version = pingouin.__version__
+        switcher = [
+            {
+                'name': 'dev (main branch)',
+                'version': 'dev',
+                'url': 'https://pingouin-stats.org/dev/'
+            },
+            {
+                'name': f'{stable_version} (stable)',
+                'version': stable_version,
+                'url': 'https://pingouin-stats.org/stable/',
+                'preferred': True
+            }
+        ]
+        with open('docs/switcher.json', 'w') as f:
+            json.dump(switcher, f, indent=2)
+            f.write('\n')
+        print(f'Updated switcher.json with stable version {stable_version}')
+        "
+    - name: Build stable documentation
       env:
-        DOC_VERSION: dev
+        DOC_VERSION: stable
       run: |
         make -C docs clean
         make -C docs html
-    - name: Deploy dev docs to gh-pages (dev/ subfolder)
+    - name: Deploy stable docs to gh-pages (stable/ subfolder)
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         folder: docs/build/html
-        target-folder: dev
+        target-folder: stable
     - name: Create root redirect and switcher
       run: |
         mkdir -p /tmp/root-pages

@@ -1,0 +1,13 @@
+[
+  {
+    "name": "dev (main branch)",
+    "version": "dev",
+    "url": "https://pingouin-stats.org/dev/"
+  },
+  {
+    "name": "0.6.0 (stable)",
+    "version": "0.6.0",
+    "url": "https://pingouin-stats.org/stable/",
+    "preferred": true
+  }
+]
