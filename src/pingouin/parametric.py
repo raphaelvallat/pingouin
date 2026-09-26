@@ -7,7 +7,7 @@ import pandas_flavor as pf
 from scipy.stats import f
 
 from .bayesian import bayesfactor_ttest
-from .distribution import _mauchly, epsilon, sphericity
+from .distribution import _contrast_cov, _mauchly, epsilon, sphericity
 from .utils import _check_dataframe, _flatten_list, _postprocess_dataframe, remove_na
 
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova", "ancova"]
@@ -449,17 +449,10 @@ def rm_anova(
     ANOVA if many missing values are present. In that case, we strongly recommend using linear
     mixed effect modelling, which can handle missing values in repeated measures.
 
-    .. warning:: The epsilon adjustement factor of the interaction in
-        two-way repeated measures ANOVA where both factors have more than
-        two levels slightly differs than from R and JASP.
-        Please always make sure to double-check your results with another
-        software.
-
-    .. warning:: Sphericity tests for the interaction term of a two-way
-        repeated measures ANOVA are not currently supported in Pingouin.
-        Instead, please refer to the Greenhouse-Geisser epsilon value
-        (a value close to 1 indicates that sphericity is met.) For more
-        details, see :py:func:`pingouin.sphericity`.
+    .. note:: Mauchly's test of sphericity is not reported for two-way repeated measures ANOVA.
+        Use :py:func:`pingouin.sphericity` with ``within=[factor1, factor2]`` to test sphericity
+        of the interaction, or refer to the Greenhouse-Geisser epsilon value
+        (a value close to 1 indicates that sphericity is met).
 
     Examples
     --------
@@ -775,9 +768,6 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     piv_b = data.pivot_table(index=subject, columns=b, values=dv, observed=True)
     eps_a = epsilon(piv_a, correction="gg")
     eps_b = epsilon(piv_b, correction="gg")
-    # Note that the GG epsilon of the interaction slightly differs between
-    # R and Pingouin. An alternative is to use the lower bound, which is
-    # very conservative (same behavior as described on real-statistics.com).
     eps_ab = epsilon(data_piv, correction="gg")
 
     # Greenhouse-Geisser correction
@@ -1562,7 +1552,7 @@ def mixed_anova(
     # Sphericity is always met with only two repeated measures
     spher, W_spher, p_spher = True, np.nan, 1.0
     if n_rm >= 3 and correction in ["auto", True]:
-        W_spher, _, _, p_spher = _mauchly(resid.cov().to_numpy(), df_resbetw)
+        W_spher, _, _, p_spher = _mauchly(_contrast_cov(resid), df_resbetw, n_rm)
         spher = bool(p_spher > 0.05)
     correction = not spher if correction == "auto" else (correction is True and n_rm >= 3)
     # GG epsilon is invariant to the scaling of the covariance matrix (N - 1 vs N - n_groups)

@@ -453,6 +453,24 @@ class TestParametric(TestCase):
         ).round(5)
         array_equal(aov.loc[:, "np2"], [0.78998, 0.74972, 0.58395])
 
+        # Non-spherical (3, 3) design: epsilon of the interaction must be computed from the
+        # Kronecker product of the contrasts of each factor. Compare with R afex::aov_ez.
+        # See https://github.com/raphaelvallat/pingouin/issues/19
+        rng = np.random.default_rng(1)
+        rows = []
+        for s in range(15):
+            b = rng.normal()
+            for i, fa in enumerate("abc"):
+                for j, fb in enumerate("xyz"):
+                    rows.append(
+                        (s, fa, fb, b + 0.5 * i + 0.3 * j * i + rng.normal(0, 0.3 + 0.5 * i * j))
+                    )
+        df33 = pd.DataFrame(rows, columns=["S", "A", "B", "y"])
+        aov = rm_anova(data=df33, subject="S", within=["A", "B"], dv="y").round(5)
+        array_equal(aov.loc[:, "F"], [53.9024, 3.53315, 3.05294])
+        array_equal(aov.loc[:, "eps"], [0.76334, 0.86145, 0.67162])
+        array_equal(aov.loc[:, "p_GG_corr"], [0.0, 0.05118, 0.04513])
+
         # 2 factors with missing values. Cannot compare with JASP directly
         # because Pingouin applies an automatic removal of missing values
         # (on the last factor). JASP uses a regression-based approach which
