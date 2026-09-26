@@ -484,9 +484,9 @@ def _prepare_Xy(X, y, remove_na=False):
     else:
         names = []
 
-    # Convert input to numpy array. X is cast to float, e.g. for boolean predictors.
+    # Convert input to numpy array. X and y are cast to float, e.g. for boolean inputs.
     X = np.asarray(X, dtype=float)
-    y = np.asarray(y)
+    y = np.asarray(y, dtype=float)
     assert y.ndim == 1, "y must be one-dimensional."
 
     if X.ndim == 1:

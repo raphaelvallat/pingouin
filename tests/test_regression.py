@@ -607,3 +607,11 @@ def test_regression_boolean_predictors():
         linear_regression(X.astype(float), y, add_intercept=False),
     )
     assert_frame_equal(logistic_regression(X, ybin), logistic_regression(X.astype(float), ybin))
+    # Boolean target: yw @ yw returned True instead of the total sum of squares
+    assert_frame_equal(
+        linear_regression(X["a"], y > 0, add_intercept=False),
+        linear_regression(X["a"], (y > 0).astype(float), add_intercept=False),
+    )
+    assert_frame_equal(
+        logistic_regression(X, ybin.astype(bool)), logistic_regression(X.astype(float), ybin)
+    )
