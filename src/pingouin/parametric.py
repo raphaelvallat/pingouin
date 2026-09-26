@@ -219,6 +219,8 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
 
     x = np.asarray(x)
     y = np.asarray(y)
+    # Accept any truthy / falsy value (e.g. numpy bool or 0 / 1)
+    paired = bool(paired)
 
     if x.size != y.size and paired:
         warnings.warn("x and y have unequal sizes. Switching to paired == False. Check your data.")
@@ -234,7 +236,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
         tval, pval = ttest_1samp(x, y.item(), alternative=alternative)
         dof = nx - 1
         se = np.sqrt(x.var(ddof=1) / nx)
-    if ny > 1 and paired is True:
+    elif paired:
         # Case paired two samples T-test
         # Do not compute if two arrays are identical (avoid SciPy warning)
         if np.array_equal(x, y):
@@ -244,7 +246,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
             tval, pval = ttest_rel(x, y, alternative=alternative)
         dof = nx - 1
         se = np.sqrt(np.var(x - y, ddof=1) / nx)
-    elif ny > 1 and paired is False:
+    else:
         dof = nx + ny - 2
         vx, vy = x.var(ddof=1), y.var(ddof=1)
         # Case unpaired two samples T-test
@@ -287,12 +289,12 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
         power = power_ttest(
             d=d, n=nx, power=None, alpha=0.05, contrast="one-sample", alternative=alternative
         )
-    if ny > 1 and paired is True:
+    elif paired:
         # Paired two-sample
         power = power_ttest(
             d=d, n=nx, power=None, alpha=0.05, contrast="paired", alternative=alternative
         )
-    elif ny > 1 and paired is False:
+    else:
         # Independent two-samples
         if nx == ny:
             # Equal sample sizes
@@ -1068,12 +1070,17 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
     grp_both = data.groupby(between, observed=True, group_keys=False)[dv]
+    ng1, ng2 = data[fac1].nunique(), data[fac2].nunique()
+    if grp_both.ngroups < ng1 * ng2:
+        raise ValueError(
+            "Each combination of the two between-subject factors must have at least one "
+            "observation. The interaction cannot be estimated with empty cells."
+        )
 
     if grp_both.count().nunique() == 1:
         # BALANCED DESIGN
         aov_fac1 = anova(data=data, dv=dv, between=fac1, detailed=True)
         aov_fac2 = anova(data=data, dv=dv, between=fac2, detailed=True)
-        ng1, ng2 = data[fac1].nunique(), data[fac2].nunique()
         # Sums of squares
         ss_fac1 = aov_fac1.at[0, "SS"]
         ss_fac2 = aov_fac2.at[0, "SS"]
@@ -1336,6 +1343,8 @@ def welch_anova(data=None, dv=None, between=None):
     # Check data
     data = _check_dataframe(dv=dv, between=between, data=data, effects="between")
 
+    # Drop missing values
+    data = data[[dv, between]].dropna()
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
 
