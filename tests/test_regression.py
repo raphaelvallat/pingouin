@@ -277,6 +277,11 @@ class TestRegression(TestCase):
         # %%R -i df
         # summary(glm(Ybin ~ X, data=df, family=binomial))
         assert_equal(np.round(lom["coef"], 3), [1.319, -0.199])
+        # Without intercept, compare to statsmodels
+        lom_noint = logistic_regression(df[["X", "M"]], df["Ybin"], fit_intercept=False)
+        sm_noint = sm.Logit(df["Ybin"], df[["X", "M"]]).fit(disp=False)
+        assert_almost_equal(lom_noint["coef"].to_numpy(), sm_noint.params.to_numpy(), decimal=4)
+        assert_almost_equal(lom_noint["se"].to_numpy(), sm_noint.bse.to_numpy(), decimal=4)
         # The default solver must converge to the maximum likelihood estimates.
         # Compare to R: summary(glm(P ~ H, family=binomial))
         H = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 4, 4.25, 4.5]
@@ -398,6 +403,12 @@ class TestRegression(TestCase):
         _, dist = mediation_analysis(data=df, x="X", m="M", y="Y", n_boot=1000, return_dist=True)
         assert dist.size == 1000
         mediation_analysis(data=df, x="X", m="M", y="Y", alpha=0.01)
+        # The type of regression is chosen separately for each mediator: a binary mediator
+        # is modeled with a logistic regression even when another mediator is continuous
+        ma_bin = mediation_analysis(data=df, x="X", m="Mbin", y="Y", n_boot=10)
+        ma_both = mediation_analysis(data=df, x="X", m=["M", "Mbin"], y="Y", n_boot=10)
+        assert np.isclose(ma_both.at[1, "coef"], ma_bin.at[0, "coef"])
+        assert np.isclose(ma_both.at[0, "coef"], ma.at[0, "coef"])
 
         # Check with a binary mediator
         ma = mediation_analysis(data=df, x="X", m="Mbin", y="Y", n_boot=2000)

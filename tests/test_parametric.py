@@ -255,6 +255,11 @@ class TestParametric(TestCase):
         # Same but unbalanced
         with pytest.raises(ValueError, match="empty cells"):
             anova(dv="Y", between=["A", "B"], data=df_empty.iloc[1:])
+        # Three-way ANOVA with an empty cell
+        df_aov3_empty = read_dataset("anova3")
+        is_cell = df_aov3_empty[["Sex", "Risk", "Drug"]].eq(["M", "High", "A"]).all(axis=1)
+        with pytest.raises(ValueError, match="empty cells"):
+            anova(dv="Cholesterol", between=["Sex", "Risk", "Drug"], data=df_aov3_empty[~is_cell])
 
         # Three-way ANOVA using statsmodels
         # Balanced
@@ -270,6 +275,12 @@ class TestParametric(TestCase):
         ).round(3)
         # Check that type 1 == type 2 == type 3
         assert aov3_ss1.equals(aov3_ss2)
+        # Unused levels of a categorical factor are ignored
+        drug_cat = pd.Categorical(df_aov3["Drug"], categories=[*df_aov3["Drug"].unique(), "X"])
+        aov3_cat = anova(
+            dv="Cholesterol", between=["Sex", "Risk", "Drug"], data=df_aov3.assign(Drug=drug_cat)
+        ).round(3)
+        assert aov3_ss2.equals(aov3_cat)
         assert aov3_ss2.equals(aov3_ss3)
         # Compare with JASP
         array_equal(
@@ -355,6 +366,12 @@ class TestParametric(TestCase):
         # Pain dataset
         df_pain = read_dataset("anova")
         aov = welch_anova(dv="Pain threshold", between="Hair color", data=df_pain).round(4)
+        # A group with a single observation or zero variance is not supported
+        df_one = pd.DataFrame({"g": ["a"] * 5 + ["b"] * 5 + ["c"], "y": np.arange(11.0) ** 2})
+        with pytest.raises(ValueError, match="at least two observations"):
+            welch_anova(dv="y", between="g", data=df_one)
+        with pytest.raises(ValueError, match="non-zero variance"):
+            welch_anova(dv="y", between="g", data=df_one.assign(y=[1.0] * 5 + [2, 3, 4, 5, 6, 7]))
         # Compare with JASP
         assert aov.at[0, "ddof1"] == 3
         assert aov.at[0, "ddof2"] == 8.3298
@@ -754,6 +771,12 @@ class TestParametric(TestCase):
         array_equal(aov["DF"], [3, 1, 31])
         array_equal(aov["F"], [3.3365, 29.4194, np.nan])
         array_equal(aov["p_unc"], [0.0319, 0.000, np.nan])
+        # Unused levels of a categorical factor are ignored
+        df_cat = df.assign(
+            Method=pd.Categorical(df["Method"], categories=[*df["Method"].unique(), "X"])
+        )
+        aov_cat = ancova(data=df_cat, dv="Scores", covar="Income", between="Method").round(4)
+        pd.testing.assert_frame_equal(aov, aov_cat)
         array_equal(aov["np2"], [0.2441, 0.4869, np.nan])
         aov = ancova(data=df, dv="Scores", covar="Income", between="Method", effsize="n2").round(4)
         array_equal(aov["n2"], [0.1421, 0.4177, np.nan])

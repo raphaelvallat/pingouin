@@ -92,6 +92,8 @@ class TestDistribution(TestCase):
     def test_homoscedasticity(self):
         """Test function test_homoscedasticity."""
         hl = homoscedasticity(data=[x, y], alpha=0.05)
+        # Method name is case-insensitive
+        assert hl.equals(homoscedasticity(data=[x, y], method="Levene", alpha=0.05))
         homoscedasticity(data=[x, y], method="bartlett", alpha=0.05)
         hd = homoscedasticity(data={"x": x, "y": y}, alpha=0.05)
         hd2 = homoscedasticity(data={"x": x, "y": y}, alpha=0.05, center="mean")
@@ -107,6 +109,13 @@ class TestDistribution(TestCase):
             hb = homoscedasticity(data, method="bartlett")
             assert np.isclose(hb.at["bartlett", "T"], 2.873569)
             assert np.isclose(hb.at["bartlett", "pval"], 0.090045)
+        # Missing values are removed separately in each sample
+        a_nan, b_nan = [*a, np.nan], [np.nan, *b, np.nan]
+        hb = homoscedasticity(data={"a": a, "b": b}, method="bartlett")
+        for data in [[a_nan, b_nan], pd.DataFrame({"a": [*a_nan, np.nan], "b": b_nan})]:
+            assert hb.equals(homoscedasticity(data, method="bartlett"))
+        df_nan = pd.DataFrame({"g": ["a"] * 6 + ["b"] * 7, "y": a_nan + b_nan})
+        assert hb.equals(homoscedasticity(df_nan, dv="y", group="g", method="bartlett"))
 
     def test_epsilon(self):
         """Test function epsilon."""
@@ -181,6 +190,12 @@ class TestDistribution(TestCase):
         # JNS
         sphericity(df_pivot, method="jns")
         sphericity(df, dv="Scores", subject="Subject", within=["Time"], method="jns")
+        # Under the null hypothesis, JNS should reject sphericity at the nominal rate
+        rng = np.random.default_rng(42)
+        pvals = [
+            sphericity(pd.DataFrame(rng.normal(size=(50, 4))), method="jns")[4] for _ in range(200)
+        ]
+        assert 0.01 < np.mean(np.array(pvals) < 0.05) < 0.1
         # Two-way design of shape (2, N)
         spher = sphericity(pab)
         assert round(spher[1], 3) == 0.625
