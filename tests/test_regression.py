@@ -180,6 +180,21 @@ class TestRegression(TestCase):
             lm.loc[[1, 2, 3], "relimp_perc"], [15.43091, 81.44355, 3.12554], decimal=4
         )
         assert np.isclose(lm["relimp"].sum(), lm.at[0, "r2"])
+        # Relative importance is scale-invariant, even for a predictor in very
+        # small units (see GH issue 522)
+        X_scaled = df[["X", "M"]].copy()
+        X_scaled["X"] *= 1e-8
+        lm = linear_regression(X_scaled, df["Y"], relimp=True)
+        assert_almost_equal(lm.loc[[1, 2], "relimp"], [0.05778011, 0.31521913])
+        assert np.isclose(lm["relimp"].sum(), lm.at[0, "r2"])
+        # User-defined constant column without intercept: the constant column
+        # has zero relative importance and the others are unchanged
+        X_const = df[["X", "M"]].copy()
+        X_const.insert(1, "const", 0.1)
+        lm = linear_regression(X_const, df["Y"], add_intercept=False, relimp=True)
+        assert lm["names"].tolist() == ["X", "const", "M"]
+        assert_almost_equal(lm["relimp"], [0.05778011, 0, 0.31521913])
+        assert_almost_equal(lm["relimp_perc"], [15.49068, 0, 84.50932], decimal=4)
 
         ######################################################################
         # WEIGHTED REGRESSION - compare against R lm() function
