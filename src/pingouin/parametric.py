@@ -1139,10 +1139,6 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     This is an internal function. The main call to this function should be done
     by the :py:func:`pingouin.anova` function.
     """
-    # Check that stasmodels is installed
-    from pingouin.utils import _is_statsmodels_installed
-
-    _is_statsmodels_installed(raise_error=True)
     from statsmodels.api import stats
     from statsmodels.formula.api import ols
 
@@ -1681,10 +1677,6 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     2       BMI    60.013656   1   1.053790  0.312842  0.015409
     3  Residual  1708.508657  30        NaN       NaN       NaN
     """
-    # Import
-    from pingouin.utils import _is_statsmodels_installed
-
-    _is_statsmodels_installed(raise_error=True)
     from statsmodels.api import stats
     from statsmodels.formula.api import ols
 

@@ -252,7 +252,7 @@ def compute_bootci(
 
     Notes
     -----
-    This function uses :py:func:`scipy.stats.bootstrap` under the hood. Requires SciPy >= 1.10.
+    This function uses :py:func:`scipy.stats.bootstrap` under the hood.
 
     The bias-corrected and accelerated method (``bca``, default) corrects for both bias and
     skewness of the bootstrap distribution using jackknife resampling.

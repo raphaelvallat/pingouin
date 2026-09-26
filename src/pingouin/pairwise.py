@@ -1062,7 +1062,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     labels = np.array(list(grp.groups.keys()))
     n = grp.count().to_numpy()
     gmeans = grp.mean(numeric_only=True).to_numpy()
-    gvars = grp.var(numeric_only=True).to_numpy()  # numeric_only=True added in pandas 1.5
+    gvars = grp.var(numeric_only=True).to_numpy()
 
     # Pairwise combinations
     g1, g2 = np.array(list(combinations(np.arange(ng), 2))).T

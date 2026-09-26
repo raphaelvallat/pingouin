@@ -18,9 +18,6 @@ __all__ = [
     "remove_na",
     "_flatten_list",
     "_check_dataframe",
-    "_is_sklearn_installed",
-    "_is_sklearn_version_compatible",
-    "_is_statsmodels_installed",
     "_is_mpmath_installed",
 ]
 
@@ -399,70 +396,13 @@ def _check_dataframe(data=None, dv=None, between=None, within=None, subject=None
 ###############################################################################
 
 
-def _is_statsmodels_installed(raise_error=False):
-    """Check if statsmodels is installed."""
-    try:
-        import statsmodels  # noqa
-
-        is_installed = True
-    except OSError:  # pragma: no cover
-        is_installed = False
-    # Raise error (if needed) :
-    if raise_error and not is_installed:  # pragma: no cover
-        raise OSError("statsmodels needs to be installed. Please use `pip install statsmodels`.")
-    return is_installed
-
-
-def _is_sklearn_installed(raise_error=False):
-    """Check if sklearn is installed."""
-    try:
-        import sklearn  # noqa
-
-        is_installed = True
-    except OSError:  # pragma: no cover
-        is_installed = False
-    # Raise error (if needed) :
-    if raise_error and not is_installed:  # pragma: no cover
-        raise OSError("sklearn needs to be installed. Please use `pip install scikit-learn`.")
-    return is_installed
-
-
-def _is_sklearn_version_compatible(max_compatible_version):
-    """
-    Checks if installed scikit-learn version is compatible.
-    Requires that scikit-learn is installed.
-
-    Args:
-        max_compatible_version (str): Maximum compatible version of sklearn.
-
-    Returns:
-        bool: True if sklearn version is compatible, False otherwise.
-
-    Raises:
-        Exception if sklearn version is not compatible
-    """
-    import sklearn  # noqa
-    from packaging import version
-
-    installed_version = version.parse(sklearn.__version__)
-    max_compatible_version = version.parse(max_compatible_version)
-    version_compatible = installed_version <= max_compatible_version
-
-    if version_compatible is False:
-        raise Exception(
-            f"sklearn version {sklearn.__version__} is installed and is not compatible."
-            f"Please install scikit-learn version <= {max_compatible_version}."
-        )
-    return version_compatible
-
-
 def _is_mpmath_installed(raise_error=False):
     """Check if mpmath is installed."""
     try:
         import mpmath  # noqa
 
         is_installed = True
-    except OSError:  # pragma: no cover
+    except ImportError:  # pragma: no cover
         is_installed = False
     # Raise error (if needed) :
     if raise_error and not is_installed:  # pragma: no cover

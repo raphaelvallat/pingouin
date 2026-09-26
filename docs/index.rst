@@ -63,7 +63,7 @@ the :code:`ttest` function of Pingouin returns the T-value, the p-value, the deg
 Installation
 ============
 
-Pingouin is a Python 3 package and is currently tested for Python 3.10+.
+Pingouin is a Python 3 package and is currently tested for Python 3.11+.
 
 The main dependencies of Pingouin are:
 
