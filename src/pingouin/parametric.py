@@ -1,6 +1,5 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 import warnings
-from collections.abc import Iterable
 
 import numpy as np
 import pandas as pd
@@ -231,11 +230,8 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
 
     if ny == 1:
         # Case one sample T-test
-        tval, pval = ttest_1samp(x, y, alternative=alternative)
-
-        # Some versions of scipy return an array for the t-value
-        if isinstance(tval, Iterable):
-            tval = tval[0]
+        # Pass the population mean as a scalar so that SciPy returns a scalar t-value
+        tval, pval = ttest_1samp(x, y.item(), alternative=alternative)
         dof = nx - 1
         se = np.sqrt(x.var(ddof=1) / nx)
     if ny > 1 and paired is True:
