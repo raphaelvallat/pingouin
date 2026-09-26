@@ -478,84 +478,67 @@ def anderson(*args, dist="norm"):
 ###############################################################################
 
 
-def _check_multilevel_rm(data, func="epsilon"):
-    """Check if data has multilevel columns for wide-format repeated measures.
-    ``func`` can be either epsilon or mauchly
+def _orthonormal_contrasts(k):
+    """(k, k - 1) matrix of orthonormal contrasts, i.e. orthogonal to the grand mean."""
+    Q, _ = np.linalg.qr(np.column_stack([np.ones(k), np.eye(k)[:, :-1]]))
+    return Q[:, 1:]
+
+
+def _rm_contrasts(columns):
+    """Orthonormal contrasts of the highest-order effect of a wide-format repeated measures design.
+
+    ``columns`` are the columns of the wide-format dataframe: a single level for a one-way design
+    (contrasts of the main effect), or a two-level :py:class:`pandas.MultiIndex` for a two-way
+    design (contrasts of the interaction). The interaction contrasts are the Kronecker product of
+    the contrasts of each factor, as in R (``mauchly.test``, car, afex), SPSS and JASP.
+    Returns an array of shape (n_columns, dof).
     """
-    # Support for two-way factor of shape (2, N)
-    if data.columns.nlevels == 1:
-        # For code clarity only
-        return data
-    elif data.columns.nlevels == 2:
-        # We sort the multiindex so that the higher factor has fewer levels
-        # Make sure to use remove_unused_levels to get the "true" shape
-        levshape = data.columns.remove_unused_levels().levshape
-        data = data.reorder_levels(np.argsort(levshape), axis=1)
-        levshape = np.sort(levshape)
-        # The first factor can have only one level (see if .. below), however,
-        # the second factor must have at least two levels.
-        assert levshape[1] >= 2, "Factor must have at least two levels."
-        if levshape[0] == 1:
-            # Two factors but first factor has only one level (= one-way)
-            data = data.droplevel(level=0, axis=1)
-        elif levshape[0] == 2:
-            # One factor has only two-level, e.g. (2, N) or (N, 2)
-            # Let's make sure that the first factor is sorted
-            data = data.sort_index(level=0, axis=1)
-            # Now let's compute the difference matrix of the first level
-            # We end up with a one-way design. It is similar to applying
-            # a paired T-test to gain scores instead of using repeated measures
-            # on two time points. Here we have computed the gain scores.
-            data = (
-                data.T.groupby(level=1, observed=True, group_keys=False).diff().dropna().transpose()
-            )
-            data = data.droplevel(level=0, axis=1)
-        else:
-            # Both factors have more than 2 levels -- differ from R / JASP
-            if func == "epsilon":
-                warnings.warn(
-                    "Epsilon values might be innaccurate in "
-                    "two-way repeated measures design where each  "
-                    "factor has more than 2 levels. Please  "
-                    "double-check your results."
-                )
-            else:
-                raise ValueError(
-                    "If using two-way repeated measures design, "
-                    "at least one factor must have exactly two "
-                    "levels. More complex designs are not yet "
-                    "supported."
-                )
-        return data
-    else:
+    if columns.nlevels > 2:
         raise ValueError("Only one-way or two-way designs are supported.")
+    codes = [pd.factorize(columns.get_level_values(i))[0] for i in range(columns.nlevels)]
+    n_levels = [c.max() + 1 for c in codes]
+    if np.prod(n_levels) != len(columns):
+        raise ValueError("Each combination of the within-subject factors must appear exactly once.")
+    C = np.ones((len(columns), 1))
+    for c, k in zip(codes, n_levels):
+        # Row-wise Kronecker product. A factor with only one level has no contrast and is ignored,
+        # e.g. the interaction of a (1, k) design is the main effect of the second factor.
+        if k > 1:
+            C_fac = _orthonormal_contrasts(k)[c]
+            C = (C[:, :, None] * C_fac[:, None, :]).reshape(len(columns), -1)
+    return C
 
 
-def _mauchly(S, df_resid):
-    """Mauchly's test of sphericity from a (k, k) covariance matrix.
+def _contrast_cov(data):
+    """Covariance matrix of the orthonormal contrasts, of shape (dof, dof).
+
+    ``data`` is a wide-format dataframe without missing values. Epsilon and sphericity tests are
+    computed on this matrix.
+    """
+    S = data.cov(numeric_only=True)
+    C = _rm_contrasts(S.columns)
+    return C.T @ S.to_numpy() @ C
+
+
+def _mauchly(M, df_resid, k):
+    """Mauchly's test of sphericity from the (d, d) covariance matrix of orthonormal contrasts.
 
     ``df_resid`` is the residual degrees of freedom of the covariance matrix,
-    i.e. n - 1 in a one-way repeated measures design and n - n_groups when ``S``
-    is the pooled within-group covariance of a mixed design.
-    Returns W, chi-square, dof and p-value.
+    i.e. n - 1 in a repeated measures design and n - n_groups when ``M`` is computed from
+    the pooled within-group covariance of a mixed design. ``k`` is the number of repeated
+    measures conditions (e.g. ka * kb for the interaction of a two-way design).
+    Returns W, chi-square, dof and p-value. Same as R ``mauchly.test``.
     """
-    k = S.shape[0]
-    d = k - 1
+    d = M.shape[0]
     # Compute dof of the test
     ddof = (d * (d + 1)) / 2 - 1
-    ddof = 1 if ddof == 0 else ddof
-    # 1 - Estimate the population covariance (= double-centered)
-    # 2 - Calculate n-1 eigenvalues
-    # 3 - Compute Mauchly's statistic
-    S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
-    eig = np.linalg.eigvalsh(S_pop)[1:]
-    # Use a relative tolerance tied to machine precision
-    tol = np.finfo(float).eps * eig.max() * d
-    eig = eig[eig > tol]
-    W = np.prod(eig) / (eig.sum() / d) ** d
-    logW = np.log(W)
+    # W = det(M) / (tr(M) / d)^d
+    sign, logdet = np.linalg.slogdet(M)
+    logW = logdet - d * np.log(np.trace(M) / d) if sign > 0 else -np.inf
+    W = np.exp(logW)
 
-    # Compute chi-square and p-value (adapted from the ezANOVA R package)
+    # Compute chi-square and p-value. Note that R uses the number of conditions k, and not d,
+    # in the second-order term w2 (Anderson 2003 uses d). We follow R to get the same p-values.
     f = 1 - (2 * d**2 + d + 2) / (6 * d * df_resid)
     w2 = (
         (d + 2)
@@ -647,20 +630,19 @@ def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
 
     .. math::
 
-        \\epsilon_{GG} = \\frac{k^2(\\overline{\\text{diag}(S)} -
-        \\overline{S})^2}{(k-1)(\\sum_{i=1}^{k}\\sum_{j=1}^{k}s_{ij}^2 -
-        2k\\sum_{j=1}^{k}\\overline{s_i}^2 + k^2\\overline{S}^2)}
+        \\epsilon_{GG} = \\frac{\\text{tr}(M)^2}{\\text{dof} \\cdot \\text{tr}(M^2)}
 
-    where :math:`S` is the covariance matrix, :math:`\\overline{S}` the
-    grandmean of S and :math:`\\overline{\\text{diag}(S)}` the mean of all the
-    elements on the diagonal of S (i.e. mean of the variances).
+    where :math:`M = C^T S C`, :math:`S` is the covariance matrix and :math:`C` is a
+    :math:`(k, \\text{dof})` matrix of orthonormal contrasts. For the interaction of a two-way
+    design, :math:`C` is the Kronecker product of the orthonormal contrasts of each factor, as in
+    R, SPSS and JASP.
 
     The Huynh-Feldt epsilon is given by:
 
     .. math::
 
-        \\epsilon_{HF} = \\frac{n(k-1)\\epsilon_{GG}-2}{(k-1)
-        (n-1-(k-1)\\epsilon_{GG})}
+        \\epsilon_{HF} = \\frac{n \\cdot \\text{dof} \\cdot \\epsilon_{GG}-2}{\\text{dof}
+        (n-1-\\text{dof} \\cdot \\epsilon_{GG})}
 
     where :math:`n` is the number of observations.
 
@@ -749,47 +731,20 @@ def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
     # Drop rows with missing values
     data = data.dropna()
 
-    # Support for two-way factor of shape (2, N)
-    data = _check_multilevel_rm(data, func="epsilon")
+    # Covariance matrix of the orthonormal contrasts
+    M = _contrast_cov(data)
+    n, dof = data.shape[0], M.shape[0]
 
-    # Covariance matrix
-    S = data.cov(numeric_only=True)
-    n, k = data.shape
-
-    # Epsilon is always 1 with only two repeated measures.
-    if k <= 2:
+    # Epsilon is always 1 with only one degree of freedom (e.g. two repeated measures).
+    if dof <= 1:
         return 1.0
-
-    # Degrees of freedom
-    if S.columns.nlevels == 1:
-        # One-way design
-        dof = k - 1
-    else:
-        # Two-way design (>2, >2)
-        ka, kb = S.columns.levshape
-        dof = (ka - 1) * (kb - 1)
 
     # Lower bound
     if correction == "lb":
         return 1 / dof
 
     # Greenhouse-Geisser
-    # Method 1. Sums of squares. (see real-statistics.com)
-    mean_var = np.diag(S).mean()
-    S_mean = S.mean().mean()
-    ss_mat = (S**2).sum().sum()
-    ss_rows = (S.mean(axis=1) ** 2).sum().sum()
-    num = (k * (mean_var - S_mean)) ** 2
-    den = (k - 1) * (ss_mat - 2 * k * ss_rows + k**2 * S_mean**2)
-    eps = np.min([num / den, 1])
-
-    # Method 2. Eigenvalues.
-    # Sv = S.to_numpy()
-    # S_pop = Sv - Sv.mean(0)[:, None] - Sv.mean(1)[None, :] + Sv.mean()
-    # eig = np.linalg.eigvalsh(S_pop)
-    # eig = eig[eig > 0.1]
-    # V = eig.sum()**2 / np.sum(eig**2)
-    # eps = np.min([V / dof, 1])
+    eps = np.min([np.trace(M) ** 2 / (dof * np.trace(M @ M)), 1])
 
     # Huynh-Feldt
     if correction == "hf":
@@ -844,12 +799,6 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
     pval : float
         P-value.
 
-    Raises
-    ------
-    ValueError
-        When testing for an interaction, if both within-subject factors have
-        more than 2 levels (not yet supported in Pingouin).
-
     See Also
     --------
     epsilon : Epsilon adjustement factor for repeated measures.
@@ -864,9 +813,10 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
 
         W = \\frac{\\prod \\lambda_j}{(\\frac{1}{k-1} \\sum \\lambda_j)^{k-1}}
 
-    where :math:`\\lambda_j` are the eigenvalues of the population
-    covariance matrix (= double-centered sample covariance matrix) and
-    :math:`k` is the number of conditions.
+    where :math:`\\lambda_j` are the eigenvalues of the covariance matrix of the orthonormal
+    contrasts :math:`M = C^T S C` (see :py:func:`pingouin.epsilon`) and :math:`k` is the number of
+    conditions. For the interaction of a two-way design, :math:`k - 1` is replaced by
+    :math:`(k_1 - 1)(k_2 - 1)`.
 
     From then, the :math:`W` statistic is transformed into a chi-square
     score using the number of observations per condition :math:`n`
@@ -959,10 +909,8 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
     The p-value value is very large, and the test therefore indicates that
     there is no violation of sphericity.
 
-    Now, let's calculate the epsilon for the interaction between the two
-    repeated measures factor. The current implementation in Pingouin only works
-    if at least one of the two within-subject factors has no more than two
-    levels.
+    Now, let's test sphericity for the interaction between the two
+    repeated measures factor.
 
     >>> spher, _, chisq, dof, pval = pg.sphericity(
     ...     data, dv="Performance", subject="Subject", within=["Time", "Metric"]
@@ -1005,45 +953,20 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
     # Remove rows with missing values in wide-format dataframe
     data = data.dropna()
 
-    # Support for two-way factor of shape (2, N)
-    data = _check_multilevel_rm(data, func="mauchly")
+    # Covariance matrix of the orthonormal contrasts
+    M = _contrast_cov(data)
+    n, d = data.shape[0], M.shape[0]
 
-    # From here, we work only with one-way design
-    n, k = data.shape
-    d = k - 1
-
-    # Sphericity is always met with only two repeated measures.
-    if k <= 2:
+    # Sphericity is always met with only one degree of freedom (e.g. two repeated measures).
+    if d <= 1:
         return True, np.nan, np.nan, 1, 1.0
 
-    # Compute dof of the test
-    ddof = (d * (d + 1)) / 2 - 1
-    ddof = 1 if ddof == 0 else ddof
-
     if method.lower() == "mauchly":
-        # Method 1. Contrast matrix. Similar to R & Matlab implementation.
-        # Only works for one-way design or two-way design with shape (2, N).
-        # 1 - Compute the successive difference matrix Z.
-        #     (Note that the order of columns does not matter.)
-        # 2 - Find the contrast matrix that M so that data * M = Z
-        # 3 - Performs the QR decomposition of this matrix (= contrast matrix)
-        # 4 - Compute sample covariance matrix S
-        # 5 - Compute Mauchly's statistic
-        # Z = data.diff(axis=1).dropna(axis=1)
-        # M = np.linalg.lstsq(data, Z, rcond=None)[0]
-        # C, _ = np.linalg.qr(M)
-        # S = data.cov(numeric_only=True)
-        # A = C.T.dot(S).dot(C)
-        # logW = np.log(np.linalg.det(A)) - d * np.log(np.trace(A / d))
-        # W = np.exp(logW)
-
-        # Method 2. Eigenvalue-based method. Faster.
-        S = data.cov(numeric_only=True).to_numpy()  # NumPy, otherwise S.mean() != grandmean
-        W, chi_sq, ddof, pval = _mauchly(S, n - 1)
+        W, chi_sq, ddof, pval = _mauchly(M, n - 1, data.shape[1])
     else:
         # Method = JNS
-        eps = epsilon(data, correction="gg")
-        W = eps * d
+        ddof = (d * (d + 1)) / 2 - 1
+        W = np.trace(M) ** 2 / np.trace(M @ M)
         chi_sq = 0.5 * n * d**2 * (W - 1 / d)
         pval = scipy.stats.chi2.sf(chi_sq, ddof)
 

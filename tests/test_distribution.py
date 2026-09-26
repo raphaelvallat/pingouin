@@ -146,7 +146,14 @@ class TestDistribution(TestCase):
         assert np.allclose(epsilon(pa1, correction="hf"), 1.0)
         assert np.allclose(epsilon(pb1), 0.9716288)
         assert np.allclose(epsilon(pb1, correction="hf"), 1.0)
-        assert 0.8 < epsilon(pab1) < 0.90  # Pingouin = .822, ez = .856
+        # Interaction of a (3, 4) design: compare with R afex::aov_ez
+        # See https://github.com/raphaelvallat/pingouin/issues/19
+        assert np.isclose(epsilon(pab1), 0.8562148)
+        assert np.isclose(epsilon(pab1, correction="hf"), 0.9684172)
+        assert epsilon(pab1, correction="lb") == 1 / 6
+        assert np.isclose(epsilon(pab1), epsilon(pab1.swaplevel(axis=1)))
+        # The order of the columns does not matter
+        assert np.isclose(epsilon(pab1), epsilon(pab1.iloc[:, ::-1]))
         eps_gg_rm = epsilon(df3, subject="subj", dv="dv", within=["within1", "within2"])
         assert eps_gg_rm == epsilon(pab1)
         # With missing values
@@ -195,12 +202,21 @@ class TestDistribution(TestCase):
         spher2 = sphericity(df3, subject="subj", dv="dv", within=["within2"])
         assert spher[1] == spher2[1]
         assert spher[4] == spher2[4]
-        # And then interaction (ValueError)
-        with pytest.raises(ValueError):
-            sphericity(pab1)
-        # Same with long-format
-        with pytest.raises(ValueError):
-            sphericity(df3, subject="subj", dv="dv", within=["within1", "within2"])
+        # And then interaction: compare with R afex::aov_ez
+        # See https://github.com/raphaelvallat/pingouin/issues/19
+        spher = sphericity(pab1)
+        assert spher[0]
+        assert np.isclose(spher[1], 0.58944, atol=1e-5)  # W
+        assert spher[3] == 20  # dof
+        assert np.isclose(spher[4], 0.21311, atol=1e-5)  # P-value
+        spher_long = sphericity(df3, subject="subj", dv="dv", within=["within1", "within2"])
+        assert np.isclose(spher[4], spher_long[4])
+        assert np.isclose(spher[4], sphericity(pab1.swaplevel(axis=1))[4])
+        assert np.isclose(spher[4], sphericity(pab1.iloc[:, ::-1])[4])
+        sphericity(pab1, method="jns")  # For coverage
+        # Missing combination of the two within-subject factors
+        with pytest.raises(ValueError, match="exactly once"):
+            sphericity(pab1.iloc[:, 1:])
         # 3 repeated measures factor
         with pytest.raises(ValueError):
             sphericity(pab_3fac)
