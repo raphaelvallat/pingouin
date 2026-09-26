@@ -9,6 +9,7 @@ import pingouin as pg
 
 df_ind = pg.read_dataset("chi2_independence")
 df_mcnemar = pg.read_dataset("chi2_mcnemar")
+df_cmh = pg.read_dataset("cochran_mantel_haenszel")
 
 data_ct = pd.DataFrame(
     {
@@ -153,6 +154,113 @@ class TestContingency(TestCase):
         assert np.isclose(stats.at["mcnemar", "p_exact"], 3.305e-06)
         # midp gives slightly different results
         # assert np.allclose(stats.at['mcnemar', 'p_mid'], 3.305e-06)
+
+    def test_cochran_mantel_haenszel(self):
+        """Test function cochran_mantel_haenszel."""
+        # Setup
+        np.random.seed(42)
+        n = 200
+        stratum = np.repeat([0, 1], n // 2)
+        x = np.random.binomial(1, 0.5, n)
+        y = np.random.binomial(1, 0.6, n)
+        data = pd.DataFrame({"x": x, "y": y, "stratum": stratum})
+
+        # Testing validations
+        def expect_assertion_error(*params):
+            with pytest.raises(AssertionError):
+                pg.cochran_mantel_haenszel(*params)
+
+        expect_assertion_error(1, "x", "y", "stratum")  # Not a pd.DataFrame
+        expect_assertion_error(data, x, "y", "stratum")  # Not a string
+        expect_assertion_error(data, "x", y, "stratum")  # Not a string
+        expect_assertion_error(data, "x", "z", "stratum")  # Not a column of data
+        expect_assertion_error(data, "x", "y", "invalid")  # Not a column of data
+
+        # Testing happy-day
+        pg.cochran_mantel_haenszel(data, "x", "y", "stratum")
+
+        # Testing with multiple strata
+        data["stratum2"] = np.repeat([0, 1], n // 2)
+        observed_multi, stats_multi = pg.cochran_mantel_haenszel(
+            data, "x", "y", ["stratum", "stratum2"]
+        )
+        assert len(observed_multi) >= 1
+        assert stats_multi.shape == (1, 4)
+
+        # Testing NaN incompatibility
+        data.iloc[0, 0] = np.nan
+        with pytest.raises(ValueError):
+            pg.cochran_mantel_haenszel(data, "x", "y", "stratum")
+
+        # Testing non-binary labels are accepted in the general CMH framework
+        data = pd.DataFrame(
+            {
+                "x": [0, 2, 0, 2, 0, 2, 0, 2],
+                "y": [0, 1, 1, 0, 0, 1, 1, 0],
+                "stratum": [0, 0, 0, 0, 1, 1, 1, 1],
+            }
+        )
+        observed_nb, stats_nb = pg.cochran_mantel_haenszel(data, "x", "y", "stratum")
+        assert len(observed_nb) == 2
+        assert stats_nb.at["cmh", "dof"] == 1
+
+        # Testing perfect association across strata still yields valid CMH output
+        data = pd.DataFrame(
+            {
+                "x": [0, 1, 0, 1, 0, 1, 0, 1],
+                "y": [0, 1, 0, 1, 0, 1, 0, 1],
+                "stratum": [0, 0, 0, 0, 1, 1, 1, 1],
+            }
+        )
+        observed_perfect, stats_perfect = pg.cochran_mantel_haenszel(data, "x", "y", "stratum")
+        assert len(observed_perfect) == 2
+        assert np.isfinite(stats_perfect.at["cmh", "cmh"])
+
+        # Comparing generalized RxCxK results against R (stats::mantelhaen.test)
+        # Agresti (2002) Job Satisfaction table (4x4x2): M^2 = 10.2, df = 9, p = 0.3345
+        data_agresti = df_cmh.loc[df_cmh.index.repeat(df_cmh["count"])].reset_index(drop=True)
+        observed_rxc, stats_rxc = pg.cochran_mantel_haenszel(
+            data_agresti, "income", "satisfaction", "gender"
+        )
+        assert isinstance(observed_rxc, list)
+        assert len(observed_rxc) == 2
+        assert observed_rxc[0].shape == (4, 4)
+        assert np.isclose(stats_rxc.at["cmh", "cmh"], 10.2, atol=1e-01)
+        assert stats_rxc.at["cmh", "dof"] == 9
+        assert np.isclose(stats_rxc.at["cmh", "pval"], 0.3345, atol=1e-04)
+        assert np.isnan(stats_rxc.at["cmh", "mh_oddsratio"])
+
+        # Comparing 2x2xK results against R (stats::mantelhaen.test)
+        # Agresti (2002) Job Satisfaction table (2x2x2):
+        #   corrected:   M^2 = 3.6286, df = 1, p = 0.0568,  MH OR = 3.271605
+        #   uncorrected: M^2 = 4.731,  df = 1, p = 0.02962, MH OR = 3.271605
+        data_agresti["income_low"] = (
+            data_agresti["income"].isin(["<5000", "5000-15000"]).astype(int)
+        )
+        data_agresti["sat_high"] = (
+            data_agresti["satisfaction"]
+            .isin(["Moderately Satisfied", "Very Satisfied"])
+            .astype(int)
+        )
+
+        observed_list, stats = pg.cochran_mantel_haenszel(
+            data_agresti, "income_low", "sat_high", "gender"
+        )
+        _, stats_no_correction = pg.cochran_mantel_haenszel(
+            data_agresti, "income_low", "sat_high", "gender", correction=False
+        )
+        assert isinstance(observed_list, list)
+        assert len(observed_list) == 2
+        assert np.isclose(stats.at["cmh", "cmh"], 3.6286, atol=1e-04)
+        assert stats.at["cmh", "dof"] == 1
+        assert np.isclose(stats.at["cmh", "pval"], 0.0568, atol=1e-04)
+        assert np.isclose(stats.at["cmh", "mh_oddsratio"], 3.271605, atol=1e-06)
+        assert np.isclose(stats_no_correction.at["cmh", "cmh"], 4.731, atol=1e-03)
+        assert stats_no_correction.at["cmh", "dof"] == 1
+        assert np.isclose(stats_no_correction.at["cmh", "pval"], 0.02962, atol=1e-04)
+        assert np.isclose(stats_no_correction.at["cmh", "mh_oddsratio"], 3.271605, atol=1e-06)
+        # The uncorrected CMH statistic should be larger than the corrected one
+        assert stats_no_correction.at["cmh", "cmh"] > stats.at["cmh", "cmh"]
 
     def test_dichotomize_series(self):
         """Test function _dichotomize_series."""
