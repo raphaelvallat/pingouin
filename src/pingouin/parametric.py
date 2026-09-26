@@ -1563,16 +1563,12 @@ def mixed_anova(
     # group differences as departure from sphericity.
     n_rm = data_piv.shape[1]
     resid = data_piv - data_piv.groupby(level=between, observed=True).transform("mean")
-    if correction == "auto" or (correction is True and n_rm >= 3):
-        if n_rm >= 3:
-            W_spher, _, _, p_spher = _mauchly(resid.cov().to_numpy(), df_resbetw)
-            spher = bool(p_spher > 0.05)
-        else:
-            spher, W_spher, p_spher = True, np.nan, 1.0
-        if correction == "auto":
-            correction = not spher
-    else:
-        correction = False
+    # Sphericity is always met with only two repeated measures
+    spher, W_spher, p_spher = True, np.nan, 1.0
+    if n_rm >= 3 and correction in ["auto", True]:
+        W_spher, _, _, p_spher = _mauchly(resid.cov().to_numpy(), df_resbetw)
+        spher = bool(p_spher > 0.05)
+    correction = not spher if correction == "auto" else (correction is True and n_rm >= 3)
     # GG epsilon is invariant to the scaling of the covariance matrix (N - 1 vs N - n_groups)
     eps = epsilon(resid, correction="gg")
     if correction:

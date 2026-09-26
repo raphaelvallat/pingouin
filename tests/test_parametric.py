@@ -632,6 +632,32 @@ class TestParametric(TestCase):
         ).round(5)
         array_equal(aov_auto.loc[1:, "p_GG_corr"], [0.00454, 0.00067])
 
+        # No correction
+        aov = mixed_anova(
+            data=df_spher,
+            dv="Scores",
+            subject="Subject",
+            within="Time",
+            between="Group",
+            correction=False,
+        )
+        assert "p_GG_corr" not in aov.columns
+        assert "W_spher" not in aov.columns
+
+        # Only two repeated measures: sphericity is always met, no correction
+        df_two = df[df["Time"] != "January"]
+        for correction in [True, "auto"]:
+            aov = mixed_anova(
+                data=df_two,
+                dv="Scores",
+                subject="Subject",
+                within="Time",
+                between="Group",
+                correction=correction,
+            )
+            assert "p_GG_corr" not in aov.columns
+            array_equal(aov.loc[1:, "eps"], [1.0, 1.0])
+
         # With overlapping subject IDs in the between-subject groups
         df_overlap = df.copy()
         df_overlap["Subject"] = df_overlap.groupby(["Group"], group_keys=False)["Subject"].apply(
