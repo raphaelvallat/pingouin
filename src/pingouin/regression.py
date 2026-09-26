@@ -1,4 +1,3 @@
-import itertools
 import warnings
 
 import numpy as np
@@ -375,14 +374,10 @@ def linear_regression(
     constant = 1 if len(idx_unique) > 0 else 0
 
     # 3. Finally, we want to remove duplicate columns
-    if X.shape[1] > 1:
-        idx_duplicate = []
-        for pair in itertools.combinations(range(X.shape[1]), 2):
-            if np.array_equal(X[:, pair[0]], X[:, pair[1]]):
-                idx_duplicate.append(pair[1])
-        if len(idx_duplicate):
-            X = np.delete(X, idx_duplicate, 1)
-            names = np.delete(names, idx_duplicate)
+    idx_duplicate = _duplicate_columns(X)
+    if len(idx_duplicate):
+        X = np.delete(X, idx_duplicate, 1)
+        names = np.delete(names, idx_duplicate)
 
     # 4. Check that we have enough samples / features
     n, p = X.shape[0], X.shape[1]
@@ -401,10 +396,10 @@ def linear_regression(
         # Do not count weights == 0 in dof
         # This gives similar results as R lm() but different from statsmodels
         n = np.count_nonzero(w)
-        # Rescale (whitening)
-        wts = np.diag(np.sqrt(w))
-        Xw = wts @ X
-        yw = wts @ y
+        # Rescale (whitening). Broadcasting avoids building a dense (n, n) diagonal matrix.
+        sw = np.sqrt(w)
+        Xw = X * sw[:, None]
+        yw = y * sw
     else:
         # Set all weights to one, [1, 1, 1, ...]
         w = np.ones(n)
@@ -525,6 +520,14 @@ def linear_regression(
     return stats
 
 
+def _duplicate_columns(X):
+    """Indices of the columns of ``X`` that are exact duplicates of an earlier column."""
+    if X.shape[1] < 2:
+        return np.array([], dtype=int)
+    _, idx_first = np.unique(X, axis=1, return_index=True)
+    return np.setdiff1d(np.arange(X.shape[1]), idx_first)
+
+
 def _relimp(S):
     """Relative importance of predictors in multiple regression.
 
@@ -539,69 +542,28 @@ def _relimp(S):
         followed by the predictors (excluding the intercept).
     """
     assert isinstance(S, pd.DataFrame)
-    cols = S.columns.tolist()
-
-    # Define indices of columns: .iloc is faster than .loc
-    predictors = cols[1:]
+    predictors = S.columns[1:].tolist()
     npred = len(predictors)
-    target_int = 0
-    predictors_int = np.arange(1, npred + 1)
+    S = S.to_numpy()
+    ss_tot, r, Rxx = S[0, 0], S[1:, 0], S[1:, 1:]
 
-    # Calculate total sum of squares and beta coefficients
-    # Note that the R^2 that we calculate below is always the R^2 of the model
-    # INCLUDING the intercept!
-    ss_tot = S.iat[target_int, target_int]
-    betas = (
-        np.linalg.pinv(S.iloc[predictors_int, predictors_int]) @ S.iloc[predictors_int, target_int]
-    )
-    r2_full = betas @ S.iloc[target_int, predictors_int] / ss_tot
+    # R^2 (including the intercept) of the model fitted on each subset of predictors, where
+    # the subset is encoded as a bitmask: bit j is set if predictor j is in the model.
+    # Each subset is solved only once.
+    masks = np.arange(2**npred)
+    r2 = np.zeros(2**npred)
+    for mask in masks[1:]:
+        idx = np.flatnonzero((mask >> np.arange(npred)) & 1)
+        r2[mask] = r[idx] @ pinvh(Rxx[np.ix_(idx, idx)]) @ r[idx] / ss_tot
+    size = np.array([bin(mask).count("1") for mask in masks])
 
-    # Pre-computed SSreg dictionnary
-    ss_reg_precomp = {}
-
-    # Start looping over predictors
+    # LMG: increase in R^2 when adding predictor j, averaged first over all the subsets of the
+    # other predictors with a given size, and then over the subset sizes.
     all_preds = []
-    for pred in predictors_int:
-        loo = np.setdiff1d(predictors_int, pred)
-        r2_seq_mean = []
-        # Loop over number of predictors
-        for k in np.arange(0, npred - 1):
-            r2_seq = []
-            # Loop over combinations of predictors
-            for p in itertools.combinations(loo, int(k)):
-                p = list(p)
-                p_with = p + [pred]
-
-                # To avoid calculating several times the same values
-                # we use a trick here: we save the first calculation
-                # to a dictionnary where the key is the sorted string
-                # (hence the order does not matter)
-                if str(sorted(p)) in ss_reg_precomp.keys():
-                    ss_reg_without = ss_reg_precomp[str(sorted(p))]
-                else:
-                    S_without = S.iloc[p, target_int]
-                    ss_reg_without = np.linalg.pinv(S.iloc[p, p]) @ S_without @ S_without
-                    ss_reg_precomp[str(sorted(p))] = ss_reg_without
-
-                S_with = S.iloc[p_with, target_int]
-                ss_reg_with = pinvh(S.iloc[p_with, p_with]) @ S_with @ S_with
-                ss_reg_precomp[str(sorted(p_with))] = ss_reg_with
-
-                # Calculate R^2
-                r2_diff = (ss_reg_with - ss_reg_without) / ss_tot
-                # Append the difference
-                r2_seq.append(r2_diff)
-
-            # First averaging
-            r2_seq_mean.append(np.mean(r2_seq))
-
-        # When Sk(r) = S
-        S_without = S.iloc[loo, target_int]
-        ss_reg = np.linalg.pinv(S.iloc[loo, loo]) @ S_without @ S_without
-        r2_without = ss_reg / ss_tot
-        r2_seq = r2_full - r2_without
-        r2_seq_mean.append(r2_seq)
-        all_preds.append(np.mean(r2_seq_mean))
+    for j in range(npred):
+        without = masks[(masks >> j) & 1 == 0]
+        r2_diff = r2[without | (1 << j)] - r2[without]
+        all_preds.append(np.mean([r2_diff[size[without] == k].mean() for k in range(npred)]))
 
     stats_relimp = {
         "names": predictors,
@@ -909,14 +871,10 @@ def logistic_regression(
         names = np.delete(names, idx_unique).tolist()
 
     # Finally, we want to remove duplicate columns
-    if X.shape[1] > 1:
-        idx_duplicate = []
-        for pair in itertools.combinations(range(X.shape[1]), 2):
-            if np.array_equal(X[:, pair[0]], X[:, pair[1]]):
-                idx_duplicate.append(pair[1])
-        if len(idx_duplicate):
-            X = np.delete(X, idx_duplicate, 1)
-            names = np.delete(names, idx_duplicate).tolist()
+    idx_duplicate = _duplicate_columns(X)
+    if len(idx_duplicate):
+        X = np.delete(X, idx_duplicate, 1)
+        names = np.delete(names, idx_duplicate).tolist()
 
     # Initialize and fit
     if "solver" not in kwargs:
@@ -935,14 +893,18 @@ def logistic_regression(
         else:  # pragma: no cover
             kwargs["penalty"] = None
     lom = LogisticRegression(**kwargs)
-    lom.fit(X, y)
+    with warnings.catch_warnings():
+        # sklearn 1.8 maps C=np.inf to penalty=None and then warns that C is ignored
+        warnings.filterwarnings("ignore", message="Setting penalty=None will ignore")
+        lom.fit(X, y)
 
     if lom.get_params()["fit_intercept"]:
         names.insert(0, "Intercept")
         X_design = np.column_stack((np.ones(X.shape[0]), X))
         coef = np.append(lom.intercept_, lom.coef_)
     else:
-        coef = lom.coef_
+        # coef_ has shape (1, n_features)
+        coef = lom.coef_.ravel()
         X_design = X
 
     if coef_only:
@@ -951,8 +913,7 @@ def logistic_regression(
     # Fisher Information Matrix
     n, p = X_design.shape
     denom = 2 * (1 + np.cosh(lom.decision_function(X)))
-    denom = np.tile(denom, (p, 1)).T
-    fim = (X_design / denom).T @ X_design
+    fim = (X_design / denom[:, None]).T @ X_design
     crao = np.linalg.pinv(fim)
 
     # Standard error and Z-scores
@@ -989,20 +950,35 @@ def logistic_regression(
         return stats
 
 
-def _point_estimate(X_val, XM_val, M_val, y_val, idx, n_mediator, mtype="linear", **logreg_kwargs):
-    """Point estimate of indirect effect based on bootstrap sample."""
+def _ols_coef(X, y):
+    """Least squares coefficients of y ~ 1 + X.
+
+    Unlike :py:func:`linear_regression`, no column is ever removed from the design matrix, so
+    that the position of each coefficient is fixed across bootstrap samples, even when a
+    covariate is constant in a given sample.
+    """
+    X = np.column_stack((np.ones(X.shape[0]), X))
+    return lstsq(X, y, cond=max(X.shape) * np.finfo(float).eps)[0]
+
+
+def _point_estimate(X_val, XM_val, M_val, y_val, idx, n_mediator, m_binary, **logreg_kwargs):
+    """Point estimate of indirect effect based on bootstrap sample.
+
+    ``m_binary`` is a boolean array indicating, for each mediator, whether it is binary and
+    thus modeled with a logistic regression instead of a linear regression.
+    """
     # Mediator(s) model (M(j) ~ X + covar)
     beta_m = []
     for j in range(n_mediator):
-        if mtype == "linear":
-            beta_m.append(linear_regression(X_val[idx], M_val[idx, j], coef_only=True)[1])
+        if not m_binary[j]:
+            beta_m.append(_ols_coef(X_val[idx], M_val[idx, j])[1])
         else:
             beta_m.append(
                 logistic_regression(X_val[idx], M_val[idx, j], coef_only=True, **logreg_kwargs)[1]
             )
 
     # Full model (Y ~ X + M + covar)
-    beta_y = linear_regression(XM_val[idx], y_val[idx], coef_only=True)[2 : (2 + n_mediator)]
+    beta_y = _ols_coef(XM_val[idx], y_val[idx])[2 : (2 + n_mediator)]
 
     # Point estimate
     return beta_m * beta_y
@@ -1143,7 +1119,8 @@ def mediation_analysis(
 
     A linear regression is used if the mediator variable is continuous and a
     logistic regression if the mediator variable is dichotomous (binary).
-    Multiple parallel mediators are also supported.
+    Multiple parallel mediators are also supported, and the type of regression is chosen
+    separately for each mediator.
 
     This function will only work well if the outcome variable is continuous.
     It does not support binary or ordinal outcome variable. For more
@@ -1227,13 +1204,13 @@ def mediation_analysis(
     >>> mediation_analysis(data=df, x="X", m=["M", "Mbin"], y="Y", seed=42).round(3)
                 path   coef     se   pval     CI2.5     CI97.5  sig
     0          M ~ X  0.561  0.094  0.000     0.374      0.749  Yes
-    1       Mbin ~ X -0.005  0.029  0.859    -0.063      0.052   No
+    1       Mbin ~ X -0.021  0.116  0.858    -0.248      0.206   No
     2          Y ~ M  0.654  0.086  0.000     0.482      0.825  Yes
     3       Y ~ Mbin -0.064  0.328  0.846    -0.715      0.587   No
     4          Total  0.396  0.111  0.001     0.176      0.617  Yes
     5         Direct  0.040  0.110  0.721    -0.179      0.258   No
     6     Indirect M  0.356  0.085  0.000     0.215      0.538  Yes
-    7  Indirect Mbin  0.000  0.010  0.952    -0.017      0.025   No
+    7  Indirect Mbin  0.001  0.041  0.952    -0.071      0.108   No
     """
     # Sanity check
     assert isinstance(x, (str, int)), "y must be a string or int."
@@ -1264,8 +1241,8 @@ def mediation_analysis(
     n = data.shape[0]
     assert n > 5, "DataFrame must have at least 5 samples (rows)."
 
-    # Check if mediator is binary
-    mtype = "logistic" if all(data[m].nunique() == 2) else "linear"
+    # Check which mediator(s) are binary (logistic regression) or continuous (linear regression)
+    m_binary = (data[m].nunique() == 2).to_numpy()
 
     # Check if a dict with kwargs for logistic_regression has been passed
     logreg_kwargs = {} if logreg_kwargs is None else logreg_kwargs
@@ -1287,78 +1264,79 @@ def mediation_analysis(
     old_options = options.copy()
     options["round"] = None
 
-    # M(j) ~ X + covar
-    sxm = {}
-    for idx, j in enumerate(m):
-        if mtype == "linear":
-            sxm[j] = linear_regression(X_val, M_val[:, idx], alpha=alpha).loc[[1], cols]
-        else:
-            sxm[j] = logistic_regression(X_val, M_val[:, idx], alpha=alpha, **logreg_kwargs).loc[
-                [1], cols
-            ]
-        sxm[j].at[1, "names"] = "%s ~ X" % j
-    sxm = pd.concat(sxm, ignore_index=True)
+    try:
+        # M(j) ~ X + covar
+        sxm = {}
+        for idx, j in enumerate(m):
+            if not m_binary[idx]:
+                sxm[j] = linear_regression(X_val, M_val[:, idx], alpha=alpha).loc[[1], cols]
+            else:
+                sxm[j] = logistic_regression(
+                    X_val, M_val[:, idx], alpha=alpha, **logreg_kwargs
+                ).loc[[1], cols]
+            sxm[j].at[1, "names"] = "%s ~ X" % j
+        sxm = pd.concat(sxm, ignore_index=True)
 
-    # Y ~ M + covar
-    smy = linear_regression(data[_fl([m, covar])], y_val, alpha=alpha).loc[1:n_mediator, cols]
-    # Average Total Effects (Y ~ X + covar)
-    sxy = linear_regression(X_val, y_val, alpha=alpha).loc[[1], cols]
-    # Average Direct Effects (Y ~ X + M + covar)
-    direct = linear_regression(XM_val, y_val, alpha=alpha).loc[[1], cols]
+        # Y ~ M + covar
+        smy = linear_regression(data[_fl([m, covar])], y_val, alpha=alpha).loc[1:n_mediator, cols]
+        # Average Total Effects (Y ~ X + covar)
+        sxy = linear_regression(X_val, y_val, alpha=alpha).loc[[1], cols]
+        # Average Direct Effects (Y ~ X + M + covar)
+        direct = linear_regression(XM_val, y_val, alpha=alpha).loc[[1], cols]
 
-    # Rename paths
-    smy["names"] = smy["names"].apply(lambda x: "Y ~ %s" % x)
-    direct.at[1, "names"] = "Direct"
-    sxy.at[1, "names"] = "Total"
+        # Rename paths
+        smy["names"] = smy["names"].apply(lambda x: "Y ~ %s" % x)
+        direct.at[1, "names"] = "Direct"
+        sxy.at[1, "names"] = "Total"
 
-    # Concatenate and create sig column
-    stats = pd.concat((sxm, smy, sxy, direct), ignore_index=True)
-    stats["sig"] = np.where(stats["pval"] < alpha, "Yes", "No")
+        # Concatenate and create sig column
+        stats = pd.concat((sxm, smy, sxy, direct), ignore_index=True)
+        stats["sig"] = np.where(stats["pval"] < alpha, "Yes", "No")
 
-    # Bootstrap confidence intervals
-    rng = np.random.RandomState(seed)
-    idx = rng.choice(np.arange(n), replace=True, size=(n_boot, n))
-    ab_estimates = np.zeros(shape=(n_boot, n_mediator))
-    for i in range(n_boot):
-        ab_estimates[i, :] = _point_estimate(
-            X_val, XM_val, M_val, y_val, idx[i, :], n_mediator, mtype, **logreg_kwargs
+        # Bootstrap confidence intervals
+        rng = np.random.RandomState(seed)
+        idx = rng.choice(np.arange(n), replace=True, size=(n_boot, n))
+        ab_estimates = np.zeros(shape=(n_boot, n_mediator))
+        for i in range(n_boot):
+            ab_estimates[i, :] = _point_estimate(
+                X_val, XM_val, M_val, y_val, idx[i, :], n_mediator, m_binary, **logreg_kwargs
+            )
+
+        ab = _point_estimate(
+            X_val, XM_val, M_val, y_val, np.arange(n), n_mediator, m_binary, **logreg_kwargs
         )
+        indirect = {
+            "names": m,
+            "coef": ab,
+            "se": ab_estimates.std(ddof=1, axis=0),
+            "pval": [],
+            ll_name: [],
+            ul_name: [],
+            "sig": [],
+        }
 
-    ab = _point_estimate(
-        X_val, XM_val, M_val, y_val, np.arange(n), n_mediator, mtype, **logreg_kwargs
-    )
-    indirect = {
-        "names": m,
-        "coef": ab,
-        "se": ab_estimates.std(ddof=1, axis=0),
-        "pval": [],
-        ll_name: [],
-        ul_name: [],
-        "sig": [],
-    }
+        for j in range(n_mediator):
+            ci_j = _bias_corrected_ci(ab_estimates[:, j], indirect["coef"][j], alpha=alpha)
+            indirect[ll_name].append(min(ci_j))
+            indirect[ul_name].append(max(ci_j))
+            # Bootstrapped p-value of indirect effect
+            # Note that this is less accurate than a permutation test because the
+            # bootstrap distribution is not conditioned on a true null hypothesis.
+            # For more details see Hayes and Rockwood 2017
+            indirect["pval"].append(_pval_from_bootci(ab_estimates[:, j], indirect["coef"][j]))
+            indirect["sig"].append("Yes" if indirect["pval"][j] < alpha else "No")
 
-    for j in range(n_mediator):
-        ci_j = _bias_corrected_ci(ab_estimates[:, j], indirect["coef"][j], alpha=alpha)
-        indirect[ll_name].append(min(ci_j))
-        indirect[ul_name].append(max(ci_j))
-        # Bootstrapped p-value of indirect effect
-        # Note that this is less accurate than a permutation test because the
-        # bootstrap distribution is not conditioned on a true null hypothesis.
-        # For more details see Hayes and Rockwood 2017
-        indirect["pval"].append(_pval_from_bootci(ab_estimates[:, j], indirect["coef"][j]))
-        indirect["sig"].append("Yes" if indirect["pval"][j] < alpha else "No")
-
-    # Create output dataframe
-    indirect = pd.DataFrame.from_dict(indirect)
-    if n_mediator == 1:
-        indirect["names"] = "Indirect"
-    else:
-        indirect["names"] = indirect["names"].apply(lambda x: "Indirect %s" % x)
-    stats = pd.concat([stats, indirect], axis=0, ignore_index=True, sort=False)
-    stats = stats.rename(columns={"names": "path"})
-
-    # Restore options
-    options.update(old_options)
+        # Create output dataframe
+        indirect = pd.DataFrame.from_dict(indirect)
+        if n_mediator == 1:
+            indirect["names"] = "Indirect"
+        else:
+            indirect["names"] = indirect["names"].apply(lambda x: "Indirect %s" % x)
+        stats = pd.concat([stats, indirect], axis=0, ignore_index=True, sort=False)
+        stats = stats.rename(columns={"names": "path"})
+    finally:
+        # Restore options, even if an error is raised
+        options.update(old_options)
 
     if return_dist:
         return _postprocess_dataframe(stats), np.squeeze(ab_estimates)

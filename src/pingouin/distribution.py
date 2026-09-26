@@ -233,21 +233,18 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
             stats["normal"] = np.where(stats["pval"] > alpha, True, False)
         else:
             # Long-format
-            stats = pd.DataFrame([])
             assert group in data.columns
             assert dv in data.columns
-            grp = data.groupby(group, observed=True, sort=False)
-            cols = grp.groups.keys()
-            for idx, tmp in grp:
-                if tmp[dv].count() <= 3:
+            rows = {}
+            for idx, x in data.groupby(group, observed=True, sort=False)[dv]:
+                x = x.dropna().to_numpy()
+                if x.size <= 3:
                     warnings.warn(f"Group {idx} has less than 4 valid samples. Returning NaN.")
-                    st_grp = pd.DataFrame(
-                        {"W": np.nan, "pval": np.nan, "normal": False}, index=[idx]
-                    )
+                    rows[idx] = (np.nan, np.nan)
                 else:
-                    st_grp = normality(tmp[dv].to_numpy(), method=method, alpha=alpha)
-                stats = pd.concat([stats, st_grp], axis=0, ignore_index=True)
-            stats.index = cols
+                    rows[idx] = tuple(func(x))[:2]
+            stats = pd.DataFrame.from_dict(rows, orient="index", columns=col_names)
+            stats["normal"] = stats["pval"] > alpha
             stats.index.name = group
     return _postprocess_dataframe(stats)
 
@@ -327,10 +324,7 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=0.05, **k
 
     .. math:: W \\sim F(k-1, N-k)
 
-    .. warning:: Missing values are not supported for this function.
-        Make sure to remove them before using the
-        :py:meth:`pandas.DataFrame.dropna` or :py:func:`pingouin.remove_na`
-        functions.
+    Missing values are automatically removed from each sample.
 
     References
     ----------
@@ -373,7 +367,8 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=0.05, **k
     bartlett  2.873569  0.090045       True
     """
     assert isinstance(data, (pd.DataFrame, list, dict))
-    assert method.lower() in ["levene", "bartlett"]
+    method = method.lower()
+    assert method in ["levene", "bartlett"]
     func = getattr(scipy.stats, method)
     if isinstance(data, pd.DataFrame):
         # Data is a Pandas DataFrame
@@ -402,9 +397,11 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=0.05, **k
         samples = data.values()
 
     # Cast to float: scipy.stats.bartlett fails with integer inputs in SciPy >= 1.17
-    statistic, p = func(*[np.asarray(x, dtype=float) for x in samples], **kwargs)
+    # Missing values are removed separately in each sample.
+    samples = [remove_na(np.asarray(x, dtype=float)) for x in samples]
+    statistic, p = func(*samples, **kwargs)
     equal_var = True if p > alpha else False
-    stat_name = "W" if method.lower() == "levene" else "T"
+    stat_name = "W" if method == "levene" else "T"
     stats = pd.DataFrame({stat_name: statistic, "pval": p, "equal_var": equal_var}, index=[method])
 
     return _postprocess_dataframe(stats)
@@ -832,7 +829,7 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
 
     .. math::
 
-        V = \\frac{(\\sum_j^{k-1} \\lambda_j)^2}{\\sum_j^{k-1} \\lambda_j^2}
+        V = \\frac{\\sum_j^{k-1} \\lambda_j^2}{(\\sum_j^{k-1} \\lambda_j)^2}
 
     .. math:: \\chi_v^2 = \\frac{n}{2}  (k-1)^2 (V - \\frac{1}{k-1})
 
@@ -880,7 +877,7 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
     John, Nagao and Sugiura (JNS) test
 
     >>> round(pg.sphericity(data, method="jns")[-1], 3)  # P-value only
-    0.046
+    0.139
 
     Now using a long-format dataframe
 
@@ -964,9 +961,9 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
     if method.lower() == "mauchly":
         W, chi_sq, ddof, pval = _mauchly(M, n - 1, data.shape[1])
     else:
-        # Method = JNS
+        # Method = JNS. John's statistic is equal to 1 / d under sphericity.
         ddof = (d * (d + 1)) / 2 - 1
-        W = np.trace(M) ** 2 / np.trace(M @ M)
+        W = np.trace(M @ M) / np.trace(M) ** 2
         chi_sq = 0.5 * n * d**2 * (W - 1 / d)
         pval = scipy.stats.chi2.sf(chi_sq, ddof)
 

@@ -202,11 +202,6 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     """
     from scipy.stats import t, ttest_1samp, ttest_ind, ttest_rel
 
-    try:  # pragma: no cover
-        from scipy.stats._stats_py import _equal_var_ttest_denom, _unequal_var_ttest_denom
-    except ImportError:  # pragma: no cover
-        # Fallback for scipy<1.8.0
-        from scipy.stats.stats import _equal_var_ttest_denom, _unequal_var_ttest_denom
     from pingouin import compute_effsize, power_ttest, power_ttest2n
 
     # Check arguments
@@ -255,10 +250,14 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
             tval, pval = ttest_ind(x, y, equal_var=False, alternative=alternative)
             # Compute sample standard deviation
             # dof are approximated using Welch–Satterthwaite equation
-            dof, se = _unequal_var_ttest_denom(vx, nx, vy, ny)
+            vnx, vny = vx / nx, vy / ny
+            dof = (vnx + vny) ** 2 / (vnx**2 / (nx - 1) + vny**2 / (ny - 1))
+            se = np.sqrt(vnx + vny)
         else:
             tval, pval = ttest_ind(x, y, equal_var=True, alternative=alternative)
-            _, se = _equal_var_ttest_denom(vx, nx, vy, ny)
+            # Pooled variance
+            svar = ((nx - 1) * vx + (ny - 1) * vy) / dof
+            se = np.sqrt(svar * (1 / nx + 1 / ny))
 
     # Effect size
     d = compute_effsize(x, y, paired=paired, eftype="cohen")
@@ -1069,13 +1068,9 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
+    _check_no_empty_cells(data, between)
     grp_both = data.groupby(between, observed=True, group_keys=False)[dv]
     ng1, ng2 = data[fac1].nunique(), data[fac2].nunique()
-    if grp_both.ngroups < ng1 * ng2:
-        raise ValueError(
-            "Each combination of the two between-subject factors must have at least one "
-            "observation. The interaction cannot be estimated with empty cells."
-        )
 
     if grp_both.count().nunique() == 1:
         # BALANCED DESIGN
@@ -1143,6 +1138,34 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     return _postprocess_dataframe(aov)
 
 
+def _check_no_empty_cells(data, between):
+    """Raise an error if a combination of the between-subject factors has no observation.
+
+    The interaction(s) cannot be estimated with empty cells: statsmodels would silently report
+    too many degrees of freedom, and the balanced two-way ANOVA negative sums of squares.
+    """
+    n_cells = np.prod([data[fac].nunique() for fac in between])
+    if data.groupby(between, observed=True).ngroups < n_cells:
+        raise ValueError(
+            "Each combination of the between-subject factors must have at least one "
+            "observation. The interaction cannot be estimated with empty cells."
+        )
+
+
+def _remove_unused_categories(data):
+    """Remove the unused levels of the categorical columns of ``data``.
+
+    Statsmodels / patsy build one dummy column per category, including unused ones (e.g. after
+    dropping missing values), which makes the design matrix rank deficient and silently
+    corrupts the sums of squares.
+    """
+    return data.apply(
+        lambda s: (
+            s.cat.remove_unused_categories() if isinstance(s.dtype, pd.CategoricalDtype) else s
+        )
+    )
+
+
 def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     """N-way ANOVA using statsmodels.
 
@@ -1165,8 +1188,9 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
         raise ValueError(err_msg)
 
     # Drop missing values
-    data = data[all_cols].dropna()
+    data = _remove_unused_categories(data[all_cols].dropna())
     assert data.shape[0] >= 5, "Data must have at least 5 non-missing values."
+    _check_no_empty_cells(data, between)
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
@@ -1354,6 +1378,11 @@ def welch_anova(data=None, dv=None, between=None):
 
     # Compute weights and ajusted means
     grp = data.groupby(between, observed=True, group_keys=False)[dv]
+    if (grp.count() < 2).any() or (grp.var() == 0).any():
+        raise ValueError(
+            "Each group must have at least two observations and a non-zero variance. "
+            "The Welch ANOVA weights are undefined otherwise."
+        )
     weights = grp.count() / grp.var(numeric_only=True)
     adj_grandmean = (weights * grp.mean(numeric_only=True)).sum() / weights.sum()
 
@@ -1758,7 +1787,7 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
         assert data[c].dtype.kind in "bfi", "covariate %s is not numeric" % c
 
     # Drop missing values
-    data = data[_flatten_list([dv, between, covar])].dropna()
+    data = _remove_unused_categories(data[_flatten_list([dv, between, covar])].dropna())
 
     # Fit ANCOVA model
     # formula = dv ~ 1 + between + covar1 + covar2 + ...
