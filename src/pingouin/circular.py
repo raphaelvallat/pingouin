@@ -29,17 +29,22 @@ __all__ = [
 ###############################################################################
 
 
-def _checkangles(angles, axis=None):
-    """Internal function to check that angles are in radians."""
-    msg = (
-        "Angles are not in unit of radians. Please use the "
-        "`pingouin.convert_angles` function to map your angles to "
-        "the [-pi, pi] range."
-    )
-    ptp_rad = np.nanmax(angles, axis=axis) - np.nanmin(angles, axis=axis)
-    ptp_mask = ptp_rad <= 2 * np.pi
-    if not ptp_mask.all():
-        raise ValueError(msg)
+def _checkangles(angles):
+    """Internal function to check that angles are in radians.
+
+    All the angles must be either in the [-pi, pi] or in the [0, 2pi] range. Checking only the
+    spread of the angles is not enough, e.g. degrees in a narrow range (10 to 15) would pass.
+    """
+    # Small tolerance for floating-point errors, e.g. angles computed as x - pi
+    tol = 1e-10
+    low, high = np.nanmin(angles), np.nanmax(angles)
+    in_pi_range = low >= -np.pi - tol and high <= np.pi + tol
+    in_2pi_range = low >= -tol and high <= 2 * np.pi + tol
+    if not (in_pi_range or in_2pi_range):
+        raise ValueError(
+            "Angles must be in radians, in the [-pi, pi] or [0, 2pi] range. Please use the "
+            "`pingouin.convert_angles` function to map your angles to radians."
+        )
 
 
 def _remove_na_weighted(angles, w=None):
@@ -603,6 +608,7 @@ def circ_corrcl(x, y):
     x = np.asarray(x)
     y = np.asarray(y)
     assert x.size == y.size, "x and y must have the same length."
+    _checkangles(x)  # Check that the circular variable is in radians
 
     # Remove NA
     x, y = remove_na(x, y, paired=True)

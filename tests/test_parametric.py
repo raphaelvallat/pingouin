@@ -356,10 +356,32 @@ class TestParametric(TestCase):
             aov3_ss3.loc[:, "n2"], [0.048, 0.189, 0.012, 0.001, 0.018, 0.026, 0.012, np.nan]
         )
 
-        # Error: invalid char in column names
-        df_aov3["Sex:"] = np.random.normal(size=df_aov3.shape[0])
-        with pytest.raises(ValueError):
-            anova(dv="Cholesterol", between=["Sex:", "Risk", "Drug"], data=df_aov3)
+        # Column names are never evaluated as code in the model formula (any name is accepted)
+        aov3 = anova(dv="Cholesterol", between=["Sex", "Risk", "Drug"], data=df_aov3)
+        for names in [
+            {"Cholesterol": "C", "Sex": "Q", "Risk": "risk (a, b): 'x'", "Drug": 2},
+            {"Sex": "Sex') + __import__('builtins').exit(\"INJECTED\") + C(Q('Risk"},
+        ]:
+            names = {"Cholesterol": "Cholesterol", "Risk": "Risk", "Drug": "Drug"} | names
+            aov_names = anova(
+                dv=names["Cholesterol"],
+                between=[names["Sex"], names["Risk"], names["Drug"]],
+                data=df_aov3.rename(columns=names),
+            )
+            pd.testing.assert_frame_equal(
+                aov3.drop(columns="Source"), aov_names.drop(columns="Source")
+            )
+            sex, risk, drug = names["Sex"], names["Risk"], names["Drug"]
+            assert aov_names["Source"].tolist() == [
+                sex,
+                risk,
+                str(drug),
+                f"{sex} * {risk}",
+                f"{sex} * {drug}",
+                f"{risk} * {drug}",
+                f"{sex} * {risk} * {drug}",
+                "Residual",
+            ]
 
     def test_welch_anova(self):
         """Test function welch_anova."""

@@ -35,11 +35,17 @@ class TestCircular(TestCase):
         """Test helper circular functions."""
         # Check angles
         _checkangles(a1)
-        _checkangles(a2, axis=None)
+        _checkangles(a2)
+        _checkangles([-np.pi, np.pi])
+        _checkangles([0, 2 * np.pi, np.nan])
         with pytest.raises(ValueError):
             _checkangles(a3)
-        with pytest.raises(ValueError):
-            _checkangles(a3, axis=None)
+        # Angles outside of the [-pi, pi] and [0, 2pi] ranges, even with a small spread
+        for angles in [[10, 12, 13, 14, 15], [100, 101], [-4, -3.5], [-3, 3.5]]:
+            with pytest.raises(ValueError, match="radians"):
+                _checkangles(angles)
+        with pytest.raises(ValueError, match="radians"):
+            circ_mean([10, 12, 13, 14, 15])
         # Convert angles
         np.testing.assert_array_almost_equal(a1, convert_angles(a1, low=-np.pi, high=np.pi))
         np.testing.assert_array_almost_equal(
@@ -109,6 +115,10 @@ class TestCircular(TestCase):
         # Compare with the CircStats MATLAB toolbox
         assert round(r, 3) == 0.109
         assert np.round(pval, 3) == 0.971
+        # The circular variable must be in radians (the linear variable can have any range)
+        circ_corrcl(x, np.array(y) * 100)
+        with pytest.raises(ValueError, match="radians"):
+            circ_corrcl(np.rad2deg(x), y)
 
     def test_circ_mean(self):
         """Test function circ_mean."""
