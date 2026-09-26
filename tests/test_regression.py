@@ -615,3 +615,17 @@ def test_regression_boolean_predictors():
     assert_frame_equal(
         logistic_regression(X, ybin.astype(bool)), logistic_regression(X.astype(float), ybin)
     )
+
+
+def test_logistic_regression_constant_column_without_intercept():
+    # With fit_intercept=False, a user-defined constant column is the intercept of the model and
+    # must not be removed. All-zero and additional constant columns are still removed.
+    ref = logistic_regression(df[["X", "M"]], df["Ybin"])
+    lom = logistic_regression(df[["Zero", "Two", "X", "One", "M"]], df["Ybin"], fit_intercept=False)
+    assert_equal(lom["names"].to_numpy(), ["Two", "X", "M"])
+    assert_allclose(lom["coef"], ref["coef"] * [0.5, 1, 1], rtol=1e-5)
+    assert_allclose(lom["se"], ref["se"] * [0.5, 1, 1], rtol=1e-5)
+    assert_allclose(lom["pval"], ref["pval"], rtol=1e-4)
+    # With the intercept of scikit-learn, all the constant columns are removed
+    lom = logistic_regression(df[["Two", "X", "M"]], df["Ybin"])
+    assert_equal(lom["names"].to_numpy(), ["Intercept", "X", "M"])

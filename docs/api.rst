@@ -93,7 +93,6 @@ Distribution
    :toctree: generated/
 
     anderson
-    gzscore
     homoscedasticity
     normality
     sphericity
