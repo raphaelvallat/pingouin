@@ -5,13 +5,14 @@ import numpy as np
 import pandas as pd
 import pytest
 import statsmodels.api as sm
-from numpy.testing import assert_almost_equal, assert_equal
+from numpy.testing import assert_allclose, assert_almost_equal, assert_equal
 from pandas.testing import assert_frame_equal
 from scipy.stats import linregress, zscore
 from sklearn.linear_model import LinearRegression
 
 from pingouin import read_dataset
 from pingouin.regression import (
+    _duplicate_columns,
     _pval_from_bootci,
     linear_regression,
     logistic_regression,
@@ -99,32 +100,52 @@ class TestRegression(TestCase):
         # With missing values
         linear_regression(df_nan[["X", "M"]], df_nan["Y"], remove_na=True)
 
-        # With columns with only one unique value
-        lm1 = linear_regression(df[["X", "M", "One"]], df["Y"])
-        lm2 = linear_regression(df[["X", "M", "One"]], df["Y"], add_intercept=False)
-        assert lm1.shape[0] == 3
-        assert lm2.shape[0] == 3
-        assert np.isclose(lm1.at[0, "r2"], lm2.at[0, "r2"])
+        # Constant, all-zero and duplicate columns are kept. The design is rank deficient: the
+        # fit is the same as without them, and the minimum-norm solution is returned.
+        ref = linear_regression(df[["X", "M"]], df["Y"])
+        # User-defined constant column without intercept: same fit as with the intercept
+        lm = linear_regression(df[["X", "M", "One"]], df["Y"], add_intercept=False)
+        assert_equal(lm["names"].to_numpy(), ["X", "M", "One"])
+        assert_allclose(lm["coef"], ref["coef"].to_numpy()[[1, 2, 0]])
+        assert_allclose(lm["se"], ref["se"].to_numpy()[[1, 2, 0]])
+        assert np.isclose(lm.at[0, "r2"], ref.at[0, "r2"])
+        assert (lm.df_model_, lm.df_resid_) == (ref.df_model_, ref.df_resid_)
+        for X in [
+            df[["X", "M", "One"]],  # Constant column in addition to the intercept
+            df[["X", "M", "Two", "One"]],
+            df[["X", "M", "Zero"]],
+            df[["X", "Zero", "M", "Zero"]],
+            df[["X", "One", "Zero", "M", "M", "X"]],  # Duplicate columns
+        ]:
+            with pytest.warns(UserWarning, match="rank 3 with"):
+                lm = linear_regression(X, df["Y"])
+            assert_equal(lm["names"].to_numpy(), ["Intercept", *X.columns])
+            assert_allclose(lm["r2"], ref.at[0, "r2"])
+            assert_allclose(lm["adj_r2"], ref.at[0, "adj_r2"])
+            assert_allclose(lm.residuals_, ref.residuals_, atol=1e-12)
+            assert (lm.df_model_, lm.df_resid_) == (ref.df_model_, ref.df_resid_)
+            # T-values of the non-constant columns are unchanged
+            is_x, is_m = (X.columns == "X"), (X.columns == "M")
+            assert_allclose(lm["T"].iloc[1:][is_x], ref.at[1, "T"])
+            assert_allclose(lm["T"].iloc[1:][is_m], ref.at[2, "T"])
+            # The coefficient of a duplicated column is split equally between the copies
+            assert_allclose(lm["coef"].iloc[1:][is_x].sum(), ref.at[1, "coef"])
+            assert_allclose(lm["coef"].iloc[1:][is_m].sum(), ref.at[2, "coef"])
+            # The coefficient of an all-zero column is zero, with NaN T-value and p-value
+            is_zero = X.columns == "Zero"
+            assert (lm["coef"].iloc[1:][is_zero] == 0).all()
+            assert lm["T"].iloc[1:][is_zero].isna().all()
+            assert lm["pval"].iloc[1:][is_zero].isna().all()
 
-        # With zero-only column
-        lm1 = linear_regression(df[["X", "M", "Zero", "One"]], df["Y"])
-        lm2 = linear_regression(
-            df[["X", "M", "Zero", "One"]], df["Y"].to_numpy(), add_intercept=False
-        )
-        lm3 = linear_regression(
-            df[["X", "Zero", "M", "Zero"]].to_numpy(), df["Y"], add_intercept=False
-        )
-        assert_equal(lm1.loc[:, "names"].to_numpy(), ["Intercept", "X", "M"])
-        assert_equal(lm2.loc[:, "names"].to_numpy(), ["X", "M", "One"])
-        assert_equal(lm3.loc[:, "names"].to_numpy(), ["x1", "x3"])
-
-        # With duplicate columns
-        lm1 = linear_regression(df[["X", "One", "Zero", "M", "M", "X"]], df["Y"])
-        lm2 = linear_regression(
-            df[["X", "One", "Zero", "M", "M", "X"]].to_numpy(), df["Y"], add_intercept=False
-        )
-        assert_equal(lm1.loc[:, "names"].to_numpy(), ["Intercept", "X", "M"])
-        assert_equal(lm2.loc[:, "names"].to_numpy(), ["x1", "x2", "x4"])
+        # Duplicate and scaled copies of a column are handled consistently
+        # https://github.com/raphaelvallat/pingouin/issues/522
+        x1 = df["X"].to_numpy()
+        ref = linear_regression(x1, df["Y"])
+        for X in [np.column_stack([x1, x1]), np.column_stack([x1, 2 * x1])]:
+            with pytest.warns(UserWarning, match="rank 2 with 3 columns"):
+                lm = linear_regression(X, df["Y"])
+            assert_allclose(lm["T"].iloc[1:], ref.at[1, "T"])
+            assert_allclose(X @ lm["coef"].iloc[1:], x1 * ref.at[1, "coef"])
 
         # with rank deficient design matrix `X`
         # see: https://github.com/raphaelvallat/pingouin/issues/130
@@ -522,3 +543,36 @@ def test_linear_regression_saturated_design():
     for res in (square, wide):
         assert not np.isfinite(res["se"]).any()
         assert res["pval"].isna().all()
+
+
+def test_logistic_regression_se_small_units():
+    # With a predictor in very small units, the Fisher information matrix is numerically singular
+    # and inverting it with pinv gave a SE of ~0 and a p-value of 0.
+    # https://github.com/raphaelvallat/pingouin/issues/522
+    rng = np.random.default_rng(42)
+    n, scale = 300, 1e-8
+    x1, x2 = rng.normal(size=(2, n))
+    y = rng.binomial(1, 1 / (1 + np.exp(-(0.8 * x1 - 0.5 * x2))))
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")  # scikit-learn may not converge at this scale
+        lr = logistic_regression(np.column_stack([x1 * scale, x2]), y)
+    # Reference: Wald SE at the same linear predictor, computed on the well-conditioned unscaled
+    # design and then rescaled.
+    coef = lr["coef"].to_numpy()
+    X = np.column_stack([np.ones(n), x1, x2])
+    prob = 1 / (1 + np.exp(-(X @ (coef * [1, scale, 1]))))
+    se = np.sqrt(np.diag(np.linalg.inv((X * (prob * (1 - prob))[:, None]).T @ X)))
+    np.testing.assert_allclose(lr["se"], se / [1, scale, 1], rtol=1e-6)
+    assert lr["pval"].iloc[1] > 0.5
+
+
+def test_duplicate_columns():
+    rng = np.random.default_rng(0)
+    x = rng.normal(size=(1000, 3))
+    dummies = np.eye(4)[rng.integers(0, 4, 1000)]
+    X = np.column_stack([x, dummies, x[:, 1], dummies[:, 2], x[:, 1] + 1e-12, -x[:, 0]])
+    assert_equal(_duplicate_columns(X), [7, 8])
+    assert_equal(_duplicate_columns(x[:, :1]), [])
+    # Centered columns whose weighted sums cancel out
+    c = np.tile([1.0, -1.0], 500)
+    assert_equal(_duplicate_columns(np.column_stack([c, -c, c, 1e6 * c])), [2])
