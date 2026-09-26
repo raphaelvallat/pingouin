@@ -427,6 +427,11 @@ class TestParametric(TestCase):
         array_equal(aov.loc[:, "F"], [33.85228, 26.95919, 12.63227])
         array_equal(aov.loc[:, "ng2"], [0.25401, 0.35933, 0.08442])
         array_equal(aov.loc[:, "eps"], [1.0, 0.96910, 0.72717])
+        # Time has only two levels: sphericity is always met
+        assert aov["sphericity"].all()
+        assert np.isnan(aov.at[0, "W_spher"])
+        array_equal(aov.loc[:, "p_spher"], [1.0, 0.87844, 0.15239])
+        array_equal(aov.loc[1:, "W_spher"], [0.96812, 0.6248])
 
         # With categorical
         data_cat = data.copy()
@@ -470,6 +475,26 @@ class TestParametric(TestCase):
         array_equal(aov.loc[:, "F"], [53.9024, 3.53315, 3.05294])
         array_equal(aov.loc[:, "eps"], [0.76334, 0.86145, 0.67162])
         array_equal(aov.loc[:, "p_GG_corr"], [0.0, 0.05118, 0.04513])
+        # Mauchly's test of sphericity (compare with R afex::aov_ez)
+        array_equal(aov.loc[:, "W_spher"], [0.68997, 0.83917, 0.32683])
+        array_equal(aov.loc[:, "p_spher"], [0.08962, 0.31991, 0.12972])
+        assert aov["sphericity"].all()
+        # (3, 4) design: compare with R afex::aov_ez. The p-value of the main effect with 4 levels
+        # uses the same chi-square approximation as R (k = n_a * n_b), and therefore very slightly
+        # differs from pingouin.sphericity (0.84364) which only sees the main effect.
+        np.random.seed(123)
+        df34 = pd.DataFrame(
+            {
+                "y": np.random.normal(scale=3, size=600),
+                "A": np.repeat(["P1", "P2", "P3"], 200),
+                "B": np.tile(np.repeat(["A", "B", "C", "D"], 50), 3),
+                "S": np.tile(np.tile(np.arange(50), 4), 3),
+            }
+        )
+        aov = rm_anova(data=df34, subject="S", within=["A", "B"], dv="y").round(5)
+        array_equal(aov.loc[:, "eps"], [0.99633, 0.97163, 0.85621])
+        array_equal(aov.loc[:, "W_spher"], [0.99631, 0.95816, 0.58944])
+        array_equal(aov.loc[:, "p_spher"], [0.91519, 0.84365, 0.21311])
 
         # 2 factors with missing values. Cannot compare with JASP directly
         # because Pingouin applies an automatic removal of missing values
