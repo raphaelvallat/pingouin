@@ -343,6 +343,11 @@ def pairwise_tests(
     assert nan_policy in ["listwise", "pairwise"]
 
     # Check if we have multiple between or within factors
+    for name, factor in [("between", between), ("within", within)]:
+        if isinstance(factor, list) and len(factor) > 2:
+            raise ValueError(
+                f"At most two {name} factors are supported, got {len(factor)}: {factor}."
+            )
     contrast = None
     if isinstance(between, list):
         if len(between) > 1:

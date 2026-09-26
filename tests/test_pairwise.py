@@ -356,6 +356,14 @@ class TestPairwise(TestCase):
                 data=df,
             )
 
+        # More than two between or within factors
+        with pytest.raises(ValueError):
+            pairwise_tests(dv="Scores", between=["Time", "Group", "Subject"], data=df)
+        with pytest.raises(ValueError):
+            pairwise_tests(
+                dv="Scores", within=["Time", "Group", "Subject"], subject="Subject", data=df
+            )
+
         # Wrong input argument
         df["Group"] = "Control"
         with pytest.raises(ValueError):
