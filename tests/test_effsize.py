@@ -239,6 +239,11 @@ class TestEffsize(TestCase):
             cef(d, "coucou", "hibou")
         with pytest.raises(ValueError):
             cef(d, "AUC", "eta_square")
+        # Effect sizes that require the raw data cannot be converted from a Cohen d
+        with pytest.raises(ValueError):
+            cef(d, "cohen", "cohen_dz")
+        with pytest.raises(ValueError):
+            cef(d, "cohen", "cles")
 
     def test_compute_effsize(self):
         """Test function compute_effsize"""
@@ -290,6 +295,19 @@ class TestEffsize(TestCase):
         # y=0 is a common use-case
         d_zero = compute_effsize(x=x, y=0, eftype="cohen")
         assert np.isclose(d_zero, np.mean(x) / np.std(x, ddof=1))
+        # One-sample: eftype is honored, with the one-sample Hedges correction (df = n - 1)
+        g_zero = compute_effsize(x=x, y=0, eftype="hedges")
+        assert np.isclose(g_zero, d_zero * (1 - 3 / (4 * (len(x) - 1) - 1)))
+        assert np.isclose(compute_effsize(x=x, y=0, eftype="AUC"), cef(d_zero, "cohen", "AUC"))
+        # One-sample CLES = P(X > mu) + .5 * P(X = mu)
+        assert compute_effsize([1, 2, 3, 4, 5], 3, eftype="cles") == 0.5
+
+        # CLES matches the brute-force pairwise definition, including ties
+        rng = np.random.default_rng(0)
+        a, b = rng.integers(0, 10, 50), rng.integers(0, 10, 40)
+        diff = a[:, None] - b
+        cles = np.where(diff == 0, 0.5, diff > 0).mean()
+        assert np.isclose(compute_effsize(a, b, eftype="cles"), cles)
 
         # Cohen's dz for paired samples (issue #450)
         # dz = mean(x - y) / std(x - y, ddof=1) = t / sqrt(n)

@@ -146,6 +146,10 @@ class TestPower(TestCase):
         assert np.isclose(
             power_anova(eta_squared=eta, k=4, n=20, power=0.80, alpha=None), 0.2268337
         )
+        # Achieved eta-squared > 0.5 (small samples): round-trip with the achieved power
+        eta_large = power_anova(k=2, n=3, power=0.80)
+        assert eta_large > 0.5
+        assert np.isclose(power_anova(eta_squared=eta_large, k=2, n=3), 0.80)
         # Error
         with pytest.raises(ValueError):
             power_anova(eta_squared=eta, k=2)
@@ -198,6 +202,14 @@ class TestPower(TestCase):
             0.0001797,
             rtol=1e-4,
         )
+
+        # Achieved eta-squared > 0.5 and required n < 5: round-trip with the achieved power
+        eta_large = power_rm_anova(m=2, n=3, power=0.90)
+        assert eta_large > 0.5
+        assert np.isclose(power_rm_anova(eta_squared=eta_large, m=2, n=3), 0.90)
+        n_small = power_rm_anova(eta_squared=0.5, m=3, power=0.80)
+        assert 2 < n_small < 5
+        assert np.isclose(power_rm_anova(eta_squared=0.5, m=3, n=n_small), 0.80)
 
         # Error
         with pytest.raises(ValueError):
