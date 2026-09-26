@@ -531,6 +531,46 @@ def _check_multilevel_rm(data, func="epsilon"):
         raise ValueError("Only one-way or two-way designs are supported.")
 
 
+def _mauchly(S, df_resid):
+    """Mauchly's test of sphericity from a (k, k) covariance matrix.
+
+    ``df_resid`` is the residual degrees of freedom of the covariance matrix,
+    i.e. n - 1 in a one-way repeated measures design and n - n_groups when ``S``
+    is the pooled within-group covariance of a mixed design.
+    Returns W, chi-square, dof and p-value.
+    """
+    k = S.shape[0]
+    d = k - 1
+    # Compute dof of the test
+    ddof = (d * (d + 1)) / 2 - 1
+    ddof = 1 if ddof == 0 else ddof
+    # 1 - Estimate the population covariance (= double-centered)
+    # 2 - Calculate n-1 eigenvalues
+    # 3 - Compute Mauchly's statistic
+    S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
+    eig = np.linalg.eigvalsh(S_pop)[1:]
+    # Use a relative tolerance tied to machine precision
+    tol = np.finfo(float).eps * eig.max() * d
+    eig = eig[eig > tol]
+    W = np.prod(eig) / (eig.sum() / d) ** d
+    logW = np.log(W)
+
+    # Compute chi-square and p-value (adapted from the ezANOVA R package)
+    f = 1 - (2 * d**2 + d + 2) / (6 * d * df_resid)
+    w2 = (
+        (d + 2)
+        * (d - 1)
+        * (d - 2)
+        * (2 * d**3 + 6 * d**2 + 3 * k + 2)
+        / (288 * (df_resid * d * f) ** 2)
+    )
+    chi_sq = -df_resid * f * logW
+    p1 = scipy.stats.chi2.sf(chi_sq, ddof)
+    p2 = scipy.stats.chi2.sf(chi_sq, ddof + 4)
+    pval = p1 + w2 * (p2 - p1)
+    return W, chi_sq, ddof, pval
+
+
 def _long_to_wide_rm(data, dv=None, within=None, subject=None):
     """Convert long-format dataframe to wide-format.
     This internal function is used in pingouin.epsilon and pingouin.sphericity.
@@ -998,31 +1038,8 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
         # W = np.exp(logW)
 
         # Method 2. Eigenvalue-based method. Faster.
-        # 1 - Estimate the population covariance (= double-centered)
-        # 2 - Calculate n-1 eigenvalues
-        # 3 - Compute Mauchly's statistic
         S = data.cov(numeric_only=True).to_numpy()  # NumPy, otherwise S.mean() != grandmean
-        S_pop = S - S.mean(0)[:, None] - S.mean(1)[None, :] + S.mean()
-        eig = np.linalg.eigvalsh(S_pop)[1:]
-        # Use a relative tolerance tied to machine precision
-        tol = np.finfo(float).eps * eig.max() * d
-        eig = eig[eig > tol]
-        W = np.prod(eig) / (eig.sum() / d) ** d
-        logW = np.log(W)
-
-        # Compute chi-square and p-value (adapted from the ezANOVA R package)
-        f = 1 - (2 * d**2 + d + 2) / (6 * d * (n - 1))
-        w2 = (
-            (d + 2)
-            * (d - 1)
-            * (d - 2)
-            * (2 * d**3 + 6 * d**2 + 3 * k + 2)
-            / (288 * ((n - 1) * d * f) ** 2)
-        )
-        chi_sq = -(n - 1) * f * logW
-        p1 = scipy.stats.chi2.sf(chi_sq, ddof)
-        p2 = scipy.stats.chi2.sf(chi_sq, ddof + 4)
-        pval = p1 + w2 * (p2 - p1)
+        W, chi_sq, ddof, pval = _mauchly(S, n - 1)
     else:
         # Method = JNS
         eps = epsilon(data, correction="gg")

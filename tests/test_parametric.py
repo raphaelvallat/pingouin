@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 import numpy as np
+import pandas as pd
 import pytest
 from numpy.testing import assert_array_equal as array_equal
 
@@ -486,9 +487,11 @@ class TestParametric(TestCase):
         array_equal(aov.loc[:, "DF2"], [58, 116, 116])
         array_equal(aov.loc[:, "F"], [5.05171, 4.02739, 2.72800])
         array_equal(aov.loc[:, "np2"], [0.08012, 0.06493, 0.04492])
-        assert round(aov.at[1, "eps"], 3) == 0.999  # Pingouin = 0.99875, JAMOVI = 0.99812
-        assert round(aov.at[1, "W_spher"], 3) == 0.999  # Pingouin = 0.99875, JAMOVI = 0.99812
-        assert round(aov.at[1, "p_GG_corr"], 2) == 0.02
+        # Compare with R afex::aov_ez (= JAMOVI)
+        array_equal(aov.loc[1:, "eps"], [0.99812, 0.99812])
+        array_equal(aov.loc[1:, "W_spher"], [0.99812, 0.99812])
+        array_equal(aov.loc[1:, "p_spher"], [0.94769, 0.94769])
+        array_equal(aov.loc[1:, "p_GG_corr"], [0.02044, 0.06966])
         # With categorical: should be the same
         aov = mixed_anova(
             dv="Scores",
@@ -503,9 +506,11 @@ class TestParametric(TestCase):
         array_equal(aov.loc[:, "DF2"], [58, 116, 116])
         array_equal(aov.loc[:, "F"], [5.05171, 4.02739, 2.72800])
         array_equal(aov.loc[:, "np2"], [0.08012, 0.06493, 0.04492])
-        assert round(aov.at[1, "eps"], 3) == 0.999  # Pingouin = 0.99875, JAMOVI = 0.99812
-        assert round(aov.at[1, "W_spher"], 3) == 0.999  # Pingouin = 0.99875, JAMOVI = 0.99812
-        assert round(aov.at[1, "p_GG_corr"], 2) == 0.02
+        # Compare with R afex::aov_ez (= JAMOVI)
+        array_equal(aov.loc[1:, "eps"], [0.99812, 0.99812])
+        array_equal(aov.loc[1:, "W_spher"], [0.99812, 0.99812])
+        array_equal(aov.loc[1:, "p_spher"], [0.94769, 0.94769])
+        array_equal(aov.loc[1:, "p_GG_corr"], [0.02044, 0.06966])
 
         # Same with different effect sizes (compare with JAMOVI)
         aov = mixed_anova(
@@ -530,8 +535,10 @@ class TestParametric(TestCase):
         ).round(3)
         array_equal(aov.loc[:, "F"], [5.692, 3.054, 3.502])
         array_equal(aov.loc[:, "np2"], [0.094, 0.053, 0.060])
-        assert aov.at[1, "eps"] == 0.997
+        # Compare with R afex::aov_ez
+        assert aov.at[1, "eps"] == 0.996
         assert aov.at[1, "W_spher"] == 0.996
+        array_equal(aov.loc[1:, "p_GG_corr"], [0.051, 0.034])
 
         # Unbalanced group
         df_unbalanced = df[df["Subject"] <= 54]
@@ -545,8 +552,10 @@ class TestParametric(TestCase):
         ).round(3)
         array_equal(aov.loc[:, "F"], [3.561, 2.421, 1.828])
         array_equal(aov.loc[:, "np2"], [0.063, 0.044, 0.033])
-        assert aov.at[1, "eps"] == 1.0  # JASP = 0.998
-        assert aov.at[1, "W_spher"] == 1.0  # JASP = 0.998
+        # Compare with R afex::aov_ez and JASP
+        assert aov.at[1, "eps"] == 0.998
+        assert aov.at[1, "W_spher"] == 0.998
+        array_equal(aov.loc[1:, "p_GG_corr"], [0.094, 0.166])
 
         # With three groups and four time points, unbalanced (JASP -- type II)
         df_unbalanced = read_dataset("mixed_anova_unbalanced.csv")
@@ -563,11 +572,11 @@ class TestParametric(TestCase):
         array_equal(aov.loc[:, "F"], [2.3026, 1.7071, 0.8877])
         array_equal(aov.loc[:, "p_unc"], [0.1226, 0.1736, 0.5088])
         array_equal(aov.loc[:, "np2"], [0.1668, 0.0691, 0.0717])
-        # Check correction: values are very slightly different than ezANOVA
-        assert np.isclose(aov.at[1, "eps"], 0.9254, atol=0.01)
-        assert np.isclose(aov.at[1, "p_GG_corr"], 0.1779, atol=0.01)
-        assert np.isclose(aov.at[1, "W_spher"], 0.8850, atol=0.01)
-        assert np.isclose(aov.at[1, "p_spher"], 0.7535, atol=0.1)
+        # Check correction: compare with R afex::aov_ez / ezANOVA
+        array_equal(aov.loc[1:, "eps"], [0.9254, 0.9254])
+        array_equal(aov.loc[1:, "p_GG_corr"], [0.1779, 0.5031])
+        array_equal(aov.loc[1:, "W_spher"], [0.8850, 0.8850])
+        array_equal(aov.loc[1:, "p_spher"], [0.7535, 0.7535])
 
         # Same but with different effect sizes
         aov = mixed_anova(
@@ -588,6 +597,66 @@ class TestParametric(TestCase):
             effsize="ng2",
         ).round(4)
         array_equal(aov.loc[:, "ng2"], [0.0371, 0.0566, 0.0587])
+
+        # Non-spherical data with a strong group x time interaction.
+        # Epsilon and Mauchly must be computed from the pooled within-group covariance,
+        # and the GG-corrected p-values from the mixed-design F-values.
+        # See https://github.com/raphaelvallat/pingouin/issues/524
+        rng = np.random.default_rng(0)
+        rows = []
+        for g, shift in [("A", np.array([0.0, 1.0, 2.0])), ("B", np.array([2.0, 1.0, 0.0]))]:
+            for i in range(10):
+                base = rng.normal(0, 1)
+                e = rng.normal(0, [0.3, 1.0, 2.0])
+                for t in range(3):
+                    rows.append((f"{g}{i}", g, f"T{t}", base + shift[t] + e[t] + 0.5 * t))
+        df_spher = pd.DataFrame(rows, columns=["Subject", "Group", "Time", "Scores"])
+        aov = mixed_anova(
+            data=df_spher,
+            dv="Scores",
+            subject="Subject",
+            within="Time",
+            between="Group",
+            correction=True,
+        ).round(5)
+        # Compare with R afex::aov_ez
+        array_equal(aov.loc[:, "F"].round(4), [4.3177, 7.8161, 11.7164])
+        array_equal(aov.loc[1:, "eps"], [0.73320, 0.73320])
+        array_equal(aov.loc[1:, "W_spher"], [0.63611, 0.63611])
+        array_equal(aov.loc[1:, "p_spher"], [0.02138, 0.02138])
+        array_equal(aov.loc[1:, "p_GG_corr"], [0.00454, 0.00067])
+        assert not aov.at[1, "sphericity"]
+        # correction="auto" applies the correction since sphericity is violated
+        aov_auto = mixed_anova(
+            data=df_spher, dv="Scores", subject="Subject", within="Time", between="Group"
+        ).round(5)
+        array_equal(aov_auto.loc[1:, "p_GG_corr"], [0.00454, 0.00067])
+
+        # No correction
+        aov = mixed_anova(
+            data=df_spher,
+            dv="Scores",
+            subject="Subject",
+            within="Time",
+            between="Group",
+            correction=False,
+        )
+        assert "p_GG_corr" not in aov.columns
+        assert "W_spher" not in aov.columns
+
+        # Only two repeated measures: sphericity is always met, no correction
+        df_two = df[df["Time"] != "January"]
+        for correction in [True, "auto"]:
+            aov = mixed_anova(
+                data=df_two,
+                dv="Scores",
+                subject="Subject",
+                within="Time",
+                between="Group",
+                correction=correction,
+            )
+            assert "p_GG_corr" not in aov.columns
+            array_equal(aov.loc[1:, "eps"], [1.0, 1.0])
 
         # With overlapping subject IDs in the between-subject groups
         df_overlap = df.copy()
