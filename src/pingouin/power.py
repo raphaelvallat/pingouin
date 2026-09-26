@@ -15,6 +15,30 @@ __all__ = [
     "power_chi2",
 ]
 
+# Bracketing interval of the Cohen d when solving for the effect size of a T-test
+_D_BOUNDS = {"two-sided": (1e-07, 10), "less": (-10, 5), "greater": (-5, 10)}
+
+
+def _solve(func, lower, upper):
+    """Find the root of ``func`` in [lower, upper] with Brent's method, or NaN if it fails."""
+    try:
+        return brenth(func, lower, upper)
+    except ValueError:  # pragma: no cover
+        return np.nan
+
+
+def _power_nct(nc, dof, alpha, alternative):
+    """Power of a T-test, given the non-centrality parameter and degrees of freedom."""
+    if alternative == "less":
+        tcrit = stats.t.ppf(alpha, dof)
+        return 1 - stats.nct.sf(tcrit, dof, nc)
+    elif alternative == "two-sided":
+        tcrit = stats.t.ppf(1 - alpha / 2, dof)
+        return stats.nct.sf(tcrit, dof, nc) + (1 - stats.nct.sf(-tcrit, dof, nc))
+    else:  # alternative = "greater"
+        tcrit = stats.t.ppf(1 - alpha, dof)
+        return stats.nct.sf(tcrit, dof, nc)
+
 
 def power_ttest(
     d=None, n=None, power=None, alpha=0.05, contrast="two-samples", alternative="two-sided"
@@ -136,81 +160,29 @@ def power_ttest(
     ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
     assert contrast.lower() in ["one-sample", "paired", "two-samples"]
     tsample = 2 if contrast.lower() == "two-samples" else 1
-    tside = 2 if alternative == "two-sided" else 1
-    if d is not None and tside == 2:
+    if d is not None and alternative == "two-sided":
         d = abs(d)
     if alpha is not None:
         assert 0 < alpha <= 1
     if power is not None:
         assert 0 < power <= 1
 
-    if alternative == "less":
-
-        def func(d, n, power, alpha):
-            dof = (n - 1) * tsample
-            nc = d * np.sqrt(n / tsample)
-            tcrit = stats.t.ppf(alpha / tside, dof)
-            return 1 - stats.nct.sf(tcrit, dof, nc)
-
-    elif alternative == "two-sided":
-
-        def func(d, n, power, alpha):
-            dof = (n - 1) * tsample
-            nc = d * np.sqrt(n / tsample)
-            tcrit = stats.t.ppf(1 - alpha / tside, dof)
-            return stats.nct.sf(tcrit, dof, nc) + (1 - stats.nct.sf(-tcrit, dof, nc))
-
-    else:  # Alternative = 'greater'
-
-        def func(d, n, power, alpha):
-            dof = (n - 1) * tsample
-            nc = d * np.sqrt(n / tsample)
-            tcrit = stats.t.ppf(1 - alpha / tside, dof)
-            return stats.nct.sf(tcrit, dof, nc)
+    def func(d, n, alpha):
+        return _power_nct(d * np.sqrt(n / tsample), (n - 1) * tsample, alpha, alternative)
 
     # Evaluate missing variable
     if power is None:
         # Compute achieved power given d, n and alpha
-        return func(d, n, power=None, alpha=alpha)
-
+        return func(d, n, alpha)
     elif n is None:
         # Compute required sample size given d, power and alpha
-
-        def _eval_n(n, d, power, alpha):
-            return func(d, n, power, alpha) - power
-
-        try:
-            return brenth(_eval_n, 2 + 1e-10, 1e07, args=(d, power, alpha))
-        except ValueError:  # pragma: no cover
-            return np.nan
-
+        return _solve(lambda n: func(d, n, alpha) - power, 2 + 1e-10, 1e07)
     elif d is None:
         # Compute achieved d given sample size, power and alpha level
-        if alternative == "two-sided":
-            b0, b1 = 1e-07, 10
-        elif alternative == "less":
-            b0, b1 = -10, 5
-        else:
-            b0, b1 = -5, 10
-
-        def _eval_d(d, n, power, alpha):
-            return func(d, n, power, alpha) - power
-
-        try:
-            return brenth(_eval_d, b0, b1, args=(n, power, alpha))
-        except ValueError:  # pragma: no cover
-            return np.nan
-
+        return _solve(lambda d: func(d, n, alpha) - power, *_D_BOUNDS[alternative])
     else:
         # Compute achieved alpha (significance) level given d, n and power
-
-        def _eval_alpha(alpha, d, n, power):
-            return func(d, n, power, alpha) - power
-
-        try:
-            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(d, n, power))
-        except ValueError:  # pragma: no cover
-            return np.nan
+        return _solve(lambda alpha: func(d, n, alpha) - power, 1e-10, 1 - 1e-10)
 
 
 def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative="two-sided"):
@@ -303,70 +275,26 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative="two-sided
         "greater",
         "less",
     ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
-    tside = 2 if alternative == "two-sided" else 1
-    if d is not None and tside == 2:
+    if d is not None and alternative == "two-sided":
         d = abs(d)
     if alpha is not None:
         assert 0 < alpha <= 1
     if power is not None:
         assert 0 < power <= 1
 
-    if alternative == "less":
-
-        def func(d, nx, ny, power, alpha):
-            dof = nx + ny - 2
-            nc = d * (1 / np.sqrt(1 / nx + 1 / ny))
-            tcrit = stats.t.ppf(alpha / tside, dof)
-            return 1 - stats.nct.sf(tcrit, dof, nc)
-
-    elif alternative == "two-sided":
-
-        def func(d, nx, ny, power, alpha):
-            dof = nx + ny - 2
-            nc = d * (1 / np.sqrt(1 / nx + 1 / ny))
-            tcrit = stats.t.ppf(1 - alpha / tside, dof)
-            return stats.nct.sf(tcrit, dof, nc) + (1 - stats.nct.sf(-tcrit, dof, nc))
-
-    else:  # Alternative = 'greater'
-
-        def func(d, nx, ny, power, alpha):
-            dof = nx + ny - 2
-            nc = d * (1 / np.sqrt(1 / nx + 1 / ny))
-            tcrit = stats.t.ppf(1 - alpha / tside, dof)
-            return stats.nct.sf(tcrit, dof, nc)
+    def func(d, alpha):
+        return _power_nct(d * (1 / np.sqrt(1 / nx + 1 / ny)), nx + ny - 2, alpha, alternative)
 
     # Evaluate missing variable
     if power is None:
         # Compute achieved power given d, n and alpha
-        return func(d, nx, ny, power=None, alpha=alpha)
-
+        return func(d, alpha)
     elif d is None:
         # Compute achieved d given sample size, power and alpha level
-        if alternative == "two-sided":
-            b0, b1 = 1e-07, 10
-        elif alternative == "less":
-            b0, b1 = -10, 5
-        else:
-            b0, b1 = -5, 10
-
-        def _eval_d(d, nx, ny, power, alpha):
-            return func(d, nx, ny, power, alpha) - power
-
-        try:
-            return brenth(_eval_d, b0, b1, args=(nx, ny, power, alpha))
-        except ValueError:  # pragma: no cover
-            return np.nan
-
+        return _solve(lambda d: func(d, alpha) - power, *_D_BOUNDS[alternative])
     else:
         # Compute achieved alpha (significance) level given d, n and power
-
-        def _eval_alpha(alpha, d, nx, ny, power):
-            return func(d, nx, ny, power, alpha) - power
-
-        try:
-            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(d, nx, ny, power))
-        except ValueError:  # pragma: no cover
-            return np.nan
+        return _solve(lambda alpha: func(d, alpha) - power, 1e-10, 1 - 1e-10)
 
 
 def power_anova(eta_squared=None, k=None, n=None, power=None, alpha=0.05):
@@ -483,7 +411,7 @@ def power_anova(eta_squared=None, k=None, n=None, power=None, alpha=0.05):
     if power is not None:
         assert 0 < power <= 1
 
-    def func(f_sq, k, n, power, alpha):
+    def func(f_sq, k, n, alpha):
         nc = (n * k) * f_sq
         dof1 = k - 1
         dof2 = (n * k) - k
@@ -493,52 +421,20 @@ def power_anova(eta_squared=None, k=None, n=None, power=None, alpha=0.05):
     # Evaluate missing variable
     if power is None:
         # Compute achieved power
-        return func(f_sq, k, n, power, alpha)
-
+        return func(f_sq, k, n, alpha)
     elif k is None:
         # Compute required number of groups
-
-        def _eval_k(k, f_sq, n, power, alpha):
-            return func(f_sq, k, n, power, alpha) - power
-
-        try:
-            return brenth(_eval_k, 2, 100, args=(f_sq, n, power, alpha))
-        except ValueError:  # pragma: no cover
-            return np.nan
-
+        return _solve(lambda k: func(f_sq, k, n, alpha) - power, 2, 100)
     elif n is None:
         # Compute required sample size
-
-        def _eval_n(n, f_sq, k, power, alpha):
-            return func(f_sq, k, n, power, alpha) - power
-
-        try:
-            return brenth(_eval_n, 2, 1e07, args=(f_sq, k, power, alpha))
-        except ValueError:  # pragma: no cover
-            return np.nan
-
+        return _solve(lambda n: func(f_sq, k, n, alpha) - power, 2, 1e07)
     elif eta_squared is None:
-        # Compute achieved eta-squared
-
-        def _eval_eta(f_sq, k, n, power, alpha):
-            return func(f_sq, k, n, power, alpha) - power
-
-        try:
-            f_sq = brenth(_eval_eta, 1e-10, 1 - 1e-10, args=(k, n, power, alpha))
-            return f_sq / (f_sq + 1)  # Return eta-square
-        except ValueError:  # pragma: no cover
-            return np.nan
-
+        # Compute achieved eta-squared. Solve directly on eta-squared in (0, 1): solving on
+        # f_sq in (0, 1) would restrict eta-squared to be lower than 0.5.
+        return _solve(lambda eta: func(eta / (1 - eta), k, n, alpha) - power, 1e-10, 1 - 1e-10)
     else:
         # Compute achieved alpha
-
-        def _eval_alpha(alpha, f_sq, k, n, power):
-            return func(f_sq, k, n, power, alpha) - power
-
-        try:
-            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(f_sq, k, n, power))
-        except ValueError:  # pragma: no cover
-            return np.nan
+        return _solve(lambda alpha: func(f_sq, k, n, alpha) - power, 1e-10, 1 - 1e-10)
 
 
 def power_rm_anova(eta_squared=None, m=None, n=None, power=None, alpha=0.05, corr=0.5, epsilon=1):
@@ -711,7 +607,7 @@ def power_rm_anova(eta_squared=None, m=None, n=None, power=None, alpha=0.05, cor
     if m is not None:
         assert m > 1, "The number of repeated measures m must be > 1."
 
-    def func(f_sq, m, n, power, alpha, corr):
+    def func(f_sq, m, n, alpha):
         dof1 = (m - 1) * epsilon
         dof2 = (n - 1) * dof1
         nc = (f_sq * n * m * epsilon) / (1 - corr)
@@ -721,52 +617,20 @@ def power_rm_anova(eta_squared=None, m=None, n=None, power=None, alpha=0.05, cor
     # Evaluate missing variable
     if power is None:
         # Compute achieved power
-        return func(f_sq, m, n, power, alpha, corr)
-
+        return func(f_sq, m, n, alpha)
     elif m is None:
         # Compute required number of repeated measures
-
-        def _eval_m(m, f_sq, n, power, alpha, corr):
-            return func(f_sq, m, n, power, alpha, corr) - power
-
-        try:
-            return brenth(_eval_m, 2, 100, args=(f_sq, n, power, alpha, corr))
-        except ValueError:  # pragma: no cover
-            return np.nan
-
+        return _solve(lambda m: func(f_sq, m, n, alpha) - power, 2, 100)
     elif n is None:
         # Compute required sample size
-
-        def _eval_n(n, f_sq, m, power, alpha, corr):
-            return func(f_sq, m, n, power, alpha, corr) - power
-
-        try:
-            return brenth(_eval_n, 5, 1e6, args=(f_sq, m, power, alpha, corr))
-        except ValueError:  # pragma: no cover
-            return np.nan
-
+        return _solve(lambda n: func(f_sq, m, n, alpha) - power, 2, 1e6)
     elif eta_squared is None:
-        # Compute achieved eta
-
-        def _eval_eta(f_sq, m, n, power, alpha, corr):
-            return func(f_sq, m, n, power, alpha, corr) - power
-
-        try:
-            f_sq = brenth(_eval_eta, 1e-10, 1 - 1e-10, args=(m, n, power, alpha, corr))
-            return f_sq / (f_sq + 1)  # Return eta-square
-        except ValueError:  # pragma: no cover
-            return np.nan
-
+        # Compute achieved eta-squared. Solve directly on eta-squared in (0, 1): solving on
+        # f_sq in (0, 1) would restrict eta-squared to be lower than 0.5.
+        return _solve(lambda eta: func(eta / (1 - eta), m, n, alpha) - power, 1e-10, 1 - 1e-10)
     else:
         # Compute achieved alpha
-
-        def _eval_alpha(alpha, f_sq, m, n, power, corr):
-            return func(f_sq, m, n, power, alpha, corr) - power
-
-        try:
-            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(f_sq, m, n, power, corr))
-        except ValueError:  # pragma: no cover
-            return np.nan
+        return _solve(lambda alpha: func(f_sq, m, n, alpha) - power, 1e-10, 1 - 1e-10)
 
 
 def power_corr(r=None, n=None, power=None, alpha=0.05, alternative="two-sided"):
@@ -862,83 +726,36 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative="two-sided"):
             warnings.warn("Sample size is too small to estimate power (n <= 4). Returning NaN.")
             return np.nan
 
-    # Define main function
-    if alternative == "two-sided":
+    # Define main function. A "less" test is a "greater" test on the negated correlation.
+    tside = 2 if alternative == "two-sided" else 1
 
-        def func(r, n, power, alpha):
-            dof = n - 2
-            ttt = stats.t.ppf(1 - alpha / 2, dof)
-            rc = np.sqrt(ttt**2 / (ttt**2 + dof))
-            zr = np.arctanh(r) + r / (2 * (n - 1))
-            zrc = np.arctanh(rc)
-            power = stats.norm.cdf((zr - zrc) * np.sqrt(n - 3)) + stats.norm.cdf(
-                (-zr - zrc) * np.sqrt(n - 3)
-            )
-            return power
-
-    elif alternative == "greater":
-
-        def func(r, n, power, alpha):
-            dof = n - 2
-            ttt = stats.t.ppf(1 - alpha, dof)
-            rc = np.sqrt(ttt**2 / (ttt**2 + dof))
-            zr = np.arctanh(r) + r / (2 * (n - 1))
-            zrc = np.arctanh(rc)
-            power = stats.norm.cdf((zr - zrc) * np.sqrt(n - 3))
-            return power
-
-    else:  # alternative == "less":
-
-        def func(r, n, power, alpha):
+    def func(r, n, alpha):
+        if alternative == "less":
             r = -r
-            dof = n - 2
-            ttt = stats.t.ppf(1 - alpha, dof)
-            rc = np.sqrt(ttt**2 / (ttt**2 + dof))
-            zr = np.arctanh(r) + r / (2 * (n - 1))
-            zrc = np.arctanh(rc)
-            power = stats.norm.cdf((zr - zrc) * np.sqrt(n - 3))
-            return power
+        dof = n - 2
+        ttt = stats.t.ppf(1 - alpha / tside, dof)
+        rc = np.sqrt(ttt**2 / (ttt**2 + dof))
+        zr = np.arctanh(r) + r / (2 * (n - 1))
+        zrc = np.arctanh(rc)
+        pwr = stats.norm.cdf((zr - zrc) * np.sqrt(n - 3))
+        if alternative == "two-sided":
+            pwr = pwr + stats.norm.cdf((-zr - zrc) * np.sqrt(n - 3))
+        return pwr
 
     # Evaluate missing variable
-    if power is None and n is not None and r is not None:
+    if power is None:
         # Compute achieved power given r, n and alpha
-        return func(r, n, power=None, alpha=alpha)
-
-    elif n is None and power is not None and r is not None:
+        return func(r, n, alpha)
+    elif n is None:
         # Compute required sample size given r, power and alpha
-
-        def _eval_n(n, r, power, alpha):
-            return func(r, n, power, alpha) - power
-
-        try:
-            return brenth(_eval_n, 4 + 1e-10, 1e09, args=(r, power, alpha))
-        except ValueError:  # pragma: no cover
-            return np.nan
-
-    elif r is None and power is not None and n is not None:
+        return _solve(lambda n: func(r, n, alpha) - power, 4 + 1e-10, 1e09)
+    elif r is None:
         # Compute achieved r given sample size, power and alpha level
-
-        def _eval_r(r, n, power, alpha):
-            return func(r, n, power, alpha) - power
-
-        try:
-            if alternative == "two-sided":
-                return brenth(_eval_r, 1e-10, 1 - 1e-10, args=(n, power, alpha))
-            else:
-                return brenth(_eval_r, -1 + 1e-10, 1 - 1e-10, args=(n, power, alpha))
-        except ValueError:  # pragma: no cover
-            return np.nan
-
+        lower = 1e-10 if alternative == "two-sided" else -1 + 1e-10
+        return _solve(lambda r: func(r, n, alpha) - power, lower, 1 - 1e-10)
     else:
         # Compute achieved alpha (significance) level given r, n and power
-
-        def _eval_alpha(alpha, r, n, power):
-            return func(r, n, power, alpha) - power
-
-        try:
-            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(r, n, power))
-        except ValueError:  # pragma: no cover
-            return np.nan
+        return _solve(lambda alpha: func(r, n, alpha) - power, 1e-10, 1 - 1e-10)
 
 
 def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
@@ -1035,7 +852,7 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
     if power is not None:
         assert 0 < power <= 1
 
-    def func(w, n, power, alpha):
+    def func(w, n, alpha):
         k = stats.chi2.ppf(1 - alpha, dof)
         nc = n * w**2
         return stats.ncx2.sf(k, dof, nc)
@@ -1043,37 +860,13 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
     # Evaluate missing variable
     if power is None:
         # Compute achieved power
-        return func(w, n, power, alpha)
-
+        return func(w, n, alpha)
     elif n is None:
         # Compute required sample size
-
-        def _eval_n(n, w, power, alpha):
-            return func(w, n, power, alpha) - power
-
-        try:
-            return brenth(_eval_n, 1, 1e07, args=(w, power, alpha))
-        except ValueError:  # pragma: no cover
-            return np.nan
-
+        return _solve(lambda n: func(w, n, alpha) - power, 1, 1e07)
     elif w is None:
         # Compute achieved effect size
-
-        def _eval_w(w, n, power, alpha):
-            return func(w, n, power, alpha) - power
-
-        try:
-            return brenth(_eval_w, 1e-10, 100, args=(n, power, alpha))
-        except ValueError:  # pragma: no cover
-            return np.nan
-
+        return _solve(lambda w: func(w, n, alpha) - power, 1e-10, 100)
     else:
         # Compute achieved alpha
-
-        def _eval_alpha(alpha, w, n, power):
-            return func(w, n, power, alpha) - power
-
-        try:
-            return brenth(_eval_alpha, 1e-10, 1 - 1e-10, args=(w, n, power))
-        except ValueError:  # pragma: no cover
-            return np.nan
+        return _solve(lambda alpha: func(w, n, alpha) - power, 1e-10, 1 - 1e-10)
