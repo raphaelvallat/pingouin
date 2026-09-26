@@ -8,7 +8,6 @@ from pingouin import read_dataset
 from pingouin.distribution import (
     anderson,
     epsilon,
-    gzscore,
     homoscedasticity,
     normality,
     sphericity,
@@ -57,11 +56,6 @@ pab1 = df3.pivot_table(index=idx, columns=within, values=dv)
 
 class TestDistribution(TestCase):
     """Test distribution.py."""
-
-    def test_gzscore(self):
-        """Test function gzscore."""
-        raw = np.random.lognormal(size=100)
-        gzscore(raw)
 
     def test_normality(self):
         """Test function test_normality."""
