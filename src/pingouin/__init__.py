@@ -20,7 +20,7 @@ from .contingency import *
 from .config import *
 
 # Current version
-__version__ = "0.6.1"
+__version__ = "0.7.0"
 
 # load default options
 set_default_options()

@@ -3,6 +3,82 @@
 What's new
 ##########
 
+v0.7.0 (September 2026)
+-----------------------
+
+This is a major release with many bugfixes, several of which silently returned incorrect results. We strongly recommend all users upgrade. It also brings new features, large speed improvements, and new minimum versions for Python and all dependencies.
+
+**Bugfixes — incorrect results**
+
+- :py:func:`pingouin.mixed_anova`: the Greenhouse-Geisser corrected p-value of the within factor did not match the F-value and degrees of freedom on the same row, and epsilon and Mauchly's test were computed from the total covariance matrix instead of the pooled within-group covariance. All values now match R, SPSS and JASP, and the interaction also gets a corrected p-value. Reported ``eps``, ``W_spher``, ``p_spher`` and ``p_GG_corr`` change whenever group means differ across levels of the within factor. (`PR525 <https://github.com/raphaelvallat/pingouin/pull/525>`_)
+- :py:func:`pingouin.epsilon`, :py:func:`pingouin.sphericity` and :py:func:`pingouin.rm_anova`: fixed the epsilon of the interaction in two-way repeated measures designs where both factors have more than 2 levels. Mauchly's test for the interaction is now supported and is reported for all effects in two-way :py:func:`pingouin.rm_anova`. (`PR527 <https://github.com/raphaelvallat/pingouin/pull/527>`_, `PR528 <https://github.com/raphaelvallat/pingouin/pull/528>`_)
+- :py:func:`pingouin.sphericity`: the John, Nagao and Sugiura (``method="jns"``) test statistic was inverted, so sphericity was rejected in 100% of simulations under the null hypothesis (now ~5%). (`PR531 <https://github.com/raphaelvallat/pingouin/pull/531>`_)
+- :py:func:`pingouin.linear_regression`: standard errors and p-values depended on the scale of the predictors. For example, multiplying a predictor by 1e-8 changed its p-value from 0.35 to 0. The same issue was fixed in :py:func:`pingouin.logistic_regression`, as well as in the LMG relative importance (``relimp=True``), which no longer summed to the model's R² for small-scale predictors. (`PR520 <https://github.com/raphaelvallat/pingouin/pull/520>`_, `PR523 <https://github.com/raphaelvallat/pingouin/pull/523>`_, `PR540 <https://github.com/raphaelvallat/pingouin/pull/540>`_)
+- :py:func:`pingouin.rcorr`: with ``padjust``, the diagonal and lower triangle of the matrix were included as fictitious zero p-values in the multiple comparison correction, making FDR correction severely liberal. (`PR521 <https://github.com/raphaelvallat/pingouin/pull/521>`_)
+- :py:func:`pingouin.ptests`: the ``padjust`` argument was ignored, and the Bonferroni correction was always applied. (`PR536 <https://github.com/raphaelvallat/pingouin/pull/536>`_)
+- :py:func:`pingouin.anova` and :py:func:`pingouin.ancova`: unused levels of a categorical factor silently corrupted the SS, DF and F-values. :py:func:`pingouin.anova` now also raises a ``ValueError`` when a combination of the between-subject factors has no observation, which previously returned a negative SS and F for the interaction. (`PR529 <https://github.com/raphaelvallat/pingouin/pull/529>`_, `PR531 <https://github.com/raphaelvallat/pingouin/pull/531>`_)
+- :py:func:`pingouin.corr` and :py:func:`pingouin.pairwise_corr`: one-sided p-values of the Kendall correlation used the Pearson t-approximation instead of the exact test. (`PR534 <https://github.com/raphaelvallat/pingouin/pull/534>`_)
+- :py:func:`pingouin.compute_effsize`: one-sample effect sizes (scalar ``y``) ignored ``eftype`` and always returned Cohen's d. (`PR534 <https://github.com/raphaelvallat/pingouin/pull/534>`_)
+- :py:func:`pingouin.power_anova` and :py:func:`pingouin.power_rm_anova`: solving for the effect size returned NaN whenever eta-squared was above 0.5. (`PR534 <https://github.com/raphaelvallat/pingouin/pull/534>`_)
+- :py:func:`pingouin.pairwise_tests`: when a global rounding option was set, all pairs but the first were rounded before the multiple comparison correction, giving wrong ``p_corr``. More generally, rounding options no longer leak into internal computations in any function. (`PR536 <https://github.com/raphaelvallat/pingouin/pull/536>`_)
+- :py:func:`pingouin.mediation_analysis`: a binary mediator was fitted with a linear model whenever another mediator was continuous. (`PR531 <https://github.com/raphaelvallat/pingouin/pull/531>`_)
+- :py:func:`pingouin.chi2_independence`: rows with missing values were counted in the sample size (wrong Cramer's V and power), and Yates' correction over-corrected cells close to the expected count. (`PR537 <https://github.com/raphaelvallat/pingouin/pull/537>`_)
+- :py:func:`pingouin.circ_rayleigh` and :py:func:`pingouin.circ_vtest`: missing angles were counted in the sample size. (`PR537 <https://github.com/raphaelvallat/pingouin/pull/537>`_)
+- :py:func:`pingouin.logistic_regression`: estimates were not fully converged with the default solver (off in the 3rd-4th decimal). They now match R ``glm`` and statsmodels to about 6 digits. (`PR526 <https://github.com/raphaelvallat/pingouin/pull/526>`_)
+- :py:func:`pingouin.welch_anova` did not drop missing values (slightly wrong ``np2``), and :py:func:`pingouin.homoscedasticity` returned NaN when a sample had missing values. (`PR529 <https://github.com/raphaelvallat/pingouin/pull/529>`_, `PR531 <https://github.com/raphaelvallat/pingouin/pull/531>`_)
+- :py:func:`pingouin.qqplot`: the data were not standardized when only one of ``loc`` or ``scale`` differed from the default. (`PR513 <https://github.com/raphaelvallat/pingouin/pull/513>`_)
+
+**Bugfixes — security, crashes and edge cases**
+
+- :py:func:`pingouin.ancova`, :py:func:`pingouin.anova` (unbalanced or 3+ factors) and :py:func:`pingouin.plot_rm_corr`: column names were inserted in a patsy formula and evaluated as Python code. Column names with quotes, commas, parentheses, or integer names now also work. (`PR537 <https://github.com/raphaelvallat/pingouin/pull/537>`_)
+- :py:func:`pingouin.distance_corr`: permutation p-values depended on the platform. (`PR526 <https://github.com/raphaelvallat/pingouin/pull/526>`_)
+- Fixed crashes in :py:func:`pingouin.ttest` with a non-bool ``paired`` (e.g. ``np.True_``), :py:func:`pingouin.logistic_regression` with ``fit_intercept=False``, :py:func:`pingouin.homoscedasticity` (Bartlett) with integer data, :py:func:`pingouin.chi2_mcnemar` when every subject switched, and :py:func:`pingouin.pairwise_corr` with mixed-type column labels. NumPy scalars and unsigned integer data are now accepted everywhere. (`PR526 <https://github.com/raphaelvallat/pingouin/pull/526>`_, `PR529 <https://github.com/raphaelvallat/pingouin/pull/529>`_, `PR531 <https://github.com/raphaelvallat/pingouin/pull/531>`_, `PR536 <https://github.com/raphaelvallat/pingouin/pull/536>`_, `PR537 <https://github.com/raphaelvallat/pingouin/pull/537>`_)
+- :py:func:`pingouin.plot_paired`: the boxplot transparency was silently ignored with recent versions of matplotlib. (`PR513 <https://github.com/raphaelvallat/pingouin/pull/513>`_)
+
+**New features**
+
+- :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell` now accept a list of between-subject factors, in which case all pairs of cells of the interaction are compared. This is equivalent to R's ``TukeyHSD(aov(dv ~ A * B), which = "A:B")``. (`PR539 <https://github.com/raphaelvallat/pingouin/pull/539>`_)
+- :py:func:`pingouin.rm_anova` now reports Mauchly's test of sphericity (``sphericity``, ``W_spher``, ``p_spher``) for two-way designs, and :py:func:`pingouin.sphericity` now supports two within-subject factors with more than 2 levels each. (`PR527 <https://github.com/raphaelvallat/pingouin/pull/527>`_, `PR528 <https://github.com/raphaelvallat/pingouin/pull/528>`_)
+- :py:func:`pingouin.plot_blandaltman`: new ``percentage`` parameter to express the differences as a percentage of the mean, and new ``symmetric_ylim`` parameter. :py:func:`pingouin.qqplot`: new ``line_kwargs`` and ``ci_kwargs`` parameters to customize the fit line and confidence envelope. (`PR513 <https://github.com/raphaelvallat/pingouin/pull/513>`_)
+- :py:func:`pingouin.pairwise_gameshowell` can now be used as a :py:class:`pandas.DataFrame` method. (`PR536 <https://github.com/raphaelvallat/pingouin/pull/536>`_)
+
+**Improvements**
+
+Many functions are now substantially faster, with identical outputs. Timings below compare v0.6.1 and v0.7.0 on an Apple M1 Max:
+
+- :py:func:`pingouin.linear_regression`: 209 ms → 128 ms with n = 1,000,000 and 10 predictors. With ``relimp=True``: 6.09 s → 0.11 s (55x) with 12 predictors. With ``weights``: 16 ms → 1 ms with n = 5,000, and a dense (n, n) matrix is no longer allocated (3.2 GB at n = 20,000). (`PR531 <https://github.com/raphaelvallat/pingouin/pull/531>`_, `PR540 <https://github.com/raphaelvallat/pingouin/pull/540>`_)
+- :py:func:`pingouin.compute_effsize` with ``eftype="cles"``: 738 ms → 4.2 ms (175x) with 20,000 observations per group, and ~3 GB less memory. (`PR534 <https://github.com/raphaelvallat/pingouin/pull/534>`_)
+- :py:func:`pingouin.bayesfactor_binom` uses the exact beta-binomial distribution instead of numerical integration: 100x faster. (`PR537 <https://github.com/raphaelvallat/pingouin/pull/537>`_)
+- :py:func:`pingouin.rcorr`: 176 ms → 13 ms (13x) with 60 columns. :py:func:`pingouin.ptests`: 61 ms → 4 ms (15x) with 20 columns. (`PR534 <https://github.com/raphaelvallat/pingouin/pull/534>`_, `PR536 <https://github.com/raphaelvallat/pingouin/pull/536>`_)
+- :py:func:`pingouin.compute_bootci`: statistics that accept an ``axis`` argument (e.g. :py:func:`numpy.mean`) are now vectorized across all bootstrap samples: 54 ms → 19 ms with ``func=np.mean`` and 10,000 bootstrap samples. (`PR538 <https://github.com/raphaelvallat/pingouin/pull/538>`_)
+- The formatting of the output dataframe, which runs at the end of every function, is about 20x faster on a 500 × 14 table. (`PR537 <https://github.com/raphaelvallat/pingouin/pull/537>`_)
+- All docstring examples are now tested in the CI. (`PR526 <https://github.com/raphaelvallat/pingouin/pull/526>`_)
+
+**Breaking changes**
+
+- :py:func:`pingouin.linear_regression` no longer removes duplicate, all-zero or extra constant columns from ``X``. The output keeps one row per input column, a rank-deficiency warning is emitted, and the collinear coefficients are the minimum-norm solution, as in statsmodels. (`PR540 <https://github.com/raphaelvallat/pingouin/pull/540>`_)
+- :py:func:`pingouin.logistic_regression` with ``fit_intercept=False`` no longer removes the first non-zero constant column of ``X``, which is the only intercept of the model in that case. (`PR541 <https://github.com/raphaelvallat/pingouin/pull/541>`_)
+- The deprecated ``gzscore`` function has been removed. Use :py:func:`scipy.stats.gzscore` instead. (`PR541 <https://github.com/raphaelvallat/pingouin/pull/541>`_)
+- Circular functions now raise a ``ValueError`` when the angles are not all in [-π, π] or all in [0, 2π], i.e. when they are likely expressed in degrees. (`PR537 <https://github.com/raphaelvallat/pingouin/pull/537>`_)
+- :py:func:`pingouin.convert_effsize` and :py:func:`pingouin.compute_effsize_from_t` now raise a ``ValueError`` for ``'cohen_dz'`` and ``'cles'``, which previously returned incorrect values. (`PR534 <https://github.com/raphaelvallat/pingouin/pull/534>`_)
+- Some input checks in the plotting functions now raise ``ValueError`` or ``TypeError`` instead of ``AssertionError``. (`PR513 <https://github.com/raphaelvallat/pingouin/pull/513>`_)
+
+**Dependency requirements**
+
+This version drops support for Python 3.10 and NumPy 1.x (`PR535 <https://github.com/raphaelvallat/pingouin/pull/535>`_). It requires Python >= 3.11 (Python 3.11-3.14 are supported) and:
+
+* `NumPy <https://numpy.org/>`_ >= 2.2.2
+* `SciPy <https://www.scipy.org/>`_ >= 1.15.0
+* `Pandas <https://pandas.pydata.org/>`_ >= 2.3.0
+* `Statsmodels <https://www.statsmodels.org/>`_ >= 0.14.5
+* `Scikit-learn <https://scikit-learn.org/>`_ >= 1.6.1
+* `Matplotlib <https://matplotlib.org/>`_ >= 3.10.1
+* `Seaborn <https://seaborn.pydata.org/>`_ >= 0.13.2
+
+The full changelog can be found on GitHub: https://github.com/raphaelvallat/pingouin/releases/tag/v0.7.0
+
+*************
+
 v0.6.1 (March 2026)
 -------------------
 

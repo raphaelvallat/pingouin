@@ -9,12 +9,12 @@
   :target: https://anaconda.org/conda-forge/pingouin
 
 .. image:: https://img.shields.io/github/license/raphaelvallat/pingouin.svg
-  :target: https://github.com/raphaelvallat/pingouin/blob/master/LICENSE
+  :target: https://github.com/raphaelvallat/pingouin/blob/main/LICENSE
 
 .. image:: https://github.com/raphaelvallat/pingouin/actions/workflows/pytest.yml/badge.svg
   :target: https://github.com/raphaelvallat/pingouin/actions
 
-.. image:: https://codecov.io/gh/raphaelvallat/pingouin/branch/master/graph/badge.svg
+.. image:: https://codecov.io/gh/raphaelvallat/pingouin/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/raphaelvallat/pingouin
 
 .. image:: https://pepy.tech/badge/pingouin/month
@@ -141,7 +141,7 @@ Quick start
 Click on the link below and navigate to the notebooks/ folder to run a collection of interactive Jupyter notebooks showing the main functionalities of Pingouin. No need to install Pingouin beforehand, the notebooks run in a Binder environment.
 
 .. image:: https://mybinder.org/badge.svg
-    :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/develop
+    :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/main
 
 10 minutes to Pingouin
 ----------------------
@@ -164,11 +164,11 @@ Click on the link below and navigate to the notebooks/ folder to run a collectio
 .. table:: Output
    :widths: auto
 
-   ======  =====  =============  =======  =============  =========  ======  =======
-        T    dof  alternative      p_val  CI95             cohen_d    BF10    power
-   ======  =====  =============  =======  =============  =========  ======  =======
-   -3.401     58  two-sided        0.001  [-1.68 -0.43]      0.878  26.155    0.917
-   ======  =====  =============  =======  =============  =========  ======  =======
+   ======  =====  =============  =======  =============  =========  =======  ======
+        T    dof  alternative      p_val  CI95             cohen_d    power    BF10
+   ======  =====  =============  =======  =============  =========  =======  ======
+   -3.401     58  two-sided        0.001  [-1.68 -0.43]      0.878    0.917  26.155
+   ======  =====  =============  =======  =============  =========  =======  ======
 
 ------------
 
@@ -321,8 +321,8 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
   Source          SS    DF1    DF2     MS      F    p_unc    np2      eps
   ===========  =====  =====  =====  =====  =====  =======  =====  =======
   Group        5.460      1     58  5.460  5.052    0.028  0.080      nan
-  Time         7.628      2    116  3.814  4.027    0.020  0.065    0.999
-  Interaction  5.167      2    116  2.584  2.728    0.070  0.045      nan
+  Time         7.628      2    116  3.814  4.027    0.020  0.065    0.998
+  Interaction  5.167      2    116  2.584  2.728    0.070  0.045    0.998
   ===========  =====  =====  =====  =====  =====  =======  =====  =======
 
 ------------
@@ -426,7 +426,7 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
   :widths: auto
 
   ==================  ========  ======  =====  =====  ========  =======
-  test                  lambda    chi2    dof      p    cramer    power
+  test                  lambda    chi2    dof   pval    cramer    power
   ==================  ========  ======  =====  =====  ========  =======
   pearson                1.000  22.717  1.000  0.000     0.274    0.997
   cressie-read           0.667  22.931  1.000  0.000     0.275    0.998
@@ -465,6 +465,7 @@ The functions that are currently supported as pandas method are:
 * `pingouin.welch_anova <https://pingouin-stats.org/generated/pingouin.welch_anova.html#pingouin.welch_anova>`_
 * `pingouin.pairwise_tests <https://pingouin-stats.org/generated/pingouin.pairwise_tests.html#pingouin.pairwise_tests>`_
 * `pingouin.pairwise_tukey <https://pingouin-stats.org/generated/pingouin.pairwise_tukey.html#pingouin.pairwise_tukey>`_
+* `pingouin.pairwise_gameshowell <https://pingouin-stats.org/generated/pingouin.pairwise_gameshowell.html#pingouin.pairwise_gameshowell>`_
 * `pingouin.pairwise_corr <https://pingouin-stats.org/generated/pingouin.pairwise_corr.html#pingouin.pairwise_corr>`_
 * `pingouin.partial_corr <https://pingouin-stats.org/generated/pingouin.partial_corr.html#pingouin.partial_corr>`_
 * `pingouin.pcorr <https://pingouin-stats.org/generated/pingouin.pcorr.html#pingouin.pcorr>`_
@@ -475,7 +476,7 @@ The functions that are currently supported as pandas method are:
 Development
 ===========
 
-Pingouin was created and is maintained by `Raphael Vallat <https://raphaelvallat.github.io>`_, a postdoctoral researcher at UC Berkeley, mostly during his spare time. Contributions are more than welcome so feel free to contact me, open an issue or submit a pull request!
+Pingouin was created and is maintained by `Raphael Vallat <https://raphaelvallat.github.io>`_, mostly during his spare time. Contributions are more than welcome so feel free to contact me, open an issue or submit a pull request!
 
 To see the code or report a bug, please visit the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
 
