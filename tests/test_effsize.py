@@ -301,6 +301,9 @@ class TestEffsize(TestCase):
         assert np.isclose(compute_effsize(x=x, y=0, eftype="AUC"), cef(d_zero, "cohen", "AUC"))
         # One-sample CLES = P(X > mu) + .5 * P(X = mu)
         assert compute_effsize([1, 2, 3, 4, 5], 3, eftype="cles") == 0.5
+        # One-sample correlation is not defined: NaN (so that pairwise_tests does not fail)
+        with pytest.warns(UserWarning):
+            assert np.isnan(compute_effsize(x=x, y=0, eftype="r"))
 
         # CLES matches the brute-force pairwise definition, including ties
         rng = np.random.default_rng(0)
