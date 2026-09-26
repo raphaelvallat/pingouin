@@ -691,7 +691,13 @@ def logistic_regression(
     the model. Pingouin will automatically add the intercept
     to your predictor(s) matrix, therefore, :math:`X` should not include a
     constant term. Pingouin will remove any constant term (e.g column with only
-    one unique value), or duplicate columns from :math:`X`.
+    one unique value), or duplicate columns from :math:`X`. If ``fit_intercept=False``
+    is passed to scikit-learn, the first non-zero constant column of :math:`X` is kept
+    and acts as the intercept.
+
+    .. versionchanged:: 0.7.0
+        With ``fit_intercept=False``, the first non-zero constant column is no longer
+        removed.
 
     The calculation of the p-values and confidence interval is adapted from a
     `code by Rob Speare
@@ -866,8 +872,11 @@ def logistic_regression(
 
     # Remove the constant columns, which are collinear with the intercept, and the duplicate
     # columns. Unlike linear_regression, scikit-learn does not return the minimum-norm solution
-    # for a rank-deficient design.
+    # for a rank-deficient design. Without the intercept of scikit-learn, the first non-zero
+    # constant column is kept, since it is then the intercept of the model.
     idx_unique = np.flatnonzero(np.ptp(X, axis=0) == 0)
+    if not kwargs.get("fit_intercept", True):
+        idx_unique = np.delete(idx_unique, np.flatnonzero(X[0, idx_unique] != 0)[:1])
     if len(idx_unique):
         X = np.delete(X, idx_unique, 1)
         names = np.delete(names, idx_unique).tolist()
