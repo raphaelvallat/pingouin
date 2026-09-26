@@ -4,6 +4,7 @@ from unittest import TestCase
 
 import numpy as np
 
+from pingouin import options, set_default_options
 from pingouin.equivalence import tost
 
 
@@ -51,3 +52,11 @@ class TestEquivalence(TestCase):
         # the way that they estimate the p-value of the one-sample test.
         assert tost(a, 0).at["TOST", "pval"] > tost(a, 5).at["TOST", "pval"]
         assert tost(a, 5, bound=3).at["TOST", "pval"] < 0.5
+
+        # Rounding options only apply to the output, not to the internal T-tests
+        pval = tost(a, b, bound=10).at["TOST", "pval"]
+        options["round.column.p_val"] = 1
+        try:
+            assert tost(a, b, bound=10).at["TOST", "pval"] == pval
+        finally:
+            set_default_options()

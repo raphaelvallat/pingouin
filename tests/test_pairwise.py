@@ -549,6 +549,11 @@ class TestPairwise(TestCase):
         assert not pt_holm.equals(pt_bonf)
         with pytest.raises(ValueError):
             df.ptests(padjust="wrong")
+        # axis and nan_policy are fixed by ptests and cannot be passed to scipy
+        with pytest.raises(ValueError):
+            df.ptests(axis=1)
+        with pytest.raises(ValueError):
+            df.ptests(nan_policy="raise")
 
     def test_pairwise_tukey(self):
         """Test function pairwise_tukey.
@@ -703,6 +708,10 @@ class TestPairwise(TestCase):
         # Test with covariate
         pairwise_corr(data, covar="Age")
         pairwise_corr(data, covar=["Age", "Neuroticism"])
+        pd.testing.assert_frame_equal(
+            pairwise_corr(data, covar=pd.Index(["Age", "Neuroticism"])),
+            pairwise_corr(data, covar=["Age", "Neuroticism"]),
+        )
         with pytest.raises(AssertionError):
             pairwise_corr(data, covar=["Age", "Gender"])
         with pytest.raises(ValueError):
