@@ -6,7 +6,7 @@ import pandas_flavor as pf
 from scipy.linalg import lstsq, pinvh
 from scipy.stats import norm, t
 
-from .config import options
+from .config import _no_rounding
 from .utils import _flatten_list as _fl
 from .utils import _postprocess_dataframe
 from .utils import remove_na as rm_na
@@ -1226,11 +1226,7 @@ def mediation_analysis(
     M_val = data[m].to_numpy()  # M as target (no covariates)
     y_val = data[y].to_numpy()  # y as target (no covariates)
 
-    # For max precision, make sure rounding is disabled
-    old_options = options.copy()
-    options["round"] = None
-
-    try:
+    with _no_rounding():  # For max precision
         # M(j) ~ X + covar
         sxm = {}
         for idx, j in enumerate(m):
@@ -1300,9 +1296,6 @@ def mediation_analysis(
             indirect["names"] = indirect["names"].apply(lambda x: "Indirect %s" % x)
         stats = pd.concat([stats, indirect], axis=0, ignore_index=True, sort=False)
         stats = stats.rename(columns={"names": "path"})
-    finally:
-        # Restore options, even if an error is raised
-        options.update(old_options)
 
     if return_dist:
         return _postprocess_dataframe(stats), np.squeeze(ab_estimates)

@@ -8,11 +8,17 @@ import pandas as pd
 import pandas_flavor as pf
 from scipy.stats import studentized_range
 
-from .config import options
+from .config import _no_rounding
 from .effsize import compute_effsize
 from .multicomp import _multicomp_triu, multicomp
 from .parametric import anova
-from .utils import _check_dataframe, _flatten_list, _postprocess_dataframe
+from .utils import (
+    _check_alternative,
+    _check_dataframe,
+    _flatten_list,
+    _format_pairwise_matrix,
+    _postprocess_dataframe,
+)
 
 __all__ = [
     "pairwise_ttests",
@@ -22,6 +28,62 @@ __all__ = [
     "pairwise_gameshowell",
     "pairwise_corr",
 ]
+
+
+def _pairwise_test(x, y, paired, parametric, alternative, correction, effsize, return_desc):
+    """Compare two samples and return the output row of :py:func:`pairwise_tests` as a dict.
+
+    Uses :py:func:`pingouin.ttest` if ``parametric``, otherwise :py:func:`pingouin.wilcoxon` or
+    :py:func:`pingouin.mwu` for paired and unpaired samples, respectively.
+    """
+    from .nonparametric import mwu, wilcoxon
+    from .parametric import ttest
+
+    row = {"alternative": alternative}
+    if return_desc:
+        row.update(
+            mean_A=np.nanmean(x),
+            std_A=np.nanstd(x, ddof=1),
+            mean_B=np.nanmean(y),
+            std_B=np.nanstd(y, ddof=1),
+        )
+    if parametric:
+        stat_name = "T"
+        res = ttest(x, y, paired=paired, alternative=alternative, correction=correction)
+        row["dof"] = float(res.at["T_test", "dof"])
+        if alternative == "two-sided":
+            row["BF10"] = res.at["T_test", "BF10"]
+    elif paired:
+        stat_name = "W_val"
+        res = wilcoxon(x, y, alternative=alternative)
+    else:
+        stat_name = "U_val"
+        res = mwu(x, y, alternative=alternative)
+    row[stat_name] = res[stat_name].iat[0]
+    row["p_unc"] = res["p_val"].iat[0]
+    row[effsize] = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
+    return row
+
+
+def _padjust(stats, padjust, alpha=0.05):
+    """Add the ``p_corr`` and ``p_adjust`` columns to a family of tests (in place) and return it.
+
+    Nothing is added if ``padjust`` is None or ``'none'``, or if there is a single test.
+    """
+    if padjust is not None and padjust.lower() != "none" and stats.shape[0] > 1:
+        stats["p_corr"] = multicomp(stats["p_unc"].to_numpy(), alpha=alpha, method=padjust)[1]
+        stats["p_adjust"] = padjust
+    return stats
+
+
+def _group_arrays(data, by, dv):
+    """Values of ``dv`` for each level of ``by``, as a dict of float arrays sorted by level.
+
+    Levels are sorted with groupby and not np.unique, because the latter does not respect the
+    custom sorting of a Categorical column. See https://github.com/raphaelvallat/pingouin/issues/111
+    """
+    grp = data.groupby(by, observed=True, sort=True)[dv]
+    return {k: v.to_numpy(dtype=np.float64) for k, v in grp}
 
 
 @pf.register_dataframe_method
@@ -272,44 +334,33 @@ def pairwise_tests(
     2     Time   August        June   False        True -2.660  118.0        less  0.004  -0.483
     3     Time  January        June   False        True -0.934  118.0        less  0.176  -0.170
     """
-    from .nonparametric import mwu, wilcoxon
-    from .parametric import ttest
-
     # Safety checks
     data = _check_dataframe(
         dv=dv, between=between, within=within, subject=subject, effects="all", data=data
     )
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_alternative(alternative)
     assert isinstance(alpha, float), "alpha must be float."
     assert nan_policy in ["listwise", "pairwise"]
 
     # Check if we have multiple between or within factors
-    multiple_between = False
-    multiple_within = False
     contrast = None
     if isinstance(between, list):
         if len(between) > 1:
-            multiple_between = True
             contrast = "multiple_between"
-            assert all([b in data.keys() for b in between])
+            assert all(b in data.keys() for b in between)
         else:
             between = between[0]
     if isinstance(within, list):
         if len(within) > 1:
-            multiple_within = True
+            if contrast == "multiple_between":
+                raise ValueError(
+                    "Multiple between and within factors are currently not supported. "
+                    "Please select only one."
+                )
             contrast = "multiple_within"
-            assert all([w in data.keys() for w in within])
+            assert all(w in data.keys() for w in within)
         else:
             within = within[0]
-    if all([multiple_within, multiple_between]):
-        raise ValueError(
-            "Multiple between and within factors are currently not supported. "
-            "Please select only one."
-        )
     # Check the other cases. Between and within column names can be str or int (not float).
     if isinstance(between, (str, int)) and within is None:
         contrast = "simple_between"
@@ -319,7 +370,7 @@ def pairwise_tests(
         assert within in data.keys()
     if isinstance(between, (str, int)) and isinstance(within, (str, int)):
         contrast = "within_between"
-        assert all([between in data.keys(), within in data.keys()])
+        assert between in data.keys() and within in data.keys()
 
     # Create col_order
     col_order = [
@@ -345,7 +396,7 @@ def pairwise_tests(
         effsize,
     ]
 
-    # If repeated measures, pivot and melt the table. This has several effects:
+    # If repeated measures, pivot and stack the table. This has several effects:
     # 1) Force missing values to be explicit (a NaN cell is created)
     # 2) Automatic collapsing to the mean if multiple within factors are present
     # 3) If using dropna, remove rows with missing values (listwise deletion).
@@ -357,248 +408,106 @@ def pairwise_tests(
             # Remove rows (= subject) with missing values. For pairwise deletion, missing values
             # will be removed directly in the lower-level functions (e.g. pg.ttest)
             data_piv = data_piv.dropna()
-        data = data_piv.melt(ignore_index=False, value_name=dv).reset_index()
+        # Stack instead of melt, which fails when a level of the within factor(s) is named as dv
+        data = data_piv.stack(list(range(data_piv.columns.nlevels)), future_stack=True)
+        data = data.rename(dv).reset_index()
 
-    if contrast in ["simple_within", "simple_between"]:
-        # OPTION A: SIMPLE MAIN EFFECTS, WITHIN OR BETWEEN
-        paired = True if contrast == "simple_within" else False
-        col = within if contrast == "simple_within" else between
-
-        # Extract levels of the grouping variable, sorted in alphabetical order
-        grp_col = data.groupby(col, sort=True, observed=True)[dv]
-        labels = grp_col.groups.keys()
-        # Number and labels of possible comparisons
-        if len(labels) >= 2:
-            combs = list(combinations(labels, 2))
-            combs = np.array(combs)
-            A = combs[:, 0]
-            B = combs[:, 1]
-        else:
-            raise ValueError("Columns must have at least two unique values.")
-
-        # Initialize dataframe
-        stats = pd.DataFrame(dtype=np.float64, index=range(len(combs)), columns=col_order)
-
-        # Force dtype conversion
-        cols_str = ["Contrast", "Time", "A", "B", "alternative", "p_adjust", "BF10"]
-        cols_bool = ["Parametric", "Paired"]
-        stats[cols_str] = stats[cols_str].astype(object)
-        stats[cols_bool] = stats[cols_bool].astype(bool)
-
-        # Fill str columns
-        stats.loc[:, "A"] = A
-        stats.loc[:, "B"] = B
-        stats.loc[:, "Contrast"] = col
-        stats.loc[:, "alternative"] = alternative
-        stats.loc[:, "Paired"] = paired
-
-        # For max precision, make sure rounding is disabled
-        old_options = options.copy()
-        options["round"] = None
-
-        for i in range(stats.shape[0]):
-            col1, col2 = stats.at[i, "A"], stats.at[i, "B"]
-            x = grp_col.get_group(col1).to_numpy(dtype=np.float64)
-            y = grp_col.get_group(col2).to_numpy(dtype=np.float64)
-            if parametric:
-                stat_name = "T"
-                df_ttest = ttest(
-                    x, y, paired=paired, alternative=alternative, correction=correction
-                )
-                if alternative == "two-sided":
-                    stats.at[i, "BF10"] = df_ttest.at["T_test", "BF10"]
-                stats.at[i, "dof"] = df_ttest.at["T_test", "dof"]
-            else:
-                if paired:
-                    stat_name = "W_val"
-                    df_ttest = wilcoxon(x, y, alternative=alternative)
-                else:
-                    stat_name = "U_val"
-                    df_ttest = mwu(x, y, alternative=alternative)
-
-            options.update(old_options)  # restore options
-
-            # Compute Hedges / Cohen
-            ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
-
-            if return_desc:
-                stats.at[i, "mean_A"] = np.nanmean(x)
-                stats.at[i, "mean_B"] = np.nanmean(y)
-                stats.at[i, "std_A"] = np.nanstd(x, ddof=1)
-                stats.at[i, "std_B"] = np.nanstd(y, ddof=1)
-            stats.at[i, stat_name] = df_ttest[stat_name].iat[0]
-            stats.at[i, "p_unc"] = df_ttest["p_val"].iat[0]
-            stats.at[i, effsize] = ef
-
-        # Multiple comparisons
-        padjust = None if stats["p_unc"].size <= 1 else padjust
-        if padjust is not None:
-            if padjust.lower() != "none":
-                _, stats["p_corr"] = multicomp(
-                    stats["p_unc"].to_numpy(), alpha=alpha, method=padjust
-                )
-                stats["p_adjust"] = padjust
-        else:
-            stats["p_corr"] = None
-            stats["p_adjust"] = None
+    # Define the main effects, as (factor, paired, marginal) tuples, and the interaction.
+    # Within-subject factors are always tested on the marginal means of each subject, i.e. after
+    # averaging across the levels of the other within-subject factor. In mixed design, the
+    # between-subject factor is tested on the marginal means if ``marginal=True``, to avoid
+    # violating the assumption of independence and conflating the degrees of freedom by the
+    # number of repeated measurements.
+    if contrast == "simple_between":
+        factors = [between]
+        main_effects = [(between, False, False)]
+    elif contrast == "simple_within":
+        factors = [within]
+        main_effects = [(within, True, False)]
+    elif contrast == "multiple_between":
+        # BETWEEN1 + BETWEEN2 + BETWEEN1 * BETWEEN2
+        # TODO: add a pool SD option, as in JASP and JAMOVI?
+        factors = between
+        main_effects = [(f, False, False) for f in factors]
+        paired_interaction = False
+    elif contrast == "multiple_within":
+        # WITHIN1 + WITHIN2 + WITHIN1 * WITHIN2
+        factors = within
+        main_effects = [(f, True, True) for f in factors]
+        paired_interaction = True
+    elif within_first:
+        # within + between + within * between
+        factors = [within, between]
+        main_effects = [(within, True, True), (between, False, marginal)]
+        paired_interaction = False  # Groups are compared at each level of the within factor
     else:
-        # Multiple factors
-        if contrast == "multiple_between":
-            # B1: BETWEEN1 + BETWEEN2 + BETWEEN1 * BETWEEN2
-            factors = between
-            fbt = factors
-            fwt = [None, None]
-            paired = False  # the interaction is not paired
-            agg = [False, False]
-            # TODO: add a pool SD option, as in JASP and JAMOVI?
-        elif contrast == "multiple_within":
-            # B2: WITHIN1 + WITHIN2 + WITHIN1 * WITHIN2
-            factors = within
-            fbt = [None, None]
-            fwt = factors
-            paired = True
-            agg = [True, True]  # Calculate marginal means for both factors
-        else:
-            # B3: WITHIN + BETWEEN + INTERACTION
-            # Decide which order should be reported
-            if within_first:
-                # within + between + within * between
-                factors = [within, between]
-                fbt = [None, between]
-                fwt = [within, None]
-                paired = False  # only for interaction
-                agg = [False, True]
-            else:
-                # between + within + between * within
-                factors = [between, within]
-                fbt = [between, None]
-                fwt = [None, within]
-                paired = True
-                agg = [True, False]
+        # between + within + between * within
+        factors = [between, within]
+        main_effects = [(between, False, marginal), (within, True, True)]
+        paired_interaction = True  # Levels are compared within each group
 
-        stats = pd.DataFrame()
-        for i, f in enumerate(factors):
-            # Introduced in Pingouin v0.3.2
-            # Note that is only has an impact in the between test of mixed
-            # designs. Indeed, a similar groupby is applied by default on
-            # each within-subject factor of a two-way repeated measures design.
-            if all([agg[i], marginal]):
+    # Keyword arguments shared by all the pairwise tests
+    test_kwargs = dict(
+        parametric=parametric,
+        alternative=alternative,
+        correction=correction,
+        effsize=effsize,
+        return_desc=return_desc,
+    )
+
+    stats = []
+    with _no_rounding():  # For max precision
+        # Main effects: one family of tests (for p-values correction) per factor
+        for f, paired, agg in main_effects:
+            tmp = data
+            if agg:
                 tmp = data.groupby([subject, f], as_index=False, observed=True, sort=True).mean(
                     numeric_only=True
                 )
-            else:
-                tmp = data
-            pt = pairwise_tests(
-                dv=dv,
-                between=fbt[i],
-                within=fwt[i],
-                subject=subject,
-                data=tmp,
-                parametric=parametric,
-                marginal=marginal,
-                alpha=alpha,
-                alternative=alternative,
-                padjust=padjust,
-                effsize=effsize,
-                correction=correction,
-                nan_policy=nan_policy,
-                return_desc=return_desc,
-            )
-            stats = pd.concat([stats, pt], axis=0, ignore_index=True, sort=False)
+            # Extract levels of the grouping variable, sorted in alphabetical order
+            groups = _group_arrays(tmp, f, dv)
+            if len(groups) < 2:
+                raise ValueError("Columns must have at least two unique values.")
+            rows = []
+            for a, b in combinations(groups, 2):
+                row = {"Contrast": f, "A": a, "B": b, "Paired": paired}
+                row.update(_pairwise_test(groups[a], groups[b], paired=paired, **test_kwargs))
+                rows.append(row)
+            stats.append(_padjust(pd.DataFrame(rows), padjust=padjust, alpha=alpha))
 
-        # Then compute the interaction between the factors
-        if interaction:
-            nrows = stats.shape[0]
+        # Interaction: compare the levels of the second factor at each level of the first factor
+        if interaction and len(factors) == 2:
             # BUGFIX 0.3.9: If subject is present, make sure that we respect
             # the order of subjects.
             if subject is not None:
                 data = data.set_index(subject).sort_index()
             # Extract interaction levels, sorted in alphabetical order
-            grp_fac1 = data.groupby(factors[0], observed=True, sort=True)[dv]
-            grp_fac2 = data.groupby(factors[1], observed=True, sort=True)[dv]
-            grp_both = data.groupby(factors, observed=True, sort=True)[dv]
-            labels_fac1 = grp_fac1.groups.keys()
-            labels_fac2 = grp_fac2.groups.keys()
-            # comb_fac1 = list(combinations(labels_fac1, 2))
-            comb_fac2 = list(combinations(labels_fac2, 2))
+            labels_fac1 = data.groupby(factors[0], observed=True, sort=True).groups.keys()
+            labels_fac2 = data.groupby(factors[1], observed=True, sort=True).groups.keys()
+            groups = _group_arrays(data, factors, dv)
+            rows = []
+            for fac1, (a, b) in product(labels_fac1, combinations(labels_fac2, 2)):
+                row = {
+                    "Contrast": f"{factors[0]} * {factors[1]}",
+                    "Time": fac1,
+                    "A": a,
+                    "B": b,
+                    "Paired": paired_interaction,
+                }
+                x, y = groups[(fac1, a)], groups[(fac1, b)]
+                row.update(_pairwise_test(x, y, paired=paired_interaction, **test_kwargs))
+                rows.append(row)
+            stats.append(_padjust(pd.DataFrame(rows), padjust=padjust, alpha=alpha))
 
-            # Pairwise comparisons
-            combs_list = list(product(labels_fac1, comb_fac2))
-            ncombs = len(combs_list)
-            # np.array(combs_list) does not work because of tuples
-            # we therefore need to flatten the tupple
-            combs = np.zeros(shape=(ncombs, 3), dtype=object)
-            for i in range(ncombs):
-                combs[i] = _flatten_list(combs_list[i], include_tuple=True)
-
-            # Append empty rows
-            idxiter = np.arange(nrows, nrows + ncombs)
-            stats = stats.reindex(stats.index.union(idxiter))
-
-            # Update other columns
-            stats.loc[idxiter, "Contrast"] = factors[0] + " * " + factors[1]
-            stats.loc[idxiter, "Time"] = combs[:, 0]
-            stats.loc[idxiter, "Paired"] = paired
-            stats.loc[idxiter, "alternative"] = alternative
-            stats.loc[idxiter, "A"] = combs[:, 1]
-            stats.loc[idxiter, "B"] = combs[:, 2]
-
-            # For max precision, make sure rounding is disabled
-            old_options = options.copy()
-            options["round"] = None
-
-            for i, comb in enumerate(combs):
-                ic = nrows + i  # Take into account previous rows
-                fac1, col1, col2 = comb
-                x = grp_both.get_group((fac1, col1)).to_numpy(dtype=np.float64)
-                y = grp_both.get_group((fac1, col2)).to_numpy(dtype=np.float64)
-                ef = compute_effsize(x=x, y=y, eftype=effsize, paired=paired)
-                if parametric:
-                    stat_name = "T"
-                    df_ttest = ttest(
-                        x, y, paired=paired, alternative=alternative, correction=correction
-                    )
-                    if alternative == "two-sided":
-                        stats.at[ic, "BF10"] = df_ttest.at["T_test", "BF10"]
-                    stats.at[ic, "dof"] = df_ttest.at["T_test", "dof"]
-                else:
-                    if paired:
-                        stat_name = "W_val"
-                        df_ttest = wilcoxon(x, y, alternative=alternative)
-                    else:
-                        stat_name = "U_val"
-                        df_ttest = mwu(x, y, alternative=alternative)
-
-                options.update(old_options)  # restore options
-
-                # Append to stats
-                if return_desc:
-                    stats.at[ic, "mean_A"] = np.nanmean(x)
-                    stats.at[ic, "mean_B"] = np.nanmean(y)
-                    stats.at[ic, "std_A"] = np.nanstd(x, ddof=1)
-                    stats.at[ic, "std_B"] = np.nanstd(y, ddof=1)
-                stats.at[ic, stat_name] = df_ttest[stat_name].iat[0]
-                stats.at[ic, "p_unc"] = df_ttest["p_val"].iat[0]
-                stats.at[ic, effsize] = ef
-
-            # Multi-comparison columns
-            if padjust is not None and padjust.lower() != "none":
-                _, pcor = multicomp(
-                    stats.loc[idxiter, "p_unc"].to_numpy(), alpha=alpha, method=padjust
-                )
-                stats.loc[idxiter, "p_corr"] = pcor
-                stats.loc[idxiter, "p_adjust"] = padjust
-
-    # ---------------------------------------------------------------------
-    # Append parametric columns
-    stats.loc[:, "Parametric"] = parametric
+    stats = pd.concat(stats, axis=0, ignore_index=True, sort=False)
+    stats["Parametric"] = parametric
 
     # Reorder and drop empty columns
-    stats = stats[np.array(col_order)[np.isin(col_order, stats.columns)]]
+    stats = stats[[c for c in col_order if c in stats.columns]]
     stats = stats.dropna(how="all", axis=1)
 
     # Rename Time columns
-    if contrast in ["multiple_within", "multiple_between", "within_between"] and interaction:
+    if "Time" in stats.columns:
         stats["Time"] = stats["Time"].fillna("-")
         stats = stats.rename(columns={"Time": factors[0]})
 
@@ -724,61 +633,39 @@ def ptests(
     A  -8.399   0.319  0.238      -  0.005
     C  -4.251   3.595  3.785  3.765      -
     """
-    from itertools import combinations
-
-    from numpy import format_float_positional as ffp
     from scipy.stats import ttest_ind, ttest_rel
 
     assert isinstance(pval_stars, dict), "pval_stars must be a dictionary."
     assert isinstance(decimals, int), "decimals must be an int."
+    if "axis" in kwargs or "nan_policy" in kwargs:
+        raise ValueError(
+            "axis and nan_policy cannot be specified: the T-tests are always calculated between "
+            "the columns of the dataframe, with pairwise deletion of missing values."
+        )
 
-    if paired:
-        func = ttest_rel
-    else:
-        func = ttest_ind
+    func = ttest_rel if paired else ttest_ind
 
-    # Get T-values and p-values
+    # Get T-values and p-values, with all the pairs tested at once in a single vectorized call.
     # We cannot use pandas.DataFrame.corr here because it will incorrectly remove rows missing
     # values, even when using an independent T-test!
     cols = self.columns
-    combs = list(combinations(cols, 2))
-    mat = pd.DataFrame(columns=cols, index=cols, dtype=np.float64)
-    mat_upper = mat.copy()
-
-    for a, b in combs:
-        t, p = func(self[a], self[b], **kwargs, nan_policy="omit")
-        mat.loc[b, a] = np.round(t, decimals)
-        # Do not round p-value here, or we'll lose precision for multicomp
-        mat_upper.loc[a, b] = p
+    arr = self.to_numpy(dtype=np.float64)
+    i1, i2 = np.triu_indices(len(cols), k=1)
+    t, p = func(arr[:, i1], arr[:, i2], axis=0, nan_policy="omit", **kwargs)
+    tvals = np.full((len(cols), len(cols)), np.nan)
+    pvals = tvals.copy()
+    tvals[i2, i1] = np.round(t, decimals)
+    # Do not round p-value here, or we'll lose precision for multicomp
+    pvals[i1, i2] = p
+    mat = pd.DataFrame(tvals, columns=cols, index=cols)
+    mat_upper = pd.DataFrame(pvals, columns=cols, index=cols)
 
     if padjust is not None:
         # Only the unique pairs (strict upper triangle) belong to the test family.
         mat_upper = _multicomp_triu(mat_upper, method=padjust, alpha=0.05)
 
-    # Convert T-values to str, and fill the diagonal with "-"
-    mat = mat.astype(str)
-
-    # Modification of the diagonal
-    for i in range(len(mat)):
-        mat.iat[i, i] = "-"
-
-    def replace_pval(x):
-        for key, value in pval_stars.items():
-            if x < key:
-                return value
-        return ""
-
-    if stars:
-        # Replace p-values by stars
-        mat_upper = mat_upper.map(replace_pval)
-    else:
-        mat_upper = mat_upper.map(lambda x: ffp(x, precision=decimals))
-
-    # Replace upper triangle by p-values
-    mask = np.triu(np.ones(mat.shape, dtype=bool), k=1)
-    mat = mat.where(~mask, mat_upper)
-
-    return mat
+    # T-values on the lower triangle and p-values (as stars or str) on the upper triangle
+    return _format_pairwise_matrix(mat, mat_upper, decimals, stars, pval_stars=pval_stars)
 
 
 @pf.register_dataframe_method
@@ -881,72 +768,23 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857 -19.224    0.000  -2.875
     """
     # First compute the ANOVA
-    # For max precision, make sure rounding is disabled
-    old_options = options.copy()
-    options["round"] = None
-    aov = anova(dv=dv, data=data, between=between, detailed=True)
-    options.update(old_options)  # Restore original options
+    with _no_rounding():  # For max precision
+        aov = anova(dv=dv, data=data, between=between, detailed=True)
     df = aov.at[1, "DF"]
-    ng = aov.at[0, "DF"] + 1
-    grp = data.groupby(between, observed=True)[dv]  # default is sort=True
-    # Careful: pd.unique does NOT sort whereas numpy does
-    # The line below should be equal to labels = np.unique(data[between])
-    # However, this does not work if between is a Categorical column, because
-    # Pandas applies a custom, not alphabetical, sorting.
-    # See https://github.com/raphaelvallat/pingouin/issues/111
-    labels = np.array(list(grp.groups.keys()))
-    n = grp.count().to_numpy()
-    gmeans = grp.mean(numeric_only=True).to_numpy()
+    stats, n, _ = _pairwise_between(data, dv, between, effsize)
+    ng = n.size
+    g1, g2 = np.triu_indices(ng, k=1)
     gvar = aov.at[1, "MS"] / n
+    stats["se"] = np.sqrt(gvar[g1] + gvar[g2])
+    stats["T"] = stats["diff"] / stats["se"]
 
-    # Pairwise combinations
-    g1, g2 = np.array(list(combinations(np.arange(ng), 2))).T
-    mn = gmeans[g1] - gmeans[g2]
-    se = np.sqrt(gvar[g1] + gvar[g2])
-    tval = mn / se
-
-    # Critical values and p-values
-    # crit = studentized_range.ppf(1 - alpha, ng, df) / np.sqrt(2)
-    pval = studentized_range.sf(np.sqrt(2) * np.abs(tval), ng, df)
-    pval = np.clip(pval, 0, 1)
-
-    # Uncorrected p-values
-    # from scipy.stats import t
-    # punc = t.sf(np.abs(tval), n[g1].size + n[g2].size - 2) * 2
-
-    # Effect size
-    # Method 1: Approximation
-    # d = tval * np.sqrt(1 / n[g1] + 1 / n[g2])
-    # ef = convert_effsize(d, "cohen", effsize, n[g1], n[g2])
-    # Method 2: Exact
-    ef = []
-    for idx_a, idx_b in zip(g1, g2):
-        ef.append(
-            compute_effsize(
-                grp.get_group(labels[idx_a]),
-                grp.get_group(labels[idx_b]),
-                paired=False,
-                eftype=effsize,
-            )
-        )
-
-    # Create dataframe
-    stats = pd.DataFrame(
-        {
-            "A": labels[g1],
-            "B": labels[g2],
-            "mean_A": gmeans[g1],
-            "mean_B": gmeans[g2],
-            "diff": mn,
-            "se": se,
-            "T": tval,
-            "p_tukey": pval,
-            effsize: ef,
-        }
-    )
-    return _postprocess_dataframe(stats)
+    # P-values
+    pval = studentized_range.sf(np.sqrt(2) * np.abs(stats["T"]), ng, df)
+    stats["p_tukey"] = np.clip(pval, 0, 1)
+    return _postprocess_dataframe(stats[[*stats.columns.drop(effsize), effsize]])
 
 
+@pf.register_dataframe_method
 def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     """Pairwise Games-Howell post-hoc test.
 
@@ -1047,72 +885,53 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     """
     # Check the dataframe
     data = _check_dataframe(dv=dv, between=between, effects="between", data=data)
+    stats, n, gvars = _pairwise_between(data, dv, between, effsize)
+    ng = n.size
+    g1, g2 = np.triu_indices(ng, k=1)
 
-    # Reset index (avoid duplicate axis error)
-    data = data.reset_index(drop=True)
+    # Standard errors and Welch-Satterthwaite degrees of freedom, using unpooled variances
+    v = gvars / n
+    stats["se"] = np.sqrt(v[g1] + v[g2])
+    stats["T"] = stats["diff"] / stats["se"]
+    stats["df"] = (v[g1] + v[g2]) ** 2 / (v[g1] ** 2 / (n[g1] - 1) + v[g2] ** 2 / (n[g2] - 1))
 
-    # Extract infos
-    ng = data[between].nunique()
-    grp = data.groupby(between, observed=True)[dv]  # default is sort=True
-    # Careful: pd.unique does NOT sort whereas numpy does
-    # The line below should be equal to labels = np.unique(data[between])
-    # However, this does not work if between is a Categorical column, because
-    # Pandas applies a custom, not alphabetical, sorting.
+    # Compute corrected p-values
+    pval = studentized_range.sf(np.sqrt(2) * np.abs(stats["T"]), ng, stats["df"])
+    stats["pval"] = np.clip(pval, 0, 1)
+    return _postprocess_dataframe(stats[[*stats.columns.drop(effsize), effsize]])
+
+
+def _pairwise_between(data, dv, between, effsize):
+    """Group summary and exact effect sizes of all the pairs of levels of a between factor.
+
+    Shared by :py:func:`pairwise_tukey` and :py:func:`pairwise_gameshowell`. Returns the output
+    dataframe (A, B, mean_A, mean_B, diff and effect size columns, one row per pair), and the
+    per-group sample sizes and variances.
+    """
+    # Levels are sorted with groupby (default sort=True) and not np.unique, because the latter
+    # does not respect the custom sorting of a Categorical column.
     # See https://github.com/raphaelvallat/pingouin/issues/111
-    labels = np.array(list(grp.groups.keys()))
+    grp = data.groupby(between, observed=True)[dv]
+    groups = {k: v.to_numpy(dtype=np.float64) for k, v in grp}
+    labels = np.array(list(groups))
     n = grp.count().to_numpy()
     gmeans = grp.mean(numeric_only=True).to_numpy()
     gvars = grp.var(numeric_only=True).to_numpy()
-
-    # Pairwise combinations
-    g1, g2 = np.array(list(combinations(np.arange(ng), 2))).T
-    mn = gmeans[g1] - gmeans[g2]
-    se = np.sqrt(gvars[g1] / n[g1] + gvars[g2] / n[g2])
-    tval = mn / np.sqrt(gvars[g1] / n[g1] + gvars[g2] / n[g2])
-    df = (gvars[g1] / n[g1] + gvars[g2] / n[g2]) ** 2 / (
-        (((gvars[g1] / n[g1]) ** 2) / (n[g1] - 1)) + (((gvars[g2] / n[g2]) ** 2) / (n[g2] - 1))
-    )
-
-    # Compute corrected p-values
-    pval = studentized_range.sf(np.sqrt(2) * np.abs(tval), ng, df)
-    pval = np.clip(pval, 0, 1)
-
-    # Uncorrected p-values
-    # from scipy.stats import t
-    # punc = t.sf(np.abs(tval), n[g1].size + n[g2].size - 2) * 2
-
-    # Effect size
-    # Method 1: Approximation
-    # d = tval * np.sqrt(1 / n[g1] + 1 / n[g2])
-    # ef = convert_effsize(d, "cohen", effsize, n[g1], n[g2])
-    # Method 2: Exact
-    ef = []
-    for idx_a, idx_b in zip(g1, g2):
-        ef.append(
-            compute_effsize(
-                grp.get_group(labels[idx_a]),
-                grp.get_group(labels[idx_b]),
-                paired=False,
-                eftype=effsize,
-            )
-        )
-
-    # Create dataframe
+    g1, g2 = np.triu_indices(len(labels), k=1)
     stats = pd.DataFrame(
         {
             "A": labels[g1],
             "B": labels[g2],
             "mean_A": gmeans[g1],
             "mean_B": gmeans[g2],
-            "diff": mn,
-            "se": se,
-            "T": tval,
-            "df": df,
-            "pval": pval,
-            effsize: ef,
+            "diff": gmeans[g1] - gmeans[g2],
+            effsize: [
+                compute_effsize(groups[labels[a]], groups[labels[b]], paired=False, eftype=effsize)
+                for a, b in zip(g1, g2)
+            ],
         }
     )
-    return _postprocess_dataframe(stats)
+    return stats, n, gvars
 
 
 @pf.register_dataframe_method
@@ -1316,11 +1135,7 @@ def pairwise_corr(
     from pingouin.correlation import corr, partial_corr
 
     # Check arguments
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_alternative(alternative)
     assert nan_policy in ["listwise", "pairwise"]
 
     # Keep only numeric columns
@@ -1334,100 +1149,41 @@ def pairwise_corr(
     if isinstance(columns, (str, tuple)):
         columns = [columns]
 
-    def traverse(o, tree_types=(list, tuple)):
-        """Helper function to flatten nested lists.
-        From https://stackoverflow.com/a/6340578
-        """
-        if isinstance(o, tree_types):
-            for value in o:
-                yield from traverse(value, tree_types)
-        else:
-            yield o
-
     # Check if columns index has multiple levels
-    if isinstance(data.columns, pd.MultiIndex):
-        multi_index = True
-        if columns is not None:
-            # Simple List with one element: [('L0', 'L1')]
-            # Simple list with >= 2 elements: [('L0', 'L1'), ('L0', 'L2')]
-            # Nested lists: [[('L0', 'L1')], ...] or [..., [('L0', 'L1')]]
-            col_flatten = list(traverse(columns, tree_types=list))
-            assert all(isinstance(c, (tuple, type(None))) for c in col_flatten)
-    else:
-        multi_index = False
+    if isinstance(data.columns, pd.MultiIndex) and columns is not None:
+        # Simple List with one element: [('L0', 'L1')]
+        # Simple list with >= 2 elements: [('L0', 'L1'), ('L0', 'L2')]
+        # Nested lists: [[('L0', 'L1')], ...] or [..., [('L0', 'L1')]]
+        assert all(isinstance(c, tuple) for c in _flatten_list(list(columns)))
 
-    # Then define combinations / products between columns
+    # Then define combinations / products between columns. Pairs are kept as tuples of column
+    # labels (not converted to a numpy array), so that column labels of any type are preserved.
     if columns is None:
         # Case A: column is not defined --> corr between all numeric columns
         combs = list(combinations(keys, 2))
-    else:
-        # Case B: column is specified
-        if isinstance(columns[0], (list, np.ndarray)):
-            group1 = [e for e in columns[0] if e in keys]
-            # Assert that column is two-dimensional
-            if len(columns) == 1:
-                columns.append(None)
-            if isinstance(columns[1], (list, np.ndarray)) and len(columns[1]):
-                # B1: [['a', 'b'], ['c', 'd']]
-                group2 = [e for e in columns[1] if e in keys]
-            else:
-                # B2: [['a', 'b']], [['a', 'b'], None] or [['a', 'b'], 'all']
-                group2 = [e for e in keys if e not in group1]
-            combs = list(product(group1, group2))
+    elif isinstance(columns[0], (list, np.ndarray)):
+        # Case B: two lists of columns
+        group1 = [e for e in columns[0] if e in keys]
+        group2 = columns[1] if len(columns) > 1 else None
+        if isinstance(group2, (list, np.ndarray)) and len(group2):
+            # B1: [['a', 'b'], ['c', 'd']]
+            group2 = [e for e in group2 if e in keys]
         else:
-            # Column is a simple list
-            if len(columns) == 1:
-                # Case B3: one-versus-all, e.g. ['a'] or 'a'
-                # Check that this column exist
-                if columns[0] not in keys:
-                    msg = '"%s" is not in data or is not numeric.' % columns[0]
-                    raise ValueError(msg)
-                others = [e for e in keys if e != columns[0]]
-                combs = list(product(columns, others))
-            else:
-                # Combinations between all specified columns ['a', 'b', 'c']
-                # Make sure that we keep numeric columns
-                columns = [c for c in columns if c in keys]
-                if len(columns) == 1:
-                    # If only one-column is left, equivalent to ['a']
-                    others = [e for e in keys if e != columns[0]]
-                    combs = list(product(columns, others))
-                else:
-                    # combinations between ['a', 'b', 'c']
-                    combs = list(combinations(columns, 2))
-
-    combs = np.array(combs)
-    if len(combs) == 0:
-        raise ValueError(
-            "No column combination found. Please make sure that "
-            "the specified columns exist in the dataframe, are "
-            "numeric, and contains at least two unique values."
-        )
-
-    # Initialize empty dataframe
-    if multi_index:
-        X = list(zip(combs[:, 0, 0], combs[:, 0, 1]))
-        Y = list(zip(combs[:, 1, 0], combs[:, 1, 1]))
+            # B2: [['a', 'b']], [['a', 'b'], None] or [['a', 'b'], 'all']
+            group2 = [e for e in keys if e not in group1]
+        combs = list(product(group1, group2))
     else:
-        X = combs[:, 0]
-        Y = combs[:, 1]
-    stats = pd.DataFrame(
-        {"X": X, "Y": Y, "method": method, "alternative": alternative},
-        index=range(len(combs)),
-        columns=[
-            "X",
-            "Y",
-            "method",
-            "alternative",
-            "n",
-            "outliers",
-            "r",
-            "CI95",
-            "p_val",
-            "BF10",
-            "power",
-        ],
-    )
+        # Case C: column is a simple list
+        if len(columns) == 1 and columns[0] not in keys:
+            raise ValueError(f'"{columns[0]}" is not in data or is not numeric.')
+        # Make sure that we keep numeric columns
+        columns = [c for c in columns if c in keys]
+        if len(columns) == 1:
+            # C1: one-versus-all, e.g. ['a'] or 'a'
+            combs = [(columns[0], e) for e in keys if e != columns[0]]
+        else:
+            # C2: combinations between ['a', 'b', 'c']
+            combs = list(combinations(columns, 2))
 
     # Now we check if covariates are present
     if covar is not None:
@@ -1441,61 +1197,51 @@ def pairwise_corr(
             "Covariate(s) are either not in data or not numeric."
         )
         # And we make sure that X or Y does not contain covar
-        stats = stats[~stats[["X", "Y"]].isin(covar).any(axis=1)]
-        stats = stats.reset_index(drop=True)
-        if stats.shape[0] == 0:
-            raise ValueError(
-                "No column combination found. Please make sure "
-                "that the specified columns and covar exist in "
-                "the dataframe, are numeric, and contains at "
-                "least two unique values."
-            )
+        combs = [(x, y) for x, y in combs if x not in covar and y not in covar]
+
+    if len(combs) == 0:
+        raise ValueError(
+            "No column combination found. Please make sure that the specified columns (and "
+            "covar) exist in the dataframe, are numeric, and contains at least two unique values."
+        )
 
     # Listwise deletion of missing values
     if nan_policy == "listwise":
-        all_cols = np.unique(stats[["X", "Y"]].to_numpy()).tolist()
+        all_cols = list(dict.fromkeys(c for pair in combs for c in pair))
         if covar is not None:
             all_cols.extend(covar)
         data = data[all_cols].dropna()
 
-    # For max precision, make sure rounding is disabled
-    old_options = options.copy()
-    options["round"] = None
+    # Compute pairwise correlations
+    results = []
+    with _no_rounding():  # For max precision
+        for col1, col2 in combs:
+            if covar is None:
+                cor_st = corr(
+                    data[col1].to_numpy(),
+                    data[col2].to_numpy(),
+                    alternative=alternative,
+                    method=method,
+                )
+            else:
+                cor_st = partial_corr(
+                    data=data, x=col1, y=col2, covar=covar, alternative=alternative, method=method
+                )
+            results.append(cor_st)
 
-    # Compute pairwise correlations and fill dataframe
-    for i in range(stats.shape[0]):
-        col1, col2 = stats.at[i, "X"], stats.at[i, "Y"]
-        if covar is None:
-            cor_st = corr(
-                data[col1].to_numpy(), data[col2].to_numpy(), alternative=alternative, method=method
-            )
-        else:
-            cor_st = partial_corr(
-                data=data, x=col1, y=col2, covar=covar, alternative=alternative, method=method
-            )
-        cor_st_keys = cor_st.columns.tolist()
-
-        for c in cor_st_keys:
-            stats.at[i, c] = cor_st.at[method, c]
-
-    options.update(old_options)  # restore options
+    stats = pd.concat(results, ignore_index=True)
+    stats.insert(0, "X", [x for x, _ in combs])
+    stats.insert(1, "Y", [y for _, y in combs])
+    stats.insert(2, "method", method)
+    stats.insert(3, "alternative", alternative)
 
     # Force conversion to numeric
-    stats = stats.astype({"r": float, "n": int, "p_val": float, "outliers": float, "power": float})
+    dtypes = {"r": float, "n": int, "p_val": float, "outliers": float, "power": float}
+    stats = stats.astype({k: v for k, v in dtypes.items() if k in stats.columns})
 
     # Multiple comparisons
     stats = stats.rename(columns={"p_val": "p_unc"})
-    padjust = None if stats["p_unc"].size <= 1 else padjust
-    if padjust is not None:
-        if padjust.lower() != "none":
-            reject, stats["p_corr"] = multicomp(stats["p_unc"].to_numpy(), method=padjust)
-            stats["p_adjust"] = padjust
-    else:
-        stats["p_corr"] = None
-        stats["p_adjust"] = None
-
-    # Standardize correlation coefficients (Fisher z-transformation)
-    # stats['z'] = np.arctanh(stats['r'].to_numpy())
+    stats = _padjust(stats, padjust=padjust)
 
     col_order = [
         "X",

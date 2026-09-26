@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import f
 
-from .config import options
+from .config import _no_rounding
 from .utils import _postprocess_dataframe
 
 __all__ = ["cronbach_alpha", "intraclass_corr"]
@@ -336,12 +336,8 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_poli
     n = data[targets].nunique()
 
     # Two-way ANOVA
-    with np.errstate(invalid="ignore"):
-        # For max precision, make sure rounding is disabled
-        old_options = options.copy()
-        options["round"] = None
+    with np.errstate(invalid="ignore"), _no_rounding():  # For max precision
         aov = anova(data=data, dv=ratings, between=[targets, raters], ss_type=2)
-        options.update(old_options)  # restore options
 
     # Extract mean squares
     msb = aov.at[0, "MS"]

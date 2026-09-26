@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import scipy
 
-from .utils import _check_dataframe, _postprocess_dataframe, remove_na
+from .utils import _check_alternative, _check_dataframe, _postprocess_dataframe, remove_na
 
 __all__ = [
     "mad",
@@ -265,11 +265,7 @@ def mwu(x, y, alternative="two-sided", **kwargs):
     x, y = remove_na(x, y, paired=False)
 
     # Check tails
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_alternative(alternative)
     if "tail" in kwargs:
         raise ValueError(
             "Since Pingouin 0.4.0, the 'tail' argument has been renamed to 'alternative'."
@@ -438,11 +434,7 @@ def wilcoxon(x, y=None, alternative="two-sided", **kwargs):
         x = x[~np.isnan(x)]
 
     # Check tails
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_alternative(alternative)
     if "tail" in kwargs:
         raise ValueError(
             "Since Pingouin 0.4.0, the 'tail' argument has been renamed to 'alternative'."

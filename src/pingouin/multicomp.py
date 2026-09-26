@@ -12,6 +12,27 @@ __all__ = ["multicomp"]
 ##############################################################################
 
 
+def _reject(pvals_corrected, alpha):
+    """Reject the hypotheses with a corrected p-value below alpha (NaN are never rejected)."""
+    with np.errstate(invalid="ignore"):
+        return np.less(pvals_corrected, alpha)
+
+
+def _correct_finite(pvals, alpha, correct):
+    """Apply a p-values correction to the non-NaN p-values only.
+
+    ``correct`` is a function that takes a 1D array of finite p-values (the test family) and
+    returns the corrected p-values. The p-values can have any shape: the finite p-values are
+    flattened before the correction, and the NaN values are kept in place (and never rejected).
+    """
+    pvals = np.asarray(pvals, dtype=float)
+    valid = ~np.isnan(pvals)
+    pvals_corrected = np.full(pvals.shape, np.nan)
+    if valid.any():
+        pvals_corrected[valid] = correct(pvals[valid])
+    return _reject(pvals_corrected, alpha), pvals_corrected
+
+
 def fdr(pvals, alpha=0.05, method="fdr_bh"):
     """P-values FDR correction with Benjamini/Hochberg and
     Benjamini/Yekutieli procedure.
@@ -91,15 +112,7 @@ def fdr(pvals, alpha=0.05, method="fdr_bh"):
     """
     method = method.lower()
     assert method in ["fdr_bh", "fdr_by"]
-    pvals = np.asarray(pvals, dtype=float)
-    # SciPy does not accept NaN: correct the finite p-values (flattened) and keep NaN in place
-    valid = ~np.isnan(pvals)
-    pvals_corrected = np.full(pvals.shape, np.nan)
-    if valid.any():
-        pvals_corrected[valid] = false_discovery_control(pvals[valid], method=method[-2:])
-    with np.errstate(invalid="ignore"):
-        reject = np.less(pvals_corrected, alpha)
-    return reject, pvals_corrected
+    return _correct_finite(pvals, alpha, lambda p: false_discovery_control(p, method=method[-2:]))
 
 
 def bonf(pvals, alpha=0.05):
@@ -166,13 +179,7 @@ def bonf(pvals, alpha=0.05):
     >>> print(reject, pvals_corr)
     [False  True False False  True] [1.     0.015  1.     0.27   0.0015]
     """
-    pvals = np.asarray(pvals)
-    num_nan = np.isnan(pvals).sum()
-    pvals_corrected = pvals * (float(pvals.size) - num_nan)
-    pvals_corrected = np.clip(pvals_corrected, None, 1)
-    with np.errstate(invalid="ignore"):
-        reject = np.less(pvals_corrected, alpha)
-    return reject, pvals_corrected
+    return _correct_finite(pvals, alpha, lambda p: np.clip(p * p.size, None, 1))
 
 
 def holm(pvals, alpha=0.05):
@@ -239,29 +246,15 @@ def holm(pvals, alpha=0.05):
     >>> print(reject, pvals_corr)
     [False  True False False  True] [0.64   0.012  0.64   0.162  0.0015]
     """
-    # Convert to array and save original shape
-    pvals = np.asarray(pvals)
-    shape_init = pvals.shape
-    pvals = pvals.ravel()
-    num_nan = np.isnan(pvals).sum()
 
-    # Sort the (flattened) p-values
-    pvals_sortind = np.argsort(pvals)
-    pvals_sorted = pvals[pvals_sortind]
-    sortrevind = pvals_sortind.argsort()
-    ntests = pvals.size - num_nan
+    def _holm(p):
+        # Running maximum of the sorted p-values multiplied by n, n - 1, ..., 1
+        order = np.argsort(p)
+        pvals_corr = np.empty(p.size)
+        pvals_corr[order] = np.maximum.accumulate(p[order] * np.arange(p.size, 0, -1))
+        return np.clip(pvals_corr, None, 1)
 
-    # Now we adjust the p-values
-    pvals_corr = pvals_sorted[:ntests] * np.arange(ntests, 0, -1)
-    pvals_corr = np.maximum.accumulate(pvals_corr)
-    pvals_corr = np.clip(pvals_corr, None, 1)
-
-    # And revert to the original shape and order
-    pvals_corr = np.append(pvals_corr, np.full(num_nan, np.nan))
-    pvals_corrected = pvals_corr[sortrevind].reshape(shape_init)
-    with np.errstate(invalid="ignore"):
-        reject = np.less(pvals_corrected, alpha)
-    return reject, pvals_corrected
+    return _correct_finite(pvals, alpha, _holm)
 
 
 def sidak(pvals, alpha=0.05):
@@ -315,18 +308,7 @@ def sidak(pvals, alpha=0.05):
     >>> print(reject, np.round(pvals_corr, 4))
     [False  True False False  True] [0.9688 0.0149 0.8546 0.2424 0.0015]
     """
-    pvals = np.asarray(pvals)
-    num_nan = np.isnan(pvals).sum()
-    ntests = float(pvals.size) - num_nan
-    if ntests == 0:
-        # Empty test family (all p-values are NaN): ``1 - (1 - nan) ** 0`` would evaluate to 0.
-        pvals_corrected = np.full(pvals.shape, np.nan)
-    else:
-        pvals_corrected = 1 - np.power((1.0 - pvals), ntests)
-    pvals_corrected = np.clip(pvals_corrected, None, 1)
-    with np.errstate(invalid="ignore"):
-        reject = np.less(pvals_corrected, alpha)
-    return reject, pvals_corrected
+    return _correct_finite(pvals, alpha, lambda p: 1 - (1 - p) ** p.size)
 
 
 ##############################################################################
@@ -460,29 +442,27 @@ def multicomp(pvals, alpha=0.05, method="holm"):
     [False  True False False  True] [0.5    0.009     nan 0.108  0.0012]
     """
     # Safety check
-    assert isinstance(pvals, (list, np.ndarray, Series)), "pvals must be list or array"
+    assert isinstance(pvals, (list, tuple, np.ndarray, Series)), "pvals must be list or array"
     assert isinstance(alpha, float), "alpha must be a float."
     assert isinstance(method, str), "method must be a string."
     assert 0 < alpha < 1, "alpha must be between 0 and 1."
     pvals = np.asarray(pvals)
+    method = method.lower()
 
-    if method.lower() in ["b", "bonf", "bonferroni"]:
-        reject, pvals_corrected = bonf(pvals, alpha=alpha)
-    elif method.lower() in ["h", "holm"]:
-        reject, pvals_corrected = holm(pvals, alpha=alpha)
-    elif method.lower() in ["s", "sidak"]:
-        reject, pvals_corrected = sidak(pvals, alpha=alpha)
-    elif method.lower() in ["fdr", "fdr_bh", "bh"]:
-        reject, pvals_corrected = fdr(pvals, alpha=alpha, method="fdr_bh")
-    elif method.lower() in ["fdr_by", "by"]:
-        reject, pvals_corrected = fdr(pvals, alpha=alpha, method="fdr_by")
-    elif method.lower() == "none":
-        pvals_corrected = pvals
-        with np.errstate(invalid="ignore"):
-            reject = np.less(pvals_corrected, alpha)
-    else:
-        raise ValueError("Multiple comparison method not recognized")
-    return reject, pvals_corrected
+    if method in ["b", "bonf", "bonferroni"]:
+        return bonf(pvals, alpha=alpha)
+    elif method in ["h", "holm"]:
+        return holm(pvals, alpha=alpha)
+    elif method in ["s", "sidak"]:
+        return sidak(pvals, alpha=alpha)
+    elif method in ["fdr", "fdr_bh", "bh"]:
+        return fdr(pvals, alpha=alpha, method="fdr_bh")
+    elif method in ["fdr_by", "by"]:
+        return fdr(pvals, alpha=alpha, method="fdr_by")
+    elif method == "none":
+        # Return a copy, so that the output is never a view on the user's input
+        return _reject(pvals, alpha), pvals.copy()
+    raise ValueError("Multiple comparison method not recognized")
 
 
 def _multicomp_triu(mat_upper, method, alpha=0.05):

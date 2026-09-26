@@ -6,6 +6,8 @@ import numpy as np
 from scipy import stats
 from scipy.optimize import brenth
 
+from .utils import _check_alternative
+
 __all__ = [
     "power_ttest",
     "power_ttest2n",
@@ -158,11 +160,7 @@ def power_ttest(
         raise ValueError("Exactly one of n, d, power, and alpha must be None.")
 
     # Safety checks
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_alternative(alternative)
     assert contrast.lower() in ["one-sample", "paired", "two-samples"]
     tsample = 2 if contrast.lower() == "two-samples" else 1
     if d is not None and alternative == "two-sided":
@@ -275,11 +273,7 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative="two-sided
         raise ValueError("Exactly one of d, power, and alpha must be None")
 
     # Safety checks
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_alternative(alternative)
     if d is not None and alternative == "two-sided":
         d = abs(d)
     if alpha is not None:
@@ -712,11 +706,7 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative="two-sided"):
         raise ValueError("Exactly one of n, r, power, and alpha must be None")
 
     # Safety checks
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_alternative(alternative)
 
     if r is not None:
         assert -1 <= r <= 1

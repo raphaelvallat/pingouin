@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 from scipy.stats import pearsonr
 
-from .utils import _check_eftype, remove_na
+from .utils import _check_alternative, _check_eftype, remove_na
 
 __all__ = [
     "compute_esci",
@@ -145,11 +145,7 @@ def compute_esci(
     from scipy.stats import norm, t
 
     assert eftype.lower() in ["r", "pearson", "spearman", "cohen", "d", "g", "hedges"]
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_alternative(alternative)
     assert stat is not None and nx is not None
     assert isinstance(confidence, float)
     assert 0 < confidence < 1, "confidence must be between 0 and 1."

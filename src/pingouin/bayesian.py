@@ -251,12 +251,10 @@ def bayesfactor_pearson(r, n, alternative="two-sided", method="ly", kappa=1.0):
     """
     from scipy.special import betaln, gamma, hyp2f1
 
+    from .utils import _check_alternative  # Local import to avoid a circular import with config
+
     assert method.lower() in ["ly", "wetzels"], "Method not recognized."
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_alternative(alternative)
 
     # Wrong input
     if not np.isfinite(r) or n < 2:
