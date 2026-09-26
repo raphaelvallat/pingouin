@@ -11,7 +11,6 @@ from scipy.stats import studentized_range
 from .config import _no_rounding
 from .effsize import compute_effsize
 from .multicomp import _multicomp_triu, multicomp
-from .parametric import anova
 from .utils import (
     _check_alternative,
     _check_dataframe,
@@ -684,8 +683,10 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
         case this argument is no longer needed.
     dv : string
         Name of column containing the dependent variable.
-    between: string
-        Name of column containing the between factor.
+    between : string or list with N elements
+        Name of column(s) containing the between factor(s). If ``between`` is a list with two or
+        more elements, all the combinations of levels (cells) of the factors are compared, i.e.
+        the interaction term.
     effsize : string or None
         Effect size type. Available methods are:
 
@@ -702,7 +703,8 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     -------
     stats : :py:class:`pandas.DataFrame`
 
-        * ``'A'``: Name of first measurement
+        * ``'A'``: Name of first measurement (a tuple with one level per factor if ``between``
+          has several factors)
         * ``'B'``: Name of second measurement
         * ``'mean_A'``: Mean of first measurement
         * ``'mean_B'``: Mean of second measurement
@@ -723,8 +725,11 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
 
     It has been proven to be conservative for one-way ANOVA with unequal sample sizes. However, it
     is not robust if the groups have unequal variances, in which case the Games-Howell test is
-    more adequate. Tukey HSD is not valid for repeated measures ANOVA. Only one-way ANOVA design
-    are supported.
+    more adequate. Tukey HSD is not valid for repeated measures ANOVA.
+
+    With several between factors, the groups are all the observed combinations of levels of the
+    factors, and :math:`\\text{MS}_w` is the residual of the full factorial ANOVA (with all the
+    interactions). This is the same as ``TukeyHSD(aov(dv ~ A * B), which = "A:B")`` in R.
 
     The T-values are defined as:
 
@@ -771,15 +776,30 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     0     Adelie  Chinstrap  3700.662  3733.088   -32.426  67.512  -0.480    0.881  -0.074
     1     Adelie     Gentoo  3700.662  5076.016 -1375.354  56.148 -24.495    0.000  -2.860
     2  Chinstrap     Gentoo  3733.088  5076.016 -1342.928  69.857 -19.224    0.000  -2.875
+
+    Tukey post-hocs on the interaction of species and sex, i.e. all the pairs of species x sex
+    combinations. This is the same as ``TukeyHSD(aov(body_mass_g ~ species * sex),
+    which = "species:sex")`` in R.
+
+    >>> stats = pg.pairwise_tukey(data=df, dv="body_mass_g", between=["species", "sex"])
+    >>> stats[["A", "B", "diff", "T", "p_tukey"]].head(4).round(3)
+                      A                    B      diff       T  p_tukey
+    0  (Adelie, female)       (Adelie, male)  -674.658 -13.174    0.000
+    1  (Adelie, female)  (Chinstrap, female)  -158.370  -2.465    0.138
+    2  (Adelie, female)    (Chinstrap, male)  -570.135  -8.875    0.000
+    3  (Adelie, female)     (Gentoo, female) -1310.906 -24.088    0.000
     """
-    # First compute the ANOVA
-    with _no_rounding():  # For max precision
-        aov = anova(dv=dv, data=data, between=between, detailed=True)
-    df = aov.at[1, "DF"]
-    stats, n, _ = _pairwise_between(data, dv, between, effsize)
+    data = _check_dataframe(dv=dv, between=between, effects="between", data=data)
+    stats, n, gvars = _pairwise_between(data, dv, between, effsize)
     ng = n.size
     g1, g2 = np.triu_indices(ng, k=1)
-    gvar = aov.at[1, "MS"] / n
+
+    # Mean squares of the error, pooled across all the groups (or cells). This is the residual of
+    # the one-way ANOVA, or of the full factorial ANOVA when there are several factors.
+    # Groups with a single observation have an undefined variance but no residual.
+    df = n.sum() - ng
+    ms_within = np.nansum((n - 1) * gvars) / df
+    gvar = ms_within / n
     stats["se"] = np.sqrt(gvar[g1] + gvar[g2])
     stats["T"] = stats["diff"] / stats["se"]
 
@@ -799,8 +819,10 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
         DataFrame
     dv : string
         Name of column containing the dependent variable.
-    between: string
-        Name of column containing the between factor.
+    between : string or list with N elements
+        Name of column(s) containing the between factor(s). If ``between`` is a list with two or
+        more elements, all the combinations of levels (cells) of the factors are compared, i.e.
+        the interaction term.
     effsize : string or None
         Effect size type. Available methods are:
 
@@ -818,7 +840,8 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     stats : :py:class:`pandas.DataFrame`
         Stats summary:
 
-        * ``'A'``: Name of first measurement
+        * ``'A'``: Name of first measurement (a tuple with one level per factor if ``between``
+          has several factors)
         * ``'B'``: Name of second measurement
         * ``'mean_A'``: Mean of first measurement
         * ``'mean_B'``: Mean of second measurement
@@ -839,7 +862,8 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     Games-Howell [1]_ is very similar to the Tukey HSD post-hoc test but is much more robust to
     heterogeneity of variances. While the Tukey-HSD post-hoc is optimal after a classic one-way
     ANOVA, the Games-Howell is optimal after a Welch ANOVA. Please note that Games-Howell
-    is not valid for repeated measures ANOVA. Only one-way ANOVA design are supported.
+    is not valid for repeated measures ANOVA. With several between factors, the groups are all
+    the observed combinations of levels of the factors.
 
     Compared to the Tukey-HSD test, the Games-Howell test uses different pooled variances for
     each pair of variables instead of the same pooled variance.
@@ -907,18 +931,25 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
 
 
 def _pairwise_between(data, dv, between, effsize):
-    """Group summary and exact effect sizes of all the pairs of levels of a between factor.
+    """Group summary and exact effect sizes of all the pairs of levels of the between factor(s).
 
     Shared by :py:func:`pairwise_tukey` and :py:func:`pairwise_gameshowell`. Returns the output
     dataframe (A, B, mean_A, mean_B, diff and effect size columns, one row per pair), and the
     per-group sample sizes and variances.
     """
+    between = _flatten_list([between])
+    data = data[[dv, *between]].dropna()
+    if len(between) == 1:
+        between = between[0]  # Scalar labels instead of 1-tuples
     # Levels are sorted with groupby (default sort=True) and not np.unique, because the latter
     # does not respect the custom sorting of a Categorical column.
     # See https://github.com/raphaelvallat/pingouin/issues/111
+    # With several factors, the groups are all the observed combinations of levels (cells), and
+    # the labels are tuples with one level per factor.
     grp = data.groupby(between, observed=True)[dv]
     groups = {k: v.to_numpy(dtype=np.float64) for k, v in grp}
-    labels = np.array(list(groups))
+    labels = np.empty(len(groups), dtype=object)
+    labels[:] = list(groups)
     n = grp.count().to_numpy()
     gmeans = grp.mean(numeric_only=True).to_numpy()
     gvars = grp.var(numeric_only=True).to_numpy()

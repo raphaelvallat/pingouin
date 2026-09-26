@@ -608,6 +608,31 @@ class TestPairwise(TestCase):
         sig = stats["p_tukey"].apply(lambda x: "Yes" if x < 0.05 else "No").to_numpy()
         assert np.array_equal(sig, ["No", "Yes", "Yes"])
 
+        # Interaction of two factors: all the pairs of species x sex cells. Compare with R:
+        # TukeyHSD(aov(body_mass_g ~ species * sex, data=df), which="species:sex")
+        stats = df.pairwise_tukey(dv="body_mass_g", between=["species", "sex"])
+        assert stats.shape[0] == 15
+        assert stats.at[0, "A"] == ("Adelie", "female")
+        assert stats.at[0, "B"] == ("Adelie", "male")
+        # R: Adelie:male-Adelie:female, Chinstrap:female-Adelie:female, Chinstrap:male-Adelie:male,
+        # Chinstrap:male-Chinstrap:female
+        idx = [0, 1, 6, 9]
+        np.testing.assert_allclose(
+            stats.loc[idx, "diff"], [-674.6575342, -158.3702659, 104.5225624, -411.7647059]
+        )
+        np.testing.assert_allclose(
+            stats.loc[idx, "p_tukey"], [0, 0.1376213087, 0.5812048336, 0.0000012196], atol=1e-8
+        )
+        # Same as a single factor with one level per cell
+        df_cells = df.dropna(subset=["species", "sex"]).copy()
+        df_cells["cell"] = df_cells["species"] + "_" + df_cells["sex"]
+        stats_cells = df_cells.pairwise_tukey(dv="body_mass_g", between="cell")
+        num = ["mean_A", "mean_B", "diff", "se", "T", "p_tukey", "hedges"]
+        np.testing.assert_allclose(stats[num], stats_cells[num])
+        # A list with a single factor is the same as a string
+        stats = df.pairwise_tukey(dv="body_mass_g", between=["species"])
+        assert stats.equals(df.pairwise_tukey(dv="body_mass_g", between="species"))
+
     def test_pairwise_gameshowell(self):
         """Test function pairwise_gameshowell.
 
@@ -663,6 +688,15 @@ class TestPairwise(TestCase):
         # P-values Pingouin: [0.3719, 0.0010, 0.0010]
         sig = stats["pval"].apply(lambda x: "Yes" if x < 0.05 else "No").to_numpy()
         assert np.array_equal(sig, ["No", "Yes", "Yes"])
+
+        # Interaction of two factors: same as a single factor with one level per cell
+        stats = pairwise_gameshowell(data=df, dv="body_mass_g", between=["species", "sex"])
+        assert stats.at[0, "A"] == ("Adelie", "female")
+        df_cells = df.dropna(subset=["species", "sex"]).copy()
+        df_cells["cell"] = df_cells["species"] + "_" + df_cells["sex"]
+        stats_cells = pairwise_gameshowell(data=df_cells, dv="body_mass_g", between="cell")
+        num = ["mean_A", "mean_B", "diff", "se", "T", "df", "pval", "hedges"]
+        np.testing.assert_allclose(stats[num], stats_cells[num])
 
     def test_pairwise_corr(self):
         """Test function pairwise_corr"""
