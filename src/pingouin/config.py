@@ -1,6 +1,8 @@
-from .bayesian import _format_bf
-
 """Pingouin global configuration."""
+
+from contextlib import contextmanager
+
+from .bayesian import _format_bf
 
 __all__ = ["options", "set_default_options"]
 
@@ -19,3 +21,23 @@ def set_default_options():
     options["round.column.CI95"] = 2
     # default is to return Bayes factors inside DataFrames as formatted str
     options["round.column.BF10"] = _format_bf
+
+
+@contextmanager
+def _no_rounding():
+    """Temporarily disable rounding, e.g. when calling public functions internally.
+
+    Both the global ``round`` option and all the per-column/row/cell ``round.*`` overrides
+    (including formatters such as the Bayes Factor one) are disabled, so that the internal results
+    are kept at full precision. Rounding and formatting are then applied once, on the final
+    output. The original options are always restored, even if an exception is raised.
+    """
+    old_options = options.copy()
+    for key in [k for k in options if k.startswith("round.")]:
+        del options[key]
+    options["round"] = None
+    try:
+        yield
+    finally:
+        options.clear()
+        options.update(old_options)

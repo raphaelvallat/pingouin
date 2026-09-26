@@ -18,8 +18,19 @@ __all__ = [
     "remove_na",
     "_flatten_list",
     "_check_dataframe",
+    "_check_alternative",
+    "_format_pairwise_matrix",
     "_is_mpmath_installed",
 ]
+
+
+def _check_alternative(alternative):
+    """Check that ``alternative`` is one of 'two-sided', 'greater' or 'less'."""
+    assert alternative in [
+        "two-sided",
+        "greater",
+        "less",
+    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
 
 
 def _perm_pval(bootstat, estimate, alternative="two-sided"):
@@ -40,7 +51,7 @@ def _perm_pval(bootstat, estimate, alternative="two-sided"):
     p : float
         P-value.
     """
-    assert alternative in ["two-sided", "greater", "less"], "Wrong tail argument."
+    _check_alternative(alternative)
     assert isinstance(estimate, (int, float))
     bootstat = np.asarray(bootstat)
     assert bootstat.ndim == 1, "bootstat must be a 1D array."
@@ -120,14 +131,19 @@ def _postprocess_dataframe(df):
         Dataframe with post-processing applied
     """
     df = df.copy()
+    formatted_cols = set()
     for row, col in it.product(df.index, df.columns):
         round_option = _get_round_setting_for(row, col)
         if round_option is None:
             continue
         if callable(round_option):
             newval = round_option(df.at[row, col])
-            # ensure that dtype changes are processed
-            df[col] = df[col].astype(type(newval))
+            # The callable can change the type of the value (e.g. float -> str). The column is
+            # temporarily cast to object so that the other cells are left untouched, and its
+            # final dtype is inferred once all the cells have been formatted.
+            if col not in formatted_cols:
+                df[col] = df[col].astype(object)
+                formatted_cols.add(col)
             df.at[row, col] = newval
             continue
         if isinstance(df.at[row, col], bool):
@@ -144,7 +160,38 @@ def _postprocess_dataframe(df):
                 # No rounding if value is not a float array
                 continue
         df.at[row, col] = np.round(df.at[row, col], decimals=round_option)
+    for col in formatted_cols:
+        df[col] = df[col].infer_objects()
     return df
+
+
+def _format_pairwise_matrix(mat, mat_upper, decimals=3, stars=True, pval_stars=None):
+    """Combine two square matrices into a single pairwise matrix of str.
+
+    Used by :py:func:`pingouin.rcorr` and :py:func:`pingouin.ptests`. The output has the lower
+    triangle of ``mat``, "-" on the diagonal, and the strict upper triangle of ``mat_upper``.
+
+    If ``pval_stars`` is a dict, ``mat_upper`` contains p-values, which are displayed as stars
+    (``stars=True``, the smallest matching threshold of ``pval_stars`` is used regardless of the
+    dict order), or as str with ``decimals`` decimals (``stars=False``). Otherwise,
+    ``mat_upper`` is displayed as-is.
+    """
+    if pval_stars is not None:
+        if stars:
+            thresholds = sorted(pval_stars.items())
+
+            def fmt(p):
+                return next((value for key, value in thresholds if p < key), "")
+
+        else:
+
+            def fmt(p):
+                return np.format_float_positional(p, precision=decimals)
+
+        mat_upper = mat_upper.map(fmt)
+    upper = np.triu(np.ones(mat.shape, dtype=bool), k=1)
+    diagonal = np.eye(mat.shape[0], dtype=bool)
+    return mat.astype(str).where(~upper, mat_upper).where(~diagonal, "-")
 
 
 def _get_round_setting_for(row, col):

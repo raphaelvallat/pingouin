@@ -8,7 +8,13 @@ from scipy.stats import f
 
 from .bayesian import bayesfactor_ttest
 from .distribution import _contrast_cov, _gg_epsilon, _mauchly_sphericity
-from .utils import _check_dataframe, _flatten_list, _postprocess_dataframe, remove_na
+from .utils import (
+    _check_alternative,
+    _check_dataframe,
+    _flatten_list,
+    _postprocess_dataframe,
+    remove_na,
+)
 
 __all__ = ["ttest", "rm_anova", "anova", "welch_anova", "mixed_anova", "ancova"]
 
@@ -205,11 +211,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     from pingouin import compute_effsize, power_ttest, power_ttest2n
 
     # Check arguments
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_alternative(alternative)
     assert 0 < confidence < 1, "confidence must be between 0 and 1."
 
     x = np.asarray(x)

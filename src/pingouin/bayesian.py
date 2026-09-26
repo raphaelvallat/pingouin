@@ -11,8 +11,6 @@ __all__ = ["bayesfactor_ttest", "bayesfactor_pearson", "bayesfactor_binom"]
 
 def _format_bf(bf, precision=3, trim="0"):
     """Format BF10 to floating point or scientific notation."""
-    if isinstance(bf, str):
-        return bf
     if bf >= 1e4 or bf <= 1e-4:
         out = np.format_float_scientific(bf, precision=precision, trim=trim)
     else:
@@ -251,12 +249,10 @@ def bayesfactor_pearson(r, n, alternative="two-sided", method="ly", kappa=1.0):
     """
     from scipy.special import betaln, gamma, hyp2f1
 
+    from .utils import _check_alternative  # Local import to avoid a circular import with config
+
     assert method.lower() in ["ly", "wetzels"], "Method not recognized."
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_alternative(alternative)
 
     # Wrong input
     if not np.isfinite(r) or n < 2:

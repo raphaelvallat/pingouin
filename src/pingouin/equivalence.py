@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 
+from .config import _no_rounding
 from .parametric import ttest
 from .utils import _postprocess_dataframe
 
@@ -76,8 +77,9 @@ def tost(x, y, bound=1, paired=False, correction=False):
     assert isinstance(bound, (int, float)), "bound must be int or float."
 
     # T-tests
-    df_a = ttest(x + bound, y, paired=paired, correction=correction, alternative="greater")
-    df_b = ttest(x - bound, y, paired=paired, correction=correction, alternative="less")
+    with _no_rounding():  # For max precision
+        df_a = ttest(x + bound, y, paired=paired, correction=correction, alternative="greater")
+        df_b = ttest(x - bound, y, paired=paired, correction=correction, alternative="less")
     pval = max(df_a.at["T_test", "p_val"], df_b.at["T_test", "p_val"])
 
     # Create output dataframe

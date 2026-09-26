@@ -8,11 +8,17 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.stats import kendalltau, pearsonr, spearmanr
 
 from .bayesian import bayesfactor_pearson
-from .config import options
+from .config import _no_rounding
 from .effsize import compute_esci
 from .multicomp import _multicomp_triu
 from .power import power_corr
-from .utils import _perm_pval, _postprocess_dataframe, remove_na
+from .utils import (
+    _check_alternative,
+    _format_pairwise_matrix,
+    _perm_pval,
+    _postprocess_dataframe,
+    remove_na,
+)
 
 __all__ = ["corr", "partial_corr", "pcorr", "rcorr", "rm_corr", "distance_corr"]
 
@@ -48,11 +54,7 @@ def _correl_pvalue(r, n, k=0, alternative="two-sided"):
     """
     from scipy.stats import t
 
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_alternative(alternative)
 
     if np.isclose(r**2, 1):  # Avoid divide by zero error
         # p-value approaches 0 as |r| approaches 1, unless r is in the opposite
@@ -580,11 +582,7 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
     y = np.asarray(y)
     assert x.ndim == y.ndim == 1, "x and y must be 1D array."
     assert x.size == y.size, "x and y must have the same length."
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_alternative(alternative)
     if "tail" in kwargs:
         raise ValueError(
             "Since Pingouin 0.4.0, the 'tail' argument has been renamed to 'alternative'."
@@ -830,11 +828,7 @@ def partial_corr(
     from pingouin.utils import _flatten_list
 
     # Safety check
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_alternative(alternative)
     assert method in [
         "pearson",
         "spearman",
@@ -1125,7 +1119,6 @@ def rcorr(
     Extraversion       -0.35            -      497
     Openness           -0.01        0.265        -
     """
-    from numpy import format_float_positional as ffp
     from scipy.special import stdtr
 
     # Safety check
@@ -1152,33 +1145,10 @@ def rcorr(
             # Only the unique pairs (strict upper triangle) belong to the test family.
             mat_upper = _multicomp_triu(mat_upper, method=padjust, alpha=0.05)
 
-    # Convert r to text
-    mat = mat.astype(str)
-
-    # Modification of the diagonal
-    for i in range(len(mat)):
-        mat.iat[i, i] = "-"
-
-    if upper == "pval":
-
-        def replace_pval(x):
-            # Check the smallest thresholds first, regardless of the dict order
-            for key, value in sorted(pval_stars.items()):
-                if x < key:
-                    return value
-            return ""
-
-        if stars:
-            # Replace p-values by stars
-            mat_upper = mat_upper.map(replace_pval)
-        else:
-            mat_upper = mat_upper.map(lambda x: ffp(x, precision=decimals))
-
-    # Replace upper triangle by p-values or n
-    mask = np.triu(np.ones(mat.shape, dtype=bool), k=1)
-    mat = mat.where(~mask, mat_upper)
-
-    return mat
+    # r on the lower triangle, and p-values (as stars or str) or n on the upper triangle
+    return _format_pairwise_matrix(
+        mat, mat_upper, decimals, stars, pval_stars=pval_stars if upper == "pval" else None
+    )
 
 
 def rm_corr(data=None, x=None, y=None, subject=None):
@@ -1261,13 +1231,8 @@ def rm_corr(data=None, x=None, y=None, subject=None):
     data = data[[x, y, subject]].dropna(axis=0)
 
     # Using PINGOUIN
-    # For max precision, make sure rounding is disabled
-    old_options = options.copy()
-    options["round"] = None
-    try:
+    with _no_rounding():  # For max precision
         aov = ancova(dv=y, covar=x, between=subject, data=data)
-    finally:
-        options.update(old_options)  # restore options, even if ancova fails
     bw = aov.bw_  # Beta within parameter
     sign = np.sign(bw)
     dof = int(aov.at[2, "DF"])
@@ -1391,11 +1356,7 @@ def distance_corr(x, y, alternative="greater", n_boot=1000, seed=None):
     >>> round(distance_corr(a, b, n_boot=None), 3)
     0.88
     """
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_alternative(alternative)
     x = np.asarray(x)
     y = np.asarray(y)
     # Check for NaN values
