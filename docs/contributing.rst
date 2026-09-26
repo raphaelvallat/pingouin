@@ -64,7 +64,7 @@ Continuous Integration
 
 Pingouin uses `GitHub Actions <https://docs.github.com/en/actions>`_ for continuous integration. The following workflows run automatically on every push and pull request to the ``main`` branch:
 
-* **PyTest** — runs the test suite on Ubuntu, macOS and Windows across Python 3.10, 3.12 and 3.14, as well as against a range of historical dependency versions (from minimum supported to latest).
+* **PyTest** — runs the test suite on Ubuntu, macOS and Windows across Python 3.11, 3.12 and 3.14, as well as against a range of historical dependency versions (from minimum supported to latest).
 * **Coverage** — measures test coverage and uploads the report to `Codecov <https://codecov.io/gh/raphaelvallat/pingouin>`_.
 * **Ruff** — checks code style and formatting.
 * **Documentation** — builds the Sphinx documentation and uploads the result as a downloadable artifact.

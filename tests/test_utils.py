@@ -11,9 +11,6 @@ from pingouin.utils import (
     _flatten_list,
     _get_round_setting_for,
     _is_mpmath_installed,
-    _is_sklearn_installed,
-    _is_sklearn_version_compatible,
-    _is_statsmodels_installed,
     _perm_pval,
     _postprocess_dataframe,
     print_table,
@@ -199,18 +196,6 @@ class TestUtils(TestCase):
         with pytest.raises(ValueError):
             _check_dataframe(dv="Values", between="Group", within="Time", effects="within", data=df)
 
-    def _is_statsmodels_installed(self):
-        """Test function _is_statsmodels_installed."""
-        assert isinstance(_is_statsmodels_installed(), bool)
-
-    def _is_sklearn_installed(self):
-        """Test function _is_sklearn_installed."""
-        assert isinstance(_is_sklearn_installed(), bool)
-
-    def _is_sklearn_version_compatible(self):
-        """Test function _is_sklearn_version_compatible."""
-        assert isinstance(_is_sklearn_version_compatible(), bool)
-
-    def _is_mpmath_installed(self):
+    def test_is_mpmath_installed(self):
         """Test function _is_mpmath_installed."""
         assert isinstance(_is_mpmath_installed(), bool)

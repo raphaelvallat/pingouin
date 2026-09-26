@@ -2,6 +2,7 @@
 # Date: April 2018
 import numpy as np
 from pandas import DataFrame, Series
+from scipy.stats import false_discovery_control
 
 __all__ = ["multicomp"]
 
@@ -63,6 +64,9 @@ def fdr(pvals, alpha=0.05, method="fdr_bh"):
     .. math::
         P_{(k)} \\leq \\frac{k}{m \\cdot c(m)} \\alpha
 
+    The adjusted p-values are computed with :py:func:`scipy.stats.false_discovery_control`.
+    Missing values are ignored and returned as NaN.
+
     References
     ----------
     - Benjamini, Y., and Hochberg, Y. (1995). Controlling the false discovery
@@ -85,37 +89,16 @@ def fdr(pvals, alpha=0.05, method="fdr_bh"):
     >>> print(reject, pvals_corr)
     [False  True False False  True] [0.5    0.0075 0.4    0.09   0.0015]
     """
-    assert method.lower() in ["fdr_bh", "fdr_by"]
-    # Convert to array and save original shape
-    pvals = np.asarray(pvals)
-    shape_init = pvals.shape
-    pvals = pvals.ravel()
-    num_nan = np.isnan(pvals).sum()
-
-    # Sort the (flattened) p-values
-    pvals_sortind = np.argsort(pvals)
-    pvals_sorted = pvals[pvals_sortind]
-    sortrevind = pvals_sortind.argsort()
-    ntests = pvals.size - num_nan
-
-    # Empirical CDF factor
-    ecdffactor = np.arange(1, ntests + 1) / float(ntests)
-
-    if method.lower() == "fdr_by":
-        cm = np.sum(1.0 / np.arange(1, ntests + 1))
-        ecdffactor /= cm
-
-    # Now we adjust the p-values
-    pvals_corr = pvals_sorted[:ntests] / ecdffactor
-    pvals_corr = np.minimum.accumulate(pvals_corr[::-1])[::-1]
-    pvals_corr = np.clip(pvals_corr, None, 1)
-
-    # And revert to the original shape and order
-    pvals_corr = np.append(pvals_corr, np.full(num_nan, np.nan))
-    pvals_corrected = pvals_corr[sortrevind].reshape(shape_init)
+    method = method.lower()
+    assert method in ["fdr_bh", "fdr_by"]
+    pvals = np.asarray(pvals, dtype=float)
+    # SciPy does not accept NaN: correct the finite p-values (flattened) and keep NaN in place
+    valid = ~np.isnan(pvals)
+    pvals_corrected = np.full(pvals.shape, np.nan)
+    if valid.any():
+        pvals_corrected[valid] = false_discovery_control(pvals[valid], method=method[-2:])
     with np.errstate(invalid="ignore"):
         reject = np.less(pvals_corrected, alpha)
-    # reject = reject[sortrevind].reshape(shape_init)
     return reject, pvals_corrected
 
 

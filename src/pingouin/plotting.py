@@ -862,10 +862,6 @@ def plot_rm_corr(
     _kwargs_scatter = {"marker": "o"}
     _kwargs_scatter.update(kwargs_scatter or {})
 
-    # Check that stasmodels is installed
-    from pingouin.utils import _is_statsmodels_installed
-
-    _is_statsmodels_installed(raise_error=True)
     from statsmodels.formula.api import ols
 
     # Safety check (duplicated from pingouin.rm_corr)

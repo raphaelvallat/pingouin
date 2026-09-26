@@ -823,10 +823,6 @@ def logistic_regression(
     | 6              | 4.96     | 141.4          | 0.99             |
     +----------------+----------+----------------+------------------+
     """
-    # Check that sklearn is installed
-    from pingouin.utils import _is_sklearn_installed
-
-    _is_sklearn_installed(raise_error=True)
     from sklearn.linear_model import LogisticRegression
 
     assert 0 < alpha < 1, "alpha must be between 0 and 1."
@@ -859,13 +855,9 @@ def logistic_regression(
         # likelihood estimates (e.g. 3rd decimal of the coefficients)
         kwargs.setdefault("tol", 1e-8)
     if "penalty" not in kwargs and "C" not in kwargs:
-        import sklearn
-
-        _sklearn_v18_plus = tuple(int(x) for x in sklearn.__version__.split(".")[:2]) >= (1, 8)
-        if _sklearn_v18_plus:  # pragma: no branch
-            kwargs["C"] = np.inf  # penalty=None deprecated in sklearn 1.8; C=np.inf is equivalent
-        else:  # pragma: no cover
-            kwargs["penalty"] = None
+        # No regularization. C=np.inf is equivalent to penalty=None, which is deprecated in
+        # sklearn 1.8
+        kwargs["C"] = np.inf
     lom = LogisticRegression(**kwargs)
     with warnings.catch_warnings():
         # sklearn 1.8 maps C=np.inf to penalty=None and then warns that C is ignored

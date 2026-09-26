@@ -116,10 +116,6 @@ def skipped(x, y, corr_type="spearman"):
        Toolbox. Frontiers in Psychology. 2012;3:606.
        doi:10.3389/fpsyg.2012.00606.
     """
-    # Check that sklearn is installed
-    from pingouin.utils import _is_sklearn_installed
-
-    _is_sklearn_installed(raise_error=True)
     from scipy.stats import chi2
     from sklearn.covariance import MinCovDet
 

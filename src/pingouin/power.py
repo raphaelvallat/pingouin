@@ -28,14 +28,8 @@ def _solve(func, lower, upper):
 
 
 def _ncf_sf(fcrit, dof1, dof2, nc):
-    """Survival function of the non-central F distribution, i.e. the power of an F-test.
-
-    The non-centrality parameter is capped at 1e9: SciPy < 1.11 aborts the Python process (Boost
-    integer overflow) when nc > ~4.3e9, which the root-finding brackets can easily reach. Power
-    is saturated long before that for any realistic design, so this only matters if the true
-    solution requires nc > 1e9.
-    """
-    return stats.ncf.sf(fcrit, dof1, dof2, np.minimum(nc, 1e9))
+    """Survival function of the non-central F distribution, i.e. the power of an F-test."""
+    return stats.ncf.sf(fcrit, dof1, dof2, nc)
 
 
 def _power_nct(nc, dof, alpha, alternative):
