@@ -117,3 +117,5 @@ class TestBayesian(TestCase):
         assert bayesfactor_binom(16, 20, 0.8) == bf10(4.582187)
         assert bayesfactor_binom(14, 20, a=6, b=4) == bf10(0.37901)
         assert bayesfactor_binom(100, 1000, 0.1) == bf10(42.05881)
+        # NumPy integers are accepted
+        assert bayesfactor_binom(np.int64(16), np.int64(20)) == bf10(0.09703159)

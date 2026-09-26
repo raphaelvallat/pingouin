@@ -811,3 +811,20 @@ class TestParametric(TestCase):
         # Other parameters
         ancova(data=df, dv="Scores", covar=["Income", "BMI"], between="Method")
         ancova(data=df, dv="Scores", covar=["Income"], between="Method")
+        # Column names are never evaluated as code in the model formula (any name is accepted)
+        aov = ancova(data=df, dv="Scores", covar=["Income", "BMI"], between="Method")
+        names = {
+            "Scores": "C",
+            "Method": "Q",
+            "Income": "family's income",
+            "BMI": "BMI') + __import__('builtins').exit(\"INJECTED\") + Q('Income",
+        }
+        aov_names = ancova(
+            data=df.rename(columns=names),
+            dv="C",
+            covar=[names["Income"], names["BMI"]],
+            between="Q",
+        )
+        assert aov_names["Source"].tolist() == ["Q", names["Income"], names["BMI"], "Residual"]
+        pd.testing.assert_frame_equal(aov.drop(columns="Source"), aov_names.drop(columns="Source"))
+        assert aov_names.bw_ == aov.bw_

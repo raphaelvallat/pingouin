@@ -1702,15 +1702,16 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     # Drop missing values
     data = _remove_unused_categories(data[_flatten_list([dv, between, covar])].dropna())
 
-    # Fit ANCOVA model
-    # formula = dv ~ 1 + between + covar1 + covar2 + ...
-    assert dv not in ["C", "Q"], "`dv` must not be 'C' or 'Q'."
-    assert between not in ["C", "Q"], "`between` must not be 'C' or 'Q'."
-    assert all(c not in ["C", "Q"] for c in covar), "`covar` must not contain 'C' or 'Q'."
-    formula = f"Q('{dv}') ~ C(Q('{between}'))"
-    for c in covar:
-        formula += " + Q('%s')" % (c)
-    model = ols(formula, data=data).fit()
+    # Fit ANCOVA model: dv ~ 1 + between + covar1 + covar2 + ...
+    # The formula is evaluated as Python code by patsy, so it must never contain the column names
+    # (which can have any character, e.g. quotes). The columns are renamed to placeholders instead.
+    covar_names = [f"covar{i}" for i in range(len(covar))]
+    model_data = pd.DataFrame(
+        {"dv": data[dv], "between": data[between]}
+        | {name: data[c] for name, c in zip(covar_names, covar)}
+    )
+    formula = " + ".join(["dv ~ C(between)", *covar_names])
+    model = ols(formula, data=model_data).fit()
 
     # Create output dataframe
     aov = stats.anova_lm(model, typ=2).reset_index()

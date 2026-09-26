@@ -3,8 +3,10 @@ from unittest import TestCase
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import pytest
 import seaborn as sns
+import statsmodels.api as sm
 from scipy import stats
 
 from pingouin import read_dataset
@@ -210,6 +212,15 @@ class TestPlotting(TestCase):
             kwargs_facetgrid={"height": 4, "aspect": 1, "palette": "Set2"},
         )
         assert isinstance(g, sns.FacetGrid)
+        # Fitted lines are the same as the ANCOVA fitted values, with any column name
+        df_quote = df.rename(columns={"pH": "patient's pH", "PacO2": "C", "Subject": "Q"})
+        g = plot_rm_corr(data=df_quote, x="patient's pH", y="C", subject="Q")
+        ols = sm.OLS(df["PacO2"], pd.get_dummies(df["Subject"], dtype=float).assign(pH=df["pH"]))
+        pred = ols.fit().fittedvalues
+        first = df["Subject"] == df["Subject"].min()  # First hue level
+        line = g.ax.lines[0].get_xydata()
+        slope, intercept = np.polyfit(line[:, 0], line[:, 1], 1)
+        np.testing.assert_allclose(intercept + slope * df.loc[first, "pH"], pred[first])
         # Fewer than 3 subjects raises ValueError
         with pytest.raises(ValueError):
             plot_rm_corr(

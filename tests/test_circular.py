@@ -143,6 +143,10 @@ class TestCircular(TestCase):
         z, pval = circ_rayleigh(x, w=[0.1, 0.2, 0.3, 0.4, 0.5], d=0.2)
         assert round(z, 3) == 0.278
         assert round(pval, 4) == 0.8070
+        # Missing values are not counted in the sample size
+        assert circ_rayleigh(x + [np.nan]) == circ_rayleigh(x)
+        w = [0.1, 0.2, 0.3, 0.4, 0.5]
+        assert circ_rayleigh(x + [np.nan], w=w + [1], d=0.2) == circ_rayleigh(x, w=w, d=0.2)
 
     def test_circ_vtest(self):
         """Test function circ_vtest."""
@@ -154,3 +158,5 @@ class TestCircular(TestCase):
         v, pval = circ_vtest(x, dir=0.5, w=[0.1, 0.2, 0.3, 0.4, 0.5], d=0.2)
         assert round(v, 3) == 0.637
         assert round(pval, 4) == 0.2309
+        # Missing values are not counted in the sample size
+        assert circ_vtest(x + [np.nan], dir=1) == circ_vtest(x, dir=1)

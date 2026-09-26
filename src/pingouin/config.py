@@ -2,11 +2,18 @@
 
 from contextlib import contextmanager
 
-from .bayesian import _format_bf
+import numpy as np
 
 __all__ = ["options", "set_default_options"]
 
 options = {}
+
+
+def _format_bf(bf, precision=3, trim="0"):
+    """Format BF10 to floating point or scientific notation."""
+    if bf >= 1e4 or bf <= 1e-4:
+        return np.format_float_scientific(bf, precision=precision, trim=trim)
+    return np.format_float_positional(bf, precision=precision, trim=trim)
 
 
 def set_default_options():
