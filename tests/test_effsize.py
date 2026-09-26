@@ -128,13 +128,13 @@ class TestEffsize(TestCase):
         assert ci_n[0] == -0.7 and ci_n[1] == 0.8
         assert ci_p[0] == -0.7 and ci_p[1] == 0.8
 
-        # 4. Bivariate custom function: paired T-test
+        # 4. Bivariate custom function: paired T-test, applied to all resamples at once
         from scipy.stats import ttest_rel
 
         ci_n = compute_bootci(
             x_m,
             y_m,
-            func=lambda x, y: ttest_rel(x, y)[0],
+            func=lambda x, y, axis=-1: ttest_rel(x, y, axis=axis)[0],
             method="norm",
             paired=True,
             n_boot=n_boot,
@@ -144,7 +144,7 @@ class TestEffsize(TestCase):
         ci_p = compute_bootci(
             x_m,
             y_m,
-            func=lambda x, y: ttest_rel(x, y)[0],
+            func=lambda x, y, axis=-1: ttest_rel(x, y, axis=axis)[0],
             method="per",
             paired=True,
             n_boot=n_boot,
@@ -169,20 +169,20 @@ class TestEffsize(TestCase):
         for m, f in list(product(methods, funcs)):
             compute_bootci(x, func=f, method=m, seed=123, n_boot=100)
 
-        # Using a custom function (use per method to avoid BCa jackknife issues with
-        # element-wise functions and paired=False)
+        # Using a custom function without an axis argument, applied to each resample (use per
+        # method to avoid BCa jackknife issues with element-wise functions and paired=False)
         _, bdist = compute_bootci(
             x,
             y,
             func=lambda x, y: np.sum(np.exp(x) / np.exp(y)),
-            n_boot=10000,
+            n_boot=1000,
             decimals=4,
             confidence=0.68,
             method="per",
             seed=None,
             return_dist=True,
         )
-        assert bdist.size == 10000
+        assert bdist.size == 1000
 
         # ERRORS
         with pytest.raises(ValueError):

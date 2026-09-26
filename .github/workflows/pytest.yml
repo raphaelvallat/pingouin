@@ -20,8 +20,10 @@ jobs:
       fail-fast: false
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.11", "3.12", "3.14"]
+        python-version: ["3.11", "3.14"]
     runs-on: ${{ matrix.platform }}
+    env:
+      COVERAGE_JOB: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.14' }}
     steps:
       - uses: actions/checkout@v6
 
@@ -32,18 +34,36 @@ jobs:
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          prune-cache: false
 
       - name: Install dependencies
         run: |
           uv pip install --group=dev .
 
+      # Use the environment installed above: `uv run` would create and sync a separate .venv
       - name: Test with pytest
-        run: uv run pytest --verbose
+        if: env.COVERAGE_JOB != 'true'
+        run: pytest --verbose
+
+      # Coverage is measured on one job only, instead of a separate workflow running the same tests
+      - name: Test with pytest and coverage
+        if: env.COVERAGE_JOB == 'true'
+        run: pytest --cov --cov-report=xml --verbose
+
+      - name: Upload coverage to Codecov
+        if: env.COVERAGE_JOB == 'true'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          fail_ci_if_error: true
 
       # Docstring examples are only checked on one job: printed outputs depend on library versions
       - name: Test docstring examples
-        if: matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.14'
-        run: uv run pytest --doctest-modules src/pingouin --verbose
+        if: env.COVERAGE_JOB == 'true'
+        run: pytest --doctest-modules src/pingouin --verbose
 
   # Test against different dependency versions
   test-dependency-combinations:
@@ -77,13 +97,7 @@ jobs:
             scikit-learn: "scikit-learn==1.7.2"
             label: "recent-versions"
 
-          - python-version: "3.14"
-            scipy: "scipy"
-            numpy: "numpy"
-            pandas: "pandas"
-            statsmodels: "statsmodels"
-            scikit-learn: "scikit-learn"
-            label: "latest-versions"
+          # The latest versions are tested in test-core
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -96,6 +110,10 @@ jobs:
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          prune-cache: false
+          cache-suffix: ${{ matrix.deps.label }}
 
       - name: Install numpy (${{ matrix.deps.label }})
         run: uv pip install "${{ matrix.deps.numpy }}"

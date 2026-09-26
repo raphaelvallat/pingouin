@@ -250,6 +250,10 @@ def compute_bootci(
     -----
     This function uses :py:func:`scipy.stats.bootstrap` under the hood.
 
+    If ``func`` accepts an ``axis`` argument (e.g. :py:func:`numpy.mean` or
+    :py:func:`scipy.stats.skew`), it is computed on all the bootstrap samples at once, which is
+    much faster than calling it on each bootstrap sample.
+
     The bias-corrected and accelerated method (``bca``, default) corrects for both bias and
     skewness of the bootstrap distribution using jackknife resampling.
 
@@ -359,7 +363,6 @@ def compute_bootci(
         "func must be a function (e.g. np.mean, custom function) or a string (e.g. 'pearson'). "
         "See documentation for more details."
     )
-    vectorized = False
 
     # Check x
     x = np.asarray(x)
@@ -382,8 +385,8 @@ def compute_bootci(
         if func == "pearson":
             assert paired, "Paired should be True if using correlation functions."
 
-            def func(x, y):
-                return pearsonr(x, y)[0]  # Faster than np.corrcoef
+            def func(x, y, axis=-1):
+                return pearsonr(x, y, axis=axis)[0]
 
         elif func == "spearman":
             from scipy.stats import spearmanr
@@ -400,19 +403,16 @@ def compute_bootci(
                 return compute_effsize(x, y, paired=paired, eftype=func_str)
 
         elif func == "mean":
-            vectorized = True
 
             def func(x, axis=-1):
                 return np.mean(x, axis=axis)
 
         elif func == "std":
-            vectorized = True
 
             def func(x, axis=-1):
                 return np.std(x, ddof=1, axis=axis)
 
         elif func == "var":
-            vectorized = True
 
             def func(x, axis=-1):
                 return np.var(x, ddof=1, axis=axis)
@@ -435,7 +435,8 @@ def compute_bootci(
         confidence_level=confidence,
         method=_scipy_method,
         paired=_paired,
-        vectorized=vectorized,
+        # Functions with an `axis` argument are applied to all the resamples at once
+        vectorized=None,
         random_state=seed,
     )
     bootstat = boot_result.bootstrap_distribution
