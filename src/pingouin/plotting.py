@@ -15,6 +15,8 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from scipy import stats
 
+from .utils import _check_dataframe, remove_na
+
 # Set default Seaborn preferences (disabled Pingouin >= 0.3.4)
 # See https://github.com/raphaelvallat/pingouin/issues/85
 # sns.set(style='ticks', context='notebook')
@@ -421,8 +423,7 @@ def qqplot(
     if isinstance(dist, str):
         dist = getattr(stats, dist)
 
-    x = np.asarray(x)
-    x = x[~np.isnan(x)]  # NaN are automatically removed
+    x = remove_na(x)  # NaN are automatically removed
     if x.size > 0 and np.ptp(x) == 0:
         # A degenerate fit (scale = 0) would divide by zero when standardizing below
         raise ValueError("All values in `x` are identical: a Q-Q plot requires some variance.")
@@ -438,17 +439,12 @@ def qqplot(
         )
 
     # Extract quantiles and regression
-    quantiles = stats.probplot(x, sparams=sparams, dist=dist, fit=False)
-    theor, observed = quantiles[0], quantiles[1]
+    theor, observed = stats.probplot(x, sparams=sparams, dist=dist, fit=False)
 
-    fit_params = dist.fit(x)
-    loc = fit_params[-2]
-    scale = fit_params[-1]
-    shape = fit_params[:-2] if len(fit_params) > 2 else None
+    *shape, loc, scale = dist.fit(x)
 
-    # Observed values to observed quantiles
-    if loc != 0 or scale != 1:
-        observed = (np.sort(observed) - loc) / scale
+    # Observed values (already sorted) to observed quantiles
+    observed = (observed - loc) / scale
 
     # Linear regression
     slope, intercept, r, _, _ = stats.linregress(theor, observed)
@@ -482,7 +478,7 @@ def qqplot(
         n = x.size
         P = _ppoints(n)
         crit = stats.norm.ppf(1 - (1 - confidence) / 2)
-        pdf = dist.pdf(theor) if shape is None else dist.pdf(theor, *shape)
+        pdf = dist.pdf(theor, *shape)
         se = (slope / pdf) * np.sqrt(P * (1 - P) / n)
         upper = fit_val + crit * se
         lower = fit_val - crit * se
@@ -617,8 +613,6 @@ def plot_paired(
         ...     data=df, dv="Scores", within="Time", subject="Subject", boxplot_in_front=True
         ... )
     """
-    from pingouin.utils import _check_dataframe
-
     if colors is None:
         colors = ["green", "grey", "indianred"]
     # Update default kwargs with specified inputs
@@ -635,23 +629,11 @@ def plot_paired(
     mew = lw * 0.75  # get the markeredgewidth
     markersize = np.pi * np.square(lw) * 2  # get the markersize
 
-    # Set boxplot in front of Line2D plot (zorder=2 for both) and add alpha
-    if boxplot_in_front:
-        _boxplot_kwargs.update(
-            {
-                "boxprops": {"zorder": 3},  # Boxplot on top
-                "whiskerprops": {"zorder": 3},
-                "zorder": 3,
-            }
-        )
-    else:
-        _boxplot_kwargs.update(
-            {
-                "boxprops": {"zorder": 1},  # Boxplot behind
-                "whiskerprops": {"zorder": 1},
-                "zorder": 1,
-            }
-        )
+    # Set boxplot in front of (or behind) the Line2D plot (zorder=2 for both)
+    zorder = 3 if boxplot_in_front else 1
+    _boxplot_kwargs.update(
+        {"boxprops": {"zorder": zorder}, "whiskerprops": {"zorder": zorder}, "zorder": zorder}
+    )
 
     # Validate args
     data = _check_dataframe(data=data, dv=dv, within=within, subject=subject, effects="within")
@@ -679,7 +661,6 @@ def plot_paired(
     # Substitue within by integer order of the ordered columns to allow for
     # changing the order of numeric withins.
     data["wthn"] = data[within].replace({_ordr: i for i, _ordr in enumerate(order)})
-    order_num = range(len(order))  # Make numeric order
 
     # Start the plot
     if ax is None:
@@ -690,7 +671,7 @@ def plot_paired(
     _y = dv if orient == "v" else "wthn"
 
     for cat in range(len(x_cat) - 1):
-        _order = (order_num[cat], order_num[cat + 1])
+        _order = (cat, cat + 1)
         # Extract data of the current subject-combination
         data_now = data.loc[data["wthn"].isin(_order), [dv, "wthn", subject]]
         # Select colors for all lines between the current subjects
@@ -816,9 +797,7 @@ def plot_rm_corr(
     measures assessed on two or more occasions for multiple individuals.
 
     Results have been tested against the
-    `rmcorr <https://github.com/cran/rmcorr>` R package. Note that this
-    function requires `statsmodels
-    <https://www.statsmodels.org/stable/index.html>`_.
+    `rmcorr <https://github.com/cran/rmcorr>` R package.
 
     Missing values are automatically removed from the ``data``
     (listwise deletion).
@@ -862,37 +841,17 @@ def plot_rm_corr(
     _kwargs_scatter = {"marker": "o"}
     _kwargs_scatter.update(kwargs_scatter or {})
 
-    from statsmodels.formula.api import ols
+    from .correlation import _check_rm_corr_data
 
-    # Safety check (duplicated from pingouin.rm_corr)
-    assert isinstance(data, pd.DataFrame), "Data must be a DataFrame"
-    assert x in data.columns, "The %s column is not in data." % x
-    assert y in data.columns, "The %s column is not in data." % y
-    assert data[x].dtype.kind in "bfiu", "%s must be numeric." % x
-    assert data[y].dtype.kind in "bfiu", "%s must be numeric." % y
-    assert subject in data.columns, "The %s column is not in data." % subject
-    if data[subject].nunique() < 3:
-        raise ValueError("rm_corr requires at least 3 unique subjects.")
+    data = _check_rm_corr_data(data, x, y, subject)
 
-    # Remove missing values
-    data = data[[x, y, subject]].dropna(axis=0)
-
-    # Calculate rm_corr
-    # rmc = pg.rm_corr(data=data, x=x, y=y, subject=subject)
-
-    # Fit ANCOVA model
-    # https://patsy.readthedocs.io/en/latest/builtins-reference.html
-    # C marks the data as categorical
-    # Q allows to quote variable that do not meet Python variable name rule
-    # e.g. if variable is "weight.in.kg" or "2A"
-    assert x not in ["C", "Q"], "`x` must not be 'C' or 'Q'."
-    assert y not in ["C", "Q"], "`y` must not be 'C' or 'Q'."
-    assert subject not in ["C", "Q"], "`subject` must not be 'C' or 'Q'."
-    formula = f"Q('{y}') ~ C(Q('{subject}')) + Q('{x}')"
-    model = ols(formula, data=data).fit()
-
-    # Fitted values
-    data["pred"] = model.fittedvalues
+    # Fitted values of the ANCOVA model y ~ C(subject) + x, i.e. parallel lines with a common
+    # within-subject slope and a subject-specific intercept.
+    grp = data.groupby(subject, observed=True)
+    x_center = data[x] - grp[x].transform("mean")
+    y_center = data[y] - grp[y].transform("mean")
+    slope = (x_center * y_center).sum() / (x_center**2).sum()
+    data["pred"] = grp[y].transform("mean") + slope * x_center
 
     # Define color palette
     if "palette" not in _kwargs_facetgrid:
@@ -1025,10 +984,8 @@ def plot_circmean(
     # X and Y ticks in radians
     ax.set_xticks([])
     ax.set_yticks([])
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    ax.spines["left"].set_visible(False)
-    ax.spines["bottom"].set_visible(False)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
     ax.text(1.2, 0, "0", verticalalignment="center")
     ax.text(-1.3, 0, r"$\pi$", verticalalignment="center")
     ax.text(0, 1.2, r"$+\pi/2$", horizontalalignment="center")

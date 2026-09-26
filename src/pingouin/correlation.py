@@ -1217,18 +1217,7 @@ def rm_corr(data=None, x=None, y=None, subject=None):
     """
     from pingouin import ancova
 
-    # Safety checks
-    assert isinstance(data, pd.DataFrame), "Data must be a DataFrame"
-    assert x in data.columns, "The %s column is not in data." % x
-    assert y in data.columns, "The %s column is not in data." % y
-    assert data[x].dtype.kind in "bfiu", "%s must be numeric." % x
-    assert data[y].dtype.kind in "bfiu", "%s must be numeric." % y
-    assert subject in data.columns, "The %s column is not in data." % subject
-    if data[subject].nunique() < 3:
-        raise ValueError("rm_corr requires at least 3 unique subjects.")
-
-    # Remove missing values
-    data = data[[x, y, subject]].dropna(axis=0)
+    data = _check_rm_corr_data(data, x, y, subject)
 
     # Using PINGOUIN
     with _no_rounding():  # For max precision
@@ -1248,6 +1237,20 @@ def rm_corr(data=None, x=None, y=None, subject=None):
         {"r": rm, "dof": int(dof), "pval": pval, "CI95": [ci], "power": pwr}, index=["rm_corr"]
     )
     return _postprocess_dataframe(stats)
+
+
+def _check_rm_corr_data(data, x, y, subject):
+    """Check the input of :py:func:`rm_corr` / :py:func:`plot_rm_corr`, and remove missing values."""
+    assert isinstance(data, pd.DataFrame), "Data must be a DataFrame"
+    assert x in data.columns, "The %s column is not in data." % x
+    assert y in data.columns, "The %s column is not in data." % y
+    assert data[x].dtype.kind in "bfiu", "%s must be numeric." % x
+    assert data[y].dtype.kind in "bfiu", "%s must be numeric." % y
+    assert subject in data.columns, "The %s column is not in data." % subject
+    if data[subject].nunique() < 3:
+        raise ValueError("rm_corr requires at least 3 unique subjects.")
+    # Remove missing values
+    return data[[x, y, subject]].dropna(axis=0)
 
 
 def _dcorr(y, n2, A, dcov2_xx):

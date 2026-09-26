@@ -1,21 +1,15 @@
 """Bayesian functions."""
 
+import numbers
 import warnings
 from math import exp, lgamma, log, pi
 
 import numpy as np
 from scipy.integrate import quad
 
+from .utils import _check_alternative, _is_mpmath_installed
+
 __all__ = ["bayesfactor_ttest", "bayesfactor_pearson", "bayesfactor_binom"]
-
-
-def _format_bf(bf, precision=3, trim="0"):
-    """Format BF10 to floating point or scientific notation."""
-    if bf >= 1e4 or bf <= 1e-4:
-        out = np.format_float_scientific(bf, precision=precision, trim=trim)
-    else:
-        out = np.format_float_positional(bf, precision=precision, trim=trim)
-    return out
 
 
 def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative="two-sided", r=0.707):
@@ -107,10 +101,10 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative="two-sided", r=0
     assert alternative == "two-sided", (
         "Alternative must be 'two-sided' (default). One-sided tests are not supported."
     )
-    one_sample = True if ny is None or ny == 1 else False
+    one_sample = ny is None or ny == 1
 
     # Check T-value
-    assert isinstance(t, (int, float)), "The T-value must be a int or a float."
+    assert isinstance(t, numbers.Real), "The T-value must be a int or a float."
     if not np.isfinite(t):
         return np.nan
 
@@ -249,9 +243,8 @@ def bayesfactor_pearson(r, n, alternative="two-sided", method="ly", kappa=1.0):
     """
     from scipy.special import betaln, gamma, hyp2f1
 
-    from .utils import _check_alternative  # Local import to avoid a circular import with config
-
-    assert method.lower() in ["ly", "wetzels"], "Method not recognized."
+    method = method.lower()
+    assert method in ["ly", "wetzels"], "Method not recognized."
     _check_alternative(alternative)
 
     # Wrong input
@@ -259,14 +252,14 @@ def bayesfactor_pearson(r, n, alternative="two-sided", method="ly", kappa=1.0):
         return np.nan
     assert -1 <= r <= 1, "r must be between -1 and 1."
 
-    if alternative != "two-sided" and method.lower() == "wetzels":
+    if alternative != "two-sided" and method == "wetzels":
         warnings.warn(
             "One-sided Bayes Factor are not supported by the "
             "Wetzels's method. Switching to method='ly'."
         )
         method = "ly"
 
-    if method.lower() == "wetzels":
+    if method == "wetzels":
         # Wetzels & Wagenmakers, 2012. Integral solving
 
         def fun(g, r, n):
@@ -280,7 +273,7 @@ def bayesfactor_pearson(r, n, alternative="two-sided", method="ly", kappa=1.0):
         integr = quad(fun, 0, np.inf, args=(r, n))[0]
         bf10 = np.sqrt(n / 2) / gamma(1 / 2) * integr
 
-    else:
+    elif alternative == "two-sided":
         # Ly et al, 2016. Analytical solution.
         k = kappa
         lbeta = betaln(1 / k, 1 / k)
@@ -294,64 +287,60 @@ def bayesfactor_pearson(r, n, alternative="two-sided", method="ly", kappa=1.0):
             + log_hyperterm
         )
 
-        if alternative != "two-sided":
-            # Directional test.
-            # We need mpmath for the generalized hypergeometric function.
-            # We also recompute bf10 in mpmath to avoid catastrophic cancellation
-            # when bf10pos or bf10neg is much smaller than bf10 (e.g. large |r|
-            # with the "wrong" sign). See https://github.com/raphaelvallat/pingouin/issues/427
-            from .utils import _is_mpmath_installed
+    else:
+        # Directional test (Ly et al, 2016).
+        # We need mpmath for the generalized hypergeometric function.
+        # The two-sided bf10 is also computed in mpmath to avoid catastrophic cancellation
+        # when bf10pos or bf10neg is much smaller than bf10 (e.g. large |r|
+        # with the "wrong" sign). See https://github.com/raphaelvallat/pingouin/issues/427
+        _is_mpmath_installed(raise_error=True)
+        import mpmath
 
-            _is_mpmath_installed(raise_error=True)
-            import mpmath
+        mp_k = mpmath.mpf(kappa)
+        mp_n = mpmath.mpf(n)
+        mp_r = mpmath.mpf(r)
 
-            mp_k = mpmath.mpf(k)
-            mp_n = mpmath.mpf(n)
-            mp_r = mpmath.mpf(r)
+        # Two-sided bf10 in mpmath precision (eq. 25 of Ly et al., 2016)
+        mp_lbeta = mpmath.log(mpmath.beta(1 / mp_k, 1 / mp_k))
+        mp_log_hyperterm = mpmath.log(
+            mpmath.hyp2f1((mp_n - 1) / 2, (mp_n - 1) / 2, (mp_n + 2 / mp_k) / 2, mp_r**2)
+        )
+        bf10_mp = mpmath.exp(
+            (1 - 2 / mp_k) * mpmath.log(2)
+            + mpmath.log(mpmath.pi) / 2
+            - mp_lbeta
+            + mpmath.loggamma((mp_n + 2 / mp_k - 1) / 2)
+            - mpmath.loggamma((mp_n + 2 / mp_k) / 2)
+            + mp_log_hyperterm
+        )
 
-            # Recompute bf10 (two-sided) in mpmath precision (eq. 25 of Ly et al., 2016)
-            mp_lbeta = mpmath.log(mpmath.beta(1 / mp_k, 1 / mp_k))
-            mp_log_hyperterm = mpmath.log(
-                mpmath.hyp2f1((mp_n - 1) / 2, (mp_n - 1) / 2, (mp_n + 2 / mp_k) / 2, mp_r**2)
-            )
-            bf10_mp = mpmath.exp(
-                (1 - 2 / mp_k) * mpmath.log(2)
-                + mpmath.log(mpmath.pi) / 2
-                - mp_lbeta
-                + mpmath.loggamma((mp_n + 2 / mp_k - 1) / 2)
-                - mpmath.loggamma((mp_n + 2 / mp_k) / 2)
-                + mp_log_hyperterm
-            )
+        # Compute the directional correction term C (eq. 27-28 of Ly et al., 2016)
+        hyper_term_mp = mpmath.hyp3f2(
+            1,
+            mp_n / 2,
+            mp_n / 2,
+            mpmath.mpf(3) / 2,
+            (2 + mp_k * (mp_n + 1)) / (2 * mp_k),
+            mp_r**2,
+        )
+        mp_log_term = 2 * (mpmath.loggamma(mp_n / 2) - mpmath.loggamma((mp_n - 1) / 2)) - mp_lbeta
+        C_mp = (
+            mpmath.power(2, (3 * mp_k - 2) / mp_k)
+            * mp_k
+            * mp_r
+            / (2 + (mp_n - 1) * mp_k)
+            * mpmath.exp(mp_log_term)
+            * hyper_term_mp
+        )
 
-            # Compute the directional correction term C (eq. 27-28 of Ly et al., 2016)
-            hyper_term_mp = mpmath.hyp3f2(
-                1,
-                mp_n / 2,
-                mp_n / 2,
-                mpmath.mpf(3) / 2,
-                (2 + mp_k * (mp_n + 1)) / (2 * mp_k),
-                mp_r**2,
-            )
-            mp_log_term = (
-                2 * (mpmath.loggamma(mp_n / 2) - mpmath.loggamma((mp_n - 1) / 2)) - mp_lbeta
-            )
-            C_mp = (
-                mpmath.power(2, (3 * mp_k - 2) / mp_k)
-                * mp_k
-                * mp_r
-                / (2 + (mp_n - 1) * mp_k)
-                * mpmath.exp(mp_log_term)
-                * hyper_term_mp
-            )
-
-            bf10neg_mp = bf10_mp - C_mp
-            bf10pos_mp = bf10_mp + C_mp
-            if alternative == "greater":
-                # We expect the correlation to be positive
-                bf10 = float(max(bf10pos_mp, mpmath.mpf(0)))
-            else:
-                # We expect the correlation to be negative
-                bf10 = float(max(bf10neg_mp, mpmath.mpf(0)))
+        bf10neg_mp = bf10_mp - C_mp
+        bf10pos_mp = bf10_mp + C_mp
+        if alternative == "greater":
+            # We expect the correlation to be positive
+            bf10 = float(max(bf10pos_mp, mpmath.mpf(0)))
+        else:
+            # We expect the correlation to be negative
+            bf10 = float(max(bf10neg_mp, mpmath.mpf(0)))
 
     return bf10
 
@@ -459,17 +448,16 @@ def bayesfactor_binom(k, n, p=0.5, a=1, b=1):
     >>> print("Bayes Factor: %.3f" % bf)
     Bayes Factor: 0.024
     """
-    from scipy.stats import beta, binom
+    from scipy.stats import betabinom, binom
 
     assert 0 < p < 1, "p must be between 0 and 1."
-    assert isinstance(k, int), "k must be int."
-    assert isinstance(n, int), "n must be int."
+    assert isinstance(k, numbers.Integral), "k must be int."
+    assert isinstance(n, numbers.Integral), "n must be int."
     assert k <= n, "k (successes) cannot be higher than n (trials)."
     assert a > 0, "a must be positive."
     assert b > 0, "b must be positive."
 
-    def fun(g):
-        return beta.pdf(g, a, b) * binom.pmf(k, n, g)
-
-    bf10 = quad(fun, 0, 1)[0] / binom.pmf(k, n, p)
+    # The marginal likelihood under the alternative, i.e. the integral of the binomial likelihood
+    # over the Beta(a, b) prior, is the beta-binomial probability mass function.
+    bf10 = betabinom.pmf(k, n, a, b) / binom.pmf(k, n, p)
     return bf10

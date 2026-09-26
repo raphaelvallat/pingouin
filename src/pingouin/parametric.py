@@ -1147,10 +1147,6 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     # Validate the dataframe
     data = _check_dataframe(dv=dv, between=between, data=data, effects="between")
     all_cols = _flatten_list([dv, between])
-    bad_chars = [",", "(", ")", ":"]
-    if not all([c not in v for c in bad_chars for v in all_cols]):
-        err_msg = "comma, bracket, and colon are not allowed in column names."
-        raise ValueError(err_msg)
 
     # Drop missing values
     data = _remove_unused_categories(data[all_cols].dropna())
@@ -1160,20 +1156,18 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
 
-    # Create R-like formula
+    # Create R-like formula: dv ~ C(factor0, Sum) * C(factor1, Sum) * ...
     # https://patsy.readthedocs.io/en/latest/builtins-reference.html
-    # C marks the data as categorical
-    # Q allows to quote variable that do not meet Python variable name rule
-    # e.g. if variable is "weight.in.kg" or "2A"
-    assert dv not in ["C", "Q"], "`dv` must not be 'C' or 'Q'."
-    assert all(fac not in ["C", "Q"] for fac in between), "`between` must not contain 'C' or 'Q'."
-    formula = "Q('%s') ~ " % dv
-    for fac in between:
-        formula += "C(Q('%s'), Sum) * " % fac
-    formula = formula[:-3]  # Remove last * and space
+    # The formula is evaluated as Python code by patsy, so it must never contain the column names
+    # (which can have any character, e.g. quotes). The columns are renamed to placeholders instead.
+    terms = {f"C(factor{i}, Sum)": fac for i, fac in enumerate(between)}
+    model_data = pd.DataFrame(
+        {"dv": data[dv]} | {f"factor{i}": data[fac] for i, fac in enumerate(between)}
+    )
+    formula = "dv ~ " + " * ".join(terms)
 
     # Fit using statsmodels
-    lm = ols(formula, data=data).fit()
+    lm = ols(formula, data=model_data).fit()
     aov = stats.anova_lm(lm, typ=ss_type)
 
     # Convert to Pingouin-like dataframe
@@ -1191,21 +1185,21 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     # Effect size
     aov[effsize] = _eta_squared(aov["SS"], effsize)
 
-    def format_source(x):
-        for fac in between:
-            x = x.replace("C(Q('%s'), Sum)" % fac, fac)
-        return x.replace(":", " * ")
-
-    aov["Source"] = aov["Source"].apply(format_source)
+    # Map the model terms back to the column names, e.g. "C(factor0, Sum):C(factor1, Sum)" -> "A * B"
+    aov["Source"] = [
+        " * ".join(str(terms.get(term, term)) for term in source.split(":"))
+        for source in aov["Source"]
+    ]
 
     # Re-index and round
     col_order = ["Source", "SS", "DF", "MS", "F", "p_unc", effsize]
     aov = aov.reindex(columns=col_order)
     aov.dropna(how="all", axis=1, inplace=True)
 
-    # Add formula to dataframe
+    # Add formula to dataframe, with the original column names (for display only, it is never
+    # evaluated)
     aov = _postprocess_dataframe(aov)
-    aov.formula_ = formula
+    aov.formula_ = f"Q('{dv}') ~ " + " * ".join(f"C(Q('{fac}'), Sum)" for fac in between)
     return aov
 
 
@@ -1702,15 +1696,16 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     # Drop missing values
     data = _remove_unused_categories(data[_flatten_list([dv, between, covar])].dropna())
 
-    # Fit ANCOVA model
-    # formula = dv ~ 1 + between + covar1 + covar2 + ...
-    assert dv not in ["C", "Q"], "`dv` must not be 'C' or 'Q'."
-    assert between not in ["C", "Q"], "`between` must not be 'C' or 'Q'."
-    assert all(c not in ["C", "Q"] for c in covar), "`covar` must not contain 'C' or 'Q'."
-    formula = f"Q('{dv}') ~ C(Q('{between}'))"
-    for c in covar:
-        formula += " + Q('%s')" % (c)
-    model = ols(formula, data=data).fit()
+    # Fit ANCOVA model: dv ~ 1 + between + covar1 + covar2 + ...
+    # The formula is evaluated as Python code by patsy, so it must never contain the column names
+    # (which can have any character, e.g. quotes). The columns are renamed to placeholders instead.
+    covar_names = [f"covar{i}" for i in range(len(covar))]
+    model_data = pd.DataFrame(
+        {"dv": data[dv], "between": data[between]}
+        | {name: data[c] for name, c in zip(covar_names, covar)}
+    )
+    formula = " + ".join(["dv ~ C(between)", *covar_names])
+    model = ols(formula, data=model_data).fit()
 
     # Create output dataframe
     aov = stats.anova_lm(model, typ=2).reset_index()

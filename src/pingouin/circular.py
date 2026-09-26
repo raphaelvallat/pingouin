@@ -5,6 +5,8 @@
 # Reference:
 # Berens, Philipp. 2009. CircStat: A MATLAB Toolbox for Circular Statistics.
 # Journal of Statistical Software, Articles 31 (10): 1–21.
+import numbers
+
 import numpy as np
 from scipy.stats import norm
 
@@ -27,17 +29,31 @@ __all__ = [
 ###############################################################################
 
 
-def _checkangles(angles, axis=None):
-    """Internal function to check that angles are in radians."""
-    msg = (
-        "Angles are not in unit of radians. Please use the "
-        "`pingouin.convert_angles` function to map your angles to "
-        "the [-pi, pi] range."
-    )
-    ptp_rad = np.nanmax(angles, axis=axis) - np.nanmin(angles, axis=axis)
-    ptp_mask = ptp_rad <= 2 * np.pi
-    if not ptp_mask.all():
-        raise ValueError(msg)
+def _checkangles(angles):
+    """Internal function to check that angles are in radians.
+
+    All the angles must be either in the [-pi, pi] or in the [0, 2pi] range. Checking only the
+    spread of the angles is not enough, e.g. degrees in a narrow range (10 to 15) would pass.
+    """
+    # Small tolerance for floating-point errors, e.g. angles computed as x - pi
+    tol = 1e-10
+    low, high = np.nanmin(angles), np.nanmax(angles)
+    in_pi_range = low >= -np.pi - tol and high <= np.pi + tol
+    in_2pi_range = low >= -tol and high <= 2 * np.pi + tol
+    if not (in_pi_range or in_2pi_range):
+        raise ValueError(
+            "Angles must be in radians, in the [-pi, pi] or [0, 2pi] range. Please use the "
+            "`pingouin.convert_angles` function to map your angles to radians."
+        )
+
+
+def _remove_na_weighted(angles, w=None):
+    """Remove missing angles (and their weights). Weights default to one per angle."""
+    angles = np.asarray(angles)
+    w = np.ones(angles.shape) if w is None else np.asarray(w, dtype=float)
+    assert angles.shape == w.shape, "Input dimensions do not match"
+    mask = ~np.isnan(angles)
+    return angles[mask], w[mask]
 
 
 def convert_angles(angles, low=0, high=360, positive=False):
@@ -121,22 +137,19 @@ def convert_angles(angles, low=0, high=360, positive=False):
            [-2.54818071, -2.35619449,  1.67551608,  1.97222205]])
     """
     assert isinstance(positive, bool)
-    assert isinstance(high, (int, float)), "high must be numeric"
-    assert isinstance(low, (int, float)), "low must be numeric"
+    assert isinstance(high, numbers.Real), "high must be numeric"
+    assert isinstance(low, numbers.Real), "low must be numeric"
     ptp = high - low
     assert ptp > 0, "high - low must be strictly positive."
     angles = np.asarray(angles)
-    assert np.nanmin(angles) >= low, "angles cannot be >= low."
-    assert np.nanmax(angles) <= high, "angles cannot be <= high."
+    assert np.nanmin(angles) >= low, "angles must be >= low."
+    assert np.nanmax(angles) <= high, "angles must be <= high."
     # Map to [0, 2pi] range
     rad = angles * (2 * np.pi) / ptp
     if not positive:
         # https://stackoverflow.com/a/29237626/10581531
         # Map to [-pi, pi) range:
         rad = (rad + np.pi) % (2 * np.pi) - np.pi  # [-pi, pi)
-        # Map to (-pi, pi] range:
-        # rad = np.angle(np.exp(1j * rad))
-        # rad = -1 * ((-rad + np.pi) % (2 * np.pi) - np.pi)
     return rad
 
 
@@ -595,15 +608,17 @@ def circ_corrcl(x, y):
     x = np.asarray(x)
     y = np.asarray(y)
     assert x.size == y.size, "x and y must have the same length."
+    _checkangles(x)  # Check that the circular variable is in radians
 
     # Remove NA
     x, y = remove_na(x, y, paired=True)
     n = x.size
 
     # Compute correlation coefficent for sin and cos independently
-    rxs = pearsonr(y, np.sin(x))[0]
-    rxc = pearsonr(y, np.cos(x))[0]
-    rcs = pearsonr(np.sin(x), np.cos(x))[0]
+    x_sin, x_cos = np.sin(x), np.cos(x)
+    rxs = pearsonr(y, x_sin)[0]
+    rxc = pearsonr(y, x_cos)[0]
+    rcs = pearsonr(x_sin, x_cos)[0]
 
     # Compute angular-linear correlation (equ. 27.47)
     r = np.sqrt((rxc**2 + rxs**2 - 2 * rxc * rxs * rcs) / (1 - rcs**2))
@@ -666,15 +681,10 @@ def circ_rayleigh(angles, w=None, d=None):
     >>> print(round(z, 3), round(pval, 6))
     0.278 0.806997
     """
-    angles = np.asarray(angles)
-    _checkangles(angles)  # Check that angles is in radians
-    if w is None:
-        r = circ_r(angles)
-        n = len(angles)
-    else:
-        assert len(angles) == len(w), "Input dimensions do not match"
-        r = circ_r(angles, w, d)
-        n = np.sum(w)
+    # Missing values are removed, so that they are not counted in the sample size
+    angles, w = _remove_na_weighted(angles, w)
+    r = circ_r(angles, w, d)
+    n = np.sum(w)
 
     # Compute Rayleigh's statistic
     R = n * r
@@ -745,16 +755,11 @@ def circ_vtest(angles, dir=0.0, w=None, d=None):
     >>> print(round(v, 3), round(pval, 5))
     0.637 0.23086
     """
-    angles = np.asarray(angles)
-    if w is None:
-        r = circ_r(angles)
-        mu = circ_mean(angles)
-        n = len(angles)
-    else:
-        assert len(angles) == len(w), "Input dimensions do not match"
-        r = circ_r(angles, w, d)
-        mu = circ_mean(angles, w)
-        n = np.sum(w)
+    # Missing values are removed, so that they are not counted in the sample size
+    angles, w = _remove_na_weighted(angles, w)
+    r = circ_r(angles, w, d)
+    mu = circ_mean(angles, w)
+    n = np.sum(w)
 
     # Compute Rayleigh and V statistics
     R = n * r

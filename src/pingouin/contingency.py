@@ -1,4 +1,5 @@
 # Date: May 2019
+import numbers
 import warnings
 
 import numpy as np
@@ -153,31 +154,35 @@ def chi2_independence(data, x, y, correction=True):
 
     dof = float(expected.size - sum(expected.shape) + expected.ndim - 1)
 
+    # Number of observations in the table (rows with missing values are dropped by crosstab)
+    n = observed.to_numpy().sum()
+
     if dof == 1 and correction:
-        # Adjust `observed` according to Yates' correction for continuity.
-        observed = observed + 0.5 * np.sign(expected - observed)
+        # Adjust `observed` according to Yates' correction for continuity. Same as
+        # scipy.stats.chi2_contingency, the correction cannot exceed the observed deviation.
+        diff = expected - observed
+        observed = observed + np.sign(diff) * np.minimum(0.5, np.abs(diff))
 
     ddof = observed.size - 1 - dof
-    n = data.shape[0]
+    dof_cramer = min(expected.shape) - 1
+    tests = {
+        "pearson": 1.0,
+        "cressie-read": 2 / 3,
+        "log-likelihood": 0.0,
+        "freeman-tukey": -1 / 2,
+        "mod-log-likelihood": -1.0,
+        "neyman": -2.0,
+    }
     stats = []
-    names = [
-        "pearson",
-        "cressie-read",
-        "log-likelihood",
-        "freeman-tukey",
-        "mod-log-likelihood",
-        "neyman",
-    ]
-
-    for name, lambda_ in zip(names, [1.0, 2 / 3, 0.0, -1 / 2, -1.0, -2.0]):
+    for name, lambda_ in tests.items():
         if dof == 0:
             chi2, p, cramer, power = 0.0, 1.0, np.nan, np.nan
         else:
-            chi2, p = power_divergence(observed, expected, ddof=ddof, axis=None, lambda_=lambda_)
-            dof_cramer = min(expected.shape) - 1
+            chi2, p = power_divergence(
+                observed.to_numpy(), expected.to_numpy(), ddof=ddof, axis=None, lambda_=lambda_
+            )
             cramer = np.sqrt(chi2 / (n * dof_cramer))
             power = power_chi2(dof=dof, w=cramer, n=n, alpha=0.05)
-
         stats.append(
             {
                 "test": name,
@@ -190,8 +195,7 @@ def chi2_independence(data, x, y, correction=True):
             }
         )
 
-    stats = pd.DataFrame(stats)[["test", "lambda", "chi2", "dof", "pval", "cramer", "power"]]
-    return expected, observed, _postprocess_dataframe(stats)
+    return expected, observed, _postprocess_dataframe(pd.DataFrame(stats))
 
 
 def chi2_mcnemar(data, x, y, correction=True):
@@ -328,8 +332,8 @@ def chi2_mcnemar(data, x, y, correction=True):
     if (b, c) == (0, 0):
         raise ValueError(
             "McNemar's test does not work if the secondary "
-            + "diagonal of the observed data summary does not "
-            + "have values different from 0."
+            "diagonal of the observed data summary does not "
+            "have values different from 0."
         )
 
     chi2 = (abs(b - c) - int(correction)) ** 2 / n_discordants
@@ -339,7 +343,6 @@ def chi2_mcnemar(data, x, y, correction=True):
         "dof": 1,
         "p_approx": sp_chi2.sf(chi2, 1),
         "p_exact": pexact,
-        # 'p_mid': pexact - binom.pmf(b, n_discordants, 0.5)
     }
 
     stats = pd.DataFrame(stats, index=["mcnemar"])
@@ -359,7 +362,7 @@ def _dichotomize_series(data, column):
         return series.astype(int)
 
     def convert_elem(elem):
-        if isinstance(elem, (int, float)) and elem in (0, 1):
+        if isinstance(elem, (numbers.Real, np.bool_)) and elem in (0, 1):
             return int(elem)
         if isinstance(elem, str):
             lower = elem.lower()
@@ -371,7 +374,8 @@ def _dichotomize_series(data, column):
             "Invalid value to build a 2x2 contingency table on column {}: {}".format(column, elem)
         )
 
-    return series.apply(convert_elem)
+    # Convert each unique value only once
+    return series.map({elem: convert_elem(elem) for elem in series.unique()})
 
 
 def dichotomous_crosstab(data, x, y):
@@ -415,15 +419,5 @@ def dichotomous_crosstab(data, x, y):
     1  1  0
     """
     crosstab = pd.crosstab(_dichotomize_series(data, x), _dichotomize_series(data, y))
-    shape = crosstab.shape
-    if shape != (2, 2):
-        if shape == (2, 1):
-            crosstab.loc[:, int(not bool(crosstab.columns[0]))] = [0, 0]
-        elif shape == (1, 2):
-            crosstab.loc[int(not bool(crosstab.index[0])), :] = [0, 0]
-        else:  # shape = (1, 1) or shape = (>2, >2)
-            raise ValueError(
-                "Both series contain only one unique value. Cannot build 2x2 contingency table."
-            )
-    crosstab = crosstab.sort_index(axis=0).sort_index(axis=1)
-    return crosstab
+    # Add the missing level(s) with a count of zero, e.g. if all the values of x are 1
+    return crosstab.reindex(index=[0, 1], columns=[0, 1], fill_value=0)

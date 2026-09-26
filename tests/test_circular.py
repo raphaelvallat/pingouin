@@ -35,11 +35,17 @@ class TestCircular(TestCase):
         """Test helper circular functions."""
         # Check angles
         _checkangles(a1)
-        _checkangles(a2, axis=None)
+        _checkangles(a2)
+        _checkangles([-np.pi, np.pi])
+        _checkangles([0, 2 * np.pi, np.nan])
         with pytest.raises(ValueError):
             _checkangles(a3)
-        with pytest.raises(ValueError):
-            _checkangles(a3, axis=None)
+        # Angles outside of the [-pi, pi] and [0, 2pi] ranges, even with a small spread
+        for angles in [[10, 12, 13, 14, 15], [100, 101], [-4, -3.5], [-3, 3.5]]:
+            with pytest.raises(ValueError, match="radians"):
+                _checkangles(angles)
+        with pytest.raises(ValueError, match="radians"):
+            circ_mean([10, 12, 13, 14, 15])
         # Convert angles
         np.testing.assert_array_almost_equal(a1, convert_angles(a1, low=-np.pi, high=np.pi))
         np.testing.assert_array_almost_equal(
@@ -109,6 +115,10 @@ class TestCircular(TestCase):
         # Compare with the CircStats MATLAB toolbox
         assert round(r, 3) == 0.109
         assert np.round(pval, 3) == 0.971
+        # The circular variable must be in radians (the linear variable can have any range)
+        circ_corrcl(x, np.array(y) * 100)
+        with pytest.raises(ValueError, match="radians"):
+            circ_corrcl(np.rad2deg(x), y)
 
     def test_circ_mean(self):
         """Test function circ_mean."""
@@ -143,6 +153,10 @@ class TestCircular(TestCase):
         z, pval = circ_rayleigh(x, w=[0.1, 0.2, 0.3, 0.4, 0.5], d=0.2)
         assert round(z, 3) == 0.278
         assert round(pval, 4) == 0.8070
+        # Missing values are not counted in the sample size
+        assert circ_rayleigh(x + [np.nan]) == circ_rayleigh(x)
+        w = [0.1, 0.2, 0.3, 0.4, 0.5]
+        assert circ_rayleigh(x + [np.nan], w=w + [1], d=0.2) == circ_rayleigh(x, w=w, d=0.2)
 
     def test_circ_vtest(self):
         """Test function circ_vtest."""
@@ -154,3 +168,5 @@ class TestCircular(TestCase):
         v, pval = circ_vtest(x, dir=0.5, w=[0.1, 0.2, 0.3, 0.4, 0.5], d=0.2)
         assert round(v, 3) == 0.637
         assert round(pval, 4) == 0.2309
+        # Missing values are not counted in the sample size
+        assert circ_vtest(x + [np.nan], dir=1) == circ_vtest(x, dir=1)
