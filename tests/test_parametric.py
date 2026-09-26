@@ -117,6 +117,10 @@ class TestParametric(TestCase):
         assert round(tt.loc["T_test", "p_val"], 5) == 0.02916
         array_equal(np.round(tt.loc["T_test", "CI95"], 2), [-np.inf, -0.61])
 
+        # `paired` accepts any boolean-like value (e.g. numpy bool)
+        pd.testing.assert_frame_equal(ttest(a, b, paired=np.True_), ttest(a, b, paired=True))
+        pd.testing.assert_frame_equal(ttest(a, b, paired=0), ttest(a, b, paired=False))
+
         # When the two arrays are identical
         tt = ttest(a, a, paired=True)
         assert str(tt.loc["T_test", "T"]) == str(np.nan)
@@ -238,6 +242,20 @@ class TestParametric(TestCase):
         )
         assert not aov2.equals(aov2_ss1)
 
+        # Two-way ANOVA with an empty cell (same number of observations in the other cells)
+        df_empty = pd.DataFrame(
+            {
+                "A": np.repeat(["a1", "a1", "a2"], 4),
+                "B": np.repeat(["b1", "b2", "b1"], 4),
+                "Y": np.arange(12.0),
+            }
+        )
+        with pytest.raises(ValueError, match="empty cells"):
+            anova(dv="Y", between=["A", "B"], data=df_empty)
+        # Same but unbalanced
+        with pytest.raises(ValueError, match="empty cells"):
+            anova(dv="Y", between=["A", "B"], data=df_empty.iloc[1:])
+
         # Three-way ANOVA using statsmodels
         # Balanced
         df_aov3 = read_dataset("anova3")
@@ -343,6 +361,14 @@ class TestParametric(TestCase):
         assert aov.at[0, "F"] == 5.8901
         assert aov.at[0, "p_unc"] == 0.0188
         assert aov.at[0, "np2"] == 0.5760
+        # Missing values in the dv or between factor are removed
+        df_nan = df_pain.copy()
+        df_nan.loc[0, "Hair color"] = np.nan
+        df_nan.loc[5, "Pain threshold"] = np.nan
+        pd.testing.assert_frame_equal(
+            welch_anova(dv="Pain threshold", between="Hair color", data=df_nan),
+            welch_anova(dv="Pain threshold", between="Hair color", data=df_nan.dropna()),
+        )
 
     def test_rm_anova(self):
         """Test function rm_anova.
