@@ -490,14 +490,20 @@ def linear_regression(
         data = pd.concat(
             [pd.DataFrame(y, columns=["y"]), pd.DataFrame(X, columns=names)], sort=False, axis=1
         )
-        if "Intercept" in names:
-            # Intercept is the first column
-            reli = _relimp(data.drop(columns=["Intercept"]).cov(numeric_only=True))
-            reli["names"] = ["Intercept"] + reli["names"]
-            reli["relimp"] = np.insert(reli["relimp"], 0, np.nan)
-            reli["relimp_perc"] = np.insert(reli["relimp_perc"], 0, np.nan)
-        else:
-            reli = _relimp(data.cov(numeric_only=True))
+        # Relative importance is computed on the correlation matrix, which makes it
+        # invariant to the scale of the predictors. The correlation of a constant
+        # column is undefined (NaN), so the constant column (at most one after the
+        # checks above, e.g. the Intercept) is excluded and re-inserted afterwards.
+        idx_const = np.flatnonzero(np.all(X == X[0, :], axis=0))
+        const_names = [names[i] for i in idx_const]
+        reli = _relimp(data.drop(columns=const_names).corr(numeric_only=True))
+        for i, name in zip(idx_const, const_names):
+            # The intercept has no relative importance, and a user-defined constant
+            # column explains no variance in y.
+            fill = np.nan if name == "Intercept" else 0.0
+            reli["names"].insert(i, name)
+            reli["relimp"] = np.insert(reli["relimp"], i, fill)
+            reli["relimp_perc"] = np.insert(reli["relimp_perc"], i, fill)
         stats.update(reli)
 
     if as_dataframe:
@@ -529,7 +535,7 @@ def _relimp(S):
     Parameters
     ----------
     S : pd.DataFrame
-        Covariance matrix. The target variable MUST be the FIRST column,
+        Correlation matrix. The target variable MUST be the FIRST column,
         followed by the predictors (excluding the intercept).
     """
     assert isinstance(S, pd.DataFrame)
