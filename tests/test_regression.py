@@ -262,6 +262,14 @@ class TestRegression(TestCase):
         # %%R -i df
         # summary(glm(Ybin ~ X, data=df, family=binomial))
         assert_equal(np.round(lom["coef"], 3), [1.319, -0.199])
+        # The default solver must converge to the maximum likelihood estimates.
+        # Compare to R: summary(glm(P ~ H, family=binomial))
+        H = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 4, 4.25, 4.5]
+        H += [4.75, 5, 5.5]
+        P = [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1]
+        lom_h = logistic_regression(H, P, as_dataframe=False)
+        np.testing.assert_allclose(lom_h["coef"], [-4.0777134, 1.5046454], atol=1e-5)
+        np.testing.assert_allclose(lom_h["se"], [1.7609843, 0.6287165], atol=1e-4)
         assert_equal(np.round(lom["se"], 3), [0.758, 0.121])
         assert_almost_equal(lom["z"], [1.74, -1.647], decimal=2)
         assert_equal(np.round(lom["pval"], 3), [0.082, 0.099])

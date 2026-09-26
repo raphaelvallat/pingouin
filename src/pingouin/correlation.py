@@ -1374,7 +1374,7 @@ def distance_corr(x, y, alternative="greater", n_boot=1000, seed=None):
     >>> b = [1, 2, 9, 4, 4]
     >>> dcor, pval = distance_corr(a, b, seed=9)
     >>> print(round(dcor, 3), pval)
-    0.763 0.312
+    0.763 0.377
 
     2. With two 2D arrays and no p-value
 

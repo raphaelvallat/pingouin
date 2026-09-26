@@ -101,6 +101,12 @@ class TestDistribution(TestCase):
         homoscedasticity(df_pivot)
         # Long-format
         homoscedasticity(df, dv="Scores", group="Time")
+        # Integer inputs (scipy.stats.bartlett fails with integers in SciPy >= 1.17)
+        a, b = [4, 8, 9, 20, 14], [5, 8, 15, 45, 12]
+        for data in [[a, np.array(b)], {"a": a, "b": b}, pd.DataFrame({"a": a, "b": b})]:
+            hb = homoscedasticity(data, method="bartlett")
+            assert np.isclose(hb.at["bartlett", "T"], 2.873569)
+            assert np.isclose(hb.at["bartlett", "pval"], 0.090045)
 
     def test_epsilon(self):
         """Test function epsilon."""

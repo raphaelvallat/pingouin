@@ -49,12 +49,15 @@ def _perm_pval(bootstat, estimate, alternative="two-sided"):
     assert bootstat.ndim == 1, "bootstat must be a 1D array."
     n_boot = bootstat.size
     assert n_boot >= 1, "bootstat must have at least one value."
+    # Relative tolerance so that permuted values that are theoretically equal to the estimate
+    # but differ by floating-point error are counted as ties (same as scipy.stats.permutation_test)
+    gamma = abs(estimate) * np.finfo(float).eps * 100
     if alternative == "greater":
-        p = np.greater_equal(bootstat, estimate).sum() / n_boot
+        p = np.greater_equal(bootstat, estimate - gamma).sum() / n_boot
     elif alternative == "less":
-        p = np.less_equal(bootstat, estimate).sum() / n_boot
+        p = np.less_equal(bootstat, estimate + gamma).sum() / n_boot
     else:
-        p = np.greater_equal(np.fabs(bootstat), abs(estimate)).sum() / n_boot
+        p = np.greater_equal(np.fabs(bootstat), abs(estimate) - gamma).sum() / n_boot
     return p
 
 

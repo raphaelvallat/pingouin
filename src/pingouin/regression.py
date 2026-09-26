@@ -276,6 +276,7 @@ def linear_regression(
 
     7. Remove missing values
 
+    >>> X, y = X.copy(), y.copy()  # to_numpy() can return a read-only view
     >>> X[4, 1] = np.nan
     >>> y[7] = np.nan
     >>> pg.linear_regression(X, y, remove_na=True, coef_only=True)
@@ -744,8 +745,8 @@ def logistic_regression(
 
     3. Using NumPy aray and returning only the coefficients
 
-    >>> pg.logistic_regression(X.to_numpy(), y.to_numpy(), coef_only=True, remove_na=True)
-    array([-26.23906892,   7.09826571,  -0.13180626,  -9.71718529])
+    >>> pg.logistic_regression(X.to_numpy(), y.to_numpy(), coef_only=True, remove_na=True).round(2)
+    array([-26.24,   7.1 ,  -0.13,  -9.72])
 
     4. Passing custom parameters to sklearn
 
@@ -916,6 +917,9 @@ def logistic_regression(
         # https://stats.stackexchange.com/a/204324/253579
         # Updated in Pingouin > 0.3.6 to be consistent with R
         kwargs["solver"] = "newton-cg"
+        # The default tol=1e-4 of scikit-learn stops before convergence to the maximum
+        # likelihood estimates (e.g. 3rd decimal of the coefficients)
+        kwargs.setdefault("tol", 1e-8)
     if "penalty" not in kwargs and "C" not in kwargs:
         import sklearn
 
@@ -1196,7 +1200,7 @@ def mediation_analysis(
 
     >>> mediation_analysis(data=df, x="X", m="Mbin", y="Y", seed=42).round(3)
            path   coef     se   pval     CI2.5     CI97.5  sig
-    0  Mbin ~ X -0.021  0.116  0.857    -0.248      0.206   No
+    0  Mbin ~ X -0.021  0.116  0.858    -0.248      0.206   No
     1  Y ~ Mbin -0.135  0.412  0.743    -0.952      0.682   No
     2     Total  0.396  0.111  0.001     0.176      0.617  Yes
     3    Direct  0.396  0.112  0.001     0.174      0.617  Yes

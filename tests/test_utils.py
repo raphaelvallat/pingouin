@@ -122,6 +122,13 @@ class TestUtils(TestCase):
         assert low > up
         assert up + low == 1
         assert up < two < low
+        # Values within floating-point error of the estimate are counted as ties
+        x = 0.1 + 0.2  # 0.30000000000000004
+        bootstat = np.array([0.3, 0.3, 0.3, 0.1])
+        assert _perm_pval(bootstat, x, alternative="greater") == 0.75
+        assert _perm_pval(bootstat, -x, alternative="less") == 0
+        assert _perm_pval(-bootstat, -x, alternative="less") == 0.75
+        assert _perm_pval(-bootstat, x, alternative="two-sided") == 0.75
 
     def test_remove_na(self):
         """Test function remove_na."""

@@ -40,6 +40,11 @@ jobs:
       - name: Test with pytest
         run: uv run pytest --verbose
 
+      # Docstring examples are only checked on one job: printed outputs depend on library versions
+      - name: Test docstring examples
+        if: matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.14'
+        run: uv run pytest --doctest-modules src/pingouin --verbose
+
   # Test against different dependency versions
   test-dependency-combinations:
     strategy:
