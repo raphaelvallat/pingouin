@@ -17,6 +17,7 @@ from pingouin.regression import (
     linear_regression,
     logistic_regression,
     mediation_analysis,
+    vif,
 )
 
 # 1st dataset: mediation
@@ -33,6 +34,9 @@ df_nan.loc[12, ["Y", "Ybin"]] = np.nan
 data = read_dataset("penguins").dropna()
 data["male"] = (data["sex"] == "male").astype(int)
 data["body_mass_kg"] = data["body_mass_g"] / 1000
+
+# 3rd dataset: tips
+tips = read_dataset("tips")
 
 
 class TestRegression(TestCase):
@@ -480,6 +484,9 @@ class TestRegression(TestCase):
         assert _pval_from_bootci(bt2, 0.9) < 0.10
         assert _pval_from_bootci(bt3, 0.9) < _pval_from_bootci(bt2, 0.9)
 
+    def test_vif(self):
+        pass
+
 
 @pytest.mark.parametrize("scale", [1.0, 1e-8, 1e8])
 @pytest.mark.parametrize("weighted", [False, True])
@@ -629,3 +636,10 @@ def test_logistic_regression_constant_column_without_intercept():
     # With the intercept of scikit-learn, all the constant columns are removed
     lom = logistic_regression(df[["Two", "X", "M"]], df["Ybin"])
     assert_equal(lom["names"].to_numpy(), ["Intercept", "X", "M"])
+
+
+@pytest.mark.parametrize("val", (1, 2.5, {1: 2}, "test", [1, 2]))
+def test_vif_invalid_input_types(val):
+    """Test vif() raises a TypeError with invalid input types."""
+    with pytest.raises(TypeError, match="must be a pandas DataFrame or a numpy ndarray"):
+        vif(val)
