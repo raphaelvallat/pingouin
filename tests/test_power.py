@@ -230,6 +230,12 @@ class TestPower(TestCase):
         assert np.isclose(power_corr(r=-0.1, n=20, alternative="greater"), 0.01941224)
         assert np.isclose(power_corr(r=0.5, power=0.80, alternative="greater"), 22.60907)
         assert np.isclose(power_corr(n=20, power=0.80, alternative="greater"), 0.5286949)
+        # pwr can't solve for alpha one-sided, so check by plugging the value back in.
+        # Power must keep rising with alpha > 0.5.
+        alpha = power_corr(r=0.5, n=20, power=0.80, alpha=None, alternative="greater")
+        assert np.isclose(alpha, 0.0689074, rtol=1e-03)
+        assert np.isclose(power_corr(r=0.5, n=20, alpha=alpha, alternative="greater"), 0.80)
+        assert power_corr(r=0.5, n=20, alpha=0.9, alternative="greater") > 0.99
 
         # Less
         assert np.isclose(power_corr(r=-0.5, n=20, alternative="less"), 0.7509873)
@@ -237,6 +243,9 @@ class TestPower(TestCase):
         assert np.isclose(power_corr(r=0.1, n=20, alternative="less"), 0.01941224)
         assert np.isclose(power_corr(r=-0.5, power=0.80, alternative="less"), 22.60907)
         assert np.isclose(power_corr(n=20, power=0.80, alternative="less"), -0.5286949)
+        alpha = power_corr(r=-0.5, n=20, power=0.80, alpha=None, alternative="less")
+        assert np.isclose(alpha, 0.0689074, rtol=1e-03)
+        assert np.isclose(power_corr(r=-0.5, n=20, alpha=alpha, alternative="less"), 0.80)
 
         # Error & Warning
         with pytest.raises(ValueError):

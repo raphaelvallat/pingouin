@@ -729,7 +729,7 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative="two-sided"):
             r = -r
         dof = n - 2
         ttt = stats.t.ppf(1 - alpha / tside, dof)
-        rc = np.sqrt(ttt**2 / (ttt**2 + dof))
+        rc = np.sign(ttt) * np.sqrt(ttt**2 / (ttt**2 + dof))
         zr = np.arctanh(r) + r / (2 * (n - 1))
         zrc = np.arctanh(rc)
         pwr = stats.norm.cdf((zr - zrc) * np.sqrt(n - 3))
