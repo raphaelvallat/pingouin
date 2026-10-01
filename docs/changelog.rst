@@ -3,6 +3,15 @@
 What's new
 ##########
 
+v0.7.1 (October 2026)
+---------------------
+
+**Bugfixes**
+
+- :py:func:`pingouin.power_corr`: solving for ``alpha`` with a one-sided alternative (``alternative="greater"`` or ``"less"``) returned incorrect values whenever the solution was above 0.5, because the sign of the critical t-value was dropped. (`PR544 <https://github.com/raphaelvallat/pingouin/pull/544>`_)
+
+The full changelog can be found on GitHub: https://github.com/raphaelvallat/pingouin/releases/tag/v0.7.1
+
 v0.7.0 (September 2026)
 -----------------------
 
