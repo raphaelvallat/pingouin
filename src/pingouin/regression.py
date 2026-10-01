@@ -1344,13 +1344,7 @@ def mediation_analysis(
 @pf.register_dataframe_method
 def vif(data):
     """Calculate the variance inflation factor (VIF) for each predictor.
-
-    The variance inflation factor quantifies the degree of multicollinearity
-    among predictor variables. For a predictor ``j``, VIF is defined as
-    ``1 / (1 - R²_j)``, where ``R²_j`` is obtained by regressing predictor
-    ``j`` against all remaining predictors. Equivalently, the VIFs are given
-    by the diagonal elements of the inverse of the predictors' correlation
-    matrix.
+    VIF quantifies the degree of multicollinearity among predictor variables. z
 
     Parameters
     ----------
@@ -1358,7 +1352,7 @@ def vif(data):
         Dataset containing the predictor variables. If a DataFrame is provided,
         only numeric columns are included in the calculation. For a numpy array,
         the input must be two-dimensional and contain values that can be converted
-        to ``float64``.
+        to ``np.float64``.
 
     Returns
     -------
@@ -1438,6 +1432,10 @@ def vif(data):
         X = numeric_data.to_numpy(dtype=np.float64, na_value=np.nan)
 
     elif isinstance(data, np.ndarray):
+        # ndarray must be two-dimensional.
+        if data.ndim != 2:
+            raise ValueError(f"Input ndarray must be 2-dimensional, got {data.ndim}D.")
+
         # Validate numpy array as a numeric dtype or that it can be coerced to numeric dtype.
         is_frame = False
         if data.dtype.kind in "bcMm":  # bool, complex, datetime, timedelta
@@ -1450,18 +1448,14 @@ def vif(data):
                 "could not be coerced to float64."
             ) from err
 
-        # ndarray must be two-dimensional.
-        if X.ndim != 2:
-            raise ValueError(f"Input ndarray must be 2-dimensional, got {X.ndim}D.")
-
     # Invalid input type.
     else:
         raise TypeError(
             f"`data` must be a pandas DataFrame or a numpy ndarray, got {type(data).__name__}."
         )
 
-    # No numeric rows are available for the VIF calculation.
-    if X.shape[0] == 0:
+    # No rows are available for the VIF calculation.
+    if X.size == 0:
         raise ValueError("`data` contains no rows of numeric data.")
 
     # At least two variables are needed to compute a VIF.
