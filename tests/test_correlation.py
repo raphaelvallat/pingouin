@@ -8,6 +8,7 @@ from itertools import product
 import numpy as np
 import pandas as pd
 import pytest
+from pandas.testing import assert_frame_equal
 from scipy.stats import kendalltau, pearsonr, spearmanr
 from statsmodels.stats.multitest import multipletests
 
@@ -82,9 +83,11 @@ def test_corr():
         assert -1 <= stats.at["skipped", "r"] <= 1
         assert 0 <= stats.at["skipped", "p_val"] <= 1
         assert 0 <= stats.at["skipped", "outliers"] < 30
-    # Shepherd: the bootstrapped Mahalanobis distances use the global NumPy random state
+    # Shepherd: seed=123 draws the same bootstrap samples as np.random.seed(123)
+    stats = corr(x, y, method="shepherd", seed=123)
     np.random.seed(123)
-    stats = corr(x, y, method="shepherd")
+    assert_frame_equal(corr(x, y, method="shepherd"), stats)
+    assert_frame_equal(corr(x, y, method="shepherd", seed=123), stats)
     assert np.isclose(stats.loc["shepherd", "r"], 0.5123153)
     assert np.isclose(stats.loc["shepherd", "p_val"], 0.005316)
     assert stats.loc["shepherd", "outliers"] == 2
