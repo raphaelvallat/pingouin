@@ -34,6 +34,22 @@ Code guidelines
 
      $ pytest --verbose
 
+Deprecations
+------------
+
+When a function or argument is deprecated, it keeps working for at least one release and emits a ``FutureWarning``, which is shown to end users by default (unlike ``DeprecationWarning``). Use ``stacklevel=2`` so that the warning points to the user's code, and say in the message what to use instead and in which version the old behavior will be removed:
+
+.. code-block:: python
+
+  warnings.warn(
+      "The `alpha` argument is deprecated and will be removed in version 0.9.0. "
+      "Use `confidence` instead.",
+      FutureWarning,
+      stacklevel=2,
+  )
+
+Add a ``.. deprecated::`` directive to the docstring, an entry to the changelog, and a test that checks the warning with ``pytest.warns(FutureWarning)``.
+
 .. _pre-commit-hooks:
 
 Pre-commit hooks

@@ -15,6 +15,11 @@ Unreleased
 
 - :py:func:`pingouin.corr`: new ``seed`` argument for the bootstrap of the Shepherd's pi correlation (``method="shepherd"``). Without it, the global NumPy random state is used, as before.
 
+**Breaking changes**
+
+- Removed :py:func:`!pingouin.pairwise_ttests`, deprecated since version 0.5.2, as well as the ``DataFrame.pairwise_ttests`` method. Use :py:func:`pingouin.pairwise_tests` instead.
+- :py:func:`pingouin.convert_effsize`: removed the specific error message for ``output_type="r"``, deprecated since version 0.5.3. Use ``output_type="pointbiserialr"`` instead.
+
 *************
 
 v0.7.0 (September 2026)

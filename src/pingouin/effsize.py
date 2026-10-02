@@ -611,12 +611,6 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
     elif ot == "odds_ratio":
         # Borenstein et al. 2009
         return np.exp(d * np.pi / np.sqrt(3))
-    elif ot == "r":
-        # https://github.com/raphaelvallat/pingouin/issues/302
-        raise ValueError(
-            "Using effect size 'r' in `pingouin.convert_effsize` has been deprecated. "
-            "Please use 'pointbiserialr' instead."
-        )
     elif ot == "auc":
         # Ruscio 2008
         from scipy.stats import norm
