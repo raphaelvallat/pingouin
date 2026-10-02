@@ -207,7 +207,7 @@ The :py:func:`pingouin.normality` function works with lists, arrays, or pandas D
 
 .. parsed-literal::
 
-   (False, 0.00018)
+   HZResults(hz=1.697, pval=0.00018, normal=False)
 
 ------------
 
@@ -297,7 +297,7 @@ The :py:func:`pingouin.normality` function works with lists, arrays, or pandas D
 
 .. code-block:: python
 
-  # Compute the two-way mixed ANOVA and export to a .csv file
+  # Compute the two-way mixed ANOVA
   aov = pg.mixed_anova(data=df, dv='Scores', between='Group', within='Time',
                        subject='Subject', correction=False, effsize="np2")
   pg.print_table(aov)
@@ -499,20 +499,14 @@ Several functions of Pingouin can be used directly as :py:class:`pandas.DataFram
 
 The functions that are currently supported as pandas method are:
 
-* :py:func:`pingouin.anova`
-* :py:func:`pingouin.ancova`
-* :py:func:`pingouin.rm_anova`
-* :py:func:`pingouin.mixed_anova`
-* :py:func:`pingouin.welch_anova`
-* :py:func:`pingouin.pairwise_tests`
-* :py:func:`pingouin.pairwise_tukey`
-* :py:func:`pingouin.pairwise_gameshowell`
-* :py:func:`pingouin.pairwise_corr`
-* :py:func:`pingouin.partial_corr`
-* :py:func:`pingouin.pcorr`
-* :py:func:`pingouin.rcorr`
-* :py:func:`pingouin.ptests`
-* :py:func:`pingouin.mediation_analysis`
+* ANOVAs: :py:func:`~pingouin.anova`, :py:func:`~pingouin.ancova`, :py:func:`~pingouin.rm_anova`, :py:func:`~pingouin.mixed_anova`, :py:func:`~pingouin.welch_anova`
+* Non-parametric: :py:func:`~pingouin.kruskal`, :py:func:`~pingouin.friedman`, :py:func:`~pingouin.cochran`
+* Post-hocs: :py:func:`~pingouin.pairwise_tests`, :py:func:`~pingouin.pairwise_tukey`, :py:func:`~pingouin.pairwise_gameshowell`, :py:func:`~pingouin.ptests`
+* Correlations: :py:func:`~pingouin.pairwise_corr`, :py:func:`~pingouin.partial_corr`, :py:func:`~pingouin.pcorr`, :py:func:`~pingouin.rcorr`, :py:func:`~pingouin.rm_corr`
+* Distribution: :py:func:`~pingouin.normality`, :py:func:`~pingouin.homoscedasticity`, :py:func:`~pingouin.sphericity`, :py:func:`~pingouin.epsilon`, :py:func:`~pingouin.box_m`
+* Contingency: :py:func:`~pingouin.chi2_independence`, :py:func:`~pingouin.chi2_mcnemar`, :py:func:`~pingouin.dichotomous_crosstab`
+* Regression: :py:func:`~pingouin.linear_regression`, :py:func:`~pingouin.logistic_regression`, :py:func:`~pingouin.mediation_analysis`
+* Reliability: :py:func:`~pingouin.cronbach_alpha`, :py:func:`~pingouin.intraclass_corr`
 
 
 ***********************
