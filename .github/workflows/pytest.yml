@@ -3,12 +3,22 @@ name: PyTest
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
-    paths:
+    paths: &test-paths
       - 'src/**'
       - 'tests/**'
+      - 'conftest.py'
       - 'pyproject.toml'
+      - '.github/workflows/pytest.yml'
+  # Any base branch, so that stacked PRs are tested too
+  pull_request:
+    paths: *test-paths
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   FORCE_COLOR: 1
@@ -25,18 +35,20 @@ jobs:
     env:
       COVERAGE_JOB: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.14' }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
         with:
           enable-cache: true
           prune-cache: false
+          # There is no uv.lock: key the cache on the dependencies declared in pyproject.toml
+          cache-dependency-glob: pyproject.toml
 
       - name: Install dependencies
         run: |
@@ -54,16 +66,19 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: env.COVERAGE_JOB == 'true'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac  # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
           fail_ci_if_error: true
 
-      # Docstring examples are only checked on one job: printed outputs depend on library versions
+      # Docstring examples are only checked on one job: printed outputs depend on library versions.
+      # --pyargs collects the installed package, the same copy as the unit tests, instead of src/.
+      # Since pytest 9.1, the root conftest.py (NumPy legacy repr for doctests) is not loaded for a
+      # package outside the repo, so load it as a plugin: `python -m` puts the repo on sys.path.
       - name: Test docstring examples
         if: env.COVERAGE_JOB == 'true'
-        run: pytest --doctest-modules src/pingouin --verbose
+        run: python -m pytest -p conftest --doctest-modules --pyargs pingouin --verbose
 
   # Test against different dependency versions
   test-dependency-combinations:
@@ -79,6 +94,8 @@ jobs:
             pandas: "pandas==2.3.0"
             statsmodels: "statsmodels==0.14.5"
             scikit-learn: "scikit-learn==1.6.1"
+            matplotlib: "matplotlib==3.10.1"
+            seaborn: "seaborn==0.13.2"
             label: "old-versions"
 
           - python-version: "3.12"
@@ -101,23 +118,25 @@ jobs:
 
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+      - name: Set up Python ${{ matrix.deps.python-version }}
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
         with:
           python-version: ${{ matrix.deps.python-version }}
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
         with:
           enable-cache: true
           prune-cache: false
+          cache-dependency-glob: pyproject.toml
           cache-suffix: ${{ matrix.deps.label }}
 
       - name: Install numpy (${{ matrix.deps.label }})
         run: uv pip install "${{ matrix.deps.numpy }}"
 
+      # matplotlib and seaborn are only pinned in the old-versions row, the latest otherwise
       - name: Install dependencies (${{ matrix.deps.label }})
         run: >-
           uv pip install --group=dev .
@@ -125,6 +144,8 @@ jobs:
           "${{ matrix.deps.pandas }}"
           "${{ matrix.deps.statsmodels }}"
           "${{ matrix.deps.scikit-learn }}"
+          "${{ matrix.deps.matplotlib || 'matplotlib' }}"
+          "${{ matrix.deps.seaborn || 'seaborn' }}"
 
       - name: Display installed versions
         run: |
@@ -133,6 +154,8 @@ jobs:
           python -c "import pandas; print(f'pandas: {pandas.__version__}')"
           python -c "import statsmodels; print(f'statsmodels: {statsmodels.__version__}')"
           python -c "import sklearn; print(f'scikit-learn: {sklearn.__version__}')"
+          python -c "import matplotlib; print(f'matplotlib: {matplotlib.__version__}')"
+          python -c "import seaborn; print(f'seaborn: {seaborn.__version__}')"
 
       - name: Test with pytest
         run: pytest --verbose

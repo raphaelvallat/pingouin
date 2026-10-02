@@ -1,9 +1,16 @@
 name: Build documentation and upload as artifact to GitHub Actions
+
+# Pushes to main are built (and deployed) by deploy_doc.yml
 on:
-  push:
-    branches: [main]
+  # Any base branch, so that stacked PRs are tested too
   pull_request:
-    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   docs:
@@ -12,15 +19,21 @@ jobs:
       FORCE_COLOR: true
       UV_SYSTEM_PYTHON: 1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
         with:
           python-version-file: "pyproject.toml"
 
+      # Same cache key as deploy_doc.yml, so PRs reuse the cache saved by main
       - name: Set up uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
+        with:
+          enable-cache: true
+          prune-cache: false
+          cache-dependency-glob: pyproject.toml
+          cache-suffix: docs
 
       - name: Install dependencies
         run: |
@@ -32,7 +45,7 @@ jobs:
           make -C docs html
 
       - name: Upload documentation artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
         with:
           name: docs-artifact
           path: docs/build/html
