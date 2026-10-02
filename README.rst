@@ -2,8 +2,8 @@
 
 |
 
-.. image:: https://badge.fury.io/py/pingouin.svg
-  :target: https://badge.fury.io/py/pingouin
+.. image:: https://img.shields.io/pypi/v/pingouin.svg
+  :target: https://pypi.org/project/pingouin/
 
 .. image:: https://img.shields.io/conda/vn/conda-forge/pingouin.svg
   :target: https://anaconda.org/conda-forge/pingouin
@@ -20,13 +20,13 @@
 .. image:: https://pepy.tech/badge/pingouin/month
     :target: https://pepy.tech/badge/pingouin/month
 
-.. image:: http://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244/status.svg
-    :target: http://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244
+.. image:: https://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244/status.svg
+    :target: https://joss.theoj.org/papers/d2254e6d8e8478da192148e4cfbe4244
 
 
 ----------------
 
-.. image::  https://pingouin-stats.org/_images/logo_pingouin.png
+.. image:: https://raw.githubusercontent.com/raphaelvallat/pingouin/main/docs/pictures/logo_pingouin.png
    :align:   center
 
 **Pingouin** is an open-source statistical package written in Python 3 and based mostly on Pandas and NumPy. Some of its main features are listed below. For a full list of available functions, please refer to the `API documentation <https://pingouin-stats.org/api.html>`_.
@@ -122,8 +122,8 @@ New releases are frequent so always make sure that you have the latest version:
 
   uv pip install --upgrade pingouin
 
-Development
------------
+Installation from source
+------------------------
 
 To build and install from source, clone this repository and install in editable mode with `uv <https://docs.astral.sh/uv/>`_
 
@@ -465,8 +465,8 @@ The functions that are currently supported as pandas method are:
 * Regression: `linear_regression <https://pingouin-stats.org/generated/pingouin.linear_regression.html>`_, `logistic_regression <https://pingouin-stats.org/generated/pingouin.logistic_regression.html>`_, `mediation_analysis <https://pingouin-stats.org/generated/pingouin.mediation_analysis.html>`_
 * Reliability: `cronbach_alpha <https://pingouin-stats.org/generated/pingouin.cronbach_alpha.html>`_, `intraclass_corr <https://pingouin-stats.org/generated/pingouin.intraclass_corr.html>`_
 
-Development
-===========
+Contributing
+============
 
 Pingouin was created and is maintained by `Raphael Vallat <https://raphaelvallat.github.io>`_, mostly during his spare time. Contributions are more than welcome so feel free to contact me, open an issue or submit a pull request!
 
