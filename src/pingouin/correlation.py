@@ -1036,10 +1036,11 @@ def rcorr(
     :py:func:`pandas.DataFrame.corr` method. Missing values are automatically
     removed from each pairwise correlation.
 
+    The input dataframe is the first positional argument, e.g. ``pingouin.rcorr(df)``, or
+    ``df.rcorr()`` when used as a :py:class:`pandas.DataFrame` method.
+
     Parameters
     ----------
-    self : :py:class:`pandas.DataFrame`
-        Input dataframe.
     method : str
         Correlation method. Can be either 'pearson' or 'spearman'.
     upper : str

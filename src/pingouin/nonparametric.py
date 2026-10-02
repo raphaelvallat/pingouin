@@ -500,6 +500,8 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
         Name of column containing the dependent variable.
     between : string
         Name of column containing the between factor.
+    detailed : boolean
+        Currently has no effect: the output is the same with ``detailed=True``.
 
     Returns
     -------
@@ -608,7 +610,6 @@ def friedman(data=None, dv=None, within=None, subject=None, method="chisq"):
         * ``'Q'``: The Friedman chi-square statistic, corrected for ties
         * ``'dof'``: degrees of freedom
         * ``'p_unc'``: Uncorrected p-value of the chi squared test
-
 
         If ``method='f'``
 

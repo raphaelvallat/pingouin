@@ -540,12 +540,13 @@ def ptests(
     :py:func:`pingouin.pairwise_test` function. Missing values are automatically removed from each
     pairwise T-test.
 
+    The input dataframe is the first positional argument, e.g. ``pingouin.ptests(df)``, or
+    ``df.ptests()`` when used as a :py:class:`pandas.DataFrame` method.
+
     .. versionadded:: 0.5.3
 
     Parameters
     ----------
-    self : :py:class:`pandas.DataFrame`
-        Input dataframe.
     paired : boolean
         Specify whether the two observations are related (i.e. repeated measures) or independent.
     decimals : int

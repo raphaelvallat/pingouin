@@ -386,8 +386,8 @@ def anderson(*args, dist="norm"):
 
     Parameters
     ----------
-    sample1, sample2,... : array_like
-        Array of sample data. They may be of different lengths.
+    *args : array_like
+        One or more arrays of sample data. They may be of different lengths.
     dist : string
         The type of distribution to test against. The default is 'norm'.
         Must be one of 'norm', 'expon', 'logistic', 'gumbel'.

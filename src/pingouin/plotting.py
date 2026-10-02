@@ -889,7 +889,7 @@ def plot_circmean(
     ----------
     angles : array or list
         Angles (expressed in radians). Only 1D array are supported here.
-    square: bool
+    square : bool
         If True (default), ensure equal aspect ratio between X and Y axes.
     ax : matplotlib axes
         Axis on which to draw the plot.

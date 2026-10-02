@@ -74,6 +74,12 @@ def power_ttest(
         Defines the alternative hypothesis, or tail of the test. Must be one of
         "two-sided" (default), "greater" or "less".
 
+    Returns
+    -------
+    float
+        The parameter that was passed as None: the Cohen d effect size ``d``, the sample size ``n``, the power ``power``
+        or the significance level ``alpha``.
+
     Notes
     -----
     Exactly ONE of the parameters ``d``, ``n``, ``power`` and ``alpha`` must be passed as None, and
@@ -208,6 +214,12 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative="two-sided
         Defines the alternative hypothesis, or tail of the test. Must be one of "two-sided"
         (default), "greater" or "less".
 
+    Returns
+    -------
+    float
+        The parameter that was passed as None: the Cohen d effect size ``d``, the power ``power`` or the significance level
+        ``alpha``.
+
     Notes
     -----
     Exactly ONE of the parameters ``d``, ``power`` and ``alpha`` must be passed as None, and that
@@ -312,6 +324,12 @@ def power_anova(eta_squared=None, k=None, n=None, power=None, alpha=0.05):
         Test power (= 1 - type II error).
     alpha : float
         Significance level :math:`\\alpha` (type I error probability). The default is 0.05.
+
+    Returns
+    -------
+    float
+        The parameter that was passed as None: the effect size ``eta_squared``, the number of groups ``k``, the sample
+        size per group ``n``, the power ``power`` or the significance level ``alpha``.
 
     Notes
     -----
@@ -458,6 +476,12 @@ def power_rm_anova(eta_squared=None, m=None, n=None, power=None, alpha=0.05, cor
     epsilon : float
         Epsilon adjustement factor for sphericity. This can be calculated using the
         :py:func:`pingouin.epsilon` function.
+
+    Returns
+    -------
+    float
+        The parameter that was passed as None: the effect size ``eta_squared``, the number of repeated measurements
+        ``m``, the sample size ``n``, the power ``power`` or the significance level ``alpha``.
 
     Notes
     -----
@@ -654,6 +678,12 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative="two-sided"):
         positive (greater than zero), "less" tests against the hypothesis that the correlation is
         negative.
 
+    Returns
+    -------
+    float
+        The parameter that was passed as None: the correlation coefficient ``r``, the sample size ``n``, the power ``power``
+        or the significance level ``alpha``.
+
     Notes
     -----
     Exactly ONE of the parameters ``r``, ``n``, ``power`` and ``alpha`` must be passed as None,
@@ -771,6 +801,12 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
         Test power (= 1 - type II error).
     alpha : float
         Significance level (type I error probability). The default is 0.05.
+
+    Returns
+    -------
+    float
+        The parameter that was passed as None: the effect size ``w``, the total sample size ``n``, the power ``power`` or
+        the significance level ``alpha``.
 
     Notes
     -----

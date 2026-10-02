@@ -441,7 +441,6 @@ def rm_anova(
         SS_{\\text{error}} = SS_{\\text{total}} - SS_{\\text{effect}} -
         SS_{\\text{subjects}}
 
-
     where :math:`i=1,...,r; j=1,...,n_i`, :math:`r` is the number of
     conditions, :math:`n_i` the number of observations for each condition,
     :math:`\\overline{Y}` the grand mean of the data, :math:`\\overline{Y_i}`

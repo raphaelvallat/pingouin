@@ -1157,7 +1157,6 @@ def mediation_analysis(
     .. [2] Fiedler, K., Schott, M. & Meiser, T. What mediation analysis can
            (not) do. J. Exp. Soc. Psychol. 47, 1231–1236 (2011).
 
-
     .. [3] Hayes, A. F. & Rockwood, N. J. Regression-based statistical
            mediation and moderation analysis in clinical research:
            Observations, recommendations, and implementation. Behav. Res.
