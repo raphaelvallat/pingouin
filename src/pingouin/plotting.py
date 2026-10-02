@@ -363,10 +363,10 @@ def qqplot(
 
     References
     ----------
-    * https://github.com/cran/car/blob/master/R/qqPlot.R
+    .. [1] https://github.com/cran/car/blob/master/R/qqPlot.R
 
-    * Fox, J. (2008), Applied Regression Analysis and Generalized Linear
-      Models, 2nd Ed., Sage Publications, Inc.
+    .. [2] Fox, J. (2008), Applied Regression Analysis and Generalized Linear
+           Models, 2nd Ed., Sage Publications, Inc.
 
     Examples
     --------
@@ -791,7 +791,7 @@ def plot_rm_corr(
     g : :py:class:`seaborn.FacetGrid`
         Seaborn FacetGrid.
 
-    See also
+    See Also
     --------
     rm_corr
 

@@ -70,7 +70,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
         * ``'power'``: achieved power of the test ( = 1 - type II error)
         * ``'BF10'``: Bayes Factor of the alternative hypothesis
 
-    See also
+    See Also
     --------
     mwu, wilcoxon, anova, rm_anova, pairwise_tests, compute_effsize
 
@@ -126,20 +126,20 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
 
     References
     ----------
-    * https://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm
+    .. [1] https://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm
 
-    * Delacre, M., Lakens, D., & Leys, C. (2017). Why psychologists should
-      by default use Welch’s t-test instead of Student’s t-test.
-      International Review of Social Psychology, 30(1).
+    .. [2] Delacre, M., Lakens, D., & Leys, C. (2017). Why psychologists should
+           by default use Welch’s t-test instead of Student’s t-test.
+           International Review of Social Psychology, 30(1).
 
-    * Zimmerman, D. W. (2004). A note on preliminary tests of equality of
-      variances. British Journal of Mathematical and Statistical
-      Psychology, 57(1), 173-181.
+    .. [3] Zimmerman, D. W. (2004). A note on preliminary tests of equality of
+           variances. British Journal of Mathematical and Statistical
+           Psychology, 57(1), 173-181.
 
-    * Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,
-      2009. Bayesian t tests for accepting and rejecting the null
-      hypothesis. Psychon. Bull. Rev. 16, 225–237.
-      https://doi.org/10.3758/PBR.16.2.225
+    .. [4] Rouder, J.N., Speckman, P.L., Sun, D., Morey, R.D., Iverson, G.,
+           2009. Bayesian t tests for accepting and rejecting the null
+           hypothesis. Psychon. Bull. Rev. 16, 225–237.
+           https://doi.org/10.3758/PBR.16.2.225
 
     Examples
     --------
@@ -387,6 +387,9 @@ def rm_anova(
         For two-way design, this argument is ignored: both the uncorrected and
         Greenhouse-Geisser corrected p-values are always returned, together with
         Mauchly's test of sphericity for each effect.
+
+        .. versionchanged:: 0.7.0
+           Mauchly's test of sphericity is returned for two-way designs.
     detailed : boolean
         If True, return a full ANOVA table.
     effsize : string

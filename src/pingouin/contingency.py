@@ -79,13 +79,13 @@ def chi2_independence(data, x, y, correction=True):
 
     References
     ----------
-    * Cressie, N., & Read, T. R. (1984). Multinomial goodness‐of‐fit
-      tests. Journal of the Royal Statistical Society: Series B
-      (Methodological), 46(3), 440-464.
+    .. [1] Cressie, N., & Read, T. R. (1984). Multinomial goodness‐of‐fit
+           tests. Journal of the Royal Statistical Society: Series B
+           (Methodological), 46(3), 440-464.
 
-    * Yates, F. (1934). Contingency Tables Involving Small Numbers and the
-      :math:`\\chi^2` Test. Supplement to the Journal of the Royal
-      Statistical Society, 1, 217-235.
+    .. [2] Yates, F. (1934). Contingency Tables Involving Small Numbers and the
+           :math:`\\chi^2` Test. Supplement to the Journal of the Royal
+           Statistical Society, 1, 217-235.
 
     Examples
     --------
@@ -288,13 +288,13 @@ def chi2_mcnemar(data, x, y, correction=True):
 
     References
     ----------
-    * Edwards, A. L. (1948). Note on the "correction for continuity" in
-      testing the significance of the difference between correlated
-      proportions. Psychometrika, 13(3), 185-187.
+    .. [1] Edwards, A. L. (1948). Note on the "correction for continuity" in
+           testing the significance of the difference between correlated
+           proportions. Psychometrika, 13(3), 185-187.
 
-    * McNemar, Q. (1947). Note on the sampling error of the difference
-      between correlated proportions or percentages. Psychometrika, 12(2),
-      153-157.
+    .. [2] McNemar, Q. (1947). Note on the sampling error of the difference
+           between correlated proportions or percentages. Psychometrika, 12(2),
+           153-157.
 
     Examples
     --------

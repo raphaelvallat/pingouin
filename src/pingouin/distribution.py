@@ -94,10 +94,10 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
 
     References
     ----------
-    * Shapiro, S. S., & Wilk, M. B. (1965). An analysis of variance test
-      for normality (complete samples). Biometrika, 52(3/4), 591-611.
+    .. [1] Shapiro, S. S., & Wilk, M. B. (1965). An analysis of variance test
+           for normality (complete samples). Biometrika, 52(3/4), 591-611.
 
-    * https://www.itl.nist.gov/div898/handbook/prc/section2/prc213.htm
+    .. [2] https://www.itl.nist.gov/div898/handbook/prc/section2/prc213.htm
 
     Examples
     --------
@@ -771,9 +771,11 @@ def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha
     within : string
         Name of column containing the within factor (only required if ``data``
         is in long format).
-        If ``within`` is a list with two strings, this function computes
-        the epsilon factor for the interaction between the two within-subject
-        factor.
+        If ``within`` is a list with two strings, this function tests the
+        sphericity of the interaction between the two within-subject factors.
+
+        .. versionchanged:: 0.7.0
+           Two within-subject factors can both have more than 2 levels.
     subject : string
         Name of column containing the subject identifier (only required if
         ``data`` is in long format).

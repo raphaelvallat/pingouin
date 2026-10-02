@@ -426,7 +426,7 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
         * ``'BF10'``: Bayes Factor of the alternative hypothesis (only for Pearson correlation)
         * ``'power'``: achieved power of the test with an alpha of 0.05.
 
-    See also
+    See Also
     --------
     pairwise_corr : Pairwise correlation between columns of a pandas DataFrame
     partial_corr : Partial correlation
@@ -734,7 +734,7 @@ def partial_corr(
         * ``'CI95'``: 95% parametric confidence intervals around :math:`r`
         * ``'p_val'``: p-value
 
-    See also
+    See Also
     --------
     corr, pcorr, pairwise_corr, rm_corr
 
@@ -1187,7 +1187,7 @@ def rm_corr(data=None, x=None, y=None, subject=None):
         * ``'CI95'``: 95% parametric confidence intervals
         * ``'power'``: achieved power of the test (= 1 - type II error).
 
-    See also
+    See Also
     --------
     plot_rm_corr
 
@@ -1344,15 +1344,15 @@ def distance_corr(x, y, alternative="greater", n_boot=1000, seed=None):
 
     References
     ----------
-    * https://en.wikipedia.org/wiki/Distance_correlation
+    .. [1] https://en.wikipedia.org/wiki/Distance_correlation
 
-    * Székely, G. J., Rizzo, M. L., & Bakirov, N. K. (2007).
-      Measuring and testing dependence by correlation of distances.
-      The annals of statistics, 35(6), 2769-2794.
+    .. [2] Székely, G. J., Rizzo, M. L., & Bakirov, N. K. (2007).
+           Measuring and testing dependence by correlation of distances.
+           The annals of statistics, 35(6), 2769-2794.
 
-    * https://gist.github.com/satra/aa3d19a12b74e9ab7941
+    .. [3] https://gist.github.com/satra/aa3d19a12b74e9ab7941
 
-    * https://gist.github.com/wladston/c931b1495184fbb99bec
+    .. [4] https://gist.github.com/wladston/c931b1495184fbb99bec
 
     Examples
     --------

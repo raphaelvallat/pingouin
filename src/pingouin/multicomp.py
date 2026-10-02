@@ -57,7 +57,7 @@ def _fdr(pvals, alpha=0.05, method="fdr_bh"):
         P-values adjusted for multiple hypothesis testing using the BH or BY
         correction.
 
-    See also
+    See Also
     --------
     _bonf : Bonferroni correction
     _holm : Holm-Bonferroni correction
@@ -90,15 +90,15 @@ def _fdr(pvals, alpha=0.05, method="fdr_bh"):
 
     References
     ----------
-    - Benjamini, Y., and Hochberg, Y. (1995). Controlling the false discovery
-      rate: a practical and powerful approach to multiple testing. Journal of
-      the Royal Statistical Society Series B, 57, 289–300.
+    .. [1] Benjamini, Y., and Hochberg, Y. (1995). Controlling the false discovery
+           rate: a practical and powerful approach to multiple testing. Journal of
+           the Royal Statistical Society Series B, 57, 289–300.
 
-    - Benjamini, Y., and Yekutieli, D. (2001). The control of the false
-      discovery rate in multiple testing under dependency. Annals of
-      Statistics, 29, 1165–1188.
+    .. [2] Benjamini, Y., and Yekutieli, D. (2001). The control of the false
+           discovery rate in multiple testing under dependency. Annals of
+           Statistics, 29, 1165–1188.
 
-    - https://en.wikipedia.org/wiki/False_discovery_rate
+    .. [3] https://en.wikipedia.org/wiki/False_discovery_rate
 
     Examples
     --------
@@ -133,7 +133,7 @@ def _bonf(pvals, alpha=0.05):
         P-values adjusted for multiple hypothesis testing using the Bonferroni
         procedure (= multiplied by the number of tests).
 
-    See also
+    See Also
     --------
     _holm : Holm-Bonferroni correction
     _fdr : Benjamini/Hochberg and Benjamini/Yekutieli FDR correction
@@ -166,10 +166,10 @@ def _bonf(pvals, alpha=0.05):
 
     References
     ----------
-    - Bonferroni, C. E. (1935). Il calcolo delle assicurazioni su gruppi
-      di teste. Studi in onore del professore salvatore ortu carboni, 13-60.
+    .. [1] Bonferroni, C. E. (1935). Il calcolo delle assicurazioni su gruppi
+           di teste. Studi in onore del professore salvatore ortu carboni, 13-60.
 
-    - https://en.wikipedia.org/wiki/Bonferroni_correction
+    .. [2] https://en.wikipedia.org/wiki/Bonferroni_correction
 
     Examples
     --------
@@ -200,7 +200,7 @@ def _holm(pvals, alpha=0.05):
         P-values adjusted for multiple hypothesis testing using the Holm
         procedure.
 
-    See also
+    See Also
     --------
     _bonf : Bonferroni correction
     _fdr : Benjamini/Hochberg and Benjamini/Yekutieli FDR correction
@@ -233,10 +233,10 @@ def _holm(pvals, alpha=0.05):
 
     References
     ----------
-    - Holm, S. (1979). A simple sequentially rejective multiple test procedure.
-      Scandinavian journal of statistics, 65-70.
+    .. [1] Holm, S. (1979). A simple sequentially rejective multiple test procedure.
+           Scandinavian journal of statistics, 65-70.
 
-    - https://en.wikipedia.org/wiki/Holm%E2%80%93Bonferroni_method
+    .. [2] https://en.wikipedia.org/wiki/Holm%E2%80%93Bonferroni_method
 
     Examples
     --------
@@ -275,7 +275,7 @@ def _sidak(pvals, alpha=0.05):
         P-values adjusted for multiple hypothesis testing using the Sidak
         procedure.
 
-    See also
+    See Also
     --------
     _bonf, _holm, _fdr, multicomp
 
@@ -293,11 +293,11 @@ def _sidak(pvals, alpha=0.05):
 
     References
     ----------
-    - Šidák, Z. K. (1967). "Rectangular Confidence Regions for the Means of
-      Multivariate Normal Distributions". Journal of the American Statistical
-      Association. 62 (318): 626–633.
+    .. [1] Šidák, Z. K. (1967). "Rectangular Confidence Regions for the Means of
+           Multivariate Normal Distributions". Journal of the American Statistical
+           Association. 62 (318): 626–633.
 
-    - https://en.wikipedia.org/wiki/%C5%A0id%C3%A1k_correction
+    .. [2] https://en.wikipedia.org/wiki/%C5%A0id%C3%A1k_correction
 
     Examples
     --------

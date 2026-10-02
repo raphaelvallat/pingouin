@@ -45,7 +45,7 @@ def mad(a, normalize=True, axis=0):
     mad : float
         mad = median(abs(a - median(a))) / c
 
-    See also
+    See Also
     --------
     madmedianrule, numpy.std
 
@@ -105,7 +105,7 @@ def madmedianrule(a):
         Boolean array indicating whether each sample is an outlier (True) or
         not (False).
 
-    See also
+    See Also
     --------
     mad
 
@@ -172,7 +172,7 @@ def mwu(x, y, alternative="two-sided", **kwargs):
         * ``'RBC'``   : rank-biserial correlation
         * ``'CLES'``  : common language effect size
 
-    See also
+    See Also
     --------
     scipy.stats.mannwhitneyu, wilcoxon, ttest
 
@@ -332,7 +332,7 @@ def wilcoxon(x, y=None, alternative="two-sided", **kwargs):
         * ``'RBC'``   : matched pairs rank-biserial correlation (effect size)
         * ``'CLES'``  : common language effect size
 
-    See also
+    See Also
     --------
     scipy.stats.wilcoxon, mwu
 

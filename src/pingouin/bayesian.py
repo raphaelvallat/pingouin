@@ -45,7 +45,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative="two-sided", r=0
         The Bayes Factor quantifies the evidence in favour of the
         alternative hypothesis.
 
-    See also
+    See Also
     --------
     ttest : T-test
     pairwise_tests : Pairwise T-tests
@@ -166,7 +166,7 @@ def bayesfactor_pearson(r, n, alternative="two-sided", method="ly", kappa=1.0):
         The Bayes Factor quantifies the evidence in favour of the alternative
         hypothesis.
 
-    See also
+    See Also
     --------
     corr : (Robust) correlation between two variables
     pairwise_corr : Pairwise correlation between columns of a pandas DataFrame
@@ -378,7 +378,7 @@ def bayesfactor_binom(k, n, p=0.5, a=1, b=1):
         the random variable is binomially distributed with base probability
         :math:`p`.
 
-    See also
+    See Also
     --------
     bayesfactor_pearson : Bayes Factor of a correlation
     bayesfactor_ttest : Bayes Factor of a T-test
@@ -397,7 +397,7 @@ def bayesfactor_binom(k, n, p=0.5, a=1, b=1):
 
     References
     ----------
-    * https://en.wikipedia.org/wiki/Bayes_factor
+    .. [1] https://en.wikipedia.org/wiki/Bayes_factor
 
     Examples
     --------

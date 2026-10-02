@@ -225,7 +225,7 @@ def pairwise_tests(
         * ``'hedges'``: effect size (or any effect size defined in
           ``effsize``)
 
-    See also
+    See Also
     --------
     ttest, mwu, wilcoxon, compute_effsize, multicomp
 
@@ -694,6 +694,9 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
         Name of column(s) containing the between factor(s). If ``between`` is a list with two or
         more elements, all the combinations of levels (cells) of the factors are compared, i.e.
         the interaction term.
+
+        .. versionchanged:: 0.7.0
+           ``between`` can be a list of factors.
     effsize : string or None
         Effect size type. Available methods are:
 
@@ -722,7 +725,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
         * ``'hedges'``: Hedges effect size (or any effect size defined in
           ``effsize``)
 
-    See also
+    See Also
     --------
     pairwise_tests, pairwise_gameshowell
 
@@ -830,6 +833,9 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
         Name of column(s) containing the between factor(s). If ``between`` is a list with two or
         more elements, all the combinations of levels (cells) of the factors are compared, i.e.
         the interaction term.
+
+        .. versionchanged:: 0.7.0
+           ``between`` can be a list of factors.
     effsize : string or None
         Effect size type. Available methods are:
 
@@ -860,7 +866,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
         * ``'hedges'``: Hedges effect size (or any effect size defined in
           ``effsize``)
 
-    See also
+    See Also
     --------
     pairwise_tests, pairwise_tukey
 
