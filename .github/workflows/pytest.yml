@@ -74,9 +74,11 @@ jobs:
 
       # Docstring examples are only checked on one job: printed outputs depend on library versions.
       # --pyargs collects the installed package, the same copy as the unit tests, instead of src/.
+      # Since pytest 9.1, the root conftest.py (NumPy legacy repr for doctests) is not loaded for a
+      # package outside the repo, so load it as a plugin: `python -m` puts the repo on sys.path.
       - name: Test docstring examples
         if: env.COVERAGE_JOB == 'true'
-        run: pytest --doctest-modules --pyargs pingouin --verbose
+        run: python -m pytest -p conftest --doctest-modules --pyargs pingouin --verbose
 
   # Test against different dependency versions
   test-dependency-combinations:
