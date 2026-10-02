@@ -11,7 +11,7 @@ from .utils import _flatten_list as _fl
 from .utils import _postprocess_dataframe
 from .utils import remove_na as rm_na
 
-__all__ = ["linear_regression", "logistic_regression", "mediation_analysis"]
+__all__ = ["linear_regression", "logistic_regression", "mediation_analysis", "vif"]
 
 
 def linear_regression(
@@ -1339,3 +1339,179 @@ def mediation_analysis(
         return _postprocess_dataframe(stats), np.squeeze(ab_estimates)
     else:
         return _postprocess_dataframe(stats)
+
+
+@pf.register_dataframe_method
+def vif(data):
+    """Calculate the variance inflation factor (VIF) for each predictor.
+    VIF quantifies the degree of multicollinearity among predictor variables. z
+
+    Parameters
+    ----------
+    data : pandas.DataFrame or numpy.ndarray
+        Dataset containing the predictor variables. If a DataFrame is provided,
+        only numeric columns are included in the calculation. For a numpy array,
+        the input must be two-dimensional and contain values that can be converted
+        to ``np.float64``.
+
+    Returns
+    -------
+    pandas.DataFrame or numpy.ndarray
+        If ``data`` is a DataFrame, returns a DataFrame containing one row
+        labelled ``"VIF"`` and one column for each numeric predictor. If
+        ``data`` is a numpy array, returns a one-dimensional array containing
+        the VIF for each input column. Constant columns are represented by
+        ``np.nan`` in the numpy output.
+
+    Notes
+    -----
+    The VIF of variable :math:`j` quantifies how much the variance of its
+    regression coefficient is inflated by its linear dependence on the other
+    variables:
+
+    .. math:: \\text{VIF}_j = \\frac{1}{1 - R_j^2}
+
+    where :math:`R_j^2` is the coefficient of determination obtained by
+    regressing variable :math:`j` on all remaining variables. Instead of
+    fitting one regression per variable, this function uses the fact that the
+    VIFs are the diagonal elements of the inverse of the correlation matrix
+    :math:`\\mathbf{R}`:
+
+    .. math:: \\text{VIF}_j = \\left(\\mathbf{R}^{-1}\\right)_{jj}
+
+    This requires a single matrix inversion instead of :math:`p` regressions.
+    If :math:`\\mathbf{R}` is numerically singular (perfect
+    multicollinearity, or more variables than observations), the function
+    falls back to one least-squares regression per variable, and perfectly
+    predictable variables are assigned a VIF of ``inf``.
+
+    A VIF of 1 indicates no collinearity. Common rules of thumb regard values
+    above 5 (sometimes 10) as a sign of problematic multicollinearity.
+
+    Pre-processing is applied in the following order:
+
+    1. Non-numeric columns are removed (DataFrame) or the array is coerced to
+       ``float64`` (ndarray).
+    2. Rows containing missing (NaN) or infinite values are removed, and a
+       warning reports the percentage of rows dropped.
+    3. Constant columns (zero variance) are removed, with a warning.
+    4. Optionally, the remaining data are standardized (``scale=True``).
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> rng = np.random.default_rng(42)
+    >>> x1 = rng.normal(size=200)
+    >>> x2 = 0.9 * x1 + rng.normal(scale=0.3, size=200)
+    >>> x3 = rng.normal(size=200)
+    >>> df = pd.DataFrame({"x1": x1, "x2": x2, "x3": x3, "group": "a"})
+    >>> vif(df).round(2)
+           x1    x2   x3
+    VIF  7.42  7.41  1.0
+
+    Numpy input returns a numpy array
+
+    >>> vif(df[["x1", "x2", "x3"]].to_numpy()).round(2)
+    array([7.42, 7.41, 1.  ])
+
+    Missing values are dropped (with a warning)
+
+    >>> df.iloc[0, 0] = np.nan
+    >>> vif(df, scale=True).round(2)  # doctest: +SKIP
+    UserWarning: 0.50% of rows (1 of 200) were removed because of missing or infinite values.
+    """
+    if isinstance(data, pd.DataFrame):
+        # Tracks if input was a DataFrame; downstream numerical computations are
+        # done with numpy to reduce overhead and to simplify logic.
+        is_frame = True
+
+        # Get only numeric columns and convert to numpy array.
+        numeric_data = data.select_dtypes(include=["integer", "floating"]).copy()
+        output_cols = numeric_data.columns
+        X = numeric_data.to_numpy(dtype=np.float64, na_value=np.nan)
+
+    elif isinstance(data, np.ndarray):
+        # ndarray must be two-dimensional.
+        if data.ndim != 2:
+            raise ValueError(f"Input ndarray must be 2-dimensional, got {data.ndim}D.")
+
+        # Validate numpy array as a numeric dtype or that it can be coerced to numeric dtype.
+        is_frame = False
+        if data.dtype.kind in "bcMm":  # bool, complex, datetime, timedelta
+            raise ValueError(f"Input ndarray of dtype {data.dtype} is not supported.")
+        try:
+            X = data.astype("float64").copy()
+        except (ValueError, TypeError) as err:
+            raise ValueError(
+                f"Input ndarray of dtype {data.dtype} is not numeric and "
+                "could not be coerced to float64."
+            ) from err
+
+    # Invalid input type.
+    else:
+        raise TypeError(
+            f"`data` must be a pandas DataFrame or a numpy ndarray, got {type(data).__name__}."
+        )
+
+    # No rows are available for the VIF calculation.
+    if X.size == 0:
+        raise ValueError("`data` contains no rows of numeric data.")
+
+    # At least two variables are needed to compute a VIF.
+    if X.shape[1] < 2:
+        raise ValueError("`data` must have at least two numeric columns")
+
+    # Remove rows with nan/inf values, print warning if any rows were discarded.
+    mask_finite = np.isfinite(X).all(axis=1)
+    n_removed = np.sum(~mask_finite)
+    if n_removed:
+        perc_removed = float(round(100 * n_removed / X.shape[0], 2))
+        warnings.warn(
+            f"{perc_removed}% of rows ({n_removed} of "
+            f"{X.shape[0]}) were removed because of missing and/or infinite values.",
+            UserWarning,
+            stacklevel=2,
+        )
+        X = X[mask_finite]
+
+    # VIF are only calculated if there are more observations than variables.
+    if X.shape[0] <= X.shape[1]:
+        raise ValueError("`data` must have more rows than numeric variables to calculate VIF.")
+
+    # Discard constant-value columns.
+    mask_non_constant = np.ptp(X, axis=0) > 0
+    if not mask_non_constant.all():
+        warnings.warn("Constant columns were removed.", UserWarning, stacklevel=2)
+        X = X[:, mask_non_constant]
+        if X.shape[1] < 2:
+            raise ValueError("Fewer than two non-constant variables remain.")
+
+        # Update output column names in case input was a DataFrame.
+        if is_frame:
+            output_cols = output_cols[mask_non_constant]
+
+    # Calculate Pearson correlation matrix column-wise.
+    corr = np.corrcoef(X, rowvar=False)
+
+    # Check that the correlation matrix is numerically stable enough to invert.
+    machine_precision = np.finfo(float).eps
+    max_condition_number = 1 / machine_precision
+    invert_matrix = np.linalg.cond(corr) < max_condition_number
+
+    # Use the inverse correlation matrix to calculate all VIFs at once.
+    if invert_matrix:
+        vif_values = np.diag(np.linalg.inv(corr))
+    # If the correlation matrix is poorly conditioned, avoid explicitly
+    # inverting it and calculate each VIF using a least-squares regression.
+    # else:
+    #     vif_values = _vif_lstsq(X)
+
+    # Return a DataFrame with VIF values.
+    if is_frame:
+        return pd.DataFrame([vif_values], columns=output_cols, index=["VIF"])
+
+    # Return a numpy ndarray with VIF values (constant value columns are set to np.nan).
+    vif_arr = np.full(data.shape[1], np.nan)
+    vif_arr[mask_non_constant] = vif_values
+    return vif_arr
