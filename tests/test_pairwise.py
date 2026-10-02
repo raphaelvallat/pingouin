@@ -522,6 +522,12 @@ class TestPairwise(TestCase):
         pt_stars = df.ptests(decimals=7)
         assert not pt.equals(pt_stars)
 
+        # Using custom significance thresholds
+        pt_custom = df.ptests(pval_stars={0.05: "sig"}).to_numpy()
+        upper = pt_custom[np.triu_indices(df.shape[1], k=1)]
+        assert set(upper) <= {"", "sig"}
+        assert "sig" in upper
+
         # Paired T-test
         pt = df.ptests(decimals=7, paired=True, stars=False)
         for a, b in combs:

@@ -366,3 +366,10 @@ class TestCorrelation(TestCase):
         for padjust in padjusts:
             assert rcorr(const, padjust=padjust).at["a", "b"] == ""
             assert rcorr(const, padjust=padjust, stars=False).at["a", "b"] == "nan"
+
+        # Custom significance thresholds
+        custom = rcorr(frame, pval_stars={0.05: "sig"}).to_numpy()[i, j]
+        assert set(custom) <= {"", "sig"}
+        assert custom[0] == "sig"  # frame[1] is correlated with frame[0]
+        with pytest.raises(AssertionError, match="pval_stars must be a dictionary"):
+            rcorr(frame, pval_stars=[0.05])
