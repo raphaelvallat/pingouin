@@ -16,6 +16,8 @@ concurrency:
 
 jobs:
   deploy-to-gh-pages:
+    # Only deploy main, including when the workflow is started manually from another branch
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: documentation-github-pages
