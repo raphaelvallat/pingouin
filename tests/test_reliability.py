@@ -30,21 +30,24 @@ def test_cronbach_alpha():
     alpha_wide, ci_wide = cronbach_alpha(data=wide)
     assert alpha == alpha_wide
     np.testing.assert_array_equal(ci, ci_wide)
-    # In R = psych:alpha(data, use="complete.obs"): same alpha as without the incomplete subject
-    alpha, _ = cronbach_alpha(
+    # In R = psych:alpha(data, use="complete.obs"): same alpha and CI as without the incomplete
+    # subject, i.e. the CI uses the sample size after listwise deletion
+    alpha, ci = cronbach_alpha(
         data=df, items="Items", scores="Scores", subject="Subj", nan_policy="listwise"
     )
     df_complete = df[df["Subj"] != df.at[2, "Subj"]]
-    alpha_complete, _ = cronbach_alpha(
+    alpha_complete, ci_complete = cronbach_alpha(
         data=df_complete, items="Items", scores="Scores", subject="Subj"
     )
     assert np.isclose(alpha, alpha_complete)
+    np.testing.assert_array_equal(ci, ci_complete)
     # Wide format
     data = read_dataset("cronbach_wide_missing")
     alpha, _ = cronbach_alpha(data=data)
     assert round(alpha, 2) == 0.73
-    alpha, _ = cronbach_alpha(data=data, nan_policy="listwise")
+    alpha, ci = cronbach_alpha(data=data, nan_policy="listwise")
     assert round(alpha, 2) == 0.80
+    np.testing.assert_array_equal(ci, cronbach_alpha(data=data.dropna())[1])
 
 
 def test_intraclass_corr():

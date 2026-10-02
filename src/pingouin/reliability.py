@@ -109,7 +109,7 @@ def cronbach_alpha(
 
     >>> # In R: psych:alpha(data, use="complete.obs")
     >>> pg.cronbach_alpha(data=data, nan_policy="listwise")
-    (0.8016949152542373, array([0.581, 0.933]))
+    (0.8016949152542373, array([0.533, 0.947]))
 
     After imputing the missing values with the median of each column
 
@@ -131,14 +131,15 @@ def cronbach_alpha(
         data = data.pivot(index=subject, values=scores, columns=items)
 
     # From now we assume that data is in wide format
-    n, k = data.shape
-    assert k >= 2, "At least two items are required."
-    assert n >= 2, "At least two raters/subjects are required."
     err = "All columns must be numeric."
     assert all([data[c].dtype.kind in "bfiu" for c in data.columns]), err
     if data.isna().any().any() and nan_policy == "listwise":
         # In R = psych:alpha(data, use="complete.obs")
         data = data.dropna(axis=0, how="any")
+    # The sample size of the confidence interval is the one after listwise deletion
+    n, k = data.shape
+    assert k >= 2, "At least two items are required."
+    assert n >= 2, "At least two raters/subjects are required."
 
     # Compute covariance matrix and Cronbach's alpha
     C = data.cov(numeric_only=True)
