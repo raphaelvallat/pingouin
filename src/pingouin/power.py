@@ -592,8 +592,8 @@ def power_rm_anova(eta_squared=None, m=None, n=None, power=None, alpha=0.05, cor
     can be done by taking the mean of the superdiagonal of the correlation matrix, which is similar
     to manually calculating the correlation between each successive pairwise measurements and then
     taking the mean. Since correlation coefficients are not normally distributed, we use the
-    *r-to-z* transform prior to averaging (:py:func:`numpy.arctanh`), and then the *z-to-r*
-    transform (:py:func:`numpy.tanh`) to convert back to a correlation coefficient. This gives a
+    *r-to-z* transform prior to averaging (:py:data:`numpy.arctanh`), and then the *z-to-r*
+    transform (:py:data:`numpy.tanh`) to convert back to a correlation coefficient. This gives a
     more precise estimate of the mean.
 
     >>> import numpy as np

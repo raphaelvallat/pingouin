@@ -218,7 +218,7 @@ We have added the :py:func:`pingouin.ptests` function to calculate a T-test (T- 
 - Effect sizes are now calculated using an exact method instead of an approximation based on T-values in :py:func:`pingouin.pairwise_tukey` and :py:func:`pingouin.pairwise_gameshowell`. `PR 328 <https://github.com/raphaelvallat/pingouin/pull/328>`_.
 - :py:func:`pingouin.normality` does not raise an AssertionError anymore if one of the groups in ``group`` has ≤ 3 samples. `PR 324 <https://github.com/raphaelvallat/pingouin/pull/324>`_.
 - Added customization options to :py:func:`pingouin.plot_rm_corr`, which now takes optional keyword arguments to pass through to :py:func:`seaborn.regplot` and :py:func:`seaborn.scatterplot`. `PR 312 <https://github.com/raphaelvallat/pingouin/pull/312>`_.
-- Changed some plotting functions to increase compatibility with :py:class:`seaborn.FacetGrid`. As explained in `issue 306 <https://github.com/raphaelvallat/pingouin/issues/306>`_, the major change is to generate matplotlib.axes using default parameters instead of accepting ``fig`` and ``dpi`` keyword arguments. This change applies to :py:func:`pingouin.plot_blandaltman`, :py:func:`pingouin.plot_paired`, :py:func:`pingouin.plot_circmean`, and :py:func:`pingouin.qqplot`. In the future, open a matplotlib.axes and pass it through using the ``ax`` parameter to use custom figure settings with these functions. Other minor changes include the addition of the ``square`` keyword argument to :py:func:`pingouin.plot_circmean` and :py:func:`pingouin.qqplot` to ensure equal aspect ratios, and the removal of ``scatter_kws`` as a keyword argument in :py:func:`pingouin.plot_blandaltmann` (now alter the scatter parameters using general ``**kwargs``). `PR 314 <https://github.com/raphaelvallat/pingouin/pull/314>`_.
+- Changed some plotting functions to increase compatibility with :py:class:`seaborn.FacetGrid`. As explained in `issue 306 <https://github.com/raphaelvallat/pingouin/issues/306>`_, the major change is to generate matplotlib.axes using default parameters instead of accepting ``fig`` and ``dpi`` keyword arguments. This change applies to :py:func:`pingouin.plot_blandaltman`, :py:func:`pingouin.plot_paired`, :py:func:`pingouin.plot_circmean`, and :py:func:`pingouin.qqplot`. In the future, open a matplotlib.axes and pass it through using the ``ax`` parameter to use custom figure settings with these functions. Other minor changes include the addition of the ``square`` keyword argument to :py:func:`pingouin.plot_circmean` and :py:func:`pingouin.qqplot` to ensure equal aspect ratios, and the removal of ``scatter_kws`` as a keyword argument in :py:func:`pingouin.plot_blandaltman` (now alter the scatter parameters using general ``**kwargs``). `PR 314 <https://github.com/raphaelvallat/pingouin/pull/314>`_.
 
 *************
 
@@ -232,11 +232,11 @@ a. The eta-squared (``n2``) effect size was not properly calculated in one-way a
 .. warning:: Please double check any effect sizes previously obtained with the :py:func:`pingouin.rm_anova` function.
 
 b. Fixed invalid resampling behavior for bivariate functions in :py:func:`pingouin.compute_bootci` when x and y were not paired. `PR 281 <https://github.com/raphaelvallat/pingouin/pull/281>`_.
-c. Fixed bug where ``confidence`` (previously ``ci``) was ignored when calculating the bootstrapped confidence intervals in :py:func:`pingouin.plot_shift`. `PR 282 <https://github.com/raphaelvallat/pingouin/pull/282>`_.
+c. Fixed bug where ``confidence`` (previously ``ci``) was ignored when calculating the bootstrapped confidence intervals in :py:func:`!pingouin.plot_shift`. `PR 282 <https://github.com/raphaelvallat/pingouin/pull/282>`_.
 
 **Enhancements**
 
-a. The :py:func:`pingouin.pairwise_ttests` has been renamed to :py:func:`pingouin.pairwise_tests`. Non-parametric tests are also supported in this function with the `parametric=False` argument, and thus the name "ttests" was misleading (see `issue 209 <https://github.com/raphaelvallat/pingouin/issues/209>`_).
+a. The :py:func:`!pingouin.pairwise_ttests` has been renamed to :py:func:`pingouin.pairwise_tests`. Non-parametric tests are also supported in this function with the `parametric=False` argument, and thus the name "ttests" was misleading (see `issue 209 <https://github.com/raphaelvallat/pingouin/issues/209>`_).
 b. Allow :py:func:`pingouin.bayesfactor_binom` to take Beta alternative model. `PR 252 <https://github.com/raphaelvallat/pingouin/pull/252>`_.
 c. Allow keyword arguments for logistic regression in :py:func:`pingouin.mediation_analysis`. `PR 245 <https://github.com/raphaelvallat/pingouin/pull/245>`_.
 d. Speed improvements for the Holm and FDR correction in :py:func:`pingouin.multicomp`. `PR 271 <https://github.com/raphaelvallat/pingouin/pull/271>`_.
@@ -263,8 +263,8 @@ b. Fixed bug where :py:func:`pingouin.rm_anova` and :py:func:`pingouin.mixed_ano
 
 **Enhancements**
 
-a. Faster implementation of :py:func:`pingouin.gzscore`, adding all options available in zscore: axis, ddof and nan_policy. Warning: this functions is deprecated and will be removed in pingouin 0.7.0 (use :py:func:`scipy.stats.gzscore` instead). `PR 210 <https://github.com/raphaelvallat/pingouin/pull/210>`_.
-b. Replace use of statsmodels' studentized range distribution functions with more SciPy's more accurate :py:func:`scipy.stats.studentized_range`. `PR 229 <https://github.com/raphaelvallat/pingouin/pull/229>`_.
+a. Faster implementation of :py:func:`!pingouin.gzscore`, adding all options available in zscore: axis, ddof and nan_policy. Warning: this functions is deprecated and will be removed in pingouin 0.7.0 (use :py:func:`scipy.stats.gzscore` instead). `PR 210 <https://github.com/raphaelvallat/pingouin/pull/210>`_.
+b. Replace use of statsmodels' studentized range distribution functions with more SciPy's more accurate :py:data:`scipy.stats.studentized_range`. `PR 229 <https://github.com/raphaelvallat/pingouin/pull/229>`_.
 c. Add support for optional keywords argument in the :py:func:`pingouin.homoscedasticity` function (`issue 218 <https://github.com/raphaelvallat/pingouin/issues/218>`_).
 d. Add support for the Jarque-Bera test in :py:func:`pingouin.normality` (`issue 216 <https://github.com/raphaelvallat/pingouin/issues/216>`_).
 
@@ -283,12 +283,12 @@ This release fixes several critical issues related to how Pingouin handles missi
 
 - :py:func:`pingouin.rm_anova`
 - :py:func:`pingouin.mixed_anova`
-- :py:func:`pingouin.pairwise_ttests`, only for mixed design or two-way repeated measures design.
+- :py:func:`!pingouin.pairwise_ttests`, only for mixed design or two-way repeated measures design.
 
 A full description of the issue, with code and example, can be found at: https://github.com/raphaelvallat/pingouin/issues/206. In short, in Pingouin <0.5.0, listwise deletion of subjects (or rows) with missing values was not strictly enforced in repeated measures or mixed ANOVA, depending on the input data format (if missing values were explicit or implicit).
 Pingouin 0.5.0 now uses a stricter complete-case analysis regardless of the input data format, which is the same behavior as JASP.
 
-Furthermore, the :py:func:`pingouin.remove_rm_na` has been deprecated. Instead, listwise deletion of rows with missing values in repeated measurements is now performed using:
+Furthermore, the :py:func:`!pingouin.remove_rm_na` has been deprecated. Instead, listwise deletion of rows with missing values in repeated measurements is now performed using:
 
 .. code-block:: python
 
@@ -298,7 +298,7 @@ Furthermore, the :py:func:`pingouin.remove_rm_na` has been deprecated. Instead, 
 
 **BUGFIX - Strict listwise deletion in pairwise_ttests when repeated measures are present**
 
-This is related to the previous issue. In mixed design, listwise deletion (complete-case analysis) was not strictly enforced in :py:func:`pingouin.pairwise_ttests` for the between-subject and interaction T-tests. In other words, the between-subject and interaction T-tests were calculated using a pairwise-deletion approach, even with ``nan_policy="pairwise"``.
+This is related to the previous issue. In mixed design, listwise deletion (complete-case analysis) was not strictly enforced in :py:func:`!pingouin.pairwise_ttests` for the between-subject and interaction T-tests. In other words, the between-subject and interaction T-tests were calculated using a pairwise-deletion approach, even with ``nan_policy="pairwise"``.
 The same issue occured in two-way repeated measures design, in which no strict listwise deletion was performed prior to calculating the T-tests, even with ``nan_policy="pairwise"``.
 
 This has now been fixed such that Pingouin will always perform a strict listwise deletion whenever repeated measurements are present when ``nan_policy="listwise"`` (default). This complete-case analysis behavior can be disabled with ``nan_policy="pairwise"``, in which case missing values will be removed separately for each contrast. This may not be appropriate for post-hoc analysis following a repeated measures or mixed ANOVA, which is always conducted on complete-case data.
@@ -406,10 +406,10 @@ v0.3.9 (January 2021)
 
 **Bugfix**
 
-This release fixes a CRITICAL ERROR in the :py:func:`pingouin.pairwise_ttests` function (see `issue 151 <https://github.com/raphaelvallat/pingouin/issues/151>`_). The bug concerns one-way and two-way repeated measures pairwise T-tests. Until now, Pingouin implicitly assumed that the dataframe was sorted such that the ordering of the subject was the same across all repeated measurements (e.g. the third values in the repeated measurements always belonged to the same subject).
+This release fixes a CRITICAL ERROR in the :py:func:`!pingouin.pairwise_ttests` function (see `issue 151 <https://github.com/raphaelvallat/pingouin/issues/151>`_). The bug concerns one-way and two-way repeated measures pairwise T-tests. Until now, Pingouin implicitly assumed that the dataframe was sorted such that the ordering of the subject was the same across all repeated measurements (e.g. the third values in the repeated measurements always belonged to the same subject).
 This led to incorrect results when the dataframe was not sorted in such a way.
 
-We therefore strongly recommend that all users UPDATE Pingouin (:code:`pip install -U pingouin`) and CHECK ANY RESULTS obtained with the :py:func:`pingouin.pairwise_ttests` function. Note that the bug does not concern non-repeated measures pairwise T-test, since the ordering of the values does not matter in this case.
+We therefore strongly recommend that all users UPDATE Pingouin (:code:`pip install -U pingouin`) and CHECK ANY RESULTS obtained with the :py:func:`!pingouin.pairwise_ttests` function. Note that the bug does not concern non-repeated measures pairwise T-test, since the ordering of the values does not matter in this case.
 
 Furthermore, and to prevent a similar issue, we have now disabled ``marginal=False`` in two-way repeated measure design. As of this release, ``marginal=False`` will therefore only have an impact on the between-factor T-test(s) of a mixed design.
 
@@ -421,7 +421,7 @@ See `issue 139 <https://github.com/raphaelvallat/pingouin/issues/139>`_.
 **Enhancements**
 
 a. :py:func:`pingouin.plot_paired` now supports an arbitrary number of within-levels as well as horizontal plotting. See `PR 133 <https://github.com/raphaelvallat/pingouin/pull/133>`_.
-b. :py:func:`pingouin.linear_regression` now handles a rank deficient design matrix X by producing a warning and trying to calculate the sum of squared residuals without relying on :py:func:`np.linalg.lstsq`. See `issue 130 <https://github.com/raphaelvallat/pingouin/issues/130>`_.
+b. :py:func:`pingouin.linear_regression` now handles a rank deficient design matrix X by producing a warning and trying to calculate the sum of squared residuals without relying on :py:func:`numpy.linalg.lstsq`. See `issue 130 <https://github.com/raphaelvallat/pingouin/issues/130>`_.
 c. :py:func:`pingouin.friedman` now has an option to choose between Chi square test or F test method.
 d. Several minor improvements to the documentation and GitHub Actions. See `PR150 <https://github.com/raphaelvallat/pingouin/pull/150>`_.
 e. Added support for ``kwargs`` in :py:func:`pingouin.corr` (see `issue 138 <https://github.com/raphaelvallat/pingouin/issues/138>`_).
@@ -436,7 +436,7 @@ a. Fix a bug in in :py:func:`pingouin.ttest` in which the confidence intervals f
 
 **New features**
 
-a. Added a `pingouin.options` module which can be used to set default options. For example, one can set the default decimal rounding of the output dataframe, either for the entire dataframe, per column, per row, or per cell. See `PR120 <https://github.com/raphaelvallat/pingouin/pull/120>`_. For more details, please refer to `notebooks/06_others.ipynb <https://github.com/raphaelvallat/pingouin/blob/master/notebooks/06_Others.ipynb>`_.
+a. Added a `pingouin.options` module which can be used to set default options. For example, one can set the default decimal rounding of the output dataframe, either for the entire dataframe, per column, per row, or per cell. See `PR120 <https://github.com/raphaelvallat/pingouin/pull/120>`_. For more details, please refer to `notebooks/06_Rounding.ipynb <https://github.com/raphaelvallat/pingouin/blob/main/notebooks/06_Rounding.ipynb>`_.
 
    .. code-block:: python
 
@@ -455,7 +455,7 @@ b. The Common Language Effect Size (CLES) in :py:func:`pingouin.mwu` is now calc
 c. Better handling of kwargs arguments in :py:func:`pingouin.plot_paired` (see `PR 116 <https://github.com/raphaelvallat/pingouin/pull/116>`_).
 d. Added ``boxplot_in_front`` argument to the :py:func:`pingouin.plot_paired`. When set to True, the boxplot is displayed in front of the lines with a slight transparency. This can make the overall plot more readable when plotting data from a large number of subjects. (see `PR 117 <https://github.com/raphaelvallat/pingouin/pull/117>`_).
 e. Better handling of Categorical columns in several functions (e.g. ANOVA). See `issue 122 <https://github.com/raphaelvallat/pingouin/issues/122>`_.
-f. :py:func:`multivariate_normality` now also returns the test statistic. This function also comes with better unit testing against the MVN R package.
+f. :py:func:`pingouin.multivariate_normality` now also returns the test statistic. This function also comes with better unit testing against the MVN R package.
 g. :py:func:`pingouin.pairwise_corr` can now control for all covariates by excluding each specific set of column-combinations from the covariates to use for this combination, similar to :py:func:`pingouin.pcorr`. See `PR 124 <https://github.com/raphaelvallat/pingouin/pull/124>`_.
 h. Bayes factor formatting is now handled via the options module. The default behaviour is unchanged (return as formatted string), but can easily be disabled by setting `pingouin.options["round.column.BF10"] = None`. See `PR 126 <https://github.com/raphaelvallat/pingouin/pull/126>`_.
 
@@ -476,7 +476,7 @@ c. Removed the ``tail`` and ``alpha`` argument from the in :py:func:`pingouin.pa
 
 **Deprecation**
 
-a. We have now removed the :py:func:`pingouin.plot_skipped_corr` function, as we felt that it may not be useful or relevant to many users (see `issue 105 <https://github.com/raphaelvallat/pingouin/issues/105>`_).
+a. We have now removed the :py:func:`!pingouin.plot_skipped_corr` function, as we felt that it may not be useful or relevant to many users (see `issue 105 <https://github.com/raphaelvallat/pingouin/issues/105>`_).
 
 v0.3.6 (July 2020)
 ------------------
@@ -490,7 +490,7 @@ b. Fixed invalid results in :py:func:`pingouin.logistic_regression` when ``fit_i
 
 **Enhancements**
 
-a. Added ``within_first`` boolean argument to :py:func:`pingouin.pairwise_ttests`. This is useful in mixed design when one want to change the order of the interaction. The default behavior of Pingouin is to return the within * between pairwise tests for the interaction. Using ``within_first=False``, one can now return the between * within pairwise tests. For more details, see `issue 102 <https://github.com/raphaelvallat/pingouin/issues/102>`_ on GitHub.
+a. Added ``within_first`` boolean argument to :py:func:`!pingouin.pairwise_ttests`. This is useful in mixed design when one want to change the order of the interaction. The default behavior of Pingouin is to return the within * between pairwise tests for the interaction. Using ``within_first=False``, one can now return the between * within pairwise tests. For more details, see `issue 102 <https://github.com/raphaelvallat/pingouin/issues/102>`_ on GitHub.
 b. :py:func:`pingouin.list_dataset` now returns a dataframe instead of simply printing the output.
 c. Added the Palmer Station LTER `Penguin dataset <https://github.com/allisonhorst/palmerpenguins>`_, which describes the flipper length and body mass for different species of penguins. It can be loaded with ``pingouin.read_dataset('penguins')``.
 d. Added the `Tips dataset <https://vincentarelbundock.github.io/Rdatasets/doc/reshape2/tips.html>`_. It can be loaded with ``pingouin.read_dataset('tips')``.
@@ -531,7 +531,7 @@ v0.3.4 (May 2020)
 **Bugfixes**
 
 a. The Cohen :math:`d_{avg}` for paired samples was previously calculated using eq. 10 in `Lakens 2013 <https://www.frontiersin.org/articles/10.3389/fpsyg.2013.00863/full>`_. However, this equation was slightly different from the original proposed by `Cumming 2012 <https://books.google.com/books/about/Understanding_the_New_Statistics.html?id=AVBDYgEACAAJ>`_, and Lakens has since updated the equation in his effect size conversion `spreadsheet <https://osf.io/vbdah/>`_. Pingouin now uses the correct formula, which is :math:`d_{avg} = \frac{\overline{X} - \overline{Y}}{\sqrt{\frac{(\sigma_1^2 + \sigma_2^2)}{2}}}`.
-b. Fixed minor bug in internal function *pingouin.utils._flatten_list* that could lead to TypeError in :py:func:`pingouin.pairwise_ttests` with within/between factors encoded as integers (see `issue #91 <https://github.com/raphaelvallat/pingouin/issues/91>`_).
+b. Fixed minor bug in internal function *pingouin.utils._flatten_list* that could lead to TypeError in :py:func:`!pingouin.pairwise_ttests` with within/between factors encoded as integers (see `issue #91 <https://github.com/raphaelvallat/pingouin/issues/91>`_).
 
 **New functions**
 
@@ -562,7 +562,7 @@ v0.3.3 (February 2020)
 **Bugfixes**
 
 a. Fixed a bug in :py:func:`pingouin.pairwise_corr` caused by the deprecation of ``pandas.core.index`` in the new version of Pandas (1.0). For now, both Pandas 0.25 and Pandas 1.0 are supported.
-b. The standard deviation in :py:func:`pingouin.pairwise_ttests` when using ``return_desc=True`` is now calculated with ``np.nanstd(ddof=1)`` to be consistent with Pingouin/Pandas default unbiased standard deviation.
+b. The standard deviation in :py:func:`!pingouin.pairwise_ttests` when using ``return_desc=True`` is now calculated with ``np.nanstd(ddof=1)`` to be consistent with Pingouin/Pandas default unbiased standard deviation.
 
 **New functions**
 
@@ -571,11 +571,11 @@ a. Added :py:func:`pingouin.plot_circmean` function to plot the circular mean an
 v0.3.2 (January 2020)
 ---------------------
 
-Hotfix release to fix a critical issue with :py:func:`pingouin.pairwise_ttests` (see below). We strongly recommend that you update to the newest version of Pingouin and double-check your previous results if you've ever used the pairwise T-tests with more than one factor (e.g. mixed, factorial or 2-way repeated measures design).
+Hotfix release to fix a critical issue with :py:func:`!pingouin.pairwise_ttests` (see below). We strongly recommend that you update to the newest version of Pingouin and double-check your previous results if you've ever used the pairwise T-tests with more than one factor (e.g. mixed, factorial or 2-way repeated measures design).
 
 **Bugfixes**
 
-a. MAJOR: Fixed a bug in :py:func:`pingouin.pairwise_ttests` when using mixed or two-way repeated measures design. Specifically, the T-tests were performed without averaging over repeated measurements first (i.e. without calculating the marginal means). Note that for mixed design, this only impacts the between-subject T-test(s). Practically speaking, this led to higher degrees of freedom (because they were conflated with the number of repeated measurements) and ultimately incorrect T and p-values because the assumption of independence was violated. Pingouin now averages over repeated measurements in mixed and two-way repeated measures design, which is the same behavior as JASP or JAMOVI. As a consequence, and when the data has only two groups, the between-subject p-value of the pairwise T-test should be (almost) equal to the p-value of the same factor in the :py:func:`pingouin.mixed_anova` function. The old behavior of Pingouin can still be obtained using the ``marginal=False`` argument.
+a. MAJOR: Fixed a bug in :py:func:`!pingouin.pairwise_ttests` when using mixed or two-way repeated measures design. Specifically, the T-tests were performed without averaging over repeated measurements first (i.e. without calculating the marginal means). Note that for mixed design, this only impacts the between-subject T-test(s). Practically speaking, this led to higher degrees of freedom (because they were conflated with the number of repeated measurements) and ultimately incorrect T and p-values because the assumption of independence was violated. Pingouin now averages over repeated measurements in mixed and two-way repeated measures design, which is the same behavior as JASP or JAMOVI. As a consequence, and when the data has only two groups, the between-subject p-value of the pairwise T-test should be (almost) equal to the p-value of the same factor in the :py:func:`pingouin.mixed_anova` function. The old behavior of Pingouin can still be obtained using the ``marginal=False`` argument.
 b. Minor: Added a check in :py:func:`pingouin.mixed_anova` to ensure that the ``subject`` variable has a unique set of values for each between-subject group defined in the ``between`` variable. For instance, the subject IDs for group1 are [1, 2, 3, 4, 5] and for group2 [6, 7, 8, 9, 10]. The function will throw an error if there are one or more overlapping subject IDs between groups (e.g. the subject IDs for group1 AND group2 are both [1, 2, 3, 4, 5]).
 c. Minor: Fixed a bug which caused the :py:func:`pingouin.plot_rm_corr` and :py:func:`pingouin.ancova` (with >1 covariates) to throw an error if any of the input variables started with a number (because of statsmodels / Patsy formula formatting).
 
@@ -583,7 +583,7 @@ c. Minor: Fixed a bug which caused the :py:func:`pingouin.plot_rm_corr` and :py:
 
 a. Upon loading, Pingouin will now use the `outdated <https://github.com/alexmojaki/outdated>`_ package to check and warn the user if a newer stable version is available.
 b. Globally removed the ``export_filename`` parameter, which allowed to export the output table to a .csv file. This helps simplify the API and testing. As an alternative, one can simply use pandas.to_csv() to export the output dataframe generated by Pingouin.
-c. Added the ``correction`` argument to :py:func:`pingouin.pairwise_ttests` to enable or disable Welch's correction for independent T-tests.
+c. Added the ``correction`` argument to :py:func:`!pingouin.pairwise_ttests` to enable or disable Welch's correction for independent T-tests.
 
 v0.3.1 (December 2019)
 ----------------------
@@ -592,7 +592,7 @@ v0.3.1 (December 2019)
 
 a. Fixed a bug in which missing values were removed from all columns in the dataframe in :py:func:`pingouin.kruskal`, even columns that were unrelated. See https://github.com/raphaelvallat/pingouin/issues/74.
 b. The :py:func:`pingouin.power_corr` function now throws a warning and return a np.nan when the sample size is too low (and not an error like in previous version). This is to improve compatibility with the :py:func:`pingouin.pairwise_corr` function.
-c. Fixed quantile direction in the :py:func:`pingouin.plot_shift` function. In v0.3.0, the quantile subplot was incorrectly labelled as Y - X, but it was in fact calculating X - Y. See https://github.com/raphaelvallat/pingouin/issues/73
+c. Fixed quantile direction in the :py:func:`!pingouin.plot_shift` function. In v0.3.0, the quantile subplot was incorrectly labelled as Y - X, but it was in fact calculating X - Y. See https://github.com/raphaelvallat/pingouin/issues/73
 
 v0.3.0 (November 2019)
 ----------------------
@@ -605,7 +605,7 @@ a. Added :py:func:`pingouin.plot_rm_corr` to plot a repeated measures correlatio
 
 a. Added the ``relimp`` argument to :py:func:`pingouin.linear_regression` to return the relative importance (= contribution) of each individual predictor to the :math:`R^2` of the full model.
 b. Complete refactoring of :py:func:`pingouin.intraclass_corr` to closely match the R implementation in the `psych <https://cran.r-project.org/web/packages/psych/psych.pdf>`_ package. Pingouin now returns the 6 types of ICC, together with F values, p-values, degrees of freedom and confidence intervals.
-c. The :py:func:`pingouin.plot_shift` now 1) uses the Harrel-Davis robust quantile estimator in conjunction with a bias-corrected bootstrap confidence intervals, and 2) support paired samples.
+c. The :py:func:`!pingouin.plot_shift` now 1) uses the Harrel-Davis robust quantile estimator in conjunction with a bias-corrected bootstrap confidence intervals, and 2) support paired samples.
 d. Added the ``axis`` argument to :py:func:`pingouin.harrelldavis` to support 2D arrays.
 
 Older versions
@@ -620,25 +620,25 @@ Older versions
    **Code and dependencies**
 
    a. Pandas methods are now internally defined using the `pandas_flavor package <https://github.com/Zsailer/pandas_flavor>`_ package.
-   b. Internal code refactoring of the :py:func:`pingouin.pairwise_ttests` (to slightly speed up computation and improve memory usage).
-   c. The first argument of the :py:func:`pingouin.anova`, :py:func:`pingouin.ancova`, :py:func:`pingouin.welch_anova`, :py:func:`pingouin.pairwise_ttests`, :py:func:`pingouin.pairwise_tukey`, :py:func:`pingouin.pairwise_gameshowell`, :py:func:`pingouin.welch_anova`, :py:func:`pingouin.kruskal`, :py:func:`pingouin.friedman`, :py:func:`pingouin.cochran`, :py:func:`pingouin.remove_rm_na` functions is now ``data`` instead of ``dv`` (to be consistent with other Pingouin functions). This will cause error if the user runs previous Pingouin code with positional-only arguments. As a general rule, **you should always pass keywords arguments** (read more `here <https://treyhunner.com/2018/04/keyword-arguments-in-python/>`_).
-   d. For clarity, :py:func:`pingouin.fdr`, :py:func:`pingouin.bonf`, :py:func:`pingouin.holm` have been deprecated from the API and must be called via :py:func:`pingouin.multicomp`.
-   e. :py:func:`pingouin.pairwise_ttests` output does not include the ``CLES`` column by default anymore. Users must explicitly pass ``effsize='CLES'``.
+   b. Internal code refactoring of the :py:func:`!pingouin.pairwise_ttests` (to slightly speed up computation and improve memory usage).
+   c. The first argument of the :py:func:`pingouin.anova`, :py:func:`pingouin.ancova`, :py:func:`pingouin.welch_anova`, :py:func:`!pingouin.pairwise_ttests`, :py:func:`pingouin.pairwise_tukey`, :py:func:`pingouin.pairwise_gameshowell`, :py:func:`pingouin.welch_anova`, :py:func:`pingouin.kruskal`, :py:func:`pingouin.friedman`, :py:func:`pingouin.cochran`, :py:func:`!pingouin.remove_rm_na` functions is now ``data`` instead of ``dv`` (to be consistent with other Pingouin functions). This will cause error if the user runs previous Pingouin code with positional-only arguments. As a general rule, **you should always pass keywords arguments** (read more `here <https://treyhunner.com/2018/04/keyword-arguments-in-python/>`_).
+   d. For clarity, :py:func:`!pingouin.fdr`, :py:func:`!pingouin.bonf`, :py:func:`!pingouin.holm` have been deprecated from the API and must be called via :py:func:`pingouin.multicomp`.
+   e. :py:func:`!pingouin.pairwise_ttests` output does not include the ``CLES`` column by default anymore. Users must explicitly pass ``effsize='CLES'``.
    f. The ``remove_na`` argument of :py:func:`pingouin.cronbach_alpha` has been replaced with ``nan_policy`` (`'pairwise'`, or `'listwise'`).
    g. Disabled Travis / AppVeyor testing for Python 3.5 While most functions should work just fine, please note that only Python >3.6 is supported now.
 
    **New functions**
 
-   a. Added :py:func:`pingouin.harrelldavis`, a robust quantile estimation method (to be used in a future version of the :py:func:`pingouin.plot_shift` function). See `PR63 <https://github.com/raphaelvallat/pingouin/pull/63>`_ by Nicolas Legrand.
+   a. Added :py:func:`pingouin.harrelldavis`, a robust quantile estimation method (to be used in a future version of the :py:func:`!pingouin.plot_shift` function). See `PR63 <https://github.com/raphaelvallat/pingouin/pull/63>`_ by Nicolas Legrand.
    b. The :py:func:`pingouin.ancova` can now directly be used a Pandas method, e.g. ``data.ancova(...)``.
    c. The :py:func:`pingouin.pairwise_tukey` can now directly be used a Pandas method, e.g. ``data.pairwise_tukey(...)``.
    d. Added Sidak one-step correction to :py:func:`pingouin.multicomp` (``method='sidak'``).
 
    **Enhancements**
 
-   a. Added support for pairwise deletion in :py:func:`pingouin.pairwise_ttests` (default is listwise deletion), using the ``nan_policy`` argument.
+   a. Added support for pairwise deletion in :py:func:`!pingouin.pairwise_ttests` (default is listwise deletion), using the ``nan_policy`` argument.
    b. Added support for listwise deletion in :py:func:`pingouin.pairwise_corr` (default is pairwise deletion), using the ``nan_policy`` argument.
-   c. Added the ``interaction`` boolean argument to :py:func:`pingouin.pairwise_ttests`, useful if one is only interested in the main effects.
+   c. Added the ``interaction`` boolean argument to :py:func:`!pingouin.pairwise_ttests`, useful if one is only interested in the main effects.
    d. Added ``correction_uniform`` boolean argument to :py:func:`pingouin.circ_corrcc`. See `PR64 <https://github.com/raphaelvallat/pingouin/pull/64>`_ by Dominik Straub.
 
    **Contributors**
@@ -692,7 +692,7 @@ Older versions
 
    a. Fixed **major error in two-sided p-value for Wilcoxon test** (:py:func:`pingouin.wilcoxon`), the p-values were accidentally squared, and therefore smaller. Make sure to always use the latest release of Pingouin.
    b. :py:func:`pingouin.wilcoxon` now uses the continuity correction by default (the documentation was saying that the correction was applied but it was not applied in the code.)
-   c. The ``show_median`` argument of the :py:func:`pingouin.plot_shift` function was not working properly when the percentiles were different that the default parameters.
+   c. The ``show_median`` argument of the :py:func:`!pingouin.plot_shift` function was not working properly when the percentiles were different that the default parameters.
 
    **Dependencies**
 
@@ -734,7 +734,7 @@ Older versions
 
    a. Added :py:func:`pingouin.multivariate_ttest` (Hotelling T-squared) test.
    b. Added :py:func:`pingouin.cronbach_alpha` function.
-   c. Added :py:func:`pingouin.plot_shift` function.
+   c. Added :py:func:`!pingouin.plot_shift` function.
    d. Several functions of pandas can now be directly used as :py:class:`pandas.DataFrame` methods.
    e. Added :py:func:`pingouin.pcorr` method to compute the partial Pearson correlation matrix of a :py:class:`pandas.DataFrame` (similar to the pcor function in the ppcor package).
    f. The :py:func:`pingouin.partial_corr` now supports semi-partial correlation.
@@ -744,15 +744,15 @@ Older versions
    a. The :py:func:`pingouin.rm_corr` function now returns a :py:class:`pandas.DataFrame` with the r-value, degrees of freedom, p-value, confidence intervals and power.
    b. :py:func:`pingouin.compute_esci` now works for paired and one-sample Cohen d.
    c. :py:func:`pingouin.bayesfactor_ttest` and :py:func:`pingouin.bayesfactor_pearson` now return a formatted str and not a float.
-   d. :py:func:`pingouin.pairwise_ttests` now returns the degrees of freedom (dof).
-   e. Better rounding of float in :py:func:`pingouin.pairwise_ttests`.
+   d. :py:func:`!pingouin.pairwise_ttests` now returns the degrees of freedom (dof).
+   e. Better rounding of float in :py:func:`!pingouin.pairwise_ttests`.
    f. Support for wide-format data in :py:func:`pingouin.rm_anova`
    g. :py:func:`pingouin.ttest` now returns the confidence intervals around the difference in means.
 
    **Missing values**
 
-   a. :py:func:`pingouin.remove_na` and :py:func:`pingouin.remove_rm_na` are now external function documented in the API.
-   b. :py:func:`pingouin.remove_rm_na` now works with multiple within-factors.
+   a. :py:func:`pingouin.remove_na` and :py:func:`!pingouin.remove_rm_na` are now external function documented in the API.
+   b. :py:func:`!pingouin.remove_rm_na` now works with multiple within-factors.
    c. :py:func:`pingouin.remove_na` now works with 2D arrays.
    d. Removed the `remove_na` argument in :py:func:`pingouin.rm_anova` and :py:func:`pingouin.mixed_anova`, an automatic listwise deletion of missing values is applied (same behavior as JASP). Note that this was also the default behavior of Pingouin, but the user could also specify not to remove the missing values, which most likely returned inaccurate results.
    e. The :py:func:`pingouin.ancova` function now applies an automatic listwise deletion of missing values.
@@ -773,9 +773,9 @@ Older versions
    c. The :py:func:`pingouin.pairwise_corr` is faster and returns the number of outlier if a robust correlation is used.
    d. Added support for 2D level in the :py:func:`pingouin.pairwise_corr`. See Jupyter notebooks for examples.
    e. Added support for partial correlation in the :py:func:`pingouin.pairwise_corr` function.
-   f. Greatly improved execution speed of :py:func:`pingouin.correlation.skipped` function.
-   g. Added default random state to compute the Min Covariance Determinant in the :py:func:`pingouin.correlation.skipped` function.
-   h. The default number of bootstrap samples for the :py:func:`pingouin.correlation.shepherd` function is now set to 200 (previously 2000) to increase computation speed.
+   f. Greatly improved execution speed of :py:func:`!pingouin.correlation.skipped` function.
+   g. Added default random state to compute the Min Covariance Determinant in the :py:func:`!pingouin.correlation.skipped` function.
+   h. The default number of bootstrap samples for the :py:func:`!pingouin.correlation.shepherd` function is now set to 200 (previously 2000) to increase computation speed.
    i. :py:func:`pingouin.partial_corr` now automatically drops rows with missing values.
 
    **Datasets**
@@ -784,8 +784,8 @@ Older versions
 
    **Pairwise T-tests and multi-comparisons**
 
-   a. Added support for non-parametric pairwise tests in :py:func:`pingouin.pairwise_ttests` function.
-   b. Common language effect size (CLES) is now reported by default in :py:func:`pingouin.pairwise_ttests` function.
+   a. Added support for non-parametric pairwise tests in :py:func:`!pingouin.pairwise_ttests` function.
+   b. Common language effect size (CLES) is now reported by default in :py:func:`!pingouin.pairwise_ttests` function.
    c. CLES is now implemented in the :py:func:`pingouin.compute_effsize` function.
    d. Better code, doc and testing for the functions in multicomp.py.
    e. P-values adjustment methods now do not take into account NaN values (same behavior as the R function p.adjust)
@@ -802,7 +802,7 @@ Older versions
    d. Added support for covariates in :py:func:`pingouin.mediation_analysis`.
    e. Added seed argument to :py:func:`pingouin.mediation_analysis` for reproducible results.
    f. :py:func:`pingouin.mediation_analysis` now returns two-sided p-values computed with a permutation test.
-   g. Added :py:func:`pingouin.utils._perm_pval` to compute p-value from a permutation test.
+   g. Added :py:func:`!pingouin.utils._perm_pval` to compute p-value from a permutation test.
 
    **Bugs and tests**
 

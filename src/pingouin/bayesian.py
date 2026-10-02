@@ -48,7 +48,7 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative="two-sided", r=0
     See also
     --------
     ttest : T-test
-    pairwise_test : Pairwise T-tests
+    pairwise_tests : Pairwise T-tests
     bayesfactor_pearson : Bayes Factor of a correlation
     bayesfactor_binom : Bayes Factor of a binomial test
 
@@ -397,8 +397,6 @@ def bayesfactor_binom(k, n, p=0.5, a=1, b=1):
 
     References
     ----------
-    * http://pcl.missouri.edu/bf-binomial
-
     * https://en.wikipedia.org/wiki/Bayes_factor
 
     Examples
@@ -423,7 +421,7 @@ def bayesfactor_binom(k, n, p=0.5, a=1, b=1):
 
     Interestingly, a frequentist alternative to this test would give very
     different results. It can be performed using the
-    :py:func:`scipy.stats.binom_test` function:
+    :py:func:`scipy.stats.binomtest` function:
 
     >>> from scipy.stats import binomtest
     >>> result = binomtest(k=115, n=200, p=0.5)

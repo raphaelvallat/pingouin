@@ -1033,7 +1033,7 @@ def rcorr(
 
     This method is a faster, but less exhaustive, matrix-version of the
     :py:func:`pingouin.pairwise_corr` function. It is based on the
-    :py:func:`pandas.DataFrame.corr` method. Missing values are automatically
+    :py:meth:`pandas.DataFrame.corr` method. Missing values are automatically
     removed from each pairwise correlation.
 
     The input dataframe is the first positional argument, e.g. ``pingouin.rcorr(df)``, or

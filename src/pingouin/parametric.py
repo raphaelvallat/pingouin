@@ -1448,7 +1448,7 @@ def mixed_anova(
     Examples
     --------
     For more examples, please refer to the `Jupyter notebooks
-    <https://github.com/raphaelvallat/pingouin/blob/master/notebooks/01_ANOVA.ipynb>`_
+    <https://github.com/raphaelvallat/pingouin/blob/main/notebooks/01_ANOVA.ipynb>`_
 
     Compute a two-way mixed model ANOVA.
 

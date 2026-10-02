@@ -295,7 +295,7 @@ def box_m(data, dvs, group, alpha=0.001):
         meet the assumption of multivariate normality or if the sample size is
         too large or small [3]_.
 
-    Pingouin uses :py:meth:`pandas.DataFrameGroupBy.cov` to calculate the
+    Pingouin uses :py:meth:`pandas.api.typing.DataFrameGroupBy.cov` to calculate the
     variance-covariance matrix of each group. Missing values are automatically
     excluded from the calculation by Pandas.
 

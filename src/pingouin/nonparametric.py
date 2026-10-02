@@ -911,7 +911,7 @@ def harrelldavis(x, quantile=0.5, axis=-1):
     .. [3] Rousselet, G. A., Pernet, C. R. and Wilcox, R. R. (2017). Beyond
        differences in means: robust graphical methods to compare two groups
        in neuroscience. Eur J Neurosci, 46: 1738-1748.
-       https://doi.org/doi:10.1111/ejn.13610
+       https://doi.org/10.1111/ejn.13610
 
     Examples
     --------
