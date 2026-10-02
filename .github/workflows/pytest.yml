@@ -9,8 +9,8 @@ on:
       - 'conftest.py'
       - 'pyproject.toml'
       - '.github/workflows/pytest.yml'
+  # Any base branch, so that stacked PRs are tested too
   pull_request:
-    branches: [main]
     paths: *test-paths
 
 permissions:

@@ -2,8 +2,8 @@ name: Build documentation and upload as artifact to GitHub Actions
 
 # Pushes to main are built (and deployed) by deploy_doc.yml
 on:
+  # Any base branch, so that stacked PRs are tested too
   pull_request:
-    branches: [main]
 
 permissions:
   contents: read

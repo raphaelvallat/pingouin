@@ -3,8 +3,8 @@ name: Ruff
 on:
   push:
     branches: [main]
+  # Any base branch, so that stacked PRs are tested too
   pull_request:
-    branches: [main]
 
 permissions:
   contents: read
