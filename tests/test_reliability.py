@@ -30,8 +30,9 @@ def test_cronbach_alpha():
     alpha_wide, ci_wide = cronbach_alpha(data=wide)
     assert alpha == alpha_wide
     np.testing.assert_array_equal(ci, ci_wide)
-    # In R = psych:alpha(data, use="complete.obs"): same alpha and CI as without the incomplete
-    # subject, i.e. the CI uses the sample size after listwise deletion
+    # Listwise deletion: same alpha and CI as without the incomplete subject, i.e. the CI uses the
+    # sample size after deletion. psych::alpha(use="complete.obs") gives the same alpha, but its CI
+    # uses the total number of subjects.
     alpha, ci = cronbach_alpha(
         data=df, items="Items", scores="Scores", subject="Subj", nan_policy="listwise"
     )
@@ -43,11 +44,14 @@ def test_cronbach_alpha():
     np.testing.assert_array_equal(ci, ci_complete)
     # Wide format
     data = read_dataset("cronbach_wide_missing")
-    alpha, _ = cronbach_alpha(data=data)
-    assert round(alpha, 2) == 0.73
+    # In R: psych::alpha(data, use="pairwise")
+    alpha, ci = cronbach_alpha(data=data)
+    assert round(alpha, 6) == 0.732661
+    np.testing.assert_array_equal(ci, [0.435, 0.909])
+    # In R: psych::alpha(data[complete.cases(data), ])
     alpha, ci = cronbach_alpha(data=data, nan_policy="listwise")
-    assert round(alpha, 2) == 0.80
-    np.testing.assert_array_equal(ci, cronbach_alpha(data=data.dropna())[1])
+    assert round(alpha, 6) == 0.801695
+    np.testing.assert_array_equal(ci, [0.533, 0.947])
 
 
 def test_intraclass_corr():

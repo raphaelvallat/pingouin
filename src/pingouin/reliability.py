@@ -82,7 +82,9 @@ def cronbach_alpha(
         c_U = 1 - (1 - \\alpha) \\cdot F_{(0.975, n-1, (n-1)(k-1))}
 
     where :math:`n` is the number of subjects and :math:`k` the number of
-    items.
+    items. With ``nan_policy="listwise"``, :math:`n` is the number of subjects
+    without missing values. Note that ``psych::alpha(use="complete.obs")`` in R
+    uses the total number of subjects instead, which gives a narrower interval.
 
     Results have been tested against the `psych
     <https://cran.r-project.org/web/packages/psych/psych.pdf>`_ R package.
@@ -101,13 +103,13 @@ def cronbach_alpha(
 
     >>> import pingouin as pg
     >>> data = pg.read_dataset("cronbach_wide_missing")
-    >>> # In R: psych:alpha(data, use="pairwise")
+    >>> # In R: psych::alpha(data, use="pairwise")
     >>> pg.cronbach_alpha(data=data)
     (0.732660835214447, array([0.435, 0.909]))
 
     After listwise deletion of missing values (remove the entire rows)
 
-    >>> # In R: psych:alpha(data, use="complete.obs")
+    >>> # In R: psych::alpha(data[complete.cases(data), ])
     >>> pg.cronbach_alpha(data=data, nan_policy="listwise")
     (0.8016949152542373, array([0.533, 0.947]))
 
@@ -134,7 +136,8 @@ def cronbach_alpha(
     err = "All columns must be numeric."
     assert all([data[c].dtype.kind in "bfiu" for c in data.columns]), err
     if data.isna().any().any() and nan_policy == "listwise":
-        # In R = psych:alpha(data, use="complete.obs")
+        # Same alpha as psych::alpha(data, use="complete.obs") in R, but the CI below uses the
+        # number of complete subjects, while psych uses the total number of subjects
         data = data.dropna(axis=0, how="any")
     # The sample size of the confidence interval is the one after listwise deletion
     n, k = data.shape
