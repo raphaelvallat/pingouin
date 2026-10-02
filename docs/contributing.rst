@@ -103,11 +103,11 @@ and then come back after executing the ``html`` recipe.
 
   $ make -C docs html
 
-The CI build treats warnings as errors. To check this locally, use:
+The CI build treats warnings as errors, and runs in nitpicky mode (``-n``): every cross-reference that cannot be resolved is a warning. To refer to a function that no longer exists, e.g. in the changelog, prefix it with ``!`` (:literal:`:py:func:\`!pingouin.old_function\``). To check this locally, use:
 
 .. code-block:: bash
 
-  $ make -C docs html SPHINXOPTS="-W --keep-going"
+  $ make -C docs html SPHINXOPTS="-W -n --keep-going"
 
 Inspect on GitHub
 ^^^^^^^^^^^^^^^^^
