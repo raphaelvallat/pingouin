@@ -1,3 +1,11 @@
+# Reference values for tests/test_correlation.py, computed with the R packages correlation
+# (test_corr) and ppcor (test_partial_corr). This script is not run by the test suite.
+# Run it from this directory: `cd tests/R && Rscript test_correlation.R`.
+# See README.md.
+
+# x and y are the data of test_corr:
+# np.random.RandomState(123).multivariate_normal([4, 6], [(1, 0.6), (0.6, 1)], 30).T,
+# with the outliers x[3] = 12 and y[5] = -8
 library(correlation)
 
 x <- c(4.524991087851508, 4.420531811767872, 3.778970926584845, 12.0, 3.2553302798031223, 4.649569372128418, 2.951786225128683, 4.591357332700219, 1.0489956831264005, 2.9292390843995104, 2.6738018656932527, 4.31118852334745, 5.406716105951538, 3.827585880548361, 4.510669777362404, 5.48020001172895, 5.897501992923205, 3.2481046204119224, 3.6896719823018116, 4.659839225398035, 5.492978998780082, 4.093017621645702, 3.702447504183336, 1.6755435235042087, 2.1236637738250335, 5.622025310958057, 2.7972808778327707, 3.495237872288203, 2.418519025293012, 2.184008274957259)
@@ -21,8 +29,8 @@ cor <- cor_test(data, x="x", y="y", method="shepherd")
 
 library(ppcor)
 
-# Update path to pingouin/datasets/
-df <- read.csv("../datasets/partial_corr.csv")
+# Path relative to tests/R/
+df <- read.csv("../../src/pingouin/datasets/partial_corr.csv")
 
 # Partial correlation
 pcor.test(x=df$x, y=df$y, z=df[, c("cv1")])
