@@ -41,7 +41,8 @@ class TestParametric(TestCase):
         ttest(x, y, paired=False, correction="auto")
         ttest(x, y, paired=False, correction=True)
         ttest(x, y, paired=False, r=0.5)
-        ttest(x, h, paired=True)
+        with pytest.warns(UserWarning, match="unequal sizes"):
+            ttest(x, h, paired=True)
 
         a = [4, 7, 8, 6, 3, 2]
         b = [6, 8, 7, 10, 11, 9]
@@ -122,7 +123,8 @@ class TestParametric(TestCase):
         pd.testing.assert_frame_equal(ttest(a, b, paired=0), ttest(a, b, paired=False))
 
         # When the two arrays are identical
-        tt = ttest(a, a, paired=True)
+        with pytest.warns(UserWarning, match="x and y are equals"):
+            tt = ttest(a, a, paired=True)
         assert str(tt.loc["T_test", "T"]) == str(np.nan)
         assert str(tt.loc["T_test", "p_val"]) == str(np.nan)
         assert tt.loc["T_test", "cohen_d"] == 0.0

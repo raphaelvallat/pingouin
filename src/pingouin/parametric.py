@@ -3,16 +3,19 @@ import warnings
 
 import numpy as np
 import pandas as pd
-import pandas_flavor as pf
 from scipy.stats import f
 
 from .bayesian import bayesfactor_ttest
 from .distribution import _contrast_cov, _gg_epsilon, _mauchly_sphericity
+from .effsize import compute_effsize
+from .power import power_ttest, power_ttest2n
 from .utils import (
     _check_alternative,
     _check_dataframe,
     _flatten_list,
+    _is_installed,
     _postprocess_dataframe,
+    _register_dataframe_method,
     remove_na,
 )
 
@@ -208,8 +211,6 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     """
     from scipy.stats import t, ttest_1samp, ttest_ind, ttest_rel
 
-    from pingouin import compute_effsize, power_ttest, power_ttest2n
-
     # Check arguments
     _check_alternative(alternative)
     assert 0 < confidence < 1, "confidence must be between 0 and 1."
@@ -220,7 +221,10 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     paired = bool(paired)
 
     if x.size != y.size and paired:
-        warnings.warn("x and y have unequal sizes. Switching to paired == False. Check your data.")
+        warnings.warn(
+            "x and y have unequal sizes. Switching to paired == False. Check your data.",
+            stacklevel=2,
+        )
         paired = False
 
     # Remove rows with missing values
@@ -237,7 +241,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
         # Case paired two samples T-test
         # Do not compute if two arrays are identical (avoid SciPy warning)
         if np.array_equal(x, y):
-            warnings.warn("x and y are equals. Cannot compute T or p-value.")
+            warnings.warn("x and y are equals. Cannot compute T or p-value.", stacklevel=2)
             tval, pval = np.nan, np.nan
         else:
             tval, pval = ttest_rel(x, y, alternative=alternative)
@@ -346,7 +350,7 @@ def _gg_corrected_pval(fval, ddof1, ddof2, eps):
     return f(np.maximum(ddof1 * eps, 1.0), np.maximum(ddof2 * eps, 1.0)).sf(fval)
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def rm_anova(
     data=None, dv=None, within=None, subject=None, correction="auto", detailed=False, effsize="ng2"
 ):
@@ -531,7 +535,7 @@ def rm_anova(
         if len(within) == 1:
             within = within[0]
         elif len(within) == 2:
-            return rm_anova2(dv=dv, within=within, data=data, subject=subject, effsize=effsize)
+            return _rm_anova2(dv=dv, within=within, data=data, subject=subject, effsize=effsize)
         else:
             raise ValueError("Repeated measures ANOVA with three or more factors is not supported.")
 
@@ -675,7 +679,7 @@ def rm_anova(
     return _postprocess_dataframe(aov)
 
 
-def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
+def _rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     """Two-way repeated measures ANOVA.
 
     This is an internal function. The main call to this function should be done
@@ -686,9 +690,9 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     # Validate the dataframe
     data = _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
 
-    assert not data[a].isnull().any(), "Cannot have missing values in %s" % a
-    assert not data[b].isnull().any(), "Cannot have missing values in %s" % b
-    assert not data[subject].isnull().any(), "Cannot have missing values in %s" % subject
+    assert not data[a].isnull().any(), f"Cannot have missing values in {a}"
+    assert not data[b].isnull().any(), f"Cannot have missing values in {b}"
+    assert not data[subject].isnull().any(), f"Cannot have missing values in {subject}"
 
     # Wide-format table, and complete-case long-format data
     data_piv, data = _pivot_rm(data, dv, within, subject)
@@ -790,7 +794,7 @@ def rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     return _postprocess_dataframe(aov)
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="np2"):
     """One-way and *N*-way ANOVA.
 
@@ -807,7 +811,8 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
         If ``between`` is a list with two or more elements, a *N*-way ANOVA is
         performed.
         Note that Pingouin will internally call statsmodels to calculate
-        ANOVA with 3 or more factors, or unbalanced two-way ANOVA.
+        ANOVA with 3 or more factors, or unbalanced two-way ANOVA. statsmodels is an optional
+        dependency (``pip install "pingouin[extras]"``).
     ss_type : int
         Specify how the sums of squares is calculated for *unbalanced* design
         with 2 or more factors. Can be 1, 2 (default), or 3. This has no impact
@@ -953,10 +958,10 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
         elif len(between) == 2:
             # Two factors with balanced design = Pingouin implementation
             # Two factors with unbalanced design = statsmodels
-            return anova2(dv=dv, between=between, data=data, ss_type=ss_type, effsize=effsize)
+            return _anova2(dv=dv, between=between, data=data, ss_type=ss_type, effsize=effsize)
         else:
             # 3 or more factors with (un)-balanced design = statsmodels
-            return anovan(dv=dv, between=between, data=data, ss_type=ss_type, effsize=effsize)
+            return _anovan(dv=dv, between=between, data=data, ss_type=ss_type, effsize=effsize)
 
     # Check data
     data = _check_dataframe(dv=dv, between=between, data=data, effects="between")
@@ -1026,7 +1031,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
     return _postprocess_dataframe(aov)
 
 
-def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
+def _anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     """Two-way balanced ANOVA in pure Python + Pandas.
 
     This is an internal function. The main call to this function should be done
@@ -1048,7 +1053,7 @@ def anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     grp_both = data.groupby(between, observed=True, group_keys=False)[dv]
     if grp_both.count().nunique() > 1:
         # UNBALANCED DESIGN
-        return anovan(dv=dv, between=between, data=data, ss_type=ss_type, effsize=effsize)
+        return _anovan(dv=dv, between=between, data=data, ss_type=ss_type, effsize=effsize)
 
     # BALANCED DESIGN
     mu = data[dv].mean()
@@ -1135,12 +1140,13 @@ def _remove_unused_categories(data):
     )
 
 
-def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
+def _anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     """N-way ANOVA using statsmodels.
 
     This is an internal function. The main call to this function should be done
     by the :py:func:`pingouin.anova` function.
     """
+    _is_installed("statsmodels", raise_error=True)
     from statsmodels.api import stats
     from statsmodels.formula.api import ols
 
@@ -1203,7 +1209,7 @@ def anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     return aov
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def welch_anova(data=None, dv=None, between=None):
     """One-way Welch ANOVA.
 
@@ -1369,7 +1375,7 @@ def welch_anova(data=None, dv=None, between=None):
     return _postprocess_dataframe(aov)
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def mixed_anova(
     data=None, dv=None, within=None, subject=None, between=None, correction="auto", effsize="np2"
 ):
@@ -1494,9 +1500,9 @@ def mixed_anova(
     if not (data.groupby([subject, within], observed=True)[between].nunique() == 1).all():
         raise ValueError(
             "Subject IDs cannot overlap between groups: each "
-            "group in `%s` must have a unique set of "
+            f"group in `{between}` must have a unique set of "
             "subject IDs, e.g. group1 = [1, 2, 3, ..., 10] "
-            "and group2 = [11, 12, 13, ..., 20]" % between
+            "and group2 = [11, 12, 13, ..., 20]"
         )
 
     # SUMS OF SQUARES
@@ -1600,7 +1606,7 @@ def mixed_anova(
     return _postprocess_dataframe(aov)
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     """ANCOVA with one or more covariate(s).
 
@@ -1641,7 +1647,8 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     of primary interest, known as covariates or nuisance variables (covar).
 
     Pingouin uses :py:class:`statsmodels.regression.linear_model.OLS` to
-    compute the ANCOVA.
+    compute the ANCOVA. statsmodels is an optional dependency
+    (``pip install "pingouin[extras]"``).
 
     .. important:: Rows with missing values are automatically removed
         (listwise deletion).
@@ -1673,6 +1680,7 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     2       BMI    60.013656   1   1.053790  0.312842  0.015409
     3  Residual  1708.508657  30        NaN       NaN       NaN
     """
+    _is_installed("statsmodels", raise_error=True)
     from statsmodels.api import stats
     from statsmodels.formula.api import ols
 
@@ -1684,14 +1692,14 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
         "between factors. For more details, please see "
         "https://github.com/raphaelvallat/pingouin/issues/173."
     )
-    assert dv in data.columns, "%s is not in data." % dv
-    assert between in data.columns, "%s is not in data." % between
+    assert dv in data.columns, f"{dv} is not in data."
+    assert between in data.columns, f"{between} is not in data."
     assert isinstance(covar, (str, list)), "covar must be a str or a list."
     if isinstance(covar, str):
         covar = [covar]
     for c in covar:
-        assert c in data.columns, "covariate %s is not in data" % c
-        assert data[c].dtype.kind in "bfi", "covariate %s is not numeric" % c
+        assert c in data.columns, f"covariate {c} is not in data"
+        assert data[c].dtype.kind in "bfi", f"covariate {c} is not numeric"
 
     # Drop missing values
     data = _remove_unused_categories(data[_flatten_list([dv, between, covar])].dropna())
@@ -1702,7 +1710,7 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     covar_names = [f"covar{i}" for i in range(len(covar))]
     model_data = pd.DataFrame(
         {"dv": data[dv], "between": data[between]}
-        | {name: data[c] for name, c in zip(covar_names, covar)}
+        | {name: data[c] for name, c in zip(covar_names, covar, strict=True)}
     )
     formula = " + ".join(["dv ~ C(between)", *covar_names])
     model = ols(formula, data=model_data).fit()

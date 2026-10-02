@@ -4,7 +4,13 @@ import numpy as np
 import pandas as pd
 import scipy
 
-from .utils import _check_alternative, _check_dataframe, _postprocess_dataframe, remove_na
+from .utils import (
+    _check_alternative,
+    _check_dataframe,
+    _postprocess_dataframe,
+    _register_dataframe_method,
+    remove_na,
+)
 
 __all__ = [
     "mad",
@@ -482,6 +488,7 @@ def wilcoxon(x, y=None, alternative="two-sided", **kwargs):
     return _postprocess_dataframe(stats)
 
 
+@_register_dataframe_method
 def kruskal(data=None, dv=None, between=None, detailed=False):
     """Kruskal-Wallis H-test for independent samples.
 
@@ -569,6 +576,7 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
     return _postprocess_dataframe(stats)
 
 
+@_register_dataframe_method
 def friedman(data=None, dv=None, within=None, subject=None, method="chisq"):
     """Friedman test for repeated measurements.
 
@@ -744,6 +752,7 @@ def friedman(data=None, dv=None, within=None, subject=None, method="chisq"):
     return _postprocess_dataframe(stats)
 
 
+@_register_dataframe_method
 def cochran(data=None, dv=None, within=None, subject=None):
     """Cochran Q test. A special case of the Friedman test when the dependent
     variable is binary.

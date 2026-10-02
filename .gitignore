@@ -49,17 +49,6 @@ coverage.xml
 *.mo
 *.pot
 
-# Django stuff:
-*.log
-local_settings.py
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
 # Sphinx documentation
 docs/_build/
 docs/build/
@@ -73,9 +62,6 @@ target/
 
 # pyenv
 .python-version
-
-# celery beat schedule file
-celerybeat-schedule
 
 # SageMath parsed files
 *.sage.py
@@ -102,13 +88,13 @@ ENV/
 test_export.csv
 notebooks/mixed_anova.csv
 desktop.ini
-examples/mixed_anova.csv
-.pytest_cache/v/cache/nodeids
 pain_anova.csv
 
 # Others
+*.log
 .Rhistory
 .DS_Store
-atom_config.txt
 .vscode/
-push_pypi.md
+
+# Claude Code local settings
+.claude/settings.local.json

@@ -3,6 +3,7 @@
 from unittest import TestCase
 
 import numpy as np
+import pytest
 
 from pingouin import options, set_default_options
 from pingouin.equivalence import tost
@@ -23,7 +24,8 @@ class TestEquivalence(TestCase):
         assert tost(a, a).at["TOST", "pval"] < 0.05
         assert tost(a, a, paired=True).at["TOST", "pval"] < 0.05
         assert tost(a, b).at["TOST", "pval"] > 0.5
-        assert tost(a, b, paired=True).at["TOST", "pval"] > 0.5
+        with pytest.warns(RuntimeWarning, match="invalid value"):
+            assert tost(a, b, paired=True).at["TOST", "pval"] > 0.5
 
         # Check all arguments with good data
         a = np.array([4, 7, 8, 6, 3, 2])

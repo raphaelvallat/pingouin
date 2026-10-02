@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 import numpy as np
+import pytest
 from pytest import approx
 from scipy.stats import pearsonr
 
@@ -61,7 +62,8 @@ class TestBayesian(TestCase):
         n = 100
         assert bfp(r, n) == appr(0.174)
         assert bfp(r, n, alternative="greater") == appr(0.275)
-        assert bfp(r, n, alternative="greater", method="wetzels") == appr(0.275)
+        with pytest.warns(UserWarning, match="not supported by the Wetzels"):
+            assert bfp(r, n, alternative="greater", method="wetzels") == appr(0.275)
         assert bfp(r, n, alternative="less") == appr(0.073)
         r, _ = pearsonr(v, w)
         # relative tolerance here

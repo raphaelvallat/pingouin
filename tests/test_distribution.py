@@ -1,9 +1,11 @@
-from unittest import TestCase
+import warnings
+from unittest import TestCase, mock
 
 import numpy as np
 import pandas as pd
 import pytest
 
+import pingouin.distribution
 from pingouin import read_dataset
 from pingouin.distribution import (
     anderson,
@@ -78,7 +80,8 @@ class TestDistribution(TestCase):
                 "variable": [5, 6, 8, 9, 5, 5, 2, 3, 4, 5, np.nan, 8],
             }
         )
-        stats = normality(df_small, dv="variable", group="group")
+        with pytest.warns(UserWarning, match="less than 4 valid samples"):
+            stats = normality(df_small, dv="variable", group="group")
         assert np.isnan(stats.loc[[1, 3], "pval"]).all()
         assert not np.isnan(stats.loc[[0, 2], "pval"]).all()
         assert (~stats.loc[[1, 3], "normal"]).all()
@@ -236,3 +239,21 @@ class TestDistribution(TestCase):
         """Test function test_anderson."""
         assert not anderson(np.random.random(size=1000))[0]
         assert anderson(np.random.normal(size=10000))[0]
+        with pytest.raises(ValueError, match="dist must be one of"):
+            anderson(x, dist="weibull")
+
+    def test_anderson_legacy_scipy(self):
+        """The p-value interpolated from the critical values of SciPy < 1.17 must match the one
+        of SciPy >= 1.17, so that pingouin.anderson does not depend on the SciPy version."""
+        samples = [x, np.random.default_rng(42).exponential(size=50)]
+        for dist in pingouin.distribution._ANDERSON_SIG_LEVELS:
+            expected = anderson(*samples, dist=dist)
+            with (
+                mock.patch.object(pingouin.distribution, "_SCIPY_VERSION", (1, 16)),
+                warnings.catch_warnings(),
+            ):
+                # SciPy >= 1.17 warns when anderson is called without `method`
+                warnings.simplefilter("ignore", FutureWarning)
+                legacy = anderson(*samples, dist=dist)
+            np.testing.assert_array_equal(legacy[0], expected[0])
+            np.testing.assert_allclose(legacy[1], expected[1])

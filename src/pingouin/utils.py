@@ -1,26 +1,15 @@
 """Helper functions."""
 
 import collections.abc
+import importlib.util
 import numbers
 
 import numpy as np
 import pandas as pd
-from tabulate import tabulate
 
 from .config import options
 
-__all__ = [
-    "_perm_pval",
-    "print_table",
-    "_postprocess_dataframe",
-    "_check_eftype",
-    "remove_na",
-    "_flatten_list",
-    "_check_dataframe",
-    "_check_alternative",
-    "_format_pairwise_matrix",
-    "_is_mpmath_installed",
-]
+__all__ = ["print_table", "remove_na"]
 
 
 def _check_alternative(alternative):
@@ -68,6 +57,16 @@ def _perm_pval(bootstat, estimate, alternative="two-sided"):
     return p
 
 
+def _register_dataframe_method(func):
+    """Register a function as a method of :py:class:`pandas.DataFrame`.
+
+    The DataFrame is passed as the first argument of the function, e.g. ``df.anova(dv="x")``
+    is equivalent to ``pingouin.anova(data=df, dv="x")``. The function is returned unchanged.
+    """
+    setattr(pd.DataFrame, func.__name__, func)
+    return func
+
+
 ###############################################################################
 # PRINT & EXPORT OUTPUT TABLE
 ###############################################################################
@@ -87,6 +86,8 @@ def print_table(df, floatfmt=".3f", tablefmt="simple"):
         For a full list of available formats, please refer to
         https://pypi.org/project/tabulate/
     """
+    from tabulate import tabulate
+
     if "F" in df.keys():
         print("\n=============\nANOVA SUMMARY\n=============\n")
     if "A" in df.keys():
@@ -136,10 +137,10 @@ def _postprocess_dataframe(df):
         if per_cell:
             round_options = [_get_round_setting_for(row, col) for row in df.index]
         else:
-            round_options = [options.get(f"round.column.{col}", options["round"])] * len(df)
+            round_options = [options.get(f"round.column.{col}", options.get("round"))] * len(df)
         if all(opt is None for opt in round_options):
             continue
-        values = [_round_value(val, opt) for val, opt in zip(df[col], round_options)]
+        values = [_round_value(val, opt) for val, opt in zip(df[col], round_options, strict=True)]
         if any(callable(opt) for opt in round_options):
             # A formatter can change the type of the values (e.g. float -> str)
             df[col] = pd.Series(values, index=df.index, dtype=object).infer_objects()
@@ -154,6 +155,10 @@ def _round_value(val, round_option):
         return val
     if callable(round_option):
         return round_option(val)
+    if not isinstance(round_option, numbers.Integral) or isinstance(round_option, bool):
+        raise TypeError(
+            f"Rounding options must be None, an int or a callable, got {round_option!r}."
+        )
     if isinstance(val, bool):
         # No rounding if value is a boolean
         return val
@@ -163,6 +168,10 @@ def _round_value(val, round_option):
     if isinstance(val, numbers.Number):
         return np.round(val, decimals=round_option)
     return val
+
+
+# Default significance thresholds of rcorr and ptests
+_DEFAULT_PVAL_STARS = {0.001: "***", 0.01: "**", 0.05: "*"}
 
 
 def _format_pairwise_matrix(mat, mat_upper, decimals=3, stars=True, pval_stars=None):
@@ -205,7 +214,7 @@ def _get_round_setting_for(row, col):
             return options[key]
         except KeyError:
             pass
-    return options["round"]
+    return options.get("round")
 
 
 ###############################################################################
@@ -378,7 +387,7 @@ def _check_dataframe(data=None, dv=None, between=None, within=None, subject=None
         except ImportError:
             raise ValueError(
                 "Failed to convert object to pandas dataframe (DataMatrix not available)"
-            )
+            ) from None
         if not isinstance(data, DataMatrix):
             raise ValueError("Data must be a pandas dataframe or compatible object.")
         data = cnv.to_pandas(data)
@@ -413,15 +422,12 @@ def _check_dataframe(data=None, dv=None, between=None, within=None, subject=None
 ###############################################################################
 
 
-def _is_mpmath_installed(raise_error=False):
-    """Check if mpmath is installed."""
-    try:
-        import mpmath  # noqa
-
-        is_installed = True
-    except ImportError:  # pragma: no cover
-        is_installed = False
-    # Raise error (if needed) :
-    if raise_error and not is_installed:  # pragma: no cover
-        raise OSError("mpmath needs to be installed. Please use `pip install mpmath`.")
+def _is_installed(module, raise_error=False):
+    """Check if an optional dependency (e.g. mpmath or statsmodels) is installed."""
+    is_installed = importlib.util.find_spec(module) is not None
+    if raise_error and not is_installed:
+        raise ImportError(
+            f"{module} is required for this function. Please install it with "
+            '`pip install "pingouin[extras]"` or `pip install {module}`.'
+        )
     return is_installed
