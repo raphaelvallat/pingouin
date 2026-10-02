@@ -6,205 +6,228 @@ Functions
 #########
 
 
+.. _anova:
+
 ANOVA and T-test
 ----------------
-
-.. _anova:
 
 .. autosummary::
    :toctree: generated/
 
-    anova
-    ancova
-    rm_anova
-    epsilon
-    mixed_anova
-    welch_anova
-    tost
-    ttest
-    ptests
+   anova
+   ancova
+   rm_anova
+   epsilon
+   mixed_anova
+   welch_anova
+   tost
+   ttest
+
+.. _bayesian:
 
 Bayesian
 --------
 
-.. _bayesian:
-
 .. autosummary::
    :toctree: generated/
 
-    bayesfactor_binom
-    bayesfactor_ttest
-    bayesfactor_pearson
+   bayesfactor_binom
+   bayesfactor_ttest
+   bayesfactor_pearson
+
+.. _circular:
 
 Circular
 --------
 
-.. _circular:
-
 .. autosummary::
    :toctree: generated/
 
-    convert_angles
-    circ_axial
-    circ_corrcc
-    circ_corrcl
-    circ_mean
-    circ_r
-    circ_rayleigh
-    circ_vtest
+   convert_angles
+   circ_axial
+   circ_corrcc
+   circ_corrcl
+   circ_mean
+   circ_r
+   circ_rayleigh
+   circ_vtest
+
+.. _contingency:
 
 Contingency
 -----------
 
-.. _contingency:
-
 .. autosummary::
    :toctree: generated/
 
-    chi2_independence
-    chi2_mcnemar
-    dichotomous_crosstab
+   chi2_independence
+   chi2_mcnemar
+   dichotomous_crosstab
+
+.. _correlations:
 
 Correlation and regression
 --------------------------
 
-.. _correlations:
-
 .. autosummary::
    :toctree: generated/
 
-    corr
-    pairwise_corr
-    partial_corr
-    pcorr
-    rcorr
-    distance_corr
-    rm_corr
-    linear_regression
-    logistic_regression
-    mediation_analysis
+   corr
+   pairwise_corr
+   partial_corr
+   pcorr
+   rcorr
+   distance_corr
+   rm_corr
+   linear_regression
+   logistic_regression
+   mediation_analysis
+
+.. _distribution:
 
 Distribution
 ------------
 
-.. _parametric:
-
 .. autosummary::
    :toctree: generated/
 
-    anderson
-    homoscedasticity
-    normality
-    sphericity
+   anderson
+   homoscedasticity
+   normality
+   sphericity
+
+.. _effsize:
 
 Effect sizes
 ------------
 
-.. _effsize:
-
 .. autosummary::
    :toctree: generated/
 
-    compute_effsize
-    compute_effsize_from_t
-    convert_effsize
-    compute_esci
-    compute_bootci
+   compute_effsize
+   compute_effsize_from_t
+   convert_effsize
+   compute_esci
+   compute_bootci
+
+.. _multicomp:
 
 Multiple comparisons and post-hoc tests
 ---------------------------------------
 
-.. _multicomp:
-
 .. autosummary::
    :toctree: generated/
 
-    pairwise_corr
-    pairwise_tests
-    pairwise_tukey
-    pairwise_gameshowell
-    ptests
-    multicomp
+   pairwise_tests
+   pairwise_tukey
+   pairwise_gameshowell
+   ptests
+   multicomp
+
+.. _multivar:
 
 Multivariate tests
 ------------------
 
-.. _multivar:
-
 .. autosummary::
    :toctree: generated/
 
-    box_m
-    multivariate_normality
-    multivariate_ttest
+   box_m
+   multivariate_normality
+   multivariate_ttest
+
+.. _nonparametric:
 
 Non-parametric
 --------------
 
-.. _nonparametric:
-
 .. autosummary::
    :toctree: generated/
 
-    cochran
-    friedman
-    kruskal
-    mad
-    madmedianrule
-    mwu
-    wilcoxon
-    harrelldavis
+   cochran
+   friedman
+   kruskal
+   mad
+   madmedianrule
+   mwu
+   wilcoxon
+   harrelldavis
+
+.. _utils:
 
 Others
 ------
 
-.. _utils:
-
 .. autosummary::
-     :toctree: generated/
+   :toctree: generated/
 
-      print_table
-      remove_na
-      read_dataset
-      list_dataset
-      set_default_options
+   print_table
+   remove_na
+   read_dataset
+   list_dataset
+   set_default_options
+
+.. data:: options
+   :type: dict
+
+   Pingouin's global options. Changes apply to every subsequent call, and
+   :py:func:`pingouin.set_default_options` restores the defaults.
+
+   * ``options["round"]``: number of decimals of the output dataframes. The
+     default is None, i.e. no rounding.
+   * ``options["round.column.<name>"]``, ``options["round.row.<name>"]`` and
+     ``options["round.cell.[<row>]x[<column>]"]``: rounding of a column, a row
+     or a single cell. The first option found is used, in this order: cell,
+     column, row, then ``options["round"]``. The value can also be a
+     function that formats each value.
+
+   By default, the ``CI95`` column is rounded to 2 decimals and the ``BF10``
+   column is formatted as a string. See the
+   `rounding notebook <https://github.com/raphaelvallat/pingouin/blob/main/notebooks/06_Rounding.ipynb>`_
+   for examples.
+
+   .. code-block:: python
+
+      import pingouin as pg
+      pg.options["round"] = 4
+      pg.options["round.column.CI95"] = 3
+
+.. _plotting:
 
 Plotting
 --------
 
-.. _plotting:
-
 .. autosummary::
-     :toctree: generated/
+   :toctree: generated/
 
-      plot_blandaltman
-      plot_circmean
-      plot_paired
-      plot_rm_corr
-      qqplot
+   plot_blandaltman
+   plot_circmean
+   plot_paired
+   plot_rm_corr
+   qqplot
+
+.. _power:
 
 Power analysis
 --------------
 
-.. _power:
-
 .. autosummary::
-     :toctree: generated/
+   :toctree: generated/
 
-      power_anova
-      power_rm_anova
-      power_chi2
-      power_corr
-      power_ttest
-      power_ttest2n
+   power_anova
+   power_rm_anova
+   power_chi2
+   power_corr
+   power_ttest
+   power_ttest2n
+
+.. _reliability:
 
 Reliability and consistency
 ---------------------------
 
-.. _reliability:
-
 .. autosummary::
-     :toctree: generated/
+   :toctree: generated/
 
-      cronbach_alpha
-      intraclass_corr
+   cronbach_alpha
+   intraclass_corr

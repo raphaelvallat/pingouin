@@ -42,7 +42,7 @@ jobs:
       - name: Build documentation
         run: |
           make -C docs clean
-          make -C docs html
+          make -C docs html SPHINXOPTS="-W -n --keep-going"
 
       - name: Upload documentation artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0

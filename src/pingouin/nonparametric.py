@@ -45,7 +45,7 @@ def mad(a, normalize=True, axis=0):
     mad : float
         mad = median(abs(a - median(a))) / c
 
-    See also
+    See Also
     --------
     madmedianrule, numpy.std
 
@@ -105,7 +105,7 @@ def madmedianrule(a):
         Boolean array indicating whether each sample is an outlier (True) or
         not (False).
 
-    See also
+    See Also
     --------
     mad
 
@@ -172,7 +172,7 @@ def mwu(x, y, alternative="two-sided", **kwargs):
         * ``'RBC'``   : rank-biserial correlation
         * ``'CLES'``  : common language effect size
 
-    See also
+    See Also
     --------
     scipy.stats.mannwhitneyu, wilcoxon, ttest
 
@@ -332,7 +332,7 @@ def wilcoxon(x, y=None, alternative="two-sided", **kwargs):
         * ``'RBC'``   : matched pairs rank-biserial correlation (effect size)
         * ``'CLES'``  : common language effect size
 
-    See also
+    See Also
     --------
     scipy.stats.wilcoxon, mwu
 
@@ -500,6 +500,8 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
         Name of column containing the dependent variable.
     between : string
         Name of column containing the between factor.
+    detailed : boolean
+        Currently has no effect: the output is the same with ``detailed=True``.
 
     Returns
     -------
@@ -608,7 +610,6 @@ def friedman(data=None, dv=None, within=None, subject=None, method="chisq"):
         * ``'Q'``: The Friedman chi-square statistic, corrected for ties
         * ``'dof'``: degrees of freedom
         * ``'p_unc'``: Uncorrected p-value of the chi squared test
-
 
         If ``method='f'``
 
@@ -910,7 +911,7 @@ def harrelldavis(x, quantile=0.5, axis=-1):
     .. [3] Rousselet, G. A., Pernet, C. R. and Wilcox, R. R. (2017). Beyond
        differences in means: robust graphical methods to compare two groups
        in neuroscience. Eur J Neurosci, 46: 1738-1748.
-       https://doi.org/doi:10.1111/ejn.13610
+       https://doi.org/10.1111/ejn.13610
 
     Examples
     --------

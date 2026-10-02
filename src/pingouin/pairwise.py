@@ -225,7 +225,7 @@ def pairwise_tests(
         * ``'hedges'``: effect size (or any effect size defined in
           ``effsize``)
 
-    See also
+    See Also
     --------
     ttest, mwu, wilcoxon, compute_effsize, multicomp
 
@@ -264,7 +264,7 @@ def pairwise_tests(
     Examples
     --------
     For more examples, please refer to the `Jupyter notebooks
-    <https://github.com/raphaelvallat/pingouin/blob/master/notebooks/01_ANOVA.ipynb>`_
+    <https://github.com/raphaelvallat/pingouin/blob/main/notebooks/01_ANOVA.ipynb>`_
 
     1. One between-subject factor
 
@@ -537,15 +537,16 @@ def ptests(
 
     T-values are reported on the lower triangle of the output pairwise matrix and p-values on the
     upper triangle. This method is a faster, but less exhaustive, matrix-version of the
-    :py:func:`pingouin.pairwise_test` function. Missing values are automatically removed from each
+    :py:func:`pingouin.pairwise_tests` function. Missing values are automatically removed from each
     pairwise T-test.
+
+    The input dataframe is the first positional argument, e.g. ``pingouin.ptests(df)``, or
+    ``df.ptests()`` when used as a :py:class:`pandas.DataFrame` method.
 
     .. versionadded:: 0.5.3
 
     Parameters
     ----------
-    self : :py:class:`pandas.DataFrame`
-        Input dataframe.
     paired : boolean
         Specify whether the two observations are related (i.e. repeated measures) or independent.
     decimals : int
@@ -693,6 +694,9 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
         Name of column(s) containing the between factor(s). If ``between`` is a list with two or
         more elements, all the combinations of levels (cells) of the factors are compared, i.e.
         the interaction term.
+
+        .. versionchanged:: 0.7.0
+           ``between`` can be a list of factors.
     effsize : string or None
         Effect size type. Available methods are:
 
@@ -721,7 +725,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
         * ``'hedges'``: Hedges effect size (or any effect size defined in
           ``effsize``)
 
-    See also
+    See Also
     --------
     pairwise_tests, pairwise_gameshowell
 
@@ -829,6 +833,9 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
         Name of column(s) containing the between factor(s). If ``between`` is a list with two or
         more elements, all the combinations of levels (cells) of the factors are compared, i.e.
         the interaction term.
+
+        .. versionchanged:: 0.7.0
+           ``between`` can be a list of factors.
     effsize : string or None
         Effect size type. Available methods are:
 
@@ -859,7 +866,7 @@ def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
         * ``'hedges'``: Hedges effect size (or any effect size defined in
           ``effsize``)
 
-    See also
+    See Also
     --------
     pairwise_tests, pairwise_tukey
 
@@ -1073,7 +1080,7 @@ def pairwise_corr(
     data using a pairwise deletion.
 
     This function is more flexible and gives a much more detailed
-    output than the :py:func:`pandas.DataFrame.corr()` method (i.e. p-values,
+    output than the :py:meth:`pandas.DataFrame.corr` method (i.e. p-values,
     confidence interval, Bayes Factor...). This comes however at
     an increased computational cost. While this should not be discernible for
     a dataframe with less than 10,000 rows and/or less than 20 columns, this
@@ -1086,7 +1093,7 @@ def pairwise_corr(
     This function also works with two-dimensional multi-index columns. In this
     case, columns must be list(s) of tuple(s). Please refer to this `example
     Jupyter notebook
-    <https://github.com/raphaelvallat/pingouin/blob/master/notebooks/04_Correlations.ipynb>`_
+    <https://github.com/raphaelvallat/pingouin/blob/main/notebooks/04_Correlations.ipynb>`_
     for more details.
 
     If and only if ``covar`` is specified, this function will compute the

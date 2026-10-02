@@ -328,7 +328,7 @@ def qqplot(
     ------
     ValueError
         If ``sparams`` does not contain the required parameters for ``dist``.
-        (e.g. :py:class:`scipy.stats.t` has a mandatory degrees of
+        (e.g. :py:data:`scipy.stats.t` has a mandatory degrees of
         freedom parameter *df*.)
 
     Notes
@@ -363,10 +363,10 @@ def qqplot(
 
     References
     ----------
-    * https://github.com/cran/car/blob/master/R/qqPlot.R
+    .. [1] https://github.com/cran/car/blob/master/R/qqPlot.R
 
-    * Fox, J. (2008), Applied Regression Analysis and Generalized Linear
-      Models, 2nd Ed., Sage Publications, Inc.
+    .. [2] Fox, J. (2008), Applied Regression Analysis and Generalized Linear
+           Models, 2nd Ed., Sage Publications, Inc.
 
     Examples
     --------
@@ -780,10 +780,10 @@ def plot_rm_corr(
         Optional keyword arguments passed to :py:class:`seaborn.FacetGrid`.
         When None, internal defaults are used.
     kwargs_line : dict or None
-        Optional keyword arguments passed to :py:class:`matplotlib.pyplot.plot`.
+        Optional keyword arguments passed to :py:func:`matplotlib.pyplot.plot`.
         When None, internal defaults are used.
     kwargs_scatter : dict or None
-        Optional keyword arguments passed to :py:class:`matplotlib.pyplot.scatter`.
+        Optional keyword arguments passed to :py:func:`matplotlib.pyplot.scatter`.
         When None, internal defaults are used.
 
     Returns
@@ -791,7 +791,7 @@ def plot_rm_corr(
     g : :py:class:`seaborn.FacetGrid`
         Seaborn FacetGrid.
 
-    See also
+    See Also
     --------
     rm_corr
 
@@ -889,7 +889,7 @@ def plot_circmean(
     ----------
     angles : array or list
         Angles (expressed in radians). Only 1D array are supported here.
-    square: bool
+    square : bool
         If True (default), ensure equal aspect ratio between X and Y axes.
     ax : matplotlib axes
         Axis on which to draw the plot.
