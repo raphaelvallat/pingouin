@@ -718,7 +718,9 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative="two-sided"):
         assert 0 < power <= 1
     if n is not None:
         if n <= 4:
-            warnings.warn("Sample size is too small to estimate power (n <= 4). Returning NaN.")
+            warnings.warn(
+                "Sample size is too small to estimate power (n <= 4). Returning NaN.", stacklevel=2
+            )
             return np.nan
 
     # Define main function. A "less" test is a "greater" test on the negated correlation.

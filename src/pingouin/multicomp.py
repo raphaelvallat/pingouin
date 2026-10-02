@@ -33,7 +33,7 @@ def _correct_finite(pvals, alpha, correct):
     return _reject(pvals_corrected, alpha), pvals_corrected
 
 
-def fdr(pvals, alpha=0.05, method="fdr_bh"):
+def _fdr(pvals, alpha=0.05, method="fdr_bh"):
     """P-values FDR correction with Benjamini/Hochberg and
     Benjamini/Yekutieli procedure.
 
@@ -59,8 +59,8 @@ def fdr(pvals, alpha=0.05, method="fdr_bh"):
 
     See also
     --------
-    bonf : Bonferroni correction
-    holm : Holm-Bonferroni correction
+    _bonf : Bonferroni correction
+    _holm : Holm-Bonferroni correction
 
     Notes
     -----
@@ -115,7 +115,7 @@ def fdr(pvals, alpha=0.05, method="fdr_bh"):
     return _correct_finite(pvals, alpha, lambda p: false_discovery_control(p, method=method[-2:]))
 
 
-def bonf(pvals, alpha=0.05):
+def _bonf(pvals, alpha=0.05):
     """P-values correction with Bonferroni method.
 
     Parameters
@@ -135,8 +135,8 @@ def bonf(pvals, alpha=0.05):
 
     See also
     --------
-    holm : Holm-Bonferroni correction
-    fdr : Benjamini/Hochberg and Benjamini/Yekutieli FDR correction
+    _holm : Holm-Bonferroni correction
+    _fdr : Benjamini/Hochberg and Benjamini/Yekutieli FDR correction
 
     Notes
     -----
@@ -182,7 +182,7 @@ def bonf(pvals, alpha=0.05):
     return _correct_finite(pvals, alpha, lambda p: np.clip(p * p.size, None, 1))
 
 
-def holm(pvals, alpha=0.05):
+def _holm(pvals, alpha=0.05):
     """P-values correction with Holm method.
 
     Parameters
@@ -202,8 +202,8 @@ def holm(pvals, alpha=0.05):
 
     See also
     --------
-    bonf : Bonferroni correction
-    fdr : Benjamini/Hochberg and Benjamini/Yekutieli FDR correction
+    _bonf : Bonferroni correction
+    _fdr : Benjamini/Hochberg and Benjamini/Yekutieli FDR correction
 
     Notes
     -----
@@ -257,7 +257,7 @@ def holm(pvals, alpha=0.05):
     return _correct_finite(pvals, alpha, _holm)
 
 
-def sidak(pvals, alpha=0.05):
+def _sidak(pvals, alpha=0.05):
     """P-values correction with Sidak method.
 
     Parameters
@@ -277,7 +277,7 @@ def sidak(pvals, alpha=0.05):
 
     See also
     --------
-    bonf, holm, fdr, multicomp
+    _bonf, _holm, _fdr, multicomp
 
     Notes
     -----
@@ -450,15 +450,15 @@ def multicomp(pvals, alpha=0.05, method="holm"):
     method = method.lower()
 
     if method in ["b", "bonf", "bonferroni"]:
-        return bonf(pvals, alpha=alpha)
+        return _bonf(pvals, alpha=alpha)
     elif method in ["h", "holm"]:
-        return holm(pvals, alpha=alpha)
+        return _holm(pvals, alpha=alpha)
     elif method in ["s", "sidak"]:
-        return sidak(pvals, alpha=alpha)
+        return _sidak(pvals, alpha=alpha)
     elif method in ["fdr", "fdr_bh", "bh"]:
-        return fdr(pvals, alpha=alpha, method="fdr_bh")
+        return _fdr(pvals, alpha=alpha, method="fdr_bh")
     elif method in ["fdr_by", "by"]:
-        return fdr(pvals, alpha=alpha, method="fdr_by")
+        return _fdr(pvals, alpha=alpha, method="fdr_by")
     elif method == "none":
         # Return a copy, so that the output is never a view on the user's input
         return _reject(pvals, alpha), pvals.copy()

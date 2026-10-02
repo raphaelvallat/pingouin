@@ -70,16 +70,17 @@ The main dependencies of Pingouin are:
 * `NumPy <https://numpy.org/>`_ >= 2.2.2
 * `SciPy <https://www.scipy.org/>`_ >= 1.15.0
 * `Pandas <https://pandas.pydata.org/>`_ >= 2.3.0
-* `Pandas-flavor <https://github.com/Zsailer/pandas_flavor>`_
-* `Statsmodels <https://www.statsmodels.org/>`_ >= 0.14.5
 * `Matplotlib <https://matplotlib.org/>`_ >= 3.10.1
 * `Seaborn <https://seaborn.pydata.org/>`_ >= 0.13.2
 * `Scikit-learn <https://scikit-learn.org/>`_ >= 1.6.1
 * `Tabulate <https://github.com/astanin/python-tabulate>`_
 
-Some functions additionally require:
+Some functions additionally require the following optional dependencies, which can be installed
+with ``pip install "pingouin[extras]"``:
 
-* `Mpmath <http://mpmath.org/>`_
+* `Statsmodels <https://www.statsmodels.org/>`_ >= 0.14.5: :py:func:`pingouin.ancova`,
+  :py:func:`pingouin.rm_corr` and :py:func:`pingouin.anova` with unbalanced or N-way designs
+* `Mpmath <http://mpmath.org/>`_: one-sided :py:func:`pingouin.bayesfactor_pearson`
 
 Pingouin can be easily installed using `uv <https://docs.astral.sh/uv/>`_
 
@@ -115,10 +116,7 @@ Quick start
 
 * If you want to *report a bug*, please open an issue on the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
 
-* If you want to see *Pingouin in action*, please click on the link below and navigate to the *notebooks/* folder to open a collection of interactive Jupyter notebooks.
-
-  .. image:: https://mybinder.org/badge.svg
-      :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/main
+* If you want to see *Pingouin in action*, please have a look at the collection of Jupyter notebooks in the `notebooks/ <https://github.com/raphaelvallat/pingouin/tree/main/notebooks>`_ folder.
 
 10 minutes to Pingouin
 ----------------------

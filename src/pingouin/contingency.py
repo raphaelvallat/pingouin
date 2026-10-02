@@ -9,7 +9,7 @@ from scipy.stats import chi2 as sp_chi2
 from scipy.stats.contingency import expected_freq
 
 from .power import power_chi2
-from .utils import _postprocess_dataframe
+from .utils import _postprocess_dataframe, _register_dataframe_method
 
 __all__ = ["chi2_independence", "chi2_mcnemar", "dichotomous_crosstab"]
 
@@ -19,6 +19,7 @@ __all__ = ["chi2_independence", "chi2_mcnemar", "dichotomous_crosstab"]
 ###############################################################################
 
 
+@_register_dataframe_method
 def chi2_independence(data, x, y, correction=True):
     """
     Chi-squared independence tests between two categorical variables.
@@ -148,9 +149,9 @@ def chi2_independence(data, x, y, correction=True):
     expected = pd.DataFrame(expected_freq(observed), index=observed.index, columns=observed.columns)
 
     # All count frequencies should be at least 5
-    for df, name in zip([observed, expected], ["observed", "expected"]):
+    for df, name in zip([observed, expected], ["observed", "expected"], strict=True):
         if (df < 5).any(axis=None):
-            warnings.warn(f"Low count on {name} frequencies.")
+            warnings.warn(f"Low count on {name} frequencies.", stacklevel=2)
 
     dof = float(expected.size - sum(expected.shape) + expected.ndim - 1)
 
@@ -198,6 +199,7 @@ def chi2_independence(data, x, y, correction=True):
     return expected, observed, _postprocess_dataframe(pd.DataFrame(stats))
 
 
+@_register_dataframe_method
 def chi2_mcnemar(data, x, y, correction=True):
     """
     Performs the exact and approximated versions of McNemar's test.
@@ -371,13 +373,14 @@ def _dichotomize_series(data, column):
             elif lower in ("y", "yes", "present", "true", "t", "positive", "p"):
                 return 1
         raise ValueError(
-            "Invalid value to build a 2x2 contingency table on column {}: {}".format(column, elem)
+            f"Invalid value to build a 2x2 contingency table on column {column}: {elem}"
         )
 
     # Convert each unique value only once
     return series.map({elem: convert_elem(elem) for elem in series.unique()})
 
 
+@_register_dataframe_method
 def dichotomous_crosstab(data, x, y):
     """
     Generates a 2x2 contingency table from a :py:class:`pandas.DataFrame` that

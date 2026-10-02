@@ -78,7 +78,8 @@ class TestDistribution(TestCase):
                 "variable": [5, 6, 8, 9, 5, 5, 2, 3, 4, 5, np.nan, 8],
             }
         )
-        stats = normality(df_small, dv="variable", group="group")
+        with pytest.warns(UserWarning, match="less than 4 valid samples"):
+            stats = normality(df_small, dv="variable", group="group")
         assert np.isnan(stats.loc[[1, 3], "pval"]).all()
         assert not np.isnan(stats.loc[[0, 2], "pval"]).all()
         assert (~stats.loc[[1, 3], "normal"]).all()

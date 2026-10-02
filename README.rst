@@ -81,16 +81,17 @@ The main dependencies of Pingouin are:
 * `NumPy <https://numpy.org/>`_ >= 2.2.2
 * `SciPy <https://www.scipy.org/>`_ >= 1.15.0
 * `Pandas <https://pandas.pydata.org/>`_ >= 2.3.0
-* `Pandas-flavor <https://github.com/Zsailer/pandas_flavor>`_
-* `Statsmodels <https://www.statsmodels.org/>`_ >= 0.14.5
 * `Matplotlib <https://matplotlib.org/>`_ >= 3.10.1
 * `Seaborn <https://seaborn.pydata.org/>`_ >= 0.13.2
 * `Scikit-learn <https://scikit-learn.org/>`_ >= 1.6.1
 * `Tabulate <https://github.com/astanin/python-tabulate>`_
 
-Some functions additionally require:
+Some functions additionally require the following optional dependencies, which can be installed
+with ``pip install "pingouin[extras]"``:
 
-* `Mpmath <http://mpmath.org/>`_
+* `Statsmodels <https://www.statsmodels.org/>`_ >= 0.14.5: ``ancova``, ``rm_corr`` and
+  ``anova`` with unbalanced or N-way designs
+* `Mpmath <http://mpmath.org/>`_: one-sided ``bayesfactor_pearson``
 
 Pingouin is a Python 3 package and is currently tested for Python 3.11+.
 
@@ -138,10 +139,7 @@ To build and install from source, clone this repository and install in editable 
 Quick start
 ============
 
-Click on the link below and navigate to the notebooks/ folder to run a collection of interactive Jupyter notebooks showing the main functionalities of Pingouin. No need to install Pingouin beforehand, the notebooks run in a Binder environment.
-
-.. image:: https://mybinder.org/badge.svg
-    :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/main
+The `notebooks/ <https://github.com/raphaelvallat/pingouin/tree/main/notebooks>`_ folder contains a collection of Jupyter notebooks showing the main functionalities of Pingouin.
 
 10 minutes to Pingouin
 ----------------------

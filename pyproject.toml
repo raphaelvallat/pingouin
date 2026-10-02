@@ -6,7 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "pingouin"
 description = "Pingouin: statistical package for Python"
 readme = "README.rst"
-license = {text = "GPL-3.0"}
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
 authors = [
     {name = "Raphael Vallat", email = "raphaelvallat9@gmail.com"},
 ]
@@ -16,8 +17,10 @@ maintainers = [
 classifiers = [
     "Intended Audience :: Science/Research",
     "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
     "Operating System :: Unix",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -30,28 +33,28 @@ dependencies = [
     "matplotlib>=3.10.1",
     "numpy>=2.2.2",
     "pandas>=2.3.0",
-    "pandas_flavor",
     "scikit-learn>=1.6.1",
     "scipy>=1.15.0",
     "seaborn>=0.13.2",
-    "statsmodels>=0.14.5",
     "tabulate",
 ]
 
 [project.optional-dependencies]
 extras = [
     "mpmath",
+    "statsmodels>=0.14.5",
 ]
 
 [dependency-groups]
 dev = [
     "pre-commit",
-    "ruff>=0.15.0",
+    "ruff==0.15.8",  # Keep in sync with .pre-commit-config.yaml and .github/workflows/ruff.yml
     "pytest>=6",
     "pytest-cov",
     # Ensure coverage is new enough for `source_pkgs`.
     "coverage[toml]>=5.3",
     "mpmath",
+    "statsmodels>=0.14.5",
 ]
 docs = [
     "sphinx>7.0.0",
@@ -65,12 +68,11 @@ docs = [
 
 [project.urls]
 Homepage = "https://pingouin-stats.org/index.html"
-Downloads = "https://github.com/raphaelvallat/pingouin/"
+Source = "https://github.com/raphaelvallat/pingouin/"
 Issues = "https://github.com/raphaelvallat/pingouin/issues"
-Changelog = "https://pingouin-stats.org/build/html/changelog.html"
+Changelog = "https://pingouin-stats.org/changelog.html"
 
 [tool.setuptools]
-py-modules = ["pingouin"]
 include-package-data = true
 
 [tool.setuptools.package-data]
@@ -90,24 +92,31 @@ minversion = "6.0"
 addopts = "--showlocals --durations=10"
 doctest_optionflags= ["NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL", "NUMBER"]
 filterwarnings = [
-    "ignore::UserWarning",
-    "ignore::RuntimeWarning",
-    "ignore::FutureWarning",
+    # Unexpected warnings raised by pingouin are errors: expected warnings must be checked with
+    # pytest.warns. Pingouin warns with stacklevel=2, so the warnings of the public functions are
+    # attributed to the test modules, and those of the internal functions to pingouin.
+    "error::UserWarning:(pingouin|tests).*",
+    "error::RuntimeWarning:(pingouin|tests).*",
+    # Deprecations raised by pingouin, or by a dependency called from pingouin
+    "error::FutureWarning:(pingouin|tests).*",
+    "error::DeprecationWarning:(pingouin|tests).*",
+    # Raised by every call to corr(method="skipped"), including the docstring examples
+    "ignore:The skipped correlation relies:UserWarning",
+    # seaborn's boxplot with matplotlib >= 3.10
+    "ignore:vert. bool will be deprecated:PendingDeprecationWarning",
 ]
-markers = ["slow"]
 
 [tool.coverage.run]
 branch = true
 omit = [
-    "*/setup.py",
-    "*/examples/*",
     "*/tests/*",
     "*/datasets/*",
 ]
 source_pkgs = ["pingouin"]
 
 [tool.coverage.paths]
-source = ["src"]
+# CI tests the installed package: map site-packages back to src
+source = ["src", "*/site-packages"]
 
 [tool.coverage.report]
 show_missing = true
@@ -141,8 +150,8 @@ select = [
     "NPY", # numpy
     "W",
     "I",
-    #"PD", # pandas imports
-    #"UP" # Upgrade pythonv versions
+    "B",  # flake8-bugbear
+    "UP",  # pyupgrade
 ]
 
 ignore = [

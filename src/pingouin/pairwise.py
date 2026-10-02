@@ -5,18 +5,22 @@ from itertools import combinations, product
 
 import numpy as np
 import pandas as pd
-import pandas_flavor as pf
 from scipy.stats import studentized_range
 
 from .config import _no_rounding
+from .correlation import corr, partial_corr
 from .effsize import compute_effsize
 from .multicomp import _multicomp_triu, multicomp
+from .nonparametric import mwu, wilcoxon
+from .parametric import ttest
 from .utils import (
+    _DEFAULT_PVAL_STARS,
     _check_alternative,
     _check_dataframe,
     _flatten_list,
     _format_pairwise_matrix,
     _postprocess_dataframe,
+    _register_dataframe_method,
 )
 
 __all__ = [
@@ -35,8 +39,6 @@ def _pairwise_test(x, y, paired, parametric, alternative, correction, effsize, r
     Uses :py:func:`pingouin.ttest` if ``parametric``, otherwise :py:func:`pingouin.wilcoxon` or
     :py:func:`pingouin.mwu` for paired and unpaired samples, respectively.
     """
-    from .nonparametric import mwu, wilcoxon
-    from .parametric import ttest
 
     row = {"alternative": alternative}
     if return_desc:
@@ -85,14 +87,16 @@ def _group_arrays(data, by, dv):
     return {k: v.to_numpy(dtype=np.float64) for k, v in grp}
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def pairwise_ttests(*args, **kwargs):
     """This function has been deprecated . Use :py:func:`pingouin.pairwise_tests` instead."""
-    warnings.warn("pairwise_ttests is deprecated, use pairwise_tests instead.", UserWarning)
+    warnings.warn(
+        "pairwise_ttests is deprecated, use pairwise_tests instead.", UserWarning, stacklevel=2
+    )
     return pairwise_tests(*args, **kwargs)
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def pairwise_tests(
     data=None,
     dv=None,
@@ -518,14 +522,14 @@ def pairwise_tests(
     return _postprocess_dataframe(stats)
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def ptests(
     self,
     paired=False,
     decimals=3,
     padjust=None,
     stars=True,
-    pval_stars={0.001: "***", 0.01: "**", 0.05: "*"},
+    pval_stars=None,
     **kwargs,
 ):
     """
@@ -558,8 +562,8 @@ def ptests(
     stars : boolean
         If True, only significant p-values are displayed as stars using the pre-defined thresholds
         of ``pval_stars``. If False, all the raw p-values are displayed.
-    pval_stars : dict
-        Significance thresholds. Default is 3 stars for p-values <0.001, 2 stars for
+    pval_stars : dict or None
+        Significance thresholds. Default (None) is 3 stars for p-values <0.001, 2 stars for
         p-values <0.01 and 1 star for p-values <0.05.
     **kwargs : optional
         Optional argument(s) passed to the lower-level scipy functions, i.e.
@@ -639,6 +643,8 @@ def ptests(
     """
     from scipy.stats import ttest_ind, ttest_rel
 
+    if pval_stars is None:
+        pval_stars = _DEFAULT_PVAL_STARS
     assert isinstance(pval_stars, dict), "pval_stars must be a dictionary."
     assert isinstance(decimals, int), "decimals must be an int."
     if "axis" in kwargs or "nan_policy" in kwargs:
@@ -672,7 +678,7 @@ def ptests(
     return _format_pairwise_matrix(mat, mat_upper, decimals, stars, pval_stars=pval_stars)
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     """Pairwise Tukey-HSD post-hoc test.
 
@@ -809,7 +815,7 @@ def pairwise_tukey(data=None, dv=None, between=None, effsize="hedges"):
     return _postprocess_dataframe(stats[[*stats.columns.drop(effsize), effsize]])
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def pairwise_gameshowell(data=None, dv=None, between=None, effsize="hedges"):
     """Pairwise Games-Howell post-hoc test.
 
@@ -963,14 +969,14 @@ def _pairwise_between(data, dv, between, effsize):
             "diff": gmeans[g1] - gmeans[g2],
             effsize: [
                 compute_effsize(groups[labels[a]], groups[labels[b]], paired=False, eftype=effsize)
-                for a, b in zip(g1, g2)
+                for a, b in zip(g1, g2, strict=True)
             ],
         }
     )
     return stats, n, gvars
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def pairwise_corr(
     data,
     columns=None,
@@ -1168,7 +1174,6 @@ def pairwise_corr(
     Openness           -0.01        -          ***
     Extraversion       -0.35    0.267            -
     """
-    from pingouin.correlation import corr, partial_corr
 
     # Check arguments
     _check_alternative(alternative)

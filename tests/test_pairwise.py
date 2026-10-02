@@ -263,7 +263,7 @@ class TestPairwise(TestCase):
         )
 
         # This only impacts the between-subject contrast
-        np.array_equal(
+        assert np.array_equal(
             (pt1["T"] == pt2["T"]).astype(int),
             [1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         )
@@ -292,7 +292,7 @@ class TestPairwise(TestCase):
         assert np.array_equal(pt.loc[:3, "p_unc"] < 0.05, [False, False, False, True])
 
         # However, the Bayes Factor of the simple main effects are the same...!
-        np.array_equal(pt.loc[:3, "BF10"].astype(float), [0.374, 0.533, 0.711, 2.287])
+        assert np.array_equal(pt.loc[:3, "BF10"].astype(float), [0.374, 0.533, 0.711, 2.287])
 
         # Using the Welch method (all df should be non-integer)
         pt_c = df_aov2.pairwise_tests(
@@ -724,7 +724,8 @@ class TestPairwise(TestCase):
         pairwise_corr(data, columns=["Neuroticism", "Gender"], method="shepherd")
         pairwise_corr(data, columns=["Neuroticism", "Extraversion", "Gender"])
         pairwise_corr(data, columns=["Neuroticism"])
-        pairwise_corr(data, columns="Neuroticism", method="skipped")
+        with pytest.warns(UserWarning, match="skipped correlation relies"):
+            pairwise_corr(data, columns="Neuroticism", method="skipped")
         pairwise_corr(data, columns=[["Neuroticism"]], method="spearman")
         pairwise_corr(data, columns=[["Neuroticism"], None], method="percbend")
         pairwise_corr(data, columns=[["Neuroticism", "Gender"], ["Age"]])

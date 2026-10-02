@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from pingouin import read_dataset
-from pingouin.correlation import bicor, corr, distance_corr, partial_corr, rm_corr, skipped
+from pingouin.correlation import _bicor, _skipped, corr, distance_corr, partial_corr, rm_corr
 
 
 class TestCorrelation(TestCase):
@@ -59,7 +59,8 @@ class TestCorrelation(TestCase):
         assert np.isclose(stats.loc["kendall", "r"], 0.3517241)
         # Skipped correlation -- compare with robust corr toolbox
         # https://sourceforge.net/projects/robustcorrtool/
-        stats = corr(x, y, method="skipped")
+        with pytest.warns(UserWarning, match="skipped correlation relies"):
+            stats = corr(x, y, method="skipped")
         assert round(stats.loc["skipped", "r"], 4) == 0.5123
         assert stats.loc["skipped", "outliers"] == 2
         _ = corr(x2, y2, method="skipped")
@@ -76,7 +77,7 @@ class TestCorrelation(TestCase):
         assert np.isclose(stats.loc["shepherd", "r"], 0.5123153)
         assert np.isclose(stats.loc["shepherd", "p_val"], 0.005316)
         assert stats.loc["shepherd", "outliers"] == 2
-        _, _, outliers = skipped(x, y, corr_type="pearson")
+        _, _, outliers = _skipped(x, y, corr_type="pearson")
         assert outliers.size == x.size
         assert stats.loc["shepherd", "n"] == 30
         # Percbend -- compare with robust corr toolbox
@@ -143,11 +144,12 @@ class TestCorrelation(TestCase):
         # When one column is a constant, the correlation is not defined
         # and Pingouin return a DataFrame full of NaN, except for ``n``
         x, y = [1, 1, 1], [1, 2, 3]
-        stats = corr(x, y)
+        with pytest.warns(RuntimeWarning, match="input array is constant"):
+            stats = corr(x, y)
         assert stats.at["pearson", "n"]
         assert np.isnan(stats.at["pearson", "r"])
         # Biweight midcorrelation returns NaN when MAD is not defined
-        assert np.isnan(bicor(np.array([1, 1, 1, 1, 0, 1]), np.arange(6))[0])
+        assert np.isnan(_bicor(np.array([1, 1, 1, 1, 0, 1]), np.arange(6))[0])
 
     def test_partial_corr(self):
         """Test function partial_corr.
@@ -342,7 +344,7 @@ class TestCorrelation(TestCase):
         for method, (padjust, sm_method), data in configs:
             corrfunc = pearsonr if method == "pearson" else spearmanr
             raw = []
-            for a, b in zip(i, j):
+            for a, b in zip(i, j, strict=True):
                 pair = data.iloc[:, [a, b]].dropna()
                 raw.append(corrfunc(pair.iloc[:, 0], pair.iloc[:, 1])[1])
             raw = np.asarray(raw)

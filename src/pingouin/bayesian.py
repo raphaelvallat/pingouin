@@ -7,7 +7,7 @@ from math import exp, lgamma, log, pi
 import numpy as np
 from scipy.integrate import quad
 
-from .utils import _check_alternative, _is_mpmath_installed
+from .utils import _check_alternative, _is_installed
 
 __all__ = ["bayesfactor_ttest", "bayesfactor_pearson", "bayesfactor_binom"]
 
@@ -255,7 +255,8 @@ def bayesfactor_pearson(r, n, alternative="two-sided", method="ly", kappa=1.0):
     if alternative != "two-sided" and method == "wetzels":
         warnings.warn(
             "One-sided Bayes Factor are not supported by the "
-            "Wetzels's method. Switching to method='ly'."
+            "Wetzels's method. Switching to method='ly'.",
+            stacklevel=2,
         )
         method = "ly"
 
@@ -293,7 +294,7 @@ def bayesfactor_pearson(r, n, alternative="two-sided", method="ly", kappa=1.0):
         # The two-sided bf10 is also computed in mpmath to avoid catastrophic cancellation
         # when bf10pos or bf10neg is much smaller than bf10 (e.g. large |r|
         # with the "wrong" sign). See https://github.com/raphaelvallat/pingouin/issues/427
-        _is_mpmath_installed(raise_error=True)
+        _is_installed("mpmath", raise_error=True)
         import mpmath
 
         mp_k = mpmath.mpf(kappa)

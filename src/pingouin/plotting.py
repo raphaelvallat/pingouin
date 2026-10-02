@@ -5,21 +5,15 @@ Authors
 - Nicolas Legrand <legrand@cyceron.fr>
 """
 
-import matplotlib.pyplot as plt
-import matplotlib.transforms as transforms
 import numpy as np
 import pandas as pd
-import seaborn as sns
-from matplotlib.cbook import normalize_kwargs
-from matplotlib.lines import Line2D
-from matplotlib.patches import Patch
 from scipy import stats
 
+from .circular import circ_mean, circ_r
+from .correlation import _check_rm_corr_data
 from .utils import _check_dataframe, remove_na
 
-# Set default Seaborn preferences (disabled Pingouin >= 0.3.4)
-# See https://github.com/raphaelvallat/pingouin/issues/85
-# sns.set(style='ticks', context='notebook')
+# matplotlib and seaborn are imported inside the plotting functions, to keep `import pingouin` fast
 
 __all__ = [
     "plot_blandaltman",
@@ -136,11 +130,15 @@ def plot_blandaltman(
 
     .. plot::
 
+        >>> import matplotlib.pyplot as plt
         >>> import pingouin as pg
         >>> df = pg.read_dataset("blandaltman")
         >>> ax = pg.plot_blandaltman(df["A"], df["B"])
         >>> plt.tight_layout()
     """
+    import matplotlib.pyplot as plt
+    import matplotlib.transforms as transforms
+
     # Safety check
     assert xaxis in ["mean", "x", "y"]
     # Get names before converting to NumPy array
@@ -211,7 +209,7 @@ def plot_blandaltman(
         trans = transforms.blended_transform_factory(ax.transAxes, ax.transData)
         xloc = 0.98
         ax.text(xloc, mean_diff + offset, "Mean", ha="right", va="bottom", transform=trans)
-        ax.text(xloc, mean_diff - offset, "%.2f" % mean_diff, ha="right", va="top", transform=trans)
+        ax.text(xloc, mean_diff - offset, f"{mean_diff:.2f}", ha="right", va="top", transform=trans)
         ax.text(
             xloc,
             high + offset,
@@ -220,7 +218,7 @@ def plot_blandaltman(
             va="bottom",
             transform=trans,
         )
-        ax.text(xloc, high - offset, "%.2f" % high, ha="right", va="top", transform=trans)
+        ax.text(xloc, high - offset, f"{high:.2f}", ha="right", va="top", transform=trans)
         ax.text(
             xloc,
             low - offset,
@@ -229,7 +227,7 @@ def plot_blandaltman(
             va="top",
             transform=trans,
         )
-        ax.text(xloc, low + offset, "%.2f" % low, ha="right", va="bottom", transform=trans)
+        ax.text(xloc, low + offset, f"{low:.2f}", ha="right", va="bottom", transform=trans)
 
     # Confidence intervals for mean bias and limits of agreement
     if confidence is not None:
@@ -410,6 +408,10 @@ def qqplot(
         >>> sns.set_style("darkgrid")
         >>> ax = pg.qqplot(x, dist="norm", sparams=(mean, std))
     """
+    import matplotlib.pyplot as plt
+    from matplotlib.cbook import normalize_kwargs
+    from matplotlib.lines import Line2D
+
     # Update default kwargs with specified inputs
     _scatter_kwargs = {"marker": "o", "color": "blue"}
     _scatter_kwargs.update(kwargs)
@@ -435,7 +437,7 @@ def qqplot(
     if len(sparams) < dist.numargs:
         raise ValueError(
             "The following sparams are required for this "
-            "distribution: %s. See scipy.stats.%s for details." % (dist.shapes, dist.name)
+            f"distribution: {dist.shapes}. See scipy.stats.{dist.name} for details."
         )
 
     # Extract quantiles and regression
@@ -613,6 +615,9 @@ def plot_paired(
         ...     data=df, dv="Scores", within="Time", subject="Subject", boxplot_in_front=True
         ... )
     """
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+
     if colors is None:
         colors = ["green", "grey", "indianred"]
     # Update default kwargs with specified inputs
@@ -680,7 +685,7 @@ def plot_paired(
         # Line and scatter colors depending on subject dv trend
         _colors = np.where(y1 < y2, colors[0], np.where(y1 > y2, colors[2], colors[1]))
         # Line and scatter colors as hue-indexed dictionary
-        _colors = {subj: clr for subj, clr in zip(data_now[subject].unique(), _colors)}
+        _colors = {subj: clr for subj, clr in zip(data_now[subject].unique(), _colors, strict=True)}
         # Plot individual lines using Seaborn
         sns.lineplot(
             data=data_now,
@@ -834,14 +839,14 @@ def plot_rm_corr(
         ...     kwargs_facetgrid=dict(height=4.5, aspect=1.5, palette="Spectral"),
         ... )
     """
+    import seaborn as sns
+
     _kwargs_facetgrid = {"height": 4, "aspect": 1}
     _kwargs_facetgrid.update(kwargs_facetgrid or {})
     _kwargs_line = {"ls": "solid"}
     _kwargs_line.update(kwargs_line or {})
     _kwargs_scatter = {"marker": "o"}
     _kwargs_scatter.update(kwargs_scatter or {})
-
-    from .correlation import _check_rm_corr_data
 
     data = _check_rm_corr_data(data, x, y, subject)
 
@@ -938,9 +943,10 @@ def plot_circmean(
         ...     [0.8, 1.5, 3.14, 5.2, 6.1, 2.8, 2.6, 3.2], kwargs_markers=dict(marker="None")
         ... )
     """
-    from matplotlib.patches import Circle
-
-    from .circular import circ_mean, circ_r
+    import matplotlib.pyplot as plt
+    from matplotlib.cbook import normalize_kwargs
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Circle, Patch
 
     # Sanity checks
     angles = np.asarray(angles)

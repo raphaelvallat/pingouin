@@ -8,6 +8,7 @@ Authors
 from unittest import TestCase
 
 import numpy as np
+import pandas as pd
 
 import pingouin as pg
 
@@ -130,4 +131,50 @@ class TestParametric(TestCase):
         med = data.mediation_analysis(x="X", m="M", y="Y", seed=42, n_boot=500)
         np.testing.assert_array_equal(
             med.loc[:, "coef"].round(4).to_numpy(), [0.5610, 0.6542, 0.3961, 0.0396, 0.3565]
+        )
+
+    def test_registered_methods(self):
+        """Test that the data-first functions are registered as DataFrame methods."""
+        methods = [
+            "anova",
+            "ancova",
+            "box_m",
+            "chi2_independence",
+            "chi2_mcnemar",
+            "cochran",
+            "cronbach_alpha",
+            "dichotomous_crosstab",
+            "epsilon",
+            "friedman",
+            "homoscedasticity",
+            "intraclass_corr",
+            "kruskal",
+            "linear_regression",
+            "logistic_regression",
+            "mediation_analysis",
+            "mixed_anova",
+            "normality",
+            "pairwise_corr",
+            "pairwise_gameshowell",
+            "pairwise_tests",
+            "pairwise_tukey",
+            "partial_corr",
+            "pcorr",
+            "ptests",
+            "rcorr",
+            "rm_anova",
+            "rm_corr",
+            "sphericity",
+            "welch_anova",
+        ]
+        for name in methods:
+            assert getattr(pd.DataFrame, name) is getattr(pg, name), name
+        # The DataFrame is passed as the first argument
+        pd.testing.assert_frame_equal(
+            df.kruskal(dv="Scores", between="Group"),
+            pg.kruskal(data=df, dv="Scores", between="Group"),
+        )
+        pd.testing.assert_frame_equal(
+            df.normality(dv="Scores", group="Group"),
+            pg.normality(df, dv="Scores", group="Group"),
         )

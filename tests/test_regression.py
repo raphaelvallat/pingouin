@@ -338,12 +338,12 @@ class TestRegression(TestCase):
         logistic_regression(df_nan[["X", "M"]], df_nan["Ybin"], remove_na=True)
 
         # Test **kwargs
-        logistic_regression(X, y, solver="sag", C=10, max_iter=10000, penalty="l2")
+        logistic_regression(X, y, solver="sag", C=10, max_iter=10000)
 
         # Test regularization coefficients are strictly closer to 0 than
         # unregularized
         c = logistic_regression(df["X"], df["Ybin"], coef_only=True)
-        c_reg = logistic_regression(df["X"], df["Ybin"], coef_only=True, penalty="l2")
+        c_reg = logistic_regression(df["X"], df["Ybin"], coef_only=True, C=1.0)
         assert all(np.abs(c - 0) > np.abs(c_reg - 0))
 
         # With one column that has only one unique value
@@ -538,7 +538,8 @@ def test_linear_regression_saturated_design():
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)
         square = linear_regression(rng.normal(size=(4, 3)), y)
-        wide = linear_regression(rng.normal(size=(4, 5)), y)
+        with pytest.warns(UserWarning, match="rank deficient"):
+            wide = linear_regression(rng.normal(size=(4, 5)), y)
     assert square.shape[0] == 4
     for res in (square, wide):
         assert not np.isfinite(res["se"]).any()
