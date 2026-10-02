@@ -486,9 +486,6 @@ class TestRegression(TestCase):
         assert _pval_from_bootci(bt2, 0.9) < 0.10
         assert _pval_from_bootci(bt3, 0.9) < _pval_from_bootci(bt2, 0.9)
 
-    def test_vif(self):
-        pass
-
 
 @pytest.mark.parametrize("scale", [1.0, 1e-8, 1e8])
 @pytest.mark.parametrize("weighted", [False, True])
@@ -752,6 +749,13 @@ def test_vif_inv_corr_matrix_matches_statsmodels(as_numpy):
         assert_almost_equal(expected, result, decimal=5)
     else:
         assert_almost_equal(expected, result.to_numpy().ravel(), decimal=5)
+
+
+def test_vif_matches_register_method():
+    """Test that vif() can be called as a method by a pandas DataFrame."""
+    result1 = vif(tips)
+    result2 = tips.vif()
+    assert_frame_equal(result1, result2)
 
 
 def test_vif_no_categorical_columns_output():
