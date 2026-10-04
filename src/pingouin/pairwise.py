@@ -1026,6 +1026,7 @@ def pairwise_corr(
         * ``'percbend'``: Percentage bend correlation (robust)
         * ``'shepherd'``: Shepherd's pi correlation (robust)
         * ``'skipped'``: Skipped correlation (robust)
+        * ``'polychoric'``: Polychoric correlation (for ordinal data)
     padjust : string
         Method used for testing and adjustment of pvalues.
 

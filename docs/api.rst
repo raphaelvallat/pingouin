@@ -77,6 +77,7 @@ Correlation and regression
     pairwise_corr
     partial_corr
     pcorr
+    polychoric
     rcorr
     distance_corr
     rm_corr

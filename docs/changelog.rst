@@ -3,6 +3,13 @@
 What's new
 ##########
 
+v0.8.0 (dev)
+------------
+
+**New features**
+
+- Added :py:func:`pingouin.polychoric` to compute the polychoric correlation between two ordinal variables (numeric or ordered :py:class:`pandas.Categorical`) or from a contingency table, with its standard error, Wald confidence interval and p-value, and the estimated thresholds. The tetrachoric correlation is the special case of two binary variables. The two-step maximum likelihood estimator has been validated against the R packages polycor and psych. The polychoric correlation is also available with ``method="polychoric"`` in :py:func:`pingouin.corr`, :py:func:`pingouin.pairwise_corr` and :py:func:`pingouin.rcorr`. (`PR554 <https://github.com/raphaelvallat/pingouin/pull/554>`_)
+
 v0.7.0 (September 2026)
 -----------------------
 

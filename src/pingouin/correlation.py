@@ -4,8 +4,10 @@ import warnings
 import numpy as np
 import pandas as pd
 import pandas_flavor as pf
+from scipy.optimize import minimize_scalar
 from scipy.spatial.distance import pdist, squareform
-from scipy.stats import kendalltau, pearsonr, spearmanr
+from scipy.special import owens_t
+from scipy.stats import kendalltau, norm, pearsonr, spearmanr
 
 from .bayesian import bayesfactor_pearson
 from .config import _no_rounding
@@ -20,7 +22,7 @@ from .utils import (
     remove_na,
 )
 
-__all__ = ["corr", "partial_corr", "pcorr", "rcorr", "rm_corr", "distance_corr"]
+__all__ = ["corr", "polychoric", "partial_corr", "pcorr", "rcorr", "rm_corr", "distance_corr"]
 
 
 def _correl_pvalue(r, n, k=0, alternative="two-sided"):
@@ -376,6 +378,200 @@ def bicor(x, y, c=9):
     return r, pval
 
 
+def _ordinal_codes(v, name="x"):
+    """Convert an ordinal variable to an array of floats that sort in the order of the categories.
+
+    Numeric (and boolean) variables are returned as floats. Ordered :py:class:`pandas.Categorical`
+    are converted to their integer codes, which respects the order of the categories. Missing
+    values are returned as NaN.
+    """
+    if not isinstance(v, (pd.Series, pd.Categorical, pd.CategoricalIndex)):
+        v = np.asarray(v)
+        assert v.ndim == 1, "x and y must be 1D array."
+    v = pd.Series(v)
+    if isinstance(v.dtype, pd.CategoricalDtype):
+        if not v.cat.ordered:
+            raise ValueError(
+                f"{name} is an unordered Categorical. The polychoric correlation requires ordinal "
+                "variables: please use an ordered Categorical or numeric values."
+            )
+        codes = v.cat.codes.to_numpy(dtype=float)
+        codes[codes < 0] = np.nan
+        return codes
+    if not pd.api.types.is_numeric_dtype(v.dtype) or pd.api.types.is_complex_dtype(v.dtype):
+        raise ValueError(
+            f"{name} must be numeric or an ordered Categorical to compute a polychoric correlation."
+        )
+    return v.to_numpy(dtype=float, na_value=np.nan)
+
+
+def _ordinal_crosstab(x, y):
+    """Contingency table of two arrays of ordinal codes, after pairwise removal of missing values.
+
+    Only the observed categories are included, in increasing order.
+    """
+    x, y = remove_na(x, y, paired=True)
+    _, ix = np.unique(x, return_inverse=True)
+    _, iy = np.unique(y, return_inverse=True)
+    if x.size == 0:
+        return np.zeros((0, 0))
+    table = np.zeros((ix.max() + 1, iy.max() + 1))
+    np.add.at(table, (ix, iy), 1)
+    return table
+
+
+def _bvn_cdf(h, k, rho):
+    """Cumulative distribution function of the standard bivariate normal distribution.
+
+    This uses the closed-form expression based on Owen's T function (Owen 1956), which is
+    accurate to machine precision. By contrast, the accuracy and reproducibility of
+    :py:func:`scipy.stats.multivariate_normal.cdf` depend on the version of SciPy (e.g. randomized
+    integration with errors up to 1e-5 in SciPy 1.16).
+    """
+    h, k = h + 0.0, k + 0.0  # Avoid negative zeros
+    omr = np.sqrt(1 - rho**2)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        cdf = (
+            0.5 * (norm.cdf(h) + norm.cdf(k))
+            - owens_t(h, (k - rho * h) / (h * omr))
+            - owens_t(k, (h - rho * k) / (k * omr))
+            - np.where((h * k > 0) | ((h * k == 0) & (h + k >= 0)), 0, 0.5)
+        )
+    return np.where((h == 0) & (k == 0), 0.25 + np.arcsin(rho) / (2 * np.pi), cdf)
+
+
+def _polychoric_probs(a, b, rho, deriv=False):
+    """Cell probabilities of a contingency table under a standard bivariate normal distribution.
+
+    ``a`` and ``b`` are the finite thresholds of the rows and columns, and ``rho`` is the latent
+    correlation. If ``deriv`` is True, the first and second derivatives of the probabilities with
+    respect to ``rho`` are also returned.
+    """
+
+    def pad(inner):
+        # Values on the grid of thresholds, padded with zeros for the -inf and +inf thresholds
+        grid = np.zeros((a.size + 2, b.size + 2))
+        grid[1:-1, 1:-1] = np.reshape(inner, (a.size, b.size))
+        return grid
+
+    def diff(grid):
+        # Mass of each rectangle of the grid
+        return grid[1:, 1:] - grid[:-1, 1:] - grid[1:, :-1] + grid[:-1, :-1]
+
+    aa, bb = np.repeat(a, b.size), np.tile(b, a.size)
+    cdf = pad(_bvn_cdf(aa, bb, rho))
+    # The bivariate CDF reduces to the univariate CDF when the other threshold is +inf
+    cdf[1:-1, -1], cdf[-1, 1:-1], cdf[-1, -1] = norm.cdf(a), norm.cdf(b), 1
+    probs = diff(cdf)
+    if not deriv:
+        return probs
+    # The derivative of the bivariate CDF with respect to rho is the bivariate density
+    omr = 1 - rho**2
+    pdf = np.exp(-(aa**2 - 2 * rho * aa * bb + bb**2) / (2 * omr)) / (2 * np.pi * np.sqrt(omr))
+    dpdf = pdf * (rho / omr + (aa * bb * (1 + rho**2) - rho * (aa**2 + bb**2)) / omr**2)
+    return probs, diff(pad(pdf)), diff(pad(dpdf))
+
+
+def _polychoric(table, correction=None):
+    """Two-step maximum likelihood estimation of the polychoric correlation.
+
+    This is the private estimator used by :py:func:`pingouin.polychoric`, :py:func:`pingouin.corr`
+    and :py:func:`pingouin.rcorr`.
+
+    Parameters
+    ----------
+    table : :py:class:`numpy.ndarray`
+        Contingency table, with the categories of both variables in increasing order.
+    correction : None, bool or float
+        Value used to replace the empty cells of the table. True is the same as 0.5.
+
+    Returns
+    -------
+    r : float
+        Polychoric correlation.
+    se : float
+        Standard error of ``r``, from the observed information.
+    n : float
+        Sample size (before the correction for empty cells).
+    tau_x, tau_y : :py:class:`numpy.ndarray`
+        Thresholds of the rows and columns.
+    """
+    table = np.asarray(table, dtype=float)
+    # Empty categories carry no information and have no identifiable threshold
+    table = table[table.sum(axis=1) > 0][:, table.sum(axis=0) > 0]
+    n = table.sum()
+    if table.shape[0] < 2 or table.shape[1] < 2:
+        warnings.warn(
+            "x and y must have at least two non-empty categories to compute a polychoric "
+            "correlation. Returning NaN."
+        )
+        return np.nan, np.nan, n, np.array([]), np.array([])
+    if correction is True:
+        correction = 0.5
+    if correction:
+        table = np.where(table == 0, correction, table)
+
+    # Step 1: thresholds from the marginal cumulative proportions
+    a = norm.ppf(np.cumsum(table.sum(axis=1))[:-1] / table.sum())
+    b = norm.ppf(np.cumsum(table.sum(axis=0))[:-1] / table.sum())
+
+    # Step 2: maximum likelihood estimation of rho, holding the thresholds constant
+    def negloglik(rho):
+        return -np.sum(table * np.log(np.maximum(_polychoric_probs(a, b, rho), 1e-300)))
+
+    # A coarse grid brackets the maximum, which is then refined with Brent's method
+    rho_max = 1 - 1e-6
+    grid = np.linspace(-0.95, 0.95, 11)
+    idx = np.argmin([negloglik(rho) for rho in grid])
+    bounds = (
+        grid[idx - 1] if idx > 0 else -rho_max,
+        grid[idx + 1] if idx < grid.size - 1 else rho_max,
+    )
+    opt = minimize_scalar(negloglik, bounds=bounds, method="bounded", options={"xatol": 1e-9})
+    r = opt.x
+
+    # The likelihood is monotone in rho with a perfect association, or with an empty cell in a
+    # 2x2 table. It can be numerically flat well before |rho| = 1 in sparse tables, so the
+    # optimum is also compared to the likelihood at the bounds.
+    nll_bounds = [negloglik(-rho_max), negloglik(rho_max)]
+    if min(nll_bounds) <= opt.fun + 1e-9 * n or abs(r) > 0.9999:
+        r = float(np.sign(r)) if abs(r) > 0.9999 else [-1.0, 1.0][np.argmin(nll_bounds)]
+        warnings.warn(
+            "The likelihood is maximised at the boundary of the parameter space. The polychoric "
+            f"correlation is set to {r:.0f} and its standard error is not defined. Consider using "
+            "a correction for empty cells (e.g. `correction=0.5`)."
+        )
+        return r, np.nan, n, a, b
+
+    # Newton steps on the analytical score, and standard error from the observed information
+    for _ in range(6):
+        p, dp, d2p = _polychoric_probs(a, b, r, deriv=True)
+        p = np.maximum(p, 1e-300)
+        score = np.sum(table * dp / p)
+        info = -np.sum(table * (d2p / p - (dp / p) ** 2))
+        step = score / info if info > 0 else 0
+        if abs(step) < 1e-12 or abs(r + step) > 0.9999:
+            break
+        r += step
+    se = 1 / np.sqrt(info) if info > 0 else np.nan
+    return float(r), float(se), n, a, b
+
+
+def _wald_ci_pval(r, se, alternative="two-sided", confidence=0.95):
+    """Wald confidence interval and p-value of a correlation, from its standard error."""
+    if np.isnan(r) or np.isnan(se):
+        return np.array([np.nan, np.nan]), np.nan
+    z = r / se
+    if alternative == "two-sided":
+        crit = norm.ppf(1 - (1 - confidence) / 2)
+        ci, pval = [r - crit * se, r + crit * se], 2 * norm.sf(abs(z))
+    elif alternative == "greater":
+        ci, pval = [r - norm.ppf(confidence) * se, 1], norm.sf(z)
+    else:  # alternative = "less"
+        ci, pval = [-1, r + norm.ppf(confidence) * se], norm.cdf(z)
+    return np.clip(ci, -1, 1), float(pval)
+
+
 def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
     """(Robust) correlation between two variables.
 
@@ -400,6 +596,8 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
         * ``'percbend'``: Percentage bend correlation (robust)
         * ``'shepherd'``: Shepherd's pi correlation (robust)
         * ``'skipped'``: Skipped correlation (robust)
+        * ``'polychoric'``: Polychoric correlation (for ordinal data, see
+          :py:func:`pingouin.polychoric`)
     **kwargs : optional
         Optional argument(s) passed to the lower-level correlation functions.
 
@@ -413,12 +611,14 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
         * ``'CI95'``: 95% parametric confidence intervals around :math:`r`
         * ``'p_val'``: p-value
         * ``'BF10'``: Bayes Factor of the alternative hypothesis (only for Pearson correlation)
-        * ``'power'``: achieved power of the test with an alpha of 0.05.
+        * ``'power'``: achieved power of the test with an alpha of 0.05 (NaN for the polychoric
+          correlation).
 
     See also
     --------
     pairwise_corr : Pairwise correlation between columns of a pandas DataFrame
     partial_corr : Partial correlation
+    polychoric : Polychoric correlation between two ordinal variables
     rm_corr : Repeated measures correlation
 
     Notes
@@ -478,8 +678,16 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
     skipped correlation is based on the minimum covariance determinant. Note that these two methods
     are significantly slower than the previous ones.
 
+    The polychoric correlation is the correlation between two ordinal variables, assuming that
+    they are discretized versions of two latent variables that follow a bivariate normal
+    distribution. ``x`` and ``y`` must be numeric or ordered :py:class:`pandas.Categorical`. It is
+    estimated by maximum likelihood, see :py:func:`pingouin.polychoric`, which also returns the
+    standard error and the thresholds, and accepts a contingency table.
+
     The confidence intervals for the correlation coefficient are estimated
-    using the Fisher transformation.
+    using the Fisher transformation. The exception is the polychoric correlation, for which the
+    confidence intervals and p-value are based on the Wald statistic, using the standard error of
+    the maximum likelihood estimate. The power is not calculated for the polychoric correlation.
 
     .. important:: Rows with missing values (NaN) are automatically removed.
 
@@ -576,8 +784,18 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
     >>> pg.corr(data["x"], data["y"]).round(3)
               n      r           CI95  p_val   BF10  power
     pearson  30  0.147  [-0.23, 0.48]  0.439  0.302  0.121
+
+    11. Polychoric correlation between two ordinal variables
+
+    >>> x_ord, y_ord = np.digitize(x, [3, 4, 5]), np.digitize(y, [5.5, 6.5])
+    >>> pg.corr(x_ord, y_ord, method="polychoric").round(3)
+                 n      r          CI95  p_val  power
+    polychoric  30  0.571  [0.27, 0.87]    0.0    NaN
     """
     # Safety check
+    if method == "polychoric":
+        # Ordinal variables, which can be ordered Categoricals
+        x, y = _ordinal_codes(x, "x"), _ordinal_codes(y, "y")
     x = np.asarray(x)
     y = np.asarray(y)
     assert x.ndim == y.ndim == 1, "x and y must be 1D array."
@@ -609,6 +827,9 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
         r, pval, outliers = shepherd(x, y, **kwargs)
     elif method == "skipped":
         r, pval, outliers = skipped(x, y, **kwargs)
+    elif method == "polychoric":
+        r, se = _polychoric(_ordinal_crosstab(x, y), **kwargs)[:2]
+        pval = np.nan
     else:
         raise ValueError(f'Method "{method}" not recognized.')
 
@@ -636,7 +857,11 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
     r = np.clip(r, -1, 1)
 
     # Compute the parametric 95% confidence interval and power
-    if abs(r) == 1:
+    if method == "polychoric":
+        # Wald confidence interval and p-value from the standard error of the ML estimate
+        ci, pval = _wald_ci_pval(r, se, alternative=alternative)
+        ci, pr = np.round(ci, 6), np.nan
+    elif abs(r) == 1:
         ci = [r, r]
         pr = 1
     else:
@@ -646,7 +871,7 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
         pr = power_corr(r=r, n=n_clean, power=None, alpha=0.05, alternative=alternative)
 
     # Recompute p-value if tail is one-sided (Student t approximation, not valid for Kendall)
-    if alternative != "two-sided" and method != "kendall":
+    if alternative != "two-sided" and method not in ["kendall", "polychoric"]:
         pval = _correl_pvalue(r, n_clean, k=0, alternative=alternative)
 
     # Create dictionnary
@@ -666,6 +891,211 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
     col_keep = ["n", "outliers", "r", "CI95", "p_val", "BF10", "power"]
     col_order = [k for k in col_keep if k in stats.keys().tolist()]
     return _postprocess_dataframe(stats)[col_order]
+
+
+def polychoric(
+    x=None,
+    y=None,
+    data=None,
+    table=None,
+    correction=None,
+    alternative="two-sided",
+    confidence=0.95,
+):
+    """Polychoric (and tetrachoric) correlation between two ordinal variables.
+
+    .. versionadded:: 0.8.0
+
+    Parameters
+    ----------
+    x, y : array_like or string
+        Ordinal variables: numeric values, or ordered :py:class:`pandas.Categorical`, in which
+        case the order of the categories is respected. If ``data`` is specified, ``x`` and ``y``
+        must be the names of two columns of ``data``.
+    data : :py:class:`pandas.DataFrame`
+        Optional dataframe containing the ``x`` and ``y`` columns.
+    table : array_like
+        Contingency table of the two variables (e.g. the output of :py:func:`pandas.crosstab`),
+        with the categories in increasing order. This is an alternative to ``x`` and ``y``.
+    correction : None, bool or float
+        Correction for continuity: value that replaces the empty cells of the contingency table
+        before estimation. The default (None) is to not apply any correction. A common choice is
+        ``correction=0.5`` (same as ``correction=True``), which is the default in the R package
+        psych. The correction mostly matters for small or sparse tables, in particular for 2x2
+        tables with an empty cell, for which the correlation is otherwise -1 or 1.
+    alternative : string
+        Defines the alternative hypothesis, or tail of the correlation. Must be one of
+        "two-sided" (default), "greater" or "less". Both "greater" and "less" return a one-sided
+        p-value and confidence interval. "greater" tests against the alternative hypothesis that
+        the correlation is positive (greater than zero), "less" tests against the hypothesis that
+        the correlation is negative.
+    confidence : float
+        Confidence level of the confidence interval. The default is 0.95 (95%).
+
+    Returns
+    -------
+    stats : :py:class:`pandas.DataFrame`
+
+        * ``'n'``: Sample size (after removal of missing values)
+        * ``'r'``: Polychoric correlation
+        * ``'se'``: Standard error of the correlation
+        * ``'CI95'``: Wald confidence interval around :math:`r`
+        * ``'p_val'``: p-value of the Wald test
+        * ``'thresholds_x'``: Estimated thresholds of ``x`` (rows of ``table``)
+        * ``'thresholds_y'``: Estimated thresholds of ``y`` (columns of ``table``)
+
+    See also
+    --------
+    corr : (Robust) correlation between two variables
+    pairwise_corr : Pairwise correlation between columns of a pandas DataFrame
+
+    Notes
+    -----
+    The polychoric correlation is the correlation between two ordinal variables under the
+    assumption that each of them is a discretized version of a latent continuous variable, and
+    that the two latent variables follow a standard bivariate normal distribution. An ordinal
+    variable with :math:`k` categories is defined by :math:`k - 1` thresholds
+    :math:`\\tau_1 < ... < \\tau_{k-1}` on its latent variable, with :math:`\\tau_0 = -\\infty`
+    and :math:`\\tau_k = +\\infty`. The tetrachoric correlation is the special case of two
+    binary variables, i.e. a 2x2 contingency table.
+
+    This function uses the two-step estimator described in [1]_, [2]_, which is also the default
+    of the ``polychor`` function of the R package polycor:
+
+    1. The thresholds of each variable are estimated from the cumulative marginal proportions
+       :math:`P_i` of the contingency table:
+
+       .. math:: \\hat{\\tau}_i = \\Phi^{-1}(P_i)
+
+       where :math:`\\Phi` is the cumulative distribution function of the standard normal
+       distribution.
+
+    2. Holding the thresholds constant, the correlation :math:`\\rho` is estimated by maximizing
+       the log-likelihood of the contingency table:
+
+       .. math:: \\ell(\\rho) = \\sum_{i, j} n_{ij} \\log \\pi_{ij}(\\rho)
+
+       where :math:`n_{ij}` is the number of observations in the cell :math:`(i, j)` and
+       :math:`\\pi_{ij}` is the probability of that cell under a standard bivariate normal
+       distribution with correlation :math:`\\rho`, i.e. the probability of the rectangle
+       delimited by the thresholds :math:`(a_{i-1}, a_i)` of ``x`` and :math:`(b_{j-1}, b_j)`
+       of ``y``.
+
+    The standard error is the inverse of the square root of the observed information
+    :math:`-\\ell''(\\hat{\\rho})`. Like in polycor, it is conditional on the estimated
+    thresholds, and may therefore be slightly smaller than the standard error of a full maximum
+    likelihood estimation, in which the thresholds and the correlation are estimated jointly.
+    The confidence interval and the p-value are based on the Wald statistic
+    :math:`z = \\hat{\\rho} / \\text{SE}`, which follows a standard normal distribution under the
+    null hypothesis.
+
+    Categories without any observation are removed. If one of the variables has fewer than two
+    categories, the correlation is not defined and NaN is returned. When the likelihood is
+    monotone in :math:`\\rho`, which happens with a perfect association or with an empty cell in
+    a 2x2 table, the estimate is -1 or 1 and the standard error, confidence interval and p-value
+    are NaN. A warning is raised in both cases.
+
+    .. important:: Rows with missing values (NaN) are automatically removed.
+
+    References
+    ----------
+    .. [1] Olsson, U., 1979. Maximum likelihood estimation of the polychoric correlation
+       coefficient. Psychometrika 44, 443–460. https://doi.org/10.1007/BF02296207
+
+    .. [2] Drasgow, F., 1986. Polychoric and polyserial correlations. In: Kotz, S., Johnson,
+       N.L. (Eds.), Encyclopedia of Statistical Sciences, vol. 7. Wiley, New York, pp. 68–74.
+
+    Examples
+    --------
+    1. Polychoric correlation from a contingency table (data from Olsson 1979)
+
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> import pingouin as pg
+    >>> table = [[13, 6, 0], [69, 113, 22], [41, 132, 104]]
+    >>> stats = pg.polychoric(table=table)
+    >>> stats[["n", "r", "se", "CI95", "p_val"]].round(4)
+                  n       r      se         CI95  p_val
+    polychoric  500  0.4914  0.0473  [0.4, 0.58]    0.0
+
+    The thresholds are stored as arrays, with one threshold less than the number of categories
+
+    >>> stats.at["polychoric", "thresholds_x"].round(3)
+    array([-1.774, -0.136])
+    >>> stats.at["polychoric", "thresholds_y"].round(3)
+    array([-0.687,  0.668])
+
+    2. From two ordinal variables
+
+    >>> rng = np.random.default_rng(42)
+    >>> latent = rng.multivariate_normal([0, 0], [[1, 0.6], [0.6, 1]], 300)
+    >>> x = np.digitize(latent[:, 0], [-1, 0, 1])
+    >>> y = np.digitize(latent[:, 1], [-0.5, 0.5])
+    >>> pg.polychoric(x, y).iloc[:, :5].round(3)
+                  n      r     se          CI95  p_val
+    polychoric  300  0.638  0.041  [0.56, 0.72]    0.0
+
+    3. With ordered categorical columns of a dataframe, and a one-sided test
+
+    >>> df = pd.DataFrame(
+    ...     {
+    ...         "x": pd.Categorical.from_codes(
+    ...             x, ["never", "rarely", "often", "always"], ordered=True
+    ...         ),
+    ...         "y": pd.Categorical.from_codes(y, ["low", "medium", "high"], ordered=True),
+    ...     }
+    ... )
+    >>> pg.polychoric("x", "y", data=df, alternative="greater").iloc[:, :5].round(3)
+                  n      r     se         CI95  p_val
+    polychoric  300  0.638  0.041  [0.57, 1.0]    0.0
+
+    4. Tetrachoric correlation, with a correction for the empty cell
+
+    >>> pg.polychoric(table=[[30, 0], [10, 20]], correction=0.5).iloc[:, :5].round(3)
+                 n      r     se         CI95  p_val
+    polychoric  60  0.939  0.049  [0.84, 1.0]    0.0
+
+    5. The polychoric correlation is also available in :py:func:`pingouin.corr`
+
+    >>> pg.corr(x, y, method="polychoric").round(3)
+                  n      r          CI95  p_val  power
+    polychoric  300  0.638  [0.56, 0.72]    0.0    NaN
+    """
+    _check_alternative(alternative)
+    assert 0 < confidence < 1, "confidence must be between 0 and 1."
+    if table is not None:
+        if x is not None or y is not None or data is not None:
+            raise ValueError("x, y and data must be None when table is specified.")
+        table = np.asarray(table, dtype=float)
+        if table.ndim != 2:
+            raise ValueError("table must be a two-dimensional contingency table.")
+        if not np.all(np.isfinite(table)) or np.any(table < 0):
+            raise ValueError("table must only contain finite and non-negative values.")
+    else:
+        if x is None or y is None:
+            raise ValueError("Either x and y, or table, must be specified.")
+        if data is not None:
+            assert isinstance(data, pd.DataFrame), "data must be a pandas DataFrame."
+            x, y = data[x], data[y]
+        x, y = _ordinal_codes(x, "x"), _ordinal_codes(y, "y")
+        assert x.size == y.size, "x and y must have the same length."
+        table = _ordinal_crosstab(x, y)
+
+    r, se, n, tau_x, tau_y = _polychoric(table, correction=correction)
+    ci, pval = _wald_ci_pval(r, se, alternative=alternative, confidence=confidence)
+    stats = pd.DataFrame(
+        {
+            "n": int(n) if float(n).is_integer() else n,
+            "r": r,
+            "se": se,
+            f"CI{100 * confidence:.0f}": [ci],
+            "p_val": pval,
+            "thresholds_x": [tau_x],
+            "thresholds_y": [tau_y],
+        },
+        index=["polychoric"],
+    )
+    return _postprocess_dataframe(stats)
 
 
 @pf.register_dataframe_method
@@ -1031,7 +1461,8 @@ def rcorr(
     self : :py:class:`pandas.DataFrame`
         Input dataframe.
     method : str
-        Correlation method. Can be either 'pearson' or 'spearman'.
+        Correlation method. Can be either 'pearson', 'spearman' or 'polychoric' (for ordinal
+        data, see :py:func:`pingouin.polychoric`).
     upper : str
         If 'pval', the upper triangle of the output correlation matrix shows
         the p-values. If 'n', the upper triangle is the sample size used in
@@ -1124,9 +1555,20 @@ def rcorr(
     # Safety check
     assert isinstance(pval_stars, dict), "pval_stars must be a dictionnary."
     assert isinstance(decimals, int), "decimals must be an int."
-    assert method in ["pearson", "spearman"], "Method is not recognized."
+    assert method in ["pearson", "spearman", "polychoric"], "Method is not recognized."
     assert upper in ["pval", "n"], "upper must be either `pval` or `n`."
-    r = self.corr(method=method, numeric_only=True)
+    if method == "polychoric":
+        # Maximum likelihood estimation and Wald p-value of each pair
+        numeric = self._get_numeric_data()
+        r = pd.DataFrame(np.eye(numeric.shape[1]), index=numeric.columns, columns=numeric.columns)
+        pval_ml = np.full(r.shape, np.nan)
+        for i, j in zip(*np.triu_indices(numeric.shape[1], k=1)):
+            pair = numeric.iloc[:, [i, j]].to_numpy(dtype=float, na_value=np.nan)
+            r_ij, se_ij = _polychoric(_ordinal_crosstab(pair[:, 0], pair[:, 1]))[:2]
+            r.iloc[i, j] = r.iloc[j, i] = r_ij
+            pval_ml[i, j] = pval_ml[j, i] = _wald_ci_pval(r_ij, se_ij)[1]
+    else:
+        r = self.corr(method=method, numeric_only=True)
     mat = r.round(decimals)
     # Pairwise sample size (pairwise deletion of missing values), for all pairs at once
     notna = self[r.columns].notna().to_numpy(dtype=float)
@@ -1134,12 +1576,16 @@ def rcorr(
     if upper == "n":
         mat_upper = pd.DataFrame(npairs.astype(int), index=r.index, columns=r.columns)
     else:
-        # Two-sided p-values from the Student t distribution, vectorized over all pairs. This is
-        # the same as scipy.stats.pearsonr (and spearmanr for Spearman) applied to each pair.
-        dof = npairs - 2
-        with np.errstate(divide="ignore", invalid="ignore"):
-            tval = r.to_numpy() * np.sqrt(dof / (1 - r.to_numpy() ** 2))
-        pval = np.clip(2 * stdtr(dof, -np.abs(tval)), 0, 1)
+        if method == "polychoric":
+            pval = pval_ml
+        else:
+            # Two-sided p-values from the Student t distribution, vectorized over all pairs. This
+            # is the same as scipy.stats.pearsonr (and spearmanr for Spearman) applied to each
+            # pair.
+            dof = npairs - 2
+            with np.errstate(divide="ignore", invalid="ignore"):
+                tval = r.to_numpy() * np.sqrt(dof / (1 - r.to_numpy() ** 2))
+            pval = np.clip(2 * stdtr(dof, -np.abs(tval)), 0, 1)
         mat_upper = pd.DataFrame(pval, index=r.index, columns=r.columns)
         if padjust is not None:
             # Only the unique pairs (strict upper triangle) belong to the test family.
