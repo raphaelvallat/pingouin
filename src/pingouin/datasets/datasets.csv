@@ -9,6 +9,7 @@ blandaltman,Hypothetical data of an agreement between two methods (Method A and 
 chi2_independence,Patients' attributes and heart conditions,chi2_independence,https://archive.ics.uci.edu/ml/datasets/Heart+Disease
 chi2_mcnemar,Responses to 2 athlete's foot treatments, chi2_mcnemar, http://www.stat.purdue.edu/~tqin/system101/method/method_mcnemar_sas.htm (adapted)
 circular,Orientation tuning properties of three neurons,circular statistics,Berens 2009
+cochran_mantel_haenszel,Job satisfaction by income and gender,cochran_mantel_haenszel,Agresti 2002 Table 7.8 / R stats::mantelhaen.test example
 cochran,Energy level across three days,Cochran,www.real-statistics.com
 cronbach_alpha,Questionnaire ratings,cronbach_alpha,www.real-statistics.com
 cronbach_wide_missing,Questionnaire rating (binary) in wide format and with missing values,cronbach_alpha,www.real-statistics.com

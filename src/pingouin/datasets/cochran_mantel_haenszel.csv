@@ -1,0 +1,33 @@
+income,satisfaction,gender,count
+<5000,Very Dissatisfied,Female,1
+5000-15000,Very Dissatisfied,Female,2
+15000-25000,Very Dissatisfied,Female,0
+>25000,Very Dissatisfied,Female,0
+<5000,A Little Satisfied,Female,3
+5000-15000,A Little Satisfied,Female,3
+15000-25000,A Little Satisfied,Female,1
+>25000,A Little Satisfied,Female,2
+<5000,Moderately Satisfied,Female,11
+5000-15000,Moderately Satisfied,Female,17
+15000-25000,Moderately Satisfied,Female,8
+>25000,Moderately Satisfied,Female,4
+<5000,Very Satisfied,Female,2
+5000-15000,Very Satisfied,Female,3
+15000-25000,Very Satisfied,Female,5
+>25000,Very Satisfied,Female,2
+<5000,Very Dissatisfied,Male,1
+5000-15000,Very Dissatisfied,Male,0
+15000-25000,Very Dissatisfied,Male,0
+>25000,Very Dissatisfied,Male,0
+<5000,A Little Satisfied,Male,1
+5000-15000,A Little Satisfied,Male,3
+15000-25000,A Little Satisfied,Male,0
+>25000,A Little Satisfied,Male,1
+<5000,Moderately Satisfied,Male,2
+5000-15000,Moderately Satisfied,Male,5
+15000-25000,Moderately Satisfied,Male,7
+>25000,Moderately Satisfied,Male,9
+<5000,Very Satisfied,Male,1
+5000-15000,Very Satisfied,Male,1
+15000-25000,Very Satisfied,Male,3
+>25000,Very Satisfied,Male,6
