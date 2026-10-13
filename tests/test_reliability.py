@@ -53,6 +53,16 @@ def test_cronbach_alpha():
     assert round(alpha, 6) == 0.801695
     np.testing.assert_array_equal(ci, [0.533, 0.947])
 
+    # Invalid confidence interval
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        cronbach_alpha(data=data, ci=95)
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        cronbach_alpha(data=data, ci=0)
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        cronbach_alpha(data=data, ci=1)
+    with pytest.raises(TypeError, match=r"'ci' must be a real number\."):
+        cronbach_alpha(data=data, ci="95")
+
 
 def test_intraclass_corr():
     """Test function intraclass_corr
