@@ -34,6 +34,39 @@ Code guidelines
 
      $ pytest --verbose
 
+.. _ai-assisted-prs:
+
+AI-assisted pull requests
+-------------------------
+
+Pingouin has only one maintainer, and the number of AI-assisted pull requests has grown faster than they can be reviewed. AI tools are welcome. But a PR that takes a minute to generate can take hours to review, so contributors are asked to do more of that work before asking for a review. **PRs that don't follow these guidelines may be closed without review.** See also `issue #558 <https://github.com/raphaelvallat/pingouin/issues/558>`_.
+
+**Before opening a PR**
+
+* **Open an issue first (preferred).** Describe the problem and the change you're proposing, so that we can agree it's worth doing before anyone writes or reviews code. This matters most for new features and large refactors.
+* **Check other open PRs.** Look for PRs that touch the same files or functions, to avoid duplicate work and merge conflicts.
+* **Base your branch on the latest** ``main``. Rebase if ``main`` moves while your PR is open.
+
+**Opening the PR**
+
+#. Open it as a **draft**.
+#. **Run an AI review and fix the issues it finds.** If you use Claude Code, run ``/review``; with other tools, use their equivalent. Then post a summary of the review as a comment: what it found, what you fixed, and anything you chose not to fix and why.
+#. **Run** ``/simplify`` (preferred, Claude Code). This helps keep the implementation small and efficient.
+#. Mark the PR as ready for review only after these steps are done.
+
+**PR description**
+
+* **Start with a summary written by you, not by the AI**: a short paragraph explaining in your own words what the PR does and why.
+* Keep it concise and in plain English. If you are fixing a bug, add the exact code to reproduce the bug and show the output before and after the fix.
+* **Report the exact model you used**, e.g. *"Claude Opus 5.5 via Claude Code"*.
+
+**Scope and size**
+
+* **Keep PRs small and focused.** A PR should do one thing. If your change is large, split it into a series of small PRs stacked on top of each other.
+* **Add tests only when they're needed.** AI agents tend to write too many tests, which slows down the test suite and makes it harder to maintain. Add a test only if it covers new behavior, a bug fix (a regression test), or a critical edge case. Remove tests that duplicate existing ones or only check trivial things.
+
+The code guidelines above still apply. In particular, new functionality must be validated against at least one other statistical software, and you are responsible for every line you submit. If you can't explain a change, please don't include it.
+
 Deprecations
 ------------
 
