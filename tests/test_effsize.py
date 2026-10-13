@@ -264,9 +264,6 @@ def test_convert_effsize():
 
     # Error
     with pytest.raises(ValueError):
-        # DEPRECATED - https://github.com/raphaelvallat/pingouin/issues/302
-        cef(d, "cohen", "r")
-    with pytest.raises(ValueError):
         cef(d, "coucou", "hibou")
     with pytest.raises(ValueError):
         cef(d, "AUC", "eta_square")
@@ -275,6 +272,9 @@ def test_convert_effsize():
         cef(d, "cohen", "cohen_dz")
     with pytest.raises(ValueError):
         cef(d, "cohen", "cles")
+    # Use "pointbiserialr" instead (https://github.com/raphaelvallat/pingouin/issues/302)
+    with pytest.raises(ValueError, match="raw data"):
+        cef(d, "cohen", "r")
 
 
 def test_compute_effsize():

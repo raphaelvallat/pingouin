@@ -32,7 +32,6 @@ from pingouin.pairwise import (
     pairwise_corr,
     pairwise_gameshowell,
     pairwise_tests,
-    pairwise_ttests,
     pairwise_tukey,
 )
 
@@ -93,16 +92,6 @@ def df_bfi():
 
 def _is_integer(dof):
     return dof.apply(lambda x: x.is_integer())
-
-
-def test_pairwise_ttests_deprecated(df):
-    """The deprecated pairwise_ttests warns and returns the same as pairwise_tests."""
-    kwargs = dict(
-        dv="Scores", within="Time", subject="Subject", data=df, return_desc=True, padjust="holm"
-    )
-    with pytest.warns(UserWarning, match="deprecated"):
-        pt = pairwise_ttests(**kwargs)
-    pd.testing.assert_frame_equal(pt, pairwise_tests(**kwargs))
 
 
 def test_pairwise_tests_within(df, df_sort):

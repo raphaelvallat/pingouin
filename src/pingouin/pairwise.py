@@ -1,6 +1,5 @@
 # Author: Raphael Vallat <raphaelvallat9@gmail.com>
 # Date: April 2018
-import warnings
 from itertools import combinations, product
 
 import numpy as np
@@ -24,7 +23,6 @@ from .utils import (
 )
 
 __all__ = [
-    "pairwise_ttests",
     "pairwise_tests",
     "ptests",
     "pairwise_tukey",
@@ -85,15 +83,6 @@ def _group_arrays(data, by, dv):
     """
     grp = data.groupby(by, observed=True, sort=True)[dv]
     return {k: v.to_numpy(dtype=np.float64) for k, v in grp}
-
-
-@_register_dataframe_method
-def pairwise_ttests(*args, **kwargs):
-    """This function has been deprecated . Use :py:func:`pingouin.pairwise_tests` instead."""
-    warnings.warn(
-        "pairwise_ttests is deprecated, use pairwise_tests instead.", UserWarning, stacklevel=2
-    )
-    return pairwise_tests(*args, **kwargs)
 
 
 @_register_dataframe_method
