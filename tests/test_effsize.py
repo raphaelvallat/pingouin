@@ -1,9 +1,9 @@
-from unittest import TestCase
+from itertools import product
 
 import numpy as np
 import pandas as pd
 import pytest
-from scipy.stats import pearsonr, pointbiserialr
+from scipy.stats import norm, pearsonr, pointbiserialr, skew, spearmanr, t, ttest_rel
 
 from pingouin.effsize import compute_bootci, compute_effsize, compute_effsize_from_t, compute_esci
 from pingouin.effsize import convert_effsize as cef
@@ -17,335 +17,381 @@ df = pd.DataFrame(
     }
 )
 
-np.random.seed(42)
-x = np.random.normal(2, 1, 20)
-y = np.random.normal(2.5, 1, 20)
+rng = np.random.RandomState(42)
+x = rng.normal(2, 1, 20)
+y = rng.normal(2.5, 1, 20)
 nx, ny = len(x), len(y)
 
 
-class TestEffsize(TestCase):
-    """Test effsize.py."""
+def test_compute_esci():
+    """Test function compute_esci.
 
-    def test_compute_esci(self):
-        """Test function compute_esci.
+    Note that since Pingouin v0.3.5, CIs around a Cohen d are calculated
+    using a T (and not Z) distribution. This is the same behavior as the
+    cohen.d function of the effsize R package.
 
-        Note that since Pingouin v0.3.5, CIs around a Cohen d are calculated
-        using a T (and not Z) distribution. This is the same behavior as the
-        cohen.d function of the effsize R package.
+    However, note that the cohen.d function does not use the Cohen d-avg
+    for paired samples, and therefore we cannot directly compare the CIs
+    for paired samples. Similarly, R uses a slightly different formula to
+    estimate the SE of one-sample cohen D.
+    """
+    # Pearson correlation
+    # https://github.com/SurajGupta/r-source/blob/master/src/library/stats/R/cor.test.R
+    ci = compute_esci(stat=0.5543563, nx=6, eftype="r", decimals=6)
+    assert np.allclose(ci, [-0.4675554, 0.9420809])
+    # Alternative == "greater"
+    ci = compute_esci(stat=0.8, nx=20, eftype="r", alternative="greater", decimals=6)
+    assert np.allclose(ci, [0.6041625, 1])
+    ci = compute_esci(stat=-0.2, nx=30, eftype="r", alternative="greater", decimals=6)
+    assert np.allclose(ci, [-0.4771478, 1])
+    # Alternative == "less"
+    ci = compute_esci(stat=-0.8, nx=20, eftype="r", alternative="less", decimals=6)
+    assert np.allclose(ci, [-1, -0.6041625])
+    ci = compute_esci(stat=0.2, nx=30, eftype="r", alternative="less", decimals=6)
+    assert np.allclose(ci, [-1, 0.4771478])
 
-        However, note that the cohen.d function does not use the Cohen d-avg
-        for paired samples, and therefore we cannot directly compare the CIs
-        for paired samples. Similarly, R uses a slightly different formula to
-        estimate the SE of one-sample cohen D.
-        """
-        # Pearson correlation
-        # https://github.com/SurajGupta/r-source/blob/master/src/library/stats/R/cor.test.R
-        ci = compute_esci(stat=0.5543563, nx=6, eftype="r", decimals=6)
-        assert np.allclose(ci, [-0.4675554, 0.9420809])
-        # Alternative == "greater"
-        ci = compute_esci(stat=0.8, nx=20, eftype="r", alternative="greater", decimals=6)
-        assert np.allclose(ci, [0.6041625, 1])
-        ci = compute_esci(stat=-0.2, nx=30, eftype="r", alternative="greater", decimals=6)
-        assert np.allclose(ci, [-0.4771478, 1])
-        # Alternative == "less"
-        ci = compute_esci(stat=-0.8, nx=20, eftype="r", alternative="less", decimals=6)
-        assert np.allclose(ci, [-1, -0.6041625])
-        ci = compute_esci(stat=0.2, nx=30, eftype="r", alternative="less", decimals=6)
-        assert np.allclose(ci, [-1, 0.4771478])
+    # Cohen d
+    # .. One sample and paired
+    # Cannot compare to R because cohen.d uses different formulas for
+    # Cohen d and SE.
+    d = compute_effsize(np.r_[x, y], y=0)
+    assert round(d, 6) == 2.086694  # Same as cohen.d
+    # Formula of www.real-statistics.com: SE = sqrt(1 / n + d^2 / (2n)), with a T(n - 1)
+    ci = compute_esci(d, nx + ny, 1, decimals=6)
+    n = nx + ny
+    se = np.sqrt(1 / n + d**2 / (2 * n))
+    np.testing.assert_allclose(ci, d + np.array([-1, 1]) * t.ppf(0.975, n - 1) * se, atol=1e-6)
+    d = compute_effsize(x, y, paired=True)
+    ci = compute_esci(d, nx, ny, paired=True, decimals=6)
+    se = np.sqrt(1 / nx + d**2 / (2 * nx))
+    np.testing.assert_allclose(ci, d + np.array([-1, 1]) * t.ppf(0.975, nx - 1) * se, atol=1e-6)
+    # Confidence level
+    ci_90 = compute_esci(d, nx, ny, paired=True, confidence=0.90, decimals=6)
+    np.testing.assert_allclose(ci_90, d + np.array([-1, 1]) * t.ppf(0.95, nx - 1) * se, atol=1e-6)
+    # Default number of decimals
+    np.testing.assert_array_equal(compute_esci(d, nx, ny, paired=True), np.round(ci, 2))
+    # .. Independent (compare with cohen.d function)
+    d = compute_effsize(x, y)
+    ci = compute_esci(d, nx, ny, decimals=6)
+    np.testing.assert_equal(ci, [-1.067645, 0.226762])
+    # Same but with different n
+    d = compute_effsize(x, y[:-5])
+    ci = compute_esci(d, nx, len(y[:-5]), decimals=8)
+    np.testing.assert_equal(ci, [-1.33603010, 0.08662825])
 
-        # Cohen d
-        # .. One sample and paired
-        # Cannot compare to R because cohen.d uses different formulas for
-        # Cohen d and SE.
-        d = compute_effsize(np.r_[x, y], y=0)
-        assert round(d, 6) == 2.086694  # Same as cohen.d
-        ci = compute_esci(d, nx + ny, 1, decimals=6)
-        d = compute_effsize(x, y, paired=True)
-        ci = compute_esci(d, nx, ny, paired=True, decimals=6)
-        # .. Independent (compare with cohen.d function)
-        d = compute_effsize(x, y)
-        ci = compute_esci(d, nx, ny, decimals=6)
-        np.testing.assert_equal(ci, [-1.067645, 0.226762])
-        # Same but with different n
-        d = compute_effsize(x, y[:-5])
-        ci = compute_esci(d, nx, len(y[:-5]), decimals=8)
-        np.testing.assert_equal(ci, [-1.33603010, 0.08662825])
 
-    def test_compute_boot_esci(self):
-        """Test function compute_bootci
+def test_compute_boot_esci():
+    """Test function compute_bootci
 
-        Compare with Matlab bootci function
+    Compare with Matlab bootci function
 
-        See also scipy.stats.bootstrap
-        """
-        # This is the `lawdata` dataset in Matlab
-        # >>> load lawdata
-        # >>> x_m = gpa;
-        # >>> y_m = lsat;
-        x_m = [
-            3.39,
-            3.3,
-            2.81,
-            3.03,
-            3.44,
-            3.07,
-            3.0,
-            3.43,
-            3.36,
-            3.13,
-            3.12,
-            2.74,
-            2.76,
-            2.88,
-            2.96,
-        ]
-        y_m = [576, 635, 558, 578, 666, 580, 555, 661, 651, 605, 653, 575, 545, 572, 594]
-        # 1. bootci around a pearson correlation coefficient
-        ci = compute_bootci(x_m, y_m, func="pearson", paired=True, method="norm", seed=123)
-        assert ci[0] == 0.53 and ci[1] == 1.04
-        ci = compute_bootci(x_m, y_m, func="pearson", paired=True, method="per", seed=123)
-        assert ci[0] == 0.46 and ci[1] == 0.96
-        ci = compute_bootci(x_m, y_m, func="spearman", paired=True)  # Spearman correlation
+    See also scipy.stats.bootstrap
+    """
+    # This is the `lawdata` dataset in Matlab
+    # >>> load lawdata
+    # >>> x_m = gpa;
+    # >>> y_m = lsat;
+    x_m = [
+        3.39,
+        3.3,
+        2.81,
+        3.03,
+        3.44,
+        3.07,
+        3.0,
+        3.43,
+        3.36,
+        3.13,
+        3.12,
+        2.74,
+        2.76,
+        2.88,
+        2.96,
+    ]
+    y_m = [576, 635, 558, 578, 666, 580, 555, 661, 651, 605, 653, 575, 545, 572, 594]
+    # 1. bootci around a pearson correlation coefficient
+    ci = compute_bootci(x_m, y_m, func="pearson", paired=True, method="norm", seed=123)
+    assert ci[0] == 0.53 and ci[1] == 1.04
+    ci = compute_bootci(x_m, y_m, func="pearson", paired=True, method="per", seed=123)
+    assert ci[0] == 0.46 and ci[1] == 0.96
+    # Spearman correlation: the CI contains the observed coefficient
+    ci = compute_bootci(x_m, y_m, func="spearman", paired=True, seed=123)
+    assert -1 <= ci[0] < spearmanr(x_m, y_m)[0] < ci[1] <= 1
 
-        # 2. Univariate function: mean
-        ci_n = compute_bootci(x_m, func="mean", method="norm", seed=42)
-        ci_p = compute_bootci(x_m, func="mean", method="per", seed=42)
-        assert ci_n[0] == 2.98 and ci_n[1] == 3.21
-        assert ci_p[0] == 2.98 and ci_p[1] == 3.21
+    # 2. Univariate function: mean
+    ci_n = compute_bootci(x_m, func="mean", method="norm", seed=42)
+    ci_p = compute_bootci(x_m, func="mean", method="per", seed=42)
+    assert ci_n[0] == 2.98 and ci_n[1] == 3.21
+    assert ci_p[0] == 2.98 and ci_p[1] == 3.21
 
-        # 2.a Univariate function: np.mean
-        ci_n = compute_bootci(x_m, func=np.mean, method="norm", seed=42)
-        ci_p = compute_bootci(x_m, func=np.mean, method="per", seed=42)
-        assert ci_n[0] == 2.98 and ci_n[1] == 3.21
-        assert ci_p[0] == 2.98 and ci_p[1] == 3.21
+    # 2.a Univariate function: np.mean
+    ci_n = compute_bootci(x_m, func=np.mean, method="norm", seed=42)
+    ci_p = compute_bootci(x_m, func=np.mean, method="per", seed=42)
+    assert ci_n[0] == 2.98 and ci_n[1] == 3.21
+    assert ci_p[0] == 2.98 and ci_p[1] == 3.21
 
-        # 3. Univariate custom function: skewness
-        from scipy.stats import skew
+    # 3. Univariate custom function: skewness
+    n_boot = 10000
+    ci_n = compute_bootci(x_m, func=skew, method="norm", n_boot=n_boot, decimals=1, seed=42)
+    ci_p = compute_bootci(x_m, func=skew, method="per", n_boot=n_boot, decimals=1, seed=42)
+    assert ci_n[0] == -0.7 and ci_n[1] == 0.8
+    assert ci_p[0] == -0.7 and ci_p[1] == 0.8
 
-        n_boot = 10000
-        ci_n = compute_bootci(x_m, func=skew, method="norm", n_boot=n_boot, decimals=1, seed=42)
-        ci_p = compute_bootci(x_m, func=skew, method="per", n_boot=n_boot, decimals=1, seed=42)
-        assert ci_n[0] == -0.7 and ci_n[1] == 0.8
-        assert ci_p[0] == -0.7 and ci_p[1] == 0.8
+    # 4. Bivariate custom function: paired T-test, applied to all resamples at once
+    ci_n = compute_bootci(
+        x_m,
+        y_m,
+        func=lambda x, y, axis=-1: ttest_rel(x, y, axis=axis)[0],
+        method="norm",
+        paired=True,
+        n_boot=n_boot,
+        decimals=0,
+        seed=42,
+    )
+    ci_p = compute_bootci(
+        x_m,
+        y_m,
+        func=lambda x, y, axis=-1: ttest_rel(x, y, axis=axis)[0],
+        method="per",
+        paired=True,
+        n_boot=n_boot,
+        decimals=0,
+        seed=42,
+    )
+    assert ci_n[0] == -69 and ci_n[1] == -35
+    assert ci_p[0] == -79 and ci_p[1] == -49
 
-        # 4. Bivariate custom function: paired T-test, applied to all resamples at once
-        from scipy.stats import ttest_rel
+    # Using a custom function without an axis argument, applied to each resample (use per
+    # method to avoid BCa jackknife issues with element-wise functions and paired=False)
+    _, bdist = compute_bootci(
+        x,
+        y,
+        func=lambda x, y: np.sum(np.exp(x) / np.exp(y)),
+        n_boot=1000,
+        decimals=4,
+        confidence=0.68,
+        method="per",
+        seed=None,
+        return_dist=True,
+    )
+    assert bdist.size == 1000
 
-        ci_n = compute_bootci(
-            x_m,
-            y_m,
-            func=lambda x, y, axis=-1: ttest_rel(x, y, axis=axis)[0],
-            method="norm",
-            paired=True,
-            n_boot=n_boot,
-            decimals=0,
-            seed=42,
-        )
-        ci_p = compute_bootci(
-            x_m,
-            y_m,
-            func=lambda x, y, axis=-1: ttest_rel(x, y, axis=axis)[0],
-            method="per",
-            paired=True,
-            n_boot=n_boot,
-            decimals=0,
-            seed=42,
-        )
-        assert ci_n[0] == -69 and ci_n[1] == -35
-        assert ci_p[0] == -79 and ci_p[1] == -49
+    # ERRORS
+    with pytest.raises(ValueError):
+        compute_bootci(x, y, func="wrong")
 
-        # 5. Test all combinations
-        from itertools import product
+    with pytest.raises(AssertionError):
+        compute_bootci(x, y, func="pearson", paired=False)
 
-        methods = ["norm", "per", "bca", "basic"]
-        funcs = ["cohen", "hedges"]
-        paired = [True, False]
-        pr = list(product(methods, funcs, paired))
-        for m, f, p in pr:
-            compute_bootci(x, y, func=f, method=m, paired=p, seed=123, n_boot=100)
 
-        # Now the univariate functions
-        funcs = ["mean", "std", "var"]
-        for m, f in list(product(methods, funcs)):
-            compute_bootci(x, func=f, method=m, seed=123, n_boot=100)
+@pytest.mark.parametrize("method", ["norm", "per", "bca", "basic"])
+@pytest.mark.parametrize("paired", [True, False])
+def test_compute_bootci_effsize(method, paired):
+    """Test function compute_bootci with func="cohen" and func="hedges"."""
+    kwargs = dict(method=method, paired=paired, seed=123, n_boot=100, decimals=8)
+    ci_d, dist_d = compute_bootci(x, y, func="cohen", return_dist=True, **kwargs)
+    ci_g, dist_g = compute_bootci(x, y, func="hedges", return_dist=True, **kwargs)
+    d = compute_effsize(x, y, paired=paired, eftype="cohen")
+    assert dist_d.shape == (100,)
+    assert ci_d[0] < d < ci_d[1]
+    # The Hedges g is the Cohen d times a constant correction factor, on the same resamples
+    correction = 1 - 3 / (4 * (nx + ny) - 9)
+    np.testing.assert_allclose(dist_g, dist_d * correction)
+    np.testing.assert_allclose(ci_g, ci_d * correction, atol=1e-7)
+    # Same seed, same output
+    np.testing.assert_array_equal(compute_bootci(x, y, func="cohen", **kwargs), ci_d)
 
-        # Using a custom function without an axis argument, applied to each resample (use per
-        # method to avoid BCa jackknife issues with element-wise functions and paired=False)
-        _, bdist = compute_bootci(
-            x,
-            y,
-            func=lambda x, y: np.sum(np.exp(x) / np.exp(y)),
-            n_boot=1000,
-            decimals=4,
-            confidence=0.68,
-            method="per",
-            seed=None,
-            return_dist=True,
-        )
-        assert bdist.size == 1000
 
-        # ERRORS
-        with pytest.raises(ValueError):
-            compute_bootci(x, y, func="wrong")
+@pytest.mark.parametrize(
+    "method, func",
+    product(["norm", "per", "bca", "basic"], ["mean", "std", "var"]),
+)
+def test_compute_bootci_univariate(method, func):
+    """Test function compute_bootci with univariate str functions."""
+    stat = {"mean": np.mean(x), "std": np.std(x, ddof=1), "var": np.var(x, ddof=1)}[func]
+    ci, bdist = compute_bootci(
+        x, func=func, method=method, seed=123, n_boot=100, decimals=8, return_dist=True
+    )
+    assert ci[0] < stat < ci[1]
+    assert bdist.shape == (100,)
+    if func != "mean":
+        assert (bdist > 0).all()
 
-        with pytest.raises(AssertionError):
-            compute_bootci(x, y, func="pearson", paired=False)
 
-    def test_convert_effsize(self):
-        """Test function convert_effsize.
+def test_convert_effsize():
+    """Test function convert_effsize.
 
-        Compare to https://www.psychometrica.de/effect_size.html
-        """
-        # Cohen d
-        d = 0.40
-        assert cef(d, "cohen", "none") == d
-        assert round(cef(d, "cohen", "pointbiserialr"), 4) == 0.1961
-        cef(d, "cohen", "pointbiserialr", nx=10, ny=12)  # When nx and ny are specified
-        assert np.allclose(cef(1.002549, "cohen", "pointbiserialr"), 0.4481248)  # R
-        assert round(cef(d, "cohen", "eta_square"), 4) == 0.0385
-        assert round(cef(d, "cohen", "odds_ratio"), 4) == 2.0658
-        cef(d, "cohen", "hedges", nx=10, ny=10)
-        cef(d, "cohen", "pointbiserialr")
-        with pytest.warns(UserWarning, match="nx and ny"):
-            cef(d, "cohen", "hedges")
+    Compare to https://www.psychometrica.de/effect_size.html
+    """
+    # Cohen d
+    d = 0.40
+    assert cef(d, "cohen", "none") == d
+    assert round(cef(d, "cohen", "pointbiserialr"), 4) == 0.1961
+    # When nx and ny are specified (McGrath and Meyer 2006)
+    a = (22**2 - 2 * 22) / (10 * 12)
+    assert np.isclose(cef(d, "cohen", "pointbiserialr", nx=10, ny=12), d / np.sqrt(d**2 + a))
+    assert np.allclose(cef(1.002549, "cohen", "pointbiserialr"), 0.4481248)  # R
+    assert round(cef(d, "cohen", "eta_square"), 4) == 0.0385
+    assert round(cef(d, "cohen", "odds_ratio"), 4) == 2.0658
+    assert np.isclose(cef(d, "cohen", "AUC"), norm.cdf(d / np.sqrt(2)))  # Ruscio 2008
+    assert np.isclose(cef(d, "cohen", "hedges", nx=10, ny=10), d * (1 - 3 / (4 * 20 - 9)))
+    # Without nx and ny, a Cohen d is returned instead of a Hedges g
+    with pytest.warns(UserWarning, match="nx and ny"):
+        assert cef(d, "cohen", "hedges") == d
 
-        # Point-biserial correlation
-        rpb = 0.65
-        assert cef(rpb, "pointbiserialr", "none") == rpb
-        assert round(cef(rpb, "pointbiserialr", "cohen"), 4) == 1.7107
-        assert np.allclose(cef(0.4481248, "pointbiserialr", "cohen"), 1.002549)
-        assert round(cef(rpb, "pointbiserialr", "eta_square"), 4) == 0.4225
-        assert round(cef(rpb, "pointbiserialr", "odds_ratio"), 4) == 22.2606
-        # Using actual values
-        np.random.seed(42)
-        x1, y1 = np.random.multivariate_normal(mean=[1, 2], cov=[[1, 0.5], [0.5, 1]], size=100).T
-        xy1 = np.hstack((x1, y1))
-        xy1_bool = np.repeat([0, 1], 100)
-        # Let's calculate the ground-truth point-biserial correlation
-        r_biserial = pearsonr(xy1_bool, xy1)[0]  # 0.50247
-        assert np.isclose(r_biserial, pointbiserialr(xy1_bool, xy1)[0])
-        # Now the Cohen's d
-        d = abs(compute_effsize(x1, y1, paired=True, eftype="cohen"))  # 1.15651
-        # And now we can convert point-biserial r <--> d
-        r_convert = cef(abs(d), "cohen", "pointbiserialr", nx=100, ny=100)  # 0.50247
-        assert np.isclose(r_convert, r_biserial)
-        d_convert = cef(r_biserial, "pointbiserialr", "cohen", nx=100, ny=100)  # 1.162
-        assert abs(d - d_convert) < 0.1
+    # Point-biserial correlation
+    rpb = 0.65
+    assert cef(rpb, "pointbiserialr", "none") == rpb
+    assert round(cef(rpb, "pointbiserialr", "cohen"), 4) == 1.7107
+    assert np.allclose(cef(0.4481248, "pointbiserialr", "cohen"), 1.002549)
+    assert round(cef(rpb, "pointbiserialr", "eta_square"), 4) == 0.4225
+    assert round(cef(rpb, "pointbiserialr", "odds_ratio"), 4) == 22.2606
+    # Using actual values
+    rng = np.random.RandomState(42)
+    x1, y1 = rng.multivariate_normal(mean=[1, 2], cov=[[1, 0.5], [0.5, 1]], size=100).T
+    xy1 = np.hstack((x1, y1))
+    xy1_bool = np.repeat([0, 1], 100)
+    # Let's calculate the ground-truth point-biserial correlation
+    r_biserial = pearsonr(xy1_bool, xy1)[0]  # 0.50247
+    assert np.isclose(r_biserial, pointbiserialr(xy1_bool, xy1)[0])
+    # Now the Cohen's d
+    d = abs(compute_effsize(x1, y1, paired=True, eftype="cohen"))  # 1.15651
+    # And now we can convert point-biserial r <--> d
+    r_convert = cef(abs(d), "cohen", "pointbiserialr", nx=100, ny=100)  # 0.50247
+    assert np.isclose(r_convert, r_biserial)
+    d_convert = cef(r_biserial, "pointbiserialr", "cohen", nx=100, ny=100)  # 1.162
+    assert abs(d - d_convert) < 0.1
 
-        # Error
-        with pytest.raises(ValueError):
-            # DEPRECATED - https://github.com/raphaelvallat/pingouin/issues/302
-            cef(d, "cohen", "r")
-        with pytest.raises(ValueError):
-            cef(d, "coucou", "hibou")
-        with pytest.raises(ValueError):
-            cef(d, "AUC", "eta_square")
-        # Effect sizes that require the raw data cannot be converted from a Cohen d
-        with pytest.raises(ValueError):
-            cef(d, "cohen", "cohen_dz")
-        with pytest.raises(ValueError):
-            cef(d, "cohen", "cles")
+    # Error
+    with pytest.raises(ValueError):
+        # DEPRECATED - https://github.com/raphaelvallat/pingouin/issues/302
+        cef(d, "cohen", "r")
+    with pytest.raises(ValueError):
+        cef(d, "coucou", "hibou")
+    with pytest.raises(ValueError):
+        cef(d, "AUC", "eta_square")
+    # Effect sizes that require the raw data cannot be converted from a Cohen d
+    with pytest.raises(ValueError):
+        cef(d, "cohen", "cohen_dz")
+    with pytest.raises(ValueError):
+        cef(d, "cohen", "cles")
 
-    def test_compute_effsize(self):
-        """Test function compute_effsize"""
-        compute_effsize(x=x, y=y, eftype="cohen", paired=False)
-        compute_effsize(x=x, y=y, eftype="AUC", paired=True)
-        compute_effsize(x=x, y=y, eftype="r", paired=False)
-        compute_effsize(x=x, y=y, eftype="odds_ratio", paired=False)
-        compute_effsize(x=x, y=y, eftype="eta_square", paired=False)
-        compute_effsize(x=x, y=y, eftype="cles", paired=False)
-        compute_effsize(x=x, y=y, eftype="pointbiserialr", paired=False)
-        compute_effsize(x=x, y=y, eftype="none", paired=False)
-        # Unequal variances
-        z = np.random.normal(2.5, 3, 30)
-        compute_effsize(x=x, y=z, eftype="cohen")
-        # Wrong effect size type
-        with pytest.raises(ValueError):
-            compute_effsize(x=x, y=y, eftype="wrong")
-        # Unequal sample size with paired == True
-        z = np.random.normal(2.5, 3, 25)
-        with pytest.warns(UserWarning, match="unequal sizes"):
-            compute_effsize(x=x, y=z, paired=True)
-        # Compare with the effsize R package
-        a = [3.2, 6.4, 1.8, 2.4, 5.8, 6.5]
-        b = [2.4, 3.2, 3.2, 1.4, 2.8, 3.5]
-        d = compute_effsize(x=a, y=b, eftype="cohen", paired=False)
-        assert np.isclose(d, 1.002549)
-        # Note that ci are different than from R because we use a normal and
-        # not a T distribution to estimate the CI.
-        # Also, for paired samples, effsize does not return the Cohen d-avg.
-        # ci = compute_esci(ef=d, nx=na, ny=nb)
-        # assert ci[0] == -.2
-        # assert ci[1] == 2.2
-        # With Hedges correction
-        g = compute_effsize(x=a, y=b, eftype="hedges", paired=False)
-        assert np.isclose(g, 0.9254296)
-        # CLES
-        # Compare to
-        # https://janhove.github.io/reporting/2016/11/16/common-language-effect-sizes
-        x2 = [20, 22, 19, 20, 22, 18, 24, 20, 19, 24, 26, 13]
-        y2 = [38, 37, 33, 29, 14, 12, 20, 22, 17, 25, 26, 16]
-        cl = compute_effsize(x=x2, y=y2, eftype="cles")
-        assert np.isclose(cl, 0.3958333)
-        assert np.isclose((1 - cl), compute_effsize(x=y2, y=x2, eftype="cles"))
 
-        # One-sample: passing a scalar as y (issue #507)
-        # Cohen d = (mean(x) - mu) / std(x, ddof=1)
-        mu = 2.0
-        d_onesample = compute_effsize(x=x, y=mu, eftype="cohen")
-        assert np.isclose(d_onesample, (np.mean(x) - mu) / np.std(x, ddof=1))
-        # y=0 is a common use-case
-        d_zero = compute_effsize(x=x, y=0, eftype="cohen")
-        assert np.isclose(d_zero, np.mean(x) / np.std(x, ddof=1))
-        # One-sample: eftype is honored, with the one-sample Hedges correction (df = n - 1)
-        g_zero = compute_effsize(x=x, y=0, eftype="hedges")
-        assert np.isclose(g_zero, d_zero * (1 - 3 / (4 * (len(x) - 1) - 1)))
-        assert np.isclose(compute_effsize(x=x, y=0, eftype="AUC"), cef(d_zero, "cohen", "AUC"))
-        # One-sample CLES = P(X > mu) + .5 * P(X = mu)
-        assert compute_effsize([1, 2, 3, 4, 5], 3, eftype="cles") == 0.5
-        # One-sample correlation is not defined: NaN (so that pairwise_tests does not fail)
-        with pytest.warns(UserWarning):
-            assert np.isnan(compute_effsize(x=x, y=0, eftype="r"))
+def test_compute_effsize():
+    """Test function compute_effsize"""
+    # Cohen d with a pooled standard deviation
+    d = compute_effsize(x=x, y=y, eftype="cohen", paired=False)
+    poolsd = np.sqrt((np.var(x, ddof=1) + np.var(y, ddof=1)) / 2)  # nx == ny
+    assert np.isclose(d, (x.mean() - y.mean()) / poolsd)
+    # Cohen d-avg with paired samples, the same as above when nx == ny
+    assert np.isclose(compute_effsize(x=x, y=y, eftype="cohen", paired=True), d)
+    # Other effect sizes are converted from the Cohen d
+    for eftype in ["AUC", "odds_ratio", "eta_square", "pointbiserialr", "none", "hedges"]:
+        ef = compute_effsize(x=x, y=y, eftype=eftype, paired=False)
+        assert np.isclose(ef, cef(d, "cohen", eftype, nx=nx, ny=ny))
+    assert np.isclose(compute_effsize(x=x, y=y, eftype="r"), pearsonr(x, y)[0])
+    assert np.isclose(compute_effsize(x=x, y=y, eftype="cles"), np.mean(x[:, None] > y))
+    # Unequal variances and sample sizes
+    z = np.random.default_rng(42).normal(2.5, 3, 30)
+    d = compute_effsize(x=x, y=z, eftype="cohen")
+    poolsd = np.sqrt((19 * np.var(x, ddof=1) + 29 * np.var(z, ddof=1)) / 48)
+    assert np.isclose(d, (x.mean() - z.mean()) / poolsd)
+    # Wrong effect size type
+    with pytest.raises(ValueError):
+        compute_effsize(x=x, y=y, eftype="wrong")
+    # Unequal sample size with paired == True
+    z = z[:25]
+    with pytest.warns(UserWarning, match="unequal sizes"):
+        d_paired = compute_effsize(x=x, y=z, paired=True)
+    assert d_paired == compute_effsize(x=x, y=z, paired=False)
+    # Missing values are removed
+    x_nan, y_nan = np.append(x, np.nan), np.append(y, 1.0)
+    d_avg = compute_effsize(x, y, paired=True)
+    assert np.isclose(compute_effsize(x_nan, y_nan, paired=True), d_avg)
+    assert np.isclose(compute_effsize(x_nan, y, paired=False), compute_effsize(x, y))
+    # Compare with the effsize R package
+    a = [3.2, 6.4, 1.8, 2.4, 5.8, 6.5]
+    b = [2.4, 3.2, 3.2, 1.4, 2.8, 3.5]
+    d = compute_effsize(x=a, y=b, eftype="cohen", paired=False)
+    assert np.isclose(d, 1.002549)
+    # Note that ci are different than from R because we use a normal and
+    # not a T distribution to estimate the CI.
+    # Also, for paired samples, effsize does not return the Cohen d-avg.
+    # ci = compute_esci(ef=d, nx=na, ny=nb)
+    # assert ci[0] == -.2
+    # assert ci[1] == 2.2
+    # With Hedges correction
+    g = compute_effsize(x=a, y=b, eftype="hedges", paired=False)
+    assert np.isclose(g, 0.9254296)
+    # CLES
+    # Compare to
+    # https://janhove.github.io/reporting/2016/11/16/common-language-effect-sizes
+    x2 = [20, 22, 19, 20, 22, 18, 24, 20, 19, 24, 26, 13]
+    y2 = [38, 37, 33, 29, 14, 12, 20, 22, 17, 25, 26, 16]
+    cl = compute_effsize(x=x2, y=y2, eftype="cles")
+    assert np.isclose(cl, 0.3958333)
+    assert np.isclose((1 - cl), compute_effsize(x=y2, y=x2, eftype="cles"))
 
-        # CLES matches the brute-force pairwise definition, including ties
-        rng = np.random.default_rng(0)
-        a, b = rng.integers(0, 10, 50), rng.integers(0, 10, 40)
-        diff = a[:, None] - b
-        cles = np.where(diff == 0, 0.5, diff > 0).mean()
-        assert np.isclose(compute_effsize(a, b, eftype="cles"), cles)
+    # One-sample: passing a scalar as y (issue #507)
+    # Cohen d = (mean(x) - mu) / std(x, ddof=1)
+    mu = 2.0
+    d_onesample = compute_effsize(x=x, y=mu, eftype="cohen")
+    assert np.isclose(d_onesample, (np.mean(x) - mu) / np.std(x, ddof=1))
+    # y=0 is a common use-case
+    d_zero = compute_effsize(x=x, y=0, eftype="cohen")
+    assert np.isclose(d_zero, np.mean(x) / np.std(x, ddof=1))
+    # One-sample: eftype is honored, with the one-sample Hedges correction (df = n - 1)
+    g_zero = compute_effsize(x=x, y=0, eftype="hedges")
+    assert np.isclose(g_zero, d_zero * (1 - 3 / (4 * (len(x) - 1) - 1)))
+    assert np.isclose(compute_effsize(x=x, y=0, eftype="AUC"), cef(d_zero, "cohen", "AUC"))
+    # One-sample CLES = P(X > mu) + .5 * P(X = mu)
+    assert compute_effsize([1, 2, 3, 4, 5], 3, eftype="cles") == 0.5
+    # One-sample correlation is not defined: NaN (so that pairwise_tests does not fail)
+    with pytest.warns(UserWarning):
+        assert np.isnan(compute_effsize(x=x, y=0, eftype="r"))
 
-        # Cohen's dz for paired samples (issue #450)
-        # dz = mean(x - y) / std(x - y, ddof=1) = t / sqrt(n)
-        dz = compute_effsize(x=x, y=y, paired=True, eftype="cohen_dz")
-        diff = np.array(x) - np.array(y)
-        assert np.isclose(dz, diff.mean() / diff.std(ddof=1))
-        # Verify equivalence with t / sqrt(n)
-        from scipy.stats import ttest_rel
+    # CLES matches the brute-force pairwise definition, including ties
+    rng = np.random.default_rng(0)
+    a, b = rng.integers(0, 10, 50), rng.integers(0, 10, 40)
+    diff = a[:, None] - b
+    cles = np.where(diff == 0, 0.5, diff > 0).mean()
+    assert np.isclose(compute_effsize(a, b, eftype="cles"), cles)
 
-        tval, _ = ttest_rel(x, y)
-        assert np.isclose(dz, tval / np.sqrt(nx))
-        # cohen_dz with paired=False should warn and fall back to Cohen's d
-        with pytest.warns(UserWarning):
-            d_fallback = compute_effsize(x=x, y=y, paired=False, eftype="cohen_dz")
-        d_cohen = compute_effsize(x=x, y=y, paired=False, eftype="cohen")
-        assert np.isclose(d_fallback, d_cohen)
+    # Cohen's dz for paired samples (issue #450)
+    # dz = mean(x - y) / std(x - y, ddof=1) = t / sqrt(n)
+    dz = compute_effsize(x=x, y=y, paired=True, eftype="cohen_dz")
+    diff = np.array(x) - np.array(y)
+    assert np.isclose(dz, diff.mean() / diff.std(ddof=1))
+    # Verify equivalence with t / sqrt(n)
+    tval, _ = ttest_rel(x, y)
+    assert np.isclose(dz, tval / np.sqrt(nx))
+    # cohen_dz with paired=False should warn and fall back to Cohen's d
+    with pytest.warns(UserWarning):
+        d_fallback = compute_effsize(x=x, y=y, paired=False, eftype="cohen_dz")
+    d_cohen = compute_effsize(x=x, y=y, paired=False, eftype="cohen")
+    assert np.isclose(d_fallback, d_cohen)
 
-    def test_compute_effsize_from_t(self):
-        """Test function compute_effsize_from_t"""
-        tval, nx, ny = 2.90, 35, 25
-        compute_effsize_from_t(tval, nx=nx, ny=ny, eftype="hedges")
-        tval, N = 2.90, 60
-        compute_effsize_from_t(tval, N=N, eftype="cohen")
-        # Wrong desired eftype
-        with pytest.raises(ValueError):
-            compute_effsize_from_t(tval, nx=x, ny=y, eftype="wrong")
-        # T is not a float
-        with pytest.raises(ValueError):
-            compute_effsize_from_t([1, 2, 3], nx=nx, ny=ny)
-        # No sample size info
-        with pytest.raises(ValueError):
-            compute_effsize_from_t(tval)
-        # Compare with Lakens spreadsheet: https://osf.io/vbdah/
-        assert np.isclose(compute_effsize_from_t(1.1, N=31), 0.395131664)
-        assert np.isclose(compute_effsize_from_t(1.74, nx=6, ny=6), 1.00458946)
-        assert np.isclose(compute_effsize_from_t(2.5, nx=10, ny=14), 1.0350983)
+
+def test_compute_effsize_from_t():
+    """Test function compute_effsize_from_t"""
+    # Lakens 2013: d = t * sqrt(1 / nx + 1 / ny), or d = 2t / sqrt(N)
+    tval, nx, ny = 2.90, 35, 25
+    d = tval * np.sqrt(1 / nx + 1 / ny)
+    assert np.isclose(compute_effsize_from_t(tval, nx=nx, ny=ny, eftype="cohen"), d)
+    g = compute_effsize_from_t(tval, nx=nx, ny=ny, eftype="hedges")
+    assert np.isclose(g, d * (1 - 3 / (4 * (nx + ny) - 9)))
+    tval, N = 2.90, 60
+    assert np.isclose(compute_effsize_from_t(tval, N=N, eftype="cohen"), 2 * tval / np.sqrt(N))
+    # Wrong desired eftype
+    with pytest.raises(ValueError):
+        compute_effsize_from_t(tval, nx=x, ny=y, eftype="wrong")
+    # T is not a float
+    with pytest.raises(ValueError):
+        compute_effsize_from_t([1, 2, 3], nx=nx, ny=ny)
+    # No sample size info
+    with pytest.raises(ValueError):
+        compute_effsize_from_t(tval)
+    # Compare with Lakens spreadsheet: https://osf.io/vbdah/
+    assert np.isclose(compute_effsize_from_t(1.1, N=31), 0.395131664)
+    assert np.isclose(compute_effsize_from_t(1.74, nx=6, ny=6), 1.00458946)
+    assert np.isclose(compute_effsize_from_t(2.5, nx=10, ny=14), 1.0350983)

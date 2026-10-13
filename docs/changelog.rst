@@ -3,6 +3,20 @@
 What's new
 ##########
 
+Unreleased
+----------
+
+**Bugfixes**
+
+- :py:func:`pingouin.cronbach_alpha`: with ``nan_policy="listwise"``, the confidence interval used the total number of subjects instead of the number of subjects without missing values, so it was too narrow. The alpha itself is unchanged. Note that R's ``psych::alpha(use="complete.obs")`` also uses the total number of subjects.
+- :py:func:`pingouin.friedman` now raises a ``ValueError`` for an invalid ``method``, instead of an ``UnboundLocalError``.
+
+**New features**
+
+- :py:func:`pingouin.corr`: new ``seed`` argument for the bootstrap of the Shepherd's pi correlation (``method="shepherd"``). Without it, the global NumPy random state is used, as before.
+
+*************
+
 v0.7.0 (September 2026)
 -----------------------
 

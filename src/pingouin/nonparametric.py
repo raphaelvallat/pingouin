@@ -689,6 +689,9 @@ def friedman(data=None, dv=None, within=None, subject=None, method="chisq"):
               Source         W     ddof1      ddof2    F     p_unc
     Friedman  Within  0.083333  1.833333  20.166667  1.0  0.378959
     """
+    if method not in ["chisq", "f"]:
+        raise ValueError(f"method must be 'chisq' or 'f', got {method!r}.")
+
     # Convert from wide to long-format, if needed
     if all([v is None for v in [dv, within, subject]]):
         assert isinstance(data, pd.DataFrame)
@@ -737,7 +740,7 @@ def friedman(data=None, dv=None, within=None, subject=None, method="chisq"):
         stats = pd.DataFrame(
             {"Source": within, "W": W, "ddof1": ddof1, "Q": Q, "p_unc": p_unc}, index=["Friedman"]
         )
-    elif method == "f":
+    else:
         # Compute the F statistic
         F = W * (n - 1) / (1 - W)
         # Approximate the p-value

@@ -7,3 +7,8 @@ include conftest.py
 
 # Add datasets .csv files
 recursive-include src/pingouin/datasets *.csv
+
+# Ship the whole tests directory: setuptools only adds tests/test*.py by default, which leaves out
+# tests/conftest.py (Agg backend, options restore fixture) and the R reference scripts
+graft tests
+global-exclude __pycache__ *.py[cod]

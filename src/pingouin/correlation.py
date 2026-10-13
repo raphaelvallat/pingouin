@@ -175,7 +175,7 @@ def _skipped(x, y, corr_type="spearman"):
     return r, pval, outliers
 
 
-def _bsmahal(a, b, n_boot=200):
+def _bsmahal(a, b, n_boot=200, seed=None):
     """
     Bootstraps Mahalanobis distances for Shepherd's pi correlation.
 
@@ -187,6 +187,8 @@ def _bsmahal(a, b, n_boot=200):
         Data
     n_boot : int
         Number of bootstrap samples to calculate.
+    seed : int or None
+        Random state seed. If None, use the global NumPy random state.
 
     Returns
     -------
@@ -197,7 +199,9 @@ def _bsmahal(a, b, n_boot=200):
     n, m = b.shape
     MD = np.zeros((n, n_boot))
     nr = np.arange(n)
-    xB = np.random.choice(nr, size=(n_boot, n), replace=True)
+    # Fall back to the global random state for backward compatibility with np.random.seed()
+    choice = np.random.choice if seed is None else np.random.RandomState(seed).choice
+    xB = choice(nr, size=(n_boot, n), replace=True)
     # Bootstrap the MD
     for i in np.arange(n_boot):
         s1 = b[xB[i, :], 0]
@@ -211,7 +215,7 @@ def _bsmahal(a, b, n_boot=200):
     return MD.mean(1)
 
 
-def _shepherd(x, y, n_boot=200):
+def _shepherd(x, y, n_boot=200, seed=None):
     """
     Shepherd's Pi correlation, equivalent to Spearman's rho after outliers
     removal.
@@ -222,6 +226,8 @@ def _shepherd(x, y, n_boot=200):
         First and second set of observations. x and y must be independent.
     n_boot : int
         Number of bootstrap samples to calculate.
+    seed : int or None
+        Random state seed for the bootstrap. If None, use the global NumPy random state.
 
     Returns
     -------
@@ -241,7 +247,7 @@ def _shepherd(x, y, n_boot=200):
     """
     X = np.column_stack((x, y))
     # Bootstrapping on Mahalanobis distance
-    m = _bsmahal(X, X, n_boot)
+    m = _bsmahal(X, X, n_boot, seed=seed)
     # Determine outliers
     outliers = m >= 6
     # Compute correlation
@@ -405,7 +411,8 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
         * ``'shepherd'``: Shepherd's pi correlation (robust)
         * ``'skipped'``: Skipped correlation (robust)
     **kwargs : optional
-        Optional argument(s) passed to the lower-level correlation functions.
+        Optional argument(s) passed to the lower-level correlation functions. For example,
+        ``seed`` (int) makes the bootstrap of the Shepherd's pi correlation reproducible.
 
     Returns
     -------
