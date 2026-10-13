@@ -3,11 +3,13 @@ import pandas as pd
 from scipy.stats import f
 
 from .config import _no_rounding
-from .utils import _postprocess_dataframe
+from .parametric import anova
+from .utils import _postprocess_dataframe, _register_dataframe_method
 
 __all__ = ["cronbach_alpha", "intraclass_corr"]
 
 
+@_register_dataframe_method
 def cronbach_alpha(
     data=None, items=None, scores=None, subject=None, nan_policy="pairwise", ci=0.95
 ):
@@ -155,6 +157,7 @@ def cronbach_alpha(
     return cronbach, np.round([lower, upper], 3)
 
 
+@_register_dataframe_method
 def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_policy="raise"):
     """
     Compute intraclass correlation (ICC) coefficients to assess measurement reliability.
@@ -297,7 +300,6 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_poli
     ICC(A,k)  0.914  11.787    7   21   0.0  [0.75, 0.98]
     ICC(C,k)  0.915  11.787    7   21   0.0  [0.75, 0.98]
     """
-    from pingouin import anova
 
     # Safety check
     assert isinstance(data, pd.DataFrame), "data must be a dataframe."

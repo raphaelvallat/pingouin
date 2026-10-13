@@ -2,18 +2,18 @@ import warnings
 
 import numpy as np
 import pandas as pd
-import pandas_flavor as pf
 from scipy.linalg import pinvh
 from scipy.stats import norm, t
 
 from .config import _no_rounding
 from .utils import _flatten_list as _fl
-from .utils import _postprocess_dataframe
+from .utils import _postprocess_dataframe, _register_dataframe_method
 from .utils import remove_na as rm_na
 
 __all__ = ["linear_regression", "logistic_regression", "mediation_analysis"]
 
 
+@_register_dataframe_method
 def linear_regression(
     X,
     y,
@@ -375,7 +375,8 @@ def linear_regression(
             f"deficient (rank {rank} with {Xw.shape[1]} columns). "
             "That means that one or more of the columns in `X` "
             "are a linear combination of one of more of the "
-            "other columns."
+            "other columns.",
+            stacklevel=2,
         )
 
     # Degrees of freedom
@@ -614,6 +615,7 @@ def _relimp(S):
     return stats_relimp
 
 
+@_register_dataframe_method
 def logistic_regression(
     X, y, coef_only=False, alpha=0.05, as_dataframe=True, remove_na=False, **kwargs
 ):
@@ -1040,7 +1042,7 @@ def _pval_from_bootci(boot, estimate):
     return min(out, 1)
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def mediation_analysis(
     data=None,
     x=None,
@@ -1274,7 +1276,7 @@ def mediation_analysis(
                 sxm[j] = logistic_regression(
                     X_val, M_val[:, idx], alpha=alpha, **logreg_kwargs
                 ).loc[[1], cols]
-            sxm[j].at[1, "names"] = "%s ~ X" % j
+            sxm[j].at[1, "names"] = f"{j} ~ X"
         sxm = pd.concat(sxm, ignore_index=True)
 
         # Y ~ M + covar
@@ -1285,7 +1287,7 @@ def mediation_analysis(
         direct = linear_regression(XM_val, y_val, alpha=alpha).loc[[1], cols]
 
         # Rename paths
-        smy["names"] = smy["names"].apply(lambda x: "Y ~ %s" % x)
+        smy["names"] = smy["names"].apply(lambda x: f"Y ~ {x}")
         direct.at[1, "names"] = "Direct"
         sxy.at[1, "names"] = "Total"
 
@@ -1331,7 +1333,7 @@ def mediation_analysis(
         if n_mediator == 1:
             indirect["names"] = "Indirect"
         else:
-            indirect["names"] = indirect["names"].apply(lambda x: "Indirect %s" % x)
+            indirect["names"] = indirect["names"].apply(lambda x: f"Indirect {x}")
         stats = pd.concat([stats, indirect], axis=0, ignore_index=True, sort=False)
         stats = stats.rename(columns={"names": "path"})
 

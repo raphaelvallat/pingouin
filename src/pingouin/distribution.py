@@ -6,11 +6,14 @@ import pandas as pd
 import scipy.stats
 
 from .utils import _flatten_list as _fl
-from .utils import _postprocess_dataframe, remove_na
+from .utils import _postprocess_dataframe, _register_dataframe_method, remove_na
+
+_SCIPY_VERSION = tuple(int(v) for v in scipy.__version__.split(".")[:2])
 
 __all__ = ["normality", "homoscedasticity", "anderson", "epsilon", "sphericity"]
 
 
+@_register_dataframe_method
 def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
     """Univariate normality test.
 
@@ -176,7 +179,9 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
             for idx, x in data.groupby(group, observed=True, sort=False)[dv]:
                 x = x.dropna().to_numpy()
                 if x.size <= 3:
-                    warnings.warn(f"Group {idx} has less than 4 valid samples. Returning NaN.")
+                    warnings.warn(
+                        f"Group {idx} has less than 4 valid samples. Returning NaN.", stacklevel=2
+                    )
                     rows[idx] = (np.nan, np.nan)
                 else:
                     rows[idx] = tuple(func(x))[:2]
@@ -186,6 +191,7 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
     return _postprocess_dataframe(stats)
 
 
+@_register_dataframe_method
 def homoscedasticity(data, dv=None, group=None, method="levene", alpha=0.05, **kwargs):
     """Test equality of variance.
 
@@ -344,6 +350,31 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=0.05, **k
     return _postprocess_dataframe(stats)
 
 
+# Significance levels (in %) of the critical values tabulated in scipy.stats.anderson
+_ANDERSON_SIG_LEVELS = {
+    "norm": np.array([15, 10, 5, 2.5, 1]),
+    "expon": np.array([15, 10, 5, 2.5, 1]),
+    "logistic": np.array([25, 10, 5, 2.5, 1, 0.5]),
+    "gumbel": np.array([25, 10, 5, 2.5, 1]),
+    "gumbel_l": np.array([25, 10, 5, 2.5, 1]),
+    "gumbel_r": np.array([25, 10, 5, 2.5, 1]),
+    "extreme1": np.array([25, 10, 5, 2.5, 1]),
+}
+
+
+def _anderson_pval(x, dist):
+    """Interpolated p-value of the Anderson-Darling test, for all supported SciPy versions.
+
+    SciPy >= 1.17 requires a ``method`` argument and no longer returns the critical values when
+    it is set. Older versions do not have ``method``, so the p-value is interpolated in the same
+    way as SciPy >= 1.17 does.
+    """
+    if _SCIPY_VERSION >= (1, 17):
+        return scipy.stats.anderson(x, dist=dist, method="interpolate").pvalue
+    res = scipy.stats.anderson(x, dist=dist)
+    return np.interp(res.statistic, res.critical_values, res.significance_level / 100)
+
+
 def anderson(*args, dist="norm"):
     """Anderson-Darling test of distribution.
 
@@ -393,13 +424,20 @@ def anderson(*args, dist="norm"):
     >>> anderson(x, dist="expon")
     (True, 15.0)
     """
+    if dist not in _ANDERSON_SIG_LEVELS:
+        raise ValueError(f"dist must be one of {list(_ANDERSON_SIG_LEVELS)}, got {dist!r}.")
+    sig = _ANDERSON_SIG_LEVELS[dist]
     k = len(args)
     from_dist = np.zeros(k, dtype="bool")
     sig_level = np.zeros(k)
     for j in range(k):
-        st, cr, sig = scipy.stats.anderson(args[j], dist=dist)
-        from_dist[j] = True if (st < cr).any() else False
-        sig_level[j] = sig[np.argmin(np.abs(st - cr))]
+        pval = _anderson_pval(args[j], dist)
+        # SciPy linearly interpolates the p-value between the tabulated critical values and clips
+        # it to the range of the significance levels. We can therefore recover (1) whether the
+        # statistic is below the critical value of the lowest significance level and (2) which
+        # critical value is the closest to the statistic, without the critical values themselves.
+        from_dist[j] = pval > sig[-1] / 100
+        sig_level[j] = sig[np.argmin(np.abs(100 * pval - sig))]
 
     if k == 1:
         from_dist = from_dist[0]
@@ -434,7 +472,7 @@ def _rm_contrasts(columns):
     if np.prod(n_levels) != len(columns):
         raise ValueError("Each combination of the within-subject factors must appear exactly once.")
     C = np.ones((len(columns), 1))
-    for c, k in zip(codes, n_levels):
+    for c, k in zip(codes, n_levels, strict=True):
         # Row-wise Kronecker product. A factor with only one level has no contrast and is ignored,
         # e.g. the interaction of a (1, k) design is the main effect of the second factor.
         if k > 1:
@@ -516,14 +554,14 @@ def _long_to_wide_rm(data, dv=None, within=None, subject=None):
     This internal function is used in pingouin.epsilon and pingouin.sphericity.
     """
     # Check that all columns are present
-    assert dv in data.columns, "%s not in data" % dv
-    assert data[dv].dtype.kind in "bfiu", "%s must be numeric" % dv
-    assert subject in data.columns, "%s not in data" % subject
-    assert not data[subject].isnull().any(), "Cannot have missing values in %s" % subject
+    assert dv in data.columns, f"{dv} not in data"
+    assert data[dv].dtype.kind in "bfiu", f"{dv} must be numeric"
+    assert subject in data.columns, f"{subject} not in data"
+    assert not data[subject].isnull().any(), f"Cannot have missing values in {subject}"
     if isinstance(within, (str, int)):
         within = [within]  # within = ['fac1'] or ['fac1', 'fac2']
     for w in within:
-        assert w in data.columns, "%s not in data" % w
+        assert w in data.columns, f"{w} not in data"
     # Keep all relevant columns and reset index
     data = data[_fl([subject, within, dv])]
     # Convert to wide-format + collapse to the mean
@@ -546,6 +584,7 @@ def _wide_rm(data, dv=None, within=None, subject=None):
     return data.dropna()
 
 
+@_register_dataframe_method
 def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
     """Epsilon adjustement factor for repeated measures.
 
@@ -714,6 +753,7 @@ def epsilon(data, dv=None, within=None, subject=None, correction="gg"):
     return eps
 
 
+@_register_dataframe_method
 def sphericity(data, dv=None, within=None, subject=None, method="mauchly", alpha=0.05):
     """Mauchly and JNS test for sphericity.
 

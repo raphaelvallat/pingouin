@@ -24,6 +24,7 @@ data_ct = pd.DataFrame(
 class TestContingency(TestCase):
     """Test contingency.py."""
 
+    @pytest.mark.filterwarnings("ignore:Low count:UserWarning")
     def test_chi2_independence(self):
         """Test function chi2_independence."""
         # Setup
@@ -36,7 +37,8 @@ class TestContingency(TestCase):
         data[~mask_class_1] = 0
 
         # Comparing results with SciPy
-        _, _, stats = pg.chi2_independence(data, x="x", y="y")
+        with pytest.warns(UserWarning, match="Low count"):
+            _, _, stats = pg.chi2_independence(data, x="x", y="y")
         contingency_table = pd.crosstab(data["x"], data["y"])
         for i in stats.index:
             lambda_ = stats.at[i, "lambda"]

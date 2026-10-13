@@ -1,6 +1,9 @@
-# Add README, LICENSE and requirements :
+# Add README and LICENSE
 include README.rst
 include LICENSE
+
+# Root conftest.py (doctest configuration), since the sdist also ships the tests
+include conftest.py
 
 # Add datasets .csv files
 recursive-include src/pingouin/datasets *.csv

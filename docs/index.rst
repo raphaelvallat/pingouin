@@ -70,16 +70,17 @@ The main dependencies of Pingouin are:
 * `NumPy <https://numpy.org/>`_ >= 2.2.2
 * `SciPy <https://www.scipy.org/>`_ >= 1.15.0
 * `Pandas <https://pandas.pydata.org/>`_ >= 2.3.0
-* `Pandas-flavor <https://github.com/Zsailer/pandas_flavor>`_
-* `Statsmodels <https://www.statsmodels.org/>`_ >= 0.14.5
 * `Matplotlib <https://matplotlib.org/>`_ >= 3.10.1
 * `Seaborn <https://seaborn.pydata.org/>`_ >= 0.13.2
 * `Scikit-learn <https://scikit-learn.org/>`_ >= 1.6.1
 * `Tabulate <https://github.com/astanin/python-tabulate>`_
 
-Some functions additionally require:
+Some functions additionally require the following optional dependencies, which can be installed
+with ``pip install "pingouin[extras]"``:
 
-* `Mpmath <http://mpmath.org/>`_
+* `Statsmodels <https://www.statsmodels.org/>`_ >= 0.14.5: :py:func:`pingouin.ancova`,
+  :py:func:`pingouin.rm_corr` and :py:func:`pingouin.anova` with unbalanced or N-way designs
+* `Mpmath <http://mpmath.org/>`_: one-sided :py:func:`pingouin.bayesfactor_pearson`
 
 Pingouin can be easily installed using `uv <https://docs.astral.sh/uv/>`_
 
@@ -115,10 +116,7 @@ Quick start
 
 * If you want to *report a bug*, please open an issue on the `GitHub repository <https://github.com/raphaelvallat/pingouin>`_.
 
-* If you want to see *Pingouin in action*, please click on the link below and navigate to the *notebooks/* folder to open a collection of interactive Jupyter notebooks.
-
-  .. image:: https://mybinder.org/badge.svg
-      :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/main
+* If you want to see *Pingouin in action*, please have a look at the collection of Jupyter notebooks in the `notebooks/ <https://github.com/raphaelvallat/pingouin/tree/main/notebooks>`_ folder.
 
 10 minutes to Pingouin
 ----------------------
@@ -209,7 +207,7 @@ The :py:func:`pingouin.normality` function works with lists, arrays, or pandas D
 
 .. parsed-literal::
 
-   (False, 0.00018)
+   HZResults(hz=1.697, pval=0.00018, normal=False)
 
 ------------
 
@@ -299,7 +297,7 @@ The :py:func:`pingouin.normality` function works with lists, arrays, or pandas D
 
 .. code-block:: python
 
-  # Compute the two-way mixed ANOVA and export to a .csv file
+  # Compute the two-way mixed ANOVA
   aov = pg.mixed_anova(data=df, dv='Scores', between='Group', within='Time',
                        subject='Subject', correction=False, effsize="np2")
   pg.print_table(aov)
@@ -501,20 +499,14 @@ Several functions of Pingouin can be used directly as :py:class:`pandas.DataFram
 
 The functions that are currently supported as pandas method are:
 
-* :py:func:`pingouin.anova`
-* :py:func:`pingouin.ancova`
-* :py:func:`pingouin.rm_anova`
-* :py:func:`pingouin.mixed_anova`
-* :py:func:`pingouin.welch_anova`
-* :py:func:`pingouin.pairwise_tests`
-* :py:func:`pingouin.pairwise_tukey`
-* :py:func:`pingouin.pairwise_gameshowell`
-* :py:func:`pingouin.pairwise_corr`
-* :py:func:`pingouin.partial_corr`
-* :py:func:`pingouin.pcorr`
-* :py:func:`pingouin.rcorr`
-* :py:func:`pingouin.ptests`
-* :py:func:`pingouin.mediation_analysis`
+* ANOVAs: :py:func:`~pingouin.anova`, :py:func:`~pingouin.ancova`, :py:func:`~pingouin.rm_anova`, :py:func:`~pingouin.mixed_anova`, :py:func:`~pingouin.welch_anova`
+* Non-parametric: :py:func:`~pingouin.kruskal`, :py:func:`~pingouin.friedman`, :py:func:`~pingouin.cochran`
+* Post-hocs: :py:func:`~pingouin.pairwise_tests`, :py:func:`~pingouin.pairwise_tukey`, :py:func:`~pingouin.pairwise_gameshowell`, :py:func:`~pingouin.ptests`
+* Correlations: :py:func:`~pingouin.pairwise_corr`, :py:func:`~pingouin.partial_corr`, :py:func:`~pingouin.pcorr`, :py:func:`~pingouin.rcorr`, :py:func:`~pingouin.rm_corr`
+* Distribution: :py:func:`~pingouin.normality`, :py:func:`~pingouin.homoscedasticity`, :py:func:`~pingouin.sphericity`, :py:func:`~pingouin.epsilon`, :py:func:`~pingouin.box_m`
+* Contingency: :py:func:`~pingouin.chi2_independence`, :py:func:`~pingouin.chi2_mcnemar`, :py:func:`~pingouin.dichotomous_crosstab`
+* Regression: :py:func:`~pingouin.linear_regression`, :py:func:`~pingouin.logistic_regression`, :py:func:`~pingouin.mediation_analysis`
+* Reliability: :py:func:`~pingouin.cronbach_alpha`, :py:func:`~pingouin.intraclass_corr`
 
 
 ***********************

@@ -162,7 +162,7 @@ class TestEffsize(TestCase):
         paired = [True, False]
         pr = list(product(methods, funcs, paired))
         for m, f, p in pr:
-            compute_bootci(x, y, func=f, method=m, seed=123, n_boot=100)
+            compute_bootci(x, y, func=f, method=m, paired=p, seed=123, n_boot=100)
 
         # Now the univariate functions
         funcs = ["mean", "std", "var"]
@@ -206,7 +206,8 @@ class TestEffsize(TestCase):
         assert round(cef(d, "cohen", "odds_ratio"), 4) == 2.0658
         cef(d, "cohen", "hedges", nx=10, ny=10)
         cef(d, "cohen", "pointbiserialr")
-        cef(d, "cohen", "hedges")
+        with pytest.warns(UserWarning, match="nx and ny"):
+            cef(d, "cohen", "hedges")
 
         # Point-biserial correlation
         rpb = 0.65
@@ -263,7 +264,8 @@ class TestEffsize(TestCase):
             compute_effsize(x=x, y=y, eftype="wrong")
         # Unequal sample size with paired == True
         z = np.random.normal(2.5, 3, 25)
-        compute_effsize(x=x, y=z, paired=True)
+        with pytest.warns(UserWarning, match="unequal sizes"):
+            compute_effsize(x=x, y=z, paired=True)
         # Compare with the effsize R package
         a = [3.2, 6.4, 1.8, 2.4, 5.8, 6.5]
         b = [2.4, 3.2, 3.2, 1.4, 2.8, 3.5]

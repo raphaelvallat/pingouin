@@ -9,6 +9,7 @@ from numpy.testing import assert_allclose, assert_almost_equal, assert_equal
 from pandas.testing import assert_frame_equal
 from scipy.stats import linregress, zscore
 from sklearn.linear_model import LinearRegression
+from statsmodels.tools.sm_exceptions import SingularMatrixWarning
 
 from pingouin import read_dataset
 from pingouin.regression import (
@@ -158,7 +159,10 @@ class TestRegression(TestCase):
             res_pingouin = linear_regression(X, y, add_intercept=True)
 
         X_with_intercept = sm.add_constant(X)
-        res_sm = sm.OLS(endog=y, exog=X_with_intercept).fit()
+        with warnings.catch_warnings():
+            # The design is rank-deficient on purpose (statsmodels >= 0.15 warns about it)
+            warnings.simplefilter("ignore", SingularMatrixWarning)
+            res_sm = sm.OLS(endog=y, exog=X_with_intercept).fit()
 
         np.testing.assert_allclose(res_pingouin.residuals_, res_sm.resid)
         np.testing.assert_allclose(res_pingouin["coef"], res_sm.params)
@@ -338,12 +342,12 @@ class TestRegression(TestCase):
         logistic_regression(df_nan[["X", "M"]], df_nan["Ybin"], remove_na=True)
 
         # Test **kwargs
-        logistic_regression(X, y, solver="sag", C=10, max_iter=10000, penalty="l2")
+        logistic_regression(X, y, solver="sag", C=10, max_iter=10000)
 
         # Test regularization coefficients are strictly closer to 0 than
         # unregularized
         c = logistic_regression(df["X"], df["Ybin"], coef_only=True)
-        c_reg = logistic_regression(df["X"], df["Ybin"], coef_only=True, penalty="l2")
+        c_reg = logistic_regression(df["X"], df["Ybin"], coef_only=True, C=1.0)
         assert all(np.abs(c - 0) > np.abs(c_reg - 0))
 
         # With one column that has only one unique value
@@ -523,7 +527,10 @@ def test_linear_regression_exactly_collinear_dummies():
     y = rng.normal(size=n)
     with pytest.warns(UserWarning, match="rank 4 with 5 columns"):
         result = linear_regression(X, y, add_intercept=True)
-    reference = sm.OLS(y, sm.add_constant(X)).fit()
+    with warnings.catch_warnings():
+        # The design is rank-deficient on purpose (statsmodels >= 0.15 warns about it)
+        warnings.simplefilter("ignore", SingularMatrixWarning)
+        reference = sm.OLS(y, sm.add_constant(X)).fit()
     np.testing.assert_allclose(result["coef"], reference.params, rtol=1e-6, atol=1e-10)
     np.testing.assert_allclose(result["se"], reference.bse, rtol=1e-6)
     np.testing.assert_allclose(result["pval"], reference.pvalues, rtol=1e-6, atol=1e-8)
@@ -538,7 +545,8 @@ def test_linear_regression_saturated_design():
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)
         square = linear_regression(rng.normal(size=(4, 3)), y)
-        wide = linear_regression(rng.normal(size=(4, 5)), y)
+        with pytest.warns(UserWarning, match="rank deficient"):
+            wide = linear_regression(rng.normal(size=(4, 5)), y)
     assert square.shape[0] == 4
     for res in (square, wide):
         assert not np.isfinite(res["se"]).any()

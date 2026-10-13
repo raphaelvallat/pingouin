@@ -81,16 +81,17 @@ The main dependencies of Pingouin are:
 * `NumPy <https://numpy.org/>`_ >= 2.2.2
 * `SciPy <https://www.scipy.org/>`_ >= 1.15.0
 * `Pandas <https://pandas.pydata.org/>`_ >= 2.3.0
-* `Pandas-flavor <https://github.com/Zsailer/pandas_flavor>`_
-* `Statsmodels <https://www.statsmodels.org/>`_ >= 0.14.5
 * `Matplotlib <https://matplotlib.org/>`_ >= 3.10.1
 * `Seaborn <https://seaborn.pydata.org/>`_ >= 0.13.2
 * `Scikit-learn <https://scikit-learn.org/>`_ >= 1.6.1
 * `Tabulate <https://github.com/astanin/python-tabulate>`_
 
-Some functions additionally require:
+Some functions additionally require the following optional dependencies, which can be installed
+with ``pip install "pingouin[extras]"``:
 
-* `Mpmath <http://mpmath.org/>`_
+* `Statsmodels <https://www.statsmodels.org/>`_ >= 0.14.5: ``ancova``, ``rm_corr`` and
+  ``anova`` with unbalanced or N-way designs
+* `Mpmath <http://mpmath.org/>`_: one-sided ``bayesfactor_pearson``
 
 Pingouin is a Python 3 package and is currently tested for Python 3.11+.
 
@@ -138,10 +139,7 @@ To build and install from source, clone this repository and install in editable 
 Quick start
 ============
 
-Click on the link below and navigate to the notebooks/ folder to run a collection of interactive Jupyter notebooks showing the main functionalities of Pingouin. No need to install Pingouin beforehand, the notebooks run in a Binder environment.
-
-.. image:: https://mybinder.org/badge.svg
-    :target: https://mybinder.org/v2/gh/raphaelvallat/pingouin/main
+The `notebooks/ <https://github.com/raphaelvallat/pingouin/tree/main/notebooks>`_ folder contains a collection of Jupyter notebooks showing the main functionalities of Pingouin.
 
 10 minutes to Pingouin
 ----------------------
@@ -232,7 +230,7 @@ The `pingouin.normality` function works with lists, arrays, or pandas DataFrame 
 
 .. parsed-literal::
 
-   (False, 0.00018)
+   HZResults(hz=1.697, pval=0.00018, normal=False)
 
 ------------
 
@@ -458,20 +456,14 @@ Several functions of Pingouin can be used directly as pandas DataFrame methods. 
 
 The functions that are currently supported as pandas method are:
 
-* `pingouin.anova <https://pingouin-stats.org/generated/pingouin.anova.html#pingouin.anova>`_
-* `pingouin.ancova <https://pingouin-stats.org/generated/pingouin.ancova.html#pingouin.ancova>`_
-* `pingouin.rm_anova <https://pingouin-stats.org/generated/pingouin.rm_anova.html#pingouin.rm_anova>`_
-* `pingouin.mixed_anova <https://pingouin-stats.org/generated/pingouin.mixed_anova.html#pingouin.mixed_anova>`_
-* `pingouin.welch_anova <https://pingouin-stats.org/generated/pingouin.welch_anova.html#pingouin.welch_anova>`_
-* `pingouin.pairwise_tests <https://pingouin-stats.org/generated/pingouin.pairwise_tests.html#pingouin.pairwise_tests>`_
-* `pingouin.pairwise_tukey <https://pingouin-stats.org/generated/pingouin.pairwise_tukey.html#pingouin.pairwise_tukey>`_
-* `pingouin.pairwise_gameshowell <https://pingouin-stats.org/generated/pingouin.pairwise_gameshowell.html#pingouin.pairwise_gameshowell>`_
-* `pingouin.pairwise_corr <https://pingouin-stats.org/generated/pingouin.pairwise_corr.html#pingouin.pairwise_corr>`_
-* `pingouin.partial_corr <https://pingouin-stats.org/generated/pingouin.partial_corr.html#pingouin.partial_corr>`_
-* `pingouin.pcorr <https://pingouin-stats.org/generated/pingouin.pcorr.html#pingouin.pcorr>`_
-* `pingouin.rcorr <https://pingouin-stats.org/generated/pingouin.rcorr.html#pingouin.rcorr>`_
-* `pingouin.ptests <https://pingouin-stats.org/generated/pingouin.ptests.html#pingouin.ptests>`_
-* `pingouin.mediation_analysis <https://pingouin-stats.org/generated/pingouin.mediation_analysis.html#pingouin.mediation_analysis>`_
+* ANOVAs: `anova <https://pingouin-stats.org/generated/pingouin.anova.html>`_, `ancova <https://pingouin-stats.org/generated/pingouin.ancova.html>`_, `rm_anova <https://pingouin-stats.org/generated/pingouin.rm_anova.html>`_, `mixed_anova <https://pingouin-stats.org/generated/pingouin.mixed_anova.html>`_, `welch_anova <https://pingouin-stats.org/generated/pingouin.welch_anova.html>`_
+* Non-parametric: `kruskal <https://pingouin-stats.org/generated/pingouin.kruskal.html>`_, `friedman <https://pingouin-stats.org/generated/pingouin.friedman.html>`_, `cochran <https://pingouin-stats.org/generated/pingouin.cochran.html>`_
+* Post-hocs: `pairwise_tests <https://pingouin-stats.org/generated/pingouin.pairwise_tests.html>`_, `pairwise_tukey <https://pingouin-stats.org/generated/pingouin.pairwise_tukey.html>`_, `pairwise_gameshowell <https://pingouin-stats.org/generated/pingouin.pairwise_gameshowell.html>`_, `ptests <https://pingouin-stats.org/generated/pingouin.ptests.html>`_
+* Correlations: `pairwise_corr <https://pingouin-stats.org/generated/pingouin.pairwise_corr.html>`_, `partial_corr <https://pingouin-stats.org/generated/pingouin.partial_corr.html>`_, `pcorr <https://pingouin-stats.org/generated/pingouin.pcorr.html>`_, `rcorr <https://pingouin-stats.org/generated/pingouin.rcorr.html>`_, `rm_corr <https://pingouin-stats.org/generated/pingouin.rm_corr.html>`_
+* Distribution: `normality <https://pingouin-stats.org/generated/pingouin.normality.html>`_, `homoscedasticity <https://pingouin-stats.org/generated/pingouin.homoscedasticity.html>`_, `sphericity <https://pingouin-stats.org/generated/pingouin.sphericity.html>`_, `epsilon <https://pingouin-stats.org/generated/pingouin.epsilon.html>`_, `box_m <https://pingouin-stats.org/generated/pingouin.box_m.html>`_
+* Contingency: `chi2_independence <https://pingouin-stats.org/generated/pingouin.chi2_independence.html>`_, `chi2_mcnemar <https://pingouin-stats.org/generated/pingouin.chi2_mcnemar.html>`_, `dichotomous_crosstab <https://pingouin-stats.org/generated/pingouin.dichotomous_crosstab.html>`_
+* Regression: `linear_regression <https://pingouin-stats.org/generated/pingouin.linear_regression.html>`_, `logistic_regression <https://pingouin-stats.org/generated/pingouin.logistic_regression.html>`_, `mediation_analysis <https://pingouin-stats.org/generated/pingouin.mediation_analysis.html>`_
+* Reliability: `cronbach_alpha <https://pingouin-stats.org/generated/pingouin.cronbach_alpha.html>`_, `intraclass_corr <https://pingouin-stats.org/generated/pingouin.intraclass_corr.html>`_
 
 Development
 ===========

@@ -381,7 +381,7 @@ def compute_bootci(
 
     # Check string functions
     if isinstance(func, str):
-        func_str = "%s" % func
+        func_str = f"{func}"
         if func == "pearson":
             assert paired, "Paired should be True if using correlation functions."
 
@@ -397,7 +397,6 @@ def compute_bootci(
                 return spearmanr(x, y)[0]
 
         elif func in ["cohen", "hedges"]:
-            from pingouin.effsize import compute_effsize
 
             def func(x, y):
                 return compute_effsize(x, y, paired=paired, eftype=func_str)
@@ -595,7 +594,8 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
             # If shapes of x and y are not known, return cohen's d
             warnings.warn(
                 "You need to pass nx and ny arguments to compute "
-                "Hedges g. Returning Cohen's d instead"
+                "Hedges g. Returning Cohen's d instead",
+                stacklevel=2,
             )
             return d
     elif ot == "pointbiserialr":
@@ -793,7 +793,7 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
     y = np.asarray(y)
 
     if x.size != y.size and paired:
-        warnings.warn("x and y have unequal sizes. Switching to paired == False.")
+        warnings.warn("x and y have unequal sizes. Switching to paired == False.", stacklevel=2)
         paired = False
 
     # Remove rows with missing values
@@ -802,7 +802,9 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
 
     if ny == 1 and eftype.lower() == "r":
         # Do not raise so that pingouin.pairwise_tests does not fail on single-observation groups
-        warnings.warn("The correlation coefficient is not defined for a one-sample test.")
+        warnings.warn(
+            "The correlation coefficient is not defined for a one-sample test.", stacklevel=2
+        )
         return np.nan
     if ny == 1 and eftype.lower() != "cles":
         # Case 1: One-sample Test. CLES = P(X > mu) + .5 * P(X = mu) is computed below.
@@ -826,7 +828,8 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
         if not paired:
             warnings.warn(
                 "Cohen's dz is only defined for paired samples. "
-                "Computing regular Cohen's d instead."
+                "Computing regular Cohen's d instead.",
+                stacklevel=2,
             )
         else:
             diff = x - y

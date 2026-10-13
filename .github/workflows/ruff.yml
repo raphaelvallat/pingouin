@@ -7,6 +7,6 @@ jobs:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v7
       - name: "Linting"
-        run: uvx ruff check
+        run: uvx ruff@0.15.8 check  # Keep in sync with pyproject.toml
       - name: "Formatting"
-        run: uvx ruff format --check
+        run: uvx ruff@0.15.8 format --check

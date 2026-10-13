@@ -12,7 +12,7 @@ from pingouin.utils import (
     _check_eftype,
     _flatten_list,
     _get_round_setting_for,
-    _is_mpmath_installed,
+    _is_installed,
     _perm_pval,
     _postprocess_dataframe,
     print_table,
@@ -49,8 +49,7 @@ class TestUtils(TestCase):
         df2 = df2.assign(Values2=[1.54321, 5.87654, 8.23456, 3.45678])
         df2.index = ["row" + str(x) for x in df.index]
 
-        # set rounding options (keeping original options dict to restore after)
-        old_opts = pingouin.options.copy()
+        # set rounding options (restored after the test by the autouse fixture in conftest.py)
         pingouin.options.clear()
         pingouin.options["round"] = 4
         pingouin.options["round.cell.[row0]x[Values]"] = None
@@ -83,14 +82,19 @@ class TestUtils(TestCase):
         np.testing.assert_array_equal(df3.at[0, "CI95"], [0.1, 2.0])
         assert df3["BF10"].tolist() == ["1.235", "1.23e-05"]
 
-        # restore old options
+        # Missing default rounding option: no rounding
         pingouin.options.clear()
-        pingouin.options.update(old_opts)
+        pd.testing.assert_frame_equal(_postprocess_dataframe(df), df)
+
+        # Invalid rounding options
+        for opt in [1.5, "2", True]:
+            pingouin.options["round"] = opt
+            with pytest.raises(TypeError, match="Rounding options"):
+                _postprocess_dataframe(df)
 
     def test_get_round_setting_for(self):
         """Test function _get_round_setting_for."""
-        # set rounding options (keeping original options dict to restore after)
-        old_opts = pingouin.options.copy()
+        # set rounding options (restored after the test by the autouse fixture in conftest.py)
         pingouin.options.clear()
         pingouin.options["round"] = 4
         pingouin.options["round.cell.[row0]x[Values]"] = None
@@ -103,9 +107,8 @@ class TestUtils(TestCase):
         assert _get_round_setting_for("row1", "Values2") == 2
         assert _get_round_setting_for("row3", "Values2") == 0
         assert _get_round_setting_for("row2", "Values2") == 4  # default
-
-        # restore old options
-        pingouin.options.update(old_opts)
+        del pingouin.options["round"]
+        assert _get_round_setting_for("row2", "Values2") is None
 
     def test_flatten_list(self):
         """Test function _flatten_list."""
@@ -243,6 +246,9 @@ class TestUtils(TestCase):
         with pytest.raises(ValueError):
             _check_dataframe(dv="Values", between="Group", within="Time", effects="within", data=df)
 
-    def test_is_mpmath_installed(self):
-        """Test function _is_mpmath_installed."""
-        assert isinstance(_is_mpmath_installed(), bool)
+    def test_is_installed(self):
+        """Test function _is_installed."""
+        assert _is_installed("numpy")
+        assert not _is_installed("a_module_that_does_not_exist")
+        with pytest.raises(ImportError, match="pingouin\\[extras\\]"):
+            _is_installed("a_module_that_does_not_exist", raise_error=True)

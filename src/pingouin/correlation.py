@@ -3,7 +3,6 @@ import warnings
 
 import numpy as np
 import pandas as pd
-import pandas_flavor as pf
 from scipy.spatial.distance import pdist, squareform
 from scipy.stats import kendalltau, pearsonr, spearmanr
 
@@ -11,12 +10,16 @@ from .bayesian import bayesfactor_pearson
 from .config import _no_rounding
 from .effsize import compute_esci
 from .multicomp import _multicomp_triu
+from .parametric import ancova
 from .power import power_corr
 from .utils import (
+    _DEFAULT_PVAL_STARS,
     _check_alternative,
+    _flatten_list,
     _format_pairwise_matrix,
     _perm_pval,
     _postprocess_dataframe,
+    _register_dataframe_method,
     remove_na,
 )
 
@@ -75,7 +78,7 @@ def _correl_pvalue(r, n, k=0, alternative="two-sided"):
     return pval
 
 
-def skipped(x, y, corr_type="spearman"):
+def _skipped(x, y, corr_type="spearman"):
     """Skipped correlation (Rousselet and Pernet 2012).
 
     Parameters
@@ -135,7 +138,8 @@ def skipped(x, y, corr_type="spearman"):
         "the skipped correlation may be different from the Matlab robust "
         "correlation toolbox (see issue 164 on Pingouin's GitHub). "
         "Make sure to double check your results or use another robust "
-        "correlation method."
+        "correlation method.",
+        stacklevel=2,
     )
 
     B = X - center
@@ -171,7 +175,7 @@ def skipped(x, y, corr_type="spearman"):
     return r, pval, outliers
 
 
-def bsmahal(a, b, n_boot=200):
+def _bsmahal(a, b, n_boot=200):
     """
     Bootstraps Mahalanobis distances for Shepherd's pi correlation.
 
@@ -207,7 +211,7 @@ def bsmahal(a, b, n_boot=200):
     return MD.mean(1)
 
 
-def shepherd(x, y, n_boot=200):
+def _shepherd(x, y, n_boot=200):
     """
     Shepherd's Pi correlation, equivalent to Spearman's rho after outliers
     removal.
@@ -237,7 +241,7 @@ def shepherd(x, y, n_boot=200):
     """
     X = np.column_stack((x, y))
     # Bootstrapping on Mahalanobis distance
-    m = bsmahal(X, X, n_boot)
+    m = _bsmahal(X, X, n_boot)
     # Determine outliers
     outliers = m >= 6
     # Compute correlation
@@ -248,7 +252,7 @@ def shepherd(x, y, n_boot=200):
     return r, pval, outliers
 
 
-def percbend(x, y, beta=0.2):
+def _percbend(x, y, beta=0.2):
     """
     Percentage bend correlation (Wilcox 1994).
 
@@ -313,7 +317,7 @@ def percbend(x, y, beta=0.2):
     return r, pval
 
 
-def bicor(x, y, c=9):
+def _bicor(x, y, c=9):
     """
     Biweight midcorrelation.
 
@@ -602,13 +606,13 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
         # Kendall tau has its own null distribution: let scipy handle one-sided tests
         r, pval = kendalltau(x, y, alternative=alternative, **kwargs)
     elif method == "bicor":
-        r, pval = bicor(x, y, **kwargs)
+        r, pval = _bicor(x, y, **kwargs)
     elif method == "percbend":
-        r, pval = percbend(x, y, **kwargs)
+        r, pval = _percbend(x, y, **kwargs)
     elif method == "shepherd":
-        r, pval, outliers = shepherd(x, y, **kwargs)
+        r, pval, outliers = _shepherd(x, y, **kwargs)
     elif method == "skipped":
-        r, pval, outliers = skipped(x, y, **kwargs)
+        r, pval, outliers = _skipped(x, y, **kwargs)
     else:
         raise ValueError(f'Method "{method}" not recognized.')
 
@@ -668,7 +672,7 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
     return _postprocess_dataframe(stats)[col_order]
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def partial_corr(
     data=None,
     x=None,
@@ -825,7 +829,6 @@ def partial_corr(
               n      r         CI95  p_val
     pearson  30  0.463  [0.1, 0.72]  0.015
     """
-    from pingouin.utils import _flatten_list
 
     # Safety check
     _check_alternative(alternative)
@@ -943,7 +946,7 @@ def partial_corr(
     return _postprocess_dataframe(stats)[col_order]
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def pcorr(self):
     """Partial correlation matrix (:py:class:`pandas.DataFrame` method).
 
@@ -1007,7 +1010,7 @@ def pcorr(self):
     return pd.DataFrame(pcor, index=V.index, columns=V.columns)
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def rcorr(
     self,
     method="pearson",
@@ -1015,7 +1018,7 @@ def rcorr(
     decimals=3,
     padjust=None,
     stars=True,
-    pval_stars={0.001: "***", 0.01: "**", 0.05: "*"},
+    pval_stars=None,
 ):
     """
     Correlation matrix of a dataframe with p-values and/or sample size on the
@@ -1051,8 +1054,8 @@ def rcorr(
         If True, only significant p-values are displayed as stars using the
         pre-defined thresholds of ``pval_stars``. If False, all the raw
         p-values are displayed.
-    pval_stars : dict
-        Significance thresholds. Default is 3 stars for p-values < 0.001,
+    pval_stars : dict or None
+        Significance thresholds. Default (None) is 3 stars for p-values < 0.001,
         2 stars for p-values < 0.01 and 1 star for p-values < 0.05.
 
     Returns
@@ -1122,7 +1125,9 @@ def rcorr(
     from scipy.special import stdtr
 
     # Safety check
-    assert isinstance(pval_stars, dict), "pval_stars must be a dictionnary."
+    if pval_stars is None:
+        pval_stars = _DEFAULT_PVAL_STARS
+    assert isinstance(pval_stars, dict), "pval_stars must be a dictionary."
     assert isinstance(decimals, int), "decimals must be an int."
     assert method in ["pearson", "spearman"], "Method is not recognized."
     assert upper in ["pval", "n"], "upper must be either `pval` or `n`."
@@ -1151,6 +1156,7 @@ def rcorr(
     )
 
 
+@_register_dataframe_method
 def rm_corr(data=None, x=None, y=None, subject=None):
     """Repeated measures correlation.
 
@@ -1182,6 +1188,9 @@ def rm_corr(data=None, x=None, y=None, subject=None):
     Repeated measures correlation (rmcorr) is a statistical technique for determining the common
     within-individual association for paired measures assessed on two or more occasions for
     multiple individuals.
+
+    This function uses :py:func:`pingouin.ancova` and therefore requires statsmodels, which is an
+    optional dependency (``pip install "pingouin[extras]"``).
 
     From `Bakdash and Marusich (2017)
     <https://doi.org/10.3389/fpsyg.2017.00456>`_:
@@ -1215,7 +1224,6 @@ def rm_corr(data=None, x=None, y=None, subject=None):
         >>> df = pg.read_dataset("rm_corr")
         >>> g = pg.plot_rm_corr(data=df, x="pH", y="PacO2", subject="Subject")
     """
-    from pingouin import ancova
 
     data = _check_rm_corr_data(data, x, y, subject)
 
@@ -1242,11 +1250,11 @@ def rm_corr(data=None, x=None, y=None, subject=None):
 def _check_rm_corr_data(data, x, y, subject):
     """Check the input of :py:func:`rm_corr` / :py:func:`plot_rm_corr`, and remove missing values."""
     assert isinstance(data, pd.DataFrame), "Data must be a DataFrame"
-    assert x in data.columns, "The %s column is not in data." % x
-    assert y in data.columns, "The %s column is not in data." % y
-    assert data[x].dtype.kind in "bfiu", "%s must be numeric." % x
-    assert data[y].dtype.kind in "bfiu", "%s must be numeric." % y
-    assert subject in data.columns, "The %s column is not in data." % subject
+    assert x in data.columns, f"The {x} column is not in data."
+    assert y in data.columns, f"The {y} column is not in data."
+    assert data[x].dtype.kind in "bfiu", f"{x} must be numeric."
+    assert data[y].dtype.kind in "bfiu", f"{y} must be numeric."
+    assert subject in data.columns, f"The {subject} column is not in data."
     if data[subject].nunique() < 3:
         raise ValueError("rm_corr requires at least 3 unique subjects.")
     # Remove missing values

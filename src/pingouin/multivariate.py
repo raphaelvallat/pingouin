@@ -3,7 +3,7 @@ from collections import namedtuple
 import numpy as np
 import pandas as pd
 
-from .utils import _postprocess_dataframe, remove_na
+from .utils import _postprocess_dataframe, _register_dataframe_method, remove_na
 
 __all__ = ["multivariate_normality", "multivariate_ttest", "box_m"]
 
@@ -263,6 +263,7 @@ def multivariate_ttest(X, Y=None, paired=False):
     return _postprocess_dataframe(stats)
 
 
+@_register_dataframe_method
 def box_m(data, dvs, group, alpha=0.001):
     """Test equality of covariance matrices using the Box's M test.
 
