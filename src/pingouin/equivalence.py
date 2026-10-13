@@ -37,7 +37,7 @@ def tost(x, y, bound=1, paired=False, correction=False):
         * ``'dof'``: degrees of freedom
         * ``'pval'``: TOST p-value
 
-    See also
+    See Also
     --------
     ttest
 

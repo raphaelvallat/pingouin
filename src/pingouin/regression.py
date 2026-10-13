@@ -121,7 +121,7 @@ def linear_regression(
 
         >>> lm['Xw'], lm['yw'] # doctest: +SKIP
 
-    See also
+    See Also
     --------
     logistic_regression, mediation_analysis, corr
 
@@ -658,7 +658,7 @@ def logistic_regression(
         * ``'CI2.5'``: lower confidence interval
         * ``'CI97.5'``: upper confidence interval
 
-    See also
+    See Also
     --------
     linear_regression
 
@@ -1103,7 +1103,7 @@ def mediation_analysis(
         * ``'pval'``: two-sided p-values
         * ``'sig'``: statistical significance
 
-    See also
+    See Also
     --------
     linear_regression, logistic_regression
 
@@ -1156,7 +1156,6 @@ def mediation_analysis(
 
     .. [2] Fiedler, K., Schott, M. & Meiser, T. What mediation analysis can
            (not) do. J. Exp. Soc. Psychol. 47, 1231–1236 (2011).
-
 
     .. [3] Hayes, A. F. & Rockwood, N. J. Regression-based statistical
            mediation and moderation analysis in clinical research:

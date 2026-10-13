@@ -8,7 +8,6 @@
 # -- Path setup --------------------------------------------------------------
 
 import inspect
-import os
 import sys
 import time
 from pathlib import Path
@@ -21,8 +20,6 @@ GITHUB_REPO = "pingouin"
 GITHUB_BRANCH = "main"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-sys.path.insert(0, os.path.abspath("sphinxext"))
-
 
 # -- Project information -----------------------------------------------------
 
@@ -30,12 +27,8 @@ project = "pingouin"
 author = "Raphael Vallat"
 copyright = "2018-{}, Raphael Vallat".format(time.strftime("%Y"))
 
-# sys.path.insert(0, os.path.abspath(os.path.pardir))
 version = pingouin.__version__
 release = pingouin.__version__
-
-# Sphinx-issues configuration
-issues_github_path = "raphaelvallat/pingouin"
 
 
 # -- General configuration ------------------------------------------------
@@ -61,22 +54,21 @@ extensions = [
 # for a list of supported languages.
 language = "en"
 
-# Path to templates
-templates_path = ["_templates"]
-
-# The master toctree document.
-master_doc = "index"
+# The root toctree document.
+root_doc = "index"
 
 # List of patterns, that match files and directories
 # to ignore when looking for source files.
-exclude_patterns = ["_build", "docstrings", "nextgen", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The suffix(es) of source filenames.
 source_suffix = ".rst"
 
 # Generate the API documentation when building
 autosummary_generate = True
-numpydoc_show_class_members = True  # FALSE ?
+numpydoc_show_class_members = True
+# Fail the build on undocumented or misdocumented parameters and returns
+numpydoc_validation_checks = {"PR01", "PR02", "PR10", "RT01", "GL03", "GL08"}
 
 # Include the example source for plots in API docs
 plot_include_source = True
@@ -93,7 +85,8 @@ html_favicon = "pictures/pingouin_blue.svg"
 html_static_path = ["_static"]
 html_css_files = ["css/custom.css"]
 
-html_show_sourcelink = True
+# No "Show Source" link to the .rst files: the "[source]" links go to GitHub instead
+html_show_sourcelink = False
 html_copy_source = False
 
 html_theme_options = {
@@ -161,12 +154,16 @@ def linkcode_resolve(domain, info):
         except AttributeError:
             return None
 
-    # Unwrap decorators (important for @wraps, dataclasses, etc.)
-    obj = inspect.unwrap(obj)
-    source_file = inspect.getsourcefile(obj) or inspect.getfile(obj)
-    source_lines, start_line = inspect.getsourcelines(obj)
-    source_path = Path(source_file).resolve()
-    relative_path = source_path.relative_to(REPO_ROOT)
+    # No link rather than a failed build when the source cannot be found, e.g. for builtins or
+    # when pingouin is installed in site-packages instead of in editable mode
+    try:
+        # Unwrap decorators (important for @wraps, dataclasses, etc.)
+        obj = inspect.unwrap(obj)
+        source_file = inspect.getsourcefile(obj) or inspect.getfile(obj)
+        source_lines, start_line = inspect.getsourcelines(obj)
+        relative_path = Path(source_file).resolve().relative_to(REPO_ROOT)
+    except (TypeError, OSError, ValueError):
+        return None
 
     end_line = start_line + len(source_lines) - 1
 
@@ -197,8 +194,8 @@ notfound_context = {
 intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
-    "matplotlib": ("https://matplotlib.org/", None),
-    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+    "pandas": ("https://pandas.pydata.org/docs/", None),
     "statsmodels": ("https://www.statsmodels.org/stable/", None),
     "seaborn": ("https://seaborn.pydata.org/", None),
     "sklearn": ("https://scikit-learn.org/stable", None),

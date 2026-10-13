@@ -16,7 +16,7 @@ Code guidelines
 
   .. code-block:: bash
 
-    $ ruff check --select I --fix
+    $ ruff check --fix
 
     $ ruff format
 
@@ -39,14 +39,15 @@ Code guidelines
 Pre-commit hooks
 -----------------
 
-Pingouin uses `pre-commit <https://pre-commit.com/>`_ to automatically run Ruff linting and formatting on every commit. To set it up:
+Pingouin uses `pre-commit <https://pre-commit.com/>`_ to automatically run Ruff linting and formatting on every commit. pre-commit is part of the ``dev`` dependency group (see :ref:`dev-environment`). To set up the hooks:
 
 .. code-block:: bash
 
-  $ uv pip install pre-commit
   $ pre-commit install
 
 Once installed, Ruff will run automatically on all staged files before each commit.
+
+.. _dev-environment:
 
 Setting up a development environment
 -------------------------------------
@@ -62,12 +63,11 @@ Pingouin uses `uv <https://docs.astral.sh/uv/>`_ for fast dependency management.
 Continuous Integration
 -----------------------
 
-Pingouin uses `GitHub Actions <https://docs.github.com/en/actions>`_ for continuous integration. The following workflows run automatically on every push and pull request to the ``main`` branch:
+Pingouin uses `GitHub Actions <https://docs.github.com/en/actions>`_ for continuous integration. The following workflows run automatically on every pull request and on every push to the ``main`` branch:
 
-* **PyTest** — runs the test suite on Ubuntu, macOS and Windows across Python 3.11, 3.12 and 3.14, as well as against a range of historical dependency versions (from minimum supported to latest).
-* **Coverage** — measures test coverage and uploads the report to `Codecov <https://codecov.io/gh/raphaelvallat/pingouin>`_.
+* **PyTest** — runs the test suite on Ubuntu, macOS and Windows with Python 3.11 and 3.14, and the docstring examples. A second job tests a range of dependency versions, from the minimum supported to the latest, on Python 3.11 to 3.13. The coverage of the tests is uploaded to `Codecov <https://codecov.io/gh/raphaelvallat/pingouin>`_.
 * **Ruff** — checks code style and formatting.
-* **Documentation** — builds the Sphinx documentation and uploads the result as a downloadable artifact.
+* **Documentation** — builds the Sphinx documentation, failing on any warning, and uploads the result as a downloadable artifact. On ``main``, the documentation is deployed to `pingouin-stats.org <https://pingouin-stats.org>`_ instead.
 
 A separate **PyTest (pre-release)** workflow runs weekly against pre-release versions of all major dependencies to catch compatibility issues early.
 
@@ -75,7 +75,7 @@ Checking and building documentation
 ------------------------------------
 
 Pingouin's documentation (including docstrings in code) uses ReStructuredText format,
-see `Sphinx documentation <http://www.sphinx-doc.org/en/master/>`_ to learn more about editing them. The code
+see `Sphinx documentation <https://www.sphinx-doc.org/en/master/>`_ to learn more about editing them. The code
 follows the `NumPy docstring standard <https://numpydoc.readthedocs.io/en/latest/format.html>`_.
 
 All changes to the codebase must be properly documented. To ensure that documentation is rendered correctly, the best bet is to follow the existing examples for function docstrings.
@@ -103,6 +103,12 @@ and then come back after executing the ``html`` recipe.
 
   $ make -C docs html
 
+The CI build treats warnings as errors, and runs in nitpicky mode (``-n``): every cross-reference that cannot be resolved is a warning. To refer to a function that no longer exists, e.g. in the changelog, prefix it with ``!`` (:literal:`:py:func:\`!pingouin.old_function\``). To check this locally, use:
+
+.. code-block:: bash
+
+  $ make -C docs html SPHINXOPTS="-W -n --keep-going"
+
 Inspect on GitHub
 ^^^^^^^^^^^^^^^^^
 
@@ -110,7 +116,7 @@ The documentation is also built automatically on GitHub after every commit you m
 To inspect the rendered documentation, follow these steps:
 
 * Click on the "Show all checks" dropdown menu at the end of the Pull Request user interface
-* Click on the check named **Documentation / docs**
+* Click on the check named **Build documentation and upload as artifact to GitHub Actions / docs**
 * In the top-right corner of the opening window, click the **Artifacts** dropdown menu
 * Download the ``docs-artifact`` zip file
 

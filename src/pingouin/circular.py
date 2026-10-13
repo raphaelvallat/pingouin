@@ -216,7 +216,7 @@ def circ_mean(angles, w=None, axis=0):
     mu : float
         Circular mean, in radians.
 
-    See also
+    See Also
     --------
     scipy.stats.circmean, scipy.stats.circstd, pingouin.circ_r
 
@@ -252,11 +252,11 @@ def circ_mean(angles, w=None, axis=0):
 
     References
     ----------
-    * https://en.wikipedia.org/wiki/Mean_of_circular_quantities
+    .. [1] https://en.wikipedia.org/wiki/Mean_of_circular_quantities
 
-    * Berens, P. (2009). CircStat: A MATLAB Toolbox for Circular
-      Statistics. Journal of Statistical Software, Articles, 31(10),
-      1–21. https://doi.org/10.18637/jss.v031.i10
+    .. [2] Berens, P. (2009). CircStat: A MATLAB Toolbox for Circular
+           Statistics. Journal of Statistical Software, Articles, 31(10),
+           1–21. https://doi.org/10.18637/jss.v031.i10
 
     Examples
     --------
@@ -347,7 +347,7 @@ def circ_r(angles, w=None, d=None, axis=0):
     r : float
         Circular mean vector length.
 
-    See also
+    See Also
     --------
     pingouin.circ_mean
 
@@ -370,11 +370,11 @@ def circ_r(angles, w=None, d=None, axis=0):
 
     References
     ----------
-    * https://en.wikipedia.org/wiki/Mean_of_circular_quantities
+    .. [1] https://en.wikipedia.org/wiki/Mean_of_circular_quantities
 
-    * Berens, P. (2009). CircStat: A MATLAB Toolbox for Circular
-      Statistics. Journal of Statistical Software, Articles, 31(10),
-      1–21. https://doi.org/10.18637/jss.v031.i10
+    .. [2] Berens, P. (2009). CircStat: A MATLAB Toolbox for Circular
+           Statistics. Journal of Statistical Software, Articles, 31(10),
+           1–21. https://doi.org/10.18637/jss.v031.i10
 
     Examples
     --------

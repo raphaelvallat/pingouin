@@ -17,6 +17,20 @@ To install Pingouin, open a command prompt (or Terminal or Anaconda Prompt) and 
 
     pip install --upgrade pingouin
 
+or, with `uv <https://docs.astral.sh/uv/>`_:
+
+.. code-block:: bash
+
+    uv pip install --upgrade pingouin
+
+A few functions require optional dependencies: statsmodels (:py:func:`pingouin.ancova`,
+:py:func:`pingouin.rm_corr`, and :py:func:`pingouin.anova` with unbalanced or N-way designs) and
+mpmath (one-sided :py:func:`pingouin.bayesfactor_pearson`). To install them as well, use:
+
+.. code-block:: bash
+
+    pip install --upgrade "pingouin[extras]"
+
 You should now be able to use Pingouin. To try it, you need to open an interactive Python console (either `IPython <https://ipython.org/>`_ or `Jupyter <https://jupyter.readthedocs.io/en/latest/index.html>`_). For example, type the following command in a command prompt:
 
 .. code-block:: bash
@@ -74,7 +88,7 @@ The `scipy.stats <https://docs.scipy.org/doc/scipy/reference/stats.html>`_ modul
     x = [4, 6, 5, 7, 6]
     y = [2, 2, 3, 1, 2]
 
-    print(pg.ttest(x, y))   # Pingouin: returns a DataFrame with T-value, p-value, degrees of freedom, tail, Cohen d, power and Bayes Factor
+    print(pg.ttest(x, y))   # Pingouin: returns a DataFrame with T-value, p-value, degrees of freedom, alternative, Cohen d, power and Bayes Factor
     print(ttest_ind(x, y))  # SciPy: returns only the T- and p-values
 
 .. ############################################################################
@@ -188,6 +202,12 @@ Whenever a new release is available, you can simply upgrade your version by typi
 .. code-block:: shell
 
     pip install --upgrade pingouin
+
+or, with uv:
+
+.. code-block:: shell
+
+    uv pip install --upgrade pingouin
 
 .. ----------------------------- DONATION -----------------------------
 

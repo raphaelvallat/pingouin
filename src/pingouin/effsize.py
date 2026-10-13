@@ -107,13 +107,13 @@ def compute_esci(
 
     References
     ----------
-    * https://en.wikipedia.org/wiki/Fisher_transformation
+    .. [1] https://en.wikipedia.org/wiki/Fisher_transformation
 
-    * Hedges, L., and Ingram Olkin. "Statistical models for meta-analysis." (1985).
+    .. [2] Hedges, L., and Ingram Olkin. "Statistical models for meta-analysis." (1985).
 
-    * http://www.leeds.ac.uk/educol/documents/00002182.htm
+    .. [3] http://www.leeds.ac.uk/educol/documents/00002182.htm
 
-    * https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5133225/
+    .. [4] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5133225/
 
     Examples
     --------
@@ -270,14 +270,14 @@ def compute_bootci(
 
     References
     ----------
-    * DiCiccio, T. J., & Efron, B. (1996). Bootstrap confidence intervals. Statistical science,
-      189-212.
+    .. [1] DiCiccio, T. J., & Efron, B. (1996). Bootstrap confidence intervals. Statistical science,
+           189-212.
 
-    * Davison, A. C., & Hinkley, D. V. (1997). Bootstrap methods and their application (Vol. 1).
-      Cambridge university press.
+    .. [2] Davison, A. C., & Hinkley, D. V. (1997). Bootstrap methods and their application
+           (Vol. 1). Cambridge university press.
 
-    * Jung, Lee, Gupta, & Cho (2019). Comparison of bootstrap confidence interval methods for
-      GSCA using a Monte Carlo simulation. Frontiers in psychology, 10, 2215.
+    .. [3] Jung, Lee, Gupta, & Cho (2019). Comparison of bootstrap confidence interval methods for
+           GSCA using a Monte Carlo simulation. Frontiers in psychology, 10, 2215.
 
     Examples
     --------
@@ -724,14 +724,14 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
 
     References
     ----------
-    * Lakens, D., 2013. Calculating and reporting effect sizes to
-      facilitate cumulative science: a practical primer for t-tests and
-      ANOVAs. Front. Psychol. 4, 863. https://doi.org/10.3389/fpsyg.2013.00863
+    .. [1] Lakens, D., 2013. Calculating and reporting effect sizes to
+           facilitate cumulative science: a practical primer for t-tests and
+           ANOVAs. Front. Psychol. 4, 863. https://doi.org/10.3389/fpsyg.2013.00863
 
-    * Cumming, Geoff. Understanding the new statistics: Effect sizes,
-      confidence intervals, and meta-analysis. Routledge, 2013.
+    .. [2] Cumming, Geoff. Understanding the new statistics: Effect sizes,
+           confidence intervals, and meta-analysis. Routledge, 2013.
 
-    * https://osf.io/vbdah/
+    .. [3] https://osf.io/vbdah/
 
     Examples
     --------
