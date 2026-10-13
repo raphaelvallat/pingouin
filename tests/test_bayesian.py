@@ -118,3 +118,5 @@ def test_bayesfactor_binom():
     assert bayesfactor_binom(100, 1000, 0.1) == bf10(42.05881)
     # NumPy integers are accepted
     assert bayesfactor_binom(np.int64(16), np.int64(20)) == bf10(0.09703159)
+    with pytest.raises(ValueError, match=r"k \(successes\) cannot be higher than n \(trials\)\."):
+        bayesfactor_binom(5, 3)

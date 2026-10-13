@@ -452,7 +452,8 @@ def bayesfactor_binom(k, n, p=0.5, a=1, b=1):
     assert 0 < p < 1, "p must be between 0 and 1."
     assert isinstance(k, numbers.Integral), "k must be int."
     assert isinstance(n, numbers.Integral), "n must be int."
-    assert k <= n, "k (successes) cannot be higher than n (trials)."
+    if k > n:
+        raise ValueError("k (successes) cannot be higher than n (trials).")
     assert a > 0, "a must be positive."
     assert b > 0, "b must be positive."
 

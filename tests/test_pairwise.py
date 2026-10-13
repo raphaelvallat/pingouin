@@ -265,6 +265,16 @@ def test_pairwise_tests_mixed(df, df_sort):
         sub = pt_np[pt_np["Contrast"] == contrast]
         np.testing.assert_allclose(sub["p_corr"], multicomp(sub["p_unc"], method="fdr_bh")[1])
 
+    # Invalid alpha
+    with pytest.raises(ValueError, match=r"'alpha' must be between 0 and 1\."):
+        pairwise_tests(dv="Scores", between="Group", data=df, alpha=1)
+    with pytest.raises(ValueError, match=r"'alpha' must be between 0 and 1\."):
+        pairwise_tests(dv="Scores", between="Group", data=df, alpha=0)
+    with pytest.raises(TypeError, match=r"'alpha' must be a real number\."):
+        pairwise_tests(dv="Scores", between="Group", data=df, alpha="0.05")
+    # Real numbers (e.g. np.float64) are accepted
+    pairwise_tests(dv="Scores", between="Group", data=df, alpha=np.float64(0.05))
+
 
 def test_pairwise_tests_mixed_unbalanced(df_unb):
     """Test function pairwise_tests with an unbalanced mixed design."""

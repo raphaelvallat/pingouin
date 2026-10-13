@@ -11,6 +11,8 @@ from .effsize import compute_effsize
 from .power import power_ttest, power_ttest2n
 from .utils import (
     _check_alternative,
+    _check_choice,
+    _check_confidence,
     _check_dataframe,
     _flatten_list,
     _is_installed,
@@ -213,7 +215,8 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
 
     # Check arguments
     _check_alternative(alternative)
-    assert 0 < confidence < 1, "confidence must be between 0 and 1."
+    _check_confidence(confidence, name="confidence")
+    _check_choice(correction, [True, False, "auto"], "correction")
 
     x = np.asarray(x)
     y = np.asarray(y)

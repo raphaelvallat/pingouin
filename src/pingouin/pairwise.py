@@ -15,6 +15,7 @@ from .parametric import ttest
 from .utils import (
     _DEFAULT_PVAL_STARS,
     _check_alternative,
+    _check_confidence,
     _check_dataframe,
     _flatten_list,
     _format_pairwise_matrix,
@@ -331,7 +332,7 @@ def pairwise_tests(
         dv=dv, between=between, within=within, subject=subject, effects="all", data=data
     )
     _check_alternative(alternative)
-    assert isinstance(alpha, float), "alpha must be float."
+    _check_confidence(alpha, name="alpha")
     assert nan_policy in ["listwise", "pairwise"]
 
     # Check if we have multiple between or within factors

@@ -4,7 +4,7 @@ from scipy.stats import f
 
 from .config import _no_rounding
 from .parametric import anova
-from .utils import _postprocess_dataframe, _register_dataframe_method
+from .utils import _check_confidence, _postprocess_dataframe, _register_dataframe_method
 
 __all__ = ["cronbach_alpha", "intraclass_corr"]
 
@@ -127,6 +127,7 @@ def cronbach_alpha(
     # Safety check
     assert isinstance(data, pd.DataFrame), "data must be a dataframe."
     assert nan_policy in ["pairwise", "listwise"]
+    _check_confidence(ci, name="ci")
 
     if all([v is not None for v in [items, scores, subject]]):
         # Data in long-format: we first convert to a wide format
