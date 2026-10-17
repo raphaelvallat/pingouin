@@ -372,7 +372,7 @@ def box_m(data, dvs, group, alpha=0.001):
     S_sign, S_logdet = np.linalg.slogdet(S)
     signs, logdets = np.linalg.slogdet(covs)
     # Keep invalid negative determinants from becoming valid log-absolute-determinants.
-    if S_sign < 0 or np.any(signs < 0):
+    if S_sign < 0 or np.any(signs < 0):  # pragma: no cover
         log_M = np.nan
     else:
         log_M = ((logdets - S_logdet) * (v / 2)).sum()
