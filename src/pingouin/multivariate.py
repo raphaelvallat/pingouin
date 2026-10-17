@@ -300,6 +300,7 @@ def box_m(data, dvs, group, alpha=0.001):
     excluded from the calculation by Pandas.
 
     Mathematical expressions can be found in [1]_.
+    The likelihood ratio is calculated in logarithmic form to avoid numerical underflow.
 
     This function has been tested against the boxM package of the `biotools`
     R package [4]_.
@@ -365,13 +366,16 @@ def box_m(data, dvs, group, alpha=0.001):
     nobs = n_samp.sum()
     v = n_samp - 1
 
-    # Calculate pooled covariance matrix (S) and M statistics
+    # Calculate pooled covariance matrix (S) and log-likelihood ratio
     covs = covs.to_numpy().reshape(n_covs, n_dvs, -1)
     S = (covs * v[..., None, None]).sum(axis=0) / (nobs - n_covs)
-    # The following lines might raise an error if the covariance matrices are
-    # not invertible (e.g. missing values in input).
-    S_det = np.linalg.det(S)
-    M = ((np.linalg.det(covs) / S_det) ** (v / 2)).prod()
+    S_sign, S_logdet = np.linalg.slogdet(S)
+    signs, logdets = np.linalg.slogdet(covs)
+    # Keep invalid negative determinants from becoming valid log-absolute-determinants.
+    if S_sign < 0 or np.any(signs < 0):  # pragma: no cover
+        log_M = np.nan
+    else:
+        log_M = ((logdets - S_logdet) * (v / 2)).sum()
 
     # Calculate C in reference [1] (page 257-259)
     if len(np.unique(n_samp)) == 1:
@@ -385,7 +389,7 @@ def box_m(data, dvs, group, alpha=0.001):
         c *= (1 / v).sum() - 1 / v.sum()
 
     # Calculate U statistics and degree of fredom
-    u = -2 * (1 - c) * np.log(M)
+    u = -2 * (1 - c) * log_M
     df = 0.5 * n_dvs * (n_dvs + 1) * (n_covs - 1)
     p = chi2.sf(u, df)
     equal_cov = True if p > alpha else False

@@ -135,6 +135,22 @@ def test_box_m():
     assert stats.at["box", "df"] == 3
 
 
+def test_box_m_numerical_stability():
+    """Test that box_m does not underflow with large sample sizes.
+
+    Tested against the R package biotools:
+    >>> big <- iris[rep(1:150, 10), ]
+    >>> boxM(big[, 1:4], big$Species)
+    """
+    iris = datasets.load_iris()
+    df = pd.DataFrame(np.tile(iris["data"], (10, 1)), columns=iris["feature_names"])
+    df["target"] = np.tile(iris["target"], 10)
+    stats = box_m(df, dvs=iris["feature_names"], group="target")
+    assert np.isclose(stats.at["box", "Chi2"], 1487.85044065064, rtol=1e-10)
+    assert stats.at["box", "df"] == 20
+    assert np.isclose(stats.at["box", "pval"], 1.60938995331184e-303, rtol=1e-8, atol=0)
+
+
 def test_multivariate_normality_numerical_stability():
     """Test numerical stability of multivariate_normality."""
     rng = np.random.RandomState(123)
