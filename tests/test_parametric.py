@@ -71,6 +71,15 @@ def test_ttest():
     # Unequal sizes: paired is ignored
     pd.testing.assert_frame_equal(tt, ttest(x, h, correction="auto"))
 
+    # Invalid correction choice
+    with pytest.raises(ValueError, match=r"'yes' is not a valid choice for 'correction'\."):
+        ttest(x, y, correction="yes")
+    # Invalid confidence
+    with pytest.raises(ValueError, match=r"'confidence' must be between 0 and 1\."):
+        ttest(x, y, confidence=95)
+    with pytest.raises(TypeError, match=r"'confidence' must be a real number\."):
+        ttest(x, y, confidence="0.95")
+
     a = [4, 7, 8, 6, 3, 2]
     b = [6, 8, 7, 10, 11, 9]
 

@@ -12,6 +12,20 @@ from .config import options
 __all__ = ["print_table", "remove_na"]
 
 
+def _check_choice(val, choices, name):
+    """Check that ``val`` is in ``choices``."""
+    if val not in choices:
+        raise ValueError(f"'{val}' is not a valid choice for '{name}'. Expected one of {choices}.")
+
+
+def _check_confidence(ci, name="ci"):
+    """Check that confidence interval / significance level is a real number strictly between 0 and 1."""
+    if isinstance(ci, bool) or not isinstance(ci, numbers.Real):
+        raise TypeError(f"'{name}' must be a real number.")
+    if not (0 < ci < 1):
+        raise ValueError(f"'{name}' must be between 0 and 1.")
+
+
 def _check_alternative(alternative):
     """Check that ``alternative`` is one of 'two-sided', 'greater' or 'less'."""
     assert alternative in [

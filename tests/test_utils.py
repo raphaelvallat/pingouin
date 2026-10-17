@@ -7,6 +7,8 @@ import pytest
 
 import pingouin
 from pingouin.utils import (
+    _check_choice,
+    _check_confidence,
     _check_dataframe,
     _check_eftype,
     _flatten_list,
@@ -289,3 +291,32 @@ def test_is_installed():
     assert not _is_installed("a_module_that_does_not_exist")
     with pytest.raises(ImportError, match="pingouin\\[extras\\]"):
         _is_installed("a_module_that_does_not_exist", raise_error=True)
+
+
+def test_check_choice():
+    """Test function _check_choice."""
+    _check_choice("a", ["a", "b"], "letter")
+    _check_choice(True, [True, False, "auto"], "correction")
+    with pytest.raises(
+        ValueError,
+        match=r"'c' is not a valid choice for 'letter'\. Expected one of \['a', 'b'\]\.",
+    ):
+        _check_choice("c", ["a", "b"], "letter")
+
+
+def test_check_confidence():
+    """Test function _check_confidence."""
+    _check_confidence(0.95)
+    _check_confidence(np.float64(0.99), name="confidence")
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        _check_confidence(0)
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        _check_confidence(1)
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        _check_confidence(95)
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        _check_confidence(-0.5)
+    with pytest.raises(TypeError, match=r"'ci' must be a real number\."):
+        _check_confidence("0.95")
+    with pytest.raises(TypeError, match=r"'confidence' must be a real number\."):
+        _check_confidence(True, name="confidence")
