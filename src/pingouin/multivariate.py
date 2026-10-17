@@ -14,7 +14,7 @@ def multivariate_normality(X, alpha=0.05):
     Parameters
     ----------
     X : np.array
-        Data matrix of shape (n_samples, n_features).
+        Data matrix of shape (n_samples, n_features), with integer or floating-point values.
     alpha : float
         Significance level.
 
@@ -75,7 +75,7 @@ def multivariate_normality(X, alpha=0.05):
 
     # Covariance matrix
     S = np.cov(X, rowvar=False, bias=True)
-    S_inv = np.linalg.pinv(S, hermitian=True).astype(X.dtype)  # Preserving original dtype
+    S_inv = np.linalg.pinv(S, hermitian=True)
     difT = X - X.mean(0)
 
     # Squared-Mahalanobis distances

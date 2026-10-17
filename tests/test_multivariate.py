@@ -5,11 +5,22 @@ Tested against the R package MVN.
 
 import numpy as np
 import pandas as pd
+import pytest
 from scipy.stats import multivariate_normal as mvn
 from sklearn import datasets
 
 from pingouin import read_dataset
 from pingouin.multivariate import box_m, multivariate_normality, multivariate_ttest
+
+
+@pytest.mark.parametrize("dtype", [np.int16, np.int32, np.int64, np.uint32, np.float32])
+def test_multivariate_normality_input_dtype(dtype):
+    x = np.array([[2, 3], [3, 1], [6, 4], [7, 2], [9, 8], [6, 9], [3, 5], [2, 1]])
+    result = multivariate_normality(x.astype(dtype))
+    reference = multivariate_normality(x.astype(np.float64))
+    np.testing.assert_allclose(result[:2], reference[:2], rtol=1e-12)
+    assert result.normal == reference.normal
+
 
 data = read_dataset("multivariate")
 dvs = ["Fever", "Pressure", "Aches"]
