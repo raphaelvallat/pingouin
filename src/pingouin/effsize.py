@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 from scipy.stats import pearsonr
 
-from .utils import _check_alternative, _check_eftype, remove_na
+from .utils import _check_alternative, _check_confidence, _check_eftype, remove_na
 
 __all__ = [
     "compute_esci",
@@ -147,8 +147,7 @@ def compute_esci(
     assert eftype.lower() in ["r", "pearson", "spearman", "cohen", "d", "g", "hedges"]
     _check_alternative(alternative)
     assert stat is not None and nx is not None
-    assert isinstance(confidence, float)
-    assert 0 < confidence < 1, "confidence must be between 0 and 1."
+    _check_confidence(confidence, "confidence")
 
     if eftype.lower() in ["r", "pearson", "spearman"]:
         z = np.arctanh(stat)  # R-to-z transform
@@ -347,8 +346,7 @@ def compute_bootci(
     from scipy.stats import norm
 
     # Check other arguments
-    assert isinstance(confidence, float)
-    assert 0 < confidence < 1, "confidence must be between 0 and 1."
+    _check_confidence(confidence, "confidence")
     valid_methods = [
         "norm",
         "normal",
@@ -571,9 +569,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
 
     # Check input and output type
     for inp in [it, ot]:
-        if not _check_eftype(inp):
-            err = f"Could not interpret input '{inp}'"
-            raise ValueError(err)
+        _check_eftype(inp)
     if it not in ["pointbiserialr", "cohen"]:
         raise ValueError("Input type must be 'cohen' or 'pointbiserialr'")
 
@@ -779,9 +775,7 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
     -1.3887301496588271
     """
     # Check arguments
-    if not _check_eftype(eftype):
-        err = f"Could not interpret input '{eftype}'"
-        raise ValueError(err)
+    _check_eftype(eftype)
 
     x = np.asarray(x)
     y = np.asarray(y)
@@ -896,9 +890,7 @@ def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype="cohen"):
     >>> print(d)
     0.7487767802667672
     """
-    if not _check_eftype(eftype):
-        err = f"Could not interpret input '{eftype}'"
-        raise ValueError(err)
+    _check_eftype(eftype)
 
     if not isinstance(tval, float):
         err = "T-value must be float"

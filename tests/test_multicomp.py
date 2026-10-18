@@ -141,3 +141,13 @@ def test_multicomp_none():
     # Wrong arguments
     with pytest.raises(ValueError):
         multicomp(pvals, method="wrong")
+    with pytest.raises(ValueError, match=r"'alpha' must be between 0 and 1\."):
+        multicomp(pvals, alpha=0)
+    with pytest.raises(ValueError, match=r"'alpha' must be between 0 and 1\."):
+        multicomp(pvals, alpha=1)
+    with pytest.raises(TypeError, match=r"'alpha' must be a real number\."):
+        multicomp(pvals, alpha="0.05")
+    with pytest.raises(TypeError, match=r"'alpha' must be a real number\."):
+        multicomp(pvals, alpha=True)
+    # Real numbers (e.g. np.float32) are accepted
+    multicomp(pvals, alpha=np.float32(0.05))

@@ -272,8 +272,12 @@ def test_pairwise_tests_mixed(df, df_sort):
         pairwise_tests(dv="Scores", between="Group", data=df, alpha=0)
     with pytest.raises(TypeError, match=r"'alpha' must be a real number\."):
         pairwise_tests(dv="Scores", between="Group", data=df, alpha="0.05")
-    # Real numbers (e.g. np.float64) are accepted
+    # Real numbers (e.g. np.float64, np.float32) are accepted even with multiple contrasts
     pairwise_tests(dv="Scores", between="Group", data=df, alpha=np.float64(0.05))
+    pairwise_tests(dv="Scores", between="Group", data=df, alpha=np.float32(0.05), padjust="bonf")
+    # Invalid nan_policy
+    with pytest.raises(ValueError, match=r"'lisWise' is not a valid choice for 'nan_policy'\."):
+        pairwise_tests(dv="Scores", between="Group", data=df, nan_policy="lisWise")
 
 
 def test_pairwise_tests_mixed_unbalanced(df_unb):

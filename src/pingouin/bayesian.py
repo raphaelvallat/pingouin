@@ -7,7 +7,7 @@ from math import exp, lgamma, log, pi
 import numpy as np
 from scipy.integrate import quad
 
-from .utils import _check_alternative, _is_installed
+from .utils import _check_alternative, _check_confidence, _is_installed
 
 __all__ = ["bayesfactor_ttest", "bayesfactor_pearson", "bayesfactor_binom"]
 
@@ -449,13 +449,25 @@ def bayesfactor_binom(k, n, p=0.5, a=1, b=1):
     """
     from scipy.stats import betabinom, binom
 
-    assert 0 < p < 1, "p must be between 0 and 1."
-    assert isinstance(k, numbers.Integral), "k must be int."
-    assert isinstance(n, numbers.Integral), "n must be int."
+    _check_confidence(p, name="p")
+    if isinstance(k, bool) or not isinstance(k, (numbers.Integral, np.integer)):
+        raise TypeError(f"'k' must be an integer, but received {type(k).__name__}.")
+    if isinstance(n, bool) or not isinstance(n, (numbers.Integral, np.integer)):
+        raise TypeError(f"'n' must be an integer, but received {type(n).__name__}.")
+    if k < 0:
+        raise ValueError("k (successes) must be positive or zero.")
+    if n <= 0:
+        raise ValueError("n (trials) must be positive.")
     if k > n:
         raise ValueError("k (successes) cannot be higher than n (trials).")
-    assert a > 0, "a must be positive."
-    assert b > 0, "b must be positive."
+    if isinstance(a, bool) or not isinstance(a, numbers.Real):
+        raise TypeError(f"'a' must be a real number, but received {type(a).__name__}.")
+    if a <= 0:
+        raise ValueError("a must be positive.")
+    if isinstance(b, bool) or not isinstance(b, numbers.Real):
+        raise TypeError(f"'b' must be a real number, but received {type(b).__name__}.")
+    if b <= 0:
+        raise ValueError("b must be positive.")
 
     # The marginal likelihood under the alternative, i.e. the integral of the binomial likelihood
     # over the Beta(a, b) prior, is the beta-binomial probability mass function.

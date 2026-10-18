@@ -11,7 +11,7 @@ from scipy import stats
 
 from .circular import circ_mean, circ_r
 from .correlation import _check_rm_corr_data
-from .utils import _check_dataframe, remove_na
+from .utils import _check_confidence, _check_dataframe, remove_na
 
 # matplotlib and seaborn are imported inside the plotting functions, to keep `import pingouin` fast
 
@@ -231,7 +231,7 @@ def plot_blandaltman(
 
     # Confidence intervals for mean bias and limits of agreement
     if confidence is not None:
-        assert 0 < confidence < 1
+        _check_confidence(confidence, "confidence")
         ci = dict()
         ci["mean"] = stats.t.interval(confidence, dof, loc=mean_diff, scale=mean_diff_se)
         ci["high"] = stats.t.interval(confidence, dof, loc=high, scale=high_low_se)

@@ -120,3 +120,47 @@ def test_bayesfactor_binom():
     assert bayesfactor_binom(np.int64(16), np.int64(20)) == bf10(0.09703159)
     with pytest.raises(ValueError, match=r"k \(successes\) cannot be higher than n \(trials\)\."):
         bayesfactor_binom(5, 3)
+    # Invalid p
+    with pytest.raises(ValueError, match=r"'p' must be between 0 and 1\."):
+        bayesfactor_binom(5, 10, p=0)
+    with pytest.raises(ValueError, match=r"'p' must be between 0 and 1\."):
+        bayesfactor_binom(5, 10, p=1)
+    with pytest.raises(ValueError, match=r"'p' must be between 0 and 1\."):
+        bayesfactor_binom(5, 10, p=1.5)
+    with pytest.raises(TypeError, match=r"'p' must be a real number\."):
+        bayesfactor_binom(5, 10, p="0.5")
+    with pytest.raises(TypeError, match=r"'p' must be a real number\."):
+        bayesfactor_binom(5, 10, p=True)
+    # Invalid k
+    with pytest.raises(TypeError, match=r"'k' must be an integer, but received float\."):
+        bayesfactor_binom(2.5, 10)
+    with pytest.raises(TypeError, match=r"'k' must be an integer, but received bool\."):
+        bayesfactor_binom(True, 10)
+    with pytest.raises(ValueError, match=r"k \(successes\) must be positive or zero\."):
+        bayesfactor_binom(-1, 10)
+    # Invalid n
+    with pytest.raises(TypeError, match=r"'n' must be an integer, but received float\."):
+        bayesfactor_binom(5, 10.5)
+    with pytest.raises(TypeError, match=r"'n' must be an integer, but received bool\."):
+        bayesfactor_binom(5, True)
+    with pytest.raises(ValueError, match=r"n \(trials\) must be positive\."):
+        bayesfactor_binom(5, 0)
+    with pytest.raises(ValueError, match=r"n \(trials\) must be positive\."):
+        bayesfactor_binom(5, -5)
+    # Invalid a and b
+    with pytest.raises(ValueError, match=r"a must be positive\."):
+        bayesfactor_binom(5, 10, a=0)
+    with pytest.raises(ValueError, match=r"a must be positive\."):
+        bayesfactor_binom(5, 10, a=-1)
+    with pytest.raises(TypeError, match=r"'a' must be a real number, but received str\."):
+        bayesfactor_binom(5, 10, a="1")
+    with pytest.raises(TypeError, match=r"'a' must be a real number, but received bool\."):
+        bayesfactor_binom(5, 10, a=True)
+    with pytest.raises(ValueError, match=r"b must be positive\."):
+        bayesfactor_binom(5, 10, b=0)
+    with pytest.raises(ValueError, match=r"b must be positive\."):
+        bayesfactor_binom(5, 10, b=-1)
+    with pytest.raises(TypeError, match=r"'b' must be a real number, but received str\."):
+        bayesfactor_binom(5, 10, b="1")
+    with pytest.raises(TypeError, match=r"'b' must be a real number, but received bool\."):
+        bayesfactor_binom(5, 10, b=True)

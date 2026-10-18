@@ -6,8 +6,12 @@ from scipy.linalg import pinvh
 from scipy.stats import norm, t
 
 from .config import _no_rounding
+from .utils import (
+    _check_confidence,
+    _postprocess_dataframe,
+    _register_dataframe_method,
+)
 from .utils import _flatten_list as _fl
-from .utils import _postprocess_dataframe, _register_dataframe_method
 from .utils import remove_na as rm_na
 
 __all__ = ["linear_regression", "logistic_regression", "mediation_analysis"]
@@ -324,7 +328,7 @@ def linear_regression(
     0  Intercept  9.00  2.03  4.42  0.01  0.51    0.39      3.35      14.64
     1         x1  1.04  0.50  2.06  0.11  0.51    0.39     -0.36       2.44
     """
-    assert 0 < alpha < 1
+    _check_confidence(alpha, "alpha")
     X, y, names = _prepare_Xy(X, y, remove_na)
 
     if add_intercept:
@@ -865,7 +869,7 @@ def logistic_regression(
     """
     from sklearn.linear_model import LogisticRegression
 
-    assert 0 < alpha < 1, "alpha must be between 0 and 1."
+    _check_confidence(alpha, "alpha")
     X, y, names = _prepare_Xy(X, y, remove_na)
 
     # Check that y is binary

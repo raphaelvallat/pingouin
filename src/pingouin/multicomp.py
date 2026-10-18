@@ -4,6 +4,8 @@ import numpy as np
 from pandas import DataFrame, Series
 from scipy.stats import false_discovery_control
 
+from .utils import _check_confidence
+
 __all__ = ["multicomp"]
 
 
@@ -443,9 +445,8 @@ def multicomp(pvals, alpha=0.05, method="holm"):
     """
     # Safety check
     assert isinstance(pvals, (list, tuple, np.ndarray, Series)), "pvals must be list or array"
-    assert isinstance(alpha, float), "alpha must be a float."
+    _check_confidence(alpha, "alpha")
     assert isinstance(method, str), "method must be a string."
-    assert 0 < alpha < 1, "alpha must be between 0 and 1."
     pvals = np.asarray(pvals)
     method = method.lower()
 

@@ -78,6 +78,11 @@ def test_compute_esci():
     d = compute_effsize(x, y[:-5])
     ci = compute_esci(d, nx, len(y[:-5]), decimals=8)
     np.testing.assert_equal(ci, [-1.33603010, 0.08662825])
+    # Invalid confidence
+    with pytest.raises(ValueError, match=r"'confidence' must be between 0 and 1\."):
+        compute_esci(stat=0.2, nx=30, confidence=1.5)
+    with pytest.raises(TypeError, match=r"'confidence' must be a real number\."):
+        compute_esci(stat=0.2, nx=30, confidence="0.95")
 
 
 def test_compute_boot_esci():
@@ -182,6 +187,11 @@ def test_compute_boot_esci():
 
     with pytest.raises(AssertionError):
         compute_bootci(x, y, func="pearson", paired=False)
+
+    with pytest.raises(ValueError, match=r"'confidence' must be between 0 and 1\."):
+        compute_bootci(x, confidence=1.5)
+    with pytest.raises(TypeError, match=r"'confidence' must be a real number\."):
+        compute_bootci(x, confidence="0.95")
 
 
 @pytest.mark.parametrize("method", ["norm", "per", "bca", "basic"])

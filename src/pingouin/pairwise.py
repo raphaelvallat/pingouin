@@ -15,6 +15,7 @@ from .parametric import ttest
 from .utils import (
     _DEFAULT_PVAL_STARS,
     _check_alternative,
+    _check_choice,
     _check_confidence,
     _check_dataframe,
     _flatten_list,
@@ -333,7 +334,7 @@ def pairwise_tests(
     )
     _check_alternative(alternative)
     _check_confidence(alpha, name="alpha")
-    assert nan_policy in ["listwise", "pairwise"]
+    _check_choice(nan_policy, ["listwise", "pairwise"], "nan_policy")
 
     # Check if we have multiple between or within factors
     for name, factor in [("between", between), ("within", within)]:

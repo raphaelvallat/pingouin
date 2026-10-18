@@ -11,7 +11,6 @@ from .effsize import compute_effsize
 from .power import power_ttest, power_ttest2n
 from .utils import (
     _check_alternative,
-    _check_choice,
     _check_confidence,
     _check_dataframe,
     _flatten_list,
@@ -216,7 +215,12 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     # Check arguments
     _check_alternative(alternative)
     _check_confidence(confidence, name="confidence")
-    _check_choice(correction, [True, False, "auto"], "correction")
+    if not (isinstance(correction, (bool, np.bool_)) or correction == "auto"):
+        raise ValueError(
+            f"'{correction}' is not a valid choice for 'correction'. Expected True, False, or 'auto'."
+        )
+    if isinstance(correction, (bool, np.bool_)):
+        correction = bool(correction)
 
     x = np.asarray(x)
     y = np.asarray(y)

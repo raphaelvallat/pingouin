@@ -14,6 +14,10 @@ __all__ = ["print_table", "remove_na"]
 
 def _check_choice(val, choices, name):
     """Check that ``val`` is in ``choices``."""
+    if np.ndim(val) != 0:
+        raise ValueError(
+            f"'{name}' must be a scalar, but received an array of shape {getattr(val, 'shape', ())}."
+        )
     if val not in choices:
         raise ValueError(f"'{val}' is not a valid choice for '{name}'. Expected one of {choices}.")
 
@@ -28,11 +32,7 @@ def _check_confidence(ci, name="ci"):
 
 def _check_alternative(alternative):
     """Check that ``alternative`` is one of 'two-sided', 'greater' or 'less'."""
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_choice(alternative, ["two-sided", "greater", "less"], "alternative")
 
 
 def _perm_pval(bootstat, estimate, alternative="two-sided"):
@@ -370,8 +370,8 @@ def _flatten_list(x, include_tuple=False):
 
 
 def _check_eftype(eftype):
-    """Check validity of eftype"""
-    return eftype.lower() in [
+    """Check validity of eftype."""
+    choices = [
         "none",
         "hedges",
         "cohen",
@@ -383,6 +383,8 @@ def _check_eftype(eftype):
         "auc",
         "cles",
     ]
+    eftype = eftype.lower() if isinstance(eftype, str) else eftype
+    _check_choice(eftype, choices, "eftype")
 
 
 def _check_dataframe(data=None, dv=None, between=None, within=None, subject=None, effects=None):

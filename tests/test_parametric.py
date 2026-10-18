@@ -74,6 +74,14 @@ def test_ttest():
     # Invalid correction choice
     with pytest.raises(ValueError, match=r"'yes' is not a valid choice for 'correction'\."):
         ttest(x, y, correction="yes")
+    with pytest.raises(ValueError, match=r"'1' is not a valid choice for 'correction'\."):
+        ttest(x, y, correction=1)
+    with pytest.raises(ValueError, match=r"'1.0' is not a valid choice for 'correction'\."):
+        ttest(x, y, correction=1.0)
+    # np.bool_ is accepted and correctly routes to Welch / Student
+    tt_welch = ttest(x, y, correction=True)
+    pd.testing.assert_frame_equal(ttest(x, y, correction=np.True_), tt_welch)
+    pd.testing.assert_frame_equal(ttest(x, y, correction=np.False_), tt_student)
     # Invalid confidence
     with pytest.raises(ValueError, match=r"'confidence' must be between 0 and 1\."):
         ttest(x, y, confidence=95)

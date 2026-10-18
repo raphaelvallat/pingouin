@@ -4,7 +4,12 @@ from scipy.stats import f
 
 from .config import _no_rounding
 from .parametric import anova
-from .utils import _check_confidence, _postprocess_dataframe, _register_dataframe_method
+from .utils import (
+    _check_choice,
+    _check_confidence,
+    _postprocess_dataframe,
+    _register_dataframe_method,
+)
 
 __all__ = ["cronbach_alpha", "intraclass_corr"]
 
@@ -125,8 +130,9 @@ def cronbach_alpha(
     (0.5917188485995826, array([0.195, 0.84 ]))
     """
     # Safety check
-    assert isinstance(data, pd.DataFrame), "data must be a dataframe."
-    assert nan_policy in ["pairwise", "listwise"]
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError(f"'data' must be a pandas DataFrame, but received {type(data).__name__}.")
+    _check_choice(nan_policy, ["pairwise", "listwise"], "nan_policy")
     _check_confidence(ci, name="ci")
 
     if all([v is not None for v in [items, scores, subject]]):

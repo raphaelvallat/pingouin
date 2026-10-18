@@ -62,6 +62,12 @@ def test_cronbach_alpha():
         cronbach_alpha(data=data, ci=1)
     with pytest.raises(TypeError, match=r"'ci' must be a real number\."):
         cronbach_alpha(data=data, ci="95")
+    # Invalid data type
+    with pytest.raises(TypeError, match=r"'data' must be a pandas DataFrame, but received list\."):
+        cronbach_alpha(data=[1, 2, 3])
+    # Invalid nan_policy
+    with pytest.raises(ValueError, match=r"'listwse' is not a valid choice for 'nan_policy'\."):
+        cronbach_alpha(data=data, nan_policy="listwse")
 
 
 def test_intraclass_corr():

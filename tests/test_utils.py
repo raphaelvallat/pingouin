@@ -7,6 +7,7 @@ import pytest
 
 import pingouin
 from pingouin.utils import (
+    _check_alternative,
     _check_choice,
     _check_confidence,
     _check_dataframe,
@@ -221,9 +222,10 @@ def test_remove_na():
 def test_check_eftype():
     """Test function _check_eftype."""
     for eftype in ["none", "hedges", "cohen", "Cohen", "cohen_dz", "r", "eta_square", "cles"]:
-        assert _check_eftype(eftype)
+        _check_eftype(eftype)
     for eftype in ["fake", "cohen-d", ""]:
-        assert not _check_eftype(eftype)
+        with pytest.raises(ValueError):
+            _check_eftype(eftype)
 
 
 def test_check_dataframe():
@@ -302,6 +304,30 @@ def test_check_choice():
         match=r"'c' is not a valid choice for 'letter'\. Expected one of \['a', 'b'\]\.",
     ):
         _check_choice("c", ["a", "b"], "letter")
+    with pytest.raises(
+        ValueError,
+        match=r"'letter' must be a scalar, but received an array of shape \(2,\)\.",
+    ):
+        _check_choice(np.array(["a", "b"]), ["a", "b"], "letter")
+    with pytest.raises(
+        ValueError,
+        match=r"'letter' must be a scalar, but received an array of shape \(1,\)\.",
+    ):
+        _check_choice(np.array(["a"]), ["a", "b"], "letter")
+    with pytest.raises(
+        ValueError,
+        match=r"'letter' must be a scalar, but received an array of shape \(\)\.",
+    ):
+        _check_choice(["a", "b"], ["a", "b"], "letter")
+
+
+def test_check_alternative():
+    """Test function _check_alternative."""
+    for alt in ["two-sided", "greater", "less"]:
+        _check_alternative(alt)
+    for alt in ["two_sided", "wrong", 1]:
+        with pytest.raises(ValueError):
+            _check_alternative(alt)
 
 
 def test_check_confidence():

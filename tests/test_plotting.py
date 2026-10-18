@@ -71,6 +71,11 @@ def test_plot_blandaltman():
     np.testing.assert_allclose(ax2.patches[0].get_y() + ax2.patches[0].get_height(), high)
     # Narrower CI than with confidence=0.95
     assert ax2.patches[0].get_height() < ax.patches[0].get_height()
+    # Invalid confidence
+    with pytest.raises(ValueError, match=r"'confidence' must be between 0 and 1\."):
+        plot_blandaltman(x, y, confidence=1.5)
+    with pytest.raises(TypeError, match=r"'confidence' must be a real number\."):
+        plot_blandaltman(x, y, confidence="0.95")
 
     # With Pingouin's dataset
     df_ba = read_dataset("blandaltman")
