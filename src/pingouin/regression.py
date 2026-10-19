@@ -1342,7 +1342,7 @@ def mediation_analysis(
         return _postprocess_dataframe(stats)
 
 
-@pf.register_dataframe_method
+@_register_dataframe_method
 def vif(data):
     """Calculate the variance inflation factor (VIF) for each predictor.
     VIF quantifies the degree of multicollinearity among predictor variables. z

@@ -751,7 +751,10 @@ def test_vif_low_sample_size():
 )
 def test_vif_constant_value_columns(arr):
     """Test vif() raises ValueError if there are less than two non-constant columns."""
-    with pytest.raises(ValueError, match="Fewer than two non-constant variables"):
+    with (
+        pytest.warns(UserWarning, match="Constant columns"),
+        pytest.raises(ValueError, match="Fewer than two non-constant variables"),
+    ):
         vif(arr)
 
 
@@ -810,7 +813,8 @@ def test_vif_ndarray_nan_constant_columns():
     arr = np.insert(arr, [1, 3], np.ones((20, 2)), axis=1)
 
     # calculate VIF and check position of nan match index of constant columns
-    result = vif(arr)
+    with pytest.warns(UserWarning, match="Constant columns"):
+        result = vif(arr)
     assert_equal(np.flatnonzero(np.isnan(result)), np.array([1, 4]))
     assert np.isfinite(result).sum() == 3
 
