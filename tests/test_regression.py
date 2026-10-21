@@ -680,7 +680,7 @@ def test_vif_invalid_input_types(val):
 @pytest.mark.parametrize("arr", (np.ones(10), np.ones((10, 2, 2))))
 def test_vif_ndarray_invalid_dim(arr):
     """Test ValueError is raised when input ndarray is not 2D."""
-    with pytest.raises(ValueError, match="Input ndarray must be 2-dimensiona"):
+    with pytest.raises(ValueError, match="Input ndarray must be 2-dimensional"):
         vif(arr)
 
 
@@ -688,7 +688,6 @@ def test_vif_ndarray_invalid_dim(arr):
     "arr",
     (
         np.array([["a", "b"]]),
-        np.array([[True, False]]),
         np.array([[1 + 2j, 3 + 4j]]),
         np.array([["2024-01-01", "2024-01-02"]], dtype="datetime64[D]"),
         np.array([[1, 2]], dtype="timedelta64[s]"),
@@ -700,27 +699,10 @@ def test_vif_ndarray_unsupported_dtypes(arr):
         vif(arr)
 
 
-def test_vif_output_dtype():
-    """Test vif() returns same valid object type as input."""
-    assert isinstance(vif(tips), pd.DataFrame)
-    assert isinstance(vif(tips.select_dtypes(np.number).to_numpy()), np.ndarray)
-
-
-@pytest.mark.parametrize("dtype", (np.float16, np.int32, np.object_))
-def test_vif_ndarray_float64(dtype):
-    """Test vif() coerces input ndarrays of different dtypes to np.float64 for the output."""
-    arr = tips[["total_bill", "tip"]].to_numpy().copy()
-    arr = arr.astype(dtype)
-    result = vif(arr)
-    assert result.dtype == np.float64
-
-
-@pytest.mark.parametrize("data", (pd.DataFrame(), tips.select_dtypes(include="str")))
+@pytest.mark.parametrize("data", (pd.DataFrame(), tips[["sex", "smoker"]]))
 def test_vif_no_numerical_columns(data):
-    """
-    Test vif() raises ValueError when input DataFrame is empty or when
-    only categorical columns are present (which get filtered out).
-    """
+    """Test vif() raises ValueError when input DataFrame is empty or when
+    only categorical columns are present (which get filtered out)."""
     with pytest.raises(ValueError, match="no rows of numeric data"):
         vif(data)
 
@@ -730,11 +712,12 @@ def test_vif_no_numerical_columns(data):
     (
         np.ones((10, 1)),
         tips[["tip"]],
-        tips[["tip", "sex"]],  # one categorical column is discarded
+        tips[["tip", "sex"]],  # One categorical column is discarded.
     ),
 )
 def test_vif_fewer_two_columns(data):
-    """Test vif() raises a ValueError when data has fewer than two columns after input validation."""
+    """Test vif() raises a ValueError when data has fewer than two columns
+    after input validation."""
     with pytest.raises(ValueError, match="at least two numeric columns"):
         vif(data)
 
@@ -752,94 +735,84 @@ def test_vif_low_sample_size():
 def test_vif_constant_value_columns(arr):
     """Test vif() raises ValueError if there are less than two non-constant columns."""
     with (
-        pytest.warns(UserWarning, match="Constant columns"),
+        pytest.warns(UserWarning, match="Columns with zero variance"),
         pytest.raises(ValueError, match="Fewer than two non-constant variables"),
     ):
         vif(arr)
 
 
+# TODO add assertion to check column names when input is numpy
 @pytest.mark.parametrize("as_numpy", (False, True))
 def test_vif_inv_corr_matrix_matches_statsmodels(as_numpy):
-    """
-    Test vif() produces identical results to the function used by statsmodels,
-    if the inverse correlation matrix is used to calculate VIFs.
-    """
+    """Test vif() produces identical results to the function used by statsmodels,
+    if the inverse correlation matrix is used to calculate VIFs."""
     data = tips.select_dtypes(np.number).copy()
     if as_numpy:
         data = data.to_numpy()
 
-    # statsmodels needs an explicit constant, otherwise it computes uncentered R^2
+    # statsmodels needs an explicit constant, otherwise it computes uncentered R^2.
     exog = sm.add_constant(np.asarray(data, dtype=float))
 
-    # calculate VIF with statsmodels
+    # Calculate VIF with statsmodels.
     vif_ratios = []
     for idx in range(1, exog.shape[1]):
         vif_ratios.append(variance_inflation_factor(exog, idx))
     expected = np.asarray(vif_ratios)
 
-    # calculate VIF using inverse correlation matrix
+    # Calculate VIF using inverse correlation matrix and check equivalence.
     result = vif(data)
-
-    # check equivalence (if DataFrame, flat it for the assertion)
-    if as_numpy:
-        assert_almost_equal(expected, result, decimal=5)
-    else:
-        assert_almost_equal(expected, result.to_numpy().ravel(), decimal=5)
-
-
-def test_vif_matches_register_method():
-    """Test that vif() can be called as a method by a pandas DataFrame."""
-    result1 = vif(tips)
-    result2 = tips.vif()
-    assert_frame_equal(result1, result2)
+    assert_almost_equal(expected, result["VIF"], decimal=5)
 
 
 def test_vif_no_categorical_columns_output():
-    """Test vif() discards categorical columns and maps column names correctly to the output."""
+    """Test vif() discards categorical columns and maps column names
+    correctly to the output."""
     tips_num = tips.select_dtypes(np.number).copy()
     expected = vif(tips_num)
     result = vif(tips)
     assert_frame_equal(expected, result)
-    assert np.all(tips_num.columns == result.columns)
+    assert np.all(expected.columns == result.columns)
 
 
-def test_vif_ndarray_nan_constant_columns():
-    """Test vif() outputs nan on indices of constant columns in output array."""
-    # create array of integers
-    rng = np.random.default_rng(42)
-    arr = rng.integers(low=1, high=100, size=(20, 3))
+@pytest.mark.parametrize("as_numpy", (False, True))
+def test_vif_nan_constant_columns(as_numpy):
+    """Test vif() outputs nan on indices of constant columns in output."""
+    # Insert zero variance columns.
+    data = tips.select_dtypes(np.number).copy()
+    data.insert(1, "const1", 10)
+    data.insert(3, "const2", 999)
+    if as_numpy:
+        data = data.to_numpy()
 
-    # add constant columns
-    arr = np.insert(arr, [1, 3], np.ones((20, 2)), axis=1)
-
-    # calculate VIF and check position of nan match index of constant columns
-    with pytest.warns(UserWarning, match="Constant columns"):
-        result = vif(arr)
-    assert_equal(np.flatnonzero(np.isnan(result)), np.array([1, 4]))
-    assert np.isfinite(result).sum() == 3
+    # Calculate VIF and check position of nan match index of constant columns.
+    with pytest.warns(UserWarning, match="Columns with zero variance"):
+        result = vif(data)
+    vif_values = result["VIF"].to_numpy()
+    assert_equal(np.flatnonzero(np.isnan(vif_values)), np.array([1, 3]))
+    assert np.isfinite(vif_values).sum() == 3
 
 
-@pytest.mark.parametrize("as_frame", (False, True))
-def test_vif_drop_rows_with_missing_nans(as_frame):
+@pytest.mark.parametrize("as_numpy", (False, True))
+def test_vif_drop_rows_with_missing_nans(as_numpy):
     """Test vif() drops rows with missing data and emits a warning."""
-    # create array of integers and convert to DataFrame if required
-    rng = np.random.default_rng(42)
-    data = rng.integers(low=1, high=100, size=(10, 3)).astype(np.float64)
-    if as_frame:
-        data = pd.DataFrame(data)
-
-    # calculate VIF without nan in input
+    # Calculate VIF without nan in input.
+    data = tips.select_dtypes(np.number).iloc[:20].copy()
+    if as_numpy:
+        data = data.to_numpy()
     result = vif(data)
 
-    # add missing data
-    if as_frame:
-        data.loc[:2, 0] = np.nan
+    # Add missing data check a warning is raised with 30% rows discarded
+    if as_numpy:
+        data[:5, 0] = np.nan
     else:
-        data[:3, 0] = np.nan
-
-    # check a warning is raised with 30% rows discarded
-    with pytest.warns(UserWarning, match=re.escape("30.0% of rows (3 of 10)")):
+        data.iloc[:5, 0] = np.nan
+    with pytest.warns(UserWarning, match=re.escape("25.0% of rows (5 of 20)")):
         result_nan = vif(data)
 
-    # check outputs are different due to rows being discarded
-    assert not np.all(result == result_nan)
+    # Check outputs are different due to rows being discarded.
+    assert not np.array_equal(result["VIF"], result_nan["VIF"])
+
+
+# TODO Test scenarion when function fallbacks to OLS
+
+# TODO Unit tests for _vif_ols

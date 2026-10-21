@@ -1342,85 +1342,111 @@ def mediation_analysis(
         return _postprocess_dataframe(stats)
 
 
+# TODO Add References section to docstring
 @_register_dataframe_method
 def vif(data):
-    """Calculate the variance inflation factor (VIF) for each predictor.
-    VIF quantifies the degree of multicollinearity among predictor variables. z
+    """Variance inflation factor (VIF) of each predictor.
+
+    VIF quantifies the degree of multicollinearity among the predictor
+    variables, i.e. how strongly each one is linearly explained by the others.
 
     Parameters
     ----------
-    data : pandas.DataFrame or numpy.ndarray
-        Dataset containing the predictor variables. If a DataFrame is provided,
-        only numeric columns are included in the calculation. For a numpy array,
-        the input must be two-dimensional and contain values that can be converted
-        to ``np.float64``.
+    data : :py:class:`pandas.DataFrame` or :py:class:`numpy.ndarray`
+        Dataset containing the predictor variables. If a DataFrame is
+        provided, only numeric and boolean columns are used. If a 2D array
+        is provided, it must be convertible to ``float64``.
 
     Returns
     -------
-    pandas.DataFrame or numpy.ndarray
-        If ``data`` is a DataFrame, returns a DataFrame containing one row
-        labelled ``"VIF"`` and one column for each numeric predictor. If
-        ``data`` is a numpy array, returns a one-dimensional array containing
-        the VIF for each input column. Constant columns are represented by
-        ``np.nan`` in the numpy output.
+    vif_df : :py:class:`pandas.DataFrame`
+        Long-format DataFrame with one row per input variable:
+
+        * ``'variables'``: predictor names
+        * ``'VIF'``: estimate VIF values
+
+        Constant (zero-variance) columns are kept in the output with a VIF
+        of ``NaN``. If ``data`` is a :py:class:`numpy.ndarray`, the predictors
+        are named ``X1``, ``X2``, ... in order of appearance (column order).
+
+    See also
+    --------
+    linear_regression
 
     Notes
     -----
-    The VIF of variable :math:`j` quantifies how much the variance of its
+    The VIF of variable :math:`j` measures how much the variance of its
     regression coefficient is inflated by its linear dependence on the other
     variables:
 
     .. math:: \\text{VIF}_j = \\frac{1}{1 - R_j^2}
 
     where :math:`R_j^2` is the coefficient of determination obtained by
-    regressing variable :math:`j` on all remaining variables. Instead of
-    fitting one regression per variable, this function uses the fact that the
-    VIFs are the diagonal elements of the inverse of the correlation matrix
-    :math:`\\mathbf{R}`:
+    regressing variable :math:`j` on all the remaining variables. A VIF of 1
+    indicates no collinearity. Common rules of thumb consider values above 5
+    as a sign of problematic multicollinearity.
+
+    Rather than fitting one regression per variable, the VIFs are computed
+    as the diagonal elements of the inverse of the Pearson correlation
+    matrix :math:`\\mathbf{R}`:
 
     .. math:: \\text{VIF}_j = \\left(\\mathbf{R}^{-1}\\right)_{jj}
 
-    This requires a single matrix inversion instead of :math:`p` regressions.
-    If :math:`\\mathbf{R}` is numerically singular (perfect
-    multicollinearity, or more variables than observations), the function
-    falls back to one least-squares regression per variable, and perfectly
-    predictable variables are assigned a VIF of ``inf``.
+    This is mathematically equivalent to the regression-based definition
+    but faster, since it requires a single matrix inversion instead of
+    :math:`p` regressions. If :math:`\\mathbf{R}` is numerically singular
+    (perfect multicollinearity, or more variables than observations), the
+    function falls back to one least-squares regression per variable, and
+    variables that are perfectly predicted by the others are assigned a VIF
+    of ``inf``.
 
-    A VIF of 1 indicates no collinearity. Common rules of thumb regard values
-    above 5 (sometimes 10) as a sign of problematic multicollinearity.
+    Because :math:`R_j^2` is invariant to linear rescaling of the variables,
+    the VIFs do not depend on the units of the data, and no standardization
+    is required.
 
-    Pre-processing is applied in the following order:
+    The data are pre-processed in the following order:
 
-    1. Non-numeric columns are removed (DataFrame) or the array is coerced to
+    1. Non-numeric columns are removed (DataFrame), or the array is cast to
        ``float64`` (ndarray).
     2. Rows containing missing (NaN) or infinite values are removed, and a
        warning reports the percentage of rows dropped.
-    3. Constant columns (zero variance) are removed, with a warning.
-    4. Optionally, the remaining data are standardized (``scale=True``).
+    3. Constant columns (zero variance) trigger a warning and their VIF is
+       reported as ``NaN``.
+
+    Results were compared against the function variance_inflation_factor
+    from library statsmodels.
 
     Examples
     --------
     >>> import numpy as np
     >>> import pandas as pd
+    >>> import pingouin as pg
     >>> rng = np.random.default_rng(42)
     >>> x1 = rng.normal(size=200)
     >>> x2 = 0.9 * x1 + rng.normal(scale=0.3, size=200)
     >>> x3 = rng.normal(size=200)
     >>> df = pd.DataFrame({"x1": x1, "x2": x2, "x3": x3, "group": "a"})
-    >>> vif(df).round(2)
-           x1    x2   x3
-    VIF  7.42  7.41  1.0
+    >>> pg.vif(df).round(2)
+      variables   VIF
+    0        x1  7.42
+    1        x2  7.41
+    2        x3  1.00
 
-    Numpy input returns a numpy array
+    Non-numeric columns (here ``group``) are ignored. A numpy array can also
+    be used, in which case the variables are named ``X1``, ``X2``, ...
 
-    >>> vif(df[["x1", "x2", "x3"]].to_numpy()).round(2)
-    array([7.42, 7.41, 1.  ])
+    >>> pg.vif(df[["x1", "x2", "x3"]].to_numpy()).round(2)
+      variables   VIF
+    0        X1  7.42
+    1        X2  7.41
+    2        X3  1.00
 
-    Missing values are dropped (with a warning)
+    Rows with missing values are dropped, with a warning.
 
     >>> df.iloc[0, 0] = np.nan
-    >>> vif(df, scale=True).round(2)  # doctest: +SKIP
-    UserWarning: 0.50% of rows (1 of 200) were removed because of missing or infinite values.
+    >>> pg.vif(df)  # doctest: +SKIP
+    UserWarning: 0.5% of rows (1 of 200) were removed because of missing
+    and/or infinite values.
     """
     if isinstance(data, pd.DataFrame):
         # Get only numeric columns and convert to numpy array.
@@ -1500,6 +1526,11 @@ def vif(data):
         vif_values = np.diag(np.linalg.inv(corr))
     # Correlation matrix not invertible, fall back to one OLS regression per variable.
     else:
+        warnings.warn(
+            "Perfect multicollinearity detected; falling back to per-variable OLS regressions.",
+            UserWarning,
+            stacklevel=2,
+        )
         vif_values = _vif_ols(X)
 
     # Create output DataFrame (zero-variance columns are set to NaN).
@@ -1509,16 +1540,30 @@ def vif(data):
     return _postprocess_dataframe(vif_df)
 
 
-def _vif_ols(X, tol=1e-12):
-    """VIF of each column of X from one regression on the other columns.
+def _vif_ols(X):
+    r"""Compute the variance inflation factor (VIF) of each column of X.
 
-    Variables perfectly predicted by the others (R² = 1 within `tol`)
-    get a VIF of ``np.inf``.
+    Each column is regressed on all the other columns using ordinary least squares,
+    and its VIF is calculated as:
+
+    .. math:: \text{VIF}_j = \frac{1}{1 - R_j^2}
+
+    where :math:`R_j^2` is the coefficient of determination of the regression of
+    column :math:`j` on the other columns. A column that is perfectly explained by
+    the others (:math:`1 - R_j^2 \leq` `tol`) gets a VIF of ``np.inf``.
     """
+    # Tolerance below which a column is considered perfectly collinear with the others.
+    tol = 1e-12
+
     vif_values = np.empty(X.shape[1])
-    for j in range(X.shape[1]):
-        y = X[:, j]
-        others = np.delete(X, j, axis=1)
-        r2 = linear_regression(others, y, as_dataframe=False)["r2"]
-        vif_values[j] = np.inf if 1 - r2 <= tol else 1 / (1 - r2)
+    for idx in range(X.shape[1]):
+        # Get data for response and predictor variables and estimate R².
+        y = X[:, idx]
+        others = np.delete(X, idx, axis=1)
+        r2 = linear_regression(others, y, add_intercept=True, as_dataframe=False)["r2"]
+
+        # If the column is (almost) perfectly explained by the others, which
+        # VIF is set to np.inf, thus avoiding division by zero.
+        vif_values[idx] = np.inf if 1 - r2 <= tol else 1 / (1 - r2)
+
     return vif_values
