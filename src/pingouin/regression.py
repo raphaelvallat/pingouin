@@ -1423,12 +1423,8 @@ def vif(data):
     UserWarning: 0.50% of rows (1 of 200) were removed because of missing or infinite values.
     """
     if isinstance(data, pd.DataFrame):
-        # Tracks if input was a DataFrame; downstream numerical computations are
-        # done with numpy to reduce overhead and to simplify logic.
-        is_frame = True
-
         # Get only numeric columns and convert to numpy array.
-        numeric_data = data.select_dtypes(include=["integer", "floating"]).copy()
+        numeric_data = data.select_dtypes(include=["bool", "integer", "floating"]).copy()
         output_cols = numeric_data.columns
         X = numeric_data.to_numpy(dtype=np.float64, na_value=np.nan)
 
@@ -1438,8 +1434,7 @@ def vif(data):
             raise ValueError(f"Input ndarray must be 2-dimensional, got {data.ndim}D.")
 
         # Validate numpy array as a numeric dtype or that it can be coerced to numeric dtype.
-        is_frame = False
-        if data.dtype.kind in "bcMm":  # bool, complex, datetime, timedelta
+        if data.dtype.kind in "cMm":  # complex, datetime, timedelta
             raise ValueError(f"Input ndarray of dtype {data.dtype} is not supported.")
         try:
             X = data.astype("float64").copy()
@@ -1448,6 +1443,9 @@ def vif(data):
                 f"Input ndarray of dtype {data.dtype} is not numeric and "
                 "could not be coerced to float64."
             ) from err
+
+        # Create list of column names for output (X1, X2...).
+        output_cols = [f"X{n}" for n in range(1, X.shape[1] + 1)]
 
     # Invalid input type.
     else:
@@ -1466,7 +1464,7 @@ def vif(data):
     # Remove rows with nan/inf values, print warning if any rows were discarded.
     mask_finite = np.isfinite(X).all(axis=1)
     n_removed = np.sum(~mask_finite)
-    if n_removed:
+    if n_removed > 0:
         perc_removed = float(round(100 * n_removed / X.shape[0], 2))
         warnings.warn(
             f"{perc_removed}% of rows ({n_removed} of "
@@ -1480,39 +1478,47 @@ def vif(data):
     if X.shape[0] <= X.shape[1]:
         raise ValueError("`data` must have more rows than numeric variables to calculate VIF.")
 
-    # Discard constant-value columns.
+    # Discard constant-value (zero variance) columns.
     mask_non_constant = np.ptp(X, axis=0) > 0
     if not mask_non_constant.all():
-        warnings.warn("Constant columns were removed.", UserWarning, stacklevel=2)
+        warnings.warn(
+            "Columns with zero variance found. VIF cannot be estimated for them and is set to NaN.",
+            UserWarning,
+            stacklevel=2,
+        )
         X = X[:, mask_non_constant]
         if X.shape[1] < 2:
             raise ValueError("Fewer than two non-constant variables remain.")
 
-        # Update output column names in case input was a DataFrame.
-        if is_frame:
-            output_cols = output_cols[mask_non_constant]
-
     # Calculate Pearson correlation matrix column-wise.
     corr = np.corrcoef(X, rowvar=False)
 
-    # Check that the correlation matrix is numerically stable enough to invert.
-    machine_precision = np.finfo(float).eps
-    max_condition_number = 1 / machine_precision
-    invert_matrix = np.linalg.cond(corr) < max_condition_number
-
-    # Use the inverse correlation matrix to calculate all VIFs at once.
-    if invert_matrix:
+    # Full numerical rank (SVD-based tolerance), R is invertible, so VIF_j = (R^-1)_jj,
+    # using one inversion instead of p regressions. Ill-conditioned but full-rank
+    # matrices lose some precision, but the VIFs are then huge anyway, so the conclusion is unchanged.
+    if np.linalg.matrix_rank(corr) == corr.shape[0]:
         vif_values = np.diag(np.linalg.inv(corr))
-    # If the correlation matrix is poorly conditioned, avoid explicitly
-    # inverting it and calculate each VIF using a least-squares regression.
-    # else:
-    #     vif_values = _vif_lstsq(X)
+    # Correlation matrix not invertible, fall back to one OLS regression per variable.
+    else:
+        vif_values = _vif_ols(X)
 
-    # Return a DataFrame with VIF values.
-    if is_frame:
-        return pd.DataFrame([vif_values], columns=output_cols, index=["VIF"])
-
-    # Return a numpy ndarray with VIF values (constant value columns are set to np.nan).
-    vif_arr = np.full(data.shape[1], np.nan)
+    # Create output DataFrame (zero-variance columns are set to NaN).
+    vif_arr = np.full(len(output_cols), np.nan)
     vif_arr[mask_non_constant] = vif_values
-    return vif_arr
+    vif_df = pd.DataFrame({"variables": output_cols, "VIF": vif_arr})
+    return _postprocess_dataframe(vif_df)
+
+
+def _vif_ols(X, tol=1e-12):
+    """VIF of each column of X from one regression on the other columns.
+
+    Variables perfectly predicted by the others (R² = 1 within `tol`)
+    get a VIF of ``np.inf``.
+    """
+    vif_values = np.empty(X.shape[1])
+    for j in range(X.shape[1]):
+        y = X[:, j]
+        others = np.delete(X, j, axis=1)
+        r2 = linear_regression(others, y, as_dataframe=False)["r2"]
+        vif_values[j] = np.inf if 1 - r2 <= tol else 1 / (1 - r2)
+    return vif_values
