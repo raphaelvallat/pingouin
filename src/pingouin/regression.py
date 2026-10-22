@@ -1471,7 +1471,7 @@ def vif(data):
             ) from err
 
         # Create list of column names for output (X1, X2...).
-        output_cols = [f"X{n}" for n in range(1, X.shape[1] + 1)]
+        output_cols = [f"x{n}" for n in range(1, X.shape[1] + 1)]
 
     # Invalid input type.
     else:

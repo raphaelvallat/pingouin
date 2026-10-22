@@ -741,7 +741,6 @@ def test_vif_constant_value_columns(arr):
         vif(arr)
 
 
-# TODO add assertion to check column names when input is numpy
 @pytest.mark.parametrize("as_numpy", (False, True))
 def test_vif_inv_corr_matrix_matches_statsmodels(as_numpy):
     """Test vif() produces identical results to the function used by statsmodels,
@@ -762,6 +761,10 @@ def test_vif_inv_corr_matrix_matches_statsmodels(as_numpy):
     # Calculate VIF using inverse correlation matrix and check equivalence.
     result = vif(data)
     assert_almost_equal(expected, result["VIF"], decimal=5)
+    if as_numpy:
+        assert result["variables"].tolist() == ["x1", "x2", "x3"]
+    else:
+        assert result["variables"].tolist() == data.columns.tolist()
 
 
 def test_vif_no_categorical_columns_output():
@@ -813,6 +816,38 @@ def test_vif_drop_rows_with_missing_nans(as_numpy):
     assert not np.array_equal(result["VIF"], result_nan["VIF"])
 
 
-# TODO Test scenarion when function fallbacks to OLS
+def test_vif_fallback_to_ols():
+    """Test that function fallbacks to calculation of VIF through OLS when
+    correlation matrix is not invertible."""
+    # Create a DataFrame with two collinear variables (x1 and x2).
+    x1 = np.arange(10, dtype=float)
+    x2 = 2 * x1  # Perfect multicollinearity
+    x3 = np.random.default_rng(42).normal(size=10)
+    data = pd.DataFrame({"x1": x1, "x2": x2, "x3": x3})
 
-# TODO Unit tests for _vif_ols
+    # Check that warning is printed and np.inf is estimated for x1 and x2.
+    with pytest.warns(UserWarning, match="falling back to per-variable OLS"):
+        result = vif(data)
+    assert np.isinf(result.loc[:1, "VIF"]).all()
+    assert round(result.loc[2, "VIF"]) == 1
+
+
+@pytest.mark.parametrize("as_numpy", (False, True))
+def test_vif_ols(as_numpy):
+    """Test _vif_ols() produces identical results to the function used by statsmodels."""
+    data = tips.select_dtypes(np.number).copy()
+    if as_numpy:
+        data = data.to_numpy()
+
+    # statsmodels needs an explicit constant, otherwise it computes uncentered R^2.
+    exog = sm.add_constant(np.asarray(data, dtype=float))
+
+    # Calculate VIF with statsmodels.
+    vif_ratios = []
+    for idx in range(1, exog.shape[1]):
+        vif_ratios.append(variance_inflation_factor(exog, idx))
+    expected = np.asarray(vif_ratios)
+
+    # Calculate VIF using using _vif_ols.
+    result = vif(data)
+    assert_almost_equal(expected, result["VIF"], decimal=5)
