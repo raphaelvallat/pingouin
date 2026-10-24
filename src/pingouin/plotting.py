@@ -952,8 +952,10 @@ def plot_circmean(
 
     # Sanity checks
     angles = np.asarray(angles)
-    assert angles.ndim == 1, "angles must be a one-dimensional array."
-    assert angles.size > 1, "angles must have at least 2 values."
+    if angles.ndim != 1:
+        raise ValueError("angles must be a one-dimensional array.")
+    if angles.size <= 1:
+        raise ValueError("angles must have at least 2 values.")
     if kwargs_markers is not None and not isinstance(kwargs_markers, dict):
         raise TypeError("`kwargs_markers` must be a dict or None.")
     if kwargs_arrow is not None and not isinstance(kwargs_arrow, dict):

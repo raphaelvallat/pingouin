@@ -148,6 +148,12 @@ def test_perm_pval():
     """Test function _perm_pval."""
     bootstat = np.random.default_rng(123).normal(size=1000)
     x = -2
+    with pytest.raises(TypeError, match="'estimate' must be a real number"):
+        _perm_pval(bootstat, "x")
+    with pytest.raises(ValueError, match="bootstat must be a 1D array"):
+        _perm_pval(bootstat.reshape(-1, 2), x)
+    with pytest.raises(ValueError, match="bootstat must have at least one value"):
+        _perm_pval([], x)
     up = _perm_pval(bootstat, x, alternative="greater")
     low = _perm_pval(bootstat, x, alternative="less")
     two = _perm_pval(bootstat, x, alternative="two-sided")
@@ -216,8 +222,10 @@ def test_remove_na():
     assert np.allclose(remove_na(x, None, axis="columns"), [[4.0], [4.0], [7.0]])
     # When y is an empty list
     # See https://github.com/raphaelvallat/pingouin/issues/222
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError, match="y cannot be an empty list or array"):
         remove_na(x, y=[])
+    with pytest.raises(ValueError, match="is not a valid choice for 'axis'"):
+        remove_na(x, axis="wrong")
 
 
 def test_check_eftype():

@@ -6,6 +6,7 @@ import scipy
 
 from .utils import (
     _check_alternative,
+    _check_choice,
     _check_dataframe,
     _postprocess_dataframe,
     _register_dataframe_method,
@@ -141,7 +142,8 @@ def madmedianrule(a):
     array([False, False, False, False, False,  True, False, False])
     """
     a = np.asarray(a)
-    assert a.ndim == 1, "Only 1D array / list are supported for this function."
+    if a.ndim != 1:
+        raise ValueError("Only 1D array / list are supported for this function.")
     k = np.sqrt(scipy.stats.chi2.ppf(0.975, 1))
     return (np.fabs(a - np.median(a)) / mad(a)) > k
 
@@ -697,18 +699,25 @@ def friedman(data=None, dv=None, within=None, subject=None, method="chisq"):
 
     # Convert from wide to long-format, if needed
     if all([v is None for v in [dv, within, subject]]):
-        assert isinstance(data, pd.DataFrame)
+        if not isinstance(data, pd.DataFrame):
+            raise TypeError(
+                f"'data' must be a pandas DataFrame, but received {type(data).__name__}."
+            )
         data = data._get_numeric_data().dropna()  # Listwise deletion of missing values
-        assert data.shape[0] > 2, "Data must have at least 3 non-missing rows."
-        assert data.shape[1] > 1, "Data must contain at least two columns."
+        if data.shape[0] <= 2:
+            raise ValueError("Data must have at least 3 non-missing rows.")
+        if data.shape[1] <= 1:
+            raise ValueError("Data must contain at least two columns.")
         data["Subj"] = np.arange(data.shape[0])
         data = data.melt(id_vars="Subj", var_name="Within", value_name="DV")
         subject, within, dv = "Subj", "Within", "DV"
 
     # Check dataframe
     data = _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
-    assert not data[within].isnull().any(), "Cannot have missing values in `within`."
-    assert not data[subject].isnull().any(), "Cannot have missing values in `subject`."
+    if data[within].isnull().any():
+        raise ValueError("Cannot have missing values in `within`.")
+    if data[subject].isnull().any():
+        raise ValueError("Cannot have missing values in `subject`.")
 
     # Pivot the table to a wide-format dataframe. This has several effects:
     # 1) Force missing values to be explicit (a NaN cell is created)
@@ -833,18 +842,25 @@ def cochran(data=None, dv=None, within=None, subject=None):
     """
     # Convert from wide to long-format, if needed
     if all([v is None for v in [dv, within, subject]]):
-        assert isinstance(data, pd.DataFrame)
+        if not isinstance(data, pd.DataFrame):
+            raise TypeError(
+                f"'data' must be a pandas DataFrame, but received {type(data).__name__}."
+            )
         data = data._get_numeric_data().dropna()  # Listwise deletion of missing values
-        assert data.shape[0] > 2, "Data must have at least 3 non-missing rows."
-        assert data.shape[1] > 1, "Data must contain at least two columns."
+        if data.shape[0] <= 2:
+            raise ValueError("Data must have at least 3 non-missing rows.")
+        if data.shape[1] <= 1:
+            raise ValueError("Data must contain at least two columns.")
         data["Subj"] = np.arange(data.shape[0])
         data = data.melt(id_vars="Subj", var_name="Within", value_name="DV")
         subject, within, dv = "Subj", "Within", "DV"
 
     # Check data
     data = _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
-    assert not data[within].isnull().any(), "Cannot have missing values in `within`."
-    assert not data[subject].isnull().any(), "Cannot have missing values in `subject`."
+    if data[within].isnull().any():
+        raise ValueError("Cannot have missing values in `within`.")
+    if data[subject].isnull().any():
+        raise ValueError("Cannot have missing values in `subject`.")
 
     # Pivot and melt the table. This has several effects:
     # 1) Force missing values to be explicit (a NaN cell is created)
@@ -950,8 +966,9 @@ def harrelldavis(x, quantile=0.5, axis=-1):
     (100,)
     """
     x = np.asarray(x)
-    assert x.ndim <= 2, "Only 1D or 2D array are supported for this function."
-    assert axis in [0, 1, -1], "Axis must be 0, 1 or -1."
+    if x.ndim > 2:
+        raise ValueError("Only 1D or 2D array are supported for this function.")
+    axis = _check_choice(axis, [0, 1, -1], "axis")
 
     # Sort the input array
     x = np.sort(x, axis=axis)

@@ -190,8 +190,22 @@ def test_compute_boot_esci():
     with pytest.raises(ValueError):
         compute_bootci(x, y, func="wrong")
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError, match="Paired should be True"):
         compute_bootci(x, y, func="pearson", paired=False)
+    with pytest.raises(ValueError, match="Paired should be True"):
+        compute_bootci(x, y, func="spearman", paired=False)
+    with pytest.raises(TypeError, match="func must be a function"):
+        compute_bootci(x, y, func=1)
+    with pytest.raises(ValueError, match="x must be one-dimensional"):
+        compute_bootci(np.column_stack([x, x]), func=np.mean)
+    with pytest.raises(ValueError, match="x must have more than one element"):
+        compute_bootci(x[:1], func=np.mean)
+    with pytest.raises(ValueError, match="y must be one-dimensional"):
+        compute_bootci(x, np.column_stack([y, y]), func=np.mean)
+    with pytest.raises(ValueError, match="y must have more than one element"):
+        compute_bootci(x, y[:1], func=np.mean)
+    with pytest.raises(ValueError, match="same number of elements when paired=True"):
+        compute_bootci(x, y[:-1], paired=True, func=np.mean)
 
     with pytest.raises(ValueError, match=r"'confidence' must be between 0 and 1\."):
         compute_bootci(x, confidence=1.5)

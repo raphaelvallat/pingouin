@@ -92,6 +92,12 @@ def test_power_ttest():
     # Error
     with pytest.raises(ValueError):
         power_ttest(d=0.5)
+    with pytest.raises(ValueError, match="is not a valid choice for 'contrast'"):
+        power_ttest(d=0.5, n=20, contrast="wrong")
+    with pytest.raises(ValueError, match="alpha must be between 0 and 1"):
+        power_ttest(d=0.5, n=20, alpha=1.5)
+    with pytest.raises(ValueError, match="power must be between 0 and 1"):
+        power_ttest(d=0.5, n=20, power=0, alpha=None)
 
 
 def test_power_ttest2n():
@@ -125,6 +131,10 @@ def test_power_ttest2n():
     # Error
     with pytest.raises(ValueError):
         power_ttest2n(nx=20, ny=20)
+    with pytest.raises(ValueError, match="alpha must be between 0 and 1"):
+        power_ttest2n(nx=20, ny=20, d=0.5, alpha=1.5)
+    with pytest.raises(ValueError, match="power must be between 0 and 1"):
+        power_ttest2n(nx=20, ny=20, d=0.5, power=0, alpha=None)
 
 
 def test_power_anova():
@@ -144,6 +154,10 @@ def test_power_anova():
     # Error
     with pytest.raises(ValueError):
         power_anova(eta_squared=eta, k=2)
+    with pytest.raises(ValueError, match="alpha must be between 0 and 1"):
+        power_anova(eta_squared=eta, k=2, n=20, alpha=1.5)
+    with pytest.raises(ValueError, match="power must be between 0 and 1"):
+        power_anova(eta_squared=eta, k=2, n=20, power=0, alpha=None)
 
 
 def test_power_rm_anova():
@@ -196,6 +210,18 @@ def test_power_rm_anova():
     # Error
     with pytest.raises(ValueError):
         power_rm_anova(eta_squared=eta, m=2)
+    with pytest.raises(ValueError, match="epsilon must be between 0 and 1"):
+        power_rm_anova(eta_squared=eta, m=2, n=20, epsilon=0)
+    with pytest.raises(ValueError, match="corr must be between -1 and 1"):
+        power_rm_anova(eta_squared=eta, m=2, n=20, corr=1)
+    with pytest.raises(ValueError, match="alpha must be between 0 and 1"):
+        power_rm_anova(eta_squared=eta, m=2, n=20, alpha=1.5)
+    with pytest.raises(ValueError, match="power must be between 0 and 1"):
+        power_rm_anova(eta_squared=eta, m=2, n=20, power=0, alpha=None)
+    with pytest.raises(ValueError, match="sample size n must be > 1"):
+        power_rm_anova(eta_squared=eta, m=2, n=1)
+    with pytest.raises(ValueError, match="repeated measures m must be > 1"):
+        power_rm_anova(eta_squared=eta, m=1, n=20)
 
 
 def test_power_corr():
@@ -233,6 +259,12 @@ def test_power_corr():
     # Error & Warning
     with pytest.raises(ValueError):
         power_corr(r=0.5)
+    with pytest.raises(ValueError, match="r must be between -1 and 1"):
+        power_corr(r=1.5, n=20)
+    with pytest.raises(ValueError, match="alpha must be between 0 and 1"):
+        power_corr(r=0.5, n=20, alpha=1.5)
+    with pytest.raises(ValueError, match="power must be between 0 and 1"):
+        power_corr(r=0.5, n=20, power=0, alpha=None)
     # n <= 4: NaN is returned
     with pytest.warns(UserWarning, match="too small"):
         assert np.isnan(power_corr(r=0.5, n=4))
@@ -264,3 +296,9 @@ def test_power_chi2():
     # Error
     with pytest.raises(ValueError):
         power_chi2(1, w=0.3)
+    with pytest.raises(TypeError, match="'dof' must be a real number"):
+        power_chi2("1", w=0.3, n=20)
+    with pytest.raises(ValueError, match="alpha must be between 0 and 1"):
+        power_chi2(1, w=0.3, n=20, alpha=1.5)
+    with pytest.raises(ValueError, match="power must be between 0 and 1"):
+        power_chi2(1, w=0.3, n=20, power=0, alpha=None)

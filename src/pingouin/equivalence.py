@@ -5,7 +5,7 @@ import pandas as pd
 
 from .config import _no_rounding
 from .parametric import ttest
-from .utils import _postprocess_dataframe
+from .utils import _check_real, _postprocess_dataframe
 
 __all__ = ["tost"]
 
@@ -74,7 +74,7 @@ def tost(x, y, bound=1, paired=False, correction=False):
     """
     x = np.asarray(x)
     y = np.asarray(y)
-    assert isinstance(bound, (int, float)), "bound must be int or float."
+    _check_real(bound, "bound")
 
     # T-tests
     with _no_rounding():  # For max precision

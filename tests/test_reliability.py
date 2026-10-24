@@ -92,6 +92,18 @@ def test_intraclass_corr():
         }
     )
     df_psych = df_psych.melt(id_vars="S", var_name="J", value_name="Y")
+    # Invalid arguments
+    with pytest.raises(TypeError, match="'data' must be a pandas DataFrame"):
+        intraclass_corr(data=df_psych.to_numpy(), targets="S", raters="J", ratings="Y")
+    with pytest.raises(ValueError, match="targets, raters and ratings must be specified"):
+        intraclass_corr(data=df_psych, targets="S", raters="J")
+    with pytest.raises(ValueError, match="must be columns of data"):
+        intraclass_corr(data=df_psych, targets="S", raters="J", ratings="Nope")
+    with pytest.raises(ValueError, match="is not a valid choice for 'nan_policy'"):
+        intraclass_corr(data=df_psych, targets="S", raters="J", ratings="Y", nan_policy="drop")
+    df_dt = df_psych.assign(Y=pd.to_datetime(df_psych["Y"], unit="D"))
+    with pytest.raises(ValueError, match="Ratings must be numeric"):
+        intraclass_corr(data=df_dt, targets="S", raters="J", ratings="Y")
     icc = intraclass_corr(data=df_psych, targets="S", raters="J", ratings="Y")
     np.testing.assert_almost_equal(
         np.round(icc["ICC"].to_numpy(), 2), [0.17, 0.29, 0.71, 0.44, 0.62, 0.91]

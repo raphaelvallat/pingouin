@@ -135,11 +135,17 @@ def chi2_independence(data, x, y, correction=True):
     presence of heart disease on this dataset.
     """
     # Python code inspired by SciPy's chi2_contingency
-    assert isinstance(data, pd.DataFrame), "data must be a pandas DataFrame."
-    assert isinstance(x, (str, int)), "x must be a string or int."
-    assert isinstance(y, (str, int)), "y must be a string or int."
-    assert all(col in data.columns for col in (x, y)), "columns are not in dataframe."
-    assert isinstance(correction, bool), "correction must be a boolean."
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError(f"'data' must be a pandas DataFrame, but received {type(data).__name__}.")
+    for name, col in (("x", x), ("y", y)):
+        if not isinstance(col, (str, int)):
+            raise TypeError(f"'{name}' must be a string or int, but received {type(col).__name__}.")
+    if not all(col in data.columns for col in (x, y)):
+        raise ValueError("columns are not in dataframe.")
+    if not isinstance(correction, bool):
+        raise TypeError(
+            f"'correction' must be a boolean, but received {type(correction).__name__}."
+        )
 
     observed = pd.crosstab(data[x], data[y])
 
@@ -315,11 +321,13 @@ def chi2_mcnemar(data, x, y, correction=True):
     mcnemar  20.020833    1  0.000008  0.000003
     """
     # Python code initially inspired by statsmodel's mcnemar
-    assert isinstance(data, pd.DataFrame), "data must be a pandas DataFrame."
-    assert all(isinstance(column, (str, int)) for column in (x, y)), (
-        "column names must be string or int."
-    )
-    assert all(column in data.columns for column in (x, y)), "columns are not in dataframe."
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError(f"'data' must be a pandas DataFrame, but received {type(data).__name__}.")
+    for name, col in (("x", x), ("y", y)):
+        if not isinstance(col, (str, int)):
+            raise TypeError(f"'{name}' must be a string or int, but received {type(col).__name__}.")
+    if not all(column in data.columns for column in (x, y)):
+        raise ValueError("columns are not in dataframe.")
 
     for column in (x, y):
         if data[column].isna().any():

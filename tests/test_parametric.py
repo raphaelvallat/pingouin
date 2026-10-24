@@ -251,6 +251,8 @@ def test_anova(df_pain):
     # Error: between is an empty list
     with pytest.raises(ValueError):
         anova(dv="Pain threshold", between=[], data=df_pain)
+    with pytest.raises(ValueError, match="is not a valid choice for 'effsize'"):
+        anova(dv="Pain threshold", between="Hair color", data=df_pain, effsize="eta")
 
     # Unbalanced and with missing values AND between as a categorical
     df_paincat = df_pain.copy()
@@ -273,6 +275,8 @@ def test_anova(df_pain):
     # Same but with standard eta-square
     aov2 = anova(dv="Yield", between=["Blend", "Crop"], data=df_aov2, effsize="n2").round(4)
     assert_array_equal(aov2.loc[[0, 1, 2], "n2"], [0.0001, 0.1843, 0.1589])
+    with pytest.raises(ValueError, match="at least 5 non-missing values"):
+        anova(dv="Yield", between=["Blend", "Crop"], data=df_aov2.iloc[:4])
 
     # Two-way ANOVA with unbalanced design
     df_aov2 = read_dataset("anova2_unbalanced")
@@ -311,6 +315,8 @@ def test_anova(df_pain):
     is_cell = df_aov3[["Sex", "Risk", "Drug"]].eq(["M", "High", "A"]).all(axis=1)
     with pytest.raises(ValueError, match="empty cells"):
         anova(dv="Cholesterol", between=["Sex", "Risk", "Drug"], data=df_aov3[~is_cell])
+    with pytest.raises(ValueError, match="at least 5 non-missing values"):
+        anova(dv="Cholesterol", between=["Sex", "Risk", "Drug"], data=df_aov3.iloc[:4])
 
     # Three-way ANOVA using statsmodels
     # Balanced
@@ -465,6 +471,26 @@ def test_rm_anova(df_rm_wide):
 
     https://github.com/raphaelvallat/pingouin/issues/251
     """
+    # Invalid arguments
+    with pytest.raises(ValueError, match="is not a valid choice for 'effsize'"):
+        rm_anova(df_rm_wide, effsize="eta")
+    with pytest.raises(ValueError, match="Within cannot be empty"):
+        rm_anova(dv="Scores", within=[], subject="Subject", data=df)
+    with pytest.raises(TypeError, match="'data' must be a pandas DataFrame"):
+        rm_anova([1, 2, 3])
+    with pytest.raises(ValueError, match="at least 3 non-missing rows"):
+        rm_anova(df_rm_wide.iloc[:2])
+    with pytest.raises(ValueError, match="at least two columns"):
+        rm_anova(df_rm_wide.iloc[:, :1])
+    df_nan_within = df.copy()
+    df_nan_within.loc[0, "Time"] = np.nan
+    with pytest.raises(ValueError, match="missing values in `within`"):
+        rm_anova(dv="Scores", within="Time", subject="Subject", data=df_nan_within)
+    df_nan_subj = df.copy()
+    df_nan_subj.loc[0, "Subject"] = np.nan
+    with pytest.raises(ValueError, match="missing values in `subject`"):
+        rm_anova(dv="Scores", within="Time", subject="Subject", data=df_nan_subj)
+
     # Boolean-like correction (e.g. numpy bool) behaves like a Python bool
     aov_true = rm_anova(df_rm_wide, correction=True)
     assert "p_GG_corr" in aov_true.columns
@@ -664,12 +690,20 @@ def test_rm_anova2():
     # Error: more than two factors
     with pytest.raises(ValueError):
         df2.rm_anova(dv="BOLD", within=["Session", "Time", "Wrong"], subject="Subj")
+    # Error: missing values in a within factor
+    df2.loc[0, "Session"] = np.nan
+    with pytest.raises(ValueError, match="missing values in Session"):
+        df2.rm_anova(dv="BOLD", within=["Session", "Time"], subject="Subj")
 
 
 def test_mixed_anova():
     """Test function anova.
     Compare with JASP and ezANOVA.
     """
+    with pytest.raises(ValueError, match="is not a valid choice for 'effsize'"):
+        mixed_anova(
+            dv="Scores", within="Time", subject="Subject", between="Group", data=df, effsize="eta"
+        )
     # trigger error when specifying more than one within or between factor
     with pytest.raises(ValueError, match="/pingouin/issues/136"):
         mixed_anova(
@@ -893,6 +927,24 @@ def test_ancova():
     assert_array_equal(aov["np2"], [0.2441, 0.4869, np.nan])
     aov = ancova(data=df, dv="Scores", covar="Income", between="Method", effsize="n2").round(4)
     assert_array_equal(aov["n2"], [0.1421, 0.4177, np.nan])
+    # Invalid arguments
+    kwargs = dict(dv="Scores", covar="Income", between="Method")
+    with pytest.raises(ValueError, match="is not a valid choice for 'effsize'"):
+        ancova(data=df, effsize="eta", **kwargs)
+    with pytest.raises(TypeError, match="'data' must be a pandas DataFrame"):
+        ancova(data=df.to_numpy(), **kwargs)
+    with pytest.raises(TypeError, match="between must be a string"):
+        ancova(data=df, dv="Scores", covar="Income", between=["Method"])
+    with pytest.raises(ValueError, match="Wrong is not in data"):
+        ancova(data=df, dv="Wrong", covar="Income", between="Method")
+    with pytest.raises(ValueError, match="Wrong is not in data"):
+        ancova(data=df, dv="Scores", covar="Income", between="Wrong")
+    with pytest.raises(TypeError, match="'covar' must be a str or a list"):
+        ancova(data=df, dv="Scores", covar=1, between="Method")
+    with pytest.raises(ValueError, match="covariate Wrong is not in data"):
+        ancova(data=df, dv="Scores", covar="Wrong", between="Method")
+    with pytest.raises(ValueError, match="covariate Method is not numeric"):
+        ancova(data=df, dv="Scores", covar="Method", between="Method")
     # With one covariate, missing values and unbalanced design
     df.loc[[1, 2], "Scores"] = np.nan
     aov = ancova(data=df, dv="Scores", covar=["Income"], between="Method").round(4)

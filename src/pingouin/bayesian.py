@@ -1,13 +1,12 @@
 """Bayesian functions."""
 
-import numbers
 import warnings
 from math import exp, lgamma, log, pi
 
 import numpy as np
 from scipy.integrate import quad
 
-from .utils import _check_alternative, _check_confidence, _check_real, _is_installed
+from .utils import _check_alternative, _check_choice, _check_confidence, _check_real, _is_installed
 
 __all__ = ["bayesfactor_ttest", "bayesfactor_pearson", "bayesfactor_binom"]
 
@@ -98,13 +97,14 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative="two-sided", r=0
     Bayes Factor: 17.185 (two-sample paired)
     """
     # Check tail
-    assert alternative == "two-sided", (
-        "Alternative must be 'two-sided' (default). One-sided tests are not supported."
-    )
+    if alternative != "two-sided":
+        raise ValueError(
+            "Alternative must be 'two-sided' (default). One-sided tests are not supported."
+        )
     one_sample = ny is None or ny == 1
 
     # Check T-value
-    assert isinstance(t, numbers.Real), "The T-value must be a int or a float."
+    _check_real(t, "t")
     if not np.isfinite(t):
         return np.nan
 
@@ -244,13 +244,14 @@ def bayesfactor_pearson(r, n, alternative="two-sided", method="ly", kappa=1.0):
     from scipy.special import betaln, gamma, hyp2f1
 
     method = method.lower()
-    assert method in ["ly", "wetzels"], "Method not recognized."
+    _check_choice(method, ["ly", "wetzels"], "method")
     _check_alternative(alternative)
 
     # Wrong input
     if not np.isfinite(r) or n < 2:
         return np.nan
-    assert -1 <= r <= 1, "r must be between -1 and 1."
+    if not (-1 <= r <= 1):
+        raise ValueError("r must be between -1 and 1.")
 
     if alternative != "two-sided" and method == "wetzels":
         warnings.warn(

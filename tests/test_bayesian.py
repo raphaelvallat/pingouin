@@ -40,6 +40,10 @@ def test_bayesfactor_ttest():
     assert int(float(ttest(x, z, paired=True).at["T_test", "BF10"])) == 420
     # Check with wrong T-value
     assert np.isnan(bayesfactor_ttest(np.nan, 20, paired=True))
+    with pytest.raises(ValueError, match="One-sided tests are not supported"):
+        bayesfactor_ttest(3.5, 20, alternative="greater")
+    with pytest.raises(TypeError, match="'t' must be a real number"):
+        bayesfactor_ttest("3.5", 20)
 
 
 def test_bayesfactor_pearson():
@@ -52,6 +56,10 @@ def test_bayesfactor_pearson():
     assert bfp(-0.1, 83) == appr(0.204)
     assert bfp(0.1, 83, alternative="greater") == appr(0.332)
     assert bfp(0.1, 83, alternative="less") == appr(0.076)
+    with pytest.raises(ValueError, match="is not a valid choice for 'method'"):
+        bfp(0.1, 83, method="wrong")
+    with pytest.raises(ValueError, match="r must be between -1 and 1"):
+        bfp(1.5, 83)
 
     # Example 2. Compare with JASP.
     r, _ = pearsonr(x, y)

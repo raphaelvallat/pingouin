@@ -315,10 +315,13 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_poli
     """
 
     # Safety check
-    assert isinstance(data, pd.DataFrame), "data must be a dataframe."
-    assert all([v is not None for v in [targets, raters, ratings]])
-    assert all([v in data.columns for v in [targets, raters, ratings]])
-    assert nan_policy in ["omit", "raise"]
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError(f"'data' must be a pandas DataFrame, but received {type(data).__name__}.")
+    if any(v is None for v in [targets, raters, ratings]):
+        raise ValueError("targets, raters and ratings must be specified.")
+    if not all(v in data.columns for v in [targets, raters, ratings]):
+        raise ValueError("targets, raters and ratings must be columns of data.")
+    _check_choice(nan_policy, ["omit", "raise"], "nan_policy")
 
     # Convert data to wide-format
     data = data.pivot_table(index=targets, columns=raters, values=ratings, observed=True)
@@ -340,7 +343,8 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_poli
     data = data.reset_index().melt(id_vars=targets, value_name=ratings)
 
     # Check that ratings is a numeric variable
-    assert data[ratings].dtype.kind in "bfiu", "Ratings must be numeric."
+    if data[ratings].dtype.kind not in "bfiu":
+        raise ValueError("Ratings must be numeric.")
     # Check that data are fully balanced
     # This behavior is ensured by the long-to-wide-to-long transformation
     # Unbalanced data will result in rows with missing values.

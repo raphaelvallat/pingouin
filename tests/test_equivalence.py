@@ -49,6 +49,8 @@ def test_tost():
     # the way that they estimate the p-value of the one-sample test.
     assert tost(a, 0).at["TOST", "pval"] > tost(a, 5).at["TOST", "pval"]
     assert tost(a, 5, bound=3).at["TOST", "pval"] < 0.5
+    with pytest.raises(TypeError, match="'bound' must be a real number"):
+        tost(a, b, bound="1")
 
     # Rounding options only apply to the output, not to the internal T-tests
     pval = tost(a, b, bound=10).at["TOST", "pval"]

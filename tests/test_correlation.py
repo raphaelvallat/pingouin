@@ -128,6 +128,10 @@ def test_corr():
         corr(x, y, method="error")
     with pytest.raises(ValueError):
         corr(x, y, tail="error")
+    with pytest.raises(ValueError, match="must be 1D array"):
+        corr(x[:, None], y)
+    with pytest.raises(ValueError, match="same length"):
+        corr(x, y[:-1])
     # Compare BF10 with JASP
     df = read_dataset("pairwise_corr")
     stats = corr(df["Neuroticism"], df["Extraversion"])
@@ -230,9 +234,31 @@ def test_partial_corr():
         partial_corr(data=df, x="x", y="y", covar="cv2", x_covar="cv1")
     with pytest.raises(ValueError):
         partial_corr(data=df, x="x", y="y", x_covar="cv2", y_covar="cv1")
-    with pytest.raises(AssertionError) as error_info:
+    with pytest.raises(ValueError) as error_info:
         partial_corr(data=df, x="cv1", y="y", covar=["cv1", "cv2"])
     assert str(error_info.value) == "x and covar must be independent"
+    with pytest.raises(ValueError, match="y and covar must be independent"):
+        partial_corr(data=df, x="x", y="cv1", covar=["cv1", "cv2"])
+    with pytest.raises(ValueError, match="x and covar must be independent"):
+        partial_corr(data=df, x="x", y="y", covar="x")
+    with pytest.raises(ValueError, match="y and covar must be independent"):
+        partial_corr(data=df, x="x", y="y", covar="y")
+    with pytest.raises(ValueError, match="x and y must be independent"):
+        partial_corr(data=df, x="x", y="x", covar="cv1")
+    with pytest.raises(ValueError, match="not a valid choice for 'method'"):
+        partial_corr(data=df, x="x", y="y", covar="cv1", method="kendall")
+    with pytest.raises(TypeError, match="'data' must be a pandas DataFrame"):
+        partial_corr(data=df.to_numpy(), x="x", y="y", covar="cv1")
+    with pytest.raises(ValueError, match="at least 3 samples"):
+        partial_corr(data=df.iloc[:2], x="x", y="y", covar="cv1")
+    with pytest.raises(ValueError, match="columns are not in dataframe"):
+        partial_corr(data=df, x="x", y="y", covar="wrong")
+    with pytest.raises(ValueError, match="columns must be numeric"):
+        partial_corr(data=df.assign(cv1=df["cv1"].astype(str)), x="x", y="y", covar="cv1")
+    df_nan = df.copy()
+    df_nan.loc[2:, "cv1"] = np.nan
+    with pytest.raises(ValueError, match="at least 3 non-NAN samples"):
+        partial_corr(data=df_nan, x="x", y="y", covar="cv1")
 
     # Issue #375: covariate numerically identical to x or y raises ValueError
     df_375 = df.copy()
@@ -285,6 +311,13 @@ def test_rmcorr():
     # Test with less than 3 subjects (same behavior as R package)
     with pytest.raises(ValueError):
         rm_corr(data=df[df["Subject"].isin([1, 2])], x="pH", y="PacO2", subject="Subject")
+    # Invalid inputs
+    with pytest.raises(TypeError, match="'data' must be a pandas DataFrame"):
+        rm_corr(data=df.to_numpy(), x="pH", y="PacO2", subject="Subject")
+    with pytest.raises(ValueError, match="The wrong column is not in data"):
+        rm_corr(data=df, x="pH", y="PacO2", subject="wrong")
+    with pytest.raises(ValueError, match="pH must be numeric"):
+        rm_corr(data=df.assign(pH=df["pH"].astype(str)), x="pH", y="PacO2", subject="Subject")
 
 
 def test_distance_corr():
@@ -308,6 +341,8 @@ def test_distance_corr():
     assert np.round(dcor, 5) == 0.87996
     assert 0.20 < pval < 0.30
 
+    with pytest.raises(ValueError, match="same number of samples"):
+        distance_corr(a, b[:-1])
     with pytest.raises(ValueError):
         a[2, 4] = np.nan
         distance_corr(a, b)
@@ -377,5 +412,11 @@ def test_rcorr():
     custom = rcorr(frame, pval_stars={0.05: "sig"}).to_numpy()[i, j]
     assert set(custom) <= {"", "sig"}
     assert custom[0] == "sig"  # frame[1] is correlated with frame[0]
-    with pytest.raises(AssertionError, match="pval_stars must be a dictionary"):
+    with pytest.raises(TypeError, match="'pval_stars' must be a dictionary"):
         rcorr(frame, pval_stars=[0.05])
+    with pytest.raises(TypeError, match="'decimals' must be an integer"):
+        rcorr(frame, decimals=2.0)
+    with pytest.raises(ValueError, match="not a valid choice for 'method'"):
+        rcorr(frame, method="kendall")
+    with pytest.raises(ValueError, match="not a valid choice for 'upper'"):
+        rcorr(frame, upper="r")

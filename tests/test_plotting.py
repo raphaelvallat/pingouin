@@ -381,6 +381,11 @@ def test_plot_circmean():
     arrow = ax.patches[-1]
     np.testing.assert_allclose(arrow.get_facecolor(), (0, 0, 0, 1))
     np.testing.assert_allclose(arrow.get_edgecolor(), matplotlib.colors.to_rgba("tab:red"))
+    # Invalid angles
+    with pytest.raises(ValueError, match="one-dimensional"):
+        plot_circmean(angles[:, None])
+    with pytest.raises(ValueError, match="at least 2 values"):
+        plot_circmean(angles[:1])
     # Non-dict kwargs raise TypeError
     with pytest.raises(TypeError):
         plot_circmean(angles, kwargs_markers="red")

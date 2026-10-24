@@ -344,18 +344,24 @@ def linear_regression(
 
     # Check that we have enough samples / features
     n, p = X.shape[0], X.shape[1]
-    assert n >= 3, "At least three valid samples are required in X."
-    assert p >= 1, "X must have at least one valid column."
+    if n < 3:
+        raise ValueError("At least three valid samples are required in X.")
+    if p < 1:
+        raise ValueError("X must have at least one valid column.")
 
     # Handle weights
     if weights is not None:
         if relimp:
             raise ValueError("relimp = True is not supported when using weights.")
         w = np.asarray(weights)
-        assert w.ndim == 1, "weights must be a 1D array."
-        assert w.size == n, "weights must be of shape n_samples."
-        assert not np.isnan(w).any(), "Missing weights are not accepted."
-        assert not (w < 0).any(), "Negative weights are not accepted."
+        if w.ndim != 1:
+            raise ValueError("weights must be a 1D array.")
+        if w.size != n:
+            raise ValueError("weights must be of shape n_samples.")
+        if np.isnan(w).any():
+            raise ValueError("Missing weights are not accepted.")
+        if (w < 0).any():
+            raise ValueError("Negative weights are not accepted.")
         # Do not count weights == 0 in dof
         # This gives similar results as R lm() but different from statsmodels
         n = np.count_nonzero(w)
@@ -492,7 +498,8 @@ def _prepare_Xy(X, y, remove_na=False):
     # Convert input to numpy array. X and y are cast to float, e.g. for boolean inputs.
     X = np.asarray(X, dtype=float)
     y = np.asarray(y, dtype=float)
-    assert y.ndim == 1, "y must be one-dimensional."
+    if y.ndim != 1:
+        raise ValueError("y must be one-dimensional.")
 
     if X.ndim == 1:
         # Convert to (n_samples, n_features) shape
@@ -502,15 +509,18 @@ def _prepare_Xy(X, y, remove_na=False):
     if remove_na:
         X, y = rm_na(X, y[..., np.newaxis], paired=True, axis="rows")
         y = np.squeeze(y)
-    assert np.isfinite(y).all(), (
-        "Target (y) contains NaN or Inf. Please remove them manually or use remove_na=True."
-    )
-    assert np.isfinite(X).all(), (
-        "Predictors (X) contain NaN or Inf. Please remove them manually or use remove_na=True."
-    )
+    if not np.isfinite(y).all():
+        raise ValueError(
+            "Target (y) contains NaN or Inf. Please remove them manually or use remove_na=True."
+        )
+    if not np.isfinite(X).all():
+        raise ValueError(
+            "Predictors (X) contain NaN or Inf. Please remove them manually or use remove_na=True."
+        )
 
     # Check that X and y have same length
-    assert y.shape[0] == X.shape[0], "X and y must have same number of samples"
+    if y.shape[0] != X.shape[0]:
+        raise ValueError("X and y must have same number of samples")
 
     if not names:
         names = ["x" + str(i + 1) for i in range(X.shape[1])]
@@ -1222,33 +1232,45 @@ def mediation_analysis(
     7  Indirect Mbin  0.001  0.041  0.952    -0.071      0.108   No
     """
     # Sanity check
-    assert isinstance(x, (str, int)), "y must be a string or int."
-    assert isinstance(y, (str, int)), "y must be a string or int."
-    assert isinstance(m, (list, str, int)), "Mediator(s) must be a list, string or int."
-    assert isinstance(covar, (type(None), str, list, int))
+    if not isinstance(x, (str, int)):
+        raise TypeError(f"'x' must be a string or int, but received {type(x).__name__}.")
+    if not isinstance(y, (str, int)):
+        raise TypeError(f"'y' must be a string or int, but received {type(y).__name__}.")
+    if not isinstance(m, (list, str, int)):
+        raise TypeError(f"'m' must be a list, string or int, but received {type(m).__name__}.")
+    if not isinstance(covar, (type(None), str, list, int)):
+        raise TypeError(
+            f"'covar' must be a list, string, int or None, but received {type(covar).__name__}."
+        )
     if isinstance(m, (str, int)):
         m = [m]
     n_mediator = len(m)
-    assert isinstance(data, pd.DataFrame), "Data must be a DataFrame."
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError(f"'data' must be a pandas DataFrame, but received {type(data).__name__}.")
     # Check for duplicates
-    assert n_mediator == len(set(m)), "Cannot have duplicates mediators."
+    if n_mediator != len(set(m)):
+        raise ValueError("Cannot have duplicates mediators.")
     if isinstance(covar, (str, int)):
         covar = [covar]
     if isinstance(covar, list):
-        assert len(covar) == len(set(covar)), "Cannot have duplicates covar."
-        assert set(m).isdisjoint(covar), "Mediator cannot be in covar."
+        if len(covar) != len(set(covar)):
+            raise ValueError("Cannot have duplicates covar.")
+        if not set(m).isdisjoint(covar):
+            raise ValueError("Mediator cannot be in covar.")
     # Check that columns are in dataframe
     columns = _fl([x, m, y, covar])
     keys = data.columns
-    assert all([c in keys for c in columns]), "Column(s) are not in DataFrame."
+    if not all([c in keys for c in columns]):
+        raise ValueError("Column(s) are not in DataFrame.")
     # Check that columns are numeric
-    err_msg = "Columns must be numeric or boolean."
-    assert all([data[c].dtype.kind in "bfiu" for c in columns]), err_msg
+    if not all([data[c].dtype.kind in "bfiu" for c in columns]):
+        raise ValueError("Columns must be numeric or boolean.")
 
     # Drop rows with NAN Values
     data = data[columns].dropna()
     n = data.shape[0]
-    assert n > 5, "DataFrame must have at least 5 samples (rows)."
+    if n <= 5:
+        raise ValueError("DataFrame must have at least 5 samples (rows).")
 
     # Check which mediator(s) are binary (logistic regression) or continuous (linear regression)
     m_binary = (data[m].nunique() == 2).to_numpy()

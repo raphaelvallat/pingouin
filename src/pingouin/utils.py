@@ -72,11 +72,13 @@ def _perm_pval(bootstat, estimate, alternative="two-sided"):
         P-value.
     """
     _check_alternative(alternative)
-    assert isinstance(estimate, numbers.Real)
+    _check_real(estimate, "estimate")
     bootstat = np.asarray(bootstat)
-    assert bootstat.ndim == 1, "bootstat must be a 1D array."
+    if bootstat.ndim != 1:
+        raise ValueError("bootstat must be a 1D array.")
     n_boot = bootstat.size
-    assert n_boot >= 1, "bootstat must have at least one value."
+    if n_boot < 1:
+        raise ValueError("bootstat must have at least one value.")
     # Relative tolerance so that permuted values that are theoretically equal to the estimate
     # but differ by floating-point error are counted as ties (same as scipy.stats.permutation_test)
     gamma = abs(estimate) * np.finfo(float).eps * 100
@@ -315,7 +317,7 @@ def remove_na(x, y=None, paired=False, axis="rows"):
     """
     # Safety checks
     x = np.asarray(x)
-    assert axis in ["rows", "columns"], "axis must be rows or columns."
+    _check_choice(axis, ["rows", "columns"], "axis")
 
     if y is None:
         return _remove_na_single(x, axis=axis)
@@ -323,7 +325,8 @@ def remove_na(x, y=None, paired=False, axis="rows"):
         return _remove_na_single(x, axis=axis), y
     else:  # y is list, np.array, pd.Series
         y = np.asarray(y)
-        assert y.size != 0, "y cannot be an empty list or array."
+        if y.size == 0:
+            raise ValueError("y cannot be an empty list or array.")
         # Make sure that we just pass-through if y have only 1 element
         if y.size == 1:
             return _remove_na_single(x, axis=axis), y

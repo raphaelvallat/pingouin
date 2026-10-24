@@ -66,14 +66,15 @@ def test_chi2_independence():
     pd.testing.assert_frame_equal(stats_nan, pg.chi2_independence(data.dropna(), "x", "y")[2])
 
     # Testing validations
-    def expect_assertion_error(*params):
-        with pytest.raises(AssertionError):
-            pg.chi2_independence(*params)
+    def expect_error(error, *params, **kwargs):
+        with pytest.raises(error):
+            pg.chi2_independence(*params, **kwargs)
 
-    expect_assertion_error(1, "x", "y")  # Not a pd.DataFrame
-    expect_assertion_error(data, x, "y")  # Not a string
-    expect_assertion_error(data, "x", y)  # Not a string
-    expect_assertion_error(data, "x", "z")  # Not a column of data
+    expect_error(TypeError, 1, "x", "y")  # Not a pd.DataFrame
+    expect_error(TypeError, data, x, "y")  # Not a string
+    expect_error(TypeError, data, "x", y)  # Not a string
+    expect_error(ValueError, data, "x", "z")  # Not a column of data
+    expect_error(TypeError, data, "x", "y", correction=1)  # Not a boolean
 
     # Testing "no data" ValueError
     data["x"] = np.nan
@@ -128,14 +129,14 @@ def test_chi2_mcnemar():
     data[~mask_class_1] = 0
 
     # Testing validations
-    def expect_assertion_error(*params):
-        with pytest.raises(AssertionError):
+    def expect_error(error, *params):
+        with pytest.raises(error):
             pg.chi2_mcnemar(*params)
 
-    expect_assertion_error(1, "x", "y")  # Not a pd.DataFrame
-    expect_assertion_error(data, x, "y")  # Not a string
-    expect_assertion_error(data, "x", y)  # Not a string
-    expect_assertion_error(data, "x", "z")  # Not a column of data
+    expect_error(TypeError, 1, "x", "y")  # Not a pd.DataFrame
+    expect_error(TypeError, data, x, "y")  # Not a string
+    expect_error(TypeError, data, "x", y)  # Not a string
+    expect_error(ValueError, data, "x", "z")  # Not a column of data
 
     # Testing happy-day
     observed, stats = pg.chi2_mcnemar(data, "x", "y")

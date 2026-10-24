@@ -5,12 +5,11 @@
 # Reference:
 # Berens, Philipp. 2009. CircStat: A MATLAB Toolbox for Circular Statistics.
 # Journal of Statistical Software, Articles 31 (10): 1–21.
-import numbers
 
 import numpy as np
 from scipy.stats import norm
 
-from .utils import remove_na
+from .utils import _check_real, remove_na
 
 __all__ = [
     "convert_angles",
@@ -51,7 +50,8 @@ def _remove_na_weighted(angles, w=None):
     """Remove missing angles (and their weights). Weights default to one per angle."""
     angles = np.asarray(angles)
     w = np.ones(angles.shape) if w is None else np.asarray(w, dtype=float)
-    assert angles.shape == w.shape, "Input dimensions do not match"
+    if angles.shape != w.shape:
+        raise ValueError("Input dimensions do not match")
     mask = ~np.isnan(angles)
     return angles[mask], w[mask]
 
@@ -136,14 +136,18 @@ def convert_angles(angles, low=0, high=360, positive=False):
            [ 1.44862328,  1.85004901,  2.14675498,  0.99483767],
            [-2.54818071, -2.35619449,  1.67551608,  1.97222205]])
     """
-    assert isinstance(positive, bool)
-    assert isinstance(high, numbers.Real), "high must be numeric"
-    assert isinstance(low, numbers.Real), "low must be numeric"
+    if not isinstance(positive, bool):
+        raise TypeError(f"'positive' must be a boolean, but received {type(positive).__name__}.")
+    _check_real(high, "high")
+    _check_real(low, "low")
     ptp = high - low
-    assert ptp > 0, "high - low must be strictly positive."
+    if not (ptp > 0):
+        raise ValueError("high - low must be strictly positive.")
     angles = np.asarray(angles)
-    assert np.nanmin(angles) >= low, "angles must be >= low."
-    assert np.nanmax(angles) <= high, "angles must be <= high."
+    if not (np.nanmin(angles) >= low):
+        raise ValueError("angles must be >= low.")
+    if not (np.nanmax(angles) <= high):
+        raise ValueError("angles must be <= high.")
     # Map to [0, 2pi] range
     rad = angles * (2 * np.pi) / ptp
     if not positive:
@@ -317,7 +321,8 @@ def circ_mean(angles, w=None, axis=0):
     angles = np.asarray(angles)
     _checkangles(angles)  # Check that angles is in radians
     w = np.asarray(w) if w is not None else np.ones(angles.shape)
-    assert angles.shape == w.shape, "Input dimensions do not match"
+    if angles.shape != w.shape:
+        raise ValueError("Input dimensions do not match")
     return np.angle(np.nansum(np.multiply(w, np.exp(1j * angles)), axis=axis))
 
 
@@ -448,7 +453,8 @@ def circ_r(angles, w=None, d=None, axis=0):
     angles = np.asarray(angles)
     _checkangles(angles)  # Check that angles is in radians
     w = np.asarray(w) if w is not None else np.ones(angles.shape)
-    assert angles.shape == w.shape, "Input dimensions do not match."
+    if angles.shape != w.shape:
+        raise ValueError("Input dimensions do not match.")
 
     # Add np.nan in weight vector (otherwise nansum(w) is wrong)
     w = w.astype(float)
@@ -538,7 +544,8 @@ def circ_corrcc(x, y, correction_uniform=False):
     """
     x = np.asarray(x)
     y = np.asarray(y)
-    assert x.size == y.size, "x and y must have the same length."
+    if x.size != y.size:
+        raise ValueError("x and y must have the same length.")
 
     # Remove NA
     x, y = remove_na(x, y, paired=True)
@@ -607,7 +614,8 @@ def circ_corrcl(x, y):
 
     x = np.asarray(x)
     y = np.asarray(y)
-    assert x.size == y.size, "x and y must have the same length."
+    if x.size != y.size:
+        raise ValueError("x and y must have the same length.")
     _checkangles(x)  # Check that the circular variable is in radians
 
     # Remove NA

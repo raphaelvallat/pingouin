@@ -358,32 +358,38 @@ def compute_bootci(
         "BCa",
         "basic",
     ]
-    assert method in valid_methods, f"method must be one of {valid_methods}."
-    assert isfunction(func) or isinstance(func, str) or isroutine(func), (
-        "func must be a function (e.g. np.mean, custom function) or a string (e.g. 'pearson'). "
-        "See documentation for more details."
-    )
+    _check_choice(method, valid_methods, "method")
+    if not (isfunction(func) or isinstance(func, str) or isroutine(func)):
+        raise TypeError(
+            "func must be a function (e.g. np.mean, custom function) or a string (e.g. 'pearson'). "
+            "See documentation for more details."
+        )
 
     # Check x
     x = np.asarray(x)
     nx = x.size
-    assert x.ndim == 1, "x must be one-dimensional."
-    assert nx > 1, "x must have more than one element."
+    if x.ndim != 1:
+        raise ValueError("x must be one-dimensional.")
+    if nx <= 1:
+        raise ValueError("x must have more than one element.")
 
     # Check y
     if y is not None:
         y = np.asarray(y)
         ny = y.size
-        assert y.ndim == 1, "y must be one-dimensional."
-        assert ny > 1, "y must have more than one element."
-        if paired:
-            assert nx == ny, "x and y must have the same number of elements when paired=True."
+        if y.ndim != 1:
+            raise ValueError("y must be one-dimensional.")
+        if ny <= 1:
+            raise ValueError("y must have more than one element.")
+        if paired and nx != ny:
+            raise ValueError("x and y must have the same number of elements when paired=True.")
 
     # Check string functions
     if isinstance(func, str):
         func_str = f"{func}"
         if func == "pearson":
-            assert paired, "Paired should be True if using correlation functions."
+            if not paired:
+                raise ValueError("Paired should be True if using correlation functions.")
 
             def func(x, y, axis=-1):
                 return pearsonr(x, y, axis=axis)[0]
@@ -391,7 +397,8 @@ def compute_bootci(
         elif func == "spearman":
             from scipy.stats import spearmanr
 
-            assert paired, "Paired should be True if using correlation functions."
+            if not paired:
+                raise ValueError("Paired should be True if using correlation functions.")
 
             def func(x, y):
                 return spearmanr(x, y)[0]
