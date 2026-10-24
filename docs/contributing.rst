@@ -34,6 +34,43 @@ Code guidelines
 
      $ pytest --verbose
 
+.. _impact-rating:
+
+Assessing the impact of your change
+-----------------------------------
+
+Reviewing a pull request often takes far longer than writing it. To keep review time focused on changes that matter to users, **every pull request must state its user impact** using the scale below, with one or two sentences explaining the rating. The maintainer may re-rate a PR; the final rating decides whether and how fast it is reviewed.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 8 32 60
+
+   * - Rating
+     - Definition
+     - Examples
+   * - **P1**
+     - Critical. Affects most users, or silently produces wrong results.
+     - Wrong statistic, p-value, effect size or confidence interval for common inputs or default parameters; crash or exception on standard usage; package fails to install or import; breakage with a new release of NumPy, SciPy, pandas or statsmodels; security issue.
+   * - **P2**
+     - Important. A clear benefit for a meaningful share of users.
+     - Wrong result for a less common but legitimate option (e.g. a specific ``alternative``, correction method, or unbalanced design); a new, well-established statistical test or effect size that has been requested and is validated against R, SPSS, Matlab or JASP; misleading documentation (wrong formula, wrong description of a parameter or of the output); a substantial, benchmarked speed-up on realistic data.
+   * - **P3**
+     - Minor. Correct and useful, but only for rare edge cases.
+     - Incorrect handling of degenerate inputs (zero variance, a single observation per group, all-NaN column) that are unlikely in practice; clearer error message; modest speed-up; small optional convenience parameter.
+   * - **P4**
+     - Negligible. No measurable benefit to users.
+     - Refactoring or renaming without a behavior change; type hints or docstring wording only; test-only changes; defensive checks for inputs nobody passes; micro-optimizations without a benchmark; style or formatting tweaks.
+
+Rules of thumb:
+
+* **P4 changes should not be submitted as standalone pull requests.** They will be closed without review. If a P4 change is a natural part of a P1-P3 PR touching the same code, include it there and mention it in the description. Otherwise, open a `Discussion <https://github.com/raphaelvallat/pingouin/discussions>`_ if you think the change is worth doing anyway.
+* **P3 changes and all new features require an issue first**, so that we can agree the change is worth doing before anyone writes or reviews code.
+* **P1 changes are fast-tracked.** Please say "P1" in the PR title and include a minimal reproducible example showing the bug.
+* **Performance claims need a benchmark.** Paste the before/after timings and the code used to produce them in the PR description.
+* **New or modified statistics need validation** against at least one other statistical software (R, SPSS, Matlab or JASP), as stated in the code guidelines above. Include the reference output in the PR.
+
+When in doubt, rate lower rather than higher, and ask in an issue before writing code.
+
 .. _ai-assisted-prs:
 
 AI-assisted pull requests
@@ -43,7 +80,8 @@ Pingouin has only one maintainer, and the number of AI-assisted pull requests ha
 
 **Before opening a PR**
 
-* **Open an issue first (preferred).** Describe the problem and the change you're proposing, so that we can agree it's worth doing before anyone writes or reviews code. This matters most for new features and large refactors.
+* **Rate the impact of your change** using the scale in :ref:`impact-rating`. Do not submit P4 changes.
+* **Open an issue first (preferred, required for P3 and new features).** Describe the problem and the change you're proposing, so that we can agree it's worth doing before anyone writes or reviews code. This matters most for new features and large refactors.
 * **Check other open PRs.** Look for PRs that touch the same files or functions, to avoid duplicate work and merge conflicts.
 * **Base your branch on the latest** ``main``. Rebase if ``main`` moves while your PR is open.
 
@@ -57,6 +95,7 @@ Pingouin has only one maintainer, and the number of AI-assisted pull requests ha
 **PR description**
 
 * **Start with a summary written by you, not by the AI**: a short paragraph explaining in your own words what the PR does and why.
+* **State the impact rating (P1-P3)** and justify it in one or two sentences.
 * Keep it concise and in plain English. If you are fixing a bug, add the exact code to reproduce the bug and show the output before and after the fix.
 * **Report the exact model you used**, e.g. *"Claude Opus 5.5 via Claude Code"*.
 
