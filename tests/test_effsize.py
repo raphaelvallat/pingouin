@@ -78,6 +78,16 @@ def test_compute_esci():
     d = compute_effsize(x, y[:-5])
     ci = compute_esci(d, nx, len(y[:-5]), decimals=8)
     np.testing.assert_equal(ci, [-1.33603010, 0.08662825])
+    # Invalid confidence
+    with pytest.raises(ValueError, match=r"'confidence' must be between 0 and 1\."):
+        compute_esci(stat=0.2, nx=30, confidence=1.5)
+    with pytest.raises(TypeError, match=r"'confidence' must be a real number"):
+        compute_esci(stat=0.2, nx=30, confidence="0.95")
+    # Invalid eftype, missing stat / nx
+    with pytest.raises(ValueError, match=r"'fake' is not a valid choice for 'eftype'\."):
+        compute_esci(stat=0.2, nx=30, eftype="fake")
+    with pytest.raises(ValueError, match=r"stat and nx are required\."):
+        compute_esci(stat=0.2)
 
 
 def test_compute_boot_esci():
@@ -180,8 +190,27 @@ def test_compute_boot_esci():
     with pytest.raises(ValueError):
         compute_bootci(x, y, func="wrong")
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError, match="Paired should be True"):
         compute_bootci(x, y, func="pearson", paired=False)
+    with pytest.raises(ValueError, match="Paired should be True"):
+        compute_bootci(x, y, func="spearman", paired=False)
+    with pytest.raises(TypeError, match="func must be a function"):
+        compute_bootci(x, y, func=1)
+    with pytest.raises(ValueError, match="x must be one-dimensional"):
+        compute_bootci(np.column_stack([x, x]), func=np.mean)
+    with pytest.raises(ValueError, match="x must have more than one element"):
+        compute_bootci(x[:1], func=np.mean)
+    with pytest.raises(ValueError, match="y must be one-dimensional"):
+        compute_bootci(x, np.column_stack([y, y]), func=np.mean)
+    with pytest.raises(ValueError, match="y must have more than one element"):
+        compute_bootci(x, y[:1], func=np.mean)
+    with pytest.raises(ValueError, match="same number of elements when paired=True"):
+        compute_bootci(x, y[:-1], paired=True, func=np.mean)
+
+    with pytest.raises(ValueError, match=r"'confidence' must be between 0 and 1\."):
+        compute_bootci(x, confidence=1.5)
+    with pytest.raises(TypeError, match=r"'confidence' must be a real number"):
+        compute_bootci(x, confidence="0.95")
 
 
 @pytest.mark.parametrize("method", ["norm", "per", "bca", "basic"])

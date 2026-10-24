@@ -103,6 +103,17 @@ def test_normality():
     assert np.isnan(stats.loc[[1, 3], "pval"]).all()
     assert not np.isnan(stats.loc[[0, 2], "pval"]).all()
     assert (~stats.loc[[1, 3], "normal"]).all()
+    # Invalid inputs
+    with pytest.raises(TypeError, match="'data' must be a pandas DataFrame, Series, list"):
+        normality("x")
+    with pytest.raises(ValueError, match="not a valid choice for 'method'"):
+        normality(x, method="wrong")
+    with pytest.raises(ValueError, match="Data must be 1D"):
+        normality(np.column_stack([x, y]))
+    with pytest.raises(ValueError, match="more than 3 samples"):
+        normality(x[:3])
+    with pytest.raises(ValueError, match="must be in data"):
+        normality(df_nan, group="Time", dv="wrong")
 
 
 def test_homoscedasticity():
@@ -135,6 +146,21 @@ def test_homoscedasticity():
         assert hb.equals(homoscedasticity(data, method="bartlett"))
     df_nan = pd.DataFrame({"g": ["a"] * 6 + ["b"] * 7, "y": a_nan + b_nan})
     assert hb.equals(homoscedasticity(df_nan, dv="y", group="g", method="bartlett"))
+    # Invalid inputs
+    with pytest.raises(TypeError, match="'data' must be a pandas DataFrame, list or dict"):
+        homoscedasticity("x")
+    with pytest.raises(ValueError, match="not a valid choice for 'method'"):
+        homoscedasticity([x, y], method="wrong")
+    with pytest.raises(ValueError, match="at least two columns"):
+        homoscedasticity(df_pivot.iloc[:, :1])
+    with pytest.raises(ValueError, match="must be in data"):
+        homoscedasticity(df, dv="Scores", group="wrong")
+    with pytest.raises(ValueError, match="at least two groups"):
+        homoscedasticity(df_nan[df_nan["g"] == "a"], dv="y", group="g")
+    with pytest.raises(TypeError, match="Each element of 'data' must be a list"):
+        homoscedasticity([x, 1])
+    with pytest.raises(ValueError, match="at least two iterables"):
+        homoscedasticity({"x": x})
 
 
 def test_epsilon():
@@ -191,6 +217,17 @@ def test_epsilon():
     # 3 repeated measures factor
     with pytest.raises(ValueError):
         epsilon(pab_3fac)
+    # Invalid inputs
+    with pytest.raises(TypeError, match="'data' must be a pandas DataFrame"):
+        epsilon(df_pivot.to_numpy())
+    with pytest.raises(ValueError, match="wrong not in data"):
+        epsilon(df, subject="Subject", within="Time", dv="wrong")
+    with pytest.raises(ValueError, match="Time must be numeric"):
+        epsilon(df, subject="Subject", within="Group", dv="Time")
+    df_subj_nan = df.copy()
+    df_subj_nan.loc[0, "Subject"] = np.nan
+    with pytest.raises(ValueError, match="Cannot have missing values in Subject"):
+        epsilon(df_subj_nan, subject="Subject", within="Time", dv="Scores")
 
 
 def test_sphericity():

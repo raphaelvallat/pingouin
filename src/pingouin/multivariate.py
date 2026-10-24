@@ -67,11 +67,14 @@ def multivariate_normality(X, alpha=0.05):
 
     # Check input and remove missing values
     X = np.asarray(X)
-    assert X.ndim == 2, "X must be of shape (n_samples, n_features)."
+    if X.ndim != 2:
+        raise ValueError("X must be of shape (n_samples, n_features).")
     X = X[~np.isnan(X).any(axis=1)]
     n, p = X.shape
-    assert n >= 3, "X must have at least 3 rows."
-    assert p >= 2, "X must have at least two columns."
+    if n < 3:
+        raise ValueError("X must have at least 3 rows.")
+    if p < 2:
+        raise ValueError("X must have at least two columns.")
 
     # Covariance matrix
     S = np.cov(X, rowvar=False, bias=True)
@@ -202,7 +205,8 @@ def multivariate_ttest(X, Y=None, paired=False):
     from scipy.stats import f
 
     x = np.asarray(X)
-    assert x.ndim == 2, "x must be of shape (n_samples, n_features)"
+    if x.ndim != 2:
+        raise ValueError("X must be of shape (n_samples, n_features).")
 
     if Y is None:
         y = np.zeros(x.shape[1])
@@ -211,24 +215,21 @@ def multivariate_ttest(X, Y=None, paired=False):
     else:
         nx, kx = x.shape
         y = np.asarray(Y)
-        assert y.ndim in [1, 2], "Y must be 1D or 2D."
-        if y.ndim == 1:
-            # One sample with specified null
-            assert y.size == kx
-        else:
-            # Two-sample
-            err = "X and Y must have the same number of features (= columns)."
-            assert y.shape[1] == kx, err
-            if paired:
-                err = "X and Y must have the same number of rows if paired."
-                assert y.shape[0] == nx, err
+        if y.ndim not in [1, 2]:
+            raise ValueError("Y must be 1D or 2D.")
+        # One sample with specified null (1D), or two-sample (2D)
+        if y.shape[-1] != kx:
+            raise ValueError("X and Y must have the same number of features (= columns).")
+        if y.ndim == 2 and paired and y.shape[0] != nx:
+            raise ValueError("X and Y must have the same number of rows if paired.")
         # Remove rows with missing values in both x and y
         x, y = remove_na(x, y, paired=paired, axis="rows")
 
     # Shape of arrays
     nx, k = x.shape
     ny = y.shape[0]
-    assert nx >= 5, "At least five samples are required."
+    if nx < 5:
+        raise ValueError("At least five samples are required.")
 
     if y.ndim == 1 or paired is True:
         n = nx
@@ -349,11 +350,15 @@ def box_m(data, dvs, group, alpha=0.001):
     # Safety checks
     from scipy.stats import chi2
 
-    assert isinstance(data, pd.DataFrame), "data must be a pandas dataframe."
-    assert group in data.columns, "The grouping variable is not in data."
-    assert set(dvs).issubset(data.columns), "The DVs are not in data."
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError(f"'data' must be a pandas DataFrame, but received {type(data).__name__}.")
+    if group not in data.columns:
+        raise ValueError("The grouping variable is not in data.")
+    if not set(dvs).issubset(data.columns):
+        raise ValueError("The DVs are not in data.")
     grp = data.groupby(group, observed=True)[dvs]
-    assert grp.ngroups > 1, "Data must have at least two columns."
+    if grp.ngroups <= 1:
+        raise ValueError("Data must have at least two groups.")
 
     # Calculate covariance matrix and descriptive statistics
     # - n_covs is the number of covariance matrices

@@ -71,6 +71,20 @@ def test_plot_blandaltman():
     np.testing.assert_allclose(ax2.patches[0].get_y() + ax2.patches[0].get_height(), high)
     # Narrower CI than with confidence=0.95
     assert ax2.patches[0].get_height() < ax.patches[0].get_height()
+    # Invalid confidence
+    with pytest.raises(ValueError, match=r"'confidence' must be between 0 and 1\."):
+        plot_blandaltman(x, y, confidence=1.5)
+    with pytest.raises(TypeError, match=r"'confidence' must be a real number"):
+        plot_blandaltman(x, y, confidence="0.95")
+    # Invalid xaxis, shapes and missing values
+    with pytest.raises(ValueError, match=r"'z' is not a valid choice for 'xaxis'\."):
+        plot_blandaltman(x, y, xaxis="z")
+    with pytest.raises(ValueError, match=r"x and y must be one-dimensional\."):
+        plot_blandaltman(x[:, None], y)
+    with pytest.raises(ValueError, match=r"x and y must have the same number of elements\."):
+        plot_blandaltman(x[:-1], y)
+    with pytest.raises(ValueError, match=r"Missing values in x or y are not supported\."):
+        plot_blandaltman(np.append(x, np.nan), np.append(y, 1.0))
 
     # With Pingouin's dataset
     df_ba = read_dataset("blandaltman")
@@ -367,6 +381,11 @@ def test_plot_circmean():
     arrow = ax.patches[-1]
     np.testing.assert_allclose(arrow.get_facecolor(), (0, 0, 0, 1))
     np.testing.assert_allclose(arrow.get_edgecolor(), matplotlib.colors.to_rgba("tab:red"))
+    # Invalid angles
+    with pytest.raises(ValueError, match="one-dimensional"):
+        plot_circmean(angles[:, None])
+    with pytest.raises(ValueError, match="at least 2 values"):
+        plot_circmean(angles[:1])
     # Non-dict kwargs raise TypeError
     with pytest.raises(TypeError):
         plot_circmean(angles, kwargs_markers="red")

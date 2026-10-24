@@ -1,13 +1,12 @@
 """Bayesian functions."""
 
-import numbers
 import warnings
 from math import exp, lgamma, log, pi
 
 import numpy as np
 from scipy.integrate import quad
 
-from .utils import _check_alternative, _is_installed
+from .utils import _check_alternative, _check_choice, _check_confidence, _check_real, _is_installed
 
 __all__ = ["bayesfactor_ttest", "bayesfactor_pearson", "bayesfactor_binom"]
 
@@ -98,13 +97,14 @@ def bayesfactor_ttest(t, nx, ny=None, paired=False, alternative="two-sided", r=0
     Bayes Factor: 17.185 (two-sample paired)
     """
     # Check tail
-    assert alternative == "two-sided", (
-        "Alternative must be 'two-sided' (default). One-sided tests are not supported."
-    )
+    if alternative != "two-sided":
+        raise ValueError(
+            "Alternative must be 'two-sided' (default). One-sided tests are not supported."
+        )
     one_sample = ny is None or ny == 1
 
     # Check T-value
-    assert isinstance(t, numbers.Real), "The T-value must be a int or a float."
+    _check_real(t, "t")
     if not np.isfinite(t):
         return np.nan
 
@@ -244,13 +244,14 @@ def bayesfactor_pearson(r, n, alternative="two-sided", method="ly", kappa=1.0):
     from scipy.special import betaln, gamma, hyp2f1
 
     method = method.lower()
-    assert method in ["ly", "wetzels"], "Method not recognized."
+    _check_choice(method, ["ly", "wetzels"], "method")
     _check_alternative(alternative)
 
     # Wrong input
     if not np.isfinite(r) or n < 2:
         return np.nan
-    assert -1 <= r <= 1, "r must be between -1 and 1."
+    if not (-1 <= r <= 1):
+        raise ValueError("r must be between -1 and 1.")
 
     if alternative != "two-sided" and method == "wetzels":
         warnings.warn(
@@ -449,12 +450,22 @@ def bayesfactor_binom(k, n, p=0.5, a=1, b=1):
     """
     from scipy.stats import betabinom, binom
 
-    assert 0 < p < 1, "p must be between 0 and 1."
-    assert isinstance(k, numbers.Integral), "k must be int."
-    assert isinstance(n, numbers.Integral), "n must be int."
-    assert k <= n, "k (successes) cannot be higher than n (trials)."
-    assert a > 0, "a must be positive."
-    assert b > 0, "b must be positive."
+    _check_confidence(p, name="p")
+    _check_real(k, "k", integer=True)
+    _check_real(n, "n", integer=True)
+    _check_real(a, "a")
+    _check_real(b, "b")
+    if k < 0:
+        raise ValueError("k (successes) must be positive or zero.")
+    if n <= 0:
+        raise ValueError("n (trials) must be positive.")
+    if k > n:
+        raise ValueError("k (successes) cannot be higher than n (trials).")
+    # ``not (x > 0)`` rather than ``x <= 0`` so that NaN is rejected too
+    if not (a > 0):
+        raise ValueError("a must be positive.")
+    if not (b > 0):
+        raise ValueError("b must be positive.")
 
     # The marginal likelihood under the alternative, i.e. the integral of the binomial likelihood
     # over the Beta(a, b) prior, is the beta-binomial probability mass function.

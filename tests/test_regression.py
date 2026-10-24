@@ -298,6 +298,31 @@ def test_linear_regression():
 
     with pytest.raises(ValueError):
         linear_regression(df[["X"]], df["Y"], weights=df["W1"], relimp=True)
+    with pytest.raises(ValueError, match=r"'alpha' must be between 0 and 1\."):
+        linear_regression(df[["X"]], df["Y"], alpha=1.5)
+    with pytest.raises(TypeError, match=r"'alpha' must be a real number"):
+        linear_regression(df[["X"]], df["Y"], alpha="0.05")
+    # Invalid X, y and weights
+    with pytest.raises(ValueError, match="At least three valid samples"):
+        linear_regression(df[["X"]].iloc[:2], df["Y"].iloc[:2])
+    with pytest.raises(ValueError, match="at least one valid column"):
+        linear_regression(np.empty((10, 0)), df["Y"].iloc[:10], add_intercept=False)
+    with pytest.raises(ValueError, match="y must be one-dimensional"):
+        linear_regression(df[["X"]], df[["Y"]])
+    with pytest.raises(ValueError, match=r"Target \(y\) contains NaN or Inf"):
+        linear_regression(df_nan[["X"]], df_nan["Y"])
+    with pytest.raises(ValueError, match=r"Predictors \(X\) contain NaN or Inf"):
+        linear_regression(df_nan[["X"]], df["Y"])
+    with pytest.raises(ValueError, match="same number of samples"):
+        linear_regression(df[["X"]].iloc[:-1], df["Y"])
+    with pytest.raises(ValueError, match="weights must be a 1D array"):
+        linear_regression(df[["X"]], df["Y"], weights=df[["W1"]])
+    with pytest.raises(ValueError, match="weights must be of shape n_samples"):
+        linear_regression(df[["X"]], df["Y"], weights=df["W1"].iloc[:-1])
+    with pytest.raises(ValueError, match="Missing weights are not accepted"):
+        linear_regression(df[["X"]], df["Y"], weights=df["W1"].where(df.index > 0))
+    with pytest.raises(ValueError, match="Negative weights are not accepted"):
+        linear_regression(df[["X"]], df["Y"], weights=-df["W1"])
 
 
 def test_logistic_regression():
@@ -346,6 +371,10 @@ def test_logistic_regression():
     # Test other arguments
     c = logistic_regression(df[["X", "M"]], df["Ybin"], coef_only=True)
     assert_equal(np.round(c, 3), [1.327, -0.196, -0.006])
+    with pytest.raises(ValueError, match=r"'alpha' must be between 0 and 1\."):
+        logistic_regression(df[["X", "M"]], df["Ybin"], alpha=1.5)
+    with pytest.raises(TypeError, match=r"'alpha' must be a real number"):
+        logistic_regression(df[["X", "M"]], df["Ybin"], alpha="0.05")
 
     # With missing values: same as removing the rows with missing values
     lom = logistic_regression(df_nan[["X", "M"]], df_nan["Ybin"], remove_na=True)
@@ -466,6 +495,30 @@ def test_mediation_analysis():
     assert_almost_equal(ma["CI2.5"][3], 0.1714, decimal=2)
     assert_almost_equal(ma["CI97.5"][3], 0.617, decimal=1)
     assert ma["sig"][3] == "Yes"
+
+    # Invalid arguments
+    with pytest.raises(TypeError, match="'x' must be a string or int"):
+        mediation_analysis(data=df_med, x=1.5, m="M", y="Y")
+    with pytest.raises(TypeError, match="'y' must be a string or int"):
+        mediation_analysis(data=df_med, x="X", m="M", y=1.5)
+    with pytest.raises(TypeError, match="'m' must be a list, string or int"):
+        mediation_analysis(data=df_med, x="X", m=1.5, y="Y")
+    with pytest.raises(TypeError, match="'covar' must be a list, string, int or None"):
+        mediation_analysis(data=df_med, x="X", m="M", y="Y", covar=1.5)
+    with pytest.raises(TypeError, match="'data' must be a pandas DataFrame"):
+        mediation_analysis(data=df_med.to_numpy(), x="X", m="M", y="Y")
+    with pytest.raises(ValueError, match="Cannot have duplicates mediators"):
+        mediation_analysis(data=df_med, x="X", m=["M", "M"], y="Y")
+    with pytest.raises(ValueError, match="Cannot have duplicates covar"):
+        mediation_analysis(data=df_med, x="X", m="M", y="Y", covar=["Mbin", "Mbin"])
+    with pytest.raises(ValueError, match="Mediator cannot be in covar"):
+        mediation_analysis(data=df_med, x="X", m="M", y="Y", covar="M")
+    with pytest.raises(ValueError, match=r"Column\(s\) are not in DataFrame"):
+        mediation_analysis(data=df_med, x="Wrong", m="M", y="Y")
+    with pytest.raises(ValueError, match="Columns must be numeric or boolean"):
+        mediation_analysis(data=df_med.assign(S="a"), x="S", m="M", y="Y")
+    with pytest.raises(ValueError, match="at least 5 samples"):
+        mediation_analysis(data=df_med.iloc[:5], x="X", m="M", y="Y")
 
     # Check if `logreg_kwargs` is being passed on to `LogisticRegression`
     with pytest.raises(ValueError):

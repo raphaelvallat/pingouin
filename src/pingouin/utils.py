@@ -12,13 +12,45 @@ from .config import options
 __all__ = ["print_table", "remove_na"]
 
 
+def _check_choice(val, choices, name):
+    """Check that ``val`` is one of ``choices`` and return it as a Python scalar.
+
+    Membership is checked by type and value, so that e.g. ``1`` or ``1.0`` are not accepted when
+    ``True`` is the valid choice. NumPy scalars are converted to their Python equivalent.
+    """
+    if np.ndim(val) != 0:
+        raise ValueError(
+            f"'{name}' must be a scalar, but received an array of shape {np.shape(val)}."
+        )
+    if isinstance(val, (np.generic, np.ndarray)):
+        val = val.item()
+    if not any(isinstance(val, type(c)) and val == c for c in choices):
+        raise ValueError(f"'{val}' is not a valid choice for '{name}'. Expected one of {choices}.")
+    return val
+
+
+def _check_real(val, name, integer=False):
+    """Check that ``val`` is a real number (or an integer if ``integer=True``), excluding booleans.
+
+    Zero-dimensional NumPy arrays are accepted.
+    """
+    if isinstance(val, np.ndarray) and val.ndim == 0:
+        val = val.item()
+    kind, label = (numbers.Integral, "an integer") if integer else (numbers.Real, "a real number")
+    if isinstance(val, bool) or not isinstance(val, kind):
+        raise TypeError(f"'{name}' must be {label}, but received {type(val).__name__}.")
+
+
+def _check_confidence(ci, name="ci"):
+    """Check that a confidence / significance level is a real number strictly between 0 and 1."""
+    _check_real(ci, name)
+    if not (0 < ci < 1):  # Also rejects NaN
+        raise ValueError(f"'{name}' must be between 0 and 1.")
+
+
 def _check_alternative(alternative):
     """Check that ``alternative`` is one of 'two-sided', 'greater' or 'less'."""
-    assert alternative in [
-        "two-sided",
-        "greater",
-        "less",
-    ], "Alternative must be one of 'two-sided' (default), 'greater' or 'less'."
+    _check_choice(alternative, ["two-sided", "greater", "less"], "alternative")
 
 
 def _perm_pval(bootstat, estimate, alternative="two-sided"):
@@ -40,11 +72,13 @@ def _perm_pval(bootstat, estimate, alternative="two-sided"):
         P-value.
     """
     _check_alternative(alternative)
-    assert isinstance(estimate, numbers.Real)
+    _check_real(estimate, "estimate")
     bootstat = np.asarray(bootstat)
-    assert bootstat.ndim == 1, "bootstat must be a 1D array."
+    if bootstat.ndim != 1:
+        raise ValueError("bootstat must be a 1D array.")
     n_boot = bootstat.size
-    assert n_boot >= 1, "bootstat must have at least one value."
+    if n_boot < 1:
+        raise ValueError("bootstat must have at least one value.")
     # Relative tolerance so that permuted values that are theoretically equal to the estimate
     # but differ by floating-point error are counted as ties (same as scipy.stats.permutation_test)
     gamma = abs(estimate) * np.finfo(float).eps * 100
@@ -283,7 +317,7 @@ def remove_na(x, y=None, paired=False, axis="rows"):
     """
     # Safety checks
     x = np.asarray(x)
-    assert axis in ["rows", "columns"], "axis must be rows or columns."
+    _check_choice(axis, ["rows", "columns"], "axis")
 
     if y is None:
         return _remove_na_single(x, axis=axis)
@@ -291,7 +325,8 @@ def remove_na(x, y=None, paired=False, axis="rows"):
         return _remove_na_single(x, axis=axis), y
     else:  # y is list, np.array, pd.Series
         y = np.asarray(y)
-        assert y.size != 0, "y cannot be an empty list or array."
+        if y.size == 0:
+            raise ValueError("y cannot be an empty list or array.")
         # Make sure that we just pass-through if y have only 1 element
         if y.size == 1:
             return _remove_na_single(x, axis=axis), y
@@ -356,8 +391,8 @@ def _flatten_list(x, include_tuple=False):
 
 
 def _check_eftype(eftype):
-    """Check validity of eftype"""
-    return eftype.lower() in [
+    """Check validity of eftype."""
+    choices = [
         "none",
         "hedges",
         "cohen",
@@ -369,6 +404,8 @@ def _check_eftype(eftype):
         "auc",
         "cles",
     ]
+    eftype = eftype.lower() if isinstance(eftype, str) else eftype
+    _check_choice(eftype, choices, "eftype")
 
 
 def _check_dataframe(data=None, dv=None, between=None, within=None, subject=None, effects=None):

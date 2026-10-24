@@ -58,6 +58,17 @@ def test_helper_angles():
         np.testing.assert_allclose(np.exp(1j * rad), np.exp(1j * rad_pos))
     _checkangles(convert_angles(a5_nan, low=0, high=1440))
     np.testing.assert_array_equal(np.isnan(convert_angles(a5_nan, 0, 1440)), np.isnan(a5_nan))
+    # Invalid inputs
+    with pytest.raises(TypeError, match="'positive' must be a boolean"):
+        convert_angles(a3, positive=1)
+    with pytest.raises(TypeError, match="'high' must be a real number"):
+        convert_angles(a3, high="360")
+    with pytest.raises(ValueError, match="strictly positive"):
+        convert_angles(a3, low=360, high=0)
+    with pytest.raises(ValueError, match="angles must be >= low"):
+        convert_angles(a3, low=10, high=360)
+    with pytest.raises(ValueError, match="angles must be <= high"):
+        convert_angles(a3, low=0, high=300)
     # Default low=0 and high=360 (degrees)
     np.testing.assert_allclose(convert_angles(a3), convert_angles(a3, low=0, high=360))
     np.testing.assert_allclose(
@@ -113,6 +124,8 @@ def test_circ_corrcc():
     assert round(pval_unif, 4) == 0.2859
     # Missing values are removed
     assert circ_corrcc(x + [np.nan], y + [1.0]) == (r, pval)
+    with pytest.raises(ValueError, match="same length"):
+        circ_corrcc(x, y[:-1])
 
 
 def test_circ_corrcl():
@@ -129,6 +142,8 @@ def test_circ_corrcl():
     assert np.isclose(r_scaled, r) and np.isclose(pval_scaled, pval)
     with pytest.raises(ValueError, match="radians"):
         circ_corrcl(np.rad2deg(x), y)
+    with pytest.raises(ValueError, match="same length"):
+        circ_corrcl(x, y[:-1])
 
 
 def test_circ_mean():
@@ -146,6 +161,8 @@ def test_circ_mean():
     angles_rep = np.repeat(angles_bins, w)
     assert np.isclose(circ_mean(angles_bins, w), circ_mean(angles_rep))
     assert np.isclose(circ_mean(angles_bins, w), circmean(angles_rep, low=-np.pi, high=np.pi))
+    with pytest.raises(ValueError, match="Input dimensions do not match"):
+        circ_mean(angles_bins, w[:-1])
 
 
 def test_circ_r():
@@ -155,6 +172,8 @@ def test_circ_r():
     # Compare with the CircStats MATLAB toolbox
     assert np.round(circ_r(x), 3) == 0.497
     assert np.round(circ_r(x_nan), 3) == 0.497
+    with pytest.raises(ValueError, match="Input dimensions do not match"):
+        circ_r(x, w=[1, 2])
 
 
 def test_circ_rayleigh():
@@ -171,6 +190,8 @@ def test_circ_rayleigh():
     assert circ_rayleigh(x + [np.nan]) == circ_rayleigh(x)
     w = [0.1, 0.2, 0.3, 0.4, 0.5]
     assert circ_rayleigh(x + [np.nan], w=w + [1], d=0.2) == circ_rayleigh(x, w=w, d=0.2)
+    with pytest.raises(ValueError, match="Input dimensions do not match"):
+        circ_rayleigh(x, w=w[:-1])
 
 
 def test_circ_vtest():

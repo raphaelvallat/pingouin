@@ -7,8 +7,12 @@ import pytest
 
 import pingouin
 from pingouin.utils import (
+    _check_alternative,
+    _check_choice,
+    _check_confidence,
     _check_dataframe,
     _check_eftype,
+    _check_real,
     _flatten_list,
     _get_round_setting_for,
     _is_installed,
@@ -144,6 +148,12 @@ def test_perm_pval():
     """Test function _perm_pval."""
     bootstat = np.random.default_rng(123).normal(size=1000)
     x = -2
+    with pytest.raises(TypeError, match="'estimate' must be a real number"):
+        _perm_pval(bootstat, "x")
+    with pytest.raises(ValueError, match="bootstat must be a 1D array"):
+        _perm_pval(bootstat.reshape(-1, 2), x)
+    with pytest.raises(ValueError, match="bootstat must have at least one value"):
+        _perm_pval([], x)
     up = _perm_pval(bootstat, x, alternative="greater")
     low = _perm_pval(bootstat, x, alternative="less")
     two = _perm_pval(bootstat, x, alternative="two-sided")
@@ -212,16 +222,19 @@ def test_remove_na():
     assert np.allclose(remove_na(x, None, axis="columns"), [[4.0], [4.0], [7.0]])
     # When y is an empty list
     # See https://github.com/raphaelvallat/pingouin/issues/222
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError, match="y cannot be an empty list or array"):
         remove_na(x, y=[])
+    with pytest.raises(ValueError, match="is not a valid choice for 'axis'"):
+        remove_na(x, axis="wrong")
 
 
 def test_check_eftype():
     """Test function _check_eftype."""
     for eftype in ["none", "hedges", "cohen", "Cohen", "cohen_dz", "r", "eta_square", "cles"]:
-        assert _check_eftype(eftype)
+        _check_eftype(eftype)
     for eftype in ["fake", "cohen-d", ""]:
-        assert not _check_eftype(eftype)
+        with pytest.raises(ValueError):
+            _check_eftype(eftype)
 
 
 def test_check_dataframe():
@@ -289,3 +302,82 @@ def test_is_installed():
     assert not _is_installed("a_module_that_does_not_exist")
     with pytest.raises(ImportError, match="pingouin\\[extras\\]"):
         _is_installed("a_module_that_does_not_exist", raise_error=True)
+
+
+def test_check_choice():
+    """Test function _check_choice."""
+    assert _check_choice("a", ["a", "b"], "letter") == "a"
+    assert _check_choice(True, [True, False, "auto"], "correction") is True
+    # NumPy scalars are accepted and converted to Python scalars
+    assert _check_choice(np.str_("a"), ["a", "b"], "letter") == "a"
+    assert _check_choice(np.True_, [True, False, "auto"], "correction") is True
+    assert _check_choice(np.array("a"), ["a", "b"], "letter") == "a"
+    # Membership is checked by type too: 1 == True but 1 is not a valid choice
+    for val in [1, 1.0, 0, np.int64(1)]:
+        with pytest.raises(ValueError, match=r"is not a valid choice for 'correction'\."):
+            _check_choice(val, [True, False, "auto"], "correction")
+    with pytest.raises(
+        ValueError,
+        match=r"'c' is not a valid choice for 'letter'\. Expected one of \['a', 'b'\]\.",
+    ):
+        _check_choice("c", ["a", "b"], "letter")
+    with pytest.raises(
+        ValueError,
+        match=r"'letter' must be a scalar, but received an array of shape \(2,\)\.",
+    ):
+        _check_choice(np.array(["a", "b"]), ["a", "b"], "letter")
+    with pytest.raises(
+        ValueError,
+        match=r"'letter' must be a scalar, but received an array of shape \(1,\)\.",
+    ):
+        _check_choice(np.array(["a"]), ["a", "b"], "letter")
+    with pytest.raises(
+        ValueError,
+        match=r"'letter' must be a scalar, but received an array of shape \(2,\)\.",
+    ):
+        _check_choice(["a", "b"], ["a", "b"], "letter")
+
+
+def test_check_alternative():
+    """Test function _check_alternative."""
+    for alt in ["two-sided", "greater", "less"]:
+        _check_alternative(alt)
+    for alt in ["two_sided", "wrong", 1]:
+        with pytest.raises(ValueError):
+            _check_alternative(alt)
+
+
+def test_check_real():
+    """Test function _check_real."""
+    for val in [0.5, 2, np.float32(0.5), np.int64(2), np.array(0.5)]:
+        _check_real(val, "x")
+    for val in [2, np.int64(2), np.array(2)]:
+        _check_real(val, "x", integer=True)
+    for val in ["1", True, np.True_, None, [1], np.array([1])]:
+        with pytest.raises(TypeError, match=r"'x' must be a real number, but received"):
+            _check_real(val, "x")
+    for val in [1.5, np.float64(1.5), True, "1"]:
+        with pytest.raises(TypeError, match=r"'x' must be an integer, but received"):
+            _check_real(val, "x", integer=True)
+
+
+def test_check_confidence():
+    """Test function _check_confidence."""
+    _check_confidence(0.95)
+    _check_confidence(np.float64(0.99), name="confidence")
+    _check_confidence(np.float32(0.9))
+    _check_confidence(np.array(0.95))  # 0-d array
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        _check_confidence(np.nan)
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        _check_confidence(0)
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        _check_confidence(1)
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        _check_confidence(95)
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        _check_confidence(-0.5)
+    with pytest.raises(TypeError, match=r"'ci' must be a real number"):
+        _check_confidence("0.95")
+    with pytest.raises(TypeError, match=r"'confidence' must be a real number"):
+        _check_confidence(True, name="confidence")

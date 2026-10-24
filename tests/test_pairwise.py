@@ -265,6 +265,20 @@ def test_pairwise_tests_mixed(df, df_sort):
         sub = pt_np[pt_np["Contrast"] == contrast]
         np.testing.assert_allclose(sub["p_corr"], multicomp(sub["p_unc"], method="fdr_bh")[1])
 
+    # Invalid alpha
+    with pytest.raises(ValueError, match=r"'alpha' must be between 0 and 1\."):
+        pairwise_tests(dv="Scores", between="Group", data=df, alpha=1)
+    with pytest.raises(ValueError, match=r"'alpha' must be between 0 and 1\."):
+        pairwise_tests(dv="Scores", between="Group", data=df, alpha=0)
+    with pytest.raises(TypeError, match=r"'alpha' must be a real number"):
+        pairwise_tests(dv="Scores", between="Group", data=df, alpha="0.05")
+    # Real numbers (e.g. np.float64, np.float32) are accepted even with multiple contrasts
+    pairwise_tests(dv="Scores", between="Group", data=df, alpha=np.float64(0.05))
+    pairwise_tests(dv="Scores", between="Group", data=df, alpha=np.float32(0.05), padjust="bonf")
+    # Invalid nan_policy
+    with pytest.raises(ValueError, match=r"'lisWise' is not a valid choice for 'nan_policy'\."):
+        pairwise_tests(dv="Scores", between="Group", data=df, nan_policy="lisWise")
+
 
 def test_pairwise_tests_mixed_unbalanced(df_unb):
     """Test function pairwise_tests with an unbalanced mixed design."""
@@ -427,6 +441,18 @@ def test_pairwise_tests_errors(df):
     df_one = df.assign(Group="Control")
     with pytest.raises(ValueError):
         pairwise_tests(dv="Scores", between="Group", data=df_one)
+
+    # Columns not in data
+    with pytest.raises(ValueError, match="between column\\(s\\) .* are not in data"):
+        pairwise_tests(dv="Scores", between=["Group", "Nope"], data=df)
+    with pytest.raises(ValueError, match="within column\\(s\\) .* are not in data"):
+        pairwise_tests(dv="Scores", within=["Time", "Nope"], subject="Subject", data=df)
+    with pytest.raises(ValueError, match="between column 'Nope' is not in data"):
+        pairwise_tests(dv="Scores", between="Nope", data=df)
+    with pytest.raises(ValueError, match="within column 'Nope' is not in data"):
+        pairwise_tests(dv="Scores", within="Nope", subject="Subject", data=df)
+    with pytest.raises(ValueError, match="within column 'Nope' is not in data"):
+        pairwise_tests(dv="Scores", between="Group", within="Nope", subject="Subject", data=df)
 
 
 def test_pairwise_tests_missing():
@@ -610,6 +636,10 @@ def test_ptests(df_bfi):
     assert not pt_holm.equals(pt_bonf)
     with pytest.raises(ValueError):
         df.ptests(padjust="wrong")
+    with pytest.raises(TypeError, match="'pval_stars' must be a dictionary"):
+        df.ptests(pval_stars=["*"])
+    with pytest.raises(TypeError, match="'decimals' must be an integer"):
+        df.ptests(decimals=3.0)
     # axis and nan_policy are fixed by ptests and cannot be passed to scipy
     with pytest.raises(ValueError):
         df.ptests(axis=1)
@@ -849,8 +879,10 @@ def test_pairwise_corr(df_bfi):
         pairwise_corr(data, covar=pd.Index(["Age", "Neuroticism"])),
         stats,
     )
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError, match="Covariate\\(s\\) are either not in data or not numeric"):
         pairwise_corr(data, covar=["Age", "Gender"])
+    with pytest.raises(TypeError, match="'covar' must be a list, string or pandas Index"):
+        pairwise_corr(data, covar=("Age",))
     with pytest.raises(ValueError):
         pairwise_corr(data, columns=["Neuroticism", "Age"], covar="Age")
     # Partial pairwise with missing values
@@ -888,6 +920,8 @@ def test_pairwise_corr_multiindex():
     assert _pairs(stats) == list(combinations(columns, 2))
     stats = pairwise_corr(data, columns=[("Behavior", "Rating")])
     assert stats.shape[0] == data.shape[1] - 1
+    with pytest.raises(ValueError, match="columns must be tuples"):
+        pairwise_corr(data, columns=["Behavior"])
     stats = pairwise_corr(data, columns=[("Behavior", "Rating"), ("Behavior", "RT")])
     assert _pairs(stats) == [(("Behavior", "Rating"), ("Behavior", "RT"))]
     st1 = pairwise_corr(data, columns=[[("Behavior", "Rating"), ("Behavior", "RT")], None])

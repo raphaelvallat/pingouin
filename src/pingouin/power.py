@@ -6,7 +6,7 @@ import numpy as np
 from scipy import stats
 from scipy.optimize import brenth
 
-from .utils import _check_alternative
+from .utils import _check_alternative, _check_choice, _check_real
 
 __all__ = [
     "power_ttest",
@@ -167,14 +167,14 @@ def power_ttest(
 
     # Safety checks
     _check_alternative(alternative)
-    assert contrast.lower() in ["one-sample", "paired", "two-samples"]
+    _check_choice(contrast.lower(), ["one-sample", "paired", "two-samples"], "contrast")
     tsample = 2 if contrast.lower() == "two-samples" else 1
     if d is not None and alternative == "two-sided":
         d = abs(d)
-    if alpha is not None:
-        assert 0 < alpha <= 1
-    if power is not None:
-        assert 0 < power <= 1
+    if alpha is not None and not (0 < alpha <= 1):
+        raise ValueError("alpha must be between 0 and 1.")
+    if power is not None and not (0 < power <= 1):
+        raise ValueError("power must be between 0 and 1.")
 
     def func(d, n, alpha):
         return _power_nct(d * np.sqrt(n / tsample), (n - 1) * tsample, alpha, alternative)
@@ -288,10 +288,10 @@ def power_ttest2n(nx, ny, d=None, power=None, alpha=0.05, alternative="two-sided
     _check_alternative(alternative)
     if d is not None and alternative == "two-sided":
         d = abs(d)
-    if alpha is not None:
-        assert 0 < alpha <= 1
-    if power is not None:
-        assert 0 < power <= 1
+    if alpha is not None and not (0 < alpha <= 1):
+        raise ValueError("alpha must be between 0 and 1.")
+    if power is not None and not (0 < power <= 1):
+        raise ValueError("power must be between 0 and 1.")
 
     def func(d, alpha):
         return _power_nct(d * (1 / np.sqrt(1 / nx + 1 / ny)), nx + ny - 2, alpha, alternative)
@@ -423,10 +423,10 @@ def power_anova(eta_squared=None, k=None, n=None, power=None, alpha=0.05):
     if eta_squared is not None:
         eta_squared = abs(eta_squared)
         f_sq = eta_squared / (1 - eta_squared)
-    if alpha is not None:
-        assert 0 < alpha <= 1
-    if power is not None:
-        assert 0 < power <= 1
+    if alpha is not None and not (0 < alpha <= 1):
+        raise ValueError("alpha must be between 0 and 1.")
+    if power is not None and not (0 < power <= 1):
+        raise ValueError("power must be between 0 and 1.")
 
     def func(f_sq, k, n, alpha):
         nc = (n * k) * f_sq
@@ -616,19 +616,21 @@ def power_rm_anova(eta_squared=None, m=None, n=None, power=None, alpha=0.05, cor
         raise ValueError(msg)
 
     # Safety checks
-    assert 0 < epsilon <= 1, "epsilon must be between 0 and 1."
-    assert -1 < corr < 1, "corr must be between -1 and 1."
+    if not (0 < epsilon <= 1):
+        raise ValueError("epsilon must be between 0 and 1.")
+    if not (-1 < corr < 1):
+        raise ValueError("corr must be between -1 and 1.")
     if eta_squared is not None:
         eta_squared = abs(eta_squared)
         f_sq = eta_squared / (1 - eta_squared)
-    if alpha is not None:
-        assert 0 < alpha <= 1, "alpha must be between 0 and 1."
-    if power is not None:
-        assert 0 < power <= 1, "power must be between 0 and 1."
-    if n is not None:
-        assert n > 1, "The sample size n must be > 1."
-    if m is not None:
-        assert m > 1, "The number of repeated measures m must be > 1."
+    if alpha is not None and not (0 < alpha <= 1):
+        raise ValueError("alpha must be between 0 and 1.")
+    if power is not None and not (0 < power <= 1):
+        raise ValueError("power must be between 0 and 1.")
+    if n is not None and not (n > 1):
+        raise ValueError("The sample size n must be > 1.")
+    if m is not None and not (m > 1):
+        raise ValueError("The number of repeated measures m must be > 1.")
 
     def func(f_sq, m, n, alpha):
         dof1 = (m - 1) * epsilon
@@ -739,13 +741,14 @@ def power_corr(r=None, n=None, power=None, alpha=0.05, alternative="two-sided"):
     _check_alternative(alternative)
 
     if r is not None:
-        assert -1 <= r <= 1
+        if not (-1 <= r <= 1):
+            raise ValueError("r must be between -1 and 1.")
         if alternative == "two-sided":
             r = abs(r)
-    if alpha is not None:
-        assert 0 < alpha <= 1
-    if power is not None:
-        assert 0 < power <= 1
+    if alpha is not None and not (0 < alpha <= 1):
+        raise ValueError("alpha must be between 0 and 1.")
+    if power is not None and not (0 < power <= 1):
+        raise ValueError("power must be between 0 and 1.")
     if n is not None:
         if n <= 4:
             warnings.warn(
@@ -870,7 +873,7 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
     >>> print("alpha: %.4f" % power_chi2(dof=1, w=0.5, n=20, power=0.80, alpha=None))
     alpha: 0.1630
     """
-    assert isinstance(dof, (int, float))
+    _check_real(dof, "dof")
     # Check the number of arguments that are None
     n_none = sum([v is None for v in [w, n, power, alpha]])
     if n_none != 1:
@@ -880,10 +883,10 @@ def power_chi2(dof, w=None, n=None, power=None, alpha=0.05):
     # Safety checks
     if w is not None:
         w = abs(w)
-    if alpha is not None:
-        assert 0 < alpha <= 1
-    if power is not None:
-        assert 0 < power <= 1
+    if alpha is not None and not (0 < alpha <= 1):
+        raise ValueError("alpha must be between 0 and 1.")
+    if power is not None and not (0 < power <= 1):
+        raise ValueError("power must be between 0 and 1.")
 
     def func(w, n, alpha):
         k = stats.chi2.ppf(1 - alpha, dof)

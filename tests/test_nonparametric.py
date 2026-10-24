@@ -58,6 +58,8 @@ def test_madmedianrule():
     """Test function madmedianrule."""
     a = [1.2, 3, 4.5, 2.4, 5, 12.7, 0.4]
     assert np.all(madmedianrule(a) == [False, False, False, False, False, True, False])
+    with pytest.raises(ValueError, match="Only 1D array / list"):
+        madmedianrule([a, a])
 
 
 def test_mwu():
@@ -192,6 +194,19 @@ def test_friedman():
     assert stats_f.at["Friedman", "p_unc"] > stats.at["Friedman", "p_unc"]
     with pytest.raises(ValueError, match="method must be"):
         friedman(df, method="wrong")
+    # Invalid inputs
+    with pytest.raises(TypeError, match="'data' must be a pandas DataFrame"):
+        friedman(df.to_numpy())
+    with pytest.raises(ValueError, match="at least 3 non-missing rows"):
+        friedman(df.iloc[:2])
+    with pytest.raises(ValueError, match="at least two columns"):
+        friedman(df.iloc[:, :1])
+    df_long = df.melt(ignore_index=False).reset_index()
+    for col in ["variable", "index"]:
+        df_long_nan = df_long.copy()
+        df_long_nan.loc[0, col] = np.nan
+        with pytest.raises(ValueError, match="Cannot have missing values in"):
+            friedman(data=df_long_nan, dv="value", within="variable", subject="index")
 
 
 def test_cochran():
@@ -225,6 +240,18 @@ def test_cochran():
     assert np.isclose(st_nan.at["cochran", "Q"], st_drop.at["cochran", "Q"])
     df_wide.loc[subj_nan, df.at[2, "Time"]] = np.nan
     assert np.isclose(cochran(df_wide).at["cochran", "Q"], st_drop.at["cochran", "Q"])
+    # Invalid inputs
+    with pytest.raises(TypeError, match="'data' must be a pandas DataFrame"):
+        cochran(df_wide.to_numpy())
+    with pytest.raises(ValueError, match="at least 3 non-missing rows"):
+        cochran(df_wide.iloc[:2])
+    with pytest.raises(ValueError, match="at least two columns"):
+        cochran(df_wide.iloc[:, :1])
+    for col in ["Time", "Subject"]:
+        df_col_nan = df.copy()
+        df_col_nan.loc[0, col] = np.nan
+        with pytest.raises(ValueError, match="Cannot have missing values in"):
+            cochran(dv="Energetic", within="Time", subject="Subject", data=df_col_nan)
 
 
 def test_harrelldavis():
@@ -270,3 +297,8 @@ def test_harrelldavis():
     np.testing.assert_array_almost_equal(
         harrelldavis(p, [0.25, 0.75], -1), np.apply_over_axes(func, p, 1)
     )
+    # Invalid inputs
+    with pytest.raises(ValueError, match="Only 1D or 2D array"):
+        harrelldavis(np.zeros((2, 2, 2)))
+    with pytest.raises(ValueError, match="not a valid choice for 'axis'"):
+        harrelldavis(p, axis=2)

@@ -15,6 +15,8 @@ from .power import power_corr
 from .utils import (
     _DEFAULT_PVAL_STARS,
     _check_alternative,
+    _check_choice,
+    _check_real,
     _flatten_list,
     _format_pairwise_matrix,
     _perm_pval,
@@ -591,8 +593,10 @@ def corr(x, y, alternative="two-sided", method="pearson", **kwargs):
     # Safety check
     x = np.asarray(x)
     y = np.asarray(y)
-    assert x.ndim == y.ndim == 1, "x and y must be 1D array."
-    assert x.size == y.size, "x and y must have the same length."
+    if not (x.ndim == y.ndim == 1):
+        raise ValueError("x and y must be 1D array.")
+    if x.size != y.size:
+        raise ValueError("x and y must have the same length.")
     _check_alternative(alternative)
     if "tail" in kwargs:
         raise ValueError(
@@ -839,36 +843,38 @@ def partial_corr(
 
     # Safety check
     _check_alternative(alternative)
-    assert method in [
-        "pearson",
-        "spearman",
-    ], 'only "pearson" and "spearman" are supported for partial correlation.'
-    assert isinstance(data, pd.DataFrame), "data must be a pandas DataFrame."
-    assert data.shape[0] > 2, "Data must have at least 3 samples."
+    _check_choice(method, ["pearson", "spearman"], "method")
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError(f"'data' must be a pandas DataFrame, but received {type(data).__name__}.")
+    if data.shape[0] <= 2:
+        raise ValueError("Data must have at least 3 samples.")
     if covar is not None and (x_covar is not None or y_covar is not None):
         raise ValueError("Cannot specify both covar and {x,y}_covar.")
     if x_covar is not None and y_covar is not None:
         raise ValueError("Cannot specify both x_covar and y_covar.")
-    assert x != y, "x and y must be independent"
-    if isinstance(covar, list):
-        assert x not in covar, "x and covar must be independent"
-        assert y not in covar, "y and covar must be independent"
-    else:
-        assert x != covar, "x and covar must be independent"
-        assert y != covar, "y and covar must be independent"
+    if x == y:
+        raise ValueError("x and y must be independent")
+    covar_list = covar if isinstance(covar, list) else [covar]
+    if x in covar_list:
+        raise ValueError("x and covar must be independent")
+    if y in covar_list:
+        raise ValueError("y and covar must be independent")
     # Build column lists; covariates is used later for data-value checks
     covariates = _flatten_list([covar, x_covar, y_covar])
     col = _flatten_list([x, y, covar, x_covar, y_covar])
     # Check that columns exist
-    assert all([c in data for c in col]), "columns are not in dataframe."
+    if not all(c in data for c in col):
+        raise ValueError("columns are not in dataframe.")
     # Check that columns are numeric
-    assert all([data[c].dtype.kind in "bfiu" for c in col])
+    if not all(data[c].dtype.kind in "bfiu" for c in col):
+        raise ValueError("columns must be numeric.")
 
     # Drop rows with NaN
     data = data[col].dropna()
     n = data.shape[0]  # Number of samples
     k = data.shape[1] - 2  # Number of covariates
-    assert n > 2, "Data must have at least 3 non-NAN samples."
+    if n <= 2:
+        raise ValueError("Data must have at least 3 non-NAN samples.")
 
     # Check that no covariate is numerically identical to x or y (issue #375)
     for c in covariates:
@@ -1135,10 +1141,13 @@ def rcorr(
     # Safety check
     if pval_stars is None:
         pval_stars = _DEFAULT_PVAL_STARS
-    assert isinstance(pval_stars, dict), "pval_stars must be a dictionary."
-    assert isinstance(decimals, int), "decimals must be an int."
-    assert method in ["pearson", "spearman"], "Method is not recognized."
-    assert upper in ["pval", "n"], "upper must be either `pval` or `n`."
+    if not isinstance(pval_stars, dict):
+        raise TypeError(
+            f"'pval_stars' must be a dictionary, but received {type(pval_stars).__name__}."
+        )
+    _check_real(decimals, "decimals", integer=True)
+    _check_choice(method, ["pearson", "spearman"], "method")
+    _check_choice(upper, ["pval", "n"], "upper")
     r = self.corr(method=method, numeric_only=True)
     mat = r.round(decimals)
     # Pairwise sample size (pairwise deletion of missing values), for all pairs at once
@@ -1257,12 +1266,14 @@ def rm_corr(data=None, x=None, y=None, subject=None):
 
 def _check_rm_corr_data(data, x, y, subject):
     """Check the input of :py:func:`rm_corr` / :py:func:`plot_rm_corr`, and remove missing values."""
-    assert isinstance(data, pd.DataFrame), "Data must be a DataFrame"
-    assert x in data.columns, f"The {x} column is not in data."
-    assert y in data.columns, f"The {y} column is not in data."
-    assert data[x].dtype.kind in "bfiu", f"{x} must be numeric."
-    assert data[y].dtype.kind in "bfiu", f"{y} must be numeric."
-    assert subject in data.columns, f"The {subject} column is not in data."
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError(f"'data' must be a pandas DataFrame, but received {type(data).__name__}.")
+    for col in (x, y, subject):
+        if col not in data.columns:
+            raise ValueError(f"The {col} column is not in data.")
+    for col in (x, y):
+        if data[col].dtype.kind not in "bfiu":
+            raise ValueError(f"{col} must be numeric.")
     if data[subject].nunique() < 3:
         raise ValueError("rm_corr requires at least 3 unique subjects.")
     # Remove missing values
@@ -1385,7 +1396,8 @@ def distance_corr(x, y, alternative="greater", n_boot=1000, seed=None):
         x = x[:, None]
     if y.ndim == 1:
         y = y[:, None]
-    assert x.shape[0] == y.shape[0], "x and y must have same number of samples"
+    if x.shape[0] != y.shape[0]:
+        raise ValueError("x and y must have same number of samples")
 
     # Extract number of samples
     n = x.shape[0]

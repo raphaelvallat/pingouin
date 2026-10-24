@@ -53,6 +53,29 @@ def test_cronbach_alpha():
     assert round(alpha, 6) == 0.801695
     np.testing.assert_array_equal(ci, [0.533, 0.947])
 
+    # Invalid confidence interval
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        cronbach_alpha(data=data, ci=95)
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        cronbach_alpha(data=data, ci=0)
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        cronbach_alpha(data=data, ci=1)
+    with pytest.raises(TypeError, match=r"'ci' must be a real number"):
+        cronbach_alpha(data=data, ci="95")
+    # Invalid data type
+    with pytest.raises(TypeError, match=r"'data' must be a pandas DataFrame, but received list\."):
+        cronbach_alpha(data=[1, 2, 3])
+    # Invalid nan_policy
+    with pytest.raises(ValueError, match=r"'listwse' is not a valid choice for 'nan_policy'\."):
+        cronbach_alpha(data=data, nan_policy="listwse")
+    # Non-numeric column, fewer than two items or subjects
+    with pytest.raises(ValueError, match=r"All columns must be numeric\."):
+        cronbach_alpha(data=data.assign(text="a"))
+    with pytest.raises(ValueError, match=r"At least two items are required\."):
+        cronbach_alpha(data=data.iloc[:, :1])
+    with pytest.raises(ValueError, match=r"At least two raters/subjects are required\."):
+        cronbach_alpha(data=data.iloc[:1])
+
 
 def test_intraclass_corr():
     """Test function intraclass_corr
@@ -69,6 +92,18 @@ def test_intraclass_corr():
         }
     )
     df_psych = df_psych.melt(id_vars="S", var_name="J", value_name="Y")
+    # Invalid arguments
+    with pytest.raises(TypeError, match="'data' must be a pandas DataFrame"):
+        intraclass_corr(data=df_psych.to_numpy(), targets="S", raters="J", ratings="Y")
+    with pytest.raises(ValueError, match="targets, raters and ratings must be specified"):
+        intraclass_corr(data=df_psych, targets="S", raters="J")
+    with pytest.raises(ValueError, match="must be columns of data"):
+        intraclass_corr(data=df_psych, targets="S", raters="J", ratings="Nope")
+    with pytest.raises(ValueError, match="is not a valid choice for 'nan_policy'"):
+        intraclass_corr(data=df_psych, targets="S", raters="J", ratings="Y", nan_policy="drop")
+    df_dt = df_psych.assign(Y=pd.to_datetime(df_psych["Y"], unit="D"))
+    with pytest.raises(ValueError, match="Ratings must be numeric"):
+        intraclass_corr(data=df_dt, targets="S", raters="J", ratings="Y")
     icc = intraclass_corr(data=df_psych, targets="S", raters="J", ratings="Y")
     np.testing.assert_almost_equal(
         np.round(icc["ICC"].to_numpy(), 2), [0.17, 0.29, 0.71, 0.44, 0.62, 0.91]

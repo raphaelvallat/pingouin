@@ -58,6 +58,13 @@ def test_multivariate_normality():
     # Return a LAPACK singular error in R so we cannot compare
     hz, pval, normal = multivariate_normality(X_rd)
     assert normal is False
+    # Invalid inputs
+    with pytest.raises(ValueError, match="X must be of shape"):
+        multivariate_normality(Z[:, 0])
+    with pytest.raises(ValueError, match="at least 3 rows"):
+        multivariate_normality(Z[:2])
+    with pytest.raises(ValueError, match="at least two columns"):
+        multivariate_normality(Z[:, :1])
 
 
 def test_multivariate_ttest():
@@ -87,6 +94,17 @@ def test_multivariate_ttest():
     stats = multivariate_ttest(X_na, Y, paired=True)
     assert stats.at["hotelling", "df1"] == 3
     assert stats.at["hotelling", "df2"] == X.shape[0] - 1 - X.shape[1]
+    # Invalid inputs
+    with pytest.raises(ValueError, match="X must be of shape"):
+        multivariate_ttest(Z[:, 0])
+    with pytest.raises(ValueError, match="Y must be 1D or 2D"):
+        multivariate_ttest(Z, Y=np.zeros((2, 2, 2)))
+    with pytest.raises(ValueError, match="same number of features"):
+        multivariate_ttest(Z, Y=[4, 5, 6])
+    with pytest.raises(ValueError, match="same number of rows if paired"):
+        multivariate_ttest(X, Y.iloc[:-1], paired=True)
+    with pytest.raises(ValueError, match="At least five samples"):
+        multivariate_ttest(Z[:4])
 
 
 def test_box_m():
@@ -133,6 +151,15 @@ def test_box_m():
     data.loc[[1, 3], ["A", "B"]] = np.nan
     stats = box_m(data, dvs=["A", "B"], group="group")
     assert stats.at["box", "df"] == 3
+    # Invalid inputs
+    with pytest.raises(TypeError, match="'data' must be a pandas DataFrame"):
+        box_m(data.to_numpy(), dvs=["A", "B"], group="group")
+    with pytest.raises(ValueError, match="grouping variable is not in data"):
+        box_m(data, dvs=["A", "B"], group="wrong")
+    with pytest.raises(ValueError, match="DVs are not in data"):
+        box_m(data, dvs=["A", "wrong"], group="group")
+    with pytest.raises(ValueError, match="at least two groups"):
+        box_m(data[data["group"] == 1], dvs=["A", "B"], group="group")
 
 
 def test_box_m_numerical_stability():

@@ -4,7 +4,12 @@ from scipy.stats import f
 
 from .config import _no_rounding
 from .parametric import anova
-from .utils import _postprocess_dataframe, _register_dataframe_method
+from .utils import (
+    _check_choice,
+    _check_confidence,
+    _postprocess_dataframe,
+    _register_dataframe_method,
+)
 
 __all__ = ["cronbach_alpha", "intraclass_corr"]
 
@@ -125,24 +130,28 @@ def cronbach_alpha(
     (0.5917188485995826, array([0.195, 0.84 ]))
     """
     # Safety check
-    assert isinstance(data, pd.DataFrame), "data must be a dataframe."
-    assert nan_policy in ["pairwise", "listwise"]
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError(f"'data' must be a pandas DataFrame, but received {type(data).__name__}.")
+    _check_choice(nan_policy, ["pairwise", "listwise"], "nan_policy")
+    _check_confidence(ci, name="ci")
 
     if all([v is not None for v in [items, scores, subject]]):
         # Data in long-format: we first convert to a wide format
         data = data.pivot(index=subject, values=scores, columns=items)
 
     # From now we assume that data is in wide format
-    err = "All columns must be numeric."
-    assert all([data[c].dtype.kind in "bfiu" for c in data.columns]), err
+    if not all(data[c].dtype.kind in "bfiu" for c in data.columns):
+        raise ValueError("All columns must be numeric.")
     if data.isna().any().any() and nan_policy == "listwise":
         # Same alpha as psych::alpha(data, use="complete.obs") in R, but the CI below uses the
         # number of complete subjects, while psych uses the total number of subjects
         data = data.dropna(axis=0, how="any")
     # The sample size of the confidence interval is the one after listwise deletion
     n, k = data.shape
-    assert k >= 2, "At least two items are required."
-    assert n >= 2, "At least two raters/subjects are required."
+    if k < 2:
+        raise ValueError("At least two items are required.")
+    if n < 2:
+        raise ValueError("At least two raters/subjects are required.")
 
     # Compute covariance matrix and Cronbach's alpha
     C = data.cov(numeric_only=True)
@@ -306,10 +315,13 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_poli
     """
 
     # Safety check
-    assert isinstance(data, pd.DataFrame), "data must be a dataframe."
-    assert all([v is not None for v in [targets, raters, ratings]])
-    assert all([v in data.columns for v in [targets, raters, ratings]])
-    assert nan_policy in ["omit", "raise"]
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError(f"'data' must be a pandas DataFrame, but received {type(data).__name__}.")
+    if any(v is None for v in [targets, raters, ratings]):
+        raise ValueError("targets, raters and ratings must be specified.")
+    if not all(v in data.columns for v in [targets, raters, ratings]):
+        raise ValueError("targets, raters and ratings must be columns of data.")
+    _check_choice(nan_policy, ["omit", "raise"], "nan_policy")
 
     # Convert data to wide-format
     data = data.pivot_table(index=targets, columns=raters, values=ratings, observed=True)
@@ -331,7 +343,8 @@ def intraclass_corr(data=None, targets=None, raters=None, ratings=None, nan_poli
     data = data.reset_index().melt(id_vars=targets, value_name=ratings)
 
     # Check that ratings is a numeric variable
-    assert data[ratings].dtype.kind in "bfiu", "Ratings must be numeric."
+    if data[ratings].dtype.kind not in "bfiu":
+        raise ValueError("Ratings must be numeric.")
     # Check that data are fully balanced
     # This behavior is ensured by the long-to-wide-to-long transformation
     # Unbalanced data will result in rows with missing values.

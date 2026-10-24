@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 import scipy.stats
 
+from .utils import _check_choice, _postprocess_dataframe, _register_dataframe_method, remove_na
 from .utils import _flatten_list as _fl
-from .utils import _postprocess_dataframe, _register_dataframe_method, remove_na
 
 _SCIPY_VERSION = tuple(int(v) for v in scipy.__version__.split(".")[:2])
 
@@ -148,16 +148,22 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
     Pre   0.304021  0.858979    True
     Post  1.265656  0.531088    True
     """
-    assert isinstance(data, (pd.DataFrame, pd.Series, list, np.ndarray))
-    assert method in ["shapiro", "normaltest", "jarque_bera"]
+    if not isinstance(data, (pd.DataFrame, pd.Series, list, np.ndarray)):
+        raise TypeError(
+            "'data' must be a pandas DataFrame, Series, list or NumPy array, but received "
+            f"{type(data).__name__}."
+        )
+    _check_choice(method, ["shapiro", "normaltest", "jarque_bera"], "method")
     if isinstance(data, pd.Series):
         data = data.to_frame()
     col_names = ["W", "pval"]
     func = getattr(scipy.stats, method)
     if isinstance(data, (list, np.ndarray)):
         data = np.asarray(data)
-        assert data.ndim == 1, "Data must be 1D."
-        assert data.size > 3, "Data must have more than 3 samples."
+        if data.ndim != 1:
+            raise ValueError("Data must be 1D.")
+        if data.size <= 3:
+            raise ValueError("Data must have more than 3 samples.")
         data = remove_na(data)
         stats = pd.DataFrame(func(data)).T
         stats.columns = col_names
@@ -173,8 +179,8 @@ def normality(data, dv=None, group=None, method="shapiro", alpha=0.05):
             stats["normal"] = np.where(stats["pval"] > alpha, True, False)
         else:
             # Long-format
-            assert group in data.columns
-            assert dv in data.columns
+            if group not in data.columns or dv not in data.columns:
+                raise ValueError(f"Columns {group!r} and {dv!r} must be in data.")
             rows = {}
             for idx, x in data.groupby(group, observed=True, sort=False)[dv]:
                 x = x.dropna().to_numpy()
@@ -309,9 +315,11 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=0.05, **k
                      T      pval  equal_var
     bartlett  2.873569  0.090045       True
     """
-    assert isinstance(data, (pd.DataFrame, list, dict))
-    method = method.lower()
-    assert method in ["levene", "bartlett"]
+    if not isinstance(data, (pd.DataFrame, list, dict)):
+        raise TypeError(
+            f"'data' must be a pandas DataFrame, list or dict, but received {type(data).__name__}."
+        )
+    method = _check_choice(method.lower(), ["levene", "bartlett"], "method")
     func = getattr(scipy.stats, method)
     if isinstance(data, pd.DataFrame):
         # Data is a Pandas DataFrame
@@ -319,25 +327,28 @@ def homoscedasticity(data, dv=None, group=None, method="levene", alpha=0.05, **k
             # Wide-format
             # Get numeric data only
             numdata = data._get_numeric_data()
-            assert numdata.shape[1] > 1, "Data must have at least two columns."
+            if numdata.shape[1] <= 1:
+                raise ValueError("Data must have at least two columns.")
             samples = numdata.to_numpy().T
         else:
             # Long-format
-            assert group in data.columns
-            assert dv in data.columns
+            if group not in data.columns or dv not in data.columns:
+                raise ValueError(f"Columns {group!r} and {dv!r} must be in data.")
             grp = data.groupby(group, observed=True)[dv]
-            assert grp.ngroups > 1, "Data must have at least two columns."
+            if grp.ngroups <= 1:
+                raise ValueError("Data must have at least two groups.")
             samples = grp.apply(list)
     elif isinstance(data, list):
-        # Check that list contains other list or np.ndarray
-        assert all(isinstance(el, (list, np.ndarray)) for el in data)
-        assert len(data) > 1, "Data must have at least two iterables."
         samples = data
     else:
         # Data is a dict
-        assert all(isinstance(el, (list, np.ndarray)) for el in data.values())
-        assert len(data) > 1, "Data must have at least two iterables."
         samples = data.values()
+    if not isinstance(data, pd.DataFrame):
+        # Check that the list / dict contains other lists or np.ndarray
+        if not all(isinstance(el, (list, np.ndarray)) for el in samples):
+            raise TypeError("Each element of 'data' must be a list or NumPy array.")
+        if len(data) <= 1:
+            raise ValueError("Data must have at least two iterables.")
 
     # Cast to float: scipy.stats.bartlett fails with integer inputs in SciPy >= 1.17
     # Missing values are removed separately in each sample.
@@ -554,14 +565,15 @@ def _long_to_wide_rm(data, dv=None, within=None, subject=None):
     This internal function is used in pingouin.epsilon and pingouin.sphericity.
     """
     # Check that all columns are present
-    assert dv in data.columns, f"{dv} not in data"
-    assert data[dv].dtype.kind in "bfiu", f"{dv} must be numeric"
-    assert subject in data.columns, f"{subject} not in data"
-    assert not data[subject].isnull().any(), f"Cannot have missing values in {subject}"
     if isinstance(within, (str, int)):
         within = [within]  # within = ['fac1'] or ['fac1', 'fac2']
-    for w in within:
-        assert w in data.columns, f"{w} not in data"
+    for col in [dv, subject, *within]:
+        if col not in data.columns:
+            raise ValueError(f"{col} not in data")
+    if data[dv].dtype.kind not in "bfiu":
+        raise ValueError(f"{dv} must be numeric")
+    if data[subject].isnull().any():
+        raise ValueError(f"Cannot have missing values in {subject}")
     # Keep all relevant columns and reset index
     data = data[_fl([subject, within, dv])]
     # Convert to wide-format + collapse to the mean
@@ -578,7 +590,8 @@ def _wide_rm(data, dv=None, within=None, subject=None):
     specified. Rows with missing values are removed (listwise deletion).
     This internal function is used in pingouin.epsilon and pingouin.sphericity.
     """
-    assert isinstance(data, pd.DataFrame), "Data must be a pandas Dataframe."
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError(f"'data' must be a pandas DataFrame, but received {type(data).__name__}.")
     if all([v is not None for v in [dv, within, subject]]):
         data = _long_to_wide_rm(data, dv=dv, within=within, subject=subject)
     return data.dropna()

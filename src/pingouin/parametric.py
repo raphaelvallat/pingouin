@@ -11,6 +11,8 @@ from .effsize import compute_effsize
 from .power import power_ttest, power_ttest2n
 from .utils import (
     _check_alternative,
+    _check_choice,
+    _check_confidence,
     _check_dataframe,
     _flatten_list,
     _is_installed,
@@ -213,7 +215,9 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
 
     # Check arguments
     _check_alternative(alternative)
-    assert 0 < confidence < 1, "confidence must be between 0 and 1."
+    _check_confidence(confidence, name="confidence")
+    # Returns a Python bool for np.bool_, so that the ``correction is True`` test below works
+    correction = _check_choice(correction, [True, False, "auto"], "correction")
 
     x = np.asarray(x)
     y = np.asarray(y)
@@ -531,9 +535,10 @@ def rm_anova(
                Source  ddof1  ddof2          F     p_unc       ng2  eps
     0  Disgustingness      1     92  12.043878  0.000793  0.025784  1.0
     """
-    assert effsize in ["n2", "np2", "ng2"], "effsize must be n2, np2 or ng2."
+    _check_choice(effsize, ["n2", "np2", "ng2"], "effsize")
     if isinstance(within, list):
-        assert len(within) > 0, "Within cannot be empty."
+        if len(within) == 0:
+            raise ValueError("Within cannot be empty.")
         if len(within) == 1:
             within = within[0]
         elif len(within) == 2:
@@ -543,10 +548,15 @@ def rm_anova(
 
     # Convert from wide to long-format, if needed
     if all([v is None for v in [dv, within, subject]]):
-        assert isinstance(data, pd.DataFrame)
+        if not isinstance(data, pd.DataFrame):
+            raise TypeError(
+                f"'data' must be a pandas DataFrame, but received {type(data).__name__}."
+            )
         data = data._get_numeric_data().dropna()  # Listwise deletion of missing values
-        assert data.shape[0] > 2, "Data must have at least 3 non-missing rows."
-        assert data.shape[1] > 1, "Data must contain at least two columns."
+        if data.shape[0] <= 2:
+            raise ValueError("Data must have at least 3 non-missing rows.")
+        if data.shape[1] <= 1:
+            raise ValueError("Data must contain at least two columns.")
         data["Subj"] = np.arange(data.shape[0])
         data = data.melt(id_vars="Subj", var_name="Within", value_name="DV")
         subject, within, dv = "Subj", "Within", "DV"
@@ -554,8 +564,10 @@ def rm_anova(
     # Check dataframe
     data = _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
 
-    assert not data[within].isnull().any(), "Cannot have missing values in `within`."
-    assert not data[subject].isnull().any(), "Cannot have missing values in `subject`."
+    if data[within].isnull().any():
+        raise ValueError("Cannot have missing values in `within`.")
+    if data[subject].isnull().any():
+        raise ValueError("Cannot have missing values in `subject`.")
 
     # Wide-format table, and complete-case long-format data
     data_piv, data = _pivot_rm(data, dv, within, subject)
@@ -692,9 +704,9 @@ def _rm_anova2(data=None, dv=None, within=None, subject=None, effsize="ng2"):
     # Validate the dataframe
     data = _check_dataframe(dv=dv, within=within, data=data, subject=subject, effects="within")
 
-    assert not data[a].isnull().any(), f"Cannot have missing values in {a}"
-    assert not data[b].isnull().any(), f"Cannot have missing values in {b}"
-    assert not data[subject].isnull().any(), f"Cannot have missing values in {subject}"
+    for col in [a, b, subject]:
+        if data[col].isnull().any():
+            raise ValueError(f"Cannot have missing values in {col}")
 
     # Wide-format table, and complete-case long-format data
     data_piv, data = _pivot_rm(data, dv, within, subject)
@@ -951,7 +963,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
     6  Sex * Risk * Drug   1.844   2.0   0.922   1.094  0.343  0.044
     7           Residual  40.445  48.0   0.843     NaN    NaN    NaN
     """
-    assert effsize in ["np2", "n2"], "effsize must be 'np2' or 'n2'."
+    _check_choice(effsize, ["np2", "n2"], "effsize")
     if isinstance(between, list):
         if len(between) == 0:
             raise ValueError("between is empty.")
@@ -1047,7 +1059,8 @@ def _anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
 
     # Drop missing values
     data = data[[dv, fac1, fac2]].dropna()
-    assert data.shape[0] >= 5, "Data must have at least 5 non-missing values."
+    if data.shape[0] < 5:
+        raise ValueError("Data must have at least 5 non-missing values.")
 
     # Reset index (avoid duplicate axis error)
     data = data.reset_index(drop=True)
@@ -1158,7 +1171,8 @@ def _anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
 
     # Drop missing values
     data = _remove_unused_categories(data[all_cols].dropna())
-    assert data.shape[0] >= 5, "Data must have at least 5 non-missing values."
+    if data.shape[0] < 5:
+        raise ValueError("Data must have at least 5 non-missing values.")
     _check_no_empty_cells(data, between)
 
     # Reset index (avoid duplicate axis error)
@@ -1476,7 +1490,7 @@ def mixed_anova(
     1         Time  7.628    2  116  3.814  4.027  0.020  0.042  0.998
     2  Interaction  5.167    2  116  2.584  2.728  0.070  0.029  0.998
     """
-    assert effsize in ["n2", "np2", "ng2"], "effsize must be n2, np2 or ng2."
+    _check_choice(effsize, ["n2", "np2", "ng2"], "effsize")
 
     # Check that only a single within and between factor are provided
     one_is_list = isinstance(within, list) or isinstance(between, list)
@@ -1687,21 +1701,28 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
     from statsmodels.formula.api import ols
 
     # Safety checks
-    assert effsize in ["np2", "n2"], "effsize must be 'np2' or 'n2'."
-    assert isinstance(data, pd.DataFrame), "data must be a pandas dataframe."
-    assert isinstance(between, str), (
-        "between must be a string. Pingouin does not support multiple "
-        "between factors. For more details, please see "
-        "https://github.com/raphaelvallat/pingouin/issues/173."
-    )
-    assert dv in data.columns, f"{dv} is not in data."
-    assert between in data.columns, f"{between} is not in data."
-    assert isinstance(covar, (str, list)), "covar must be a str or a list."
+    _check_choice(effsize, ["np2", "n2"], "effsize")
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError(f"'data' must be a pandas DataFrame, but received {type(data).__name__}.")
+    if not isinstance(between, str):
+        raise TypeError(
+            "between must be a string. Pingouin does not support multiple "
+            "between factors. For more details, please see "
+            "https://github.com/raphaelvallat/pingouin/issues/173."
+        )
+    if dv not in data.columns:
+        raise ValueError(f"{dv} is not in data.")
+    if between not in data.columns:
+        raise ValueError(f"{between} is not in data.")
+    if not isinstance(covar, (str, list)):
+        raise TypeError(f"'covar' must be a str or a list, but received {type(covar).__name__}.")
     if isinstance(covar, str):
         covar = [covar]
     for c in covar:
-        assert c in data.columns, f"covariate {c} is not in data"
-        assert data[c].dtype.kind in "bfi", f"covariate {c} is not numeric"
+        if c not in data.columns:
+            raise ValueError(f"covariate {c} is not in data")
+        if data[c].dtype.kind not in "bfi":
+            raise ValueError(f"covariate {c} is not numeric")
 
     # Drop missing values
     data = _remove_unused_categories(data[_flatten_list([dv, between, covar])].dropna())

@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 from scipy.stats import pearsonr
 
-from .utils import _check_alternative, _check_eftype, remove_na
+from .utils import _check_alternative, _check_choice, _check_confidence, _check_eftype, remove_na
 
 __all__ = [
     "compute_esci",
@@ -144,13 +144,14 @@ def compute_esci(
     """
     from scipy.stats import norm, t
 
-    assert eftype.lower() in ["r", "pearson", "spearman", "cohen", "d", "g", "hedges"]
+    eftype = eftype.lower() if isinstance(eftype, str) else eftype
+    _check_choice(eftype, ["r", "pearson", "spearman", "cohen", "d", "g", "hedges"], "eftype")
     _check_alternative(alternative)
-    assert stat is not None and nx is not None
-    assert isinstance(confidence, float)
-    assert 0 < confidence < 1, "confidence must be between 0 and 1."
+    if stat is None or nx is None:
+        raise ValueError("stat and nx are required.")
+    _check_confidence(confidence, "confidence")
 
-    if eftype.lower() in ["r", "pearson", "spearman"]:
+    if eftype in ["r", "pearson", "spearman"]:
         z = np.arctanh(stat)  # R-to-z transform
         se = 1 / np.sqrt(nx - 3)
         # See https://github.com/SurajGupta/r-source/blob/master/src/library/stats/R/cor.test.R
@@ -347,8 +348,7 @@ def compute_bootci(
     from scipy.stats import norm
 
     # Check other arguments
-    assert isinstance(confidence, float)
-    assert 0 < confidence < 1, "confidence must be between 0 and 1."
+    _check_confidence(confidence, "confidence")
     valid_methods = [
         "norm",
         "normal",
@@ -358,32 +358,38 @@ def compute_bootci(
         "BCa",
         "basic",
     ]
-    assert method in valid_methods, f"method must be one of {valid_methods}."
-    assert isfunction(func) or isinstance(func, str) or isroutine(func), (
-        "func must be a function (e.g. np.mean, custom function) or a string (e.g. 'pearson'). "
-        "See documentation for more details."
-    )
+    _check_choice(method, valid_methods, "method")
+    if not (isfunction(func) or isinstance(func, str) or isroutine(func)):
+        raise TypeError(
+            "func must be a function (e.g. np.mean, custom function) or a string (e.g. 'pearson'). "
+            "See documentation for more details."
+        )
 
     # Check x
     x = np.asarray(x)
     nx = x.size
-    assert x.ndim == 1, "x must be one-dimensional."
-    assert nx > 1, "x must have more than one element."
+    if x.ndim != 1:
+        raise ValueError("x must be one-dimensional.")
+    if nx <= 1:
+        raise ValueError("x must have more than one element.")
 
     # Check y
     if y is not None:
         y = np.asarray(y)
         ny = y.size
-        assert y.ndim == 1, "y must be one-dimensional."
-        assert ny > 1, "y must have more than one element."
-        if paired:
-            assert nx == ny, "x and y must have the same number of elements when paired=True."
+        if y.ndim != 1:
+            raise ValueError("y must be one-dimensional.")
+        if ny <= 1:
+            raise ValueError("y must have more than one element.")
+        if paired and nx != ny:
+            raise ValueError("x and y must have the same number of elements when paired=True.")
 
     # Check string functions
     if isinstance(func, str):
         func_str = f"{func}"
         if func == "pearson":
-            assert paired, "Paired should be True if using correlation functions."
+            if not paired:
+                raise ValueError("Paired should be True if using correlation functions.")
 
             def func(x, y, axis=-1):
                 return pearsonr(x, y, axis=axis)[0]
@@ -391,7 +397,8 @@ def compute_bootci(
         elif func == "spearman":
             from scipy.stats import spearmanr
 
-            assert paired, "Paired should be True if using correlation functions."
+            if not paired:
+                raise ValueError("Paired should be True if using correlation functions.")
 
             def func(x, y):
                 return spearmanr(x, y)[0]
@@ -571,9 +578,7 @@ def convert_effsize(ef, input_type, output_type, nx=None, ny=None):
 
     # Check input and output type
     for inp in [it, ot]:
-        if not _check_eftype(inp):
-            err = f"Could not interpret input '{inp}'"
-            raise ValueError(err)
+        _check_eftype(inp)
     if it not in ["pointbiserialr", "cohen"]:
         raise ValueError("Input type must be 'cohen' or 'pointbiserialr'")
 
@@ -779,9 +784,7 @@ def compute_effsize(x, y, paired=False, eftype="cohen"):
     -1.3887301496588271
     """
     # Check arguments
-    if not _check_eftype(eftype):
-        err = f"Could not interpret input '{eftype}'"
-        raise ValueError(err)
+    _check_eftype(eftype)
 
     x = np.asarray(x)
     y = np.asarray(y)
@@ -896,9 +899,7 @@ def compute_effsize_from_t(tval, nx=None, ny=None, N=None, eftype="cohen"):
     >>> print(d)
     0.7487767802667672
     """
-    if not _check_eftype(eftype):
-        err = f"Could not interpret input '{eftype}'"
-        raise ValueError(err)
+    _check_eftype(eftype)
 
     if not isinstance(tval, float):
         err = "T-value must be float"

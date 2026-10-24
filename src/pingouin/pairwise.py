@@ -15,7 +15,10 @@ from .parametric import ttest
 from .utils import (
     _DEFAULT_PVAL_STARS,
     _check_alternative,
+    _check_choice,
+    _check_confidence,
     _check_dataframe,
+    _check_real,
     _flatten_list,
     _format_pairwise_matrix,
     _postprocess_dataframe,
@@ -331,8 +334,8 @@ def pairwise_tests(
         dv=dv, between=between, within=within, subject=subject, effects="all", data=data
     )
     _check_alternative(alternative)
-    assert isinstance(alpha, float), "alpha must be float."
-    assert nan_policy in ["listwise", "pairwise"]
+    _check_confidence(alpha, name="alpha")
+    _check_choice(nan_policy, ["listwise", "pairwise"], "nan_policy")
 
     # Check if we have multiple between or within factors
     for name, factor in [("between", between), ("within", within)]:
@@ -344,7 +347,8 @@ def pairwise_tests(
     if isinstance(between, list):
         if len(between) > 1:
             contrast = "multiple_between"
-            assert all(b in data.keys() for b in between)
+            if not all(b in data.keys() for b in between):
+                raise ValueError(f"between column(s) {between} are not in data.")
         else:
             between = between[0]
     if isinstance(within, list):
@@ -355,19 +359,25 @@ def pairwise_tests(
                     "Please select only one."
                 )
             contrast = "multiple_within"
-            assert all(w in data.keys() for w in within)
+            if not all(w in data.keys() for w in within):
+                raise ValueError(f"within column(s) {within} are not in data.")
         else:
             within = within[0]
     # Check the other cases. Between and within column names can be str or int (not float).
     if isinstance(between, (str, int)) and within is None:
         contrast = "simple_between"
-        assert between in data.keys()
+        if between not in data.keys():
+            raise ValueError(f"between column '{between}' is not in data.")
     if isinstance(within, (str, int)) and between is None:
         contrast = "simple_within"
-        assert within in data.keys()
+        if within not in data.keys():
+            raise ValueError(f"within column '{within}' is not in data.")
     if isinstance(between, (str, int)) and isinstance(within, (str, int)):
         contrast = "within_between"
-        assert between in data.keys() and within in data.keys()
+        if between not in data.keys() or within not in data.keys():
+            raise ValueError(
+                f"between column '{between}' or within column '{within}' is not in data."
+            )
 
     # Create col_order
     col_order = [
@@ -635,8 +645,11 @@ def ptests(
 
     if pval_stars is None:
         pval_stars = _DEFAULT_PVAL_STARS
-    assert isinstance(pval_stars, dict), "pval_stars must be a dictionary."
-    assert isinstance(decimals, int), "decimals must be an int."
+    if not isinstance(pval_stars, dict):
+        raise TypeError(
+            f"'pval_stars' must be a dictionary, but received {type(pval_stars).__name__}."
+        )
+    _check_real(decimals, "decimals", integer=True)
     if "axis" in kwargs or "nan_policy" in kwargs:
         raise ValueError(
             "axis and nan_policy cannot be specified: the T-tests are always calculated between "
@@ -1173,7 +1186,7 @@ def pairwise_corr(
 
     # Check arguments
     _check_alternative(alternative)
-    assert nan_policy in ["listwise", "pairwise"]
+    _check_choice(nan_policy, ["listwise", "pairwise"], "nan_policy")
 
     # Keep only numeric columns
     data = data._get_numeric_data()
@@ -1191,7 +1204,8 @@ def pairwise_corr(
         # Simple List with one element: [('L0', 'L1')]
         # Simple list with >= 2 elements: [('L0', 'L1'), ('L0', 'L2')]
         # Nested lists: [[('L0', 'L1')], ...] or [..., [('L0', 'L1')]]
-        assert all(isinstance(c, tuple) for c in _flatten_list(list(columns)))
+        if not all(isinstance(c, tuple) for c in _flatten_list(list(columns))):
+            raise ValueError("columns must be tuples when data has a MultiIndex column index.")
 
     # Then define combinations / products between columns. Pairs are kept as tuples of column
     # labels (not converted to a numpy array), so that column labels of any type are preserved.
@@ -1224,15 +1238,17 @@ def pairwise_corr(
 
     # Now we check if covariates are present
     if covar is not None:
-        assert isinstance(covar, (str, list, pd.Index)), "covar must be list or string."
+        if not isinstance(covar, (str, list, pd.Index)):
+            raise TypeError(
+                f"'covar' must be a list, string or pandas Index, but received {type(covar).__name__}."
+            )
         if isinstance(covar, str):
             covar = [covar]
         elif isinstance(covar, pd.Index):
             covar = covar.tolist()
         # Check that columns exist and are numeric
-        assert all([c in keys for c in covar]), (
-            "Covariate(s) are either not in data or not numeric."
-        )
+        if not all([c in keys for c in covar]):
+            raise ValueError("Covariate(s) are either not in data or not numeric.")
         # And we make sure that X or Y does not contain covar
         combs = [(x, y) for x, y in combs if x not in covar and y not in covar]
 
