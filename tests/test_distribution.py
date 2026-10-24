@@ -288,6 +288,10 @@ def test_anderson_legacy_scipy():
     """The p-value interpolated from the critical values of SciPy < 1.17 must match the one
     of SciPy >= 1.17, so that pingouin.anderson does not depend on the SciPy version."""
     samples = [x, np.random.default_rng(42).exponential(size=50)]
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", FutureWarning)
+        if not hasattr(scipy.stats.anderson(x), "critical_values"):
+            pytest.skip("SciPy >= 2.0 no longer returns the critical values of anderson")
     for dist in pingouin.distribution._ANDERSON_SIG_LEVELS:
         expected = anderson(*samples, dist=dist)
         with (

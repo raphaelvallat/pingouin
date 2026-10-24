@@ -558,8 +558,10 @@ def kruskal(data=None, dv=None, between=None, detailed=False):
     # Calculate chi-square statistic (H)
     H = (12 / (n * (n + 1)) * np.sum(sum_rk_grp**2 / n_per_grp)) - 3 * (n + 1)
 
-    # Correct for ties
-    H /= scipy.stats.tiecorrect(data["rank"].to_numpy())
+    # Correct for ties: 1 - sum(t**3 - t) / (n**3 - n), with t the size of each group of ties
+    # (scipy.stats.tiecorrect is deprecated in SciPy 2.0)
+    _, ties = np.unique(data["rank"].to_numpy(), return_counts=True)
+    H /= 1 - (ties**3 - ties).sum() / (n**3 - n)
 
     # Calculate DOF and p-value
     ddof1 = n_groups - 1
