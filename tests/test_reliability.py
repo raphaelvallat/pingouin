@@ -60,7 +60,7 @@ def test_cronbach_alpha():
         cronbach_alpha(data=data, ci=0)
     with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
         cronbach_alpha(data=data, ci=1)
-    with pytest.raises(TypeError, match=r"'ci' must be a real number\."):
+    with pytest.raises(TypeError, match=r"'ci' must be a real number"):
         cronbach_alpha(data=data, ci="95")
     # Invalid data type
     with pytest.raises(TypeError, match=r"'data' must be a pandas DataFrame, but received list\."):
@@ -68,6 +68,13 @@ def test_cronbach_alpha():
     # Invalid nan_policy
     with pytest.raises(ValueError, match=r"'listwse' is not a valid choice for 'nan_policy'\."):
         cronbach_alpha(data=data, nan_policy="listwse")
+    # Non-numeric column, fewer than two items or subjects
+    with pytest.raises(ValueError, match=r"All columns must be numeric\."):
+        cronbach_alpha(data=data.assign(text="a"))
+    with pytest.raises(ValueError, match=r"At least two items are required\."):
+        cronbach_alpha(data=data.iloc[:, :1])
+    with pytest.raises(ValueError, match=r"At least two raters/subjects are required\."):
+        cronbach_alpha(data=data.iloc[:1])
 
 
 def test_intraclass_corr():

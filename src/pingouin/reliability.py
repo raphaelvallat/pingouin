@@ -140,16 +140,18 @@ def cronbach_alpha(
         data = data.pivot(index=subject, values=scores, columns=items)
 
     # From now we assume that data is in wide format
-    err = "All columns must be numeric."
-    assert all([data[c].dtype.kind in "bfiu" for c in data.columns]), err
+    if not all(data[c].dtype.kind in "bfiu" for c in data.columns):
+        raise ValueError("All columns must be numeric.")
     if data.isna().any().any() and nan_policy == "listwise":
         # Same alpha as psych::alpha(data, use="complete.obs") in R, but the CI below uses the
         # number of complete subjects, while psych uses the total number of subjects
         data = data.dropna(axis=0, how="any")
     # The sample size of the confidence interval is the one after listwise deletion
     n, k = data.shape
-    assert k >= 2, "At least two items are required."
-    assert n >= 2, "At least two raters/subjects are required."
+    if k < 2:
+        raise ValueError("At least two items are required.")
+    if n < 2:
+        raise ValueError("At least two raters/subjects are required.")
 
     # Compute covariance matrix and Cronbach's alpha
     C = data.cov(numeric_only=True)

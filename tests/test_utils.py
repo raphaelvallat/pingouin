@@ -12,6 +12,7 @@ from pingouin.utils import (
     _check_confidence,
     _check_dataframe,
     _check_eftype,
+    _check_real,
     _flatten_list,
     _get_round_setting_for,
     _is_installed,
@@ -297,8 +298,16 @@ def test_is_installed():
 
 def test_check_choice():
     """Test function _check_choice."""
-    _check_choice("a", ["a", "b"], "letter")
-    _check_choice(True, [True, False, "auto"], "correction")
+    assert _check_choice("a", ["a", "b"], "letter") == "a"
+    assert _check_choice(True, [True, False, "auto"], "correction") is True
+    # NumPy scalars are accepted and converted to Python scalars
+    assert _check_choice(np.str_("a"), ["a", "b"], "letter") == "a"
+    assert _check_choice(np.True_, [True, False, "auto"], "correction") is True
+    assert _check_choice(np.array("a"), ["a", "b"], "letter") == "a"
+    # Membership is checked by type too: 1 == True but 1 is not a valid choice
+    for val in [1, 1.0, 0, np.int64(1)]:
+        with pytest.raises(ValueError, match=r"is not a valid choice for 'correction'\."):
+            _check_choice(val, [True, False, "auto"], "correction")
     with pytest.raises(
         ValueError,
         match=r"'c' is not a valid choice for 'letter'\. Expected one of \['a', 'b'\]\.",
@@ -316,7 +325,7 @@ def test_check_choice():
         _check_choice(np.array(["a"]), ["a", "b"], "letter")
     with pytest.raises(
         ValueError,
-        match=r"'letter' must be a scalar, but received an array of shape \(\)\.",
+        match=r"'letter' must be a scalar, but received an array of shape \(2,\)\.",
     ):
         _check_choice(["a", "b"], ["a", "b"], "letter")
 
@@ -330,10 +339,28 @@ def test_check_alternative():
             _check_alternative(alt)
 
 
+def test_check_real():
+    """Test function _check_real."""
+    for val in [0.5, 2, np.float32(0.5), np.int64(2), np.array(0.5)]:
+        _check_real(val, "x")
+    for val in [2, np.int64(2), np.array(2)]:
+        _check_real(val, "x", integer=True)
+    for val in ["1", True, np.True_, None, [1], np.array([1])]:
+        with pytest.raises(TypeError, match=r"'x' must be a real number, but received"):
+            _check_real(val, "x")
+    for val in [1.5, np.float64(1.5), True, "1"]:
+        with pytest.raises(TypeError, match=r"'x' must be an integer, but received"):
+            _check_real(val, "x", integer=True)
+
+
 def test_check_confidence():
     """Test function _check_confidence."""
     _check_confidence(0.95)
     _check_confidence(np.float64(0.99), name="confidence")
+    _check_confidence(np.float32(0.9))
+    _check_confidence(np.array(0.95))  # 0-d array
+    with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
+        _check_confidence(np.nan)
     with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
         _check_confidence(0)
     with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
@@ -342,7 +369,7 @@ def test_check_confidence():
         _check_confidence(95)
     with pytest.raises(ValueError, match=r"'ci' must be between 0 and 1\."):
         _check_confidence(-0.5)
-    with pytest.raises(TypeError, match=r"'ci' must be a real number\."):
+    with pytest.raises(TypeError, match=r"'ci' must be a real number"):
         _check_confidence("0.95")
-    with pytest.raises(TypeError, match=r"'confidence' must be a real number\."):
+    with pytest.raises(TypeError, match=r"'confidence' must be a real number"):
         _check_confidence(True, name="confidence")

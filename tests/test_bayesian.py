@@ -127,9 +127,9 @@ def test_bayesfactor_binom():
         bayesfactor_binom(5, 10, p=1)
     with pytest.raises(ValueError, match=r"'p' must be between 0 and 1\."):
         bayesfactor_binom(5, 10, p=1.5)
-    with pytest.raises(TypeError, match=r"'p' must be a real number\."):
+    with pytest.raises(TypeError, match=r"'p' must be a real number"):
         bayesfactor_binom(5, 10, p="0.5")
-    with pytest.raises(TypeError, match=r"'p' must be a real number\."):
+    with pytest.raises(TypeError, match=r"'p' must be a real number"):
         bayesfactor_binom(5, 10, p=True)
     # Invalid k
     with pytest.raises(TypeError, match=r"'k' must be an integer, but received float\."):
@@ -164,3 +164,8 @@ def test_bayesfactor_binom():
         bayesfactor_binom(5, 10, b="1")
     with pytest.raises(TypeError, match=r"'b' must be a real number, but received bool\."):
         bayesfactor_binom(5, 10, b=True)
+    # NaN priors are rejected
+    with pytest.raises(ValueError, match=r"a must be positive\."):
+        bayesfactor_binom(5, 10, a=np.nan)
+    with pytest.raises(ValueError, match=r"b must be positive\."):
+        bayesfactor_binom(5, 10, b=np.nan)

@@ -15,6 +15,10 @@ Unreleased
 
 - :py:func:`pingouin.corr`: new ``seed`` argument for the bootstrap of the Shepherd's pi correlation (``method="shepherd"``). Without it, the global NumPy random state is used, as before.
 
+**Improvements**
+
+- Input validation no longer relies on ``assert`` statements, which are skipped when Python runs with the ``-O`` flag. Invalid arguments now raise a ``ValueError`` (invalid value or choice) or a ``TypeError`` (invalid type) instead of an ``AssertionError``. This applies to the ``alternative``, ``eftype``, ``nan_policy`` and ``correction`` arguments, to the ``confidence`` / ``ci`` / ``alpha`` arguments of :py:func:`pingouin.ttest`, :py:func:`pingouin.compute_esci`, :py:func:`pingouin.compute_bootci`, :py:func:`pingouin.multicomp`, :py:func:`pingouin.pairwise_tests`, :py:func:`pingouin.linear_regression`, :py:func:`pingouin.logistic_regression`, :py:func:`pingouin.cronbach_alpha` and :py:func:`pingouin.plot_blandaltman`, and to all arguments of :py:func:`pingouin.bayesfactor_binom`. In addition, :py:func:`pingouin.ttest` now rejects ``correction=1`` or ``1.0``, and correctly applies Welch's correction with ``correction=np.True_``, which previously ran a Student t-test. (`PR555 <https://github.com/raphaelvallat/pingouin/pull/555>`_)
+
 **Breaking changes**
 
 - Removed :py:func:`!pingouin.pairwise_ttests`, deprecated since version 0.5.2, as well as the ``DataFrame.pairwise_ttests`` method. Use :py:func:`pingouin.pairwise_tests` instead.

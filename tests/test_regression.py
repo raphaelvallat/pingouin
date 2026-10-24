@@ -300,7 +300,7 @@ def test_linear_regression():
         linear_regression(df[["X"]], df["Y"], weights=df["W1"], relimp=True)
     with pytest.raises(ValueError, match=r"'alpha' must be between 0 and 1\."):
         linear_regression(df[["X"]], df["Y"], alpha=1.5)
-    with pytest.raises(TypeError, match=r"'alpha' must be a real number\."):
+    with pytest.raises(TypeError, match=r"'alpha' must be a real number"):
         linear_regression(df[["X"]], df["Y"], alpha="0.05")
 
 
@@ -352,7 +352,7 @@ def test_logistic_regression():
     assert_equal(np.round(c, 3), [1.327, -0.196, -0.006])
     with pytest.raises(ValueError, match=r"'alpha' must be between 0 and 1\."):
         logistic_regression(df[["X", "M"]], df["Ybin"], alpha=1.5)
-    with pytest.raises(TypeError, match=r"'alpha' must be a real number\."):
+    with pytest.raises(TypeError, match=r"'alpha' must be a real number"):
         logistic_regression(df[["X", "M"]], df["Ybin"], alpha="0.05")
 
     # With missing values: same as removing the rows with missing values

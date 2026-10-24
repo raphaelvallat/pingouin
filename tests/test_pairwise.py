@@ -270,7 +270,7 @@ def test_pairwise_tests_mixed(df, df_sort):
         pairwise_tests(dv="Scores", between="Group", data=df, alpha=1)
     with pytest.raises(ValueError, match=r"'alpha' must be between 0 and 1\."):
         pairwise_tests(dv="Scores", between="Group", data=df, alpha=0)
-    with pytest.raises(TypeError, match=r"'alpha' must be a real number\."):
+    with pytest.raises(TypeError, match=r"'alpha' must be a real number"):
         pairwise_tests(dv="Scores", between="Group", data=df, alpha="0.05")
     # Real numbers (e.g. np.float64, np.float32) are accepted even with multiple contrasts
     pairwise_tests(dv="Scores", between="Group", data=df, alpha=np.float64(0.05))

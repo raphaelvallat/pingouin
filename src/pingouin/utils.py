@@ -13,20 +13,38 @@ __all__ = ["print_table", "remove_na"]
 
 
 def _check_choice(val, choices, name):
-    """Check that ``val`` is in ``choices``."""
+    """Check that ``val`` is one of ``choices`` and return it as a Python scalar.
+
+    Membership is checked by type and value, so that e.g. ``1`` or ``1.0`` are not accepted when
+    ``True`` is the valid choice. NumPy scalars are converted to their Python equivalent.
+    """
     if np.ndim(val) != 0:
         raise ValueError(
-            f"'{name}' must be a scalar, but received an array of shape {getattr(val, 'shape', ())}."
+            f"'{name}' must be a scalar, but received an array of shape {np.shape(val)}."
         )
-    if val not in choices:
+    if isinstance(val, (np.generic, np.ndarray)):
+        val = val.item()
+    if not any(isinstance(val, type(c)) and val == c for c in choices):
         raise ValueError(f"'{val}' is not a valid choice for '{name}'. Expected one of {choices}.")
+    return val
+
+
+def _check_real(val, name, integer=False):
+    """Check that ``val`` is a real number (or an integer if ``integer=True``), excluding booleans.
+
+    Zero-dimensional NumPy arrays are accepted.
+    """
+    if isinstance(val, np.ndarray) and val.ndim == 0:
+        val = val.item()
+    kind, label = (numbers.Integral, "an integer") if integer else (numbers.Real, "a real number")
+    if isinstance(val, bool) or not isinstance(val, kind):
+        raise TypeError(f"'{name}' must be {label}, but received {type(val).__name__}.")
 
 
 def _check_confidence(ci, name="ci"):
-    """Check that confidence interval / significance level is a real number strictly between 0 and 1."""
-    if isinstance(ci, bool) or not isinstance(ci, numbers.Real):
-        raise TypeError(f"'{name}' must be a real number.")
-    if not (0 < ci < 1):
+    """Check that a confidence / significance level is a real number strictly between 0 and 1."""
+    _check_real(ci, name)
+    if not (0 < ci < 1):  # Also rejects NaN
         raise ValueError(f"'{name}' must be between 0 and 1.")
 
 

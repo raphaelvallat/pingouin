@@ -11,7 +11,7 @@ from scipy import stats
 
 from .circular import circ_mean, circ_r
 from .correlation import _check_rm_corr_data
-from .utils import _check_confidence, _check_dataframe, remove_na
+from .utils import _check_choice, _check_confidence, _check_dataframe, remove_na
 
 # matplotlib and seaborn are imported inside the plotting functions, to keep `import pingouin` fast
 
@@ -140,16 +140,18 @@ def plot_blandaltman(
     import matplotlib.transforms as transforms
 
     # Safety check
-    assert xaxis in ["mean", "x", "y"]
+    _check_choice(xaxis, ["mean", "x", "y"], "xaxis")
     # Get names before converting to NumPy array
     xname = x.name if isinstance(x, pd.Series) else "x"
     yname = y.name if isinstance(y, pd.Series) else "y"
     x = np.asarray(x)
     y = np.asarray(y)
-    assert x.ndim == 1 and y.ndim == 1
-    assert x.size == y.size
-    assert not np.isnan(x).any(), "Missing values in x or y are not supported."
-    assert not np.isnan(y).any(), "Missing values in x or y are not supported."
+    if x.ndim != 1 or y.ndim != 1:
+        raise ValueError("x and y must be one-dimensional.")
+    if x.size != y.size:
+        raise ValueError("x and y must have the same number of elements.")
+    if np.isnan(x).any() or np.isnan(y).any():
+        raise ValueError("Missing values in x or y are not supported.")
 
     # Update default kwargs with specified inputs
     _scatter_kwargs = {"color": "tab:blue", "alpha": 0.8}

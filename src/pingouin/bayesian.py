@@ -7,7 +7,7 @@ from math import exp, lgamma, log, pi
 import numpy as np
 from scipy.integrate import quad
 
-from .utils import _check_alternative, _check_confidence, _is_installed
+from .utils import _check_alternative, _check_confidence, _check_real, _is_installed
 
 __all__ = ["bayesfactor_ttest", "bayesfactor_pearson", "bayesfactor_binom"]
 
@@ -450,23 +450,20 @@ def bayesfactor_binom(k, n, p=0.5, a=1, b=1):
     from scipy.stats import betabinom, binom
 
     _check_confidence(p, name="p")
-    if isinstance(k, bool) or not isinstance(k, (numbers.Integral, np.integer)):
-        raise TypeError(f"'k' must be an integer, but received {type(k).__name__}.")
-    if isinstance(n, bool) or not isinstance(n, (numbers.Integral, np.integer)):
-        raise TypeError(f"'n' must be an integer, but received {type(n).__name__}.")
+    _check_real(k, "k", integer=True)
+    _check_real(n, "n", integer=True)
+    _check_real(a, "a")
+    _check_real(b, "b")
     if k < 0:
         raise ValueError("k (successes) must be positive or zero.")
     if n <= 0:
         raise ValueError("n (trials) must be positive.")
     if k > n:
         raise ValueError("k (successes) cannot be higher than n (trials).")
-    if isinstance(a, bool) or not isinstance(a, numbers.Real):
-        raise TypeError(f"'a' must be a real number, but received {type(a).__name__}.")
-    if a <= 0:
+    # ``not (x > 0)`` rather than ``x <= 0`` so that NaN is rejected too
+    if not (a > 0):
         raise ValueError("a must be positive.")
-    if isinstance(b, bool) or not isinstance(b, numbers.Real):
-        raise TypeError(f"'b' must be a real number, but received {type(b).__name__}.")
-    if b <= 0:
+    if not (b > 0):
         raise ValueError("b must be positive.")
 
     # The marginal likelihood under the alternative, i.e. the integral of the binomial likelihood

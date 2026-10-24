@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 from scipy.stats import pearsonr
 
-from .utils import _check_alternative, _check_confidence, _check_eftype, remove_na
+from .utils import _check_alternative, _check_choice, _check_confidence, _check_eftype, remove_na
 
 __all__ = [
     "compute_esci",
@@ -144,12 +144,14 @@ def compute_esci(
     """
     from scipy.stats import norm, t
 
-    assert eftype.lower() in ["r", "pearson", "spearman", "cohen", "d", "g", "hedges"]
+    eftype = eftype.lower() if isinstance(eftype, str) else eftype
+    _check_choice(eftype, ["r", "pearson", "spearman", "cohen", "d", "g", "hedges"], "eftype")
     _check_alternative(alternative)
-    assert stat is not None and nx is not None
+    if stat is None or nx is None:
+        raise ValueError("stat and nx are required.")
     _check_confidence(confidence, "confidence")
 
-    if eftype.lower() in ["r", "pearson", "spearman"]:
+    if eftype in ["r", "pearson", "spearman"]:
         z = np.arctanh(stat)  # R-to-z transform
         se = 1 / np.sqrt(nx - 3)
         # See https://github.com/SurajGupta/r-source/blob/master/src/library/stats/R/cor.test.R

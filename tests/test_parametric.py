@@ -78,6 +78,8 @@ def test_ttest():
         ttest(x, y, correction=1)
     with pytest.raises(ValueError, match=r"'1.0' is not a valid choice for 'correction'\."):
         ttest(x, y, correction=1.0)
+    with pytest.raises(ValueError, match=r"'correction' must be a scalar"):
+        ttest(x, y, correction=np.array([True, False]))
     # np.bool_ is accepted and correctly routes to Welch / Student
     tt_welch = ttest(x, y, correction=True)
     pd.testing.assert_frame_equal(ttest(x, y, correction=np.True_), tt_welch)
@@ -85,7 +87,7 @@ def test_ttest():
     # Invalid confidence
     with pytest.raises(ValueError, match=r"'confidence' must be between 0 and 1\."):
         ttest(x, y, confidence=95)
-    with pytest.raises(TypeError, match=r"'confidence' must be a real number\."):
+    with pytest.raises(TypeError, match=r"'confidence' must be a real number"):
         ttest(x, y, confidence="0.95")
 
     a = [4, 7, 8, 6, 3, 2]

@@ -81,8 +81,13 @@ def test_compute_esci():
     # Invalid confidence
     with pytest.raises(ValueError, match=r"'confidence' must be between 0 and 1\."):
         compute_esci(stat=0.2, nx=30, confidence=1.5)
-    with pytest.raises(TypeError, match=r"'confidence' must be a real number\."):
+    with pytest.raises(TypeError, match=r"'confidence' must be a real number"):
         compute_esci(stat=0.2, nx=30, confidence="0.95")
+    # Invalid eftype, missing stat / nx
+    with pytest.raises(ValueError, match=r"'fake' is not a valid choice for 'eftype'\."):
+        compute_esci(stat=0.2, nx=30, eftype="fake")
+    with pytest.raises(ValueError, match=r"stat and nx are required\."):
+        compute_esci(stat=0.2)
 
 
 def test_compute_boot_esci():
@@ -190,7 +195,7 @@ def test_compute_boot_esci():
 
     with pytest.raises(ValueError, match=r"'confidence' must be between 0 and 1\."):
         compute_bootci(x, confidence=1.5)
-    with pytest.raises(TypeError, match=r"'confidence' must be a real number\."):
+    with pytest.raises(TypeError, match=r"'confidence' must be a real number"):
         compute_bootci(x, confidence="0.95")
 
 
