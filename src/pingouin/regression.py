@@ -10,7 +10,7 @@ from .utils import _flatten_list as _fl
 from .utils import _postprocess_dataframe, _register_dataframe_method
 from .utils import remove_na as rm_na
 
-__all__ = ["linear_regression", "logistic_regression", "mediation_analysis"]
+__all__ = ["linear_regression", "logistic_regression", "mediation_analysis", "vif"]
 
 
 @_register_dataframe_method
@@ -1340,3 +1340,230 @@ def mediation_analysis(
         return _postprocess_dataframe(stats), np.squeeze(ab_estimates)
     else:
         return _postprocess_dataframe(stats)
+
+
+# TODO Add References section to docstring
+@_register_dataframe_method
+def vif(data):
+    """Variance inflation factor (VIF) of each predictor.
+
+    VIF quantifies the degree of multicollinearity among the predictor
+    variables, i.e. how strongly each one is linearly explained by the others.
+
+    Parameters
+    ----------
+    data : :py:class:`pandas.DataFrame` or :py:class:`numpy.ndarray`
+        Dataset containing the predictor variables. If a DataFrame is
+        provided, only numeric and boolean columns are used. If a 2D array
+        is provided, it must be convertible to ``float64``.
+
+    Returns
+    -------
+    vif_df : :py:class:`pandas.DataFrame`
+        Long-format DataFrame with one row per input variable:
+
+        * ``'variables'``: predictor names
+        * ``'VIF'``: estimate VIF values
+
+        Constant (zero-variance) columns are kept in the output with a VIF
+        of ``NaN``. If ``data`` is a :py:class:`numpy.ndarray`, the predictors
+        are named ``X1``, ``X2``, ... in order of appearance (column order).
+
+    See also
+    --------
+    linear_regression
+
+    Notes
+    -----
+    The VIF of variable :math:`j` measures how much the variance of its
+    regression coefficient is inflated by its linear dependence on the other
+    variables:
+
+    .. math:: \\text{VIF}_j = \\frac{1}{1 - R_j^2}
+
+    where :math:`R_j^2` is the coefficient of determination obtained by
+    regressing variable :math:`j` on all the remaining variables. A VIF of 1
+    indicates no collinearity. Common rules of thumb consider values above 5
+    as a sign of problematic multicollinearity.
+
+    Rather than fitting one regression per variable, the VIFs are computed
+    as the diagonal elements of the inverse of the Pearson correlation
+    matrix :math:`\\mathbf{R}`:
+
+    .. math:: \\text{VIF}_j = \\left(\\mathbf{R}^{-1}\\right)_{jj}
+
+    This is mathematically equivalent to the regression-based definition
+    but faster, since it requires a single matrix inversion instead of
+    :math:`p` regressions. If :math:`\\mathbf{R}` is numerically singular
+    (perfect multicollinearity, or more variables than observations), the
+    function falls back to one least-squares regression per variable, and
+    variables that are perfectly predicted by the others are assigned a VIF
+    of ``inf``.
+
+    Because :math:`R_j^2` is invariant to linear rescaling of the variables,
+    the VIFs do not depend on the units of the data, and no standardization
+    is required.
+
+    The data are pre-processed in the following order:
+
+    1. Non-numeric columns are removed (DataFrame), or the array is cast to
+       ``float64`` (ndarray).
+    2. Rows containing missing (NaN) or infinite values are removed, and a
+       warning reports the percentage of rows dropped.
+    3. Constant columns (zero variance) trigger a warning and their VIF is
+       reported as ``NaN``.
+
+    Results were compared against the function variance_inflation_factor
+    from library statsmodels.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> import pingouin as pg
+    >>> rng = np.random.default_rng(42)
+    >>> x1 = rng.normal(size=200)
+    >>> x2 = 0.9 * x1 + rng.normal(scale=0.3, size=200)
+    >>> x3 = rng.normal(size=200)
+    >>> df = pd.DataFrame({"x1": x1, "x2": x2, "x3": x3, "group": "a"})
+    >>> pg.vif(df).round(2)
+      variables   VIF
+    0        x1  7.42
+    1        x2  7.41
+    2        x3  1.00
+
+    Non-numeric columns (here ``group``) are ignored. A numpy array can also
+    be used, in which case the variables are named ``X1``, ``X2``, ...
+
+    >>> pg.vif(df[["x1", "x2", "x3"]].to_numpy()).round(2)
+      variables   VIF
+    0        X1  7.42
+    1        X2  7.41
+    2        X3  1.00
+
+    Rows with missing values are dropped, with a warning.
+
+    >>> df.iloc[0, 0] = np.nan
+    >>> pg.vif(df)  # doctest: +SKIP
+    UserWarning: 0.5% of rows (1 of 200) were removed because of missing
+    and/or infinite values.
+    """
+    if isinstance(data, pd.DataFrame):
+        # Get only numeric columns and convert to numpy array.
+        numeric_data = data.select_dtypes(include=["bool", "integer", "floating"]).copy()
+        output_cols = numeric_data.columns
+        X = numeric_data.to_numpy(dtype=np.float64, na_value=np.nan)
+
+    elif isinstance(data, np.ndarray):
+        # ndarray must be two-dimensional.
+        if data.ndim != 2:
+            raise ValueError(f"Input ndarray must be 2-dimensional, got {data.ndim}D.")
+
+        # Validate numpy array as a numeric dtype or that it can be coerced to numeric dtype.
+        if data.dtype.kind in "cMm":  # complex, datetime, timedelta
+            raise ValueError(f"Input ndarray of dtype {data.dtype} is not supported.")
+        try:
+            X = data.astype("float64").copy()
+        except (ValueError, TypeError) as err:
+            raise ValueError(
+                f"Input ndarray of dtype {data.dtype} is not numeric and "
+                "could not be coerced to float64."
+            ) from err
+
+        # Create list of column names for output (X1, X2...).
+        output_cols = [f"x{n}" for n in range(1, X.shape[1] + 1)]
+
+    # Invalid input type.
+    else:
+        raise TypeError(
+            f"`data` must be a pandas DataFrame or a numpy ndarray, got {type(data).__name__}."
+        )
+
+    # No rows are available for the VIF calculation.
+    if X.size == 0:
+        raise ValueError("`data` contains no rows of numeric data.")
+
+    # At least two variables are needed to compute a VIF.
+    if X.shape[1] < 2:
+        raise ValueError("`data` must have at least two numeric columns")
+
+    # Remove rows with nan/inf values, print warning if any rows were discarded.
+    mask_finite = np.isfinite(X).all(axis=1)
+    n_removed = np.sum(~mask_finite)
+    if n_removed > 0:
+        perc_removed = float(round(100 * n_removed / X.shape[0], 2))
+        warnings.warn(
+            f"{perc_removed}% of rows ({n_removed} of "
+            f"{X.shape[0]}) were removed because of missing and/or infinite values.",
+            UserWarning,
+            stacklevel=2,
+        )
+        X = X[mask_finite]
+
+    # VIF are only calculated if there are more observations than variables.
+    if X.shape[0] <= X.shape[1]:
+        raise ValueError("`data` must have more rows than numeric variables to calculate VIF.")
+
+    # Discard constant-value (zero variance) columns.
+    mask_non_constant = np.ptp(X, axis=0) > 0
+    if not mask_non_constant.all():
+        warnings.warn(
+            "Columns with zero variance found. VIF cannot be estimated for them and is set to NaN.",
+            UserWarning,
+            stacklevel=2,
+        )
+        X = X[:, mask_non_constant]
+        if X.shape[1] < 2:
+            raise ValueError("Fewer than two non-constant variables remain.")
+
+    # Calculate Pearson correlation matrix column-wise.
+    corr = np.corrcoef(X, rowvar=False)
+
+    # Full numerical rank (SVD-based tolerance), R is invertible, so VIF_j = (R^-1)_jj,
+    # using one inversion instead of p regressions. Ill-conditioned but full-rank
+    # matrices lose some precision, but the VIFs are then huge anyway, so the conclusion is unchanged.
+    if np.linalg.matrix_rank(corr) == corr.shape[0]:
+        vif_values = np.diag(np.linalg.inv(corr))
+    # Correlation matrix not invertible, fall back to one OLS regression per variable.
+    else:
+        warnings.warn(
+            "Perfect multicollinearity detected; falling back to per-variable OLS regressions.",
+            UserWarning,
+            stacklevel=2,
+        )
+        vif_values = _vif_ols(X)
+
+    # Create output DataFrame (zero-variance columns are set to NaN).
+    vif_arr = np.full(len(output_cols), np.nan)
+    vif_arr[mask_non_constant] = vif_values
+    vif_df = pd.DataFrame({"variables": output_cols, "VIF": vif_arr})
+    return _postprocess_dataframe(vif_df)
+
+
+def _vif_ols(X):
+    r"""Compute the variance inflation factor (VIF) of each column of X.
+
+    Each column is regressed on all the other columns using ordinary least squares,
+    and its VIF is calculated as:
+
+    .. math:: \text{VIF}_j = \frac{1}{1 - R_j^2}
+
+    where :math:`R_j^2` is the coefficient of determination of the regression of
+    column :math:`j` on the other columns. A column that is perfectly explained by
+    the others (:math:`1 - R_j^2 \leq` `tol`) gets a VIF of ``np.inf``.
+    """
+    # Tolerance below which a column is considered perfectly collinear with the others.
+    tol = 1e-12
+
+    vif_values = np.empty(X.shape[1])
+    for idx in range(X.shape[1]):
+        # Get data for response and predictor variables and estimate R².
+        y = X[:, idx]
+        others = np.delete(X, idx, axis=1)
+        r2 = linear_regression(others, y, add_intercept=True, as_dataframe=False)["r2"]
+
+        # If the column is (almost) perfectly explained by the others, which
+        # VIF is set to np.inf, thus avoiding division by zero.
+        vif_values[idx] = np.inf if 1 - r2 <= tol else 1 / (1 - r2)
+
+    return vif_values

@@ -1,5 +1,6 @@
 """Test regression.py."""
 
+import re
 import warnings
 
 import numpy as np
@@ -10,6 +11,7 @@ from numpy.testing import assert_allclose, assert_almost_equal, assert_equal
 from pandas.testing import assert_frame_equal
 from scipy.stats import linregress, zscore
 from sklearn.linear_model import LinearRegression
+from statsmodels.stats.outliers_influence import variance_inflation_factor
 from statsmodels.tools.sm_exceptions import SingularMatrixWarning
 
 from pingouin import read_dataset
@@ -19,6 +21,7 @@ from pingouin.regression import (
     linear_regression,
     logistic_regression,
     mediation_analysis,
+    vif,
 )
 
 # 1st dataset: mediation
@@ -35,6 +38,9 @@ df_nan.loc[12, ["Y", "Ybin"]] = np.nan
 data = read_dataset("penguins").dropna()
 data["male"] = (data["sex"] == "male").astype(int)
 data["body_mass_kg"] = data["body_mass_g"] / 1000
+
+# 3rd dataset: tips
+tips = read_dataset("tips")
 
 
 def test_linear_regression():
@@ -662,3 +668,186 @@ def test_logistic_regression_constant_column_without_intercept():
     # With the intercept of scikit-learn, all the constant columns are removed
     lom = logistic_regression(df[["Two", "X", "M"]], df["Ybin"])
     assert_equal(lom["names"].to_numpy(), ["Intercept", "X", "M"])
+
+
+@pytest.mark.parametrize("val", (1, 2.5, {1: 2}, "test", [1, 2], pd.Series([1, 2])))
+def test_vif_invalid_input_types(val):
+    """Test vif() raises a TypeError with invalid input types."""
+    with pytest.raises(TypeError, match="must be a pandas DataFrame or a numpy ndarray"):
+        vif(val)
+
+
+@pytest.mark.parametrize("arr", (np.ones(10), np.ones((10, 2, 2))))
+def test_vif_ndarray_invalid_dim(arr):
+    """Test ValueError is raised when input ndarray is not 2D."""
+    with pytest.raises(ValueError, match="Input ndarray must be 2-dimensional"):
+        vif(arr)
+
+
+@pytest.mark.parametrize(
+    "arr",
+    (
+        np.array([["a", "b"]]),
+        np.array([[1 + 2j, 3 + 4j]]),
+        np.array([["2024-01-01", "2024-01-02"]], dtype="datetime64[D]"),
+        np.array([[1, 2]], dtype="timedelta64[s]"),
+    ),
+)
+def test_vif_ndarray_unsupported_dtypes(arr):
+    """Test vif() raises a ValueError when input is a ndarray of invalid dtype."""
+    with pytest.raises(ValueError, match="Input ndarray of dtype"):
+        vif(arr)
+
+
+@pytest.mark.parametrize("data", (pd.DataFrame(), tips[["sex", "smoker"]]))
+def test_vif_no_numerical_columns(data):
+    """Test vif() raises ValueError when input DataFrame is empty or when
+    only categorical columns are present (which get filtered out)."""
+    with pytest.raises(ValueError, match="no rows of numeric data"):
+        vif(data)
+
+
+@pytest.mark.parametrize(
+    "data",
+    (
+        np.ones((10, 1)),
+        tips[["tip"]],
+        tips[["tip", "sex"]],  # One categorical column is discarded.
+    ),
+)
+def test_vif_fewer_two_columns(data):
+    """Test vif() raises a ValueError when data has fewer than two columns
+    after input validation."""
+    with pytest.raises(ValueError, match="at least two numeric columns"):
+        vif(data)
+
+
+def test_vif_low_sample_size():
+    """Test vif() raises ValueError if there are more columns than rows."""
+    with pytest.raises(ValueError, match="have more rows than numeric variables"):
+        vif(np.ones((2, 3)))
+
+
+@pytest.mark.parametrize(
+    "arr",
+    (np.ones((10, 3)), np.column_stack((np.arange(10), np.ones(10)))),
+)
+def test_vif_constant_value_columns(arr):
+    """Test vif() raises ValueError if there are less than two non-constant columns."""
+    with (
+        pytest.warns(UserWarning, match="Columns with zero variance"),
+        pytest.raises(ValueError, match="Fewer than two non-constant variables"),
+    ):
+        vif(arr)
+
+
+@pytest.mark.parametrize("as_numpy", (False, True))
+def test_vif_inv_corr_matrix_matches_statsmodels(as_numpy):
+    """Test vif() produces identical results to the function used by statsmodels,
+    if the inverse correlation matrix is used to calculate VIFs."""
+    data = tips.select_dtypes(np.number).copy()
+    if as_numpy:
+        data = data.to_numpy()
+
+    # statsmodels needs an explicit constant, otherwise it computes uncentered R^2.
+    exog = sm.add_constant(np.asarray(data, dtype=float))
+
+    # Calculate VIF with statsmodels.
+    vif_ratios = []
+    for idx in range(1, exog.shape[1]):
+        vif_ratios.append(variance_inflation_factor(exog, idx))
+    expected = np.asarray(vif_ratios)
+
+    # Calculate VIF using inverse correlation matrix and check equivalence.
+    result = vif(data)
+    assert_almost_equal(expected, result["VIF"], decimal=5)
+    if as_numpy:
+        assert result["variables"].tolist() == ["x1", "x2", "x3"]
+    else:
+        assert result["variables"].tolist() == data.columns.tolist()
+
+
+def test_vif_no_categorical_columns_output():
+    """Test vif() discards categorical columns and maps column names
+    correctly to the output."""
+    tips_num = tips.select_dtypes(np.number).copy()
+    expected = vif(tips_num)
+    result = vif(tips)
+    assert_frame_equal(expected, result)
+    assert np.all(expected.columns == result.columns)
+
+
+@pytest.mark.parametrize("as_numpy", (False, True))
+def test_vif_nan_constant_columns(as_numpy):
+    """Test vif() outputs nan on indices of constant columns in output."""
+    # Insert zero variance columns.
+    data = tips.select_dtypes(np.number).copy()
+    data.insert(1, "const1", 10)
+    data.insert(3, "const2", 999)
+    if as_numpy:
+        data = data.to_numpy()
+
+    # Calculate VIF and check position of nan match index of constant columns.
+    with pytest.warns(UserWarning, match="Columns with zero variance"):
+        result = vif(data)
+    vif_values = result["VIF"].to_numpy()
+    assert_equal(np.flatnonzero(np.isnan(vif_values)), np.array([1, 3]))
+    assert np.isfinite(vif_values).sum() == 3
+
+
+@pytest.mark.parametrize("as_numpy", (False, True))
+def test_vif_drop_rows_with_missing_nans(as_numpy):
+    """Test vif() drops rows with missing data and emits a warning."""
+    # Calculate VIF without nan in input.
+    data = tips.select_dtypes(np.number).iloc[:20].copy()
+    if as_numpy:
+        data = data.to_numpy()
+    result = vif(data)
+
+    # Add missing data check a warning is raised with 30% rows discarded
+    if as_numpy:
+        data[:5, 0] = np.nan
+    else:
+        data.iloc[:5, 0] = np.nan
+    with pytest.warns(UserWarning, match=re.escape("25.0% of rows (5 of 20)")):
+        result_nan = vif(data)
+
+    # Check outputs are different due to rows being discarded.
+    assert not np.array_equal(result["VIF"], result_nan["VIF"])
+
+
+def test_vif_fallback_to_ols():
+    """Test that function fallbacks to calculation of VIF through OLS when
+    correlation matrix is not invertible."""
+    # Create a DataFrame with two collinear variables (x1 and x2).
+    x1 = np.arange(10, dtype=float)
+    x2 = 2 * x1  # Perfect multicollinearity
+    x3 = np.random.default_rng(42).normal(size=10)
+    data = pd.DataFrame({"x1": x1, "x2": x2, "x3": x3})
+
+    # Check that warning is printed and np.inf is estimated for x1 and x2.
+    with pytest.warns(UserWarning, match="falling back to per-variable OLS"):
+        result = vif(data)
+    assert np.isinf(result.loc[:1, "VIF"]).all()
+    assert round(result.loc[2, "VIF"]) == 1
+
+
+@pytest.mark.parametrize("as_numpy", (False, True))
+def test_vif_ols(as_numpy):
+    """Test _vif_ols() produces identical results to the function used by statsmodels."""
+    data = tips.select_dtypes(np.number).copy()
+    if as_numpy:
+        data = data.to_numpy()
+
+    # statsmodels needs an explicit constant, otherwise it computes uncentered R^2.
+    exog = sm.add_constant(np.asarray(data, dtype=float))
+
+    # Calculate VIF with statsmodels.
+    vif_ratios = []
+    for idx in range(1, exog.shape[1]):
+        vif_ratios.append(variance_inflation_factor(exog, idx))
+    expected = np.asarray(vif_ratios)
+
+    # Calculate VIF using using _vif_ols.
+    result = vif(data)
+    assert_almost_equal(expected, result["VIF"], decimal=5)
