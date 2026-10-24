@@ -677,7 +677,7 @@ def rm_anova(
         ]
 
     aov = aov.reindex(columns=col_order)
-    aov.dropna(how="all", axis=1, inplace=True)
+    aov = aov.dropna(how="all", axis=1)
     return _postprocess_dataframe(aov)
 
 
@@ -1029,7 +1029,7 @@ def anova(data=None, dv=None, between=None, ss_type=2, detailed=False, effsize="
             }
         )
 
-    aov.dropna(how="all", axis=1, inplace=True)
+    aov = aov.dropna(how="all", axis=1)
     return _postprocess_dataframe(aov)
 
 
@@ -1099,7 +1099,7 @@ def _anova2(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
         }
     )
 
-    aov.dropna(how="all", axis=1, inplace=True)
+    aov = aov.dropna(how="all", axis=1)
     return _postprocess_dataframe(aov)
 
 
@@ -1202,7 +1202,7 @@ def _anovan(data=None, dv=None, between=None, ss_type=2, effsize="np2"):
     # Re-index and round
     col_order = ["Source", "SS", "DF", "MS", "F", "p_unc", effsize]
     aov = aov.reindex(columns=col_order)
-    aov.dropna(how="all", axis=1, inplace=True)
+    aov = aov.dropna(how="all", axis=1)
 
     # Add formula to dataframe, with the original column names (for display only, it is never
     # evaluated)
@@ -1604,7 +1604,7 @@ def mixed_anova(
         "p_spher",
     ]
     aov = aov.reindex(columns=col_order)
-    aov.dropna(how="all", axis=1, inplace=True)
+    aov = aov.dropna(how="all", axis=1)
     return _postprocess_dataframe(aov)
 
 
@@ -1719,9 +1719,7 @@ def ancova(data=None, dv=None, between=None, covar=None, effsize="np2"):
 
     # Create output dataframe
     aov = stats.anova_lm(model, typ=2).reset_index()
-    aov.rename(
-        columns={"index": "Source", "sum_sq": "SS", "df": "DF", "PR(>F)": "p_unc"}, inplace=True
-    )
+    aov = aov.rename(columns={"index": "Source", "sum_sq": "SS", "df": "DF", "PR(>F)": "p_unc"})
     aov.at[0, "Source"] = between
     for i in range(len(covar)):
         aov.at[i + 1, "Source"] = covar[i]

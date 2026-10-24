@@ -483,7 +483,7 @@ def test_mediation_analysis():
 
     # With multiple mediator
     rng = np.random.RandomState(42)
-    df_med.rename(columns={"M": "M1"}, inplace=True)
+    df_med = df_med.rename(columns={"M": "M1"})
     df_med["M2"] = rng.randint(0, 10, df_med.shape[0])
     ma2 = mediation_analysis(data=df_med, x="X", m=["M1", "M2"], y="Y", seed=42)
     assert ma["coef"][2] == ma2["coef"][4]
