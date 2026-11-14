@@ -830,7 +830,6 @@ def test_vif_drop_rows_with_missing_nans():
     assert_frame_equal(vif(data.dropna()), result_nan)
 
 
-# TODO - test fails because linear_regression is used and emits a duplicated warning.
 def test_vif_fallback_to_ols():
     """Test that function fallbacks to calculation of VIF through OLS when
     correlation matrix is not invertible."""
@@ -844,4 +843,4 @@ def test_vif_fallback_to_ols():
     with pytest.warns(UserWarning, match="falling back to per-variable OLS"):
         result = vif(data)
     assert np.isinf(result.loc[:1, "VIF"]).all()
-    assert_equal(result, _vif_ols(data.to_numpy()))
+    assert_allclose(result["VIF"].to_numpy(), _vif_ols(data.to_numpy()))

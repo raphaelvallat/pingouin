@@ -1588,14 +1588,16 @@ def _vif_ols(X):
     tol = 1e-12
 
     vif_values = np.empty(X.shape[1])
+    n = X.shape[0]
     for idx in range(X.shape[1]):
-        # Get data for response and predictor variables and estimate R².
+        # Regress column idx on the remaining columns plus an intercept.
         y = X[:, idx]
-        others = np.delete(X, idx, axis=1)
-        r2 = linear_regression(others, y, add_intercept=True, as_dataframe=False)["r2"]
+        others = np.column_stack((np.ones(n), np.delete(X, idx, axis=1)))
+        coef, *_ = _lstsq(others, y)
+        resid = y - others @ coef
 
-        # If the column is (almost) perfectly explained by the others, which
-        # VIF is set to np.inf, thus avoiding division by zero.
+        # VIF = 1 / (1 - R^2); return inf when 1 - R^2 is ~0 to avoid dividing by zero.
+        r2 = 1 - (resid @ resid) / ((y - y.mean()) @ (y - y.mean()))
         vif_values[idx] = np.inf if 1 - r2 <= tol else 1 / (1 - r2)
 
     return vif_values
