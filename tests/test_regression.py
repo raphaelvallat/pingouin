@@ -755,7 +755,6 @@ def test_vif_invalid_input(data, exc, match):
         vif(data)
 
 
-# TODO - update docstring and test name of test to reflect new logic.
 @pytest.mark.parametrize("as_numpy", (False, True))
 def test_vif_inv_corr_matrix_matches_statsmodels(as_numpy):
     """Test vif() produces identical results to the function used by statsmodels,
@@ -783,7 +782,6 @@ def test_vif_inv_corr_matrix_matches_statsmodels(as_numpy):
         result_ols = _vif_ols(np.asarray(data_sm, dtype=float))
         assert_almost_equal(expected, result_ols, decimal=5)
 
-    # TODO - change this comment, main method to calculate VIF is not defined.
     # Calculate VIF using inverse correlation matrix and check equivalence.
     result = vif(data)
     assert_almost_equal(expected, result["VIF"], decimal=5)
