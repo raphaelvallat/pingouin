@@ -833,7 +833,7 @@ def test_vif_fallback_to_ols():
     correlation matrix is not invertible."""
     # Create a DataFrame with two collinear variables (x1 and x2).
     x1 = np.arange(10, dtype=float)
-    x2 = 2 * x1  # Perfect .
+    x2 = 2 * x1
     x3 = np.random.default_rng(42).normal(size=10)
     data = pd.DataFrame({"x1": x1, "x2": x2, "x3": x3})
 
