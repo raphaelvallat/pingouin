@@ -82,6 +82,7 @@ Correlation and regression
    linear_regression
    logistic_regression
    mediation_analysis
+   vif
 
 .. _distribution:
 
