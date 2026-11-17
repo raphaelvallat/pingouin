@@ -300,6 +300,8 @@ def test_is_installed():
     """Test function _is_installed."""
     assert _is_installed("numpy")
     assert not _is_installed("a_module_that_does_not_exist")
+    with pytest.raises(ImportError, match="pip install a_module_that_does_not_exist"):
+        _is_installed("a_module_that_does_not_exist", raise_error=True)
     with pytest.raises(ImportError, match="pingouin\\[extras\\]"):
         _is_installed("a_module_that_does_not_exist", raise_error=True)
 

@@ -465,6 +465,6 @@ def _is_installed(module, raise_error=False):
     if raise_error and not is_installed:
         raise ImportError(
             f"{module} is required for this function. Please install it with "
-            '`pip install "pingouin[extras]"` or `pip install {module}`.'
+            f'`pip install "pingouin[extras]"` or `pip install {module}`.'
         )
     return is_installed
