@@ -12,7 +12,6 @@ from .utils import (
     _register_dataframe_method,
 )
 from .utils import _flatten_list as _fl
-from .utils import remove_na as rm_na
 
 __all__ = ["linear_regression", "logistic_regression", "mediation_analysis"]
 
@@ -329,7 +328,7 @@ def linear_regression(
     1         x1  1.04  0.50  2.06  0.11  0.51    0.39     -0.36       2.44
     """
     _check_confidence(alpha, "alpha")
-    X, y, names = _prepare_Xy(X, y, remove_na)
+    X, y, names, w = _prepare_Xy(X, y, remove_na, weights=weights)
 
     if add_intercept:
         # Add intercept
@@ -350,14 +349,9 @@ def linear_regression(
         raise ValueError("X must have at least one valid column.")
 
     # Handle weights
-    if weights is not None:
+    if w is not None:
         if relimp:
             raise ValueError("relimp = True is not supported when using weights.")
-        w = np.asarray(weights)
-        if w.ndim != 1:
-            raise ValueError("weights must be a 1D array.")
-        if w.size != n:
-            raise ValueError("weights must be of shape n_samples.")
         if np.isnan(w).any():
             raise ValueError("Missing weights are not accepted.")
         if (w < 0).any():
@@ -481,11 +475,12 @@ def linear_regression(
     return stats
 
 
-def _prepare_Xy(X, y, remove_na=False):
-    """Validate the predictors and target of a regression.
+def _prepare_Xy(X, y, remove_na=False, weights=None):
+    """Validate the predictors, target, and optional sample weights of a regression.
 
-    Returns ``X`` as a (n_samples, n_features) array, ``y`` as a (n_samples,) array and the names
-    of the predictors, which are extracted from ``X`` if it is a DataFrame or a Series.
+    Returns ``X`` as a (n_samples, n_features) array, ``y`` as a (n_samples,) array, the names
+    of the predictors (extracted from ``X`` if it is a DataFrame or a Series), and ``weights``
+    as a (n_samples,) float array (or None if not provided).
     """
     # Extract names if X is a Dataframe or Series
     if isinstance(X, pd.DataFrame):
@@ -505,10 +500,26 @@ def _prepare_Xy(X, y, remove_na=False):
         # Convert to (n_samples, n_features) shape
         X = X[..., np.newaxis]
 
+    # Check that X and y have same length
+    if y.shape[0] != X.shape[0]:
+        raise ValueError("X and y must have same number of samples")
+
+    w = None
+    if weights is not None:
+        w = np.asarray(weights, dtype=float)
+        if w.ndim != 1:
+            raise ValueError("weights must be a 1D array.")
+        if w.size != X.shape[0]:
+            raise ValueError("weights must be of shape n_samples.")
+
     # Check for NaN / Inf
     if remove_na:
-        X, y = rm_na(X, y[..., np.newaxis], paired=True, axis="rows")
-        y = np.squeeze(y)
+        valid = ~(np.isnan(X).any(axis=1) | np.isnan(y))
+        if w is not None:
+            valid &= ~np.isnan(w)
+            w = w[valid]
+        X = X[valid]
+        y = y[valid]
     if not np.isfinite(y).all():
         raise ValueError(
             "Target (y) contains NaN or Inf. Please remove them manually or use remove_na=True."
@@ -518,13 +529,9 @@ def _prepare_Xy(X, y, remove_na=False):
             "Predictors (X) contain NaN or Inf. Please remove them manually or use remove_na=True."
         )
 
-    # Check that X and y have same length
-    if y.shape[0] != X.shape[0]:
-        raise ValueError("X and y must have same number of samples")
-
     if not names:
         names = ["x" + str(i + 1) for i in range(X.shape[1])]
-    return X, y, names
+    return X, y, names, w
 
 
 def _lstsq(X, y=None):
@@ -880,7 +887,7 @@ def logistic_regression(
     from sklearn.linear_model import LogisticRegression
 
     _check_confidence(alpha, "alpha")
-    X, y, names = _prepare_Xy(X, y, remove_na)
+    X, y, names, _ = _prepare_Xy(X, y, remove_na)
 
     # Check that y is binary
     if np.unique(y).size != 2:

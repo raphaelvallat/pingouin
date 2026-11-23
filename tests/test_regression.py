@@ -296,6 +296,28 @@ def test_linear_regression():
     for key in ["coef", "se", "T", "pval", "CI2.5", "CI97.5"]:
         assert_allclose(lm[key], ref[key])
 
+    # Weighted regression with remove_na=True (NaNs in X/y and also in weights)
+    lm_w_na = linear_regression(df_nan[["X", "M"]], df_nan["Y"], weights=df_nan["W2"], remove_na=True)
+    df_w_complete = df_nan.dropna(subset=["X", "M", "Y", "W2"])
+    assert_frame_equal(
+        lm_w_na,
+        linear_regression(df_w_complete[["X", "M"]], df_w_complete["Y"], weights=df_w_complete["W2"]),
+    )
+    w_nan = df_nan["W2"].copy()
+    w_nan.iloc[5] = np.nan
+    lm_w_na2 = linear_regression(df_nan[["X", "M"]], df_nan["Y"], weights=w_nan, remove_na=True)
+    df_w_complete2 = df_nan.assign(W2_nan=w_nan).dropna(subset=["X", "M", "Y", "W2_nan"])
+    assert_frame_equal(
+        lm_w_na2,
+        linear_regression(
+            df_w_complete2[["X", "M"]], df_w_complete2["Y"], weights=df_w_complete2["W2_nan"]
+        ),
+    )
+    with pytest.raises(ValueError, match="weights must be of shape n_samples"):
+        linear_regression(
+            df_nan[["X", "M"]], df_nan["Y"], weights=df_w_complete["W2"], remove_na=True
+        )
+
     with pytest.raises(ValueError):
         linear_regression(df[["X"]], df["Y"], weights=df["W1"], relimp=True)
     with pytest.raises(ValueError, match=r"'alpha' must be between 0 and 1\."):
