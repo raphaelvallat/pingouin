@@ -148,9 +148,11 @@ def convert_angles(angles, low=0, high=360, positive=False):
         raise ValueError("angles must be >= low.")
     if not (np.nanmax(angles) <= high):
         raise ValueError("angles must be <= high.")
-    # Map to [0, 2pi] range
     rad = angles * (2 * np.pi) / ptp
-    if not positive:
+    if positive:
+        if low != 0:
+            rad = rad % (2 * np.pi)
+    else:
         # https://stackoverflow.com/a/29237626/10581531
         # Map to [-pi, pi) range:
         rad = (rad + np.pi) % (2 * np.pi) - np.pi  # [-pi, pi)

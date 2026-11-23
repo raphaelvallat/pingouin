@@ -99,6 +99,29 @@ def test_helper_angles():
     assert_circmean(a5_nan, low=0, high=1440, axis=0)
     assert_circmean(a5_nan, low=0, high=1440, axis=None)
 
+    # Non-zero low boundary with positive=True and positive=False
+    for angles, low, high in [
+        (a1, -np.pi, np.pi),
+        ([-180, -90, 0, 90, 180], -180, 180),
+        ([10, 100, 190, 280, 370], 10, 370),
+        ([-10, 170, 350, np.nan], -10, 350),
+    ]:
+        rad = convert_angles(angles, low=low, high=high)
+        rad_pos = convert_angles(angles, low=low, high=high, positive=True)
+        _checkangles(rad)
+        _checkangles(rad_pos)
+        assert np.nanmin(rad) >= -np.pi and np.nanmax(rad) < np.pi
+        assert np.nanmin(rad_pos) >= 0 and np.nanmax(rad_pos) <= 2 * np.pi
+        np.testing.assert_allclose(np.exp(1j * rad), np.exp(1j * rad_pos))
+    np.testing.assert_allclose(
+        convert_angles([-180, -90, 0, 90, 180], low=-180, high=180, positive=True),
+        [np.pi, 1.5 * np.pi, 0, 0.5 * np.pi, np.pi],
+    )
+    np.testing.assert_allclose(
+        convert_angles([10, 100, 190, 280, 370], low=10, high=370, positive=True),
+        np.deg2rad([10, 100, 190, 280, 10]),
+    )
+
 
 def test_circ_axial():
     """Test function circ_axial."""
