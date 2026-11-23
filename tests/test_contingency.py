@@ -116,6 +116,28 @@ def test_chi2_independence():
     assert round(stats.at[0, "cramer"], 3) == 0.519
     assert np.isclose(stats.at[0, "power"], 1.0)
 
+    # 3 x 3 contingency table (min(r, c) > 2, so Cohen's w != Cramer's V)
+    rows = (
+        [(0, 0)] * 12
+        + [(0, 1)] * 6
+        + [(0, 2)] * 6
+        + [(1, 0)] * 6
+        + [(1, 1)] * 12
+        + [(1, 2)] * 6
+        + [(2, 0)] * 6
+        + [(2, 1)] * 6
+        + [(2, 2)] * 12
+    )
+    df_3x3 = pd.DataFrame(rows, columns=["x", "y"])
+    _, _, stats = pg.chi2_independence(df_3x3, "x", "y")
+    chi2 = stats.at[0, "chi2"]
+    n = len(df_3x3)
+    expected_w = np.sqrt(chi2 / n)
+    expected_cramer = np.sqrt(chi2 / (n * 2))
+    expected_power = pg.power_chi2(dof=4, w=expected_w, n=n, alpha=0.05)
+    assert np.isclose(stats.at[0, "cramer"], expected_cramer)
+    assert np.isclose(stats.at[0, "power"], expected_power)
+
 
 def test_chi2_mcnemar():
     """Test function chi2_mcnemar."""

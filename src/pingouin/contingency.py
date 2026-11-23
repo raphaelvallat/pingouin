@@ -189,7 +189,8 @@ def chi2_independence(data, x, y, correction=True):
                 observed.to_numpy(), expected.to_numpy(), ddof=ddof, axis=None, lambda_=lambda_
             )
             cramer = np.sqrt(chi2 / (n * dof_cramer))
-            power = power_chi2(dof=dof, w=cramer, n=n, alpha=0.05)
+            w = np.sqrt(chi2 / n)
+            power = power_chi2(dof=dof, w=w, n=n, alpha=0.05)
         stats.append(
             {
                 "test": name,
