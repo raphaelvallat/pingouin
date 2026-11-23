@@ -164,6 +164,14 @@ def test_ttest():
     assert round(tt.loc["T_test", "p_val"], 5) == 0.02916
     assert_array_equal(np.round(tt.loc["T_test", "CI95"], 2), [-np.inf, -0.61])
 
+    # Paired achieved power must use Cohen's d_z and match the equivalent one-sample test on x - y
+    pre = np.array([5.5, 2.4, 6.8, 9.6, 4.2])
+    post = np.array([6.4, 3.4, 6.4, 11.0, 4.8])
+    for alt in ("two-sided", "less", "greater"):
+        tt_paired = ttest(pre, post, paired=True, alternative=alt)
+        tt_diff = ttest(pre - post, 0, alternative=alt)
+        assert np.isclose(tt_paired.loc["T_test", "power"], tt_diff.loc["T_test", "power"])
+
     # `paired` accepts any boolean-like value (e.g. numpy bool)
     pd.testing.assert_frame_equal(ttest(a, b, paired=np.True_), ttest(a, b, paired=True))
     pd.testing.assert_frame_equal(ttest(a, b, paired=0), ttest(a, b, paired=False))
