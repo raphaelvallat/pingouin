@@ -159,13 +159,13 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> post = [6.4, 3.4, 6.4, 11.0, 4.8]
     >>> ttest(pre, post, paired=True, alternative="less").round(2)
                T  dof alternative  p_val           CI95  cohen_d  power
-    T_test -2.31    4        less   0.04  [-inf, -0.05]     0.25   0.12
+    T_test -2.31    4        less   0.04  [-inf, -0.05]     0.25   0.60
 
     Now testing the opposite alternative hypothesis
 
     >>> ttest(pre, post, paired=True, alternative="greater").round(2)
                T  dof alternative  p_val          CI95  cohen_d  power
-    T_test -2.31    4     greater   0.96  [-1.35, inf]     0.25   0.02
+    T_test -2.31    4     greater   0.96  [-1.35, inf]     0.25   0.00
 
     3. Paired T-test with missing values.
 
@@ -174,7 +174,7 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
     >>> post = [6.4, 3.4, 6.4, 11.0, 4.8]
     >>> ttest(pre, post, paired=True).round(3)
                 T  dof alternative  p_val           CI95  cohen_d  power   BF10
-    T_test -5.902    3   two-sided   0.01  [-1.5, -0.45]    0.306  0.073  7.169
+    T_test -5.902    3   two-sided   0.01  [-1.5, -0.45]    0.306  0.963  7.169
 
     Compare with SciPy
 
@@ -299,10 +299,14 @@ def ttest(x, y, paired=False, alternative="two-sided", correction="auto", r=0.70
             d=d, n=nx, power=None, alpha=0.05, contrast="one-sample", alternative=alternative
         )
     elif paired:
-        # Paired two-sample
-        power = power_ttest(
-            d=d, n=nx, power=None, alpha=0.05, contrast="paired", alternative=alternative
-        )
+        # Paired two-sample: power_ttest expects Cohen's d_z (SD of differences), not d_avg
+        if np.array_equal(x, y):
+            power = np.nan
+        else:
+            dz = compute_effsize(x, y, paired=True, eftype="cohen_dz")
+            power = power_ttest(
+                d=dz, n=nx, power=None, alpha=0.05, contrast="paired", alternative=alternative
+            )
     else:
         # Independent two-samples
         if nx == ny:
