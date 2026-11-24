@@ -341,6 +341,43 @@ def test_distance_corr():
     assert np.round(dcor, 5) == 0.87996
     assert 0.20 < pval < 0.30
 
+    # Permutation invariance: precomputing B must match recomputing pdist on y[p]
+    from scipy.spatial.distance import pdist, squareform
+
+    from pingouin.utils import _perm_pval
+
+    def _ref_dcorr(x_arr, y_arr, n_boot, seed, alternative):
+        x_arr = np.asarray(x_arr)
+        y_arr = np.asarray(y_arr)
+        if x_arr.ndim == 1:
+            x_arr = x_arr[:, None]
+        if y_arr.ndim == 1:
+            y_arr = y_arr[:, None]
+        n = x_arr.shape[0]
+        n2 = n**2
+        da = squareform(pdist(x_arr, metric="euclidean"))
+        A = da - da.mean(axis=0)[None, :] - da.mean(axis=1)[:, None] + da.mean()
+        dcov2_xx = np.vdot(A, A) / n2
+
+        def _one(y_sub):
+            db = squareform(pdist(y_sub, metric="euclidean"))
+            B = db - db.mean(axis=0)[None, :] - db.mean(axis=1)[:, None] + db.mean()
+            dcov2_yy = np.vdot(B, B) / n2
+            dcov2_xy = np.vdot(A, B) / n2
+            return np.sqrt(dcov2_xy) / np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
+
+        obs = _one(y_arr)
+        perms = np.random.RandomState(seed).random_sample((n_boot, n)).argsort(axis=1)
+        boot = np.array([_one(y_arr[p]) for p in perms])
+        return obs, _perm_pval(boot, obs, alternative=alternative)
+
+    for x_case, y_case in [([1, 2, 3, 4, 5], [1, 2, 9, 4, 4]), (a, b)]:
+        for alt in ("greater", "less", "two-sided"):
+            obs, p_val = distance_corr(x_case, y_case, alternative=alt, n_boot=200, seed=42)
+            ref_obs, ref_p = _ref_dcorr(x_case, y_case, n_boot=200, seed=42, alternative=alt)
+            assert np.isclose(obs, ref_obs, atol=1e-15)
+            assert p_val == ref_p
+
     with pytest.raises(ValueError, match="same number of samples"):
         distance_corr(a, b[:-1])
     with pytest.raises(ValueError):
