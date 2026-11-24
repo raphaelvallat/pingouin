@@ -283,16 +283,17 @@ def mwu(x, y, alternative="two-sided", **kwargs):
     # Effect size 1: Common Language Effect Size
     # CLES is tail-specific and calculated according to the formula given in
     # Vargha and Delaney 2000 which works with ordinal data.
-    diff = x[:, None] - y
-    # cles = max((diff < 0).sum(), (diff > 0).sum()) / diff.size
-    # Tail = 'greater', with ties set to 0.5
-    # Note that tail = 'two-sided' gives same output as tail = 'greater'
-    cles = np.where(diff == 0, 0.5, diff > 0).mean()
+    # SciPy's U1 = sum(x > y) + 0.5 * sum(x == y) for all alternatives, so
+    # U1 / (nx * ny) equals the pairwise Vargha-Delaney CLES without allocating
+    # an (nx, ny) difference matrix.
+    # Note that alternative = 'two-sided' gives same output as alternative = 'greater'.
+    n_pairs = x.size * y.size
+    cles = uval_x / n_pairs
     cles = 1 - cles if alternative == "less" else cles
 
     # Effect size 2: rank biserial correlation (Wendt 1972)
-    uval_y = x.shape[0] * y.shape[0] - uval_x
-    rbc = 1 - (2 * uval_y) / diff.size  # diff.size = x.size * y.size
+    uval_y = n_pairs - uval_x
+    rbc = 1 - (2 * uval_y) / n_pairs
 
     # Fill output DataFrame
     stats = pd.DataFrame(

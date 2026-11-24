@@ -82,6 +82,18 @@ def test_mwu():
     assert round(mwu_pg.at["MWU", "CLES"], 4) == 0.5363
     assert round(mwu_pg_less.at["MWU", "CLES"], 4) == 0.4637
     assert round(mwu_pg_greater.at["MWU", "CLES"], 4) == 0.5363
+    # Equivalence of CLES with ties and unequal sample sizes across all alternatives
+    x_ties = np.array([1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 5.0])
+    y_ties = np.array([2.0, 2.0, 3.0, 4.0, 4.0])
+    diff = x_ties[:, None] - y_ties
+    expected_greater = np.where(diff == 0, 0.5, diff > 0).mean()
+    for alt in ("two-sided", "greater", "less"):
+        expected = 1 - expected_greater if alt == "less" else expected_greater
+        res = mwu(x_ties, y_ties, alternative=alt)
+        assert np.isclose(res.at["MWU", "CLES"], expected, atol=1e-15)
+    # All-tied samples
+    assert mwu([2, 2, 2], [2, 2], alternative="two-sided").at["MWU", "CLES"] == 0.5
+    assert mwu([2, 2, 2], [2, 2], alternative="less").at["MWU", "CLES"] == 0.5
     with pytest.raises(ValueError):
         mwu(x, y, tail="error")
 
