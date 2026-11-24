@@ -162,9 +162,7 @@ def test_chi2_mcnemar():
 
     # Equal discordant counts (b == c > 0) with continuity correction should give chi2=0, p_approx=1
     for n_disc in (1, 5):
-        data_eq = pd.DataFrame(
-            {"x": [0] * n_disc + [1] * n_disc, "y": [1] * n_disc + [0] * n_disc}
-        )
+        data_eq = pd.DataFrame({"x": [0] * n_disc + [1] * n_disc, "y": [1] * n_disc + [0] * n_disc})
         _, stats_eq = pg.chi2_mcnemar(data_eq, "x", "y", correction=True)
         assert stats_eq.at["mcnemar", "chi2"] == 0.0
         assert stats_eq.at["mcnemar", "p_approx"] == 1.0
