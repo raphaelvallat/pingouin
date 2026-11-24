@@ -346,7 +346,7 @@ def chi2_mcnemar(data, x, y, correction=True):
             "have values different from 0."
         )
 
-    chi2 = (abs(b - c) - int(correction)) ** 2 / n_discordants
+    chi2 = max(0, abs(b - c) - int(correction)) ** 2 / n_discordants
     pexact = min(1, 2 * binom.cdf(min(b, c), n_discordants, 0.5))
     stats = {
         "chi2": chi2,
