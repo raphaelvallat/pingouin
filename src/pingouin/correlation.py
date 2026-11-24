@@ -1280,16 +1280,10 @@ def _check_rm_corr_data(data, x, y, subject):
     return data[[x, y, subject]].dropna(axis=0)
 
 
-def _dcorr(y, n2, A, dcov2_xx):
-    """Helper function for distance correlation bootstrapping."""
-    # Pairwise Euclidean distances
-    b = squareform(pdist(y, metric="euclidean"))
-    # Double centering
-    B = b - b.mean(axis=0)[None, :] - b.mean(axis=1)[:, None] + b.mean()
-    # Compute squared distance covariances
-    dcov2_yy = np.vdot(B, B) / n2
-    dcov2_xy = np.vdot(A, B) / n2
-    return np.sqrt(dcov2_xy) / np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
+def _double_centered_dist(x):
+    """Return the double-centered pairwise Euclidean distance matrix."""
+    d = squareform(pdist(x, metric="euclidean"))
+    return d - d.mean(axis=0)[None, :] - d.mean(axis=1)[:, None] + d.mean()
 
 
 def distance_corr(x, y, alternative="greater", n_boot=1000, seed=None):
@@ -1403,22 +1397,27 @@ def distance_corr(x, y, alternative="greater", n_boot=1000, seed=None):
     n = x.shape[0]
     n2 = n**2
 
-    # Process first array to avoid redundancy when performing bootstrap
-    a = squareform(pdist(x, metric="euclidean"))
-    A = a - a.mean(axis=0)[None, :] - a.mean(axis=1)[:, None] + a.mean()
+    # Precompute double-centered distance matrices and distance variances once;
+    # permuting rows of y permutes both axes of B and leaves dcov2_yy invariant.
+    A = _double_centered_dist(x)
+    B = _double_centered_dist(y)
     dcov2_xx = np.vdot(A, A) / n2
+    dcov2_yy = np.vdot(B, B) / n2
+    denom = np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
 
-    # Process second array and compute final distance correlation
-    dcor = _dcorr(y, n2, A, dcov2_xx)
+    # Compute sample distance correlation
+    dcor = np.sqrt(np.vdot(A, B) / n2) / denom
 
-    # Compute one-sided p-value using a bootstrap procedure
+    # Compute p-value using a permutation procedure
     if n_boot is not None and n_boot > 1:
         # Define random seed and permutation
         rng = np.random.RandomState(seed)
         bootsam = rng.random_sample((n_boot, n)).argsort(axis=1)
         bootstat = np.empty(n_boot)
         for i in range(n_boot):
-            bootstat[i] = _dcorr(y[bootsam[i, :]], n2, A, dcov2_xx)
+            p = bootsam[i]
+            dcov2_xy = np.vdot(A, B[p][:, p]) / n2
+            bootstat[i] = np.sqrt(dcov2_xy) / denom
 
         pval = _perm_pval(bootstat, dcor, alternative=alternative)
         return dcor, pval
