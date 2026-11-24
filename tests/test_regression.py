@@ -297,11 +297,15 @@ def test_linear_regression():
         assert_allclose(lm[key], ref[key])
 
     # Weighted regression with remove_na=True (NaNs in X/y and also in weights)
-    lm_w_na = linear_regression(df_nan[["X", "M"]], df_nan["Y"], weights=df_nan["W2"], remove_na=True)
+    lm_w_na = linear_regression(
+        df_nan[["X", "M"]], df_nan["Y"], weights=df_nan["W2"], remove_na=True
+    )
     df_w_complete = df_nan.dropna(subset=["X", "M", "Y", "W2"])
     assert_frame_equal(
         lm_w_na,
-        linear_regression(df_w_complete[["X", "M"]], df_w_complete["Y"], weights=df_w_complete["W2"]),
+        linear_regression(
+            df_w_complete[["X", "M"]], df_w_complete["Y"], weights=df_w_complete["W2"]
+        ),
     )
     w_nan = df_nan["W2"].copy()
     w_nan.iloc[5] = np.nan
