@@ -458,11 +458,14 @@ def wilcoxon(x, y=None, alternative="two-sided", **kwargs):
     # according to the formula given in Vargha and Delaney 2000 which
     # works with ordinal data.
     if y is not None:
-        diff = x[:, None] - y
-        # cles = max((diff < 0).sum(), (diff > 0).sum()) / diff.size
+        # Counting via binary search on sorted y avoids building the O(n^2) difference matrix
+        # (same approach as pingouin.compute_effsize(..., eftype="cles")).
         # alternative = 'greater', with ties set to 0.5
         # Note that alternative = 'two-sided' gives same output as alternative = 'greater'
-        cles = np.where(diff == 0, 0.5, diff > 0).mean()
+        ys = np.sort(y)
+        n_less = np.searchsorted(ys, x, side="left")
+        n_ties = np.searchsorted(ys, x, side="right") - n_less
+        cles = (n_less.sum() + 0.5 * n_ties.sum()) / (x.size * y.size)
         cles = 1 - cles if alternative == "less" else cles
     else:
         # CLES cannot be computed if y is None

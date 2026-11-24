@@ -115,6 +115,15 @@ def test_wilcoxon():
     assert round(wc_pg.at["Wilcoxon", "CLES"], 3) == 0.396
     assert round(wc_pg_less.at["Wilcoxon", "CLES"], 3) == 0.604
     assert round(wc_pg_greater.at["Wilcoxon", "CLES"], 3) == 0.396
+    # Equivalence of CLES with ties across all alternatives
+    x_ties = np.array([1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 5.0, 5.0])
+    y_ties = np.array([2.0, 2.0, 3.0, 4.0, 4.0, 1.0, 5.0, 3.0])
+    diff = x_ties[:, None] - y_ties
+    expected_greater = np.where(diff == 0, 0.5, diff > 0).mean()
+    for alt in ("two-sided", "greater", "less"):
+        expected = 1 - expected_greater if alt == "less" else expected_greater
+        res = wilcoxon(x_ties, y_ties, alternative=alt, method="asymptotic")
+        assert np.isclose(res.at["Wilcoxon", "CLES"], expected, atol=1e-15)
     # Without continuity correction
     wc_scp_nocorr = scipy.stats.wilcoxon(x2, y2, correction=False, method="asymptotic")
     wc_pg_nocorr = wilcoxon(x2, y2, correction=False, method="asymptotic")
